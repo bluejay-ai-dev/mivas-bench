@@ -1,0 +1,26 @@
+industries/control-industry/agent_blueprint.json
+  s_6dd0c90f375723::t_2223a006e908f1 11-14,25-28,33
+industries/control-industry/tools.json
+  s_6dd0c90f375723::t_2223a006e908f1 53-79,82
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "fa231d8caa0f928c40ee09d972e3c5d3c45233e3",
+  "prompts": {},
+  "humans": {
+    "h_bbe1a3ca680b9f": {
+      "author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_6dd0c90f375723": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "319bc4cb-9526-48f5-95f2-bb0f8a259311",
+        "model": "grok-4.5"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
