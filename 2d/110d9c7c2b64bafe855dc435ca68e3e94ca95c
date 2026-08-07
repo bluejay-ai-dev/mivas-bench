@@ -1,0 +1,36 @@
+voice-agent-harnesses/openai/README.md
+  s_6dd0c90f375723::t_023ba5b1efd48f 3-10
+.cursor/rules/mivas-runtime.mdc
+  s_6dd0c90f375723::t_6ba2fe8f6c2f32 8,10,12,15
+voice-agent-harnesses/openai/agent.py
+  s_6dd0c90f375723::t_37729c4b9f97e6 47-48,58-62,84-89,120,122,124-126
+  s_6dd0c90f375723::t_795b1cf013a648 123
+  s_6dd0c90f375723::t_16986d336ff6a4 1-46,49-57,63-83,90-119,121,127-128
+.env.example
+  s_6dd0c90f375723::t_7457e4c6c8be81 2
+voice-agent-harnesses/README.md
+  s_6dd0c90f375723::t_68ec8220edf480 1-3
+voice-agent-harnesses/openai/requirements.txt
+  s_6dd0c90f375723::t_fb08501708a704 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "2d110d9c7c2b64bafe855dc435ca68e3e94ca95c",
+  "prompts": {},
+  "humans": {
+    "h_bbe1a3ca680b9f": {
+      "author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_6dd0c90f375723": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "319bc4cb-9526-48f5-95f2-bb0f8a259311",
+        "model": "grok-4.5"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
