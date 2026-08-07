@@ -2,10 +2,16 @@
 
 Model: [`gpt-realtime-2.1-mini`](https://developers.openai.com/api/docs/models/gpt-realtime-2.1-mini)
 
+From repo root:
+
 ```bash
-cd .. && pip install -r requirements.txt
-export OPENAI_API_KEY=...
-python realtime-2.1-mini/agent.py healthcare          # live
-python realtime-2.1-mini/agent.py healthcare --check  # wiring only
-python realtime-2.1-mini/agent.py control-industry
+uv sync
+uv run python run.py --harness openai/realtime-2.1-mini --check
+uv run python tests/converse.py --harness openai/realtime-2.1-mini
+```
+
+Harness-only (tool server must already be up):
+
+```bash
+uv run python voice-agent-harnesses/openai/realtime-2.1-mini/agent.py control-industry --check
 ```

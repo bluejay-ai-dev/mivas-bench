@@ -18,4 +18,25 @@ This industry does **not** mirror how customers build voice agents. It is a cont
 
 ## Expected outcome
 
-Your agent schedules a generic repair appointment, and evaluations show database state reflecting a scheduled appointment.
+Your agent schedules a generic repair appointment, and evaluations show database state reflecting a scheduled appointment (`GET /state` on the tool server).
+
+## DB + tool server
+
+Industry-owned state and tools live here:
+
+| Path | Role |
+|------|------|
+| `db/schema.sql` | SQLite schema (`appointments`) |
+| `db/seed.sql` | Initial empty baseline |
+| `tool_server.py` | FastAPI: `POST /tools/{name}`, `GET /health`, `GET /state` |
+| `tools.json` | Input/output schemas for tools |
+
+Handoffs (`handoff_to_scheduler`) stay in the harness; only `schedule_appointment` is served by the tool server.
+
+```bash
+uv pip install -r requirements.txt
+export MIVAS_DB_PATH=db/runtime.db
+uv run python tool_server.py
+# curl -X POST http://127.0.0.1:8000/tools/schedule_appointment -H 'content-type: application/json' -d '{"date":"08/07/2026"}'
+# curl http://127.0.0.1:8000/state
+```
