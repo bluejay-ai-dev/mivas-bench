@@ -1,0 +1,27 @@
+flowchart TD
+    START(["Inbound call"]) --> reception["reception"]
+
+    reception -->|transfer_to_identity| identity["identity"]
+    reception -->|transfer_to_scheduling| scheduling["scheduling"]
+    reception -->|transfer_to_coverage| coverage["coverage"]
+    reception -->|transfer_to_cosmetic| cosmetic["cosmetic"]
+
+    identity -->|transfer_to_scheduling| scheduling
+    identity -->|transfer_to_coverage| coverage
+    identity -->|transfer_to_cosmetic| cosmetic
+    identity -->|transfer_to_billing| billing["billing"]
+    identity -->|transfer_to_clinical| clinical["clinical"]
+
+    scheduling -->|transfer_to_coverage| coverage
+    coverage -->|transfer_to_scheduling| scheduling
+    scheduling -->|transfer_to_cosmetic| cosmetic
+    cosmetic -->|transfer_to_scheduling| scheduling
+    scheduling -->|transfer_to_identity| identity
+    coverage -->|transfer_to_identity| identity
+    cosmetic -->|transfer_to_identity| identity
+    billing -->|transfer_to_scheduling| scheduling
+    billing -->|transfer_to_identity| identity
+    clinical -->|transfer_to_scheduling| scheduling
+    clinical -->|transfer_to_identity| identity
+
+    human["human (via transfer to human)"]
