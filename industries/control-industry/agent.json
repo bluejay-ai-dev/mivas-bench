@@ -1,0 +1,14 @@
+{
+  "agents": [
+    {
+      "name": "receptionist",
+      "system_prompt": "system-prompts/receptionist.md",
+      "tools": ["handoff_to_scheduler"]
+    },
+    {
+      "name": "scheduler",
+      "system_prompt": "system-prompts/scheduler.md",
+      "tools": ["schedule_appointment"]
+    }
+  ]
+}
