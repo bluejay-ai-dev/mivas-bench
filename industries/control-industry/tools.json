@@ -10,9 +10,13 @@
       "outputSchema": {
         "type": "object",
         "properties": {
-          "success": { "type": "boolean" }
+          "success": {
+            "type": "boolean"
+          }
         },
-        "required": ["success"]
+        "required": [
+          "success"
+        ]
       }
     },
     {
@@ -26,18 +30,25 @@
             "description": "Repair appointment date in MM/DD/YYYY format"
           }
         },
-        "required": ["date"]
+        "required": [
+          "date"
+        ]
       },
       "outputSchema": {
         "type": "object",
         "properties": {
-          "success": { "type": "boolean" },
+          "success": {
+            "type": "boolean"
+          },
           "date": {
             "type": "string",
             "description": "Scheduled repair appointment date in MM/DD/YYYY format"
           }
         },
-        "required": ["success", "date"]
+        "required": [
+          "success",
+          "date"
+        ]
       }
     }
   ]
