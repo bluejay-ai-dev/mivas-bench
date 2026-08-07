@@ -1,0 +1,2 @@
+-- Control industry starts with no appointments booked.
+-- Baseline is an empty appointments table after schema.sql.

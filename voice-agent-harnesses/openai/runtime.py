@@ -1,18 +1,28 @@
-"""Shared blueprint → RealtimeRunner builder for OpenAI Realtime harnesses."""
+"""Shared blueprint → RealtimeRunner builder for OpenAI Realtime harnesses.
+
+Non-handoff tools are proxied to the industry tool server (TOOL_SERVER_URL).
+"""
 
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 from typing import Any
 
+import httpx
 from agents import FunctionTool
 from agents.realtime import RealtimeAgent, RealtimeRunner, realtime_handoff
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+TOOL_SERVER_URL = os.environ.get("TOOL_SERVER_URL", "http://127.0.0.1:8000").rstrip("/")
 
-# ponytail: process-local store; swap when Bluejay evals need durable DB state
-DB: dict[str, Any] = {}
+
+def industry_path(name: str | Path) -> Path:
+    path = Path(name)
+    if path.is_dir():
+        return path.resolve()
+    return (REPO_ROOT / "industries" / name).resolve()
 
 
 def _tool_catalog(industry_dir: Path) -> dict[str, dict]:
@@ -24,15 +34,14 @@ def _fn_tool(spec: dict) -> FunctionTool:
     name = spec["name"]
     schema = {**spec["inputSchema"], "additionalProperties": False}
     schema.setdefault("properties", {})
+    url = f"{TOOL_SERVER_URL}/tools/{name}"
 
     async def on_invoke(_ctx: Any, raw: str) -> str:
         args = json.loads(raw or "{}")
-        if name == "schedule_appointment":
-            date = args["date"]
-            DB["appointment"] = {"date": date}
-            return json.dumps({"success": True, "date": date})
-        # ponytail: stub OK until industry tool servers are wired
-        return json.dumps({"ok": True, "success": True, **args})
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            resp = await client.post(url, json=args)
+            resp.raise_for_status()
+            return resp.text
 
     return FunctionTool(
         name=name,
@@ -43,7 +52,7 @@ def _fn_tool(spec: dict) -> FunctionTool:
 
 
 def build_agents(industry_dir: str | Path) -> tuple[RealtimeAgent, dict[str, RealtimeAgent]]:
-    industry_dir = Path(industry_dir).resolve()
+    industry_dir = industry_path(industry_dir)
     blueprint = json.loads((industry_dir / "agent_blueprint.json").read_text())
     catalog = _tool_catalog(industry_dir)
 
@@ -101,7 +110,3 @@ def build_from_blueprint(industry_dir: str | Path, model: str) -> RealtimeRunner
             }
         },
     )
-
-
-def industry_path(name: str) -> Path:
-    return REPO_ROOT / "industries" / name

@@ -1,0 +1,57 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: mivas-__JOB_SLUG__
+  labels:
+    app: mivas-bench
+    mivas.harness: "__HARNESS_FAMILY__"
+    mivas.runtime: "__HARNESS_RUNTIME__"
+    mivas.industry: "__INDUSTRY__"
+spec:
+  ttlSecondsAfterFinished: 3600
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        app: mivas-bench
+        mivas.harness: "__HARNESS_FAMILY__"
+        mivas.runtime: "__HARNESS_RUNTIME__"
+        mivas.industry: "__INDUSTRY__"
+    spec:
+      restartPolicy: Never
+      dnsPolicy: ClusterFirst
+      containers:
+        - name: mivas
+          image: __IMAGE__
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: VOICE_AGENT
+              value: "__VOICE_AGENT__"
+            - name: INDUSTRY
+              value: "__INDUSTRY__"
+            - name: HARNESS_DIR
+              value: "/app/harness/__HARNESS_RUNTIME__"
+            - name: PYTHONPATH
+              value: "/app/harness"
+            - name: TOOL_SERVER_URL
+              value: "http://127.0.0.1:8000"
+            - name: TOOL_SERVER_PORT
+              value: "8000"
+            - name: MIVAS_DB_PATH
+              value: "/data/industry.db"
+            - name: INDUSTRY_DIR
+              value: "/app/industry"
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: mivas-secrets
+                  key: OPENAI_API_KEY
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          ports:
+            - containerPort: 8000
+              name: tools
+      volumes:
+        - name: data
+          emptyDir: {}

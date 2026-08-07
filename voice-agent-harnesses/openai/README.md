@@ -1,15 +1,17 @@
 # openai
 
-OpenAI Realtime harnesses. Each subfolder is one model runtime; cross with any `industries/*/agent_blueprint.json`.
+OpenAI Realtime harnesses. Each subfolder is one model runtime; tools go through the industry `tool_server.py`.
 
 | Folder | Model |
 |---|---|
 | `realtime-2.1/` | [`gpt-realtime-2.1`](https://developers.openai.com/api/docs/models/gpt-realtime-2.1) |
 | `realtime-2.1-mini/` | [`gpt-realtime-2.1-mini`](https://developers.openai.com/api/docs/models/gpt-realtime-2.1-mini) |
 
+Shared builder: `runtime.py` (HTTP proxy → `TOOL_SERVER_URL`).
+
 ```bash
-pip install -r requirements.txt
-export OPENAI_API_KEY=...
-python realtime-2.1/agent.py healthcare
-python realtime-2.1-mini/agent.py healthcare
+uv sync
+# set VOICE_AGENT=openai/realtime-2.1 in root .env
+uv run python run.py --check
+uv run python tests/converse.py
 ```

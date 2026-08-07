@@ -1,4 +1,37 @@
+# env / secrets
 .env
-.DS_Store
+.env.*
+!.env.example
 
+# python / uv
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+uv.toml
+
+# local industry DB runtime state
+**/db/runtime.db
+**/db/runtime.db-*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
 .cursor/
+*.swp
+*~
+
+# k8s / docker scratch
+*.local.yaml
