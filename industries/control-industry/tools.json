@@ -1,0 +1,44 @@
+{
+  "tools": [
+    {
+      "name": "handoff_to_scheduler",
+      "description": "Hand off the caller to the Bluejay's Repair Services scheduler agent",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" }
+        },
+        "required": ["success"]
+      }
+    },
+    {
+      "name": "schedule_appointment",
+      "description": "Schedule a repair appointment and store it in the database",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "description": "Repair appointment date in MM/DD/YYYY format"
+          }
+        },
+        "required": ["date"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "date": {
+            "type": "string",
+            "description": "Scheduled repair appointment date in MM/DD/YYYY format"
+          }
+        },
+        "required": ["success", "date"]
+      }
+    }
+  ]
+}
