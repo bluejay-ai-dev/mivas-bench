@@ -1,0 +1,30 @@
+.cursor/rules/mivas-runtime.mdc
+  s_6dd0c90f375723::t_386d1725a932e4 1-15
+.env.example
+  s_6dd0c90f375723::t_cb5d424b77c31f 1-12
+.gitignore
+  s_6dd0c90f375723::t_4c63de5d3bd5ab 1-2
+industries/control-industry/agent.json
+  h_bbe1a3ca680b9f 1-14
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "b23d21ccd10572b5dc5761f9b6be3e75a69ce14d",
+  "prompts": {},
+  "humans": {
+    "h_bbe1a3ca680b9f": {
+      "author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_6dd0c90f375723": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "319bc4cb-9526-48f5-95f2-bb0f8a259311",
+        "model": "grok-4.5"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
