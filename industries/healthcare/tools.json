@@ -1,0 +1,1451 @@
+{
+  "tools": [
+    {
+      "name": "resolve_inbound_context",
+      "description": "Resolve dialed DID / caller ANI into office, legacy brand greeting, and known_caller before the first spoken turn.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "dialed_did": {
+            "type": "string"
+          },
+          "caller_ani": {
+            "type": "string"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "patient_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "detect_language",
+      "description": "Detect the caller's language when they open in something other than English, then switch and stay switched. Never ask them to press a number for Spanish.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "utterance": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "utterance"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "patient_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "identify_patient",
+      "description": "Find the patient record. The number they're calling from is tried automatically \u2014 try that before asking for anything. dob is YYYY-MM-DD. Returns masked candidates only.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "first_name": {
+            "type": "string"
+          },
+          "last_name": {
+            "type": "string"
+          },
+          "dob": {
+            "type": "string"
+          },
+          "zip": {
+            "type": "string"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "patient_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "verify_identity",
+      "description": "Verify the caller. Needs full name and date of birth (YYYY-MM-DD); add a second factor \u2014 their zip or the last four of the phone on file \u2014 if the tool asks for one. Never ask for a Social Security number. After the third failure this locks; when it does, stop and offer the front desk or a callback.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "full_name": {
+            "type": "string"
+          },
+          "dob": {
+            "type": "string"
+          },
+          "second_factor": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "full_name",
+          "dob"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "patient_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "get_patient_summary",
+      "description": "Load everything the chart already knows \u2014 name, language, home office, last visit, upcoming appointments, insurance, balance, card on file, portal status, open orders and clinical flags. Call this the moment verification passes, before handing off.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "patient_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "list_locations",
+      "description": "Offices near a zip that do cosmetic work.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "zip": {
+            "type": "string"
+          },
+          "radius_miles": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "zip"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "patient_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "classify_visit_request",
+      "description": "Map the reason for the visit to an appointment type, visit class, required credential, duration, urgency and constraints. Always call this before find_slots \u2014 it is what stops a Mohs consult being booked with a PA.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "reason_text": {
+            "type": "string"
+          },
+          "is_new_patient": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "reason_text"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "patient_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "find_slots",
+      "description": "Open cosmetic consult slots. Offer two or three.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "location_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "window_start": {
+            "type": "string"
+          },
+          "window_end": {
+            "type": "string"
+          },
+          "max_results": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "location_ids"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "patient_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "book_appointment",
+      "description": "Create the appointment. Only after you have read back the day, the time, the office WITH THE FLOOR and the provider with credentials, and the caller said yes.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "slot_id": {
+            "type": "string"
+          },
+          "appointment_type_code": {
+            "type": "string"
+          },
+          "location_id": {
+            "type": "string"
+          },
+          "provider_id": {
+            "type": "string"
+          },
+          "start": {
+            "type": "string"
+          },
+          "end": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "new_patient": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "slot_id",
+          "appointment_type_code",
+          "location_id",
+          "provider_id",
+          "start",
+          "end",
+          "description"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "patient_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "reschedule_appointment",
+      "description": "Move an existing appointment. This is an update, never a cancel-then-rebook, and it never costs anything \u2014 say so. Always offer this before cancelling.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "appointment_id": {
+            "type": "string"
+          },
+          "new_slot_id": {
+            "type": "string"
+          },
+          "new_start": {
+            "type": "string"
+          },
+          "new_end": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "appointment_id",
+          "new_slot_id",
+          "new_start",
+          "new_end",
+          "reason"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "patient_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "cancel_appointment",
+      "description": "Cancel. Leave fee_disclosed_and_accepted false the first time: if a fee applies the tool will hand you the exact wording to say. Say it, offer a different time instead, and only call again with true if they still want to cancel. Always offer to rebook after.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "appointment_id": {
+            "type": "string"
+          },
+          "cancellation_reason_code": {
+            "type": "string"
+          },
+          "fee_disclosed_and_accepted": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "appointment_id",
+          "cancellation_reason_code"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "patient_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "join_waitlist",
+      "description": "Put them on the earlier-appointment list. Offer this to anyone who cancels without rebooking, and to anyone who doesn't like the times you found.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "appointment_type_code": {
+            "type": "string"
+          },
+          "location_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "earliest": {
+            "type": "string"
+          },
+          "latest": {
+            "type": "string"
+          },
+          "contact_preference": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "appointment_type_code",
+          "location_ids",
+          "earliest",
+          "latest"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "patient_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "schedule_allergy_service",
+      "description": "Allergy visits: skin_testing, patch_testing, food_challenge, allergy_shot, drops_pickup, asthma_eval, immunotherapy_buildup. Say the prep instructions, the observation time after a shot, and the linked return visits out loud.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "service": {
+            "type": "string"
+          },
+          "location_id": {
+            "type": "string"
+          },
+          "window_start": {
+            "type": "string"
+          },
+          "window_end": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "service",
+          "location_id"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "patient_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "check_plan_accepted",
+      "description": "Carrier by plan by OFFICE by provider. location_id accepts a real id OR whatever the caller called the office \u2014 \"Park Avenue\", \"Brooklyn Heights\", \"Windermere\" \u2014 so pass their words straight through rather than refusing for want of an id. If must_not_assert is true you may not say they're covered or not covered: say required_script and create a callback or point them at the text line. If accepted is no, say so plainly and offer alternative_locations by distance.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "carrier": {
+            "type": "string"
+          },
+          "location_id": {
+            "type": "string"
+          },
+          "plan_name": {
+            "type": "string"
+          },
+          "plan_type": {
+            "type": "string"
+          },
+          "provider_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "carrier",
+          "location_id"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "patient_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "run_eligibility_check",
+      "description": "Live copay, deductible and coinsurance. Only if they gave you a member ID. If the payer doesn't answer, say you couldn't get the number \u2014 never guess at a copay.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "carrier": {
+            "type": "string"
+          },
+          "member_id": {
+            "type": "string"
+          },
+          "dob": {
+            "type": "string"
+          },
+          "service_date": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "carrier",
+          "member_id",
+          "dob",
+          "service_date"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "patient_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "capture_insurance_update",
+      "description": "Take new or changed insurance by voice, then send a secure link for card photos. Never ask for a Social Security number.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "carrier": {
+            "type": "string"
+          },
+          "member_id": {
+            "type": "string"
+          },
+          "group_number": {
+            "type": "string"
+          },
+          "subscriber_relationship": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "carrier",
+          "member_id"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "patient_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "get_account_balance",
+      "description": "The balance and the line items behind it.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "patient_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "explain_charge",
+      "description": "The approved explanation for a charge. Say approved_script as written \u2014 do not improvise a billing explanation.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "line_item_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "line_item_id"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "patient_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "send_payment_link",
+      "description": "Text a secure payment link. The only payment path \u2014 never take a card by voice.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "mobile_e164": {
+            "type": "string"
+          },
+          "amount_cents": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "mobile_e164"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "patient_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "offer_financing",
+      "description": "CareCredit for a balance they can't pay at once. Over two hundred fifty dollars.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "amount_cents": {
+            "type": "integer"
+          },
+          "context": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "amount_cents"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "patient_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "request_fee_waiver",
+      "description": "Open a review of a missed-visit fee. You do NOT waive it yourself. Say the SLA the tool gives you out loud.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "fee_line_item_id": {
+            "type": "string"
+          },
+          "stated_reason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "fee_line_item_id",
+          "stated_reason"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "patient_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "quote_cosmetic_service",
+      "description": "The only source of a cosmetic price. If it returns a range you may say that range and must add that the consult settles the number. If it returns no range, pricing depends on the treatment plan \u2014 never invent, estimate, or say 'probably around'.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "service": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "service"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "patient_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "book_cosmetic_consult",
+      "description": "Book the consult. Leave policy_acknowledged false the first time \u2014 the tool hands you the exact four policy lines to say (deposit, 72 hours, forfeited, balance due). Say them, get a real yes, then call again with true.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "slot_id": {
+            "type": "string"
+          },
+          "service_interest": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "location_id": {
+            "type": "string"
+          },
+          "provider_id": {
+            "type": "string"
+          },
+          "start": {
+            "type": "string"
+          },
+          "policy_acknowledged": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "slot_id",
+          "service_interest",
+          "location_id",
+          "provider_id",
+          "start"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "patient_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "request_rx_refill",
+      "description": "Open a refill request. This NEVER approves a refill. Follow the route it returns; on a no_recent_visit hard stop, offer to book the visit on this call. Call it as soon as you know the medication \u2014 do NOT wait for a pharmacy name; hard-stop routes (isotretinoin, controlled, biologics) don't need one.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "medication_name": {
+            "type": "string"
+          },
+          "pharmacy_name": {
+            "type": "string"
+          },
+          "pharmacy_phone": {
+            "type": "string"
+          },
+          "last_fill_date": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "medication_name"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "patient_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "get_results_status",
+      "description": "STATUS of pathology, lab or allergy testing \u2014 never the content. Say approved_script. If they push for what the results say, hold the line warmly every time and create a clinical message instead.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "order_type": {
+            "type": "string"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "patient_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "create_clinical_message",
+      "description": "Task the clinical team. priority stat for anything emergent, urgent otherwise.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "callback_number": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "category",
+          "priority",
+          "summary"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "patient_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "search_practice_kb",
+      "description": "Look up a grounded answer about Straus: hours, directions, parking, policies, fees, the portal, what we treat. Only say what this returns \u2014 if it finds no source, do not make one up.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "query"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "patient_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "send_sms",
+      "description": "Text the caller. template_id is one of appointment_confirmation, portal_activation, payment_link, insurance_card_upload, directions, cosmetic_deposit.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "mobile_e164": {
+            "type": "string"
+          },
+          "template_id": {
+            "type": "string"
+          },
+          "variables": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "mobile_e164",
+          "template_id"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "patient_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "send_portal_activation",
+      "description": "Send the portal activation link when the portal isn't active.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "channel": {
+            "type": "string"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "patient_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "create_callback_task",
+      "description": "Promise a callback with a real, tracked SLA. queue is billing, clinical, front_desk, cosmetic or records. Say the spoken_commitment out loud, verbatim.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "callback_number": {
+            "type": "string"
+          },
+          "topic": {
+            "type": "string"
+          },
+          "queue": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "string"
+          },
+          "best_time": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "callback_number",
+          "topic",
+          "queue"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "patient_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "authenticate_for_transfer",
+      "description": "Authenticate and package context before transferring to a human queue.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "patient_id": {
+            "type": "string"
+          },
+          "context_summary": {
+            "type": "string"
+          },
+          "intents_attempted": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "tools_called": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "unresolved_reason": {
+            "type": "string"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "patient_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "transfer_call",
+      "description": "Transfer the call to a human destination queue.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "destination": {
+            "type": "string"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "patient_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "log_call_disposition",
+      "description": "Log call disposition (normally fired on session shutdown).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "intents": {
+            "type": "string"
+          },
+          "containment": {
+            "type": "string"
+          },
+          "revenue_events": {
+            "type": "string"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "patient_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "transfer_to_human",
+      "description": "Transfer the caller to a human. Use only when (1) the caller asks for a human, or (2) after telling them to call 911 and saying you are transferring them for a clinical emergency. Destinations include patient_support_center, billing_team, location_front_desk, cosmetic_coordinator, clinical_triage, records, or on_call.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "destination": {
+            "type": "string"
+          },
+          "context_summary": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "destination",
+          "context_summary",
+          "reason"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "patient_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "end_call",
+      "description": "End the call once the caller is done, or immediately if it's spam or a wrong number. Say goodbye first.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "patient_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    }
+  ]
+}

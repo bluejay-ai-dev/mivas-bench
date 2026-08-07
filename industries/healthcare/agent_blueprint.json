@@ -1,0 +1,422 @@
+{
+  "agents": [
+    {
+      "name": "reception",
+      "system_prompt": "system-prompts/reception.md",
+      "tools": [
+        {
+          "name": "search_practice_kb",
+          "handoff": false
+        },
+        {
+          "name": "create_callback_task",
+          "handoff": false
+        },
+        {
+          "name": "send_sms",
+          "handoff": false
+        },
+        {
+          "name": "transfer_to_human",
+          "handoff": false
+        },
+        {
+          "name": "end_call",
+          "handoff": false
+        },
+        {
+          "name": "detect_language",
+          "handoff": false
+        },
+        {
+          "name": "classify_visit_request",
+          "handoff": false
+        },
+        {
+          "name": "list_locations",
+          "handoff": false
+        },
+        {
+          "name": "transfer_to_identity",
+          "handoff": true,
+          "handoff_to": "identity"
+        },
+        {
+          "name": "transfer_to_scheduling",
+          "handoff": true,
+          "handoff_to": "scheduling"
+        },
+        {
+          "name": "transfer_to_coverage",
+          "handoff": true,
+          "handoff_to": "coverage"
+        },
+        {
+          "name": "transfer_to_cosmetic",
+          "handoff": true,
+          "handoff_to": "cosmetic"
+        }
+      ]
+    },
+    {
+      "name": "identity",
+      "system_prompt": "system-prompts/identity.md",
+      "tools": [
+        {
+          "name": "search_practice_kb",
+          "handoff": false
+        },
+        {
+          "name": "create_callback_task",
+          "handoff": false
+        },
+        {
+          "name": "send_sms",
+          "handoff": false
+        },
+        {
+          "name": "transfer_to_human",
+          "handoff": false
+        },
+        {
+          "name": "end_call",
+          "handoff": false
+        },
+        {
+          "name": "identify_patient",
+          "handoff": false
+        },
+        {
+          "name": "verify_identity",
+          "handoff": false
+        },
+        {
+          "name": "get_patient_summary",
+          "handoff": false
+        },
+        {
+          "name": "transfer_to_scheduling",
+          "handoff": true,
+          "handoff_to": "scheduling"
+        },
+        {
+          "name": "transfer_to_billing",
+          "handoff": true,
+          "handoff_to": "billing"
+        },
+        {
+          "name": "transfer_to_clinical",
+          "handoff": true,
+          "handoff_to": "clinical"
+        },
+        {
+          "name": "transfer_to_coverage",
+          "handoff": true,
+          "handoff_to": "coverage"
+        },
+        {
+          "name": "transfer_to_cosmetic",
+          "handoff": true,
+          "handoff_to": "cosmetic"
+        }
+      ]
+    },
+    {
+      "name": "scheduling",
+      "system_prompt": "system-prompts/scheduling.md",
+      "tools": [
+        {
+          "name": "search_practice_kb",
+          "handoff": false
+        },
+        {
+          "name": "create_callback_task",
+          "handoff": false
+        },
+        {
+          "name": "send_sms",
+          "handoff": false
+        },
+        {
+          "name": "transfer_to_human",
+          "handoff": false
+        },
+        {
+          "name": "end_call",
+          "handoff": false
+        },
+        {
+          "name": "classify_visit_request",
+          "handoff": false
+        },
+        {
+          "name": "check_plan_accepted",
+          "handoff": false
+        },
+        {
+          "name": "list_locations",
+          "handoff": false
+        },
+        {
+          "name": "find_slots",
+          "handoff": false
+        },
+        {
+          "name": "book_appointment",
+          "handoff": false
+        },
+        {
+          "name": "reschedule_appointment",
+          "handoff": false
+        },
+        {
+          "name": "cancel_appointment",
+          "handoff": false
+        },
+        {
+          "name": "join_waitlist",
+          "handoff": false
+        },
+        {
+          "name": "schedule_allergy_service",
+          "handoff": false
+        },
+        {
+          "name": "transfer_to_coverage",
+          "handoff": true,
+          "handoff_to": "coverage"
+        },
+        {
+          "name": "transfer_to_identity",
+          "handoff": true,
+          "handoff_to": "identity"
+        },
+        {
+          "name": "transfer_to_cosmetic",
+          "handoff": true,
+          "handoff_to": "cosmetic"
+        }
+      ]
+    },
+    {
+      "name": "coverage",
+      "system_prompt": "system-prompts/coverage.md",
+      "tools": [
+        {
+          "name": "search_practice_kb",
+          "handoff": false
+        },
+        {
+          "name": "create_callback_task",
+          "handoff": false
+        },
+        {
+          "name": "send_sms",
+          "handoff": false
+        },
+        {
+          "name": "transfer_to_human",
+          "handoff": false
+        },
+        {
+          "name": "end_call",
+          "handoff": false
+        },
+        {
+          "name": "list_locations",
+          "handoff": false
+        },
+        {
+          "name": "check_plan_accepted",
+          "handoff": false
+        },
+        {
+          "name": "run_eligibility_check",
+          "handoff": false
+        },
+        {
+          "name": "capture_insurance_update",
+          "handoff": false
+        },
+        {
+          "name": "transfer_to_scheduling",
+          "handoff": true,
+          "handoff_to": "scheduling"
+        },
+        {
+          "name": "transfer_to_identity",
+          "handoff": true,
+          "handoff_to": "identity"
+        }
+      ]
+    },
+    {
+      "name": "cosmetic",
+      "system_prompt": "system-prompts/cosmetic.md",
+      "tools": [
+        {
+          "name": "search_practice_kb",
+          "handoff": false
+        },
+        {
+          "name": "create_callback_task",
+          "handoff": false
+        },
+        {
+          "name": "send_sms",
+          "handoff": false
+        },
+        {
+          "name": "transfer_to_human",
+          "handoff": false
+        },
+        {
+          "name": "end_call",
+          "handoff": false
+        },
+        {
+          "name": "quote_cosmetic_service",
+          "handoff": false
+        },
+        {
+          "name": "list_locations",
+          "handoff": false
+        },
+        {
+          "name": "find_slots",
+          "handoff": false
+        },
+        {
+          "name": "book_cosmetic_consult",
+          "handoff": false
+        },
+        {
+          "name": "send_payment_link",
+          "handoff": false
+        },
+        {
+          "name": "offer_financing",
+          "handoff": false
+        },
+        {
+          "name": "transfer_to_identity",
+          "handoff": true,
+          "handoff_to": "identity"
+        },
+        {
+          "name": "transfer_to_scheduling",
+          "handoff": true,
+          "handoff_to": "scheduling"
+        }
+      ]
+    },
+    {
+      "name": "billing",
+      "system_prompt": "system-prompts/billing.md",
+      "tools": [
+        {
+          "name": "search_practice_kb",
+          "handoff": false
+        },
+        {
+          "name": "create_callback_task",
+          "handoff": false
+        },
+        {
+          "name": "send_sms",
+          "handoff": false
+        },
+        {
+          "name": "transfer_to_human",
+          "handoff": false
+        },
+        {
+          "name": "end_call",
+          "handoff": false
+        },
+        {
+          "name": "get_account_balance",
+          "handoff": false
+        },
+        {
+          "name": "explain_charge",
+          "handoff": false
+        },
+        {
+          "name": "send_payment_link",
+          "handoff": false
+        },
+        {
+          "name": "offer_financing",
+          "handoff": false
+        },
+        {
+          "name": "request_fee_waiver",
+          "handoff": false
+        },
+        {
+          "name": "transfer_to_scheduling",
+          "handoff": true,
+          "handoff_to": "scheduling"
+        },
+        {
+          "name": "transfer_to_identity",
+          "handoff": true,
+          "handoff_to": "identity"
+        }
+      ]
+    },
+    {
+      "name": "clinical",
+      "system_prompt": "system-prompts/clinical.md",
+      "tools": [
+        {
+          "name": "search_practice_kb",
+          "handoff": false
+        },
+        {
+          "name": "create_callback_task",
+          "handoff": false
+        },
+        {
+          "name": "send_sms",
+          "handoff": false
+        },
+        {
+          "name": "transfer_to_human",
+          "handoff": false
+        },
+        {
+          "name": "end_call",
+          "handoff": false
+        },
+        {
+          "name": "get_results_status",
+          "handoff": false
+        },
+        {
+          "name": "request_rx_refill",
+          "handoff": false
+        },
+        {
+          "name": "create_clinical_message",
+          "handoff": false
+        },
+        {
+          "name": "send_portal_activation",
+          "handoff": false
+        },
+        {
+          "name": "transfer_to_scheduling",
+          "handoff": true,
+          "handoff_to": "scheduling"
+        },
+        {
+          "name": "transfer_to_identity",
+          "handoff": true,
+          "handoff_to": "identity"
+        }
+      ]
+    }
+  ]
+}
