@@ -8,6 +8,10 @@
           "name": "handoff_to_scheduler",
           "handoff": true,
           "handoff_to": "scheduler"
+        },
+        {
+          "name": "end_call",
+          "handoff": false
         }
       ]
     },
@@ -17,6 +21,10 @@
       "tools": [
         {
           "name": "schedule_appointment",
+          "handoff": false
+        },
+        {
+          "name": "end_call",
           "handoff": false
         }
       ]

@@ -50,6 +50,33 @@
           "date"
         ]
       }
+    },
+    {
+      "name": "end_call",
+      "description": "End the call once the caller is done, or immediately if it is spam or a wrong number. Say goodbye first.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "description": "Why the call is ending"
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "success"
+        ]
+      }
     }
   ]
 }
