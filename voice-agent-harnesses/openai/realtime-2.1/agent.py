@@ -14,6 +14,7 @@ from harness import (  # noqa: E402
     build_from_blueprint as _build_from_blueprint,
     industry_path,
 )
+from report import traced_run  # noqa: E402
 
 MODEL = "gpt-realtime-2.1"
 # https://developers.openai.com/api/docs/models/gpt-realtime-2.1
@@ -27,11 +28,13 @@ def build_from_blueprint(industry_dir: str | Path):
 async def run(industry: str = "control-industry") -> None:
     industry_dir = os.environ.get("INDUSTRY_DIR") or str(industry_path(industry))
     runner = build_from_blueprint(industry_dir)
-    ctx: dict = {}
-    async with await runner.run(context=ctx) as session:
-        ctx["session"] = session
-        async for event in session:
-            print(event.type)
+    name = Path(industry_dir).name
+    async with traced_run(f"mivas-{name}-{MODEL}"):
+        ctx: dict = {}
+        async with await runner.run(context=ctx) as session:
+            ctx["session"] = session
+            async for event in session:
+                print(event.type)
 
 
 if __name__ == "__main__":

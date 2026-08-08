@@ -24,9 +24,28 @@ There is **no safety agent**. Escalation is a single global tool, `transfer_to_h
 | Caller asks for a human | Call `transfer_to_human`. |
 | Clinical emergency | Tell them to call 911, say "I'm transferring you to a human now," then `transfer_to_human`. |
 
-## Files
+## DB + state API
 
-- `agent_blueprint.json` — agents, tool surfaces, `transfer_to_*` handoffs
-- `agent_blueprint.mmd` — Mermaid graph of the blueprint handoff edges
-- `system-prompts/*.md` — full per-node prompts (shared CORE rules in each)
-- `tools.json` — MCP tool schemas for the industry tool surface
+| Path | Role |
+|------|------|
+| `db/schema.sql` | SQLite schema (`locations`, `providers`, `patients`, `appointments`, `waitlist`) |
+| `db/seed.sql` | Baseline offices + 2 patients + 1 upcoming visit |
+| `tool_server.py` | FastAPI **state API** for durable DB ops (not a tools.json mirror) |
+| `tools.json` | Agent-facing tool schemas |
+| `agent_blueprint.json` | Wires tools: industry / `handoff` / `session` |
+| `agent_blueprint.mmd` | Mermaid graph of the blueprint handoff edges |
+| `system-prompts/*.md` | Full per-node prompts (shared CORE rules in each) |
+
+Example state routes: `GET /patients`, `POST /appointments`, `PATCH /appointments/{id}`, `POST /waitlist`, `GET /state`, `GET /health`.
+
+Harness tool kinds:
+- **industry** (default) — e.g. `book_appointment` → `POST /appointments`
+- **handoff** — e.g. `transfer_to_scheduling` (provider handoff)
+- **session** — e.g. `end_call` (harness-native; closes the realtime session, no state API)
+
+```bash
+uv run python tool_server.py
+# curl http://127.0.0.1:8000/state
+# curl -X POST http://127.0.0.1:8000/appointments -H 'content-type: application/json' \
+#   -d '{"location_id":"loc_park_ave","provider_id":"prov_chen","appointment_type_code":"MED_NEW","start":"2026-09-01T09:00:00","end":"2026-09-01T09:30:00","description":"New patient visit"}'
+```

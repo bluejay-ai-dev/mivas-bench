@@ -17,7 +17,8 @@ from pathlib import Path
 from websockets.asyncio.server import serve
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from runtime import build_from_blueprint, industry_path  # noqa: E402
+from harness import build_from_blueprint, industry_path  # noqa: E402
+from report import traced_run  # noqa: E402
 
 W, R_IN, R_OUT = 2, 16_000, 24_000
 
@@ -34,44 +35,59 @@ def _event(t: str, data: dict) -> str:
     )
 
 
+def _simulation_result_id(ws) -> str | None:
+    """Bluejay sends this on the CHIRP WebSocket upgrade request."""
+    headers = getattr(getattr(ws, "request", None), "headers", None)
+    if headers is None:
+        return None
+    val = headers.get("X-Simulation-Result-Id") or headers.get("x-simulation-result-id")
+    return str(val) if val else None
+
+
 async def _bridge(ws, model: str, industry: str) -> None:
-    ctx: dict = {}
-    up = down = None
-    utt: str | None = None
-    async with await build_from_blueprint(industry_path(industry), model).run(context=ctx) as session:
-        ctx["session"] = session
+    industry_dir = industry_path(industry)
+    workflow = f"mivas-{Path(industry_dir).name}-{model}"
+    sim_id = _simulation_result_id(ws)
+    if sim_id:
+        print(f"chirp sim_result_id={sim_id}", flush=True)
+    async with traced_run(workflow, simulation_result_id=sim_id):
+        ctx: dict = {}
+        up = down = None
+        utt: str | None = None
+        async with await build_from_blueprint(industry_dir, model).run(context=ctx) as session:
+            ctx["session"] = session
 
-        async def inbound() -> None:
-            nonlocal up
-            try:
-                async for msg in ws:
-                    if isinstance(msg, bytes) and msg:
-                        pcm, up = audioop.ratecv(msg, W, 1, R_IN, R_OUT, up)
-                        if pcm:
-                            await session.send_audio(pcm)
-            finally:
-                if not getattr(session, "_closed", False):
-                    asyncio.create_task(session.close())
+            async def inbound() -> None:
+                nonlocal up
+                try:
+                    async for msg in ws:
+                        if isinstance(msg, bytes) and msg:
+                            pcm, up = audioop.ratecv(msg, W, 1, R_IN, R_OUT, up)
+                            if pcm:
+                                await session.send_audio(pcm)
+                finally:
+                    if not getattr(session, "_closed", False):
+                        asyncio.create_task(session.close())
 
-        async def outbound() -> None:
-            nonlocal down, utt
-            try:
-                async for event in session:
-                    if event.type == "audio":
-                        if utt is None:
-                            utt = f"u_{uuid.uuid4().hex[:12]}"
-                            await ws.send(_event("speech.started", {"utterance_id": utt}))
-                        pcm, down = audioop.ratecv(event.audio.data, W, 1, R_OUT, R_IN, down)
-                        if pcm:
-                            await ws.send(pcm)
-                    elif event.type in {"audio_end", "audio_interrupted"} and utt:
-                        await ws.send(_event("speech.completed", {"utterance_id": utt}))
-                        utt = None
-            finally:
-                with contextlib.suppress(Exception):
-                    await ws.close(1000)
+            async def outbound() -> None:
+                nonlocal down, utt
+                try:
+                    async for event in session:
+                        if event.type == "audio":
+                            if utt is None:
+                                utt = f"u_{uuid.uuid4().hex[:12]}"
+                                await ws.send(_event("speech.started", {"utterance_id": utt}))
+                            pcm, down = audioop.ratecv(event.audio.data, W, 1, R_OUT, R_IN, down)
+                            if pcm:
+                                await ws.send(pcm)
+                        elif event.type in {"audio_end", "audio_interrupted"} and utt:
+                            await ws.send(_event("speech.completed", {"utterance_id": utt}))
+                            utt = None
+                finally:
+                    with contextlib.suppress(Exception):
+                        await ws.close(1000)
 
-        await asyncio.gather(inbound(), outbound())
+            await asyncio.gather(inbound(), outbound())
 
 
 async def _handler(ws, model: str, industry: str) -> None:
