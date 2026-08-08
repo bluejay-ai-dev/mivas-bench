@@ -105,7 +105,7 @@ async def _post_appointment(date: str) -> dict[str, Any]:
     return {"success": True, "date": body["date"]}
 
 
-async def run_tool(
+async def _execute_tool(
     name: str,
     args: dict[str, Any],
     bp: dict[str, Any],
@@ -138,6 +138,23 @@ async def run_tool(
     return {"success": False, "error": f"unknown tool {name}"}, False
 
 
+async def run_tool(
+    name: str,
+    args: dict[str, Any],
+    bp: dict[str, Any],
+    state: dict[str, Any],
+    *,
+    call_id: str | None = None,
+) -> tuple[dict[str, Any], bool]:
+    """Execute a tool under a GenAI execute_tool span when a traced_run is active."""
+    from report import finish_tool_span, tool_span
+
+    with tool_span(name, args, call_id=call_id) as span:
+        result, stop = await _execute_tool(name, args, bp, state)
+        finish_tool_span(span, result)
+        return result, stop
+
+
 def build_agents(industry_dir: str | Path) -> tuple[str, list[str]]:
     bp = load_blueprint(industry_dir)
     return bp["start"], list(bp["agents"])
@@ -145,37 +162,49 @@ def build_agents(industry_dir: str | Path) -> tuple[str, list[str]]:
 
 async def run_live(industry_dir: str | Path, model: str) -> None:
     """open a Live session; stdin text turns in, event types on stdout."""
+    from report import traced_run
+
     key = os.environ.get("GOOGLE_API_KEY") or os.environ.get("GEMINI_API_KEY")
     if not key:
         raise SystemExit("need GOOGLE_API_KEY")
     bp = load_blueprint(industry_dir)
     state = {"agent": bp["start"]}
     client = genai.Client(api_key=key)
-    async with client.aio.live.connect(model=model, config=live_config(bp)) as session:
-        prompt = "Hello"
-        while True:
-            await session.send_realtime_input(text=prompt)
-            async for response in session.receive():
-                if response.data:
-                    print(f"audio {len(response.data)}", flush=True)
-                if response.tool_call:
-                    replies = []
-                    should_end = False
-                    for fc in response.tool_call.function_calls or []:
-                        result, stop = await run_tool(fc.name, dict(fc.args or {}), bp, state)
-                        should_end = should_end or stop
-                        print(f"tool {fc.name}", flush=True)
-                        replies.append(
-                            types.FunctionResponse(id=fc.id, name=fc.name, response=result)
-                        )
-                    if replies:
-                        await session.send_tool_response(function_responses=replies)
-                    if should_end:
-                        return
-                sc = response.server_content
-                if sc is not None and getattr(sc, "turn_complete", False):
-                    print("turn_complete", flush=True)
-            line = await asyncio.to_thread(sys.stdin.readline)
-            if not line:
-                return
-            prompt = line.strip() or "Hello"
+    name = Path(industry_path(industry_dir)).name
+    async with traced_run(f"mivas-{name}-{model}", model=model):
+        async with client.aio.live.connect(model=model, config=live_config(bp)) as session:
+            prompt = "Hello"
+            while True:
+                await session.send_realtime_input(text=prompt)
+                async for response in session.receive():
+                    if response.data:
+                        print(f"audio {len(response.data)}", flush=True)
+                    if response.tool_call:
+                        replies = []
+                        should_end = False
+                        for fc in response.tool_call.function_calls or []:
+                            result, stop = await run_tool(
+                                fc.name,
+                                dict(fc.args or {}),
+                                bp,
+                                state,
+                                call_id=getattr(fc, "id", None),
+                            )
+                            should_end = should_end or stop
+                            print(f"tool {fc.name}", flush=True)
+                            replies.append(
+                                types.FunctionResponse(
+                                    id=fc.id, name=fc.name, response=result
+                                )
+                            )
+                        if replies:
+                            await session.send_tool_response(function_responses=replies)
+                        if should_end:
+                            return
+                    sc = response.server_content
+                    if sc is not None and getattr(sc, "turn_complete", False):
+                        print("turn_complete", flush=True)
+                line = await asyncio.to_thread(sys.stdin.readline)
+                if not line:
+                    return
+                prompt = line.strip() or "Hello"
