@@ -31,7 +31,7 @@ Industry-owned state and tools live here:
 | `tool_server.py` | FastAPI: `POST /tools/{name}`, `GET /health`, `GET /state` |
 | `tools.json` | Input/output schemas for tools |
 
-Handoffs (`handoff_to_scheduler`) stay in the harness; only `schedule_appointment` is served by the tool server.
+Handoffs (`handoff_to_scheduler`) stay in the harness. Industry tools (`schedule_appointment`) and session tools (`end_call`) POST to the tool server; the harness also closes the call for `session: true` tools.
 
 ```bash
 uv pip install -r requirements.txt

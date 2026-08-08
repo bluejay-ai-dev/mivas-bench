@@ -285,16 +285,26 @@ class VoiceSession:
             or time.monotonic() < self._mic_hold_until
         )
 
+    def _session_alive(self) -> bool:
+        session = self.session
+        if session is None:
+            return False
+        return not getattr(session, "_closed", False) and not getattr(session, "_closing", False)
+
     async def capture_audio(self) -> None:
         if not self.audio_stream or not self.session:
             return
         read_size = int(SAMPLE_RATE * CHUNK_LENGTH_S)
         try:
-            while self.recording:
+            while self.recording and self._session_alive():
                 if self.audio_stream.read_available < read_size:
                     await asyncio.sleep(0.01)
                     continue
-                data, _ = self.audio_stream.read(read_size)
+                try:
+                    data, _ = self.audio_stream.read(read_size)
+                except Exception as e:
+                    print(f"audio capture error: {e}", file=sys.stderr)
+                    break
                 audio_bytes = data.tobytes()
 
                 # Default: don't upload mic while assistant audio is playing.
@@ -313,11 +323,14 @@ class VoiceSession:
                         continue
                     self.interrupt_event.set()
 
-                await self.session.send_audio(audio_bytes)
+                try:
+                    await self.session.send_audio(audio_bytes)
+                except Exception:
+                    # session closed (e.g. end_call) — expected, not a mic failure
+                    break
                 await asyncio.sleep(0)
-        except Exception as e:
-            print(f"audio capture error: {e}", file=sys.stderr)
         finally:
+            self.recording = False
             if self.audio_stream and self.audio_stream.active:
                 self.audio_stream.stop()
             if self.audio_stream:
@@ -372,7 +385,9 @@ async def converse_voice(harness: str, industry: str, *, barge_in: bool = False)
                 },
             },
         }
-        async with await runner.run(model_config=model_config) as session:
+        ctx: dict[str, Any] = {}
+        async with await runner.run(context=ctx, model_config=model_config) as session:
+            ctx["session"] = session
             voice.session = session
             await voice.start_mic()
             print("listening…")
@@ -398,7 +413,9 @@ async def converse_text(harness: str, industry: str) -> None:
     print(f"text chat: {harness} × {industry}")
     print("type a message, or quit / exit / q to stop\n")
 
-    async with await runner.run() as session:
+    ctx: dict[str, Any] = {}
+    async with await runner.run(context=ctx) as session:
+        ctx["session"] = session
 
         async def consume() -> None:
             async for event in session:

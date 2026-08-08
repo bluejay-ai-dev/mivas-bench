@@ -11,7 +11,7 @@
         },
         {
           "name": "end_call",
-          "handoff": false
+          "session": true
         }
       ]
     },
@@ -20,12 +20,11 @@
       "system_prompt": "system-prompts/scheduler.md",
       "tools": [
         {
-          "name": "schedule_appointment",
-          "handoff": false
+          "name": "schedule_appointment"
         },
         {
           "name": "end_call",
-          "handoff": false
+          "session": true
         }
       ]
     }
