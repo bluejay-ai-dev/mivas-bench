@@ -1,4 +1,4 @@
-"""CHIRP (16 kHz pcm_s16le) ↔ OpenAI Realtime (24 kHz)."""
+"""optional 16 kHz pcm websocket bridge ↔ OpenAI Realtime (24 kHz)."""
 
 from __future__ import annotations
 
@@ -108,7 +108,7 @@ def main(model: str | None = None) -> None:
     a = p.parse_args()
     if not a.model or not os.environ.get("OPENAI_API_KEY"):
         raise SystemExit("need --model/OPENAI_REALTIME_MODEL and OPENAI_API_KEY")
-    print(f"CHIRP↔OpenAI {a.model} × {a.industry} :{a.port} auth={bool(_auth())}", flush=True)
+    print(f"ws↔OpenAI {a.model} × {a.industry} :{a.port} auth={bool(_auth())}", flush=True)
 
     async def run() -> None:
         async with serve(lambda ws: _handler(ws, a.model, a.industry), a.host, a.port):
