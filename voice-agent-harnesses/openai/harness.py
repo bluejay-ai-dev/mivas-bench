@@ -16,6 +16,7 @@ session on it (`context["session"] = session`) so session tools can hang up.
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import json
 import os
 from pathlib import Path
@@ -27,6 +28,8 @@ from agents.realtime import RealtimeAgent, RealtimeRunner, realtime_handoff
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 TOOL_SERVER_URL = os.environ.get("TOOL_SERVER_URL", "http://127.0.0.1:8000").rstrip("/")
+# Let farewell audio finish before tearing down Realtime after end_call.
+END_CALL_CLOSE_DELAY_S = float(os.environ.get("MIVAS_END_CALL_CLOSE_DELAY_S", "2.5"))
 
 # Industry tools: name → call state API and shape the tools.json result.
 IndustryMapper = Callable[[dict[str, Any]], Awaitable[dict[str, Any]]]
@@ -65,6 +68,10 @@ def industry_path(name: str | Path) -> Path:
     path = Path(name)
     if path.is_dir():
         return path.resolve()
+    # Docker/k8s mounts the selected industry at INDUSTRY_DIR (/app/industry).
+    env_dir = os.environ.get("INDUSTRY_DIR", "").strip()
+    if env_dir and Path(env_dir).is_dir():
+        return Path(env_dir).resolve()
     return (REPO_ROOT / "industries" / name).resolve()
 
 
@@ -78,6 +85,17 @@ def _session_from_ctx(tool_ctx: Any) -> Any:
     if isinstance(ctx, dict):
         return ctx.get("session")
     return getattr(ctx, "session", None)
+
+
+async def _close_session_soon(session: Any, delay_s: float | None = None) -> None:
+    """Hang up after a short delay so farewell audio can finish playing.
+
+    Awaiting close inside the tool deadlocks SDK cleanup; closing immediately
+    cuts off the model's goodbye and races Chirp inbound send_audio.
+    """
+    await asyncio.sleep(END_CALL_CLOSE_DELAY_S if delay_s is None else delay_s)
+    with contextlib.suppress(Exception):
+        await session.close()
 
 
 def _fn_tool(spec: dict, *, session_tool: bool = False) -> FunctionTool:
@@ -101,14 +119,18 @@ def _fn_tool(spec: dict, *, session_tool: bool = False) -> FunctionTool:
             )
 
     async def on_invoke(tool_ctx: Any, raw: str) -> str:
+        from report import finish_tool_span, tool_span
+
         args = json.loads(raw or "{}")
-        result = await handler(args)
-        if session_tool:
-            session = _session_from_ctx(tool_ctx)
-            # don't await: SDK cleanup waits on tool tasks, so awaiting close deadlocks
-            if session is not None:
-                asyncio.create_task(session.close())
-        return json.dumps(result)
+        call_id = getattr(tool_ctx, "tool_call_id", None)
+        with tool_span(name, args, call_id=call_id) as span:
+            result = await handler(args)
+            finish_tool_span(span, result)
+            if session_tool:
+                session = _session_from_ctx(tool_ctx)
+                if session is not None:
+                    asyncio.create_task(_close_session_soon(session))
+            return json.dumps(result)
 
     return FunctionTool(
         name=name,
@@ -209,7 +231,7 @@ if __name__ == "__main__":
             tool_arguments='{"reason": "done"}',
         )
         out = await tool.on_invoke_tool(tool_ctx, '{"reason": "done"}')
-        await asyncio.sleep(0)  # let create_task(session.close) run
+        await asyncio.sleep(END_CALL_CLOSE_DELAY_S + 0.05)
         assert out == '{"success": true}'
         assert closed
 

@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Build and run a MIVAS harness × industry combo (local or Kubernetes Job)."""
+"""Build and run a MIVAS harness × industry combo (local or Kubernetes)."""
 
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import signal
 import subprocess
@@ -35,6 +36,10 @@ def _redact_cmd(cmd: list[str]) -> str:
     for part in cmd:
         if part.startswith("--from-literal=OPENAI_API_KEY="):
             out.append("--from-literal=OPENAI_API_KEY=***")
+        elif part.startswith("--from-literal=BLUEJAY_API_KEY="):
+            out.append("--from-literal=BLUEJAY_API_KEY=***")
+        elif part.startswith("--from-literal=CHIRP_PASS="):
+            out.append("--from-literal=CHIRP_PASS=***")
         elif "OPENAI_API_KEY=" in part and not part.startswith("OPENAI_API_KEY=***"):
             out.append("OPENAI_API_KEY=***")
         else:
@@ -73,7 +78,12 @@ def harness_paths(harness: str) -> tuple[Path, Path]:
 
 
 def slug(harness: str, industry: str) -> str:
-    return f"{harness.replace('/', '-')}-{industry}".replace("_", "-")
+    return (
+        f"{harness.replace('/', '-')}-{industry}"
+        .replace("_", "-")
+        .replace(".", "-")
+        .lower()
+    )
 
 
 def build_image(harness: str, industry: str, image: str) -> None:
@@ -98,20 +108,18 @@ def build_image(harness: str, industry: str, image: str) -> None:
     )
 
 
-def render_job(harness: str, industry: str, image: str) -> Path:
+def _render(template_name: str, harness: str, industry: str, image: str, service_type: str) -> str:
     family, runtime = split_harness(harness)
-    template = (ROOT / "k8s" / "job.yaml").read_text()
-    rendered = (
+    template = (ROOT / "k8s" / template_name).read_text()
+    return (
         template.replace("__VOICE_AGENT__", harness)
         .replace("__HARNESS_FAMILY__", family)
         .replace("__HARNESS_RUNTIME__", runtime)
         .replace("__INDUSTRY__", industry)
         .replace("__IMAGE__", image)
         .replace("__JOB_SLUG__", slug(harness, industry))
+        .replace("__SERVICE_TYPE__", service_type)
     )
-    out = Path(tempfile.mkstemp(suffix=".yaml", prefix="mivas-job-")[1])
-    out.write_text(rendered)
-    return out
 
 
 def secret_exists() -> bool:
@@ -124,61 +132,160 @@ def secret_exists() -> bool:
     return result.returncode == 0
 
 
-def apply_job(harness: str, industry: str, image: str, job_name: str, follow_logs: bool) -> None:
-    if not secret_exists():
-        api_key = os.environ.get("OPENAI_API_KEY", "")
-        if not api_key:
-            print(
-                "missing Secret mivas-secrets and OPENAI_API_KEY unset\n"
-                "create with: kubectl create secret generic mivas-secrets "
-                "--from-literal=OPENAI_API_KEY=...",
-                file=sys.stderr,
-            )
-            sys.exit(1)
-        run(
-            [
-                "kubectl",
-                "create",
-                "secret",
-                "generic",
-                "mivas-secrets",
-                f"--from-literal=OPENAI_API_KEY={api_key}",
-            ]
+def ensure_secret() -> None:
+    """Create or refresh mivas-secrets from env (OPENAI required; Bluejay/CHIRP optional)."""
+    api_key = os.environ.get("OPENAI_API_KEY", "")
+    if not secret_exists() and not api_key:
+        print(
+            "missing Secret mivas-secrets and OPENAI_API_KEY unset\n"
+            "create with: kubectl create secret generic mivas-secrets "
+            "--from-literal=OPENAI_API_KEY=...",
+            file=sys.stderr,
         )
-
-    subprocess.run(
-        ["kubectl", "delete", "job", job_name, "--ignore-not-found"],
+        sys.exit(1)
+    if not api_key:
+        # Secret already exists; nothing to sync from env.
+        return
+    cmd = [
+        "kubectl",
+        "create",
+        "secret",
+        "generic",
+        "mivas-secrets",
+        f"--from-literal=OPENAI_API_KEY={api_key}",
+        "--dry-run=client",
+        "-o",
+        "yaml",
+    ]
+    if os.environ.get("BLUEJAY_API_KEY"):
+        cmd.append(f"--from-literal=BLUEJAY_API_KEY={os.environ['BLUEJAY_API_KEY']}")
+    chirp_user = os.environ.get("CHIRP_USER", "mivas")
+    chirp_pass = os.environ.get("CHIRP_PASS", "mivas")
+    cmd.append(f"--from-literal=CHIRP_USER={chirp_user}")
+    cmd.append(f"--from-literal=CHIRP_PASS={chirp_pass}")
+    rendered = subprocess.run(cmd, check=True, capture_output=True, text=True)
+    apply = subprocess.run(
+        ["kubectl", "apply", "-f", "-"],
+        input=rendered.stdout,
+        capture_output=True,
+        text=True,
         check=False,
     )
-    rendered = render_job(harness, industry, image)
+    if apply.returncode != 0:
+        print(apply.stderr or apply.stdout, file=sys.stderr)
+        sys.exit(apply.returncode)
+    print(f"+ kubectl apply secret/mivas-secrets → {(apply.stdout or '').strip()}")
+
+
+def _kubectl_json(cmd: list[str]) -> dict:
+    result = subprocess.run(cmd, check=True, capture_output=True, text=True)
+    return json.loads(result.stdout or "{}")
+
+
+def service_websocket_url(service_name: str, timeout_s: float = 120.0) -> str | None:
+    """Resolve a dialable wss:// URL from the CHIRP Service."""
+    deadline = time.monotonic() + timeout_s
+    while time.monotonic() < deadline:
+        svc = _kubectl_json(["kubectl", "get", "svc", service_name, "-o", "json"])
+        spec = svc.get("spec") or {}
+        status = svc.get("status") or {}
+        ports = spec.get("ports") or []
+        port = next((p.get("port") for p in ports if p.get("name") == "chirp"), 8765)
+        node_port = next((p.get("nodePort") for p in ports if p.get("name") == "chirp"), None)
+        svc_type = spec.get("type")
+
+        if svc_type == "LoadBalancer":
+            ingress = ((status.get("loadBalancer") or {}).get("ingress") or [])
+            if ingress:
+                host = ingress[0].get("hostname") or ingress[0].get("ip")
+                if host:
+                    # Docker Desktop / local LBs often terminate TLS elsewhere; use ws for plain.
+                    scheme = "wss" if os.environ.get("MIVAS_WSS", "").lower() in {"1", "true"} else "ws"
+                    return f"{scheme}://{host}:{port}"
+
+        if svc_type == "NodePort" and node_port:
+            # Prefer explicit override; else try a node InternalIP.
+            host = os.environ.get("MIVAS_NODE_HOST")
+            if not host:
+                nodes = _kubectl_json(["kubectl", "get", "nodes", "-o", "json"])
+                for node in nodes.get("items") or []:
+                    for addr in (node.get("status") or {}).get("addresses") or []:
+                        if addr.get("type") == "InternalIP" and addr.get("address"):
+                            host = addr["address"]
+                            break
+                    if host:
+                        break
+            if host:
+                return f"ws://{host}:{node_port}"
+
+        if svc_type == "ClusterIP":
+            cluster_ip = spec.get("clusterIP")
+            if cluster_ip and cluster_ip != "None":
+                return f"ws://{cluster_ip}:{port}"
+
+        time.sleep(2.0)
+    return None
+
+
+def apply_chirp(harness: str, industry: str, image: str, name: str, follow_logs: bool) -> None:
+    ensure_secret()
+    service_type = os.environ.get("MIVAS_SERVICE_TYPE", "LoadBalancer")
+
+    for kind, resource in (("deploy", f"deployment/{name}"), ("svc", f"svc/{name}")):
+        subprocess.run(
+            ["kubectl", "delete", kind, name, "--ignore-not-found"],
+            check=False,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+
+    rendered_files: list[Path] = []
     try:
-        print(f"applying Job {job_name} (image={image})")
-        run(["kubectl", "apply", "-f", str(rendered)])
+        for template in ("deployment.yaml", "service.yaml"):
+            text = _render(template, harness, industry, image, service_type)
+            path = Path(tempfile.mkstemp(suffix=".yaml", prefix=f"mivas-{template}-")[1])
+            path.write_text(text)
+            rendered_files.append(path)
+            print(f"applying {template} → {name}")
+            run(["kubectl", "apply", "-f", str(path)])
     finally:
-        rendered.unlink(missing_ok=True)
+        for path in rendered_files:
+            path.unlink(missing_ok=True)
 
     subprocess.run(
         [
             "kubectl",
-            "wait",
-            "--for=condition=Ready",
-            "pod",
-            "-l",
-            f"job-name={job_name}",
-            "--timeout=120s",
+            "rollout",
+            "status",
+            f"deployment/{name}",
+            "--timeout=180s",
         ],
         check=False,
     )
+
+    url = service_websocket_url(name)
+    if url:
+        print(f"CHIRP websocket URL: {url}")
+        print("Point the Bluejay agent websocket_url at that address (auth: CHIRP_USER/CHIRP_PASS).")
+    else:
+        print(
+            "Service has no external address yet. Check:\n"
+            f"  kubectl get svc {name}\n"
+            "Or set MIVAS_SERVICE_TYPE=NodePort and MIVAS_NODE_HOST=<reachable-ip>.",
+            file=sys.stderr,
+        )
+
     if follow_logs:
-        run(["kubectl", "logs", "-f", f"job/{job_name}"])
+        run(["kubectl", "logs", "-f", f"deployment/{name}"])
 
 
-def run_local(harness: str, industry: str, agent_check: bool) -> None:
+def run_local(harness: str, industry: str, agent_check: bool, mode: str) -> None:
     family_dir, agent_dir = harness_paths(harness)
     port = os.environ.get("TOOL_SERVER_PORT", "8000")
     url = os.environ.get("TOOL_SERVER_URL", f"http://127.0.0.1:{port}")
     industry_dir = ROOT / "industries" / industry
     db_path = os.environ.get("MIVAS_DB_PATH", str(industry_dir / "db" / "runtime.db"))
+    _, runtime = split_harness(harness)
 
     env = os.environ.copy()
     env.update(
@@ -189,6 +296,8 @@ def run_local(harness: str, industry: str, agent_check: bool) -> None:
             "INDUSTRY_DIR": str(industry_dir),
             "VOICE_AGENT": harness,
             "INDUSTRY": industry,
+            "HARNESS_RUNTIME": runtime,
+            "MIVAS_MODE": mode,
             "PYTHONPATH": str(family_dir)
             + (os.pathsep + env["PYTHONPATH"] if env.get("PYTHONPATH") else ""),
         }
@@ -224,9 +333,22 @@ def run_local(harness: str, industry: str, agent_check: bool) -> None:
             print("tool server failed health check", file=sys.stderr)
             sys.exit(1)
 
+        if agent_check or mode == "check":
+            agent_cmd = [sys.executable, str(agent_dir / "agent.py"), industry, "--check"]
+            print(f"starting local harness check ({harness})")
+            run(agent_cmd, env=env, cwd=str(ROOT))
+            return
+
+        if mode == "chirp":
+            chirp = agent_dir / "adapters" / "chirp.py"
+            if not chirp.is_file():
+                print(f"no chirp adapter for harness={harness}", file=sys.stderr)
+                sys.exit(1)
+            print(f"starting local CHIRP ({harness}) — Ctrl+C to stop")
+            run([sys.executable, str(chirp)], env=env, cwd=str(ROOT))
+            return
+
         agent_cmd = [sys.executable, str(agent_dir / "agent.py"), industry]
-        if agent_check:
-            agent_cmd.append("--check")
         print(f"starting local harness agent ({harness})")
         run(agent_cmd, env=env, cwd=str(ROOT))
     finally:
@@ -237,7 +359,7 @@ def main() -> None:
     load_dotenv(ROOT / ".env")
 
     parser = argparse.ArgumentParser(
-        description="Build and run a MIVAS harness × industry combo (local or Kubernetes Job)."
+        description="Build and run a MIVAS harness × industry combo (local or Kubernetes)."
     )
     parser.add_argument(
         "--harness",
@@ -250,13 +372,23 @@ def main() -> None:
         help="Industry pack (default: $INDUSTRY or control-industry)",
     )
     parser.add_argument("--build", action="store_true", help="docker build image")
-    parser.add_argument("--apply", action="store_true", help="kubectl apply rendered Job")
+    parser.add_argument(
+        "--apply",
+        action="store_true",
+        help="kubectl apply CHIRP Deployment + Service",
+    )
     parser.add_argument(
         "--local",
         action="store_true",
-        help="Run tool server + agent locally (default when no --build/--apply)",
+        help="Run tool server + chirp/agent locally (default when no --build/--apply)",
     )
-    parser.add_argument("--check", action="store_true", help="Pass --check to agent.py")
+    parser.add_argument(
+        "--mode",
+        choices=("chirp", "agent", "check"),
+        default=os.environ.get("MIVAS_MODE", "chirp"),
+        help="Runtime mode (default: chirp for Bluejay WebSocket sims)",
+    )
+    parser.add_argument("--check", action="store_true", help="Shortcut for --mode check")
     parser.add_argument(
         "--no-logs",
         action="store_true",
@@ -266,8 +398,9 @@ def main() -> None:
 
     harness = args.harness
     industry = args.industry
+    mode = "check" if args.check else args.mode
     image = f"mivas-bench:{slug(harness, industry)}"
-    job_name = f"mivas-{slug(harness, industry)}"
+    name = f"mivas-{slug(harness, industry)}"
 
     do_local = args.local or not (args.build or args.apply)
 
@@ -293,9 +426,12 @@ def main() -> None:
     if args.build:
         build_image(harness, industry, image)
     if do_local:
-        run_local(harness, industry, args.check)
+        run_local(harness, industry, agent_check=args.check, mode=mode)
     if args.apply:
-        apply_job(harness, industry, image, job_name, follow_logs=not args.no_logs)
+        if mode != "chirp":
+            print("--apply deploys the CHIRP server; use --mode chirp (default)", file=sys.stderr)
+            sys.exit(1)
+        apply_chirp(harness, industry, image, name, follow_logs=not args.no_logs)
 
 
 if __name__ == "__main__":

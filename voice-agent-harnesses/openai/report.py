@@ -1,33 +1,35 @@
-"""OpenAI Agents → OpenTelemetry → Bluejay OTLP, then link via update-simulation-result.
+"""OpenTelemetry → Bluejay OTLP for OpenAI Realtime harnesses.
 
-No bluejay-sdk / BluejayTracing (LiveKit-specific). No tool_calls API posts.
+OpenAI Realtime does **not** emit Agents SDK local spans (function/speech/…),
+so openai-agents-opentelemetry only ever produced an empty workflow root.
+We create the OTel tree ourselves:
 
-Stack:
-  agents.trace() → openai-agents-opentelemetry → OTel TracerProvider
-  → OTLP HTTP → BLUEJAY_OTLP_ENDPOINT
-  → POST /v1/update-simulation-result {simulation_result_id, trace_ids:[tid]}
+  voice.call (root)
+    └── execute_tool <name>   (gen_ai.tool.* — Bluejay-readable)
 
-Chirp supplies simulation_result_id as X-Simulation-Result-Id on the
-WebSocket upgrade (Bluejay CHIRP docs).
+Then POST {simulation_result_id, trace_ids:[tid]} after the call.
+Chirp supplies simulation_result_id via X-Simulation-Result-Id on upgrade.
+No bluejay-sdk / BluejayTracing. No tool_calls API posts.
 """
 
 from __future__ import annotations
 
 import asyncio
+import json
 import logging
 import os
 import time
-from contextlib import asynccontextmanager
-from typing import Any, AsyncIterator
+from contextlib import asynccontextmanager, contextmanager
+from contextvars import ContextVar
+from typing import Any, AsyncIterator, Iterator
 
 import httpx
-from agents import add_trace_processor, trace
-from openai_agents_opentelemetry import OpenTelemetryTracingProcessor
 from opentelemetry import trace as otel_trace
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
 from opentelemetry.sdk.resources import SERVICE_NAME, Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import SimpleSpanProcessor
+from opentelemetry.trace import Span, SpanKind, Status, StatusCode
 
 logger = logging.getLogger("mivas.otel")
 
@@ -44,33 +46,8 @@ TERMINAL_STATUSES = {
 }
 
 _provider: TracerProvider | None = None
-_processor: "_CapturingOTelProcessor | None" = None
-_processor_registered = False
-
-
-class _CapturingOTelProcessor(OpenTelemetryTracingProcessor):
-    """Agents→OTel bridge; records the OTel root trace id per Agents workflow.
-
-    The stock processor does not attach roots to the global OTel context, so we
-    read the root span it creates.
-    """
-
-    def __init__(self) -> None:
-        super().__init__(tracer_name="openai.agents")
-        self.otel_trace_ids: dict[str, str] = {}
-
-    def on_trace_start(self, agent_trace: Any) -> None:
-        super().on_trace_start(agent_trace)
-        agents_tid = getattr(agent_trace, "trace_id", None)
-        if not agents_tid:
-            return
-        with self._lock:
-            span = self._trace_root_spans.get(agents_tid)
-        if span is None:
-            return
-        ctx = span.get_span_context()
-        if ctx.is_valid:
-            self.otel_trace_ids[agents_tid] = format(ctx.trace_id, "032x")
+_root_span: ContextVar[Span | None] = ContextVar("mivas_otel_root", default=None)
+_call_t0: ContextVar[float | None] = ContextVar("mivas_otel_t0", default=None)
 
 
 def _api_url() -> str:
@@ -89,9 +66,18 @@ def _api_key() -> str | None:
     return os.environ.get("BLUEJAY_API_KEY") or None
 
 
+def _json_attr(value: Any) -> str:
+    if isinstance(value, str):
+        return value
+    try:
+        return json.dumps(value, default=str)
+    except Exception:
+        return str(value)
+
+
 def setup_otel() -> TracerProvider | None:
     """Install global OTel exporter to Bluejay OTLP. No-op without BLUEJAY_API_KEY."""
-    global _provider, _processor, _processor_registered
+    global _provider
 
     api_key = _api_key()
     if not api_key:
@@ -110,12 +96,6 @@ def setup_otel() -> TracerProvider | None:
     )
     otel_trace.set_tracer_provider(provider)
     _provider = provider
-
-    if not _processor_registered:
-        _processor = _CapturingOTelProcessor()
-        add_trace_processor(_processor)
-        _processor_registered = True
-
     logger.info("otel → %s service=%s", endpoint, _service_name())
     return provider
 
@@ -128,16 +108,56 @@ def flush() -> None:
             logger.error("otel flush failed: %s", e)
 
 
-def _otel_trace_id_for_agents(agents_trace_id: str) -> str | None:
-    if _processor is None:
-        return None
-    return _processor.otel_trace_ids.get(agents_trace_id)
+@contextmanager
+def tool_span(
+    name: str,
+    parameters: Any = None,
+    *,
+    call_id: str | None = None,
+) -> Iterator[Span | None]:
+    """Child span under the active voice.call root. No-op outside traced_run."""
+    parent = _root_span.get()
+    if parent is None or not parent.get_span_context().is_valid:
+        yield None
+        return
+
+    tracer = otel_trace.get_tracer("mivas.openai")
+    parent_ctx = otel_trace.set_span_in_context(parent)
+    t0 = _call_t0.get()
+    attrs: dict[str, Any] = {
+        "gen_ai.operation.name": "execute_tool",
+        "gen_ai.tool.name": name,
+        "gen_ai.tool.call.arguments": _json_attr(parameters if parameters is not None else {}),
+    }
+    if call_id:
+        attrs["gen_ai.tool.call.id"] = str(call_id)
+    if t0 is not None:
+        attrs["bluejay.tool.start_offset_ms"] = int((time.monotonic() - t0) * 1000)
+
+    with tracer.start_as_current_span(
+        f"execute_tool {name}",
+        context=parent_ctx,
+        kind=SpanKind.CLIENT,
+        attributes=attrs,
+    ) as span:
+        try:
+            yield span
+        except Exception as e:
+            span.record_exception(e)
+            span.set_status(Status(StatusCode.ERROR, str(e)[:400]))
+            raise
+
+
+def finish_tool_span(span: Span | None, output: Any) -> None:
+    if span is None:
+        return
+    span.set_attribute("gen_ai.tool.call.result", _json_attr(output))
+    span.set_status(Status(StatusCode.OK))
 
 
 async def _await_terminal_upsert(
     client: httpx.AsyncClient, simulation_result_id: str, timeout: float = 18.0
 ) -> str | None:
-    """Wait until Bluejay has written its terminal row so our POST is not overwritten."""
     deadline = time.monotonic() + timeout
     key = _api_key()
     if not key:
@@ -204,27 +224,51 @@ async def traced_run(
     *,
     simulation_result_id: str | None = None,
 ) -> AsyncIterator[None]:
-    """Agents workflow → OTLP; on exit flush and POST trace_ids when sim id is set."""
+    """OTel voice.call root for a realtime session; flush + link trace_ids on exit."""
     provider = setup_otel()
     if provider is None:
         yield
         return
 
-    agents_tid: str | None = None
+    tracer = otel_trace.get_tracer("mivas.openai")
+    attrs: dict[str, Any] = {
+        "gen_ai.system": "openai.realtime",
+        "mivas.workflow.name": workflow_name,
+    }
+    if simulation_result_id:
+        attrs["bluejay.simulation_result_id"] = str(simulation_result_id)
+
     otel_tid: str | None = None
+    root_token = None
+    t0_token = _call_t0.set(time.monotonic())
     try:
-        with trace(workflow_name=workflow_name) as t:
-            agents_tid = t.trace_id
-            otel_tid = _otel_trace_id_for_agents(agents_tid)
-            if otel_tid:
+        with tracer.start_as_current_span(
+            "voice.call",
+            kind=SpanKind.SERVER,
+            attributes=attrs,
+        ) as root:
+            root_token = _root_span.set(root)
+            ctx = root.get_span_context()
+            if ctx.is_valid:
+                otel_tid = format(ctx.trace_id, "032x")
                 logger.info(
-                    "otel trace_id=%s agents=%s sim=%s",
+                    "otel trace_id=%s sim=%s workflow=%s",
                     otel_tid,
-                    agents_tid,
                     simulation_result_id,
+                    workflow_name,
                 )
-            yield
+            try:
+                yield
+            except Exception as e:
+                # Normal CHIRP/OpenAI close after end_call — not a failed call.
+                if type(e).__name__.startswith("ConnectionClosed"):
+                    root.set_status(Status(StatusCode.OK))
+                else:
+                    raise
     finally:
+        if root_token is not None:
+            _root_span.reset(root_token)
+        _call_t0.reset(t0_token)
         flush()
         if simulation_result_id and otel_tid:
             await post_trace_ids(simulation_result_id, otel_tid)

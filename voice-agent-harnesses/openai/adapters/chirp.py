@@ -61,10 +61,19 @@ async def _bridge(ws, model: str, industry: str) -> None:
                 nonlocal up
                 try:
                     async for msg in ws:
+                        if getattr(session, "_closed", False):
+                            break
                         if isinstance(msg, bytes) and msg:
                             pcm, up = audioop.ratecv(msg, W, 1, R_IN, R_OUT, up)
-                            if pcm:
+                            if not pcm:
+                                continue
+                            try:
                                 await session.send_audio(pcm)
+                            except Exception as e:
+                                # end_call closed the Realtime socket — normal hangup
+                                if type(e).__name__.startswith("ConnectionClosed"):
+                                    break
+                                raise
                 finally:
                     if not getattr(session, "_closed", False):
                         asyncio.create_task(session.close())
@@ -84,10 +93,19 @@ async def _bridge(ws, model: str, industry: str) -> None:
                             await ws.send(_event("speech.completed", {"utterance_id": utt}))
                             utt = None
                 finally:
+                    if utt is not None:
+                        with contextlib.suppress(Exception):
+                            await ws.send(_event("speech.completed", {"utterance_id": utt}))
+                        utt = None
                     with contextlib.suppress(Exception):
                         await ws.close(1000)
 
-            await asyncio.gather(inbound(), outbound())
+            results = await asyncio.gather(inbound(), outbound(), return_exceptions=True)
+            for r in results:
+                if isinstance(r, BaseException) and not type(r).__name__.startswith(
+                    "ConnectionClosed"
+                ):
+                    raise r
 
 
 async def _handler(ws, model: str, industry: str) -> None:
@@ -95,8 +113,14 @@ async def _handler(ws, model: str, industry: str) -> None:
     if expected and ws.request.headers.get("Authorization") != expected:
         await ws.close(1008, "unauthorized")
         return
-    with contextlib.suppress(Exception):
+    try:
         await _bridge(ws, model, industry)
+    except Exception as e:
+        # Hangups look like ConnectionClosed*; everything else is a real fault.
+        if type(e).__name__.startswith("ConnectionClosed"):
+            return
+        print(f"chirp bridge error: {type(e).__name__}: {e}", flush=True)
+        raise
 
 
 def main(model: str | None = None) -> None:

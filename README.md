@@ -30,13 +30,22 @@ uv run python run.py --check      # blueprint wiring only
 uv run python tests/converse.py   # speak to the agent (mic + speakers)
 ```
 
-## Kubernetes
+## Kubernetes (CHIRP for Bluejay)
 
-Each harness × industry run is one Job / one image (`mivas-bench:$harness-$industry`). Image builds install deps with `uv`.
+`--apply` deploys a long-running **Deployment + Service** that runs the industry tool server and the harness **CHIRP** WebSocket adapter (what Bluejay dials).
 
 ```bash
-# Ensure a cluster context (kind, minikube, remote, …)
-uv run python run.py --build --apply
+# Ensure a cluster context (kind, minikube, Docker Desktop, …)
+# kind: kind load docker-image mivas-bench:openai-realtime-2.1-control-industry
+uv run python run.py --build --apply --no-logs
+# → prints CHIRP websocket URL (e.g. ws://localhost:8765 on Docker Desktop)
+# Auth: CHIRP_USER / CHIRP_PASS from mivas-secrets (default mivas/mivas)
+# Bluejay cloud cannot reach localhost — tunnel it, then set agent websocket_url:
+#   cloudflared tunnel --url http://127.0.0.1:8765
+#   # use wss://….trycloudflare.com on the Bluejay agent
+
+# Service type (default LoadBalancer). For kind without LB:
+# MIVAS_SERVICE_TYPE=NodePort MIVAS_NODE_HOST=<node-ip> uv run python run.py --apply
 ```
 
-See `k8s/secret.example.yaml` and `k8s/job.yaml`. Bluejay eval invocation is still TBD.
+Manifests: `k8s/deployment.yaml`, `k8s/service.yaml`, `k8s/secret.example.yaml`. One-shot blueprint checks: `k8s/job.yaml` (`MIVAS_MODE=check`).
