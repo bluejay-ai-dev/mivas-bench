@@ -1,0 +1,51 @@
+CREATE TABLE IF NOT EXISTS locations (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    zip TEXT NOT NULL,
+    offers_cosmetic INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS providers (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    credentials TEXT NOT NULL,
+    location_id TEXT NOT NULL REFERENCES locations(id)
+);
+
+CREATE TABLE IF NOT EXISTS patients (
+    id TEXT PRIMARY KEY,
+    first_name TEXT NOT NULL,
+    last_name TEXT NOT NULL,
+    dob TEXT NOT NULL,
+    zip TEXT NOT NULL,
+    phone_e164 TEXT,
+    home_office_id TEXT REFERENCES locations(id),
+    language TEXT NOT NULL DEFAULT 'en',
+    balance_cents INTEGER NOT NULL DEFAULT 0,
+    carrier TEXT,
+    member_id TEXT,
+    plan_name TEXT
+);
+
+CREATE TABLE IF NOT EXISTS appointments (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    patient_id TEXT REFERENCES patients(id),
+    location_id TEXT NOT NULL REFERENCES locations(id),
+    provider_id TEXT NOT NULL REFERENCES providers(id),
+    appointment_type_code TEXT NOT NULL,
+    start TEXT NOT NULL,
+    end TEXT NOT NULL,
+    description TEXT NOT NULL DEFAULT '',
+    status TEXT NOT NULL DEFAULT 'booked',
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS waitlist (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    patient_id TEXT REFERENCES patients(id),
+    appointment_type_code TEXT NOT NULL,
+    location_ids TEXT NOT NULL,
+    earliest TEXT,
+    latest TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);

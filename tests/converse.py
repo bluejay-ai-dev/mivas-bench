@@ -352,6 +352,26 @@ class VoiceSession:
             self.interrupt_event.set()
 
 
+def _traced_run(harness: str, industry: str):
+    """Optional Agents→OTel→Bluejay OTLP scope when openai report.py is on the path."""
+    family = harness.split("/", 1)[0]
+    if family != "openai":
+        from contextlib import asynccontextmanager
+
+        @asynccontextmanager
+        async def _noop():
+            yield None
+
+        return _noop()
+    family_dir = ROOT / "voice-agent-harnesses" / family
+    if str(family_dir) not in sys.path:
+        sys.path.insert(0, str(family_dir))
+    from report import traced_run  # noqa: E402
+
+    model = harness.rsplit("/", 1)[-1]
+    return traced_run(f"mivas-{industry}-{model}")
+
+
 async def converse_voice(harness: str, industry: str, *, barge_in: bool = False) -> None:
     mod = _load_harness_module(harness)
     if not hasattr(mod, "build_from_blueprint"):
@@ -385,14 +405,15 @@ async def converse_voice(harness: str, industry: str, *, barge_in: bool = False)
                 },
             },
         }
-        ctx: dict[str, Any] = {}
-        async with await runner.run(context=ctx, model_config=model_config) as session:
-            ctx["session"] = session
-            voice.session = session
-            await voice.start_mic()
-            print("listening…")
-            async for event in session:
-                await voice.on_event(event)
+        async with _traced_run(harness, industry):
+            ctx: dict[str, Any] = {}
+            async with await runner.run(context=ctx, model_config=model_config) as session:
+                ctx["session"] = session
+                voice.session = session
+                await voice.start_mic()
+                print("listening…")
+                async for event in session:
+                    await voice.on_event(event)
     finally:
         await voice.stop()
 
@@ -413,38 +434,39 @@ async def converse_text(harness: str, industry: str) -> None:
     print(f"text chat: {harness} × {industry}")
     print("type a message, or quit / exit / q to stop\n")
 
-    ctx: dict[str, Any] = {}
-    async with await runner.run(context=ctx) as session:
-        ctx["session"] = session
+    async with _traced_run(harness, industry):
+        ctx: dict[str, Any] = {}
+        async with await runner.run(context=ctx) as session:
+            ctx["session"] = session
 
-        async def consume() -> None:
-            async for event in session:
-                _print_event(event, verbose=True)
-                if event.type == "agent_end":
-                    turn_done.set()
-                if stop.is_set():
-                    break
+            async def consume() -> None:
+                async for event in session:
+                    _print_event(event, verbose=True)
+                    if event.type == "agent_end":
+                        turn_done.set()
+                    if stop.is_set():
+                        break
 
-        consumer = asyncio.create_task(consume())
-        try:
-            while True:
-                line = await asyncio.to_thread(input, "you> ")
-                text = line.strip()
-                if not text:
-                    continue
-                if text.lower() in {"quit", "exit", "q"}:
-                    break
-                turn_done.clear()
-                await session.send_message(text)
-                try:
-                    await asyncio.wait_for(turn_done.wait(), timeout=120)
-                except asyncio.TimeoutError:
-                    print("(timed out waiting for agent_end)", file=sys.stderr)
-        finally:
-            stop.set()
-            consumer.cancel()
-            with suppress(asyncio.CancelledError):
-                await consumer
+            consumer = asyncio.create_task(consume())
+            try:
+                while True:
+                    line = await asyncio.to_thread(input, "you> ")
+                    text = line.strip()
+                    if not text:
+                        continue
+                    if text.lower() in {"quit", "exit", "q"}:
+                        break
+                    turn_done.clear()
+                    await session.send_message(text)
+                    try:
+                        await asyncio.wait_for(turn_done.wait(), timeout=120)
+                    except asyncio.TimeoutError:
+                        print("(timed out waiting for agent_end)", file=sys.stderr)
+            finally:
+                stop.set()
+                consumer.cancel()
+                with suppress(asyncio.CancelledError):
+                    await consumer
 
 
 def main() -> None:

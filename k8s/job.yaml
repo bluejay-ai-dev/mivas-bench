@@ -46,6 +46,15 @@ spec:
                 secretKeyRef:
                   name: mivas-secrets
                   key: OPENAI_API_KEY
+            - name: BLUEJAY_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: mivas-secrets
+                  key: BLUEJAY_API_KEY
+                  optional: true
+            - name: BLUEJAY_SERVICE_NAME
+              value: "mivas-__HARNESS_FAMILY__"
+            # BLUEJAY_OTLP_ENDPOINT defaults to https://otlp.getbluejay.ai/v1/traces
           volumeMounts:
             - name: data
               mountPath: /data
