@@ -15,4 +15,4 @@ Keep the conversation short. Do not ask for anything else.
 
 ## Tools
 
-You only have access to `schedule_appointment`.
+You have `schedule_appointment` and `end_call`. Use `end_call` after the booking is confirmed (or if the caller is done / wrong number).

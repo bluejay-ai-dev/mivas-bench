@@ -52,7 +52,7 @@ def _load_harness_module(harness: str) -> Any:
     agent_path = family_dir / runtime / "agent.py"
     if not agent_path.is_file():
         raise FileNotFoundError(f"no agent.py for harness={harness}")
-    # runtime.py lives on the family package path
+    # harness.py lives on the family package path
     family_s = str(family_dir)
     if family_s not in sys.path:
         sys.path.insert(0, family_s)

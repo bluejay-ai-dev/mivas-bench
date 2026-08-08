@@ -1,9 +1,13 @@
 """Shared blueprint → RealtimeRunner builder for OpenAI Realtime harnesses.
 
 Tool kinds (from agent_blueprint.json):
-  - industry (default): POST → industry tool server
+  - industry (default): harness maps the tool onto the industry state API
+    (e.g. schedule_appointment → POST /appointments)
   - handoff: provider handoff API
-  - session: POST → tool server, then close the realtime session
+  - session: harness-local tool (e.g. end_call); then close the realtime session
+
+The industry tool_server is a state/DB API — not a 1:1 tools.json mirror.
+Session tools never hit it.
 
 Callers must pass a mutable context into RealtimeRunner.run and stash the
 session on it (`context["session"] = session`) so session tools can hang up.
@@ -15,7 +19,7 @@ import asyncio
 import json
 import os
 from pathlib import Path
-from typing import Any
+from typing import Any, Awaitable, Callable
 
 import httpx
 from agents import FunctionTool
@@ -23,6 +27,38 @@ from agents.realtime import RealtimeAgent, RealtimeRunner, realtime_handoff
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 TOOL_SERVER_URL = os.environ.get("TOOL_SERVER_URL", "http://127.0.0.1:8000").rstrip("/")
+
+# Industry tools: name → call state API and shape the tools.json result.
+IndustryMapper = Callable[[dict[str, Any]], Awaitable[dict[str, Any]]]
+
+# Session tools: name → harness-local side effect (no state API).
+SessionMapper = Callable[[dict[str, Any]], Awaitable[dict[str, Any]]]
+
+
+async def _post_json(path: str, body: dict[str, Any]) -> dict[str, Any]:
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        resp = await client.post(f"{TOOL_SERVER_URL}{path}", json=body)
+        resp.raise_for_status()
+        return resp.json()
+
+
+async def _schedule_appointment_via_api(args: dict[str, Any]) -> dict[str, Any]:
+    created = await _post_json("/appointments", {"date": args["date"]})
+    return {"success": True, "date": created["date"]}
+
+
+async def _end_call_local(args: dict[str, Any]) -> dict[str, Any]:
+    _ = args.get("reason", "")
+    return {"success": True}
+
+
+INDUSTRY_TOOL_HANDLERS: dict[str, IndustryMapper] = {
+    "schedule_appointment": _schedule_appointment_via_api,
+}
+
+SESSION_TOOL_HANDLERS: dict[str, SessionMapper] = {
+    "end_call": _end_call_local,
+}
 
 
 def industry_path(name: str | Path) -> Path:
@@ -48,20 +84,31 @@ def _fn_tool(spec: dict, *, session_tool: bool = False) -> FunctionTool:
     name = spec["name"]
     schema = {**spec["inputSchema"], "additionalProperties": False}
     schema.setdefault("properties", {})
-    url = f"{TOOL_SERVER_URL}/tools/{name}"
+
+    if session_tool:
+        handler = SESSION_TOOL_HANDLERS.get(name)
+        if handler is None:
+            raise KeyError(
+                f"no harness session handler for tool {name!r} "
+                "(session tools are harness-native, not state API routes)"
+            )
+    else:
+        handler = INDUSTRY_TOOL_HANDLERS.get(name)
+        if handler is None:
+            raise KeyError(
+                f"no harness industry handler for tool {name!r} "
+                "(map it to a state API call in INDUSTRY_TOOL_HANDLERS)"
+            )
 
     async def on_invoke(tool_ctx: Any, raw: str) -> str:
         args = json.loads(raw or "{}")
-        async with httpx.AsyncClient(timeout=30.0) as client:
-            resp = await client.post(url, json=args)
-            resp.raise_for_status()
-            body = resp.text
+        result = await handler(args)
         if session_tool:
             session = _session_from_ctx(tool_ctx)
-            # don't await: SDK cleanup waits on tool tasks, so awaiting close here deadlocks
+            # don't await: SDK cleanup waits on tool tasks, so awaiting close deadlocks
             if session is not None:
                 asyncio.create_task(session.close())
-        return body
+        return json.dumps(result)
 
     return FunctionTool(
         name=name,
@@ -133,9 +180,7 @@ def build_from_blueprint(industry_dir: str | Path, model: str) -> RealtimeRunner
 
 
 if __name__ == "__main__":
-    import asyncio
-    from types import SimpleNamespace
-    from unittest.mock import AsyncMock, MagicMock, patch
+    from agents.tool_context import ToolContext
 
     async def _check() -> None:
         closed = False
@@ -157,23 +202,20 @@ if __name__ == "__main__":
             },
             session_tool=True,
         )
-        fake_resp = MagicMock()
-        fake_resp.text = '{"success": true}'
-        fake_resp.raise_for_status = MagicMock()
-        mock_client = AsyncMock()
-        mock_client.__aenter__.return_value = mock_client
-        mock_client.post.return_value = fake_resp
-
-        with patch("runtime.httpx.AsyncClient", return_value=mock_client):
-            out = await tool.on_invoke_tool(
-                SimpleNamespace(context={"session": FakeSession()}),
-                '{"reason": "done"}',
-            )
+        tool_ctx: ToolContext[dict[str, Any]] = ToolContext(
+            context={"session": FakeSession()},
+            tool_name="end_call",
+            tool_call_id="test",
+            tool_arguments='{"reason": "done"}',
+        )
+        out = await tool.on_invoke_tool(tool_ctx, '{"reason": "done"}')
         await asyncio.sleep(0)  # let create_task(session.close) run
         assert out == '{"success": true}'
         assert closed
+
         start, agents = build_agents("control-industry")
         assert any(t.name == "end_call" for t in start.tools)
+        assert any(t.name == "schedule_appointment" for t in agents["scheduler"].tools)
         print(f"ok session tools start={start.name} agents={list(agents)}")
 
     asyncio.run(_check())

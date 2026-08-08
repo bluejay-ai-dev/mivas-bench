@@ -18,25 +18,27 @@ This industry does **not** mirror how customers build voice agents. It is a cont
 
 ## Expected outcome
 
-Your agent schedules a generic repair appointment, and evaluations show database state reflecting a scheduled appointment (`GET /state` on the tool server).
+Your agent schedules a generic repair appointment, and evaluations show database state reflecting a scheduled appointment (`GET /state` on the state API).
 
-## DB + tool server
-
-Industry-owned state and tools live here:
+## DB + state API
 
 | Path | Role |
 |------|------|
 | `db/schema.sql` | SQLite schema (`appointments`) |
 | `db/seed.sql` | Initial empty baseline |
-| `tool_server.py` | FastAPI: `POST /tools/{name}`, `GET /health`, `GET /state` |
-| `tools.json` | Input/output schemas for tools |
+| `tool_server.py` | FastAPI **state API** for durable DB ops (not a tools.json mirror) |
+| `tools.json` | Agent-facing tool schemas |
+| `agent_blueprint.json` | Wires tools: industry / `handoff` / `session` |
 
-Handoffs (`handoff_to_scheduler`) stay in the harness. Industry tools (`schedule_appointment`) and session tools (`end_call`) POST to the tool server; the harness also closes the call for `session: true` tools.
+Example state routes: `POST /appointments`, `GET /appointments`, `GET /state`, `GET /health`.
+
+Harness tool kinds:
+- **industry** (default) — e.g. `schedule_appointment` → `POST /appointments`
+- **handoff** — e.g. `handoff_to_scheduler` (provider handoff)
+- **session** — e.g. `end_call` (harness-native; closes the realtime session, no state API)
 
 ```bash
-uv pip install -r requirements.txt
-export MIVAS_DB_PATH=db/runtime.db
 uv run python tool_server.py
-# curl -X POST http://127.0.0.1:8000/tools/schedule_appointment -H 'content-type: application/json' -d '{"date":"08/07/2026"}'
+# curl -X POST http://127.0.0.1:8000/appointments -H 'content-type: application/json' -d '{"date":"08/07/2026"}'
 # curl http://127.0.0.1:8000/state
 ```
