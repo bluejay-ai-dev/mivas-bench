@@ -119,18 +119,13 @@ def _fn_tool(spec: dict, *, session_tool: bool = False) -> FunctionTool:
             )
 
     async def on_invoke(tool_ctx: Any, raw: str) -> str:
-        from report import finish_tool_span, tool_span
-
         args = json.loads(raw or "{}")
-        call_id = getattr(tool_ctx, "tool_call_id", None)
-        with tool_span(name, args, call_id=call_id) as span:
-            result = await handler(args)
-            finish_tool_span(span, result)
-            if session_tool:
-                session = _session_from_ctx(tool_ctx)
-                if session is not None:
-                    asyncio.create_task(_close_session_soon(session))
-            return json.dumps(result)
+        result = await handler(args)
+        if session_tool:
+            session = _session_from_ctx(tool_ctx)
+            if session is not None:
+                asyncio.create_task(_close_session_soon(session))
+        return json.dumps(result)
 
     return FunctionTool(
         name=name,
@@ -180,6 +175,9 @@ def build_agents(industry_dir: str | Path) -> tuple[RealtimeAgent, dict[str, Rea
 
 def build_from_blueprint(industry_dir: str | Path, model: str) -> RealtimeRunner:
     start, _ = build_agents(industry_dir)
+    industry_name = Path(industry_path(industry_dir)).name
+    # Realtime session.tracing.workflow_name: ^[A-Za-z0-9_ -]+$
+    workflow = f"mivas {industry_name} {model}".replace(".", "-").replace("/", " ")
     return RealtimeRunner(
         starting_agent=start,
         config={
@@ -188,6 +186,8 @@ def build_from_blueprint(industry_dir: str | Path, model: str) -> RealtimeRunner
                 "audio": {
                     "input": {
                         "format": "pcm16",
+                        # User audio → text for the instrumentor's prompt buffer.
+                        "transcription": {"model": "gpt-4o-mini-transcribe"},
                         "turn_detection": {
                             "type": "semantic_vad",
                             "interrupt_response": True,
@@ -196,6 +196,14 @@ def build_from_blueprint(industry_dir: str | Path, model: str) -> RealtimeRunner
                     "output": {"format": "pcm16", "voice": "ash"},
                 },
                 "tool_choice": "auto",
+                # Realtime API server-side traces → OpenAI dashboard.
+                "tracing": {
+                    "workflow_name": workflow,
+                    "metadata": {
+                        "mivas.industry": industry_name,
+                        "mivas.model": model,
+                    },
+                },
             }
         },
     )

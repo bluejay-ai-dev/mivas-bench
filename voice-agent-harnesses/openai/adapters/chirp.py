@@ -1,4 +1,9 @@
-"""optional 16 kHz pcm websocket bridge ↔ OpenAI Realtime (24 kHz)."""
+"""CHIRP (16 kHz pcm_s16le) ↔ OpenAI Realtime (24 kHz).
+
+Tracing is owned by ``opentelemetry-instrumentation-openai-agents`` (RealtimeSession
+patch). This adapter only bridges audio + CHIRP speech framing, and asks report.py
+to enrich the instrumentor's spans where it has gaps.
+"""
 
 from __future__ import annotations
 
@@ -18,7 +23,7 @@ from websockets.asyncio.server import serve
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from harness import build_from_blueprint, industry_path  # noqa: E402
-from report import traced_run  # noqa: E402
+from report import enrich_realtime_session, traced_run  # noqa: E402
 
 W, R_IN, R_OUT = 2, 16_000, 24_000
 
@@ -46,7 +51,8 @@ def _simulation_result_id(ws) -> str | None:
 
 async def _bridge(ws, model: str, industry: str) -> None:
     industry_dir = industry_path(industry)
-    workflow = f"mivas-{Path(industry_dir).name}-{model}"
+    # Must match Realtime tracing.workflow_name pattern ^[A-Za-z0-9_ -]+$
+    workflow = f"mivas {Path(industry_dir).name} {model}".replace(".", "-").replace("/", " ")
     sim_id = _simulation_result_id(ws)
     if sim_id:
         print(f"chirp sim_result_id={sim_id}", flush=True)
@@ -54,8 +60,26 @@ async def _bridge(ws, model: str, industry: str) -> None:
         ctx: dict = {}
         up = down = None
         utt: str | None = None
-        async with await build_from_blueprint(industry_dir, model).run(context=ctx) as session:
+        async with await build_from_blueprint(industry_dir, model).run(
+            context=ctx,
+            model_config=(
+                {
+                    "initial_model_settings": {
+                        "tracing": {
+                            "workflow_name": workflow,
+                            "group_id": str(sim_id),
+                            "metadata": {
+                                "bluejay.simulation_result_id": str(sim_id),
+                            },
+                        }
+                    }
+                }
+                if sim_id
+                else None
+            ),
+        ) as session:
             ctx["session"] = session
+            enrich_realtime_session(session, simulation_result_id=sim_id)
 
             async def inbound() -> None:
                 nonlocal up
@@ -70,7 +94,6 @@ async def _bridge(ws, model: str, industry: str) -> None:
                             try:
                                 await session.send_audio(pcm)
                             except Exception as e:
-                                # end_call closed the Realtime socket — normal hangup
                                 if type(e).__name__.startswith("ConnectionClosed"):
                                     break
                                 raise
@@ -85,17 +108,25 @@ async def _bridge(ws, model: str, industry: str) -> None:
                         if event.type == "audio":
                             if utt is None:
                                 utt = f"u_{uuid.uuid4().hex[:12]}"
-                                await ws.send(_event("speech.started", {"utterance_id": utt}))
-                            pcm, down = audioop.ratecv(event.audio.data, W, 1, R_OUT, R_IN, down)
+                                await ws.send(
+                                    _event("speech.started", {"utterance_id": utt})
+                                )
+                            pcm, down = audioop.ratecv(
+                                event.audio.data, W, 1, R_OUT, R_IN, down
+                            )
                             if pcm:
                                 await ws.send(pcm)
                         elif event.type in {"audio_end", "audio_interrupted"} and utt:
-                            await ws.send(_event("speech.completed", {"utterance_id": utt}))
+                            await ws.send(
+                                _event("speech.completed", {"utterance_id": utt})
+                            )
                             utt = None
                 finally:
                     if utt is not None:
                         with contextlib.suppress(Exception):
-                            await ws.send(_event("speech.completed", {"utterance_id": utt}))
+                            await ws.send(
+                                _event("speech.completed", {"utterance_id": utt})
+                            )
                         utt = None
                     with contextlib.suppress(Exception):
                         await ws.close(1000)
@@ -116,7 +147,6 @@ async def _handler(ws, model: str, industry: str) -> None:
     try:
         await _bridge(ws, model, industry)
     except Exception as e:
-        # Hangups look like ConnectionClosed*; everything else is a real fault.
         if type(e).__name__.startswith("ConnectionClosed"):
             return
         print(f"chirp bridge error: {type(e).__name__}: {e}", flush=True)
