@@ -27,7 +27,9 @@ def build_from_blueprint(industry_dir: str | Path):
 async def run(industry: str = "control-industry") -> None:
     industry_dir = os.environ.get("INDUSTRY_DIR") or str(industry_path(industry))
     runner = build_from_blueprint(industry_dir)
-    async with await runner.run() as session:
+    ctx: dict = {}
+    async with await runner.run(context=ctx) as session:
+        ctx["session"] = session
         async for event in session:
             print(event.type)
 
