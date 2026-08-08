@@ -1,8 +1,8 @@
-"""OpenTelemetry → Bluejay OTLP for Gemini Live harnesses.
+"""OpenTelemetry → Bluejay OTLP for AssemblyAI Voice Agent harnesses.
 
-Gemini Live has no Agents-SDK span tree, so we emit GenAI-native spans:
+The Voice Agent API has no Agents-SDK span tree, so we emit GenAI-native spans:
 
-  voice.call (root) — gen_ai.provider.name=gcp.gemini
+  voice.call (root) — gen_ai.provider.name=assemblyai
     ├── agent.speech          (TTS / agent audio turns)
     └── execute_tool <name>   (gen_ai.tool.*)
 
@@ -33,7 +33,7 @@ from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import SimpleSpanProcessor
 from opentelemetry.trace import Span, SpanKind, Status, StatusCode
 
-logger = logging.getLogger("mivas.otel.gemini")
+logger = logging.getLogger("mivas.otel.assemblyai")
 if not logger.handlers:
     _h = logging.StreamHandler(sys.stdout)
     _h.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s"))
@@ -52,7 +52,6 @@ TERMINAL_STATUSES = {
     "NO_ANSWER",
     "CANCELLED",
 }
-# Bluejay may clear trace_ids during EVALUATING → COMPLETED; re-link after these.
 FINAL_STATUSES = {
     "COMPLETED",
     "FAILED",
@@ -62,14 +61,14 @@ FINAL_STATUSES = {
     "NO_CONNECTION",
 }
 EARLY_UPSERT_STATUSES = {"EVALUATING", "EVALUATED", "CONVERSATION_ENDED"}
-PROVIDER = "gcp.gemini"
-TRACER_NAME = "mivas.gemini"
+PROVIDER = "assemblyai"
+TRACER_NAME = "mivas.assemblyai"
 
 _provider: TracerProvider | None = None
-_root_span: ContextVar[Span | None] = ContextVar("mivas_gemini_otel_root", default=None)
-_call_t0: ContextVar[float | None] = ContextVar("mivas_gemini_otel_t0", default=None)
+_root_span: ContextVar[Span | None] = ContextVar("mivas_assemblyai_otel_root", default=None)
+_call_t0: ContextVar[float | None] = ContextVar("mivas_assemblyai_otel_t0", default=None)
 _reported_tools: ContextVar[list[dict[str, Any]] | None] = ContextVar(
-    "mivas_gemini_reported_tools", default=None
+    "mivas_assemblyai_reported_tools", default=None
 )
 # module fallbacks when asyncio tasks don't inherit ContextVars
 _active_root: Span | None = None
@@ -86,7 +85,7 @@ def _otlp_endpoint() -> str:
 
 
 def _service_name() -> str:
-    return os.environ.get("BLUEJAY_SERVICE_NAME", "mivas-gemini")
+    return os.environ.get("BLUEJAY_SERVICE_NAME", "mivas-assemblyai")
 
 
 def _api_key() -> str | None:
@@ -383,6 +382,7 @@ async def post_simulation_enrichment(
     logger.error("update-simulation-result gave up: %s", last_err)
 
 
+
 async def _relink_after_final(
     client: httpx.AsyncClient,
     simulation_result_id: str,
@@ -439,7 +439,6 @@ async def _relink_after_final(
             final,
         )
 
-
 # back-compat alias used by older call sites
 async def post_trace_ids(simulation_result_id: str, trace_id: str) -> None:
     await post_simulation_enrichment(
@@ -464,7 +463,7 @@ async def traced_run(
 
     tracer = otel_trace.get_tracer(TRACER_NAME)
     attrs: dict[str, Any] = {
-        # Gemini / GenAI semantic conventions (not openai.realtime)
+        # AssemblyAI / GenAI semantic conventions (not openai.realtime)
         "gen_ai.system": PROVIDER,
         "gen_ai.provider.name": PROVIDER,
         "gen_ai.operation.name": "invoke_agent",

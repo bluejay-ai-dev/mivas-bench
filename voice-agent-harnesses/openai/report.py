@@ -48,6 +48,15 @@ TERMINAL_STATUSES = {
     "NO_ANSWER",
     "CANCELLED",
 }
+FINAL_STATUSES = {
+    "COMPLETED",
+    "FAILED",
+    "SYSTEM_ERROR",
+    "NO_ANSWER",
+    "CANCELLED",
+    "NO_CONNECTION",
+}
+EARLY_UPSERT_STATUSES = {"EVALUATING", "EVALUATED", "CONVERSATION_ENDED"}
 _MAX_ATTR = 4000
 
 _provider: TracerProvider | None = None
@@ -172,6 +181,63 @@ async def _await_terminal_upsert(
     return None
 
 
+async def _relink_after_final(
+    client: httpx.AsyncClient,
+    simulation_result_id: str,
+    body: dict[str, Any],
+    key: str,
+    trace_id: str,
+    early_status: str | None,
+) -> None:
+    """Re-POST trace_ids once the sim leaves EVALUATING (eval can wipe the link)."""
+    final: str | None = None
+    deadline = time.monotonic() + 120.0
+    while time.monotonic() < deadline:
+        try:
+            r = await client.get(
+                f"{_api_url()}/retrieve-simulation-result/{simulation_result_id}",
+                headers={"X-API-Key": key},
+            )
+            if r.status_code == 200:
+                st = str(
+                    ((r.json() or {}).get("simulation_result") or {}).get("status")
+                )
+                if st in FINAL_STATUSES:
+                    final = st
+                    break
+        except Exception:
+            pass
+        await asyncio.sleep(2.0)
+    if final is None:
+        logger.warning(
+            "relink skipped — still not final after early upsert terminal=%s sim=%s",
+            early_status,
+            simulation_result_id,
+        )
+        return
+    r = await client.post(
+        f"{_api_url()}/update-simulation-result",
+        json=body,
+        headers={"X-API-Key": key, "Content-Type": "application/json"},
+    )
+    if r.status_code >= 400:
+        logger.error(
+            "relink after %s FAILED sim=%s %s %s",
+            early_status,
+            simulation_result_id,
+            r.status_code,
+            r.text[:300],
+        )
+    else:
+        logger.info(
+            "relink after %s ok trace=%s sim=%s final=%s",
+            early_status,
+            trace_id,
+            simulation_result_id,
+            final,
+        )
+
+
 async def post_trace_ids(simulation_result_id: str, trace_id: str) -> None:
     key = _api_key()
     if not key or not simulation_result_id or not trace_id:
@@ -182,14 +248,15 @@ async def post_trace_ids(simulation_result_id: str, trace_id: str) -> None:
             bool(key),
         )
         return
+    body = {
+        "simulation_result_id": str(simulation_result_id),
+        "trace_ids": [trace_id],
+    }
     async with httpx.AsyncClient(timeout=20) as client:
         st = await _await_terminal_upsert(client, simulation_result_id)
         r = await client.post(
             f"{_api_url()}/update-simulation-result",
-            json={
-                "simulation_result_id": str(simulation_result_id),
-                "trace_ids": [trace_id],
-            },
+            json=body,
             headers={"X-API-Key": key, "Content-Type": "application/json"},
         )
         if r.status_code >= 400:
@@ -206,6 +273,10 @@ async def post_trace_ids(simulation_result_id: str, trace_id: str) -> None:
                 simulation_result_id,
                 st,
             )
+            if st is None or st in EARLY_UPSERT_STATUSES:
+                await _relink_after_final(
+                    client, simulation_result_id, body, key, trace_id, st
+                )
 
 
 class RealtimeEventTracer:
@@ -218,11 +289,38 @@ class RealtimeEventTracer:
         self._tool_spans: dict[str, Span] = {}
         self._speech_spans: dict[str, Span] = {}
         self._speech_text: dict[str, list[str]] = {}
+        self._customer_speech: Span | None = None
         self._seen_agent_text: set[str] = set()
         self._seen_user_text: set[str] = set()
 
     def wrap(self, session: Any) -> "TracedRealtimeSession":
         return TracedRealtimeSession(session, self)
+
+    def start_customer_speech(self, utterance_id: str) -> Span | None:
+        """CHIRP inbound speech.* → customer.speech under voice.call."""
+        self.end_customer_speech()
+        span = self._tracer.start_span(
+            "customer.speech",
+            context=otel_trace.set_span_in_context(self.root),
+            kind=SpanKind.INTERNAL,
+            attributes={
+                GenAIAttributes.GEN_AI_OPERATION_NAME: "speech_to_text",
+                "mivas.speech.speaker": "customer",
+                "mivas.utterance_id": str(utterance_id),
+                "mivas.event": "chirp.speech.started",
+            },
+        )
+        self._customer_speech = span
+        return span
+
+    def end_customer_speech(self, span: Span | None = None) -> None:
+        target = span if span is not None else self._customer_speech
+        if target is None:
+            return
+        if self._customer_speech is target:
+            self._customer_speech = None
+        target.set_status(Status(StatusCode.OK))
+        target.end()
 
     def _parent_ctx(self, agent_name: str | None = None):
         if agent_name and agent_name in self._agent_spans:
@@ -493,6 +591,7 @@ class RealtimeEventTracer:
             span.set_status(Status(StatusCode.OK))
 
     def close(self) -> None:
+        self.end_customer_speech()
         for span in list(self._tool_spans.values()):
             span.set_status(Status(StatusCode.OK))
             span.end()

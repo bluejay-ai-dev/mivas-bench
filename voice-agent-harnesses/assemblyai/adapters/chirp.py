@@ -1,4 +1,4 @@
-"""optional 16 kHz pcm websocket bridge ↔ Gemini Live (24 kHz out)."""
+"""optional 16 khz pcm websocket bridge ↔ assemblyai voice agent (24 khz)."""
 
 from __future__ import annotations
 
@@ -14,12 +14,11 @@ import time
 import uuid
 from pathlib import Path
 
-from google import genai
-from google.genai import types
+import websockets
 from websockets.asyncio.server import serve
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from harness import industry_path, live_config, load_blueprint, run_tool  # noqa: E402
+from harness import WS_URL, industry_path, load_blueprint, run_tool, session_config  # noqa: E402
 from report import end_speech_span, start_speech_span, traced_run  # noqa: E402
 
 W, R_OUT, R_CHIRP = 2, 24_000, 16_000
@@ -49,20 +48,24 @@ def _simulation_result_id(ws) -> str | None:
 async def _bridge(ws, model: str, industry: str) -> None:
     bp = load_blueprint(industry)
     state = {"agent": bp["start"]}
-    down = None
-    utt: str | None = None
-    speech_otel = None
-    end = asyncio.Event()
     industry_dir = industry_path(industry)
     workflow = f"mivas-{Path(industry_dir).name}-{model}"
     sim_id = _simulation_result_id(ws)
     if sim_id:
         print(f"chirp sim_result_id={sim_id}", flush=True)
 
-    client = genai.Client(api_key=os.environ.get("GOOGLE_API_KEY") or os.environ.get("GEMINI_API_KEY"))
-    config = live_config(bp)
+    key = os.environ.get("ASSEMBLYAI_API_KEY")
+    if not key:
+        raise SystemExit("need ASSEMBLYAI_API_KEY")
 
+    up = down = None
+    utt: str | None = None
+    speech_otel = None
     customer_otel = None
+    pending: list[dict] = []
+    should_end = False
+    ready = asyncio.Event()
+    end = asyncio.Event()
 
     def _close_utt() -> None:
         nonlocal utt, speech_otel
@@ -76,24 +79,29 @@ async def _bridge(ws, model: str, industry: str) -> None:
         customer_otel = None
 
     async with traced_run(workflow, simulation_result_id=sim_id, model=model):
-        async with client.aio.live.connect(model=model, config=config) as session:
-            # Live waits for a turn before speaking — nudge the scripted greeting.
-            await session.send_realtime_input(
-                text="[Call connected. Greet the caller now per your instructions.]"
+        async with websockets.connect(f"{WS_URL}?token={key}") as agent_ws:
+            await agent_ws.send(
+                json.dumps({"type": "session.update", "session": session_config(bp)})
             )
 
             async def inbound() -> None:
-                nonlocal customer_otel
+                """chirp 16 khz pcm → assemblyai 24 khz base64 input.audio (only once ready)."""
+                nonlocal up, customer_otel
                 try:
                     async for msg in ws:
                         if end.is_set():
                             break
-                        if isinstance(msg, bytes) and msg:
-                            await session.send_realtime_input(
-                                audio=types.Blob(
-                                    data=msg, mime_type="audio/pcm;rate=16000"
+                        if isinstance(msg, bytes) and msg and ready.is_set():
+                            pcm, up = audioop.ratecv(msg, W, 1, R_CHIRP, R_OUT, up)
+                            if pcm:
+                                await agent_ws.send(
+                                    json.dumps(
+                                        {
+                                            "type": "input.audio",
+                                            "audio": base64.b64encode(pcm).decode(),
+                                        }
+                                    )
                                 )
-                            )
                             continue
                         if not isinstance(msg, str):
                             continue
@@ -112,60 +120,65 @@ async def _bridge(ws, model: str, industry: str) -> None:
                 finally:
                     _close_customer()
                     end.set()
+                    with contextlib.suppress(Exception):
+                        await agent_ws.close()
 
             async def outbound() -> None:
-                nonlocal down, utt, speech_otel
+                """assemblyai reply.audio → chirp 16 khz pcm; drain tool.call on reply.done."""
+                nonlocal down, utt, speech_otel, should_end
                 try:
-                    while not end.is_set():
-                        async for response in session.receive():
-                            if end.is_set():
-                                break
-                            if response.data:
-                                if utt is None:
-                                    utt = f"u_{uuid.uuid4().hex[:12]}"
-                                    speech_otel = start_speech_span(utt, speaker="agent")
-                                    await ws.send(
-                                        _event("speech.started", {"utterance_id": utt})
-                                    )
-                                pcm, down = audioop.ratecv(
-                                    response.data, W, 1, R_OUT, R_CHIRP, down
-                                )
-                                if pcm:
-                                    await ws.send(pcm)
-                            sc = response.server_content
-                            if sc is not None and getattr(sc, "turn_complete", False) and utt:
-                                await ws.send(
-                                    _event("speech.completed", {"utterance_id": utt})
-                                )
+                    async for raw in agent_ws:
+                        if end.is_set():
+                            break
+                        event = json.loads(raw)
+                        etype = event.get("type")
+                        if etype == "session.ready":
+                            ready.set()
+                        elif etype == "reply.audio":
+                            if utt is None:
+                                utt = f"u_{uuid.uuid4().hex[:12]}"
+                                speech_otel = start_speech_span(utt, speaker="agent")
+                                await ws.send(_event("speech.started", {"utterance_id": utt}))
+                            pcm, down = audioop.ratecv(
+                                base64.b64decode(event["data"]), W, 1, R_OUT, R_CHIRP, down
+                            )
+                            if pcm:
+                                await ws.send(pcm)
+                        elif etype == "tool.call":
+                            pending.append(event)
+                        elif etype == "reply.done":
+                            if utt:
+                                await ws.send(_event("speech.completed", {"utterance_id": utt}))
                                 _close_utt()
-                            if response.tool_call:
-                                replies = []
-                                should_end = False
-                                for fc in response.tool_call.function_calls or []:
-                                    args = dict(fc.args or {})
+                            if pending:
+                                calls, pending[:] = list(pending), []
+                                for call in calls:
                                     result, stop = await run_tool(
-                                        fc.name,
-                                        args,
+                                        call["name"],
+                                        dict(call.get("arguments") or {}),
                                         bp,
                                         state,
-                                        call_id=getattr(fc, "id", None),
+                                        call_id=call.get("call_id"),
                                     )
                                     should_end = should_end or stop
-                                    replies.append(
-                                        types.FunctionResponse(
-                                            id=fc.id, name=fc.name, response=result
+                                    await agent_ws.send(
+                                        json.dumps(
+                                            {
+                                                "type": "tool.result",
+                                                "call_id": call["call_id"],
+                                                "result": json.dumps(result),
+                                            }
                                         )
                                     )
-                                if replies:
-                                    await session.send_tool_response(
-                                        function_responses=replies
-                                    )
-                                if should_end:
-                                    end.set()
-                                    break
-                        else:
-                            continue
-                        break
+                                # let the farewell reply (if any) play before ending
+                            elif should_end:
+                                with contextlib.suppress(Exception):
+                                    await agent_ws.send(json.dumps({"type": "session.end"}))
+                        elif etype == "session.ended":
+                            end.set()
+                            break
+                        elif etype == "session.error":
+                            print(f"chirp assemblyai error: {event}", flush=True)
                 finally:
                     if utt:
                         _close_utt()
@@ -205,16 +218,15 @@ async def _handler(ws, model: str, industry: str) -> None:
 
 def main(model: str | None = None) -> None:
     p = argparse.ArgumentParser()
-    p.add_argument("--model", default=model or os.environ.get("GEMINI_LIVE_MODEL"))
+    p.add_argument("--model", default=model or os.environ.get("ASSEMBLYAI_VOICE_AGENT_MODEL"))
     p.add_argument("--industry", default=os.environ.get("INDUSTRY", "control-industry"))
     p.add_argument("--host", default=os.environ.get("CHIRP_HOST", "0.0.0.0"))
     p.add_argument("--port", type=int, default=int(os.environ.get("CHIRP_PORT", "8765")))
     a = p.parse_args()
-    key = os.environ.get("GOOGLE_API_KEY") or os.environ.get("GEMINI_API_KEY")
-    if not a.model or not key:
-        raise SystemExit("need --model/GEMINI_LIVE_MODEL and GOOGLE_API_KEY")
+    if not a.model or not os.environ.get("ASSEMBLYAI_API_KEY"):
+        raise SystemExit("need --model/ASSEMBLYAI_VOICE_AGENT_MODEL and ASSEMBLYAI_API_KEY")
     industry_path(a.industry)
-    print(f"ws↔Gemini {a.model} × {a.industry} :{a.port} auth={bool(_auth())}", flush=True)
+    print(f"ws↔AssemblyAI {a.model} × {a.industry} :{a.port} auth={bool(_auth())}", flush=True)
 
     async def run() -> None:
         async with serve(lambda ws: _handler(ws, a.model, a.industry), a.host, a.port):
