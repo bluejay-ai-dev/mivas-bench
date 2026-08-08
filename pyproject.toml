@@ -30,4 +30,4 @@ package = false
 venvPath = "."
 venv = ".venv"
 pythonVersion = "3.12"
-extraPaths = ["voice-agent-harnesses/openai", "voice-agent-harnesses/gemini"]
+extraPaths = ["voice-agent-harnesses/openai", "voice-agent-harnesses/gemini", "voice-agent-harnesses/assemblyai", "voice-agent-harnesses/deepgram", "voice-agent-harnesses/elevenlabs"]

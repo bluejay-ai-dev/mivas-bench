@@ -2,6 +2,7 @@
 
 Tracing: Realtime session events are proxied through ``report.RealtimeEventTracer``
 into a Bluejay OTel ``voice.call`` tree (turns, transcripts, tools, handoffs).
+CHIRP inbound ``speech.*`` frames open ``customer.speech`` spans.
 """
 
 from __future__ import annotations
@@ -96,7 +97,25 @@ async def _bridge(ws, model: str, industry: str) -> None:
                                 if type(e).__name__.startswith("ConnectionClosed"):
                                     break
                                 raise
+                            continue
+                        if not isinstance(msg, str):
+                            continue
+                        try:
+                            event = json.loads(msg)
+                        except json.JSONDecodeError:
+                            continue
+                        etype = event.get("type")
+                        data = event.get("data") or {}
+                        if tracer is None:
+                            continue
+                        if etype == "speech.started":
+                            uid = data.get("utterance_id") or f"c_{uuid.uuid4().hex[:12]}"
+                            tracer.start_customer_speech(uid)
+                        elif etype == "speech.completed":
+                            tracer.end_customer_speech()
                 finally:
+                    if tracer is not None:
+                        tracer.end_customer_speech()
                     if not getattr(session, "_closed", False):
                         asyncio.create_task(session.close())
 
@@ -130,12 +149,19 @@ async def _bridge(ws, model: str, industry: str) -> None:
                     with contextlib.suppress(Exception):
                         await ws.close(1000)
 
-            results = await asyncio.gather(inbound(), outbound(), return_exceptions=True)
-            for r in results:
-                if isinstance(r, BaseException) and not type(r).__name__.startswith(
+            tasks = [asyncio.create_task(inbound()), asyncio.create_task(outbound())]
+            done, pending = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
+            for t in pending:
+                t.cancel()
+            await asyncio.gather(*pending, return_exceptions=True)
+            for t in done:
+                if t.cancelled():
+                    continue
+                exc = t.exception()
+                if isinstance(exc, BaseException) and not type(exc).__name__.startswith(
                     "ConnectionClosed"
                 ):
-                    raise r
+                    raise exc
 
 
 async def _handler(ws, model: str, industry: str) -> None:

@@ -1,16 +1,15 @@
-"""OpenTelemetry → Bluejay OTLP for Gemini Live harnesses.
+"""OpenTelemetry → Bluejay OTLP for ElevenLabs Conversational AI harnesses.
 
-Gemini Live has no Agents-SDK span tree, so we emit GenAI-native spans:
+Conversational AI has no Agents-SDK span tree, so we emit GenAI-native spans:
 
-  voice.call (root) — gen_ai.provider.name=gcp.gemini
+  voice.call (root) — gen_ai.provider.name=elevenlabs
     ├── agent.speech          (TTS / agent audio turns)
     └── execute_tool <name>   (gen_ai.tool.*)
 
-After the call we POST to update-simulation-result with:
-  - trace_ids  → waterfall flamegraph
-  Conversation tool markers come from execute_tool OTel spans (not a tool_calls POST).
-
-Chirp supplies simulation_result_id via X-Simulation-Result-Id on upgrade.
+After the call we POST {simulation_result_id, trace_ids} so the flamegraph links.
+Bluejay places execute_tool spans onto the conversation timeline from OTel
+(span start relative to voice.call) — we do not also POST tool_calls (that
+duplicates). Chirp supplies simulation_result_id via X-Simulation-Result-Id.
 """
 
 from __future__ import annotations
@@ -33,7 +32,7 @@ from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import SimpleSpanProcessor
 from opentelemetry.trace import Span, SpanKind, Status, StatusCode
 
-logger = logging.getLogger("mivas.otel.gemini")
+logger = logging.getLogger("mivas.otel.elevenlabs")
 if not logger.handlers:
     _h = logging.StreamHandler(sys.stdout)
     _h.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s"))
@@ -44,6 +43,7 @@ if not logger.handlers:
 DEFAULT_OTLP_ENDPOINT = "https://otlp.getbluejay.ai/v1/traces"
 DEFAULT_API_URL = "https://api.getbluejay.ai/v1"
 TERMINAL_STATUSES = {
+    "CONVERSATION_ENDED",
     "EVALUATING",
     "EVALUATED",
     "COMPLETED",
@@ -52,7 +52,6 @@ TERMINAL_STATUSES = {
     "NO_ANSWER",
     "CANCELLED",
 }
-# Bluejay may clear trace_ids during EVALUATING → COMPLETED; re-link after these.
 FINAL_STATUSES = {
     "COMPLETED",
     "FAILED",
@@ -62,14 +61,14 @@ FINAL_STATUSES = {
     "NO_CONNECTION",
 }
 EARLY_UPSERT_STATUSES = {"EVALUATING", "EVALUATED", "CONVERSATION_ENDED"}
-PROVIDER = "gcp.gemini"
-TRACER_NAME = "mivas.gemini"
+PROVIDER = "elevenlabs"
+TRACER_NAME = "mivas.elevenlabs"
 
 _provider: TracerProvider | None = None
-_root_span: ContextVar[Span | None] = ContextVar("mivas_gemini_otel_root", default=None)
-_call_t0: ContextVar[float | None] = ContextVar("mivas_gemini_otel_t0", default=None)
+_root_span: ContextVar[Span | None] = ContextVar("mivas_elevenlabs_otel_root", default=None)
+_call_t0: ContextVar[float | None] = ContextVar("mivas_elevenlabs_otel_t0", default=None)
 _reported_tools: ContextVar[list[dict[str, Any]] | None] = ContextVar(
-    "mivas_gemini_reported_tools", default=None
+    "mivas_elevenlabs_reported_tools", default=None
 )
 # module fallbacks when asyncio tasks don't inherit ContextVars
 _active_root: Span | None = None
@@ -77,8 +76,16 @@ _active_t0: float | None = None
 _active_tools: list[dict[str, Any]] | None = None
 
 
+def _log(msg: str) -> None:
+    print(f"[otel.elevenlabs] {msg}", flush=True)
+    logger.info("%s", msg)
+
+
 def _api_url() -> str:
-    return os.environ.get("BLUEJAY_API_URL", DEFAULT_API_URL).rstrip("/")
+    base = os.environ.get("BLUEJAY_API_URL", DEFAULT_API_URL).rstrip("/")
+    if base.endswith("/v1"):
+        return base
+    return f"{base}/v1"
 
 
 def _otlp_endpoint() -> str:
@@ -86,7 +93,7 @@ def _otlp_endpoint() -> str:
 
 
 def _service_name() -> str:
-    return os.environ.get("BLUEJAY_SERVICE_NAME", "mivas-gemini")
+    return os.environ.get("BLUEJAY_SERVICE_NAME", "mivas-elevenlabs")
 
 
 def _api_key() -> str | None:
@@ -117,6 +124,7 @@ def setup_otel() -> TracerProvider | None:
 
     api_key = _api_key()
     if not api_key:
+        _log("otel disabled — BLUEJAY_API_KEY unset")
         return None
 
     if _provider is not None:
@@ -132,16 +140,17 @@ def setup_otel() -> TracerProvider | None:
     )
     otel_trace.set_tracer_provider(provider)
     _provider = provider
-    logger.info("otel → %s service=%s", endpoint, _service_name())
+    _log(f"otel → {endpoint} service={_service_name()}")
     return provider
 
 
 def flush() -> None:
     if _provider is not None:
         try:
-            _provider.force_flush()
+            ok = _provider.force_flush(timeout_millis=10_000)
+            _log(f"otel flush ok={ok}")
         except Exception as e:
-            logger.error("otel flush failed: %s", e)
+            _log(f"otel flush failed: {e}")
 
 
 def _parent_span() -> Span | None:
@@ -201,7 +210,8 @@ def tool_span(
         "gen_ai.provider.name": PROVIDER,
         "gen_ai.tool.name": name,
         "gen_ai.tool.call.arguments": _json_attr(parameters if parameters is not None else {}),
-        # conversation timestamps come from span start vs voice.call (OTel extraction)
+        # conversation timestamps go via tool_calls POST (not this attr) to avoid
+        # Bluejay double-counting OTel extraction + update-simulation-result
     }
     if call_id:
         attrs["gen_ai.tool.call.id"] = str(call_id)
@@ -229,12 +239,16 @@ def finish_tool_span(
     parameters: Any = None,
     start_offset_ms: int | None = None,
 ) -> None:
-    if span is not None:
-        span.set_attribute("gen_ai.tool.call.result", _json_attr(output))
-        if ok:
-            span.set_status(Status(StatusCode.OK))
-        else:
-            span.set_status(Status(StatusCode.ERROR, _json_attr(output)[:400]))
+    # name/parameters/start_offset_ms kept for call-site compat; conversation
+    # placement comes from the OTel span timeline, not a tool_calls POST.
+    del name, parameters, start_offset_ms
+    if span is None:
+        return
+    span.set_attribute("gen_ai.tool.call.result", _json_attr(output))
+    if ok:
+        span.set_status(Status(StatusCode.OK))
+    else:
+        span.set_status(Status(StatusCode.ERROR, _json_attr(output)[:400]))
 
 
 def start_speech_span(
@@ -304,30 +318,24 @@ async def post_simulation_enrichment(
     trace_id: str | None,
     tool_calls: list[dict[str, Any]] | None = None,
 ) -> None:
-    """Link OTel trace_ids. tool_calls ignored — use execute_tool spans."""
-    del tool_calls
+    """Link OTel trace_ids to the sim result. tool_calls arg ignored (use OTel spans)."""
+    del tool_calls  # conversation tools come from execute_tool spans
     key = _api_key()
-    if not key or not simulation_result_id:
-        logger.warning(
-            "skip update-simulation-result — "
-            "simulation_result_id=%s key=%s",
-            simulation_result_id,
-            bool(key),
+    if not key or not simulation_result_id or not trace_id:
+        _log(
+            f"skip update-simulation-result — "
+            f"simulation_result_id={simulation_result_id} "
+            f"trace_id={trace_id} key={bool(key)}"
         )
         return
     if not str(simulation_result_id).isdigit():
-        logger.warning(
-            "skip update-simulation-result — non-numeric sim id=%s",
-            simulation_result_id,
-        )
+        _log(f"skip update-simulation-result — non-numeric sim id={simulation_result_id}")
         return
 
-    body: dict[str, Any] = {"simulation_result_id": str(simulation_result_id)}
-    if trace_id:
-        body["trace_ids"] = [trace_id]
-    if "trace_ids" not in body and "tool_calls" not in body:
-        logger.warning("skip update-simulation-result — nothing to post")
-        return
+    body: dict[str, Any] = {
+        "simulation_result_id": str(simulation_result_id),
+        "trace_ids": [trace_id],
+    }
 
     await asyncio.sleep(0.5)
 
@@ -342,9 +350,9 @@ async def post_simulation_enrichment(
                         headers={"X-API-Key": key},
                     )
                     if check.status_code == 404:
-                        logger.warning(
-                            "skip update-simulation-result — sim=%s not found",
-                            simulation_result_id,
+                        _log(
+                            f"skip update-simulation-result — "
+                            f"sim={simulation_result_id} not found"
                         )
                         return
                 r = await client.post(
@@ -354,20 +362,13 @@ async def post_simulation_enrichment(
                 )
                 if r.status_code >= 400:
                     last_err = f"{r.status_code} {r.text[:300]} (status={st})"
-                    logger.error(
-                        "update-simulation-result FAILED attempt=%s %s",
-                        attempt,
-                        last_err,
-                    )
+                    _log(f"update-simulation-result FAILED attempt={attempt} {last_err}")
                     if r.status_code == 404:
                         return
                 else:
-                    logger.info(
-                        "update-simulation-result ok trace=%s sim=%s terminal=%s attempt=%s",
-                        trace_id,
-                        simulation_result_id,
-                        st,
-                        attempt,
+                    _log(
+                        f"update-simulation-result ok trace={trace_id} "
+                        f"sim={simulation_result_id} terminal={st} attempt={attempt}"
                     )
                     if (st is None or st in EARLY_UPSERT_STATUSES) and trace_id:
                         await _relink_after_final(
@@ -376,11 +377,10 @@ async def post_simulation_enrichment(
                     return
         except Exception as e:
             last_err = f"{type(e).__name__}: {e}"
-            logger.error(
-                "update-simulation-result error attempt=%s %s", attempt, last_err
-            )
+            _log(f"update-simulation-result error attempt={attempt} {last_err}")
         await asyncio.sleep(1.0 * attempt)
-    logger.error("update-simulation-result gave up: %s", last_err)
+    _log(f"update-simulation-result gave up: {last_err}")
+
 
 
 async def _relink_after_final(
@@ -411,10 +411,9 @@ async def _relink_after_final(
             pass
         await asyncio.sleep(2.0)
     if final is None:
-        logger.warning(
-            "relink skipped — still not final after early upsert terminal=%s sim=%s",
-            early_status,
-            simulation_result_id,
+        _log(
+            f"relink skipped — still not final after early upsert terminal={early_status} "
+            f"sim={simulation_result_id}"
         )
         return
     r = await client.post(
@@ -423,28 +422,18 @@ async def _relink_after_final(
         headers={"X-API-Key": key, "Content-Type": "application/json"},
     )
     if r.status_code >= 400:
-        logger.error(
-            "relink after %s FAILED sim=%s %s %s",
-            early_status,
-            simulation_result_id,
-            r.status_code,
-            r.text[:300],
+        _log(
+            f"relink after {early_status} FAILED sim={simulation_result_id} "
+            f"{r.status_code} {r.text[:300]}"
         )
     else:
-        logger.info(
-            "relink after %s ok trace=%s sim=%s final=%s",
-            early_status,
-            trace_id,
-            simulation_result_id,
-            final,
+        _log(
+            f"relink after {early_status} ok trace={trace_id} "
+            f"sim={simulation_result_id} final={final}"
         )
 
-
-# back-compat alias used by older call sites
 async def post_trace_ids(simulation_result_id: str, trace_id: str) -> None:
-    await post_simulation_enrichment(
-        simulation_result_id, trace_id=trace_id, tool_calls=_reported_tools.get()
-    )
+    await post_simulation_enrichment(simulation_result_id, trace_id=trace_id)
 
 
 @asynccontextmanager
@@ -464,7 +453,6 @@ async def traced_run(
 
     tracer = otel_trace.get_tracer(TRACER_NAME)
     attrs: dict[str, Any] = {
-        # Gemini / GenAI semantic conventions (not openai.realtime)
         "gen_ai.system": PROVIDER,
         "gen_ai.provider.name": PROVIDER,
         "gen_ai.operation.name": "invoke_agent",
@@ -498,20 +486,23 @@ async def traced_run(
             ctx = root.get_span_context()
             if ctx.is_valid:
                 otel_tid = format(ctx.trace_id, "032x")
-                logger.info(
-                    "otel trace_id=%s sim=%s workflow=%s model=%s",
-                    otel_tid,
-                    simulation_result_id,
-                    workflow_name,
-                    model,
+                _log(
+                    f"otel trace_id={otel_tid} sim={simulation_result_id} "
+                    f"workflow={workflow_name} model={model}"
                 )
             try:
                 yield
             except Exception as e:
-                if type(e).__name__.startswith("ConnectionClosed"):
+                name = type(e).__name__
+                if name.startswith("ConnectionClosed") or name in {
+                    "ConnectionResetError",
+                    "BrokenPipeError",
+                }:
                     root.set_status(Status(StatusCode.OK))
                 else:
-                    raise
+                    root.record_exception(e)
+                    root.set_status(Status(StatusCode.OK))
+                    _log(f"voice.call swallowed {name}: {e}")
     finally:
         _active_root = prev_active
         _active_t0 = prev_t0
@@ -522,20 +513,12 @@ async def traced_run(
             _reported_tools.reset(tools_token)
         _call_t0.reset(t0_token)
         flush()
-        if simulation_result_id and (otel_tid or tool_buf):
+        if simulation_result_id and otel_tid:
             try:
                 await post_simulation_enrichment(
-                    simulation_result_id,
-                    trace_id=otel_tid,
-                                    )
-            except Exception as e:
-                logger.error(
-                    "post_simulation_enrichment crashed: %s: %s",
-                    type(e).__name__,
-                    e,
+                    simulation_result_id, trace_id=otel_tid
                 )
+            except Exception as e:
+                _log(f"post_simulation_enrichment crashed: {type(e).__name__}: {e}")
         elif simulation_result_id and not otel_tid:
-            logger.error(
-                "have simulation_result_id=%s but no otel trace id to post",
-                simulation_result_id,
-            )
+            _log(f"have simulation_result_id={simulation_result_id} but no otel trace id")
