@@ -8,9 +8,14 @@ Pick a **harness** from `voice-agent-harnesses/` (e.g. `openai/realtime-2.1`) an
 
 - `agent_blueprint.json`, `tools.json`, system prompts
 - SQLite `db/schema.sql` + `db/seed.sql`
-- `tool_server.py` (FastAPI routes matching non-handoff tools)
+- `tool_server.py` (FastAPI **state API** over SQLite — not a 1:1 tools.json mirror)
 
-The harness adapts that pack into a voice runtime and proxies tool calls to the industry tool server. One container packs harness + industry + DB + tool server.
+The harness adapts the blueprint into a voice runtime:
+- **industry** tools → industry state API
+- **session** tools (`session: true`, e.g. `end_call`) → harness-native + hang up
+- **handoff** tools → provider handoffs
+
+One container packs harness + industry + DB + state API.
 
 ## Quick start (local)
 

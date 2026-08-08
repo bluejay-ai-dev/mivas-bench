@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from runtime import (  # noqa: E402
+from harness import (  # noqa: E402
     TOOL_SERVER_URL,
     build_agents,
     build_from_blueprint as _build_from_blueprint,
