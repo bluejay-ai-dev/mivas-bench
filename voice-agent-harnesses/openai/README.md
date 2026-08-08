@@ -15,9 +15,16 @@ Shared builder: `harness.py`.
 
 Callers must `context["session"] = session` after `runner.run(context=ctx)`.
 
+CHIRP adapter (Bluejay WebSocket sims): `adapters/chirp.py`, with thin entrypoints under each runtime’s `adapters/`.
+
 ```bash
 uv sync
 # set VOICE_AGENT=openai/realtime-2.1 in root .env
 uv run python run.py --check
 uv run python tests/converse.py
+
+# Bluejay CHIRP (needs OPENAI_API_KEY, tool server, optional CHIRP_USER/CHIRP_PASS)
+uv run python industries/control-industry/tool_server.py
+CHIRP_PORT=8765 uv run python voice-agent-harnesses/openai/realtime-2.1/adapters/chirp.py
+CHIRP_PORT=8766 uv run python voice-agent-harnesses/openai/realtime-2.1-mini/adapters/chirp.py
 ```
