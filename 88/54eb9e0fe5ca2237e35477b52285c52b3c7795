@@ -1,0 +1,70 @@
+voice-agent-harnesses/glm/README.md
+  s_1698b0f5d9ae82::t_f0f6868e54a0b1 1-3
+voice-agent-harnesses/openai/report.py
+  s_529682e286274b::t_ca1371843c78dc 242,269-270
+  s_529682e286274b::t_d2e7c580db6f17 260-267
+  s_529682e286274b::t_12293e69d72ee8 1,3-5,7-8,10-12,18,22-24,32,49-50,69-77,80,111-155,227,233-239,243,245-253,255,258,271
+  s_529682e286274b::t_8d83c9d742d875 240
+voice-agent-harnesses/openai/harness.py
+  s_529682e286274b::t_04ecef91df5219 90,96
+  s_529682e286274b::t_5e5234b7516451 122-123,125-131,133
+  s_529682e286274b::t_6c8a16e18951f7 71-74
+  s_529682e286274b::t_0ee91649e3ecff 31-32
+  s_529682e286274b::t_9b57d9eece693c 234
+  s_529682e286274b::t_94d539ee66beed 19
+  s_529682e286274b::t_eeac27d70dd027 91-95,97-100,132
+k8s/secret.example.yaml
+  s_529682e286274b::t_4b757dc353f4a4 1,4-7,9,19-21
+.env.example
+  s_529682e286274b::t_84b782e20bb4a7 34-42
+k8s/deployment.yaml
+  s_529682e286274b::t_ab0aa56ac6ccb0 1-76,79-87,93-97
+  s_529682e286274b::t_b897c26aedf969 77-78
+  s_529682e286274b::t_9e57e8a5bb4faf 88-92
+run.py
+  s_529682e286274b::t_3d96bb056c81f5 2,7,39-42,111,113-114,121,135,137,139-143,145,149-155,159-165,178-242,244-250,252-253,258-261,265-277,279,282,288,299-300,336-350,362,375-379,383,385-391,401,403,429,431-434
+  s_529682e286274b::t_27bac485470e09 81-86
+  s_529682e286274b::t_27440903c38007 136,138,146-148,156-158,166-171,174-177
+k8s/job.yaml
+  s_529682e286274b::t_98d89883d2a456 1-2,6,14,30-31,36-37
+README.md
+  s_529682e286274b::t_4f54739e751bc0 33,35,38-40,42,46-48,51
+  s_529682e286274b::t_57ce7659684777 41,43-45
+k8s/service.yaml
+  s_529682e286274b::t_7028d3230ae077 1-19
+voice-agent-harnesses/openai/adapters/chirp.py
+  s_529682e286274b::t_e111a584d1b31d 116,118-123
+  s_529682e286274b::t_b8e04a10dcf7da 64-65,68-70,72-76,96-99,103-108
+runtime/entrypoint.sh
+  s_529682e286274b::t_ea71724be83e09 2,13-14,18-26,56-75,78-79
+voice-agent-harnesses/openai/README.md
+  s_529682e286274b::t_c2705daf9c7918 26-29
+  s_529682e286274b::t_105a6b1815fd7d 15
+  s_529682e286274b::t_e9f0365e6e4b59 25,30-32
+Dockerfile
+  s_529682e286274b::t_e27164893adb54 42
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "8854eb9e0fe5ca2237e35477b52285c52b3c7795",
+  "prompts": {},
+  "sessions": {
+    "s_1698b0f5d9ae82": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "ff786f7d-0d44-4ef5-b79c-bceb6871f80b",
+        "model": "grok-4.5"
+      },
+      "human_author": null
+    },
+    "s_529682e286274b": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "193d5298-7ec4-49a6-b2c3-125217dfa9e2",
+        "model": "default"
+      },
+      "human_author": null
+    }
+  }
+}
