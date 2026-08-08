@@ -1,0 +1,24 @@
+voice-agent-harnesses/gemini/adapters/chirp.py
+  s_d699876125c6ea::t_4791dc37dd9b59 23,40-48,55-59,64-69,71-73,76-80,82-96,98-99,101-140,142-147,157-160
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "2e8f348e581eee26656e29c1e85eb9fec5ac7c22",
+  "prompts": {},
+  "humans": {
+    "h_bbe1a3ca680b9f": {
+      "author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_d699876125c6ea": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "99aaff9a-5019-40cf-bc79-c1a8c275271d",
+        "model": "grok-4.5"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
