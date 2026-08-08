@@ -39,6 +39,6 @@ RUN uv pip install --system --no-cache \
     && mkdir -p /data \
     && test -f "${HARNESS_DIR}/agent.py"
 
-EXPOSE 8000
+EXPOSE 8000 8765
 
 CMD ["/app/runtime/entrypoint.sh"]

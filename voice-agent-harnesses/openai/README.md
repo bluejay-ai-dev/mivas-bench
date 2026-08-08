@@ -12,7 +12,7 @@ Shared builder: `harness.py`. Tracing/reporting: `report.py`.
 - Industry tools → industry state API (`TOOL_SERVER_URL`)
 - Session tools (`session: true`, e.g. `end_call`) → harness-local + close realtime session
 - Handoffs → Realtime handoffs
-- Tracing → OpenAI Agents + OTel SDK → Bluejay OTLP; Chirp reads `X-Simulation-Result-Id` on upgrade and POSTs `{trace_ids}` to `/v1/update-simulation-result` after the call (no tool_calls payload, no bluejay-sdk).
+- Tracing → OTel `voice.call` + harness `execute_tool` spans → Bluejay OTLP; Chirp reads `X-Simulation-Result-Id` and POSTs `{trace_ids}` after the call (Realtime does not emit Agents SDK child spans).
 
 Callers must `context["session"] = session` after `runner.run(context=ctx)`. Optional pcm websocket bridge under `adapters/` if an external evaluator needs one.
 
@@ -22,5 +22,12 @@ uv sync
 uv run python run.py --check
 uv run python tests/converse.py
 uv run python voice-agent-harnesses/openai/realtime-2.1/agent.py control-industry
-# optional: adapters/chirp.py (16 kHz ↔ 24 kHz)
+
+# Bluejay via k8s CHIRP (preferred)
+uv run python run.py --build --apply --no-logs
+
+# Bluejay CHIRP local (needs OPENAI_API_KEY, tool server, optional CHIRP_USER/CHIRP_PASS)
+uv run python industries/control-industry/tool_server.py
+CHIRP_PORT=8765 uv run python voice-agent-harnesses/openai/realtime-2.1/adapters/chirp.py
+CHIRP_PORT=8766 uv run python voice-agent-harnesses/openai/realtime-2.1-mini/adapters/chirp.py
 ```

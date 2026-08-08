@@ -544,7 +544,6 @@ dependencies = [
     { name = "httpx" },
     { name = "numpy" },
     { name = "openai-agents" },
-    { name = "openai-agents-opentelemetry" },
     { name = "opentelemetry-api" },
     { name = "opentelemetry-exporter-otlp-proto-http" },
     { name = "opentelemetry-sdk" },
@@ -560,7 +559,6 @@ requires-dist = [
     { name = "httpx", specifier = ">=0.27.0" },
     { name = "numpy", specifier = ">=1.26.0" },
     { name = "openai-agents", specifier = ">=0.18.0" },
-    { name = "openai-agents-opentelemetry", specifier = ">=0.3.0" },
     { name = "opentelemetry-api", specifier = ">=1.27.0" },
     { name = "opentelemetry-exporter-otlp-proto-http", specifier = ">=1.27.0" },
     { name = "opentelemetry-sdk", specifier = ">=1.27.0" },
@@ -658,20 +656,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/ff/ea/a8cae2dadf798f369be5f9cb544a169f5f6aecc096a80f1a209dddc4c00f/openai_agents-0.19.4.tar.gz", hash = "sha256:fe21778ee1e8216c9cdb775fa86d11b08be68c0184e14023993088d3f812c0be", size = 5784063, upload-time = "2026-08-05T02:59:12.939Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/90/d8/98925e1e4888e58d7694ba71af2ba93b94540f481c45ee8b7f7be7e30fcd/openai_agents-0.19.4-py3-none-any.whl", hash = "sha256:12e0372fae9698fe6f78e05aaeb4ccdb229602f7ef99b8195a7d68dc82869f51", size = 968498, upload-time = "2026-08-05T02:59:11.191Z" },
-]
-
-[[package]]
-name = "openai-agents-opentelemetry"
-version = "0.4.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "openai-agents" },
-    { name = "opentelemetry-api" },
-    { name = "opentelemetry-sdk" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/5f/ff/1452c1050b391938e591a88447163277afa74f2a7f533152a56f1bf46f00/openai_agents_opentelemetry-0.4.0.tar.gz", hash = "sha256:0fbc95b4d58cf66a35f7aa98705cba5e6dfbd3651547915da91978de7cc81eca", size = 156375, upload-time = "2026-06-16T16:22:45.813Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/7a/f0/e4376700eed6413dadb9709860c35b949ed79bd3e985d2687473580f9e3e/openai_agents_opentelemetry-0.4.0-py3-none-any.whl", hash = "sha256:4bf157354e7c7d1fdadc3aaf5957cb6a88056c1e9fa9baf3a17bf4b09fa553bd", size = 19536, upload-time = "2026-06-16T16:22:46.842Z" },
 ]
 
 [[package]]
