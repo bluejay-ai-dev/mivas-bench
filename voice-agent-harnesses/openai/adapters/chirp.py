@@ -1,8 +1,7 @@
 """CHIRP (16 kHz pcm_s16le) ↔ OpenAI Realtime (24 kHz).
 
-Tracing is owned by ``opentelemetry-instrumentation-openai-agents`` (RealtimeSession
-patch). This adapter only bridges audio + CHIRP speech framing, and asks report.py
-to enrich the instrumentor's spans where it has gaps.
+Tracing: Realtime session events are proxied through ``report.RealtimeEventTracer``
+into a Bluejay OTel ``voice.call`` tree (turns, transcripts, tools, handoffs).
 """
 
 from __future__ import annotations
@@ -23,7 +22,7 @@ from websockets.asyncio.server import serve
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from harness import build_from_blueprint, industry_path  # noqa: E402
-from report import enrich_realtime_session, traced_run  # noqa: E402
+from report import traced_run  # noqa: E402
 
 W, R_IN, R_OUT = 2, 16_000, 24_000
 
@@ -56,7 +55,7 @@ async def _bridge(ws, model: str, industry: str) -> None:
     sim_id = _simulation_result_id(ws)
     if sim_id:
         print(f"chirp sim_result_id={sim_id}", flush=True)
-    async with traced_run(workflow, simulation_result_id=sim_id):
+    async with traced_run(workflow, simulation_result_id=sim_id) as tracer:
         ctx: dict = {}
         up = down = None
         utt: str | None = None
@@ -79,7 +78,7 @@ async def _bridge(ws, model: str, industry: str) -> None:
             ),
         ) as session:
             ctx["session"] = session
-            enrich_realtime_session(session, simulation_result_id=sim_id)
+            events = tracer.wrap(session) if tracer is not None else session
 
             async def inbound() -> None:
                 nonlocal up
@@ -104,7 +103,7 @@ async def _bridge(ws, model: str, industry: str) -> None:
             async def outbound() -> None:
                 nonlocal down, utt
                 try:
-                    async for event in session:
+                    async for event in events:
                         if event.type == "audio":
                             if utt is None:
                                 utt = f"u_{uuid.uuid4().hex[:12]}"

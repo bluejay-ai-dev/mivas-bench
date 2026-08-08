@@ -29,11 +29,12 @@ async def run(industry: str = "control-industry") -> None:
     industry_dir = os.environ.get("INDUSTRY_DIR") or str(industry_path(industry))
     runner = build_from_blueprint(industry_dir)
     name = Path(industry_dir).name
-    async with traced_run(f"mivas-{name}-{MODEL}"):
+    async with traced_run(f"mivas-{name}-{MODEL}") as tracer:
         ctx: dict = {}
         async with await runner.run(context=ctx) as session:
             ctx["session"] = session
-            async for event in session:
+            events = tracer.wrap(session) if tracer is not None else session
+            async for event in events:
                 print(event.type)
 
 
