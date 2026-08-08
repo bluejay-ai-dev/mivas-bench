@@ -1,0 +1,28 @@
+voice-agent-harnesses/gemini/2.5-flash-native-audio/agent.py
+  s_d699876125c6ea::t_d0621610a0e65b 2-4,7-10,12-15,21-22,24-25,30
+  s_d699876125c6ea::t_020ea96cbe6026 1,5-6,11,16-20,23,26-29,31
+voice-agent-harnesses/gemini/flash-live-3.1/agent.py
+  s_d699876125c6ea::t_b73ece22dac9df 5-6,11,16-20,23,26-29,31
+  s_d699876125c6ea::t_7b119414a03dfe 1-4,7-10,12-15,21-22,24-25,30
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "1f0e71cf282ab19dd0539e8ece1ff4dff351909e",
+  "prompts": {},
+  "humans": {
+    "h_bbe1a3ca680b9f": {
+      "author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_d699876125c6ea": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "99aaff9a-5019-40cf-bc79-c1a8c275271d",
+        "model": "grok-4.5"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
