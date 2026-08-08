@@ -12,7 +12,7 @@ Shared builder: `harness.py`. Tracing/reporting: `report.py`.
 - Industry tools → industry state API (`TOOL_SERVER_URL`)
 - Session tools (`session: true`, e.g. `end_call`) → harness-local + close realtime session
 - Handoffs → Realtime handoffs
-- Tracing → OTel `voice.call` + harness `execute_tool` spans → Bluejay OTLP; Chirp reads `X-Simulation-Result-Id` and POSTs `{trace_ids}` after the call (Realtime does not emit Agents SDK child spans).
+- Tracing → official `opentelemetry-instrumentation-openai-agents` (RealtimeSession patch + GenAI OTel) → Bluejay OTLP; Chirp stamps `X-Simulation-Result-Id` and POSTs `{trace_ids}`. Realtime API server-side traces also go to the OpenAI dashboard.
 
 Callers must `context["session"] = session` after `runner.run(context=ctx)`. Optional pcm websocket bridge under `adapters/` if an external evaluator needs one.
 
