@@ -1,0 +1,178 @@
+{
+  "agents": [
+    {
+      "name": "reception",
+      "system_prompt": "system-prompts/reception.md",
+      "tools": [
+        {
+          "name": "lookup_caller",
+          "handoff": false
+        },
+        {
+          "name": "get_caller_matters",
+          "handoff": false
+        },
+        {
+          "name": "take_message",
+          "handoff": false
+        },
+        {
+          "name": "escalate_to_human",
+          "handoff": false
+        },
+        {
+          "name": "end_call",
+          "session": true
+        },
+        {
+          "name": "transfer_to_screening",
+          "handoff": true,
+          "handoff_to": "screening"
+        },
+        {
+          "name": "transfer_to_client_services",
+          "handoff": true,
+          "handoff_to": "client_services"
+        }
+      ]
+    },
+    {
+      "name": "screening",
+      "system_prompt": "system-prompts/screening.md",
+      "tools": [
+        {
+          "name": "check_conflict",
+          "handoff": false
+        },
+        {
+          "name": "check_practice_area",
+          "handoff": false
+        },
+        {
+          "name": "check_jurisdiction",
+          "handoff": false
+        },
+        {
+          "name": "calculate_filing_deadline",
+          "handoff": false
+        },
+        {
+          "name": "escalate_to_human",
+          "handoff": false
+        },
+        {
+          "name": "end_call",
+          "session": true
+        },
+        {
+          "name": "transfer_to_intake",
+          "handoff": true,
+          "handoff_to": "intake"
+        }
+      ]
+    },
+    {
+      "name": "intake",
+      "system_prompt": "system-prompts/intake.md",
+      "tools": [
+        {
+          "name": "record_intake",
+          "handoff": false
+        },
+        {
+          "name": "add_intake_note",
+          "handoff": false
+        },
+        {
+          "name": "send_intake_packet",
+          "handoff": false
+        },
+        {
+          "name": "request_records_authorization",
+          "handoff": false
+        },
+        {
+          "name": "escalate_to_human",
+          "handoff": false
+        },
+        {
+          "name": "end_call",
+          "session": true
+        },
+        {
+          "name": "transfer_to_scheduling",
+          "handoff": true,
+          "handoff_to": "scheduling"
+        }
+      ]
+    },
+    {
+      "name": "scheduling",
+      "system_prompt": "system-prompts/scheduling.md",
+      "tools": [
+        {
+          "name": "get_attorney",
+          "handoff": false
+        },
+        {
+          "name": "find_evaluation_slots",
+          "handoff": false
+        },
+        {
+          "name": "hold_evaluation",
+          "handoff": false
+        },
+        {
+          "name": "confirm_evaluation",
+          "handoff": false
+        },
+        {
+          "name": "hold_cancellation",
+          "handoff": false
+        },
+        {
+          "name": "confirm_cancellation",
+          "handoff": false
+        },
+        {
+          "name": "escalate_to_human",
+          "handoff": false
+        },
+        {
+          "name": "end_call",
+          "session": true
+        }
+      ]
+    },
+    {
+      "name": "client_services",
+      "system_prompt": "system-prompts/client_services.md",
+      "tools": [
+        {
+          "name": "get_caller_matters",
+          "handoff": false
+        },
+        {
+          "name": "get_case_status",
+          "handoff": false
+        },
+        {
+          "name": "take_message",
+          "handoff": false
+        },
+        {
+          "name": "add_intake_note",
+          "handoff": false
+        },
+        {
+          "name": "escalate_to_human",
+          "handoff": false
+        },
+        {
+          "name": "end_call",
+          "session": true
+        }
+      ]
+    }
+  ]
+}
