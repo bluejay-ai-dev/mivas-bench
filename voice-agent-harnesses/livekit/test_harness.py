@@ -57,7 +57,7 @@ def test_real_handoff() -> None:
         return models.setdefault(name, object())
 
     receptionist = BlueprintAgent(
-        bp, "receptionist", hangup, llm_factory=llm_factory, opener="hi"
+        bp, "receptionist", hangup, llm_factory=llm_factory, scripted_opener=True
     )
     assert _tool_names(receptionist) == {"handoff_to_scheduler", "end_call"}
     assert receptionist.instructions == bp["agents"]["receptionist"]["instructions"]
@@ -68,6 +68,9 @@ def test_real_handoff() -> None:
     assert scheduler.agent_name == "scheduler"
     assert _tool_names(scheduler) == {"schedule_appointment", "end_call"}
     assert scheduler.instructions == bp["agents"]["scheduler"]["instructions"]
+    # scripted_opener propagates as a capability flag, but the actual spoken line is
+    # derived from the *target's own* prompt, not inherited verbatim from the caller.
+    assert scheduler._opener == "Hey, when do you want to schedule your repair appointment?"
     # each agent carries its own model => LiveKit cannot reuse the realtime session
     assert receptionist.llm is models["receptionist"]
     assert scheduler.llm is models["scheduler"]
