@@ -54,8 +54,12 @@ GREETING = "Welcome to Bluejay's Repair Services!"
 # step 1 of system-prompts/scheduler.md, verbatim. Only used by runtimes whose model
 # rejects generate_reply() (see Scheduler.on_enter); every other turn is model-generated.
 SCHEDULER_OPENER = "Hey, when do you want to schedule your repair appointment?"
-# the caller hangs up too; this is just long enough for the goodbye to play out
-HANGUP_GRACE_S = 4.0
+# Seconds of *silence* the agent must reach after `end_call` before we tear the room
+# down. This was a flat sleep, which deleted the room mid-farewell on gpt-realtime-2.1
+# (see README "Hanging up waits for silence"). Same env knobs as the pipecat harness.
+HANGUP_QUIET_S = float(os.environ.get("MIVAS_END_CALL_CLOSE_DELAY_S", "4.0"))
+# hard cap so a model that never stops talking cannot hold the room forever
+HANGUP_MAX_WAIT_S = float(os.environ.get("MIVAS_END_CALL_MAX_WAIT_S", "20.0"))
 
 
 # ── blueprint ────────────────────────────────────────────────────────────────
@@ -250,6 +254,26 @@ def sim_result_id_from_job_metadata(raw: Any) -> str | None:
     return None
 
 
+async def await_farewell(session: AgentSession, disconnected: asyncio.Event) -> None:
+    """Hold the room until the agent has gone quiet for HANGUP_QUIET_S.
+
+    Polled, not edge-triggered: the farewell can start anywhere in this window and a
+    one-shot wait would miss the transition. The quiet timer restarts on every busy
+    sample, so the pause before the goodbye does not count as "done talking".
+    """
+    loop = asyncio.get_running_loop()
+    t0 = quiet_since = loop.time()
+    while not disconnected.is_set() and loop.time() - t0 < HANGUP_MAX_WAIT_S:
+        # "thinking" counts: it is the gap between the end_call tool result and the
+        # farewell audio, exactly where a speaking-only check fires early (713652).
+        if session.agent_state in ("thinking", "speaking"):
+            quiet_since = loop.time()
+        elif loop.time() - quiet_since >= HANGUP_QUIET_S:
+            break
+        await asyncio.sleep(0.2)
+    logger.info("farewell wait %.1fs (state=%s)", loop.time() - t0, session.agent_state)
+
+
 def wire_speech_spans(session: AgentSession) -> None:
     """agent.speech / customer.speech from real turn events (no silence heuristic)."""
     spans: dict[str, Any] = {"agent": None, "customer": None}
@@ -326,7 +350,7 @@ async def run_call(
             t.cancel()
 
         if hangup.is_set() and not disconnected.is_set():
-            await asyncio.sleep(HANGUP_GRACE_S)
+            await await_farewell(session, disconnected)
             try:
                 await ctx.delete_room()
             except Exception as e:

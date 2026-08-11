@@ -57,9 +57,19 @@ Iterate on routing with Bland's text-chat endpoint (`POST /v1/pathway/chat/creat
 `POST /v1/pathway/chat/{chat_id}` with `{message}`) — it returns `current_node_id`, so a
 routing bug is one HTTP call away instead of one voice call away.
 
-The industry prompts tell the agent to *call* `handoff_to_scheduler`; a pathway node has
-no tools, so `harness.PATHWAY_NOTE` is appended to each node prompt. Without it the model
-reads the tool name out loud ("handoff underscore to scheduler") and stays put.
+The industry prompts tell the agent to *call* `handoff_to_scheduler` /
+`schedule_appointment`, but a Default node has no tools bound — the tools are the Webhook
+nodes and the routing is the edge descriptions. The only way the model can obey a "call
+this tool" instruction is to put the call in the one channel it does have, its dialogue,
+and Bland's TTS then reads that out: bare `handoff_to_scheduler`, or
+`<tool_call>schedule_appointment</tool_call>` mid-sentence after "I'll go ahead and book
+that for you now" (heard in run 713481, transcribed back by Bluejay's STT as
+"ToolappointmentToolAccall"). So `harness._strip_tool_instructions` drops every prompt
+sentence that names a blueprint tool, along with any heading left empty, before
+`PATHWAY_NOTE` is appended; the note now only covers the surrounding narration. Nothing is
+lost — the sentences it removes are duplicated by the edge descriptions, which are what
+actually route. Measured over the text-chat endpoint: 2 leaks in 3 scripted bookings
+before, 0 in 8 after. `base/agent.py --check` asserts no node prompt contains a tool name.
 
 ## Transport
 
@@ -120,11 +130,12 @@ Smoke without Bluejay: `uv run python voice-agent-harnesses/bland/base/agent.py 
 ## Proof run
 
 control-industry, agent **30387** / sim **30211** / DH **194138** →
-result **710642** at
-[simulations/30211/runs/224728](https://app.getbluejay.ai/simulations/30211/runs/224728) — `COMPLETED`,
+result **713651** at
+[simulations/30211/runs/225457](https://app.getbluejay.ai/simulations/30211/runs/225457) — `COMPLETED`,
 `goal_success: true`, both tools once each and both matched against the DH's
-`expected_tool_calls` (`handoff_to_scheduler` @16.4 s, `schedule_appointment`
-`{date: "08/18/2026"}` @27.2 s), clean turn-taking with no overlap.
+`expected_tool_calls` (`handoff_to_scheduler` @16.1 s, `schedule_appointment`
+`{date: "08/18/2026"}` @38.2 s), no tool syntax anywhere in the transcript,
+0 interruptions either way, `pronunciation: 5`, `agent_audio_clarity: 100`.
 
 The start node greets, which is what the industry prompt requires, so this assumes a
 digital human that does **not** speak first. With `speaks_first` the two openers collide

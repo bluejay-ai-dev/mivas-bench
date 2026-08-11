@@ -22,8 +22,13 @@ from harness import ensure_agent, load_blueprint, pathway_graph, session_ws_url 
 
 
 def check(industry: str) -> None:
-    graph = pathway_graph(load_blueprint(industry), "https://example.test")
+    bp = load_blueprint(industry)
+    graph = pathway_graph(bp, "https://example.test")
     nodes = {n["id"]: n for n in graph["nodes"]}
+    # A Default node has no tools bound, so a prompt naming one gets read out loud.
+    for nid in ("receptionist", "scheduler"):
+        prompt = nodes[nid]["data"]["prompt"]
+        assert not any(tool in prompt for tool in bp["catalog"]), prompt
     assert nodes["receptionist"]["data"]["isStart"], "receptionist must be the start node"
     assert nodes["end"]["type"] == "End Call"
     for nid, tool in (("handoff", "handoff_to_scheduler"), ("book", "schedule_appointment")):
