@@ -92,6 +92,16 @@ def test_dispatch_every_industry_tool() -> None:
                 # each industry's declared envelope: ok/data/... or success/...
                 assert "ok" in body or "success" in body, f"{industry}/{name}: {body}"
 
+            # reverse direction: no DISPATCH entry without a tools.json tool
+            declared = {
+                spec["name"]
+                for spec in tools
+                if not (flags.get(spec["name"], {}).get("session")
+                        or flags.get(spec["name"], {}).get("handoff"))
+            }
+            orphans = set(module.DISPATCH) - declared
+            assert not orphans, f"{industry}: DISPATCH entries not in tools.json: {sorted(orphans)}"
+
 
 def test_control_industry_rest_and_dispatch() -> None:
     module = _load_tool_server("control-industry")
