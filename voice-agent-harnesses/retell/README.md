@@ -82,7 +82,7 @@ set -a && source .env && set +a
 export PUBLIC_URL=https://<tunnel>.trycloudflare.com
 uv run python voice-agent-harnesses/retell/flux-gpt4.1-flash2.5/agent.py control-industry
 
-# terminal C — the bridge
+# terminal D — the bridge
 export BLUEJAY_API_KEY=… BLUEJAY_API_URL=https://api.getbluejay.ai/v1
 export BLUEJAY_OTLP_ENDPOINT=https://otlp.getbluejay.ai/v1/traces
 export BLUEJAY_SERVICE_NAME=mivas-retell
