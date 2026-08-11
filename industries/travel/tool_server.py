@@ -535,6 +535,77 @@ def escalate_to_human(body: EscalationCreate) -> dict[str, Any]:
             "reason_code": body.reason_code}
 
 
+# ------------------------------------------------------------------ dispatch
+# POST /tools/{tool_name} {"arguments": {...}} — the industry-agnostic contract
+# every harness speaks. Wraps the REST handlers above in the tools.json envelope:
+# {"ok": bool, "data": ..., "error_code": str|null, "caller_safe_message": str|null}.
+# Session (end_call) and handoff (transfer_to_*) tools never land here → 404.
+
+
+def _quote(kind: str, a: dict[str, Any]) -> dict[str, Any]:
+    return create_hold(HoldCreate(kind=kind, **a))
+
+
+DISPATCH = {
+    "find_reservation": lambda a: find_reservation(ReservationFind(**a)),
+    "get_reservation": lambda a: get_reservation(a["confirmation_code"]),
+    "get_traveler_list": lambda a: get_traveler_list(a["confirmation_code"]),
+    "get_fare_rules": lambda a: get_fare_rules(a["confirmation_code"]),
+    "get_flight_status": lambda a: get_flight_status(a["flight_number"], a.get("date", "")),
+    "search_flights": lambda a: search_flights(
+        a["origin"], a["destination"], a["earliest_date"], a.get("cabin", "main")
+    ),
+    "get_seat_map": lambda a: get_seat_map(
+        a["flight_number"], a.get("date", ""), a.get("cabin", "")
+    ),
+    "get_bag_allowance": lambda a: get_bag_allowance(a["confirmation_code"]),
+    "get_credit_balance": lambda a: get_credit_balance(a["summit_number"]),
+    "get_summit_status": lambda a: get_summit_status(a["summit_number"]),
+    "quote_change": lambda a: _quote("change", a),
+    "quote_cancellation": lambda a: _quote("cancellation", a),
+    "quote_seat": lambda a: _quote("seat", a),
+    "quote_bag": lambda a: _quote("bag", a),
+    "quote_payment": lambda a: _quote("payment", a),
+    "confirm_change": lambda a: confirm(ConfirmCreate(**a)),
+    "confirm_cancellation": lambda a: confirm(ConfirmCreate(**a)),
+    "confirm_seat": lambda a: confirm(ConfirmCreate(**a)),
+    "confirm_bag": lambda a: confirm(ConfirmCreate(**a)),
+    "confirm_payment": lambda a: confirm(ConfirmCreate(**a)),
+    "send_itinerary": lambda a: send_itinerary(ItineraryCreate(**a)),
+    "add_reservation_note": lambda a: add_reservation_note(NoteCreate(**a)),
+    "escalate_to_human": lambda a: escalate_to_human(EscalationCreate(**a)),
+}
+
+
+class ToolCall(BaseModel):
+    arguments: dict[str, Any] = {}
+
+
+@app.post("/tools/{tool_name}")
+def dispatch_tool(tool_name: str, body: ToolCall) -> dict[str, Any]:
+    handler = DISPATCH.get(tool_name)
+    if handler is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"unknown tool {tool_name!r} — session and handoff tools are "
+            "harness-native and industry tools must be listed in DISPATCH",
+        )
+    try:
+        data = handler(dict(body.arguments or {}))
+        return {"ok": True, "data": data, "error_code": None, "caller_safe_message": None}
+    except HTTPException as e:
+        detail = e.detail if isinstance(e.detail, dict) else {"message": str(e.detail)}
+        message = detail.get("message", "")
+        if detail.get("suggested_action"):
+            message = f"{message} {detail['suggested_action']}".strip()
+        return {"ok": False, "data": None,
+                "error_code": detail.get("error_code", f"HTTP_{e.status_code}"),
+                "caller_safe_message": message}
+    except Exception as e:  # soft-fail: a broken tool must not 500 into the call
+        return {"ok": False, "data": None, "error_code": "INVALID_ARGUMENTS",
+                "caller_safe_message": f"{type(e).__name__}: {e}"}
+
+
 # ------------------------------------------------------------------ selfcheck
 
 def selfcheck() -> None:
@@ -637,8 +708,37 @@ def selfcheck() -> None:
         for q in [n for n in owned if n.startswith("quote_")]:
             assert f"confirm_{q.removeprefix('quote_')}" in owned, f"{agent['name']}: {q}"
 
+    # dispatch route: every non-handoff non-session tool is callable, unknown
+    # names 404, and the fare guards survive the envelope.
+    init_db()
+    flags: dict[str, dict] = {}
+    for agent in blueprint["agents"]:
+        for t in agent["tools"]:
+            flags.setdefault(t["name"], t)
+    dispatchable = {n for n in names
+                    if not flags.get(n, {}).get("handoff") and not flags.get(n, {}).get("session")}
+    assert dispatchable == set(DISPATCH), (dispatchable ^ set(DISPATCH))
+
+    d = dispatch_tool("find_reservation", ToolCall(
+        arguments={"last_name": "Solberg", "confirmation_code": "RT2LKD"}))
+    assert d["ok"] and d["data"]["verified"], d
+    saver = dispatch_tool("quote_change", ToolCall(
+        arguments={"confirmation_code": "QK4TZP", "new_flight": "CX119"}))
+    assert saver["ok"] is False and saver["error_code"] == "SAVER_NOT_CHANGEABLE", saver
+    try:
+        dispatch_tool("not_a_tool", ToolCall())
+        raise AssertionError("unknown tool must 404")
+    except HTTPException as e:
+        assert e.status_code == 404
+    for native in ("end_call", "transfer_to_ticketing"):
+        try:
+            dispatch_tool(native, ToolCall())
+            raise AssertionError(f"{native} must not be dispatchable")
+        except HTTPException as e:
+            assert e.status_code == 404
+
     print(f"ok — {len(names)} tools, {len(agents)} agents, fare ladder / waiver / token "
-          "traps all hold")
+          f"traps all hold, dispatch covers {len(DISPATCH)} tools")
 
 
 if __name__ == "__main__":
