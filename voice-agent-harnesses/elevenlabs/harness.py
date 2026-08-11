@@ -350,7 +350,7 @@ async def run_tool(
     with tool_span(name, args, call_id=call_id) as span:
         try:
             result = await _execute_tool(name, args)
-            ok = bool(result.get("ok", result.get("success", True)))
+            ok = bool(result.get("ok", result.get("success", False)))
             finish_tool_span(span, result, ok=ok)
             return result
         except Exception as e:
@@ -407,7 +407,7 @@ async def run_session(industry_dir: str | Path, model: str) -> None:
                         dict(call.get("parameters") or {}),
                         call_id=call.get("tool_call_id"),
                     )
-                    is_error = not bool(result.get("ok", result.get("success", True)))
+                    is_error = not bool(result.get("ok", result.get("success", False)))
                     print(f"tool {call.get('tool_name')} error={is_error}", flush=True)
                     await ws.send(
                         json.dumps(
