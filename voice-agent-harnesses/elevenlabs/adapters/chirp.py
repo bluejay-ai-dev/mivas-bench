@@ -201,8 +201,6 @@ async def _bridge(ws, model: str, industry: str) -> None:
                                         span,
                                         {"success": ok, "source": "elevenlabs_system_tool"},
                                         ok=ok,
-                                        name=tool_name,
-                                        parameters=params,
                                     )
                         elif etype in ("client_error", "guardrail_triggered"):
                             print(f"chirp elevenlabs {etype}: {event}", flush=True)
