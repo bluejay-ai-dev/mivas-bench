@@ -4,8 +4,8 @@ Multi-agent is native, not soft: each blueprint agent is a persisted ElevenLabs
 agent, and the receptionist hands off via the `transfer_to_agent` system tool
 (server-side, no harness-side handoff/routing). `end_call` is likewise the
 `end_call` system tool — the harness never executes it. `ensure_agents` creates
-(or reuses cached) agent IDs; `run_tool` only ever runs client tools such as
-`schedule_appointment`.
+(or reuses cached) agent IDs; `run_tool` only ever runs client tools, which it
+forwards generically to the industry tool server's POST /tools/{name} dispatch.
 """
 
 from __future__ import annotations
@@ -318,20 +318,13 @@ async def get_signed_url(agent_id: str) -> str:
         return r.json()["signed_url"]
 
 
-async def _post_appointment(date: str) -> dict[str, Any]:
-    async with httpx.AsyncClient(timeout=30.0) as client:
-        resp = await client.post(f"{TOOL_SERVER_URL}/appointments", json={"date": date})
-        resp.raise_for_status()
-        body = resp.json()
-    return {"success": True, "date": body["date"]}
-
-
 async def _execute_tool(name: str, args: dict[str, Any]) -> dict[str, Any]:
-    """Execute a client tool. `end_call`/`transfer_to_agent` are ElevenLabs system
-    tools — they never reach the harness as a `client_tool_call`."""
-    if name == "schedule_appointment":
-        return await _post_appointment(args["date"])
-    return {"success": False, "error": f"unknown tool {name}"}
+    """Execute a client tool by dispatching to POST /tools/{name}; the server's
+    envelope goes back to the model verbatim. `end_call`/`transfer_to_agent` are
+    ElevenLabs system tools — they never reach the harness as a `client_tool_call`."""
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        resp = await client.post(f"{TOOL_SERVER_URL}/tools/{name}", json={"arguments": args})
+        return resp.json()
 
 
 async def run_tool(
@@ -349,7 +342,8 @@ async def run_tool(
     with tool_span(name, args, call_id=call_id) as span:
         try:
             result = await _execute_tool(name, args)
-            finish_tool_span(span, result, ok=True)
+            ok = bool(result.get("ok", result.get("success", True)))
+            finish_tool_span(span, result, ok=ok)
             return result
         except Exception as e:
             err = {"success": False, "error": f"{type(e).__name__}: {e}"}
@@ -405,7 +399,7 @@ async def run_session(industry_dir: str | Path, model: str) -> None:
                         dict(call.get("parameters") or {}),
                         call_id=call.get("tool_call_id"),
                     )
-                    is_error = not bool(result.get("success", True))
+                    is_error = not bool(result.get("ok", result.get("success", True)))
                     print(f"tool {call.get('tool_name')} error={is_error}", flush=True)
                     await ws.send(
                         json.dumps(

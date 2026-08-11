@@ -1,8 +1,9 @@
 """Blueprint → Pipecat services, tools and nodes, for three runtimes.
 
-Pipecat runs our code, so the industry tools are plain Python coroutines wrapped
-in `report.tool_span` — all three (`handoff_to_scheduler`, `schedule_appointment`,
-`end_call`) produce real `execute_tool` spans, no untimeable gaps.
+Pipecat runs our code, so every blueprint tool is a plain Python coroutine wrapped
+in `report.tool_span` — handoffs, session tools (`end_call`) and industry tools all
+produce real `execute_tool` spans, no untimeable gaps. Industry tools dispatch
+generically to the tool server's POST /tools/{name} route.
 
 The handoff is a real agent switch in every runtime, not a prompt injection: each
 blueprint agent gets its own prompt and its own tool set, and `handoff_to_scheduler`
@@ -136,34 +137,42 @@ def tool_server_url() -> str:
     return os.environ.get("TOOL_SERVER_URL", "http://127.0.0.1:8000").rstrip("/")
 
 
+def _tool_entry(bp: dict[str, Any], agent: str, name: str) -> dict[str, Any] | None:
+    """The blueprint entry for a tool, preferring the current agent's copy."""
+    for owner in [agent] + [a for a in bp["agents"] if a != agent]:
+        for t in bp["agents"][owner]["tools"]:
+            if t["name"] == name:
+                return t
+    return None
+
+
 async def _execute_tool(
     name: str, args: dict[str, Any], bp: dict[str, Any], state: dict[str, Any]
 ) -> tuple[dict[str, Any], bool]:
     """Run a blueprint tool. Returns (result, should_end_call).
 
-    A handoff only resolves and records the target here; moving the call is the
+    Handoff and session tools are harness-native; every other tool is POSTed to
+    {TOOL_SERVER_URL}/tools/{name} and the server's envelope is the result. A
+    handoff only resolves and records the target here; moving the call is the
     caller's job, because *how* you move it is a runtime property (a Flows node
     transition, or an `LLMSwitcher` swap to the target agent's own S2S session).
     """
-    if name == "handoff_to_scheduler":
+    entry = _tool_entry(bp, state["agent"], name)
+    if entry is not None and entry.get("handoff"):
         target = handoff_target(bp, state["agent"], name)
         if not target:
             return {"success": False, "error": "unknown handoff target"}, False
         state["agent"] = target
         return {"success": True, "role": target}, False
 
-    if name == "schedule_appointment":
-        async with httpx.AsyncClient(timeout=30.0) as client:
-            resp = await client.post(
-                f"{tool_server_url()}/appointments", json={"date": args["date"]}
-            )
-            resp.raise_for_status()
-            return {"success": True, "date": resp.json()["date"]}, False
-
-    if name == "end_call":
+    if entry is not None and entry.get("session"):
         return {"success": True}, True
 
-    return {"success": False, "error": f"unknown tool {name}"}, False
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        resp = await client.post(
+            f"{tool_server_url()}/tools/{name}", json={"arguments": args}
+        )
+        return resp.json(), False
 
 
 async def run_tool(
@@ -180,7 +189,7 @@ async def run_tool(
     with tool_span(name, args, call_id=call_id) as span:
         try:
             result, stop = await _execute_tool(name, args, bp, state)
-            ok = bool(result.get("success"))
+            ok = bool(result.get("ok", result.get("success", True)))
         except Exception as e:  # noqa: BLE001 — a dead tool must not kill the call
             result, stop, ok = {"success": False, "error": f"{type(e).__name__}: {e}"}, False, False
         finish_tool_span(span, result, ok=ok)
