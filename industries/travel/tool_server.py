@@ -31,7 +31,7 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 INDUSTRY_DIR = Path(__file__).resolve().parent
 DB_DIR = INDUSTRY_DIR / "db"
@@ -584,7 +584,7 @@ DISPATCH = {
 
 
 class ToolCall(BaseModel):
-    arguments: dict[str, Any] = {}
+    arguments: dict[str, Any] = Field(default_factory=dict)
 
 
 @app.post("/tools/{tool_name}")
