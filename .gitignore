@@ -38,3 +38,6 @@ Thumbs.db
 
 # k8s / docker scratch
 *.local.yaml
+
+# cached Bluejay agent/sim/DH ids (pipecat harness bootstrap)
+**/.bluejay-ids.json
