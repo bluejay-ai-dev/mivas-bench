@@ -50,18 +50,13 @@ def _simulation_result_id(ws) -> str | None:
     return str(val) if val else None
 
 
-async def _nudge_greeting(session) -> None:
-    """Make the agent open the call.
-
-    ``semantic_vad`` only responds to caller audio, so a digital human with
-    ``speaks_first: false`` deadlocks both sides into silence. A bare
-    ``response.create`` asks for a turn without adding a conversation item, so
-    the greeting comes from the agent's own instructions and no phantom user
-    item / ``customer.speech`` span lands in the trace.
-    """
-    await session.model.send_event(
-        RealtimeModelSendRawMessage(message={"type": "response.create"})
-    )
+# Makes the agent open the call: `semantic_vad` only responds to caller audio, so a
+# digital human with `speaks_first: false` deadlocks both sides into silence. Bare, with
+# no conversation item, so the greeting comes from the agent's own instructions and no
+# phantom user item / `customer.speech` span lands in the trace. A raw message the SDK
+# can't validate is dropped with a log line, not an error — test_nudge_greeting.py is the
+# check that this one still converts.
+NUDGE_GREETING = RealtimeModelSendRawMessage(message={"type": "response.create"})
 
 
 async def _bridge(ws, model: str, industry: str) -> None:
@@ -95,7 +90,7 @@ async def _bridge(ws, model: str, industry: str) -> None:
         ) as session:
             ctx["session"] = session
             events = tracer.wrap(session) if tracer is not None else session
-            await _nudge_greeting(session)
+            await session.model.send_event(NUDGE_GREETING)
 
             async def inbound() -> None:
                 nonlocal up

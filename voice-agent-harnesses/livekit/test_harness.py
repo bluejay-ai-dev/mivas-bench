@@ -11,6 +11,7 @@ import asyncio
 import json
 import sys
 from pathlib import Path
+from types import SimpleNamespace
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
@@ -74,28 +75,24 @@ def test_real_handoff() -> None:
 def test_await_farewell() -> None:
     """The hangup wait must outlast the agent's goodbye, but never run forever."""
 
-    class FakeSession:
-        def __init__(self, states: list[tuple[float, str]], start: str) -> None:
-            self.agent_state = start
-            loop = asyncio.get_event_loop()
-            for at, state in states:
-                loop.call_later(at, lambda s=state: setattr(self, "agent_state", s))
-
-    async def elapsed(states: list[tuple[float, str]], start: str, max_wait: float) -> float:
+    async def elapsed(start: str, states: list[tuple[float, str]], max_wait: float = 5.0) -> float:
         harness.HANGUP_QUIET_S, harness.HANGUP_MAX_WAIT_S = 0.3, max_wait
         loop = asyncio.get_running_loop()
+        session = SimpleNamespace(agent_state=start)
+        for at, state in states:
+            loop.call_later(at, setattr, session, "agent_state", state)
         t0 = loop.time()
-        await harness.await_farewell(FakeSession(states, start), asyncio.Event())
+        await harness.await_farewell(session, asyncio.Event())
         return loop.time() - t0
 
     # nothing left to say -> exactly the quiet window, as the old flat sleep did
-    assert 0.3 < asyncio.run(elapsed([], "listening", 5.0)) < 0.6
+    assert 0.3 < asyncio.run(elapsed("listening", [])) < 0.6
     # 713652: quiet at the old sample point, then the farewell starts -> keep waiting
-    assert 1.0 < asyncio.run(elapsed([(0.2, "thinking"), (1.0, "listening")], "listening", 5.0)) < 1.6
+    assert 1.0 < asyncio.run(elapsed("listening", [(0.2, "thinking"), (1.0, "listening")])) < 1.6
     # still speaking after the quiet window -> wait for it to stop
-    assert 0.7 < asyncio.run(elapsed([(0.6, "listening")], "speaking", 5.0)) < 1.2
+    assert 0.7 < asyncio.run(elapsed("speaking", [(0.6, "listening")])) < 1.2
     # a model that never stops talking is cut off at the cap
-    assert 0.5 < asyncio.run(elapsed([], "speaking", 0.6)) < 1.0
+    assert 0.5 < asyncio.run(elapsed("speaking", [], max_wait=0.6)) < 1.0
 
 
 if __name__ == "__main__":
