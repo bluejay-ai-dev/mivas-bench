@@ -91,16 +91,14 @@ actual per expected tool (`handoff_to_scheduler`, `schedule_appointment`).
 
 * **Hanging up waits for silence, not a fixed delay.** `end_call` only marks the
   *intent* to hang up; the goodbye is still playing. `await_farewell` polls
-  `AgentSession.agent_state` and deletes the room once the agent has been neither
-  `speaking` nor `thinking` for `HANGUP_QUIET_S` (4 s), capped at
-  `HANGUP_MAX_WAIT_S` (20 s). The old flat 4 s sleep clipped all three runtimes and
-  broke `gpt-realtime-2.1` outright: it calls `end_call` in the same response turn as
-  `schedule_appointment`, so the room went away mid-sentence ("…scheduled for
-  eighteighteentwenty", 713478/713612/713652), the caller never heard a goodbye,
-  never hung up, and the run burned the full 180 s cap. `thinking` matters as much as
-  `speaking` — the gap between the tool result and the farewell audio is where a
-  single `speaking` check fires early (713652). The three proof runs above waited
-  6.3 s, 14.3 s and 7.5 s respectively.
+  `AgentSession.agent_state` and deletes the room after `HANGUP_QUIET_S` (4 s) of
+  neither `speaking` nor `thinking`, capped at `HANGUP_MAX_WAIT_S` (20 s). The old flat
+  4 s sleep clipped all three runtimes and broke `gpt-realtime-2.1` outright: it calls
+  `end_call` in the same response turn as `schedule_appointment`, so the room went away
+  mid-sentence (713478/713612/713652), the caller never heard a goodbye, never hung up,
+  and the run burned the full 180 s cap. `thinking` counts as busy too: the gap before
+  the farewell audio is where a `speaking`-only check fires early (713652). The three
+  proof runs above waited 6.3 s, 14.3 s and 7.5 s.
 * **Job executor is THREAD, not PROCESS.** `spawn` pickles the entrypoint by
   reference and ours is a closure over the runtime's session/agent factories.
 * **The trace-linking POST lives in the entrypoint**, not a shutdown callback:
