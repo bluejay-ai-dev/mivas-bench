@@ -21,7 +21,9 @@ MODEL = "retell-gpt4.1-flash2.5"
 if __name__ == "__main__":
     industry = next((a for a in sys.argv[1:] if not a.startswith("-")), "control-industry")
     industry_dir = Path(os.environ.get("INDUSTRY_DIR", str(industry_path(industry))))
-    public_url = os.environ.get("PUBLIC_URL", "https://example.invalid")
+    public_url = os.environ.get("PUBLIC_URL", "").strip()
+    if not public_url:
+        raise SystemExit("need PUBLIC_URL (cloudflared https url) — Retell calls tools over HTTPS")
     bp = load_blueprint(industry_dir)
     ids = ensure_agent(industry_dir, public_url)
     print(
