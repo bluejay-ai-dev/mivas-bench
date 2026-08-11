@@ -180,31 +180,27 @@ async def _bridge(ws, model: str, industry: str) -> None:
                                     }
                                 )
                             )
-                        elif etype in ("agent_tool_response", "agent_tool_request"):
-                            # system tools (transfer_to_agent / end_call) never hit
-                            # client_tool_call — emit an execute_tool span so Bluejay
-                            # can place them on the conversation + waterfall.
-                            payload = (
-                                event.get("agent_tool_response")
-                                or event.get("agent_tool_request")
-                                or {}
-                            )
-                            tool_name = payload.get("tool_name") or etype
-                            params = dict(
-                                payload.get("tool_details")
-                                or payload.get("parameters")
-                                or {}
-                            )
-                            print(f"chirp elevenlabs {etype}: {tool_name}", flush=True)
-                            if etype == "agent_tool_response" and tool_name in {
-                                "transfer_to_agent",
-                                "end_call",
-                            }:
-                                with tool_span(tool_name, params) as span:
+                        elif etype == "agent_tool_response":
+                            # System tools (transfer_to_agent / end_call) run server-side
+                            # and never hit client_tool_call — this is the only event that
+                            # exposes them, so emit an execute_tool span for Bluejay.
+                            # Payload is identity + outcome only (tool_name, tool_call_id,
+                            # tool_type, is_error, is_called, is_blocked) — no arguments.
+                            # Client tools are skipped: run_tool already spans those.
+                            payload = event.get("agent_tool_response") or {}
+                            tool_name = payload.get("tool_name")
+                            print(f"chirp elevenlabs agent_tool_response {payload}", flush=True)
+                            fired = payload.get("is_called", True) and not payload.get("is_blocked")
+                            if fired and tool_name in ("transfer_to_agent", "end_call"):
+                                ok = not payload.get("is_error")
+                                params = {"tool_type": payload.get("tool_type", "system")}
+                                with tool_span(
+                                    tool_name, params, call_id=payload.get("tool_call_id")
+                                ) as span:
                                     finish_tool_span(
                                         span,
-                                        {"success": True, "source": "elevenlabs_system_tool"},
-                                        ok=True,
+                                        {"success": ok, "source": "elevenlabs_system_tool"},
+                                        ok=ok,
                                         name=tool_name,
                                         parameters=params,
                                     )
