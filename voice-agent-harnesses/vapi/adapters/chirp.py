@@ -247,13 +247,9 @@ def _trace_server_tools(body: dict, seen: set[str]) -> None:
                     args = json.loads(args)
             print(f"chirp vapi server tool {name}", flush=True)
             with tool_span(name, args) as span:
-                finish_tool_span(
-                    span,
-                    {"success": True, "source": "vapi"},
-                    ok=True,
-                    name=name,
-                    parameters=args,
-                )
+                # tool_span already records name + arguments; finish_tool_span takes
+                # only (span, output, *, ok).
+                finish_tool_span(span, {"success": True, "source": "vapi"}, ok=True)
 
 
 def main(model: str | None = None) -> None:

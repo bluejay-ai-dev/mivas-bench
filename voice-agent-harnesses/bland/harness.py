@@ -19,6 +19,8 @@ from __future__ import annotations
 
 import json
 import os
+import re
+from collections.abc import Iterable
 from pathlib import Path
 from typing import Any
 
@@ -84,20 +86,44 @@ def _headers() -> dict[str, str]:
     return {"authorization": _api_key(), "Content-Type": "application/json"}
 
 
-# The industry prompts tell the agent to *call* handoff_to_scheduler / schedule_appointment.
-# A pathway node has no tools — those are edges — so without this note the model reads the
-# tool name out loud ("handoff underscore to scheduler") and never leaves the node.
+# A pathway Default node has no tools bound — tools are Webhook nodes and handoffs are
+# edges — so any prompt sentence that tells the model to *call* one is an instruction it
+# can only satisfy by emitting tool syntax into its dialogue, which Bland's TTS then reads
+# out ("<tool_call>schedule_appointment</tool_call>", "handoff underscore to scheduler").
+# The pathway routes on the edge descriptions, so those sentences are redundant as well as
+# harmful: strip them, and keep the note for the surrounding narration only.
 PATHWAY_NOTE = """
 
 # Bland pathway
-Tools and handoffs are edges in this pathway, not functions you call. Never say a tool
-name out loud and never announce a transfer or that you are looking something up — say
-your line, and the pathway moves you on by itself.
+Never announce a transfer or that you are looking something up, and never read out any
+name written in snake_case — say your line, and the pathway moves you on by itself.
 """
 
+_SENTENCE = re.compile(r"(?<=[.!?])\s+")
 
-def _adapt_prompt(instructions: str) -> str:
-    return instructions.rstrip() + PATHWAY_NOTE
+
+def _strip_tool_instructions(instructions: str, tool_names: Iterable[str]) -> str:
+    """Drop every sentence that names a blueprint tool, then any heading left empty."""
+    named = re.compile("|".join(re.escape(name) for name in tool_names))
+    kept = []
+    for line in instructions.splitlines():
+        if line.strip():
+            line = " ".join(s for s in _SENTENCE.split(line) if not named.search(s))
+            if not line.strip():
+                continue
+        kept.append(line)
+    body = []
+    for i, line in enumerate(kept):
+        if line.startswith("#"):
+            after = [x for x in kept[i + 1 :] if x.strip()]
+            if not after or after[0].startswith("#"):
+                continue
+        body.append(line)
+    return "\n".join(body).rstrip()
+
+
+def _adapt_prompt(instructions: str, tool_names: Iterable[str]) -> str:
+    return _strip_tool_instructions(instructions, tool_names) + PATHWAY_NOTE
 
 
 def _model_options() -> dict[str, Any]:
@@ -191,7 +217,7 @@ def pathway_graph(bp: dict[str, Any], public_url: str) -> dict[str, Any]:
             "type": "Default",
             "data": {
                 "name": start["name"],
-                "prompt": _adapt_prompt(start["instructions"]),
+                "prompt": _adapt_prompt(start["instructions"], bp["catalog"]),
                 "isStart": True,
                 "modelOptions": _model_options(),
             },
@@ -207,7 +233,7 @@ def pathway_graph(bp: dict[str, Any], public_url: str) -> dict[str, Any]:
             "type": "Default",
             "data": {
                 "name": target["name"],
-                "prompt": _adapt_prompt(target["instructions"]),
+                "prompt": _adapt_prompt(target["instructions"], bp["catalog"]),
                 "modelOptions": _model_options(),
             },
         },
