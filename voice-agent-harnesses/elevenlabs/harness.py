@@ -320,11 +320,19 @@ async def get_signed_url(agent_id: str) -> str:
 
 async def _execute_tool(name: str, args: dict[str, Any]) -> dict[str, Any]:
     """Execute a client tool by dispatching to POST /tools/{name}; the server's
-    envelope goes back to the model verbatim. `end_call`/`transfer_to_agent` are
-    ElevenLabs system tools — they never reach the harness as a `client_tool_call`."""
+    envelope goes back to the model. `end_call`/`transfer_to_agent` are ElevenLabs
+    system tools — they never reach the harness as a `client_tool_call`.
+
+    After the envelope migration some industries report outcomes with `ok`
+    instead of `success`. Normalize a missing `success` key from `ok` so the
+    Chirp bridge's ElevenLabs error check uses the same fallback as
+    `run_session` and correctly marks guarded/policy failures as errors."""
     async with httpx.AsyncClient(timeout=30.0) as client:
         resp = await client.post(f"{TOOL_SERVER_URL}/tools/{name}", json={"arguments": args})
-        return resp.json()
+        result = resp.json()
+        if isinstance(result, dict) and "success" not in result and "ok" in result:
+            result["success"] = result["ok"]
+        return result
 
 
 async def run_tool(

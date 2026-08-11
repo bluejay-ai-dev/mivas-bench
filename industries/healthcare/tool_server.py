@@ -13,6 +13,7 @@ backed by the seeded fixtures; their writes land in `tool_events` so GET
 from __future__ import annotations
 
 import json
+import logging
 import os
 import sqlite3
 from contextlib import asynccontextmanager, contextmanager
@@ -63,6 +64,8 @@ async def lifespan(_app: FastAPI):
 
 
 app = FastAPI(title="healthcare state API", lifespan=lifespan)
+
+logger = logging.getLogger(__name__)
 
 
 class AppointmentCreate(BaseModel):
@@ -547,24 +550,78 @@ def _d_find_slots(a: dict[str, Any]) -> dict[str, Any]:
     return {"slots": slots[:max_results], "count": min(len(slots), max_results)}
 
 
+def _resolve_slot(slot_id: str) -> dict[str, Any]:
+    """Recompute the exact same deterministic slot _d_find_slots would have
+    offered for this slot_id, so book_appointment can bind the booking to
+    whatever was actually presented to the caller instead of trusting
+    arbitrary location/provider/start/end supplied alongside the id."""
+    with _db() as conn:
+        for loc in conn.execute("SELECT * FROM locations ORDER BY id"):
+            prov = conn.execute(
+                "SELECT * FROM providers WHERE location_id = ? ORDER BY id LIMIT 1",
+                (loc["id"],),
+            ).fetchone()
+            if prov is None:
+                continue
+            for i, start in enumerate(_SLOT_TIMES):
+                if slot_id == f"slot_{loc['id']}_{i + 1}":
+                    return {
+                        "location_id": loc["id"],
+                        "provider_id": prov["id"],
+                        "start": start,
+                        "end": _iso_plus_minutes(start, 30),
+                    }
+    raise ToolError(
+        "UNKNOWN_SLOT", f"No open slot matches {slot_id!r}. Call find_slots again."
+    )
+
+
 def _d_book_appointment(a: dict[str, Any]) -> dict[str, Any]:
+    slot = _resolve_slot(str(a["slot_id"]))
+    if (
+        str(a["location_id"]) != slot["location_id"]
+        or str(a["provider_id"]) != slot["provider_id"]
+        or str(a["start"]) != slot["start"]
+        or str(a["end"]) != slot["end"]
+    ):
+        raise ToolError(
+            "SLOT_MISMATCH",
+            "That slot no longer matches what was offered — call find_slots again "
+            "and read back the new time before booking.",
+        )
     created = create_appointment(
         AppointmentCreate(
             patient_id=_session.get("patient_id"),
-            location_id=a["location_id"],
-            provider_id=a["provider_id"],
+            location_id=slot["location_id"],
+            provider_id=slot["provider_id"],
             appointment_type_code=a["appointment_type_code"],
-            start=a["start"],
-            end=a["end"],
+            start=slot["start"],
+            end=slot["end"],
             description=a.get("description", ""),
         )
     )
     return {"appointment": created, "status": "booked"}
 
 
+def _owned_appointment(appointment_id: int) -> sqlite3.Row:
+    """An appointment row, scoped to the verified caller — prevents an id from
+    reaching another patient's booking without identity verification."""
+    patient = _patient_row()
+    with _db() as conn:
+        row = conn.execute(
+            "SELECT * FROM appointments WHERE id = ? AND patient_id = ?",
+            (appointment_id, patient["id"]),
+        ).fetchone()
+    if row is None:
+        raise ToolError("NOT_FOUND", "No appointment with that id for this patient.")
+    return row
+
+
 def _d_reschedule_appointment(a: dict[str, Any]) -> dict[str, Any]:
+    appt_id = int(a["appointment_id"])
+    _owned_appointment(appt_id)
     updated = update_appointment(
-        int(a["appointment_id"]),
+        appt_id,
         AppointmentUpdate(start=a["new_start"], end=a["new_end"], status="booked"),
     )
     return {"appointment": updated, "status": "rescheduled", "fee_cents": 0,
@@ -575,10 +632,8 @@ def _d_cancel_appointment(a: dict[str, Any]) -> dict[str, Any]:
     from datetime import datetime
 
     appt_id = int(a["appointment_id"])
-    with _db() as conn:
-        row = conn.execute("SELECT * FROM appointments WHERE id = ?", (appt_id,)).fetchone()
-    if row is None:
-        raise ToolError("NOT_FOUND", "No appointment with that id.")
+    patient = _patient_row()
+    row = _owned_appointment(appt_id)
     cosmetic = row["appointment_type_code"].startswith("COS")
     window_h, fee_cents = (72, 12500) if cosmetic else (24, 5000)
     hours_out = (datetime.fromisoformat(row["start"]) - datetime.fromisoformat(TODAY)).total_seconds() / 3600
@@ -595,9 +650,23 @@ def _d_cancel_appointment(a: dict[str, Any]) -> dict[str, Any]:
             ),
         }
     update_appointment(appt_id, AppointmentUpdate(status="cancelled"))
+    fee_charged_cents = 0
+    if inside_window:
+        fee_charged_cents = fee_cents
+        with _db() as conn:
+            conn.execute(
+                "UPDATE patients SET balance_cents = balance_cents + ? WHERE id = ?",
+                (fee_cents, patient["id"]),
+            )
+        _event(
+            "cancellation_fee",
+            {"patient_id": patient["id"], "appointment_id": appt_id,
+             "fee_cents": fee_cents,
+             "cancellation_reason_code": a["cancellation_reason_code"]},
+        )
     return {
         "status": "cancelled",
-        "fee_charged_cents": fee_cents if inside_window else 0,
+        "fee_charged_cents": fee_charged_cents,
         "cancellation_reason_code": a["cancellation_reason_code"],
         "note": "Offer to rebook or join the waitlist.",
     }
@@ -671,29 +740,59 @@ _ACCEPTED_CARRIERS = {"aetna", "unitedhealthcare", "united healthcare", "cigna",
 _NOT_ACCEPTED_CARRIERS = {"medicaid"}
 
 
+_UNCONFIRMED_SCRIPT = (
+    "I can't confirm that plan over the phone. The insurance team will "
+    "verify it before your visit — I can set up a callback or you can "
+    "text our insurance line."
+)
+
+
 def _d_check_plan_accepted(a: dict[str, Any]) -> dict[str, Any]:
     carrier = str(a["carrier"]).strip().lower()
     loc = _resolve_location(a["location_id"])
+    provider_id = a.get("provider_id")
+    if provider_id:
+        with _db() as conn:
+            prov = conn.execute(
+                "SELECT * FROM providers WHERE id = ?", (provider_id,)
+            ).fetchone()
+        if prov is None or prov["location_id"] != loc["id"]:
+            # Unknown provider/location combo — can't validate the plan against
+            # a provider we can't place, so don't assert coverage either way.
+            return {
+                "accepted": None,
+                "must_not_assert": True,
+                "carrier": a["carrier"],
+                "location": loc["name"],
+                "required_script": _UNCONFIRMED_SCRIPT,
+            }
     with _db() as conn:
         others = [r["name"] for r in conn.execute(
             "SELECT name FROM locations WHERE id != ? ORDER BY id", (loc["id"],))]
-    if carrier in _ACCEPTED_CARRIERS:
-        return {"accepted": True, "must_not_assert": False,
-                "carrier": a["carrier"], "location": loc["name"]}
     if carrier in _NOT_ACCEPTED_CARRIERS:
         return {"accepted": False, "must_not_assert": False,
                 "carrier": a["carrier"], "location": loc["name"],
                 "alternative_locations": others}
+    if carrier in _ACCEPTED_CARRIERS:
+        # We only have a carrier-level acceptance list, no real plan/provider
+        # coverage matrix — a specific plan_name/plan_type can't be validated,
+        # so don't assert accepted for those dimensions.
+        if a.get("plan_name") or a.get("plan_type"):
+            return {
+                "accepted": None,
+                "must_not_assert": True,
+                "carrier": a["carrier"],
+                "location": loc["name"],
+                "required_script": _UNCONFIRMED_SCRIPT,
+            }
+        return {"accepted": True, "must_not_assert": False,
+                "carrier": a["carrier"], "location": loc["name"]}
     return {
         "accepted": None,
         "must_not_assert": True,
         "carrier": a["carrier"],
         "location": loc["name"],
-        "required_script": (
-            "I can't confirm that plan over the phone. The insurance team will "
-            "verify it before your visit — I can set up a callback or you can "
-            "text our insurance line."
-        ),
+        "required_script": _UNCONFIRMED_SCRIPT,
     }
 
 
@@ -709,6 +808,14 @@ def _d_run_eligibility_check(a: dict[str, Any]) -> dict[str, Any]:
             "The payer didn't return eligibility. Say you couldn't get the number — "
             "never guess at a copay.",
         )
+    submitted_carrier = "".join(str(a["carrier"]).strip().lower().split())
+    on_file_carrier = "".join(str(row["carrier"] or "").strip().lower().split())
+    if not on_file_carrier or submitted_carrier != on_file_carrier:
+        raise ToolError(
+            "PAYER_UNAVAILABLE",
+            "The payer didn't return eligibility for that carrier. Say you "
+            "couldn't get the number — never guess at a copay.",
+        )
     return {"copay_cents": 3000, "deductible_remaining_cents": 25000,
             "coinsurance_pct": 20, "plan_active": True, "service_date": a["service_date"]}
 
@@ -717,10 +824,11 @@ def _d_capture_insurance_update(a: dict[str, Any]) -> dict[str, Any]:
     row = _patient_row()
     with _db() as conn:
         conn.execute(
-            "UPDATE patients SET carrier = ?, member_id = ?, plan_name = COALESCE(?, plan_name) "
-            "WHERE id = ?",
-            (a["carrier"], a["member_id"], a.get("group_number"), row["id"]),
+            "UPDATE patients SET carrier = ?, member_id = ? WHERE id = ?",
+            (a["carrier"], a["member_id"], row["id"]),
         )
+    # group_number has no dedicated column — it must never overwrite plan_name;
+    # keep it (and the rest of the update) in the durable event stream instead.
     _event("insurance_update", {"patient_id": row["id"], **a})
     return {"updated": True, "card_upload_link_sent": True,
             "note": "A secure link for card photos was texted."}
@@ -844,12 +952,13 @@ _RX_HARD_STOPS = (
 
 
 def _d_request_rx_refill(a: dict[str, Any]) -> dict[str, Any]:
+    patient = _patient_row()
     med = str(a["medication_name"]).strip().lower()
     for keywords, route, note in _RX_HARD_STOPS:
         if any(k in med for k in keywords):
-            _event("rx_refill_request", {**a, "route": route})
+            _event("rx_refill_request", {"patient_id": patient["id"], **a, "route": route})
             return {"route": route, "hard_stop": True, "approved": False, "note": note}
-    _event("rx_refill_request", {**a, "route": "routed_to_provider"})
+    _event("rx_refill_request", {"patient_id": patient["id"], **a, "route": "routed_to_provider"})
     return {"route": "routed_to_provider", "hard_stop": False, "approved": False,
             "pharmacy_needed": not a.get("pharmacy_name"),
             "note": "The request is with the clinical team; this never approves a refill."}
@@ -868,7 +977,8 @@ def _d_get_results_status(a: dict[str, Any]) -> dict[str, Any]:
 
 
 def _d_create_clinical_message(a: dict[str, Any]) -> dict[str, Any]:
-    event_id = _event("clinical_message", dict(a))
+    patient = _patient_row()
+    event_id = _event("clinical_message", {"patient_id": patient["id"], **a})
     return {"message_id": f"cm_{event_id}", "queued": True,
             "priority": a["priority"], "category": a["category"]}
 
@@ -953,6 +1063,9 @@ def _d_authenticate_for_transfer(a: dict[str, Any]) -> dict[str, Any]:
 
 def _d_transfer_call(a: dict[str, Any]) -> dict[str, Any]:
     dest = str(a.get("destination") or "patient_support_center")
+    if dest not in _TRANSFER_DESTINATIONS:
+        raise ToolError("UNKNOWN_DESTINATION",
+                        f"destination must be one of {sorted(_TRANSFER_DESTINATIONS)}.")
     _event("transfer", {"destination": dest})
     return {"transferred": True, "destination": dest}
 
@@ -1031,9 +1144,13 @@ def dispatch_tool(tool_name: str, body: ToolCall) -> dict[str, Any]:
     except HTTPException as e:
         return {"ok": False, "data": None, "error_code": f"HTTP_{e.status_code}",
                 "patient_safe_message": str(e.detail)}
-    except Exception as e:  # soft-fail: a broken tool must not 500 into the call
+    except Exception:  # soft-fail: a broken tool must not 500 into the call
+        # Diagnostic details (exception type/message, tracebacks, DB errors)
+        # stay server-side; callers only ever hear a fixed safe message.
+        logger.exception("unhandled error dispatching tool %r", tool_name)
         return {"ok": False, "data": None, "error_code": "INVALID_ARGUMENTS",
-                "patient_safe_message": f"{type(e).__name__}: {e}"}
+                "patient_safe_message": "Something went wrong handling that request. "
+                "Please try again or ask for a callback."}
 
 
 if __name__ == "__main__":

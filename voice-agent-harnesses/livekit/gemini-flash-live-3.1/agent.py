@@ -11,10 +11,12 @@ not running two of them, so this runtime does a real agent handoff by giving eac
   `llm.session()` and logs "created new realtime session for activity".
 * the fresh session has no active socket yet, so `update_instructions`/`update_tools`
   land on `_opts`/`_tools` and `_build_connect_config` sends them as the connect-time
-  `system_instruction` and `tools` — the scheduler prompt and *only* the scheduler's
-  tools reach the model.
+  `system_instruction` and `tools` — the target agent's own prompt and *only* that
+  agent's tools reach the model.
 * `generate_reply()` is still rejected, so the ElevenLabs TTS delivers the two
-  scripted lines (call greeting, scheduler opener); every other turn is Gemini audio.
+  scripted lines: the call greeting, and (on handoff) a first line derived from the
+  target agent's own prompt (`harness._derive_opener`); every other turn is Gemini
+  audio.
 
     python gemini-flash-live-3.1/agent.py dev
 """
@@ -61,14 +63,15 @@ def build_session(_bp: dict[str, Any]) -> AgentSession:
 def build_agent(bp: dict[str, Any], hangup: asyncio.Event) -> harness.BlueprintAgent:
     # llm_factory gives every agent its own RealtimeModel, which is what makes a
     # handoff open a second Gemini Live session instead of reusing the first.
-    # `opener` is the scripted first line for handoff targets, since 3.1 rejects
-    # generate_reply().
+    # `scripted_opener=True` because 3.1 rejects generate_reply(): each handoff
+    # target derives its own scripted first line from its own prompt (see
+    # `harness._derive_opener`) rather than reusing one literal for every target.
     return harness.BlueprintAgent(
         bp,
         bp["start"],
         hangup,
         llm_factory=lambda name: _model(bp["agents"][name]["instructions"]),
-        opener=harness.SCHEDULER_OPENER,
+        scripted_opener=True,
     )
 
 

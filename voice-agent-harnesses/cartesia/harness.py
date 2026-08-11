@@ -154,6 +154,7 @@ async def _execute_tool(name: str, args: dict[str, Any]) -> dict[str, Any]:
     """Generic dispatch: POST /tools/{name}; the server's envelope is the result."""
     async with httpx.AsyncClient(timeout=30.0) as client:
         resp = await client.post(f"{TOOL_SERVER_URL}/tools/{name}", json={"arguments": args})
+        resp.raise_for_status()
         return resp.json()
 
 

@@ -20,6 +20,7 @@ Self-check: python tool_server.py --selfcheck
 from __future__ import annotations
 
 import json
+import logging
 import os
 import re
 import sqlite3
@@ -482,7 +483,7 @@ COMMIT_STATUS = {"change": "changed", "cancellation": "cancelled", "seat": "assi
 
 
 @app.post("/confirmations", status_code=201)
-def confirm(body: ConfirmCreate) -> dict[str, Any]:
+def confirm(body: ConfirmCreate, expected_kind: str | None = None) -> dict[str, Any]:
     """Step two: spend the token. Unheld, cross-tool, and reused tokens all fail."""
     with _db() as conn:
         hold = conn.execute("SELECT * FROM holds WHERE token = ?",
@@ -493,6 +494,11 @@ def confirm(body: ConfirmCreate) -> dict[str, Any]:
         if hold["consumed"]:
             raise _fail(409, "TOKEN_ALREADY_USED", "That token was already used.",
                         "Quote it again and read the new summary back.")
+        if expected_kind is not None and hold["kind"] != expected_kind:
+            raise _fail(409, "TOKEN_KIND_MISMATCH",
+                        "That token was minted by a different operation.",
+                        "Quote the operation you actually want to confirm and use "
+                        "the token that quote returns.")
         conn.execute("UPDATE holds SET consumed = 1 WHERE token = ?",
                      (body.confirmation_token,))
         conn.execute("INSERT INTO commits (kind, confirmation_code, detail) VALUES (?, ?, ?)",
@@ -566,11 +572,11 @@ DISPATCH = {
     "quote_seat": lambda a: _quote("seat", a),
     "quote_bag": lambda a: _quote("bag", a),
     "quote_payment": lambda a: _quote("payment", a),
-    "confirm_change": lambda a: confirm(ConfirmCreate(**a)),
-    "confirm_cancellation": lambda a: confirm(ConfirmCreate(**a)),
-    "confirm_seat": lambda a: confirm(ConfirmCreate(**a)),
-    "confirm_bag": lambda a: confirm(ConfirmCreate(**a)),
-    "confirm_payment": lambda a: confirm(ConfirmCreate(**a)),
+    "confirm_change": lambda a: confirm(ConfirmCreate(**a), expected_kind="change"),
+    "confirm_cancellation": lambda a: confirm(ConfirmCreate(**a), expected_kind="cancellation"),
+    "confirm_seat": lambda a: confirm(ConfirmCreate(**a), expected_kind="seat"),
+    "confirm_bag": lambda a: confirm(ConfirmCreate(**a), expected_kind="bag"),
+    "confirm_payment": lambda a: confirm(ConfirmCreate(**a), expected_kind="payment"),
     "send_itinerary": lambda a: send_itinerary(ItineraryCreate(**a)),
     "add_reservation_note": lambda a: add_reservation_note(NoteCreate(**a)),
     "escalate_to_human": lambda a: escalate_to_human(EscalationCreate(**a)),
@@ -602,8 +608,11 @@ def dispatch_tool(tool_name: str, body: ToolCall) -> dict[str, Any]:
                 "error_code": detail.get("error_code", f"HTTP_{e.status_code}"),
                 "caller_safe_message": message}
     except Exception as e:  # soft-fail: a broken tool must not 500 into the call
+        logging.getLogger(__name__).exception(
+            "tool dispatch failed for %r with arguments %r", tool_name, body.arguments)
         return {"ok": False, "data": None, "error_code": "INVALID_ARGUMENTS",
-                "caller_safe_message": f"{type(e).__name__}: {e}"}
+                "caller_safe_message": "I couldn't process those details. Please check "
+                "the information and try again."}
 
 
 # ------------------------------------------------------------------ selfcheck

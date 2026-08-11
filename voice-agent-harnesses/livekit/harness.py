@@ -27,6 +27,7 @@ import asyncio
 import json
 import logging
 import os
+import re
 from pathlib import Path
 from typing import Any, Callable
 
@@ -51,10 +52,34 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 TOOL_SERVER_URL = os.environ.get("TOOL_SERVER_URL", "http://127.0.0.1:8000").rstrip("/")
 INDUSTRY = os.environ.get("INDUSTRY", "control-industry")
 GREETING = "Welcome to Bluejay's Repair Services!"
-# step 1 of system-prompts/scheduler.md, verbatim. Only used by runtimes whose model
-# rejects generate_reply() (see BlueprintAgent.on_enter); every other turn is
-# model-generated.
-SCHEDULER_OPENER = "Hey, when do you want to schedule your repair appointment?"
+# Matches *step 1* of an agent's own flow, e.g.
+# `1. Ask: "Hey, when do you want to schedule your repair appointment?"` in
+# system-prompts/scheduler.md. Anchored to step 1 specifically (not any numbered
+# `Ask:`/`Say:` line) so this doesn't pick up an unrelated mid-prompt instruction,
+# e.g. a later "call 911, then say ..." escalation step. Used to give handoff
+# targets a target-specific opener on runtimes whose model rejects
+# generate_reply() (see BlueprintAgent.on_enter and `_derive_opener` below); every
+# other turn is model-generated.
+_OPENER_RE = re.compile(r'(?:^|\n)\s*1\.\s*(?:Ask|Say):\s*"([^"]+)"', re.IGNORECASE)
+# Last-resort opener when an agent's prompt has no quoted `Ask:`/`Say:` line to pull
+# from. Deliberately industry- and blueprint-neutral so it never announces another
+# agent's task (e.g. a scheduling line) on a target that doesn't do that job.
+GENERIC_OPENER = "Okay, I can help you with that."
+
+
+def _derive_opener(instructions: str) -> str:
+    """Pull a natural, spoken opening line out of `instructions` for `session.say()`.
+
+    Every `BlueprintAgent` derives its *own* opener from its *own* prompt, so a
+    handoff target never inherits another agent's scripted line (e.g. Gemini Live
+    used to open every handoff with the control-industry scheduler's "when do you
+    want to schedule your repair appointment?" line regardless of which agent, or
+    industry, it had actually landed on).
+    """
+    match = _OPENER_RE.search(instructions)
+    return match.group(1) if match else GENERIC_OPENER
+
+
 # Seconds of *silence* the agent must reach after `end_call` before we tear the room
 # down. This was a flat sleep, which deleted the room mid-farewell on gpt-realtime-2.1
 # (see README "Hanging up waits for silence"). Same env knobs as the pipecat harness.
@@ -122,7 +147,10 @@ async def run_tool(name: str, args: dict[str, Any], *, local: bool = False) -> d
     with report.tool_span(name, args) as span:
         try:
             result = await _execute(name, args, local=local)
-            ok = bool(result.get("ok", result.get("success", True)))
+            # default to False, not True: a 404/error envelope from POST /tools/{name}
+            # (e.g. an unknown tool name) has neither `ok` nor `success`, and treating
+            # that as a successful call would hide the failure from the trace.
+            ok = bool(result.get("ok", result.get("success", False)))
         except Exception as e:  # soft-fail: the call (and its trace) must still finish
             result, ok = {"success": False, "error": f"{type(e).__name__}: {e}"}, False
         report.finish_tool_span(span, result, ok=ok)
@@ -146,7 +174,7 @@ def _blueprint_tools(
     agent_name: str,
     hangup: asyncio.Event,
     llm_factory: Callable[[str], Any] | None,
-    opener: str | None,
+    scripted_opener: bool,
 ) -> list[Any]:
     """One agent's blueprint tools as LiveKit raw function tools.
 
@@ -155,6 +183,12 @@ def _blueprint_tools(
     transfer on top of the incoming agent's own opener — the blueprint forbids
     that, and the two overlapping turns let the caller's "okay, thank you" land
     on the new agent as "I'm done" -> end_call before anything is booked.
+
+    `scripted_opener` only says whether *this runtime's model* rejects
+    generate_reply() and therefore needs its handoff targets to speak a scripted
+    first line at all; it carries no agent-specific text. Each target derives its
+    own opener from its own prompt (see `BlueprintAgent.on_enter`/`_derive_opener`)
+    so a handoff never announces another agent's task.
     """
     tools: list[Any] = []
     for t in bp["agents"][agent_name]["tools"]:
@@ -175,7 +209,9 @@ def _blueprint_tools(
                     await run_tool(tool_name, dict(raw_arguments), local=True)
                     return BlueprintAgent(
                         bp, target, hangup,
-                        llm_factory=llm_factory, opener=opener, entered_by_handoff=True,
+                        llm_factory=llm_factory,
+                        scripted_opener=scripted_opener,
+                        entered_by_handoff=True,
                     )
                 return _handoff
 
@@ -208,9 +244,14 @@ class BlueprintAgent(Agent):
     the two activities share the *same* model object, so a fresh instance means
     a fresh provider session configured with this agent's prompt and tools.
 
-    `opener` is a scripted first line for handoff targets on runtimes whose
-    model rejects generate_reply() (mutable_chat_context=False); everyone else
-    model-generates the opener. The start agent's greeting is `run_call`'s job.
+    `scripted_opener=True` means this runtime's model rejects generate_reply()
+    (mutable_chat_context=False), so a handoff target must speak a scripted first
+    line via `session.say()` instead; everyone else model-generates the opener.
+    That scripted line is always derived from *this* agent's own instructions
+    (`_derive_opener`), never inherited from whichever agent handed off to it — a
+    flat, runtime-wide literal here would put another agent's task in this one's
+    mouth on any blueprint with more than one possible handoff target. The start
+    agent's greeting is `run_call`'s job, not this one's.
     """
 
     def __init__(
@@ -220,17 +261,18 @@ class BlueprintAgent(Agent):
         hangup: asyncio.Event,
         *,
         llm_factory: Callable[[str], Any] | None = None,
-        opener: str | None = None,
+        scripted_opener: bool = False,
         entered_by_handoff: bool = False,
     ):
+        instructions = bp["agents"][name]["instructions"]
         llm: NotGivenOr[Any] = llm_factory(name) if llm_factory else NOT_GIVEN
         super().__init__(
-            instructions=bp["agents"][name]["instructions"],
+            instructions=instructions,
             llm=llm,
-            tools=_blueprint_tools(bp, name, hangup, llm_factory, opener),
+            tools=_blueprint_tools(bp, name, hangup, llm_factory, scripted_opener),
         )
         self.agent_name = name
-        self._opener = opener
+        self._opener = _derive_opener(instructions) if scripted_opener else None
         self._entered_by_handoff = entered_by_handoff
 
     async def on_enter(self) -> None:

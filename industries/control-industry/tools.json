@@ -42,12 +42,15 @@
           },
           "date": {
             "type": "string",
-            "description": "Scheduled repair appointment date in MM/DD/YYYY format"
+            "description": "Scheduled repair appointment date in MM/DD/YYYY format (present on success)"
+          },
+          "error": {
+            "type": "string",
+            "description": "Human-readable failure reason (present when success is false)"
           }
         },
         "required": [
-          "success",
-          "date"
+          "success"
         ]
       }
     },
