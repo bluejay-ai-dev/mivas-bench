@@ -1,0 +1,19 @@
+flowchart TD
+    START(["Inbound call"]) --> reception["reception"]
+
+    reception -->|transfer_to_ticketing| ticketing["ticketing"]
+    reception -->|transfer_to_loyalty_services| loyalty_services["loyalty_services"]
+    reception -->|transfer_to_payments| payments["payments"]
+
+    ticketing -->|transfer_to_loyalty_services| loyalty_services
+    ticketing -->|transfer_to_payments| payments
+    loyalty_services -->|transfer_to_payments| payments
+
+    payments --> DONE(["call ends"])
+
+    reception -.->|"identity_failed · not_named_on_booking · unaccompanied_minor"| specialist
+    ticketing -.->|"saver_not_changeable · non_refundable"| specialist
+    loyalty_services -.->|out_of_scope| specialist
+    payments -.->|out_of_scope| specialist
+
+    specialist["specialist (via escalate_to_human)"]
