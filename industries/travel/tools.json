@@ -1,0 +1,1084 @@
+{
+  "tools": [
+    {
+      "name": "find_reservation",
+      "description": "Locate a booking. Must be called before any other tool. Needs last_name plus either confirmation_code or summit_number.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "last_name": {
+            "type": "string",
+            "description": "Traveler last name"
+          },
+          "confirmation_code": {
+            "type": "string",
+            "description": "6-character confirmation code"
+          },
+          "summit_number": {
+            "type": "string",
+            "description": "Summit Club number"
+          }
+        },
+        "required": [
+          "last_name"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "get_reservation",
+      "description": "Return the itinerary, fare brand, booking date, and disruption status. Check disruption_status before quoting any amount.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "confirmation_code": {
+            "type": "string",
+            "description": "Confirmation code"
+          }
+        },
+        "required": [
+          "confirmation_code"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "get_traveler_list",
+      "description": "List every traveler on the reservation with age and guardian flag.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "confirmation_code": {
+            "type": "string",
+            "description": "Confirmation code"
+          }
+        },
+        "required": [
+          "confirmation_code"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "get_fare_rules",
+      "description": "Return whether the fare is changeable and refundable, the cancellation credit percentage, and whether the 24-hour window is still open.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "confirmation_code": {
+            "type": "string",
+            "description": "Confirmation code"
+          }
+        },
+        "required": [
+          "confirmation_code"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "get_flight_status",
+      "description": "Return scheduled and current times, delay minutes, and cancellation status for a flight.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "flight_number": {
+            "type": "string",
+            "description": "Flight number, e.g. CX412"
+          },
+          "date": {
+            "type": "string",
+            "description": "Date, year-month-day"
+          }
+        },
+        "required": [
+          "flight_number",
+          "date"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "search_flights",
+      "description": "Search Cascade Air flights with available seats on a route.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "origin": {
+            "type": "string",
+            "description": "3-letter airport code"
+          },
+          "destination": {
+            "type": "string",
+            "description": "3-letter airport code"
+          },
+          "earliest_date": {
+            "type": "string",
+            "description": "Earliest acceptable date, year-month-day"
+          },
+          "cabin": {
+            "type": "string",
+            "enum": [
+              "main",
+              "first"
+            ],
+            "description": "Cabin"
+          }
+        },
+        "required": [
+          "origin",
+          "destination",
+          "earliest_date"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "get_seat_map",
+      "description": "Return open seats and their fees for a flight and cabin.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "flight_number": {
+            "type": "string",
+            "description": "Flight number"
+          },
+          "date": {
+            "type": "string",
+            "description": "Date, year-month-day"
+          },
+          "cabin": {
+            "type": "string",
+            "enum": [
+              "main",
+              "first"
+            ],
+            "description": "Cabin"
+          }
+        },
+        "required": [
+          "flight_number",
+          "date"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "get_bag_allowance",
+      "description": "Return bags already included and the fee for the next checked bag.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "confirmation_code": {
+            "type": "string",
+            "description": "Confirmation code"
+          }
+        },
+        "required": [
+          "confirmation_code"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "get_credit_balance",
+      "description": "Return travel credits on file and their expiry.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "summit_number": {
+            "type": "string",
+            "description": "Summit Club number"
+          }
+        },
+        "required": [
+          "summit_number"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "get_summit_status",
+      "description": "Return loyalty tier and the fee waivers it carries.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "summit_number": {
+            "type": "string",
+            "description": "Summit Club number"
+          }
+        },
+        "required": [
+          "summit_number"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "quote_change",
+      "description": "Price a flight change. Returns a summary to read aloud and a confirmation token. Does not change anything. Refuses Saver fares unless the booking is disrupted.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "confirmation_code": {
+            "type": "string",
+            "description": "Confirmation code"
+          },
+          "new_flight": {
+            "type": "string",
+            "description": "Flight number to move to"
+          },
+          "cabin": {
+            "type": "string",
+            "enum": [
+              "main",
+              "first"
+            ],
+            "description": "Cabin"
+          }
+        },
+        "required": [
+          "confirmation_code",
+          "new_flight"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "confirm_change",
+      "description": "Finalize a flight change. Requires the token from quote_change and a spoken yes.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "confirmation_token": {
+            "type": "string",
+            "description": "Token from quote_change"
+          }
+        },
+        "required": [
+          "confirmation_token"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "quote_cancellation",
+      "description": "Price a cancellation, including refund or credit amount. Returns a token. Does not cancel.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "confirmation_code": {
+            "type": "string",
+            "description": "Confirmation code"
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "traveler_request",
+              "schedule_change",
+              "illness",
+              "no_longer_travelling"
+            ],
+            "description": "Reason"
+          }
+        },
+        "required": [
+          "confirmation_code",
+          "reason"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "confirm_cancellation",
+      "description": "Finalize a cancellation. Requires the token from quote_cancellation.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "confirmation_token": {
+            "type": "string",
+            "description": "Token from quote_cancellation"
+          }
+        },
+        "required": [
+          "confirmation_token"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "quote_seat",
+      "description": "Price a seat assignment. Returns a token. Does not assign the seat.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "confirmation_code": {
+            "type": "string",
+            "description": "Confirmation code"
+          },
+          "seat_number": {
+            "type": "string",
+            "description": "Seat, e.g. 14C"
+          }
+        },
+        "required": [
+          "confirmation_code",
+          "seat_number"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "confirm_seat",
+      "description": "Finalize a seat assignment. Requires the token from quote_seat.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "confirmation_token": {
+            "type": "string",
+            "description": "Token from quote_seat"
+          }
+        },
+        "required": [
+          "confirmation_token"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "quote_bag",
+      "description": "Price checked bags. Returns a token. Does not add them.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "confirmation_code": {
+            "type": "string",
+            "description": "Confirmation code"
+          },
+          "bag_count": {
+            "type": "number",
+            "description": "Number of checked bags to add"
+          }
+        },
+        "required": [
+          "confirmation_code",
+          "bag_count"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "confirm_bag",
+      "description": "Finalize adding checked bags. Requires the token from quote_bag.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "confirmation_token": {
+            "type": "string",
+            "description": "Token from quote_bag"
+          }
+        },
+        "required": [
+          "confirmation_token"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "quote_payment",
+      "description": "Price a payment. Returns a token. Does not charge.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "confirmation_code": {
+            "type": "string",
+            "description": "Confirmation code"
+          },
+          "amount": {
+            "type": "number",
+            "description": "Amount in USD"
+          }
+        },
+        "required": [
+          "confirmation_code",
+          "amount"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "confirm_payment",
+      "description": "Finalize a payment. Requires the token from quote_payment.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "confirmation_token": {
+            "type": "string",
+            "description": "Token from quote_payment"
+          }
+        },
+        "required": [
+          "confirmation_token"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "send_itinerary",
+      "description": "Email or text the current itinerary to the traveler.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "confirmation_code": {
+            "type": "string",
+            "description": "Confirmation code"
+          },
+          "channel": {
+            "type": "string",
+            "enum": [
+              "email",
+              "sms"
+            ],
+            "description": "Delivery channel"
+          }
+        },
+        "required": [
+          "confirmation_code",
+          "channel"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "add_reservation_note",
+      "description": "Attach a note to the reservation.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "confirmation_code": {
+            "type": "string",
+            "description": "Confirmation code"
+          },
+          "note": {
+            "type": "string",
+            "description": "Note text"
+          }
+        },
+        "required": [
+          "confirmation_code",
+          "note"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "escalate_to_human",
+      "description": "Transfer to a specialist. Terminal: no further tools may be called.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "reason_code": {
+            "type": "string",
+            "enum": [
+              "identity_failed",
+              "not_named_on_booking",
+              "non_refundable",
+              "saver_not_changeable",
+              "unaccompanied_minor",
+              "entry_requirements",
+              "service_recovery",
+              "caller_request",
+              "out_of_scope"
+            ],
+            "description": "Why the call is being transferred"
+          }
+        },
+        "required": [
+          "reason_code"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "transfer_to_ticketing",
+      "description": "Hand the traveler to Ticketing for a change, a cancellation, a refund, a fare question, disrupted travel, or a flight status question.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "handoff_summary": {
+            "type": "string",
+            "description": "one sentence on the booking and what the traveler wants changed, cancelled, or told about their flight."
+          }
+        },
+        "required": [
+          "handoff_summary"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "transfer_to_loyalty_services",
+      "description": "Hand the traveler to Loyalty Services for bags, seats, Summit tier and its waivers, or a travel credit balance.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "handoff_summary": {
+            "type": "string",
+            "description": "one sentence on the booking and which bag, seat, tier, or credit question is open."
+          }
+        },
+        "required": [
+          "handoff_summary"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "transfer_to_payments",
+      "description": "Hand the traveler to Payments to charge an amount already quoted, send the itinerary, or note the record.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "handoff_summary": {
+            "type": "string",
+            "description": "one sentence on what was agreed, the amount if there is one, and whether an itinerary needs sending."
+          }
+        },
+        "required": [
+          "handoff_summary"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "end_call",
+      "description": "End the call once the traveler is done, or immediately if it is spam or a wrong number. Say goodbye first.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "description": "Why the call is ending"
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    }
+  ]
+}
