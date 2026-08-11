@@ -634,6 +634,9 @@ def _d_cancel_appointment(a: dict[str, Any]) -> dict[str, Any]:
     appt_id = int(a["appointment_id"])
     patient = _patient_row()
     row = _owned_appointment(appt_id)
+    if row["status"] == "cancelled":
+        return {"status": "cancelled", "fee_charged_cents": 0,
+                "note": "Already cancelled — no fee charged again."}
     cosmetic = row["appointment_type_code"].startswith("COS")
     window_h, fee_cents = (72, 12500) if cosmetic else (24, 5000)
     hours_out = (datetime.fromisoformat(row["start"]) - datetime.fromisoformat(TODAY)).total_seconds() / 3600

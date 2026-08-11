@@ -483,8 +483,15 @@ COMMIT_STATUS = {"change": "changed", "cancellation": "cancelled", "seat": "assi
 
 
 @app.post("/confirmations", status_code=201)
-def confirm(body: ConfirmCreate, expected_kind: str | None = None) -> dict[str, Any]:
+def confirm(body: ConfirmCreate) -> dict[str, Any]:
     """Step two: spend the token. Unheld, cross-tool, and reused tokens all fail."""
+    return _confirm(body, expected_kind=None)
+
+
+def _confirm(body: ConfirmCreate, *, expected_kind: str | None) -> dict[str, Any]:
+    """Internal dispatch helper: same as `confirm`, but also rejects a token
+    minted by a different operation. Not a REST route — `expected_kind` is a
+    dispatch-only guard, never a public query parameter."""
     with _db() as conn:
         hold = conn.execute("SELECT * FROM holds WHERE token = ?",
                             (body.confirmation_token,)).fetchone()
@@ -572,11 +579,11 @@ DISPATCH = {
     "quote_seat": lambda a: _quote("seat", a),
     "quote_bag": lambda a: _quote("bag", a),
     "quote_payment": lambda a: _quote("payment", a),
-    "confirm_change": lambda a: confirm(ConfirmCreate(**a), expected_kind="change"),
-    "confirm_cancellation": lambda a: confirm(ConfirmCreate(**a), expected_kind="cancellation"),
-    "confirm_seat": lambda a: confirm(ConfirmCreate(**a), expected_kind="seat"),
-    "confirm_bag": lambda a: confirm(ConfirmCreate(**a), expected_kind="bag"),
-    "confirm_payment": lambda a: confirm(ConfirmCreate(**a), expected_kind="payment"),
+    "confirm_change": lambda a: _confirm(ConfirmCreate(**a), expected_kind="change"),
+    "confirm_cancellation": lambda a: _confirm(ConfirmCreate(**a), expected_kind="cancellation"),
+    "confirm_seat": lambda a: _confirm(ConfirmCreate(**a), expected_kind="seat"),
+    "confirm_bag": lambda a: _confirm(ConfirmCreate(**a), expected_kind="bag"),
+    "confirm_payment": lambda a: _confirm(ConfirmCreate(**a), expected_kind="payment"),
     "send_itinerary": lambda a: send_itinerary(ItineraryCreate(**a)),
     "add_reservation_note": lambda a: add_reservation_note(NoteCreate(**a)),
     "escalate_to_human": lambda a: escalate_to_human(EscalationCreate(**a)),
@@ -608,8 +615,9 @@ def dispatch_tool(tool_name: str, body: ToolCall) -> dict[str, Any]:
                 "error_code": detail.get("error_code", f"HTTP_{e.status_code}"),
                 "caller_safe_message": message}
     except Exception as e:  # soft-fail: a broken tool must not 500 into the call
-        logging.getLogger(__name__).exception(
-            "tool dispatch failed for %r with arguments %r", tool_name, body.arguments)
+        # Log only the tool name and exception, not the arguments — they can carry
+        # confirmation codes and caller-provided notes that shouldn't sit in logs.
+        logging.getLogger(__name__).exception("tool dispatch failed for %r", tool_name)
         return {"ok": False, "data": None, "error_code": "INVALID_ARGUMENTS",
                 "caller_safe_message": "I couldn't process those details. Please check "
                 "the information and try again."}
