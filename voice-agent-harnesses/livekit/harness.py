@@ -11,11 +11,13 @@ token with a `RoomAgentDispatch` for our `agent_name`, and puts
 `X-Simulation-Result-Id` on the job metadata (see livekit_agent
 `src/agent_bootstrap/hydration.py`). There is no CHIRP bridge.
 
-Gemini 3.1 Live is the one runtime that cannot use the in-framework handoff:
-`livekit.plugins.google` sets `mutable_chat_context/instructions/tools = False`
-for any "3.1" model, so swapping the active `Agent` would silently keep the old
-prompt and tools. That runtime uses `Combined` (one agent, both prompts, soft
-handoff) — the tool still runs and still gets its span.
+All three runtimes use the same handoff, including the speech-to-speech ones. The
+`mutable_*` capability flags only gate *mutating an existing* realtime session, so
+a runtime whose model cannot be mutated (Gemini 3.1 Live) gives each `Agent` its
+own `llm=` instead: `AgentActivity._detach_reusable_resources` only reuses the
+realtime session when `self.llm is new_activity.llm`, so a distinct model instance
+forces `llm.session()` — a second, independently configured provider session with
+the new agent's prompt and only the new agent's tools.
 """
 
 from __future__ import annotations
@@ -29,11 +31,13 @@ from typing import Any, Callable
 
 import httpx
 from livekit.agents import (
+    NOT_GIVEN,
     Agent,
     AgentServer,
     AgentSession,
     JobContext,
     JobExecutorType,
+    NotGivenOr,
     RunContext,
     cli,
     function_tool,
@@ -47,6 +51,9 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 TOOL_SERVER_URL = os.environ.get("TOOL_SERVER_URL", "http://127.0.0.1:8000").rstrip("/")
 INDUSTRY = os.environ.get("INDUSTRY", "control-industry")
 GREETING = "Welcome to Bluejay's Repair Services!"
+# step 1 of system-prompts/scheduler.md, verbatim. Only used by runtimes whose model
+# rejects generate_reply() (see Scheduler.on_enter); every other turn is model-generated.
+SCHEDULER_OPENER = "Hey, when do you want to schedule your repair appointment?"
 # the caller hangs up too; this is just long enough for the goodbye to play out
 HANGUP_GRACE_S = 4.0
 
@@ -125,15 +132,34 @@ async def _end_call(reason: str, hangup: asyncio.Event) -> dict[str, Any]:
 
 
 class Scheduler(Agent):
-    """Books the appointment. Reached by handoff (or is the whole agent, gemini)."""
+    """Books the appointment. Reached by handoff from the receptionist.
 
-    def __init__(self, bp: dict[str, Any], hangup: asyncio.Event, *, greet_on_enter: bool = True):
-        super().__init__(instructions=bp["agents"]["scheduler"]["instructions"])
+    `llm` is the per-agent model override. Passing a distinct instance is what makes
+    the handoff a real switch on models that cannot be mutated mid-session: LiveKit
+    only carries the realtime session across a handoff when the two activities share
+    the *same* model object, so a fresh instance means a fresh provider session
+    configured with this agent's prompt and this agent's tools.
+    """
+
+    def __init__(
+        self,
+        bp: dict[str, Any],
+        hangup: asyncio.Event,
+        *,
+        llm: NotGivenOr[Any] = NOT_GIVEN,
+        opener: str | None = None,
+    ):
+        super().__init__(instructions=bp["agents"]["scheduler"]["instructions"], llm=llm)
         self._hangup = hangup
-        self._greet_on_enter = greet_on_enter
+        self._opener = opener
 
     async def on_enter(self) -> None:
-        if self._greet_on_enter:
+        # generate_reply() is rejected by realtime models with mutable_chat_context=False
+        # (google plugin, any "3.1" model); those runtimes pass `opener` and the session
+        # TTS speaks the scheduler's scripted first line instead.
+        if self._opener:
+            self.session.say(self._opener)
+        else:
             self.session.generate_reply()
 
     @function_tool
@@ -159,10 +185,19 @@ class Scheduler(Agent):
 class Receptionist(Agent):
     """Greets, then hands off in-framework by returning the Scheduler instance."""
 
-    def __init__(self, bp: dict[str, Any], hangup: asyncio.Event):
-        super().__init__(instructions=bp["agents"]["receptionist"]["instructions"])
-        self._bp = bp
+    def __init__(
+        self,
+        bp: dict[str, Any],
+        hangup: asyncio.Event,
+        *,
+        llm: NotGivenOr[Any] = NOT_GIVEN,
+        make_scheduler: Callable[[], Agent] | None = None,
+    ):
+        super().__init__(instructions=bp["agents"]["receptionist"]["instructions"], llm=llm)
         self._hangup = hangup
+        # runtimes whose model can't be mutated mid-session pass a factory that gives the
+        # Scheduler its own model instance; everyone else shares the session's.
+        self._make_scheduler = make_scheduler or (lambda: Scheduler(bp, hangup))
 
     @function_tool
     async def handoff_to_scheduler(self, context: RunContext) -> Agent:
@@ -174,7 +209,7 @@ class Receptionist(Agent):
         # opener. The blueprint forbids that, and the two overlapping turns let the
         # caller's "okay, thank you" land on the scheduler as "I'm done" -> end_call
         # before anything is booked.
-        return Scheduler(self._bp, self._hangup)
+        return self._make_scheduler()
 
     @function_tool
     async def end_call(self, context: RunContext, reason: str) -> dict[str, Any]:
@@ -185,36 +220,6 @@ class Receptionist(Agent):
             reason: Why the call is ending
         """
         return await _end_call(reason, self._hangup)
-
-
-class Combined(Scheduler):
-    """Single-agent variant for models that cannot swap prompt/tools mid-session.
-
-    Both blueprint prompts live in one instruction block and `handoff_to_scheduler`
-    returns a string instead of an Agent, so the tool call is still real and timed
-    but nothing has to mutate on the realtime session.
-    """
-
-    def __init__(self, bp: dict[str, Any], hangup: asyncio.Event):
-        Agent.__init__(self, instructions=combined_instructions(bp))
-        self._hangup = hangup
-        self._greet_on_enter = False
-
-    @function_tool
-    async def handoff_to_scheduler(self, context: RunContext) -> dict[str, Any]:
-        """Hand off the caller to the Bluejay's Repair Services scheduler agent."""
-        return await run_tool("handoff_to_scheduler", {})
-
-
-def combined_instructions(bp: dict[str, Any]) -> str:
-    return (
-        bp["agents"]["receptionist"]["instructions"]
-        + "\n\n---\n\n"
-        + bp["agents"]["scheduler"]["instructions"]
-        + "\n\n# Handoff\n\nYou play both roles in one session. After you call "
-        "`handoff_to_scheduler`, continue as the scheduler above and book the "
-        "appointment yourself.\n"
-    )
 
 
 # ── job plumbing ─────────────────────────────────────────────────────────────

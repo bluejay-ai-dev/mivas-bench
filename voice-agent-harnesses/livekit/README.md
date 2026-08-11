@@ -18,7 +18,7 @@ the framework is the only variable.
 ## Layout
 
 ```
-harness.py     blueprint load, Receptionist/Scheduler/Combined agents, run_tool, serve()
+harness.py     blueprint load, Receptionist/Scheduler agents, run_tool, serve()
 report.py      OTel → Bluejay OTLP + the single post-final update-simulation-result
 <runtime>/agent.py   plugin wiring for one stack; everything else comes from harness.py
 ```
@@ -67,20 +67,25 @@ The exporter is attached to a **private** `TracerProvider` rather than the globa
 one. livekit-agents resolves its own tracer off the global provider, and setting it
 would ship the framework's entire internal span tree to Bluejay as unrelated traces.
 
-`_await_terminal_upsert` waits **300 s** here, not the 150 s the CHIRP harnesses
+`_await_terminal_upsert` waits **600 s** here, not the 150 s the CHIRP harnesses
 use. Result 710911 proved why: its evaluation took longer than 150 s, the wait
 fell through to `_relink_after_final`, the link had by then been wiped, and the
 relink POST appended a second copy of every tool (`handoff_to_scheduler` actual=2,
-`end_call` actual=2). The relink net still double-counts whenever it actually
-fires — the fix is to make the wait long enough that it does not.
+`end_call` actual=2). Since we never re-post, a fall-through is now simply a lost
+link: result 712617 hit the old 300 s ceiling, POSTed during `EVALUATING`, and
+evaluation wiped its `trace_ids`. The clock to beat is our hangup → `COMPLETED`,
+which includes the ~2 min the simulation can linger after we hang up.
 
 ## Proof runs (control-industry)
 
+All three `COMPLETED` with `goal_success: true`, a linked `trace_ids`, and exactly one
+actual per expected tool (`handoff_to_scheduler`, `schedule_appointment`).
+
 | runtime | agent | sim | run | result | link |
 | --- | --- | --- | --- | --- | --- |
-| cascaded | 30519 | 30223 | 224783 | 710922 | https://app.getbluejay.ai/simulations/30223/runs/224783 |
-| openai-realtime-2.1 | 30520 | 30224 | 224784 | 710923 | https://app.getbluejay.ai/simulations/30224/runs/224784 |
-| gemini-flash-live-3.1 | 30521 | 30225 | 224785 | 710924 | https://app.getbluejay.ai/simulations/30225/runs/224785 |
+| cascaded | 30519 | 30223 | 225189 | 712620 | https://app.getbluejay.ai/simulations/30223/runs/225189 |
+| openai-realtime-2.1 | 30520 | 30224 | 225198 | 712629 | https://app.getbluejay.ai/simulations/30224/runs/225198 |
+| gemini-flash-live-3.1 | 30521 | 30225 | 225188 | 712619 | https://app.getbluejay.ai/simulations/30225/runs/225188 |
 
 ## Runtime notes
 
@@ -90,13 +95,30 @@ fires — the fix is to make the wait long enough that it does not.
   waiting for a final status can take ~1 min and the entrypoint gets
   `session_end_timeout` (300 s) versus a shutdown callback's
   `shutdown_process_timeout` (10 s).
-* **Gemini 3.1 Live is degraded by plugin design.**
+* **All three runtimes do a real two-agent handoff.** `handoff_to_scheduler` is a
+  `@function_tool` on `Receptionist` that returns a `Scheduler` *instance*, so
+  LiveKit swaps the active `Agent`. The two agents never share a prompt or a tool
+  set: the receptionist is physically unable to call `schedule_appointment` and the
+  scheduler is unable to call `handoff_to_scheduler` (asserted by
+  `test_harness.test_real_handoff`).
+* **Gemini 3.1 Live gets one model instance per agent.**
   `livekit/plugins/google/realtime/realtime_api.py` sets
-  `mutable = "3.1" not in model`, which turns off `mutable_instructions`,
-  `mutable_chat_context` and `mutable_tools`. Consequences:
-  * no in-framework Agent handoff (a swapped Agent's prompt and tools would never
-    reach the session) — this runtime uses `harness.Combined`: one agent, both
-    blueprint prompts, `handoff_to_scheduler` still runs and still gets a span;
-  * `generate_reply()` is rejected, so the agent cannot open the call from the
-    model. An ElevenLabs TTS is attached purely so `session.say()` can deliver the
-    scripted greeting; every later turn is native Gemini audio.
+  `mutable = "3.1" not in model`, turning off `mutable_instructions` and
+  `mutable_chat_context` (`mutable_tools` is off for every Gemini Live model).
+  Those flags only forbid *mutating a live session*, not running two of them:
+  * `AgentActivity._detach_reusable_resources` carries the realtime session across
+    a handoff only when `self.llm is new_activity.llm`. This runtime gives the
+    `Receptionist` and the `Scheduler` their own `RealtimeModel`, so the handoff
+    falls through to `llm.session()` and a second Gemini Live socket is opened with
+    the scheduler's `system_instruction` and only the scheduler's `tools`
+    (`_build_connect_config`). The debug log shows *two* "created new realtime
+    session for activity" lines and no "reusing realtime session";
+  * `generate_reply()` is still rejected, so the model cannot open a turn on its
+    own. An ElevenLabs TTS is attached so `session.say()` can deliver the two
+    scripted lines (the call greeting and `harness.SCHEDULER_OPENER`, which is step
+    1 of `scheduler.md` verbatim); every other turn is native Gemini audio.
+* **OpenAI Realtime reuses the socket, by design.** Its capabilities are all
+  mutable, so LiveKit keeps the WebSocket and re-pushes the scheduler's
+  instructions and tool list with a `session.update` (`_start_session`, `rt_reused`
+  branch). Still a real agent switch — the model is handed a different prompt and a
+  different tool set — just without a reconnect.
