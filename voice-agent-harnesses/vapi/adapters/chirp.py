@@ -33,8 +33,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from harness import (  # noqa: E402
     ensure_squad,
     industry_path,
+    load_blueprint,
     run_tool,
     start_websocket_call,
+    webhook_tool_names,
 )
 from report import (  # noqa: E402
     end_speech_span,
@@ -238,7 +240,8 @@ def _trace_server_tools(body: dict, seen: set[str]) -> None:
             fn = call.get("function") or {}
             name = fn.get("name") or call.get("name")
             key = str(call.get("id") or name)
-            if not name or name in ("schedule_appointment",) or key in seen:
+            # webhook tools already have a live span from /tool/{name}
+            if not name or name in _cfg.get("webhook_tools", ()) or key in seen:
                 continue
             seen.add(key)
             args = fn.get("arguments") or {}
@@ -264,7 +267,12 @@ def main(model: str | None = None) -> None:
         raise SystemExit("need PUBLIC_URL (cloudflared https url) — Vapi tool webhooks point at it")
 
     ids = ensure_squad(a.industry, public_url)
-    _cfg.update(model=a.model, industry=a.industry, squad_id=ids["squad_id"])
+    _cfg.update(
+        model=a.model,
+        industry=a.industry,
+        squad_id=ids["squad_id"],
+        webhook_tools=webhook_tool_names(load_blueprint(a.industry)),
+    )
     print(
         f"ws↔Vapi {a.model} × {a.industry} :{a.port} auth={bool(_auth())} "
         f"squad={ids['squad_id']} tools→{public_url}/tool/",

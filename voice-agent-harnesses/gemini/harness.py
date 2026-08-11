@@ -47,6 +47,23 @@ def load_blueprint(industry_dir: str | Path) -> dict[str, Any]:
     }
 
 
+def _multiagent_note(bp: dict[str, Any]) -> str:
+    """Soft-handoff note: the Live config's tool list is fixed at connect, so every
+    agent's tools are visible — the prompt has to hold the role boundary."""
+    handoffs = sorted(
+        {t["name"] for a in bp["agents"].values() for t in a["tools"] if t.get("handoff")}
+    )
+    if not handoffs:
+        return ""
+    return (
+        "\n\n# Multi-agent note\n"
+        f"Start as the {bp['start']} agent. Tools belonging to other agents are "
+        f"visible to you; only use another agent's tools after the matching handoff "
+        f"tool ({', '.join(handoffs)}) has succeeded and you have adopted that "
+        "agent's role."
+    )
+
+
 def _decl(spec: dict) -> types.FunctionDeclaration:
     # Gemini Live rejects JSON-Schema keys like additionalProperties.
     raw = dict(spec.get("inputSchema") or {})
@@ -78,13 +95,8 @@ def live_config(bp: dict[str, Any], *, voice: str = "Puck") -> types.LiveConnect
             decls.append(_decl(bp["catalog"][name]))
 
     start = bp["agents"][bp["start"]]
-    # note soft-handoff: scheduler tools are visible; prompt still starts as receptionist
-    instruction = (
-        start["instructions"]
-        + "\n\n# Multi-agent note\n"
-        "Start as the receptionist. Only call schedule_appointment after "
-        "handoff_to_scheduler has succeeded and you have adopted the scheduler role."
-    )
+    # note soft-handoff: other agents' tools are visible; prompt still starts as bp["start"]
+    instruction = start["instructions"] + _multiagent_note(bp)
     return types.LiveConnectConfig(
         response_modalities=[types.Modality.AUDIO],
         speech_config=types.SpeechConfig(
@@ -97,12 +109,20 @@ def live_config(bp: dict[str, Any], *, voice: str = "Puck") -> types.LiveConnect
     )
 
 
-async def _post_appointment(date: str) -> dict[str, Any]:
+def _tool_entry(bp: dict[str, Any], agent: str, name: str) -> dict[str, Any] | None:
+    """The blueprint entry for a tool, preferring the current agent's copy."""
+    for owner in [agent] + [a for a in bp["agents"] if a != agent]:
+        for t in bp["agents"][owner]["tools"]:
+            if t["name"] == name:
+                return t
+    return None
+
+
+async def _dispatch(name: str, args: dict[str, Any]) -> dict[str, Any]:
+    """Generic dispatch: POST /tools/{name}; the server's envelope is the result."""
     async with httpx.AsyncClient(timeout=30.0) as client:
-        resp = await client.post(f"{TOOL_SERVER_URL}/appointments", json={"date": date})
-        resp.raise_for_status()
-        body = resp.json()
-    return {"success": True, "date": body["date"]}
+        resp = await client.post(f"{TOOL_SERVER_URL}/tools/{name}", json={"arguments": args})
+        return resp.json()
 
 
 async def _execute_tool(
@@ -111,31 +131,26 @@ async def _execute_tool(
     bp: dict[str, Any],
     state: dict[str, Any],
 ) -> tuple[dict[str, Any], bool]:
-    """Execute a tool. Returns (result, should_end_call)."""
-    if name == "handoff_to_scheduler":
-        target = None
-        for t in bp["agents"][state["agent"]]["tools"]:
-            if t["name"] == name and t.get("handoff"):
-                target = t.get("handoff_to")
-                break
+    """Execute a tool. Returns (result, should_end_call). Handoff and session
+    tools are harness-native; every other tool dispatches to the tool server."""
+    entry = _tool_entry(bp, state["agent"], name)
+    if entry is not None and entry.get("handoff"):
+        target = entry.get("handoff_to")
         if not target or target not in bp["agents"]:
             return {"success": False, "error": "unknown handoff target"}, False
         state["agent"] = target
-        sched = bp["agents"][target]
+        agent = bp["agents"][target]
         return {
             "success": True,
             "role": target,
-            "instructions": sched["instructions"],
-            "note": "You are now the scheduler. Follow the instructions field exactly.",
+            "instructions": agent["instructions"],
+            "note": f"You are now the {target} agent. Follow the instructions field exactly.",
         }, False
 
-    if name == "schedule_appointment":
-        return await _post_appointment(args["date"]), False
-
-    if name == "end_call":
+    if entry is not None and entry.get("session"):
         return {"success": True}, True
 
-    return {"success": False, "error": f"unknown tool {name}"}, False
+    return await _dispatch(name, args), False
 
 
 async def run_tool(
@@ -150,7 +165,8 @@ async def run_tool(
     from report import finish_tool_span, tool_span
     with tool_span(name, args, call_id=call_id) as span:
         result, stop = await _execute_tool(name, args, bp, state)
-        finish_tool_span(span, result, ok=bool(result.get("success")))
+        ok = bool(result.get("ok", result.get("success", True)))
+        finish_tool_span(span, result, ok=ok)
         return result, stop
 
 

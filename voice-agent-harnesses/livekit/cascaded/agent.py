@@ -42,6 +42,6 @@ if __name__ == "__main__":
     harness.serve(
         AGENT_NAME,
         build_session=build_session,
-        build_agent=lambda bp, hangup: harness.Receptionist(bp, hangup),
+        build_agent=lambda bp, hangup: harness.BlueprintAgent(bp, bp["start"], hangup),
         model=MODEL,
     )

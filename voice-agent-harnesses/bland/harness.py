@@ -397,16 +397,30 @@ async def session_ws_url(agent_id: str) -> str:
     return f"{WS_BASE}?agent={agent_id}&token={token}"
 
 
+def _tool_flags(name: str) -> dict[str, Any]:
+    """Blueprint flags for a tool (handoff/session), from the INDUSTRY env."""
+    global _FLAGS
+    if _FLAGS is None:
+        bp = load_blueprint(os.environ.get("INDUSTRY", "control-industry"))
+        _FLAGS = {}
+        for entry in bp["agents"].values():
+            for t in entry["tools"]:
+                _FLAGS.setdefault(t["name"], t)
+    return _FLAGS.get(name, {})
+
+
+_FLAGS: dict[str, dict[str, Any]] | None = None
+
+
 async def _execute_tool(name: str, args: dict[str, Any]) -> dict[str, Any]:
-    """Industry tools hit the tool server; the handoff node has no state to write."""
-    if name == "schedule_appointment":
-        async with httpx.AsyncClient(timeout=30.0) as client:
-            resp = await client.post(f"{TOOL_SERVER_URL}/appointments", json={"date": args["date"]})
-            resp.raise_for_status()
-            return {"success": True, "date": resp.json()["date"]}
-    if name == "handoff_to_scheduler":
+    """Industry tools dispatch to POST /tools/{name}; handoff webhook nodes have
+    no server state to write and session tools stay harness-native."""
+    flags = _tool_flags(name)
+    if flags.get("handoff") or flags.get("session"):
         return {"success": True}
-    return {"success": False, "error": f"unknown tool {name}"}
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        resp = await client.post(f"{TOOL_SERVER_URL}/tools/{name}", json={"arguments": args})
+        return resp.json()
 
 
 async def run_tool(name: str, args: dict[str, Any]) -> dict[str, Any]:
@@ -415,7 +429,7 @@ async def run_tool(name: str, args: dict[str, Any]) -> dict[str, Any]:
     with tool_span(name, args) as span:
         try:
             result = await _execute_tool(name, args)
-            ok = bool(result.get("success"))
+            ok = bool(result.get("ok", result.get("success", True)))
         except Exception as e:
             result, ok = {"success": False, "error": f"{type(e).__name__}: {e}"}, False
         finish_tool_span(span, result, ok=ok)
