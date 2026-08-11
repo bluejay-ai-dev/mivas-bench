@@ -110,9 +110,7 @@ async def run_tool(name: str, args: dict[str, Any]) -> dict[str, Any]:
             ok = True
         except Exception as e:  # soft-fail: the call (and its trace) must still finish
             result, ok = {"success": False, "error": f"{type(e).__name__}: {e}"}, False
-        report.finish_tool_span(
-            span, result, ok=ok, name=name, parameters=args, start_offset_ms=offset
-        )
+        report.finish_tool_span(span, result, ok=ok)
     logger.info("tool %s args=%s -> %s (+%dms)", name, args, result, offset)
     return result
 

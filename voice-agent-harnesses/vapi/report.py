@@ -52,20 +52,15 @@ FINAL_STATUSES = {
     "CANCELLED",
     "NO_CONNECTION",
 }
-EARLY_UPSERT_STATUSES = {"EVALUATING", "EVALUATED", "CONVERSATION_ENDED"}
 PROVIDER = "vapi"
 TRACER_NAME = "mivas.vapi"
 
 _provider: TracerProvider | None = None
 _root_span: ContextVar[Span | None] = ContextVar("mivas_vapi_otel_root", default=None)
 _call_t0: ContextVar[float | None] = ContextVar("mivas_vapi_otel_t0", default=None)
-_reported_tools: ContextVar[list[dict[str, Any]] | None] = ContextVar(
-    "mivas_vapi_reported_tools", default=None
-)
 # module fallbacks when asyncio tasks don't inherit ContextVars
 _active_root: Span | None = None
 _active_t0: float | None = None
-_active_tools: list[dict[str, Any]] | None = None
 
 
 def _api_url() -> str:
@@ -147,31 +142,6 @@ def _parent_span() -> Span | None:
     return None
 
 
-def record_tool_call(
-    name: str,
-    parameters: Any,
-    output: Any,
-    *,
-    start_offset_ms: int | None = None,
-) -> None:
-    """Buffer a tool call for the end-of-call update-simulation-result POST."""
-    tools = _reported_tools.get()
-    if tools is None:
-        tools = _active_tools
-    if tools is None:
-        return
-    tools.append(
-        {
-            "name": str(name),
-            "parameters": parameters if isinstance(parameters, dict) else {"raw": parameters},
-            "output": output,
-            "start_offset_ms": int(
-                start_offset_ms if start_offset_ms is not None else call_offset_ms()
-            ),
-        }
-    )
-
-
 @contextmanager
 def tool_span(
     name: str,
@@ -216,9 +186,6 @@ def finish_tool_span(
     output: Any,
     *,
     ok: bool = True,
-    name: str | None = None,
-    parameters: Any = None,
-    start_offset_ms: int | None = None,
 ) -> None:
     if span is not None:
         span.set_attribute("gen_ai.tool.call.result", _json_attr(output))
@@ -272,11 +239,11 @@ async def _await_terminal_upsert(
     300 s, not 150 s: eval needs ~175 s to settle and anything shorter forces the
     early-post + relink path below, which double-counts every tool.
 
-    Posting during EVALUATING works, but eval then wipes trace_ids and the relink
-    POST re-extracts the execute_tool spans on top of the ones the first POST
-    already produced — every tool lands on the timeline twice. One POST after the
-    sim settles gives a surviving link and one row per tool; `_relink_after_final`
-    stays as the safety net for when this wait times out.
+    Posting during EVALUATING works, but eval then wipes trace_ids, and re-posting
+    makes Bluejay re-extract the execute_tool spans on top of the ones the first
+    POST already produced — every tool lands on the timeline twice. One POST after
+    the sim settles gives a surviving link and one row per tool. On timeout we post
+    anyway and log it; we never re-post, because that is the double-count.
     """
     deadline = time.monotonic() + timeout
     key = _api_key()
@@ -304,10 +271,8 @@ async def post_simulation_enrichment(
     simulation_result_id: str,
     *,
     trace_id: str | None,
-    tool_calls: list[dict[str, Any]] | None = None,
 ) -> None:
-    """Link OTel trace_ids. tool_calls ignored — use execute_tool spans."""
-    del tool_calls
+    """Link OTel trace_ids; conversation tools come from execute_tool spans."""
     key = _api_key()
     if not key or not simulation_result_id:
         logger.warning(
@@ -327,7 +292,7 @@ async def post_simulation_enrichment(
     body: dict[str, Any] = {"simulation_result_id": str(simulation_result_id)}
     if trace_id:
         body["trace_ids"] = [trace_id]
-    if "trace_ids" not in body and "tool_calls" not in body:
+    if "trace_ids" not in body:
         logger.warning("skip update-simulation-result — nothing to post")
         return
 
@@ -371,9 +336,12 @@ async def post_simulation_enrichment(
                         st,
                         attempt,
                     )
-                    if (st is None or st in EARLY_UPSERT_STATUSES) and trace_id:
-                        await _relink_after_final(
-                            client, simulation_result_id, body, key, trace_id, st
+                    if st is None:
+                        logger.warning(
+                            "linked without a final status — sim=%s may still be "
+                            "EVALUATING; if eval wipes trace_ids the link is lost "
+                            "(we do not re-post: a second POST double-counts tools)",
+                            simulation_result_id,
                         )
                     return
         except Exception as e:
@@ -386,83 +354,6 @@ async def post_simulation_enrichment(
 
 
 
-async def _relink_after_final(
-    client: httpx.AsyncClient,
-    simulation_result_id: str,
-    body: dict[str, Any],
-    key: str,
-    trace_id: str,
-    early_status: str | None,
-) -> None:
-    """Re-POST trace_ids once the sim leaves EVALUATING (eval can wipe the link).
-
-    Only if it actually got wiped: each POST re-extracts the execute_tool spans and
-    appends them, so a redundant relink double-counts every tool on the timeline.
-    """
-    final: str | None = None
-    linked = False
-    deadline = time.monotonic() + 120.0
-    while time.monotonic() < deadline:
-        try:
-            r = await client.get(
-                f"{_api_url()}/retrieve-simulation-result/{simulation_result_id}",
-                headers={"X-API-Key": key},
-            )
-            if r.status_code == 200:
-                result = (r.json() or {}).get("simulation_result") or {}
-                st = str(result.get("status"))
-                if st in FINAL_STATUSES:
-                    final = st
-                    linked = trace_id in (result.get("trace_ids") or [])
-                    break
-        except Exception:
-            pass
-        await asyncio.sleep(2.0)
-    if final is not None and linked:
-        logger.info(
-            "relink not needed after %s — trace=%s still linked sim=%s final=%s",
-            early_status,
-            trace_id,
-            simulation_result_id,
-            final,
-        )
-        return
-    if final is None:
-        logger.warning(
-            "relink skipped — still not final after early upsert terminal=%s sim=%s",
-            early_status,
-            simulation_result_id,
-        )
-        return
-    r = await client.post(
-        f"{_api_url()}/update-simulation-result",
-        json=body,
-        headers={"X-API-Key": key, "Content-Type": "application/json"},
-    )
-    if r.status_code >= 400:
-        logger.error(
-            "relink after %s FAILED sim=%s %s %s",
-            early_status,
-            simulation_result_id,
-            r.status_code,
-            r.text[:300],
-        )
-    else:
-        logger.info(
-            "relink after %s ok trace=%s sim=%s final=%s",
-            early_status,
-            trace_id,
-            simulation_result_id,
-            final,
-        )
-
-# back-compat alias used by older call sites
-async def post_trace_ids(simulation_result_id: str, trace_id: str) -> None:
-    await post_simulation_enrichment(
-        simulation_result_id, trace_id=trace_id, tool_calls=_reported_tools.get()
-    )
-
-
 @asynccontextmanager
 async def traced_run(
     workflow_name: str,
@@ -471,7 +362,7 @@ async def traced_run(
     model: str | None = None,
 ) -> AsyncIterator[None]:
     """OTel voice.call root; flush + link trace_ids/tool_calls on exit."""
-    global _active_root, _active_t0, _active_tools
+    global _active_root, _active_t0
 
     provider = setup_otel()
     if provider is None:
@@ -492,13 +383,10 @@ async def traced_run(
 
     otel_tid: str | None = None
     root_token = None
-    tools_token = None
     t0 = time.monotonic()
     t0_token = _call_t0.set(t0)
-    tool_buf: list[dict[str, Any]] = []
     prev_active = _active_root
     prev_t0 = _active_t0
-    prev_tools = _active_tools
     try:
         with tracer.start_as_current_span(
             "voice.call",
@@ -506,10 +394,8 @@ async def traced_run(
             attributes=attrs,
         ) as root:
             root_token = _root_span.set(root)
-            tools_token = _reported_tools.set(tool_buf)
             _active_root = root
             _active_t0 = t0
-            _active_tools = tool_buf
             ctx = root.get_span_context()
             if ctx.is_valid:
                 otel_tid = format(ctx.trace_id, "032x")
@@ -530,14 +416,11 @@ async def traced_run(
     finally:
         _active_root = prev_active
         _active_t0 = prev_t0
-        _active_tools = prev_tools
         if root_token is not None:
             _root_span.reset(root_token)
-        if tools_token is not None:
-            _reported_tools.reset(tools_token)
         _call_t0.reset(t0_token)
         flush()
-        if simulation_result_id and (otel_tid or tool_buf):
+        if simulation_result_id and otel_tid:
             try:
                 await post_simulation_enrichment(
                     simulation_result_id,

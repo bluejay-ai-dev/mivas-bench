@@ -159,14 +159,12 @@ async def run_tool(name: str, args: dict[str, Any], *, call_id: str | None = Non
     """Run an industry tool under an execute_tool span. Never raises — a failed
     tool must not take down the bridge before OTel flushes."""
     from report import call_offset_ms, finish_tool_span, tool_span
-
-    offset = call_offset_ms()
     with tool_span(name, args, call_id=call_id) as span:
         try:
             result = await _execute_tool(name, args)
-            finish_tool_span(span, result, ok=True, name=name, parameters=args, start_offset_ms=offset)
+            finish_tool_span(span, result, ok=True)
             return result
         except Exception as e:
             err = {"success": False, "error": f"{type(e).__name__}: {e}"}
-            finish_tool_span(span, err, ok=False, name=name, parameters=args, start_offset_ms=offset)
+            finish_tool_span(span, err, ok=False)
             return err

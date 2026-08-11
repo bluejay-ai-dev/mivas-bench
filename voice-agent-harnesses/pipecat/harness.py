@@ -156,18 +156,14 @@ async def run_tool(
 ) -> tuple[dict[str, Any], bool]:
     """Execute a tool under an `execute_tool` span. Errors soft-fail so the call
     survives and the trace still flushes."""
-    from report import call_offset_ms, finish_tool_span, tool_span
-
-    offset = call_offset_ms()
+    from report import finish_tool_span, tool_span
     with tool_span(name, args, call_id=call_id) as span:
         try:
             result, stop = await _execute_tool(name, args, bp, state)
             ok = bool(result.get("success"))
         except Exception as e:  # noqa: BLE001 — a dead tool must not kill the call
             result, stop, ok = {"success": False, "error": f"{type(e).__name__}: {e}"}, False, False
-        finish_tool_span(
-            span, result, ok=ok, name=name, parameters=args, start_offset_ms=offset
-        )
+        finish_tool_span(span, result, ok=ok)
         return result, stop
 
 
