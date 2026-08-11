@@ -328,13 +328,11 @@ async def _execute_tool(name: str, args: dict[str, Any]) -> dict[str, Any]:
 async def run_tool(name: str, args: dict[str, Any]) -> dict[str, Any]:
     """Execute a pathway webhook call under an execute_tool span. Never raises."""
     from report import call_offset_ms, finish_tool_span, tool_span
-
-    offset = call_offset_ms()
     with tool_span(name, args) as span:
         try:
             result = await _execute_tool(name, args)
             ok = bool(result.get("success"))
         except Exception as e:
             result, ok = {"success": False, "error": f"{type(e).__name__}: {e}"}, False
-        finish_tool_span(span, result, ok=ok, name=name, parameters=args, start_offset_ms=offset)
+        finish_tool_span(span, result, ok=ok)
         return result
