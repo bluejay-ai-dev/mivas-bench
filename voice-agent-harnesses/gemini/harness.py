@@ -169,6 +169,14 @@ async def _execute_tool(
     if local is not None and local.get("session"):
         return {"success": True}, True
 
+    # A handoff/session tool still visible from a *previous* agent (Gemini can
+    # keep offering it post-handoff) must stay harness-native and fail here,
+    # not fall through to the tool server — it isn't a dispatchable tool and a
+    # 404 there would wrongly read as a successful call in the trace.
+    visible = _tool_entry(bp, state["agent"], name)
+    if local is None and visible is not None and (visible.get("handoff") or visible.get("session")):
+        return {"success": False, "error": "tool unavailable for current agent"}, False
+
     # Industry (dispatchable) tools: fall back across all agents so shared
     # tools remain reachable regardless of which agent is currently active.
     return await _dispatch(name, args), False
