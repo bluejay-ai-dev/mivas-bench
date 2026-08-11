@@ -55,7 +55,17 @@ async def main():
         sys.modules.pop("report", None)
         mod = importlib.import_module("report")
         sys.path.pop(0)
-        wait, relink = mod._await_terminal_upsert, mod._relink_after_final
+        wait = mod._await_terminal_upsert
+
+        if not hasattr(mod, "_relink_after_final"):
+            f = Feed("EVALUATING", "COMPLETED")
+            got = await wait(f, "1", timeout=30)
+            assert (got, f.polls, f.posts) == ("COMPLETED", 2, 0)
+            checked.append(name)
+            print(f"ok {name} (single-post final-status contract)")
+            continue
+
+        relink = mod._relink_after_final
 
         assert wait.__defaults__[-1] == 300.0, f"{name}: budget under eval's ~175 s"
         assert await wait(Feed("EVALUATING"), "1", timeout=2.5) is None, f"{name}: posts mid-eval"

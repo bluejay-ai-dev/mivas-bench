@@ -19,6 +19,8 @@ dependencies = [
     "opentelemetry-exporter-otlp-proto-http>=1.27.0",
     # gemini harness
     "google-genai>=1.0.0",
+    # retell harness — web calls run over LiveKit, so the bridge joins the room
+    "livekit>=1.1.0",
 ]
 [dependency-groups]
 dev = []
@@ -30,4 +32,4 @@ package = false
 venvPath = "."
 venv = ".venv"
 pythonVersion = "3.12"
-extraPaths = ["voice-agent-harnesses/openai", "voice-agent-harnesses/gemini", "voice-agent-harnesses/assemblyai", "voice-agent-harnesses/deepgram", "voice-agent-harnesses/elevenlabs"]
+extraPaths = ["voice-agent-harnesses/openai", "voice-agent-harnesses/gemini", "voice-agent-harnesses/assemblyai", "voice-agent-harnesses/deepgram", "voice-agent-harnesses/elevenlabs", "voice-agent-harnesses/vapi", "voice-agent-harnesses/retell", "voice-agent-harnesses/bland", "voice-agent-harnesses/cartesia", "voice-agent-harnesses/livekit", "voice-agent-harnesses/pipecat"]
