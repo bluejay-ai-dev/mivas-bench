@@ -148,14 +148,10 @@ async def run_tool(
     call_id: str | None = None,
 ) -> tuple[dict[str, Any], bool]:
     """Execute a tool under a GenAI execute_tool span when a traced_run is active."""
-    from report import call_offset_ms, finish_tool_span, tool_span
-
-    offset = call_offset_ms()
+    from report import finish_tool_span, tool_span
     with tool_span(name, args, call_id=call_id) as span:
         result, stop = await _execute_tool(name, args, bp, state)
-        finish_tool_span(
-            span, result, name=name, parameters=args, start_offset_ms=offset
-        )
+        finish_tool_span(span, result, ok=bool(result.get("success")))
         return result, stop
 
 
