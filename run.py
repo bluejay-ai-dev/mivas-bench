@@ -36,12 +36,16 @@ def _redact_cmd(cmd: list[str]) -> str:
     for part in cmd:
         if part.startswith("--from-literal=OPENAI_API_KEY="):
             out.append("--from-literal=OPENAI_API_KEY=***")
+        elif part.startswith("--from-literal=NVIDIA_API_KEY="):
+            out.append("--from-literal=NVIDIA_API_KEY=***")
         elif part.startswith("--from-literal=BLUEJAY_API_KEY="):
             out.append("--from-literal=BLUEJAY_API_KEY=***")
         elif part.startswith("--from-literal=CHIRP_PASS="):
             out.append("--from-literal=CHIRP_PASS=***")
         elif "OPENAI_API_KEY=" in part and not part.startswith("OPENAI_API_KEY=***"):
             out.append("OPENAI_API_KEY=***")
+        elif "NVIDIA_API_KEY=" in part and not part.startswith("NVIDIA_API_KEY=***"):
+            out.append("NVIDIA_API_KEY=***")
         else:
             out.append(part)
     return " ".join(out)
@@ -133,17 +137,18 @@ def secret_exists() -> bool:
 
 
 def ensure_secret() -> None:
-    """Create or refresh mivas-secrets from env (OPENAI required; Bluejay/CHIRP optional)."""
+    """Create or refresh mivas-secrets from env (provider keys + Bluejay/CHIRP)."""
     api_key = os.environ.get("OPENAI_API_KEY", "")
-    if not secret_exists() and not api_key:
+    nvidia_key = os.environ.get("NVIDIA_API_KEY", "")
+    if not secret_exists() and not api_key and not nvidia_key:
         print(
-            "missing Secret mivas-secrets and OPENAI_API_KEY unset\n"
+            "missing Secret mivas-secrets and no OPENAI_API_KEY/NVIDIA_API_KEY in env\n"
             "create with: kubectl create secret generic mivas-secrets "
-            "--from-literal=OPENAI_API_KEY=...",
+            "--from-literal=OPENAI_API_KEY=... and/or --from-literal=NVIDIA_API_KEY=...",
             file=sys.stderr,
         )
         sys.exit(1)
-    if not api_key:
+    if not api_key and not nvidia_key:
         # Secret already exists; nothing to sync from env.
         return
     cmd = [
@@ -152,11 +157,14 @@ def ensure_secret() -> None:
         "secret",
         "generic",
         "mivas-secrets",
-        f"--from-literal=OPENAI_API_KEY={api_key}",
         "--dry-run=client",
         "-o",
         "yaml",
     ]
+    if api_key:
+        cmd.append(f"--from-literal=OPENAI_API_KEY={api_key}")
+    if nvidia_key:
+        cmd.append(f"--from-literal=NVIDIA_API_KEY={nvidia_key}")
     if os.environ.get("BLUEJAY_API_KEY"):
         cmd.append(f"--from-literal=BLUEJAY_API_KEY={os.environ['BLUEJAY_API_KEY']}")
     chirp_user = os.environ.get("CHIRP_USER", "mivas")
