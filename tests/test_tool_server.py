@@ -126,6 +126,24 @@ def _dispatch_args(industry: str, spec: dict[str, Any]) -> tuple[dict[str, Any],
     return _sample_args(spec), False
 
 
+# Some known-good tools only succeed once a prerequisite tool has seeded session
+# state (e.g. healthcare's get_patient_summary/explain_charge need verify_identity
+# to have run first). Listed explicitly so the smoke test's dispatch order doesn't
+# silently depend on tools.json's declaration order.
+_DISPATCH_BEFORE: dict[str, list[str]] = {
+    "healthcare": ["verify_identity"],
+}
+
+
+def _ordered_tools(industry: str, tools: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Reorder `tools` so each name in _DISPATCH_BEFORE[industry] comes first,
+    in that order, ahead of everything else (original order otherwise)."""
+    first = [n for n in _DISPATCH_BEFORE.get(industry, []) if any(t["name"] == n for t in tools)]
+    by_name = {t["name"]: t for t in tools}
+    rest = [t for t in tools if t["name"] not in first]
+    return [by_name[n] for n in first] + rest
+
+
 def test_dispatch_every_industry_tool() -> None:
     for industry in INDUSTRIES:
         with _load_tool_server(industry) as module:
@@ -139,7 +157,7 @@ def test_dispatch_every_industry_tool() -> None:
 
                 assert client.post("/tools/not_a_real_tool", json={"arguments": {}}).status_code == 404
 
-                for spec in tools:
+                for spec in _ordered_tools(industry, tools):
                     name = spec["name"]
                     entry = flags.get(name, {})
                     args, must_succeed = _dispatch_args(industry, spec)
