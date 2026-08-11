@@ -19,6 +19,7 @@ import time
 import uuid
 from pathlib import Path
 
+from agents.realtime import RealtimeModelSendRawMessage
 from websockets.asyncio.server import serve
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -47,6 +48,20 @@ def _simulation_result_id(ws) -> str | None:
         return None
     val = headers.get("X-Simulation-Result-Id") or headers.get("x-simulation-result-id")
     return str(val) if val else None
+
+
+async def _nudge_greeting(session) -> None:
+    """Make the agent open the call.
+
+    ``semantic_vad`` only responds to caller audio, so a digital human with
+    ``speaks_first: false`` deadlocks both sides into silence. A bare
+    ``response.create`` asks for a turn without adding a conversation item, so
+    the greeting comes from the agent's own instructions and no phantom user
+    item / ``customer.speech`` span lands in the trace.
+    """
+    await session.model.send_event(
+        RealtimeModelSendRawMessage(message={"type": "response.create"})
+    )
 
 
 async def _bridge(ws, model: str, industry: str) -> None:
@@ -80,6 +95,7 @@ async def _bridge(ws, model: str, industry: str) -> None:
         ) as session:
             ctx["session"] = session
             events = tracer.wrap(session) if tracer is not None else session
+            await _nudge_greeting(session)
 
             async def inbound() -> None:
                 nonlocal up
