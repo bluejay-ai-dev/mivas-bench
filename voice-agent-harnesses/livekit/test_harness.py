@@ -18,7 +18,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from livekit.agents import llm as lk_llm
 
 import harness
-from harness import Receptionist, Scheduler, load_blueprint, sim_result_id_from_job_metadata
+from harness import BlueprintAgent, load_blueprint, sim_result_id_from_job_metadata
 
 
 def test_sim_result_id() -> None:
@@ -51,25 +51,41 @@ def test_real_handoff() -> None:
     bp = load_blueprint("control-industry")
     hangup = asyncio.Event()
 
-    receptionist_model = object()  # stands in for a per-agent RealtimeModel instance
-    scheduler_model = object()
-    receptionist = Receptionist(
-        bp,
-        hangup,
-        llm=receptionist_model,
-        make_scheduler=lambda: Scheduler(bp, hangup, llm=scheduler_model, opener="hi"),
+    models: dict[str, object] = {}  # stand-ins for per-agent RealtimeModel instances
+
+    def llm_factory(name: str) -> object:
+        return models.setdefault(name, object())
+
+    receptionist = BlueprintAgent(
+        bp, "receptionist", hangup, llm_factory=llm_factory, scripted_opener=True
     )
     assert _tool_names(receptionist) == {"handoff_to_scheduler", "end_call"}
     assert receptionist.instructions == bp["agents"]["receptionist"]["instructions"]
 
-    scheduler = asyncio.run(receptionist.handoff_to_scheduler(None))
-    assert isinstance(scheduler, Scheduler)
+    handoff = lk_llm.ToolContext(receptionist.tools).get_function_tool("handoff_to_scheduler")
+    scheduler = asyncio.run(handoff(raw_arguments={}))
+    assert isinstance(scheduler, BlueprintAgent)
+    assert scheduler.agent_name == "scheduler"
     assert _tool_names(scheduler) == {"schedule_appointment", "end_call"}
     assert scheduler.instructions == bp["agents"]["scheduler"]["instructions"]
+    # scripted_opener propagates as a capability flag, but the actual spoken line is
+    # derived from the *target's own* prompt, not inherited verbatim from the caller.
+    assert scheduler._opener == "Hey, when do you want to schedule your repair appointment?"
     # each agent carries its own model => LiveKit cannot reuse the realtime session
-    assert receptionist.llm is receptionist_model
-    assert scheduler.llm is scheduler_model
+    assert receptionist.llm is models["receptionist"]
+    assert scheduler.llm is models["scheduler"]
     assert scheduler.llm is not receptionist.llm
+
+
+def test_generic_industries() -> None:
+    """Every shipped industry builds without per-tool harness handlers, and each
+    agent only carries its own blueprint tools."""
+    for industry in ("healthcare", "legal", "travel"):
+        bp = load_blueprint(industry)
+        hangup = asyncio.Event()
+        start = BlueprintAgent(bp, bp["start"], hangup)
+        expected = {t["name"] for t in bp["agents"][bp["start"]]["tools"]}
+        assert _tool_names(start) == expected, (industry, _tool_names(start) ^ expected)
 
 
 def test_await_farewell() -> None:
@@ -99,5 +115,6 @@ if __name__ == "__main__":
     test_sim_result_id()
     test_blueprint()
     test_real_handoff()
+    test_generic_industries()
     test_await_farewell()
     print("ok")
