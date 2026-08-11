@@ -411,8 +411,9 @@ async def traced_run(
                     root.set_status(Status(StatusCode.OK))
                 else:
                     root.record_exception(e)
-                    root.set_status(Status(StatusCode.OK))
+                    root.set_status(Status(StatusCode.ERROR, str(e)[:400]))
                     _log(f"voice.call swallowed {name}: {e}")
+                    raise
     finally:
         _active_root = prev_active
         _active_t0 = prev_t0

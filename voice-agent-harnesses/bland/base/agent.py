@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import os
 import sys
 import time
 from pathlib import Path
@@ -31,16 +32,25 @@ def check(industry: str) -> None:
     assert nodes["book"]["data"]["extractVars"][0][0] == "date"
     # Default nodes route on edge descriptions, Webhook nodes on responsePathways.
     hops = {(e["source"], e["target"]) for e in graph["edges"]}
-    assert hops == {("receptionist", "handoff"), ("scheduler", "book")}, hops
+    assert hops == {
+        ("receptionist", "handoff"),
+        ("scheduler", "book"),
+        ("receptionist", "end_receptionist"),
+        ("scheduler", "end_scheduler"),
+    }, hops
     # top-level, not under `data` — Bland drops nested edge fields
     assert all(e.get("description") and "data" not in e for e in graph["edges"])
     assert [
         (n, nodes[n]["data"]["responsePathways"][0][3]["id"]) for n in ("handoff", "book")
     ] == [("handoff", "scheduler"), ("book", "end")]
+    assert nodes["book"]["data"]["responsePathways"][1][3]["id"] == "scheduler"
     print(f"ok — {len(graph['nodes'])} nodes, {len(graph['edges'])} edges")
 
 
 async def call(industry: str, public_url: str, seconds: float) -> None:
+    public_url = os.environ.get("PUBLIC_URL", "").strip() or public_url
+    if not public_url:
+        raise SystemExit("need PUBLIC_URL (cloudflared https url) — Bland calls tools over HTTPS")
     ids = ensure_agent(industry, public_url)
     print(f"agent={ids['agent_id']} pathway={ids['pathway_id']}", flush=True)
     frame = b"\x00\x00" * 882  # 20 ms of 44.1 kHz silence
@@ -64,15 +74,19 @@ async def call(industry: str, public_url: str, seconds: float) -> None:
                 else:
                     print(f"{time.monotonic() - t0:6.2f} {msg[:240]}", flush=True)
 
-        await asyncio.gather(send(), recv(), return_exceptions=True)
+        results = await asyncio.gather(send(), recv(), return_exceptions=True)
+        for result in results:
+            if isinstance(result, BaseException):
+                raise result
         print(f"agent audio bytes={audio}", flush=True)
+        assert audio > 0, "provider session produced no audio"
 
 
 if __name__ == "__main__":
     p = argparse.ArgumentParser()
     p.add_argument("industry", nargs="?", default="control-industry")
     p.add_argument("--check", action="store_true")
-    p.add_argument("--public-url", default="https://example.test")
+    p.add_argument("--public-url", default="")
     p.add_argument("--seconds", type=float, default=15.0)
     a = p.parse_args()
     if a.check:

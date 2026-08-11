@@ -101,7 +101,9 @@ def ensure_agent(industry_dir: str | Path, *, public_url: str | None = None) -> 
     """
     name = export_blueprint(industry_dir)
     cache = _cache()
-    agent_id = os.environ.get("CARTESIA_AGENT_ID", "").strip() or cache.get(name, {}).get("agent_id")
+    cached_agent_id = cache.get(name, {}).get("agent_id")
+    agent_id = os.environ.get("CARTESIA_AGENT_ID", "").strip() or cached_agent_id
+    agent_changed = bool(cached_agent_id and agent_id != cached_agent_id)
 
     if not agent_id:
         _cli("init", "--new", f"mivas-{name}", str(AGENT_DIR))
@@ -116,7 +118,7 @@ def ensure_agent(industry_dir: str | Path, *, public_url: str | None = None) -> 
     # `env set` rolls a new deployment version (~2 min), so only push on change —
     # by digest, so the cache file never holds the API key it carries.
     digest = hashlib.sha256(json.dumps(env, sort_keys=True).encode()).hexdigest()[:16]
-    if cache.get(name, {}).get("env_digest") != digest:
+    if agent_changed or cache.get(name, {}).get("env_digest") != digest:
         _cli("env", "set", "--agent-id", agent_id, *[f"{k}={v}" for k, v in env.items()])
         cache.setdefault(name, {}).update(agent_id=agent_id, env_digest=digest)
         AGENT_CACHE_PATH.write_text(json.dumps(cache, indent=2) + "\n")
@@ -158,7 +160,7 @@ async def _execute_tool(name: str, args: dict[str, Any]) -> dict[str, Any]:
 async def run_tool(name: str, args: dict[str, Any], *, call_id: str | None = None) -> dict[str, Any]:
     """Run an industry tool under an execute_tool span. Never raises — a failed
     tool must not take down the bridge before OTel flushes."""
-    from report import call_offset_ms, finish_tool_span, tool_span
+    from report import finish_tool_span, tool_span
     with tool_span(name, args, call_id=call_id) as span:
         try:
             result = await _execute_tool(name, args)

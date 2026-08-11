@@ -227,6 +227,7 @@ def ensure_agent(industry_dir: str | Path, public_url: str) -> dict[str, str]:
 
     if llm_id and agent_id:
         _call("PATCH", f"/update-retell-llm/{llm_id}", payload)
+        _call("PATCH", f"/update-agent/{agent_id}", _agent_payload(llm_id, industry_name))
         return {"llm_id": llm_id, "agent_id": agent_id}
 
     llm_id = _call("POST", "/create-retell-llm", payload)["llm_id"]

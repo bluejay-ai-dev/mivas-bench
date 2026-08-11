@@ -119,6 +119,7 @@ def _webhook_node(
     public_url: str,
     *,
     next_node: tuple[str, str],
+    failure_node: tuple[str, str] | None = None,
     response_data: list[dict[str, str]] | None = None,
 ) -> dict[str, Any]:
     """A tool as a Webhook node.
@@ -146,8 +147,20 @@ def _webhook_node(
                     "",
                     "",
                     {"id": next_node[0], "name": next_node[1]},
+                ],
+            ]
+            + (
+                [
+                    [
+                        "Default/Webhook Failure",
+                        "",
+                        "",
+                        {"id": failure_node[0], "name": failure_node[1]},
+                    ]
                 ]
-            ],
+                if failure_node
+                else []
+            ),
         },
     }
 
@@ -203,6 +216,7 @@ def pathway_graph(bp: dict[str, Any], public_url: str) -> dict[str, Any]:
             booking_spec,
             public_url,
             next_node=("end", "end_call"),
+            failure_node=("scheduler", target["name"]),
             response_data=[{"name": "{{booked_date}}", "data": "$.date", "context": ""}],
         ),
         {
@@ -212,6 +226,24 @@ def pathway_graph(bp: dict[str, Any], public_url: str) -> dict[str, Any]:
                 "name": "end_call",
                 "prompt": "Confirm the repair appointment is booked for {{booked_date}}, "
                 "say goodbye, and end the call.",
+                "modelOptions": {"skipUserResponse": True},
+            },
+        },
+        {
+            "id": "end_receptionist",
+            "type": "End Call",
+            "data": {
+                "name": "end_call_receptionist",
+                "prompt": "Say goodbye and end the call.",
+                "modelOptions": {"skipUserResponse": True},
+            },
+        },
+        {
+            "id": "end_scheduler",
+            "type": "End Call",
+            "data": {
+                "name": "end_call_scheduler",
+                "prompt": "Say goodbye and end the call.",
                 "modelOptions": {"skipUserResponse": True},
             },
         },
@@ -236,6 +268,22 @@ def pathway_graph(bp: dict[str, Any], public_url: str) -> dict[str, Any]:
             "or agreed on, so the appointment can be booked. Do not take it while the "
             "date is still vague (\"next week\", \"soon\").",
         },
+        {
+            "id": "e_end_receptionist",
+            "source": "receptionist",
+            "target": "end_receptionist",
+            "label": "receptionist → end_call",
+            "description": "Take this path when the caller is done, says goodbye, or says "
+            "this is a wrong number.",
+        },
+        {
+            "id": "e_end_scheduler",
+            "source": "scheduler",
+            "target": "end_scheduler",
+            "label": "scheduler → end_call",
+            "description": "Take this path when the caller is done, says goodbye, or says "
+            "this is a wrong number.",
+        },
     ]
     return {"nodes": nodes, "edges": edges}
 
@@ -259,6 +307,15 @@ def ensure_agent(industry_dir: str | Path, public_url: str) -> dict[str, str]:
     industry_name = Path(bp["industry_dir"]).name
     cache = _load_cache()
     entry = dict(cache.get(industry_name) or {})
+    agent_config = {
+        "prompt": bp["agents"][bp["start"]]["instructions"],
+        "pathway_id": entry.get("pathway_id"),
+        "voice": DEFAULT_VOICE,
+        "model": DEFAULT_MODEL,
+        "language": "ENG",
+        "max_duration": MAX_DURATION_MIN,
+        "interruption_threshold": INTERRUPTION_THRESHOLD,
+    }
 
     if not entry.get("pathway_id"):
         r = httpx.post(
@@ -283,19 +340,20 @@ def ensure_agent(industry_dir: str | Path, public_url: str) -> dict[str, str]:
         r = httpx.post(
             f"{API_BASE}/v1/agents",
             headers=_headers(),
-            json={
-                "prompt": bp["agents"][bp["start"]]["instructions"],  # ignored once pathway_id is set
-                "pathway_id": entry["pathway_id"],
-                "voice": DEFAULT_VOICE,
-                "model": DEFAULT_MODEL,
-                "language": "ENG",
-                "max_duration": MAX_DURATION_MIN,
-                "interruption_threshold": INTERRUPTION_THRESHOLD,
-            },
+            json={**agent_config, "pathway_id": entry["pathway_id"]},
             timeout=30.0,
         )
         r.raise_for_status()
         entry["agent_id"] = r.json()["agent"]["agent_id"]
+    else:
+        agent_config["pathway_id"] = entry["pathway_id"]
+        r = httpx.patch(
+            f"{API_BASE}/v1/agents/{entry['agent_id']}",
+            headers=_headers(),
+            json=agent_config,
+            timeout=30.0,
+        )
+        r.raise_for_status()
 
     cache[industry_name] = entry
     AGENT_CACHE_PATH.write_text(json.dumps(cache, indent=2) + "\n")
@@ -327,7 +385,7 @@ async def _execute_tool(name: str, args: dict[str, Any]) -> dict[str, Any]:
 
 async def run_tool(name: str, args: dict[str, Any]) -> dict[str, Any]:
     """Execute a pathway webhook call under an execute_tool span. Never raises."""
-    from report import call_offset_ms, finish_tool_span, tool_span
+    from report import finish_tool_span, tool_span
     with tool_span(name, args) as span:
         try:
             result = await _execute_tool(name, args)
