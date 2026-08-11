@@ -364,12 +364,15 @@ def _traced_run(harness: str, industry: str):
 
         return _noop()
     family_dir = ROOT / "voice-agent-harnesses" / family
-    if str(family_dir) not in sys.path:
-        sys.path.insert(0, str(family_dir))
-    from report import traced_run  # noqa: E402
+    report_path = family_dir / "report.py"
+    spec = importlib.util.spec_from_file_location("mivas_openai_report", report_path)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"cannot load report module from {report_path}")
+    report_mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(report_mod)
 
     model = harness.rsplit("/", 1)[-1]
-    return traced_run(f"mivas-{industry}-{model}")
+    return report_mod.traced_run(f"mivas-{industry}-{model}")
 
 
 async def converse_voice(harness: str, industry: str, *, barge_in: bool = False) -> None:

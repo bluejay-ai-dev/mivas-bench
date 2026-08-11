@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Any
 
 import httpx
-from google import genai
+import google.genai as genai
 from google.genai import types
 
 REPO_ROOT = Path(__file__).resolve().parents[2]

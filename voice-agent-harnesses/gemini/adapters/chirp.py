@@ -14,7 +14,7 @@ import time
 import uuid
 from pathlib import Path
 
-from google import genai
+import google.genai as genai
 from google.genai import types
 from websockets.asyncio.server import serve
 
