@@ -42,9 +42,11 @@ async def smoke(industry: str, seconds: float = 20.0) -> None:
 
         task = asyncio.create_task(feed())
         audio, first, last, t0 = 0, None, None, time.monotonic()
+        deadline = t0 + seconds
         try:
-            while time.monotonic() - t0 < seconds:
-                event = json.loads(await asyncio.wait_for(ws.recv(), timeout=seconds))
+            while time.monotonic() < deadline:
+                remaining = deadline - time.monotonic()
+                event = json.loads(await asyncio.wait_for(ws.recv(), timeout=remaining))
                 if event.get("event") == "media_output":
                     first = first or time.monotonic()
                     last = time.monotonic()
