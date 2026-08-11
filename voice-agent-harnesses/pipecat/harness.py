@@ -52,7 +52,7 @@ RUNTIMES = {
 RUNTIME_SECRET_KEYS = {
     "cascaded": frozenset({"DEEPGRAM_API_KEY", "OPENAI_API_KEY", "ELEVENLABS_API_KEY"}),
     "openai-realtime-2.1": frozenset({"OPENAI_API_KEY"}),
-    "gemini-flash-live-3.1": frozenset({"GOOGLE_API_KEY"}),
+    "gemini-flash-live-3.1": frozenset({"GOOGLE_API_KEY", "ELEVENLABS_API_KEY"}),
 }
 DEFAULT_RUNTIME = "cascaded"
 # The runtimes whose "agent" is a speech-to-speech session rather than a text LLM.

@@ -101,7 +101,8 @@ def ensure_agent(industry_dir: str | Path, *, public_url: str | None = None) -> 
     """
     name = export_blueprint(industry_dir)
     cache = _cache()
-    cached_agent_id = cache.get(name, {}).get("agent_id")
+    cached_entry = cache.get(name, {})
+    cached_agent_id = cached_entry.get("agent_id")
     agent_id = os.environ.get("CARTESIA_AGENT_ID", "").strip() or cached_agent_id
     agent_changed = bool(cached_agent_id and agent_id != cached_agent_id)
 
@@ -118,12 +119,18 @@ def ensure_agent(industry_dir: str | Path, *, public_url: str | None = None) -> 
     # `env set` rolls a new deployment version (~2 min), so only push on change —
     # by digest, so the cache file never holds the API key it carries.
     digest = hashlib.sha256(json.dumps(env, sort_keys=True).encode()).hexdigest()[:16]
-    if agent_changed or cache.get(name, {}).get("env_digest") != digest:
+    needs_env_set = agent_changed or cached_entry.get("env_digest") != digest
+    needs_deploy = (
+        agent_changed
+        or cached_agent_id != agent_id
+        or os.environ.get("CARTESIA_REDEPLOY")
+    )
+    if needs_env_set:
         _cli("env", "set", "--agent-id", agent_id, *[f"{k}={v}" for k, v in env.items()])
         cache.setdefault(name, {}).update(agent_id=agent_id, env_digest=digest)
         AGENT_CACHE_PATH.write_text(json.dumps(cache, indent=2) + "\n")
 
-    if cache.get(name, {}).get("agent_id") != agent_id or os.environ.get("CARTESIA_REDEPLOY"):
+    if needs_deploy:
         print(f"cartesia deploy {agent_id} …", flush=True)
         print(_cli("deploy", "--agent-id", agent_id, str(AGENT_DIR)), flush=True)
         cache.setdefault(name, {})["agent_id"] = agent_id
