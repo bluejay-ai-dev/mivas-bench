@@ -58,17 +58,17 @@ def build_session(_bp: dict[str, Any]) -> AgentSession:
     )
 
 
-def build_agent(bp: dict[str, Any], hangup: asyncio.Event) -> harness.Receptionist:
-    return harness.Receptionist(
+def build_agent(bp: dict[str, Any], hangup: asyncio.Event) -> harness.BlueprintAgent:
+    # llm_factory gives every agent its own RealtimeModel, which is what makes a
+    # handoff open a second Gemini Live session instead of reusing the first.
+    # `opener` is the scripted first line for handoff targets, since 3.1 rejects
+    # generate_reply().
+    return harness.BlueprintAgent(
         bp,
+        bp["start"],
         hangup,
-        llm=_model(bp["agents"]["receptionist"]["instructions"]),
-        make_scheduler=lambda: harness.Scheduler(
-            bp,
-            hangup,
-            llm=_model(bp["agents"]["scheduler"]["instructions"]),
-            opener=harness.SCHEDULER_OPENER,
-        ),
+        llm_factory=lambda name: _model(bp["agents"][name]["instructions"]),
+        opener=harness.SCHEDULER_OPENER,
     )
 
 
