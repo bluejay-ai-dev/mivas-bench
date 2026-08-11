@@ -12,6 +12,7 @@ import json
 import os
 import sys
 import tempfile
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
 
@@ -21,19 +22,29 @@ ROOT = Path(__file__).resolve().parents[1]
 INDUSTRIES = ("control-industry", "healthcare", "legal", "travel")
 
 
+@contextmanager
 def _load_tool_server(industry: str):
     """Import industries/<industry>/tool_server.py under a unique module name,
-    pointing MIVAS_DB_PATH at a throwaway file (DB_PATH is read at import)."""
-    os.environ["MIVAS_DB_PATH"] = str(
-        Path(tempfile.mkdtemp(prefix=f"mivas-{industry}-")) / "runtime.db"
-    )
-    path = ROOT / "industries" / industry / "tool_server.py"
-    name = f"tool_server_{industry.replace('-', '_')}"
-    spec = importlib.util.spec_from_file_location(name, path)
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[name] = module
-    spec.loader.exec_module(module)
-    return module
+    pointing MIVAS_DB_PATH at a temp file (DB_PATH is read at import).
+    Restores the previous MIVAS_DB_PATH value and deletes the temp dir on exit."""
+    original = os.environ.get("MIVAS_DB_PATH")
+    with tempfile.TemporaryDirectory(prefix=f"mivas-{industry}-") as tmp:
+        os.environ["MIVAS_DB_PATH"] = str(Path(tmp) / "runtime.db")
+        try:
+            name = f"tool_server_{industry.replace('-', '_')}"
+            if name in sys.modules:
+                del sys.modules[name]
+            path = ROOT / "industries" / industry / "tool_server.py"
+            spec = importlib.util.spec_from_file_location(name, path)
+            module = importlib.util.module_from_spec(spec)
+            sys.modules[name] = module
+            spec.loader.exec_module(module)
+            yield module
+        finally:
+            if original is None:
+                os.environ.pop("MIVAS_DB_PATH", None)
+            else:
+                os.environ["MIVAS_DB_PATH"] = original
 
 
 def _tool_flags(industry: str) -> dict[str, dict[str, Any]]:
@@ -66,46 +77,99 @@ def _sample_args(spec: dict[str, Any]) -> dict[str, Any]:
     return {name: _sample_value(name, props[name]) for name in schema.get("required") or []}
 
 
+# Curated sample argument sets for tools that should return ok/success == True.
+# This is a targeted smoke signal: a regressed handler that always soft-fails will
+# fail these assertions even though the generic floor below still passes.
+_KNOWN_GOOD_ARGS: dict[str, dict[str, dict[str, Any]]] = {
+    "control-industry": {
+        "schedule_appointment": {"date": "08/15/2026"},
+    },
+    "legal": {
+        "lookup_caller": {"full_name": "Dana Whitfield", "phone": "5105550142"},
+        "check_practice_area": {"practice_area": "auto_accident"},
+        "calculate_filing_deadline": {
+            "state": "CA",
+            "practice_area": "auto_accident",
+            "incident_date": "2024-09-15",
+        },
+        "find_evaluation_slots": {
+            "practice_area": "auto_accident",
+            "state": "CA",
+            "earliest_date": "2026-08-01",
+        },
+        "get_attorney": {"attorney_id": "a_10"},
+    },
+    "healthcare": {
+        "resolve_inbound_context": {"caller_ani": "+12125550100"},
+        "verify_identity": {"full_name": "Jordan Lee", "dob": "1990-04-12"},
+        "get_patient_summary": {},
+        "find_slots": {"location_ids": ["loc_park_ave"]},
+        "explain_charge": {"line_item_id": "li_noshow"},
+        "search_practice_kb": {"query": "open"},
+    },
+    "travel": {
+        "find_reservation": {"last_name": "Solberg", "confirmation_code": "RT2LKD"},
+        "get_reservation": {"confirmation_code": "RT2LKD"},
+        "search_flights": {"origin": "ORD", "destination": "SEA", "earliest_date": "2026-08-09"},
+        "get_flight_status": {"flight_number": "CX771", "date": "2026-08-09"},
+        "get_credit_balance": {"summit_number": "SC2019773"},
+    },
+}
+
+
+def _dispatch_args(industry: str, spec: dict[str, Any]) -> tuple[dict[str, Any], bool]:
+    """Return the arguments and whether this tool must return ok/success == True."""
+    name = spec["name"]
+    known = _KNOWN_GOOD_ARGS.get(industry, {})
+    if name in known:
+        return known[name], True
+    return _sample_args(spec), False
+
+
 def test_dispatch_every_industry_tool() -> None:
     for industry in INDUSTRIES:
-        module = _load_tool_server(industry)
-        tools = json.loads(
-            (ROOT / "industries" / industry / "tools.json").read_text()
-        )["tools"]
-        flags = _tool_flags(industry)
-        with TestClient(module.app) as client:
-            assert client.get("/health").status_code == 200, industry
-            assert client.get("/state").status_code == 200, industry
+        with _load_tool_server(industry) as module:
+            tools = json.loads(
+                (ROOT / "industries" / industry / "tools.json").read_text()
+            )["tools"]
+            flags = _tool_flags(industry)
+            with TestClient(module.app) as client:
+                assert client.get("/health").status_code == 200, industry
+                assert client.get("/state").status_code == 200, industry
 
-            assert client.post("/tools/not_a_real_tool", json={"arguments": {}}).status_code == 404
+                assert client.post("/tools/not_a_real_tool", json={"arguments": {}}).status_code == 404
 
-            for spec in tools:
-                name = spec["name"]
-                entry = flags.get(name, {})
-                resp = client.post(f"/tools/{name}", json={"arguments": _sample_args(spec)})
-                if entry.get("session") or entry.get("handoff"):
-                    assert resp.status_code == 404, f"{industry}/{name} must stay harness-native"
-                    continue
-                assert resp.status_code == 200, f"{industry}/{name}: {resp.text[:200]}"
-                body = resp.json()
-                assert isinstance(body, dict), f"{industry}/{name}"
-                # each industry's declared envelope: ok/data/... or success/...
-                assert "ok" in body or "success" in body, f"{industry}/{name}: {body}"
+                for spec in tools:
+                    name = spec["name"]
+                    entry = flags.get(name, {})
+                    args, must_succeed = _dispatch_args(industry, spec)
+                    resp = client.post(f"/tools/{name}", json={"arguments": args})
+                    if entry.get("session") or entry.get("handoff"):
+                        assert resp.status_code == 404, f"{industry}/{name} must stay harness-native"
+                        continue
+                    assert resp.status_code == 200, f"{industry}/{name}: {resp.text[:200]}"
+                    body = resp.json()
+                    assert isinstance(body, dict), f"{industry}/{name}"
+                    # floor: every dispatchable tool returns the industry envelope
+                    assert "ok" in body or "success" in body, f"{industry}/{name}: {body}"
+                    if must_succeed:
+                        assert body.get("ok") is True or body.get("success") is True, (
+                            f"{industry}/{name} must succeed with known-good args: {body}"
+                        )
 
-            # reverse direction: no DISPATCH entry without a tools.json tool
-            declared = {
-                spec["name"]
-                for spec in tools
-                if not (flags.get(spec["name"], {}).get("session")
-                        or flags.get(spec["name"], {}).get("handoff"))
-            }
-            orphans = set(module.DISPATCH) - declared
-            assert not orphans, f"{industry}: DISPATCH entries not in tools.json: {sorted(orphans)}"
+                # reverse direction: no DISPATCH entry without a tools.json tool
+                declared = {
+                    spec["name"]
+                    for spec in tools
+                    if not (flags.get(spec["name"], {}).get("session")
+                            or flags.get(spec["name"], {}).get("handoff"))
+                }
+                orphans = set(module.DISPATCH) - declared
+                assert not orphans, f"{industry}: DISPATCH entries not in tools.json: {sorted(orphans)}"
 
 
 def test_control_industry_rest_and_dispatch() -> None:
-    module = _load_tool_server("control-industry")
-    with TestClient(module.app) as client:
+    with _load_tool_server("control-industry") as module, TestClient(module.app) as client:
         assert client.get("/health").json() == {"status": "ok"}
         assert client.get("/state").json() == {"appointments": []}
         assert client.get("/appointments").json() == []
@@ -128,8 +192,7 @@ def test_control_industry_rest_and_dispatch() -> None:
 
 
 def test_legal_guards_survive_dispatch() -> None:
-    module = _load_tool_server("legal")
-    with TestClient(module.app) as client:
+    with _load_tool_server("legal") as module, TestClient(module.app) as client:
         def tool(name: str, args: dict[str, Any]) -> dict[str, Any]:
             resp = client.post(f"/tools/{name}", json={"arguments": args})
             assert resp.status_code == 200, resp.text
@@ -151,8 +214,7 @@ def test_legal_guards_survive_dispatch() -> None:
 
 
 def test_healthcare_flow_through_dispatch() -> None:
-    module = _load_tool_server("healthcare")
-    with TestClient(module.app) as client:
+    with _load_tool_server("healthcare") as module, TestClient(module.app) as client:
         def tool(name: str, args: dict[str, Any]) -> dict[str, Any]:
             resp = client.post(f"/tools/{name}", json={"arguments": args})
             assert resp.status_code == 200, resp.text
@@ -193,8 +255,7 @@ def test_healthcare_flow_through_dispatch() -> None:
 
 
 def test_travel_guards_survive_dispatch() -> None:
-    module = _load_tool_server("travel")
-    with TestClient(module.app) as client:
+    with _load_tool_server("travel") as module, TestClient(module.app) as client:
         def tool(name: str, args: dict[str, Any]) -> dict[str, Any]:
             resp = client.post(f"/tools/{name}", json={"arguments": args})
             assert resp.status_code == 200, resp.text

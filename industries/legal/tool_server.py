@@ -535,7 +535,10 @@ _session: dict[str, str] = {}
 
 
 def _cid() -> str:
-    return _session.get("caller_id", "")
+    caller_id = _session.get("caller_id")
+    if not caller_id:
+        raise HTTPException(status_code=400, detail="Identify the caller first.")
+    return caller_id
 
 
 def _d_lookup_caller(a: dict[str, Any]) -> dict[str, Any]:
@@ -559,14 +562,14 @@ DISPATCH = {
     "record_intake": lambda a: record_intake(IntakeCreate(caller_id=_cid(), **a)),
     "add_intake_note": lambda a: add_intake_note(NoteCreate(caller_id=_cid(), note=a["note"])),
     "send_intake_packet": lambda a: send_document(
-        DocumentCreate(caller_id=_cid(), kind="intake_packet", target=a.get("channel", ""))
+        DocumentCreate(caller_id=_cid(), kind="intake_packet", target=a["channel"])
     ),
     "request_records_authorization": lambda a: send_document(
-        DocumentCreate(caller_id=_cid(), kind="records_authorization", target=a.get("provider", ""))
+        DocumentCreate(caller_id=_cid(), kind="records_authorization", target=a["provider"])
     ),
     "get_attorney": lambda a: get_attorney(a["attorney_id"]),
     "find_evaluation_slots": lambda a: find_evaluation_slots(
-        a["practice_area"], a["state"], a.get("earliest_date", "")
+        a["practice_area"], a["state"], a["earliest_date"]
     ),
     "hold_evaluation": lambda a: create_hold(
         HoldCreate(kind="evaluation", caller_id=_cid(), slot_id=a["slot_id"],
@@ -575,7 +578,7 @@ DISPATCH = {
     "confirm_evaluation": lambda a: confirm(ConfirmCreate(**a)),
     "hold_cancellation": lambda a: create_hold(
         HoldCreate(kind="cancellation", caller_id=_cid(),
-                   evaluation_id=a["evaluation_id"], reason=a.get("reason"))
+                   evaluation_id=a["evaluation_id"], reason=a["reason"])
     ),
     "confirm_cancellation": lambda a: confirm(ConfirmCreate(**a)),
     "get_case_status": lambda a: get_case_status(a["matter_id"], caller_id=_cid()),

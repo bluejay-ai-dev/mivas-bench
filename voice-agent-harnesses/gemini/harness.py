@@ -109,9 +109,24 @@ def live_config(bp: dict[str, Any], *, voice: str = "Puck") -> types.LiveConnect
     )
 
 
-def _tool_entry(bp: dict[str, Any], agent: str, name: str) -> dict[str, Any] | None:
-    """The blueprint entry for a tool, preferring the current agent's copy."""
-    for owner in [agent] + [a for a in bp["agents"] if a != agent]:
+def _tool_entry(bp: dict[str, Any], agent: str, name: str,
+                *, local_only: bool = False) -> dict[str, Any] | None:
+    """The blueprint entry for a tool.
+
+    When *local_only* is True the search is restricted to *agent*'s own tool
+    list — this is the correct scope for handoff and session tools, which must
+    never resolve against a different agent.  Industry (dispatchable) tools may
+    fall back across all agents because the Gemini Live tool list is fixed at
+    connect time and every agent's tools are visible.
+    """
+    for t in bp["agents"][agent]["tools"]:
+        if t["name"] == name:
+            return t
+    if local_only:
+        return None
+    for owner in bp["agents"]:
+        if owner == agent:
+            continue
         for t in bp["agents"][owner]["tools"]:
             if t["name"] == name:
                 return t
@@ -133,9 +148,13 @@ async def _execute_tool(
 ) -> tuple[dict[str, Any], bool]:
     """Execute a tool. Returns (result, should_end_call). Handoff and session
     tools are harness-native; every other tool dispatches to the tool server."""
-    entry = _tool_entry(bp, state["agent"], name)
-    if entry is not None and entry.get("handoff"):
-        target = entry.get("handoff_to")
+
+    # Handoff / session tools must belong to the *current* agent — never fall
+    # back to another agent's tool table, otherwise a post-handoff agent could
+    # re-trigger the previous agent's handoff.
+    local = _tool_entry(bp, state["agent"], name, local_only=True)
+    if local is not None and local.get("handoff"):
+        target = local.get("handoff_to")
         if not target or target not in bp["agents"]:
             return {"success": False, "error": "unknown handoff target"}, False
         state["agent"] = target
@@ -147,9 +166,11 @@ async def _execute_tool(
             "note": f"You are now the {target} agent. Follow the instructions field exactly.",
         }, False
 
-    if entry is not None and entry.get("session"):
+    if local is not None and local.get("session"):
         return {"success": True}, True
 
+    # Industry (dispatchable) tools: fall back across all agents so shared
+    # tools remain reachable regardless of which agent is currently active.
     return await _dispatch(name, args), False
 
 
