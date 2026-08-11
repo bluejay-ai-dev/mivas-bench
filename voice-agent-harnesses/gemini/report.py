@@ -43,15 +43,6 @@ if not logger.handlers:
 
 DEFAULT_OTLP_ENDPOINT = "https://otlp.getbluejay.ai/v1/traces"
 DEFAULT_API_URL = "https://api.getbluejay.ai/v1"
-TERMINAL_STATUSES = {
-    "EVALUATING",
-    "EVALUATED",
-    "COMPLETED",
-    "FAILED",
-    "SYSTEM_ERROR",
-    "NO_ANSWER",
-    "CANCELLED",
-}
 # Bluejay may clear trace_ids during EVALUATING → COMPLETED; re-link after these.
 FINAL_STATUSES = {
     "COMPLETED",
@@ -274,8 +265,15 @@ def end_speech_span(span: Span | None) -> None:
 
 
 async def _await_terminal_upsert(
-    client: httpx.AsyncClient, simulation_result_id: str, timeout: float = 18.0
+    client: httpx.AsyncClient, simulation_result_id: str, timeout: float = 300.0
 ) -> str | None:
+    """Wait for a *final* status, then POST once.
+
+    Not TERMINAL_STATUSES (it counts EVALUATING) and not 18 s: posting mid-eval gets
+    trace_ids wiped, and the relink then re-extracts every execute_tool span on top of
+    the first POST's, so each tool lands twice. Eval needs ~175 s; CHIRP has no session
+    cap, so the wait is free.
+    """
     deadline = time.monotonic() + timeout
     key = _api_key()
     if not key:
@@ -290,7 +288,7 @@ async def _await_terminal_upsert(
                 st = str(
                     ((r.json() or {}).get("simulation_result") or {}).get("status")
                 )
-                if st in TERMINAL_STATUSES:
+                if st in FINAL_STATUSES:
                     return st
         except Exception:
             pass
@@ -391,8 +389,13 @@ async def _relink_after_final(
     trace_id: str,
     early_status: str | None,
 ) -> None:
-    """Re-POST trace_ids once the sim leaves EVALUATING (eval can wipe the link)."""
+    """Re-POST trace_ids once the sim leaves EVALUATING (eval can wipe the link).
+
+    Only if it actually got wiped: each POST re-extracts the execute_tool spans and
+    appends them, so a redundant relink double-counts every tool on the timeline.
+    """
     final: str | None = None
+    linked = False
     deadline = time.monotonic() + 120.0
     while time.monotonic() < deadline:
         try:
@@ -401,15 +404,24 @@ async def _relink_after_final(
                 headers={"X-API-Key": key},
             )
             if r.status_code == 200:
-                st = str(
-                    ((r.json() or {}).get("simulation_result") or {}).get("status")
-                )
+                result = (r.json() or {}).get("simulation_result") or {}
+                st = str(result.get("status"))
                 if st in FINAL_STATUSES:
                     final = st
+                    linked = trace_id in (result.get("trace_ids") or [])
                     break
         except Exception:
             pass
         await asyncio.sleep(2.0)
+    if final is not None and linked:
+        logger.info(
+            "relink not needed after %s — trace=%s still linked sim=%s final=%s",
+            early_status,
+            trace_id,
+            simulation_result_id,
+            final,
+        )
+        return
     if final is None:
         logger.warning(
             "relink skipped — still not final after early upsert terminal=%s sim=%s",
