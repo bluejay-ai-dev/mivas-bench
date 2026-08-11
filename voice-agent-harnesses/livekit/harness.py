@@ -54,23 +54,12 @@ GREETING = "Welcome to Bluejay's Repair Services!"
 # step 1 of system-prompts/scheduler.md, verbatim. Only used by runtimes whose model
 # rejects generate_reply() (see Scheduler.on_enter); every other turn is model-generated.
 SCHEDULER_OPENER = "Hey, when do you want to schedule your repair appointment?"
-# How long the agent must be *quiet* after `end_call` before we tear the room down.
-# This used to be a flat sleep, which was enough for cascaded/Gemini (they finish the
-# farewell and the caller hangs up first) but not for gpt-realtime-2.1: it calls
-# `end_call` in the same response turn as `schedule_appointment` (2.6-2.9 s apart)
-# while still speaking, so a fixed 4 s deleted the room mid-sentence — the transcript
-# cut at "scheduled for eighteighteentwenty" (713478/713612) and at "Your repair
-# appointment is scheduled for" (713652). The digital human never heard a goodbye,
-# never hung up, and the run burned the full 180 s cap. The timer now *restarts*
-# whenever the agent is speaking or generating, so it measures 4 s of silence rather
-# than 4 s of wall clock; a model with nothing left to say still waits exactly 4 s.
+# Seconds of *silence* the agent must reach after `end_call` before we tear the room
+# down. This was a flat sleep, which deleted the room mid-farewell on gpt-realtime-2.1
+# (see README "Hanging up waits for silence"). Same env knobs as the pipecat harness.
 HANGUP_QUIET_S = float(os.environ.get("MIVAS_END_CALL_CLOSE_DELAY_S", "4.0"))
 # hard cap so a model that never stops talking cannot hold the room forever
 HANGUP_MAX_WAIT_S = float(os.environ.get("MIVAS_END_CALL_MAX_WAIT_S", "20.0"))
-# States where the agent still owes us audio. "thinking" is the gap between the
-# end_call tool result and the farewell audio starting — exactly where a check that
-# only looked for "speaking" fires early (713652 cut 1.7 s into that gap).
-AGENT_BUSY_STATES = ("thinking", "speaking")
 
 
 # ── blueprint ────────────────────────────────────────────────────────────────
@@ -268,26 +257,21 @@ def sim_result_id_from_job_metadata(raw: Any) -> str | None:
 async def await_farewell(session: AgentSession, disconnected: asyncio.Event) -> None:
     """Hold the room until the agent has gone quiet for HANGUP_QUIET_S.
 
-    `AgentSession.agent_state` is the same signal `wire_speech_spans` brackets
-    `agent.speech` on, polled rather than subscribed: the farewell can start at any
-    point in this window and an edge-triggered wait would miss the transition. The
-    quiet timer restarts on every busy sample, so a pause between the confirmation
-    and the goodbye does not count as "done talking".
+    Polled, not edge-triggered: the farewell can start anywhere in this window and a
+    one-shot wait would miss the transition. The quiet timer restarts on every busy
+    sample, so the pause before the goodbye does not count as "done talking".
     """
     loop = asyncio.get_running_loop()
-    deadline = loop.time() + HANGUP_MAX_WAIT_S
-    quiet_since = loop.time()
-    while not disconnected.is_set() and loop.time() < deadline:
-        if session.agent_state in AGENT_BUSY_STATES:
+    t0 = quiet_since = loop.time()
+    while not disconnected.is_set() and loop.time() - t0 < HANGUP_MAX_WAIT_S:
+        # "thinking" counts: it is the gap between the end_call tool result and the
+        # farewell audio, exactly where a speaking-only check fires early (713652).
+        if session.agent_state in ("thinking", "speaking"):
             quiet_since = loop.time()
         elif loop.time() - quiet_since >= HANGUP_QUIET_S:
             break
         await asyncio.sleep(0.2)
-    logger.info(
-        "farewell wait done after %.1fs (state=%s)",
-        loop.time() - (deadline - HANGUP_MAX_WAIT_S),
-        session.agent_state,
-    )
+    logger.info("farewell wait %.1fs (state=%s)", loop.time() - t0, session.agent_state)
 
 
 def wire_speech_spans(session: AgentSession) -> None:

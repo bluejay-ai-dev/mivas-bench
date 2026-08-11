@@ -25,8 +25,7 @@ def check(industry: str) -> None:
     bp = load_blueprint(industry)
     graph = pathway_graph(bp, "https://example.test")
     nodes = {n["id"]: n for n in graph["nodes"]}
-    # A Default node has no tools bound, so a prompt that tells the model to call one is
-    # only satisfiable by speaking the tool syntax ("<tool_call>schedule_appointment…").
+    # A Default node has no tools bound, so a prompt naming one gets read out loud.
     for nid in ("receptionist", "scheduler"):
         prompt = nodes[nid]["data"]["prompt"]
         assert not any(tool in prompt for tool in bp["catalog"]), prompt
