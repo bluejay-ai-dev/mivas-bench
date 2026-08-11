@@ -1,0 +1,190 @@
+{
+  "agents": [
+    {
+      "name": "reception",
+      "system_prompt": "system-prompts/reception.md",
+      "tools": [
+        {
+          "name": "find_reservation",
+          "handoff": false
+        },
+        {
+          "name": "get_traveler_list",
+          "handoff": false
+        },
+        {
+          "name": "get_reservation",
+          "handoff": false
+        },
+        {
+          "name": "escalate_to_human",
+          "handoff": false
+        },
+        {
+          "name": "end_call",
+          "session": true
+        },
+        {
+          "name": "transfer_to_ticketing",
+          "handoff": true,
+          "handoff_to": "ticketing"
+        },
+        {
+          "name": "transfer_to_loyalty_services",
+          "handoff": true,
+          "handoff_to": "loyalty_services"
+        },
+        {
+          "name": "transfer_to_payments",
+          "handoff": true,
+          "handoff_to": "payments"
+        }
+      ]
+    },
+    {
+      "name": "ticketing",
+      "system_prompt": "system-prompts/ticketing.md",
+      "tools": [
+        {
+          "name": "get_fare_rules",
+          "handoff": false
+        },
+        {
+          "name": "get_flight_status",
+          "handoff": false
+        },
+        {
+          "name": "search_flights",
+          "handoff": false
+        },
+        {
+          "name": "quote_change",
+          "handoff": false
+        },
+        {
+          "name": "confirm_change",
+          "handoff": false
+        },
+        {
+          "name": "quote_cancellation",
+          "handoff": false
+        },
+        {
+          "name": "confirm_cancellation",
+          "handoff": false
+        },
+        {
+          "name": "get_reservation",
+          "handoff": false
+        },
+        {
+          "name": "escalate_to_human",
+          "handoff": false
+        },
+        {
+          "name": "end_call",
+          "session": true
+        },
+        {
+          "name": "transfer_to_loyalty_services",
+          "handoff": true,
+          "handoff_to": "loyalty_services"
+        },
+        {
+          "name": "transfer_to_payments",
+          "handoff": true,
+          "handoff_to": "payments"
+        }
+      ]
+    },
+    {
+      "name": "loyalty_services",
+      "system_prompt": "system-prompts/loyalty_services.md",
+      "tools": [
+        {
+          "name": "get_summit_status",
+          "handoff": false
+        },
+        {
+          "name": "get_credit_balance",
+          "handoff": false
+        },
+        {
+          "name": "get_bag_allowance",
+          "handoff": false
+        },
+        {
+          "name": "get_seat_map",
+          "handoff": false
+        },
+        {
+          "name": "quote_seat",
+          "handoff": false
+        },
+        {
+          "name": "confirm_seat",
+          "handoff": false
+        },
+        {
+          "name": "quote_bag",
+          "handoff": false
+        },
+        {
+          "name": "confirm_bag",
+          "handoff": false
+        },
+        {
+          "name": "get_reservation",
+          "handoff": false
+        },
+        {
+          "name": "escalate_to_human",
+          "handoff": false
+        },
+        {
+          "name": "end_call",
+          "session": true
+        },
+        {
+          "name": "transfer_to_payments",
+          "handoff": true,
+          "handoff_to": "payments"
+        }
+      ]
+    },
+    {
+      "name": "payments",
+      "system_prompt": "system-prompts/payments.md",
+      "tools": [
+        {
+          "name": "quote_payment",
+          "handoff": false
+        },
+        {
+          "name": "confirm_payment",
+          "handoff": false
+        },
+        {
+          "name": "send_itinerary",
+          "handoff": false
+        },
+        {
+          "name": "add_reservation_note",
+          "handoff": false
+        },
+        {
+          "name": "get_reservation",
+          "handoff": false
+        },
+        {
+          "name": "escalate_to_human",
+          "handoff": false
+        },
+        {
+          "name": "end_call",
+          "session": true
+        }
+      ]
+    }
+  ]
+}
