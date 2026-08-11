@@ -1,0 +1,25 @@
+industries/legal/tool_server.py
+  s_0d00e88b1c778a::t_091fc429ec6e21 31,592
+industries/travel/tool_server.py
+  s_0d00e88b1c778a::t_2c6f738f5afd70 34,587
+voice-agent-harnesses/cartesia/harness.py
+  s_0d00e88b1c778a::t_de94e0d098c93f 154-157,170
+voice-agent-harnesses/elevenlabs/harness.py
+  s_0d00e88b1c778a::t_0aa2914009342b 353,410
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "5c20a43a8331a33847b8d17ba45c91dc865d392e",
+  "prompts": {},
+  "sessions": {
+    "s_0d00e88b1c778a": {
+      "agent_id": {
+        "tool": "windsurf",
+        "id": "dawn-noodle",
+        "model": "unknown"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
