@@ -5,11 +5,11 @@ plus a generated `line_agent/blueprint.json` (the deployed runtime has no repo).
 `ensure_agent()` deploys that directory with the `cartesia` CLI and caches the
 resulting agent id in `.agents.json`.
 
-Tools run provider-side: `schedule_appointment` is an `http_server_tool` inside
-the Line agent that POSTs to `{TOOL_BASE_URL}/tool/schedule_appointment`, i.e.
-back into `adapters/chirp.py`. That webhook is what emits the `execute_tool`
-span and forwards to the industry tool server, so `run_tool` here is the
-webhook's body — nothing calls it from the audio path.
+Tools run provider-side: each industry tool is an `http_server_tool` inside
+the Line agent that POSTs to `{TOOL_BASE_URL}/tool/<name>`, i.e. back into
+`adapters/chirp.py`. That webhook is what emits the `execute_tool` span and
+forwards verbatim to the industry tool server's POST /tools/{name} dispatch,
+so `run_tool` here is the webhook's body — nothing calls it from the audio path.
 
 The tunnel URL is ephemeral, so `ensure_agent()` re-pushes `TOOL_BASE_URL` with
 `cartesia env set` on every chirp boot; `get_agent` reads it per call, so a new
@@ -150,18 +150,14 @@ def ensure_agent(industry_dir: str | Path, *, public_url: str | None = None) -> 
     raise SystemExit(f"cartesia deployment for {agent_id} never became Ready")
 
 
-async def _post_appointment(date: str) -> dict[str, Any]:
-    async with httpx.AsyncClient(timeout=30.0) as client:
-        resp = await client.post(f"{TOOL_SERVER_URL}/appointments", json={"date": date})
-        resp.raise_for_status()
-        body = resp.json()
-    return {"success": True, "date": body["date"]}
-
-
 async def _execute_tool(name: str, args: dict[str, Any]) -> dict[str, Any]:
-    if name == "schedule_appointment":
-        return await _post_appointment(args["date"])
-    return {"success": False, "error": f"unknown tool {name}"}
+    """Generic dispatch: POST /tools/{name}; the server's envelope is the result.
+    A 404 for an unknown/non-dispatchable tool has no `ok`/`success` key, so
+    run_tool's `default=False` fallback (not an exception here) is what turns
+    it into a failure, matching how the other harnesses handle the same case."""
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        resp = await client.post(f"{TOOL_SERVER_URL}/tools/{name}", json={"arguments": args})
+        return resp.json()
 
 
 async def run_tool(name: str, args: dict[str, Any], *, call_id: str | None = None) -> dict[str, Any]:
@@ -171,7 +167,8 @@ async def run_tool(name: str, args: dict[str, Any], *, call_id: str | None = Non
     with tool_span(name, args, call_id=call_id) as span:
         try:
             result = await _execute_tool(name, args)
-            finish_tool_span(span, result, ok=True)
+            ok = bool(result.get("ok", result.get("success", False)))
+            finish_tool_span(span, result, ok=ok)
             return result
         except Exception as e:
             err = {"success": False, "error": f"{type(e).__name__}: {e}"}

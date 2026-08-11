@@ -1,13 +1,13 @@
 """Shared blueprint → RealtimeRunner builder for OpenAI Realtime harnesses.
 
 Tool kinds (from agent_blueprint.json):
-  - industry (default): harness maps the tool onto the industry state API
-    (e.g. schedule_appointment → POST /appointments)
+  - industry (default): the harness is a dumb pipe — every industry tool is
+    POSTed to {TOOL_SERVER_URL}/tools/{name} with {"arguments": {...}} and the
+    server's JSON envelope goes back to the model verbatim
   - handoff: provider handoff API
   - session: harness-local tool (e.g. end_call); then close the realtime session
 
-The industry tool_server is a state/DB API — not a 1:1 tools.json mirror.
-Session tools never hit it.
+Session and handoff tools never hit the tool server.
 
 Callers must pass a mutable context into RealtimeRunner.run and stash the
 session on it (`context["session"] = session`) so session tools can hang up.
@@ -31,33 +31,21 @@ TOOL_SERVER_URL = os.environ.get("TOOL_SERVER_URL", "http://127.0.0.1:8000").rst
 # Let farewell audio finish before tearing down Realtime after end_call.
 END_CALL_CLOSE_DELAY_S = float(os.environ.get("MIVAS_END_CALL_CLOSE_DELAY_S", "2.5"))
 
-# Industry tools: name → call state API and shape the tools.json result.
-IndustryMapper = Callable[[dict[str, Any]], Awaitable[dict[str, Any]]]
-
 # Session tools: name → harness-local side effect (no state API).
 SessionMapper = Callable[[dict[str, Any]], Awaitable[dict[str, Any]]]
 
 
-async def _post_json(path: str, body: dict[str, Any]) -> dict[str, Any]:
+async def dispatch_industry_tool(name: str, args: dict[str, Any]) -> dict[str, Any]:
+    """Generic dispatch: POST /tools/{name}; the server's envelope is the result."""
     async with httpx.AsyncClient(timeout=30.0) as client:
-        resp = await client.post(f"{TOOL_SERVER_URL}{path}", json=body)
-        resp.raise_for_status()
+        resp = await client.post(f"{TOOL_SERVER_URL}/tools/{name}", json={"arguments": args})
         return resp.json()
-
-
-async def _schedule_appointment_via_api(args: dict[str, Any]) -> dict[str, Any]:
-    created = await _post_json("/appointments", {"date": args["date"]})
-    return {"success": True, "date": created["date"]}
 
 
 async def _end_call_local(args: dict[str, Any]) -> dict[str, Any]:
     _ = args.get("reason", "")
     return {"success": True}
 
-
-INDUSTRY_TOOL_HANDLERS: dict[str, IndustryMapper] = {
-    "schedule_appointment": _schedule_appointment_via_api,
-}
 
 SESSION_TOOL_HANDLERS: dict[str, SessionMapper] = {
     "end_call": _end_call_local,
@@ -111,12 +99,8 @@ def _fn_tool(spec: dict, *, session_tool: bool = False) -> FunctionTool:
                 "(session tools are harness-native, not state API routes)"
             )
     else:
-        handler = INDUSTRY_TOOL_HANDLERS.get(name)
-        if handler is None:
-            raise KeyError(
-                f"no harness industry handler for tool {name!r} "
-                "(map it to a state API call in INDUSTRY_TOOL_HANDLERS)"
-            )
+        async def handler(args: dict[str, Any]) -> dict[str, Any]:
+            return await dispatch_industry_tool(name, args)
 
     async def on_invoke(tool_ctx: Any, raw: str) -> str:
         args = json.loads(raw or "{}")
@@ -246,6 +230,11 @@ if __name__ == "__main__":
         start, agents = build_agents("control-industry")
         assert any(t.name == "end_call" for t in start.tools)
         assert any(t.name == "schedule_appointment" for t in agents["scheduler"].tools)
+
+        # every shipped industry builds without per-tool harness handlers
+        for industry in ("healthcare", "legal", "travel"):
+            ind_start, ind_agents = build_agents(industry)
+            assert ind_agents, industry
         print(f"ok session tools start={start.name} agents={list(agents)}")
 
     asyncio.run(_check())
