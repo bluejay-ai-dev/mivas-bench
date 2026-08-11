@@ -1,0 +1,41 @@
+industries/control-industry/tools.json
+  s_0d00e88b1c778a::t_4998dd6a2a4c65 45-49,53
+industries/healthcare/tool_server.py
+  s_0d00e88b1c778a::t_adb2ebaf406304 16,68-69,553-578,580-591,595-596,598-599,606-619,621-622,624,635-636,653-666,669,743-749,753-768,776-789,795,811-818,827-828,830-831,955,959,961,980-981,1066-1068,1147-1150,1152-1153
+industries/legal/tool_server.py
+  s_0d00e88b1c778a::t_32808d211a58d2 538-541,565,568,572,581
+industries/travel/tool_server.py
+  s_0d00e88b1c778a::t_0adf7cd567fc85 23,486,497-501,575-579,611-612,614-615
+tests/test_tool_server.py
+  s_0d00e88b1c778a::t_93bdddbe6be20f 15,25,28-47,80-128,131-168,172,195,217,258
+voice-agent-harnesses/cartesia/harness.py
+  s_0d00e88b1c778a::t_d9a5772248d2f4 157
+voice-agent-harnesses/elevenlabs/harness.py
+  s_0d00e88b1c778a::t_86aafb35d9bf94 323-329,332-335
+voice-agent-harnesses/gemini/harness.py
+  s_0d00e88b1c778a::t_e16eb97fb65b4a 112-129,151-157,169,172-173
+voice-agent-harnesses/livekit/README.md
+  s_0d00e88b1c778a::t_6634f21ecd5f20 128-131
+voice-agent-harnesses/livekit/gemini-flash-live-3.1/agent.py
+  s_0d00e88b1c778a::t_f13fc665b31e7c 14-15,17-19,66-68,74
+voice-agent-harnesses/livekit/harness.py
+  s_0d00e88b1c778a::t_6d4595d67431e1 30,55-82,150-153,177,186-191,212-214,247-254,264,267,270,272,275
+voice-agent-harnesses/livekit/test_harness.py
+  s_0d00e88b1c778a::t_cb6b6a98532670 60,71-73
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "64949acc9abb62828e0e5102c82816abea71c569",
+  "prompts": {},
+  "sessions": {
+    "s_0d00e88b1c778a": {
+      "agent_id": {
+        "tool": "windsurf",
+        "id": "dawn-noodle",
+        "model": "unknown"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
