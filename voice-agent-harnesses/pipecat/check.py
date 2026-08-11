@@ -45,6 +45,7 @@ def check_greeting_gate() -> None:
 
 
 def check_runtime(runtime: str, industry: str = "control-industry") -> None:
+    check_greeting_gate()
     from pipecat.pipeline.llm_switcher import LLMSwitcher
     from pipecat.pipeline.pipeline import Pipeline
 

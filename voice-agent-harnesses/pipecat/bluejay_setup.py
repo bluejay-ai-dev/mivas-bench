@@ -69,6 +69,9 @@ def main() -> None:
     state = json.loads(STATE.read_text()) if STATE.exists() else {}
     by_name = {a["name"]: a["id"] for a in call("/all-agents")}
 
+    def checkpoint() -> None:
+        STATE.write_text(json.dumps(state, indent=2) + "\n")
+
     for runtime, desc in RUNTIMES.items():
         st = state.setdefault(runtime, {})
         name = f"control-industry:pipecat {runtime}"
@@ -86,6 +89,7 @@ def main() -> None:
                 "pipecat_agent_name": PIPECAT_AGENT,
                 "pipecat_agent_configuration": {"runtime": runtime},
             })["agent_id"]
+            checkpoint()
 
         if not st.get("simulation_id"):
             st["simulation_id"] = call("/create-simulation", {
@@ -96,6 +100,7 @@ def main() -> None:
                 "max_call_duration": 180,
                 "max_call_duration_units": "seconds",
             })["simulation_id"]
+            checkpoint()
 
         # the config is the bot's only channel: runtime, tool server, and the
         # simulation id it resolves the live simulation_result_id from
@@ -129,10 +134,11 @@ def main() -> None:
             })
             dhs = call(f"/digital-humans-by-simulation/{st['simulation_id']}")
             st["digital_human_id"] = (dhs.get("digital_humans") or dhs)[0]["id"]
+            checkpoint()
 
         print(runtime, st, cfg["tool_server_url"])
 
-    STATE.write_text(json.dumps(state, indent=2))
+    checkpoint()
 
 
 if __name__ == "__main__":
