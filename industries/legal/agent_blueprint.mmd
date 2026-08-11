@@ -1,0 +1,18 @@
+flowchart TD
+    START(["Inbound call"]) --> reception["reception"]
+
+    reception -->|transfer_to_screening| screening["screening"]
+    reception -->|transfer_to_client_services| client_services["client_services"]
+    screening -->|"transfer_to_intake(contact_details_only)"| intake["intake"]
+    intake -->|transfer_to_scheduling| scheduling["scheduling"]
+
+    scheduling --> DONE(["call ends"])
+    client_services --> DONE
+
+    reception -.->|"identity_failed · represented_party · adverse_party"| staff
+    screening -.->|"conflict · practice_area · jurisdiction · deadline_review · conflict_review"| staff
+    intake -.->|conflict_review| staff
+    scheduling -.->|caller_request| staff
+    client_services -.->|"legal_advice_requested · caller_request"| staff
+
+    staff["staff (via escalate_to_human)"]
