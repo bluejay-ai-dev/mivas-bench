@@ -26,6 +26,8 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
+from harness import RUNTIME_SECRET_KEYS
+
 HARNESS_DIR = Path(__file__).resolve().parent
 REPO_ROOT = HARNESS_DIR.parents[1]
 API = "https://api.pipecat.daily.co/v1"
@@ -119,13 +121,16 @@ def upload_and_build(context: bytes) -> str:
     raise SystemExit("build timed out")
 
 
-def main() -> None:
+def main() -> int:
     secrets = [
         {"secretKey": k, "secretValue": os.environ[k]}
         for k in SECRET_KEYS
         if os.environ.get(k)
     ]
-    missing = [k for k in ("OPENAI_API_KEY", "BLUEJAY_API_KEY") if not os.environ.get(k)]
+    required = {"BLUEJAY_API_KEY"}
+    for runtime_keys in RUNTIME_SECRET_KEYS.values():
+        required.update(runtime_keys)
+    missing = sorted(k for k in required if not os.environ.get(k))
     if missing:
         sys.exit(f"missing required env: {missing}")
     api(f"/secrets/{SECRET_SET}", {"secrets": secrets, "region": REGION}, method="PUT")
@@ -155,10 +160,11 @@ def main() -> None:
         details = api(f"/agents/{AGENT_NAME}")
         if details.get("ready") and details.get("activeDeploymentReady"):
             print(f"agent {AGENT_NAME} ready")
-            return
+            return 0
         time.sleep(10)
     print(f"agent {AGENT_NAME} deployed but not reporting ready yet", file=sys.stderr)
+    return 1
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main() or 0)
