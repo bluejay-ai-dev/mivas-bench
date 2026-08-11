@@ -151,10 +151,12 @@ def ensure_agent(industry_dir: str | Path, *, public_url: str | None = None) -> 
 
 
 async def _execute_tool(name: str, args: dict[str, Any]) -> dict[str, Any]:
-    """Generic dispatch: POST /tools/{name}; the server's envelope is the result."""
+    """Generic dispatch: POST /tools/{name}; the server's envelope is the result.
+    A 404 for an unknown/non-dispatchable tool has no `ok`/`success` key, so
+    run_tool's `default=False` fallback (not an exception here) is what turns
+    it into a failure, matching how the other harnesses handle the same case."""
     async with httpx.AsyncClient(timeout=30.0) as client:
         resp = await client.post(f"{TOOL_SERVER_URL}/tools/{name}", json={"arguments": args})
-        resp.raise_for_status()
         return resp.json()
 
 
@@ -165,7 +167,7 @@ async def run_tool(name: str, args: dict[str, Any], *, call_id: str | None = Non
     with tool_span(name, args, call_id=call_id) as span:
         try:
             result = await _execute_tool(name, args)
-            ok = bool(result.get("ok", result.get("success", True)))
+            ok = bool(result.get("ok", result.get("success", False)))
             finish_tool_span(span, result, ok=ok)
             return result
         except Exception as e:
