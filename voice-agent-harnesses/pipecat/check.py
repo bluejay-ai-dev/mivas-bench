@@ -1,5 +1,10 @@
 """Offline construction check for one runtime: blueprint → services → pipeline.
 
+Also the proof that the handoff is a real agent switch and not a prompt trick:
+for every runtime it asserts the receptionist's model is never given
+`schedule_appointment`, at the level the model actually sees (the S2S session's
+own tool set, or the Flows node's `functions`).
+
 Needs the runtime's API keys in the environment (nothing is dialled — the
 services only open sockets once the pipeline starts).
 """
@@ -7,6 +12,11 @@ services only open sockets once the pipeline starts).
 from __future__ import annotations
 
 import harness
+
+EXPECTED = {
+    "receptionist": ["handoff_to_scheduler", "end_call"],
+    "scheduler": ["schedule_appointment", "end_call"],
+}
 
 
 def check_greeting_gate() -> None:
@@ -35,22 +45,54 @@ def check_greeting_gate() -> None:
 
 
 def check_runtime(runtime: str, industry: str = "control-industry") -> None:
+    from pipecat.pipeline.llm_switcher import LLMSwitcher
     from pipecat.pipeline.pipeline import Pipeline
 
     bp = harness.load_blueprint(industry)
     assert runtime in harness.RUNTIMES, runtime
+    assert {a: harness.tool_names(bp, a) for a in bp["agents"]} == EXPECTED
 
-    async def _noop(params):  # pragma: no cover - never called here
+    async def _noop(*_a, **_k):  # pragma: no cover - never called here
         raise AssertionError("tool handler must not run during the build check")
 
-    tools = harness.function_schemas(bp, _noop)
-    assert [t.name for t in tools] == harness.tool_names(bp)
-
-    llm = harness.build_llm(runtime, harness.system_prompt(bp), tools)
     stt, tts = harness.build_stt_tts(runtime)
     assert (stt is None) == (runtime != "cascaded")
 
-    stages = [s for s in (stt, llm, tts) if s is not None]
-    Pipeline(stages)
-    print(f"{runtime}: model={harness.RUNTIMES[runtime]} "
-          f"stages={[type(s).__name__ for s in stages]} tools={[t.name for t in tools]} ok")
+    if runtime in harness.S2S_RUNTIMES:
+        agent_llms = harness.build_agent_llms(runtime, bp, _noop)
+        assert list(agent_llms) == harness.agent_order(bp)
+        switcher = LLMSwitcher(llms=list(agent_llms.values()))
+        # ServiceSwitcher starts on services[0]; that must be the receptionist.
+        assert switcher.active_llm is agent_llms[bp["start"]]
+
+        for agent, llm in agent_llms.items():
+            # what the session advertises to the model...
+            advertised = [t.name for t in llm._service_tools().standard_tools]
+            assert advertised == EXPECTED[agent], (agent, advertised)
+            # ...and what Pipecat will route a call for. `None` (context tools
+            # unset) is how the live pipeline calls this: the service falls back
+            # to its own tools, which is what keeps the two sessions distinct.
+            llm._sync_registered_tool_handlers(None)
+            for name in ("handoff_to_scheduler", "schedule_appointment", "end_call"):
+                assert llm.has_function(name) == (name in EXPECTED[agent]), (agent, name)
+
+        assert not agent_llms["receptionist"].has_function("schedule_appointment")
+        assert agent_llms["receptionist"] is not agent_llms["scheduler"]
+        stages = [switcher]
+    else:
+        for agent in bp["agents"]:
+            node = harness.flows_node(bp, agent, _noop)
+            assert node["name"] == agent
+            assert [f.name for f in node["functions"]] == EXPECTED[agent], agent
+            assert node["task_messages"][0]["content"] == harness.instructions(bp, agent)
+        assert "schedule_appointment" not in str(
+            harness.instructions(bp, "receptionist")
+        )
+        stages = [harness.build_llm(runtime, "", None)]
+
+    Pipeline([s for s in ([stt] + stages + [tts]) if s is not None])
+    print(
+        f"{runtime}: model={harness.RUNTIMES[runtime]} "
+        f"agents={ {a: harness.tool_names(bp, a) for a in bp['agents']} } "
+        f"stages={[type(s).__name__ for s in stages]} ok"
+    )

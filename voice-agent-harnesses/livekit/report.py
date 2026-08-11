@@ -249,14 +249,16 @@ def end_speech_span(span: Span | None) -> None:
 
 
 async def _await_terminal_upsert(
-    client: httpx.AsyncClient, simulation_result_id: str, timeout: float = 300.0
+    client: httpx.AsyncClient, simulation_result_id: str, timeout: float = 600.0
 ) -> str | None:
     """Wait for a *final* status before the upsert.
 
-    300 s, not the 150 s the CHIRP harnesses use: this runs on a detached thread
-    with no job deadline, and Bluejay evaluation has been observed taking >150 s —
-    every timeout falls back to the relink path, which is the one that can
-    double-count.
+    600 s, not the 150 s the CHIRP harnesses use: this runs on a detached thread
+    with no job deadline, and the wall clock we have to beat is our own hangup to
+    Bluejay's COMPLETED — which includes the ~2 min the simulation can linger after
+    we hang up, plus evaluation. Result 712617 timed out at 300 s, posted during
+    EVALUATING, and evaluation then wiped its trace_ids: a linked-then-wiped run is
+    unrecoverable, because re-posting is what double-counts every tool.
 
     Posting during EVALUATING works, but eval then wipes trace_ids, and re-posting
     makes Bluejay re-extract the execute_tool spans on top of the ones the first

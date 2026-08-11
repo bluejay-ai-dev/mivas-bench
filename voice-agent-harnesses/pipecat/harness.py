@@ -1,12 +1,29 @@
-"""Blueprint → Pipecat services, tools and pipeline, for three runtimes.
+"""Blueprint → Pipecat services, tools and nodes, for three runtimes.
 
 Pipecat runs our code, so the industry tools are plain Python coroutines wrapped
 in `report.tool_span` — all three (`handoff_to_scheduler`, `schedule_appointment`,
 `end_call`) produce real `execute_tool` spans, no untimeable gaps.
 
-Handoff is soft (prompt + tool result), not Pipecat Flows: Flows explicitly does
-not support realtime S2S services, and two of the three runtimes are S2S. Doing
-it the same way in all three keeps the runtimes comparable.
+The handoff is a real agent switch in every runtime, not a prompt injection: each
+blueprint agent gets its own prompt and its own tool set, and `handoff_to_scheduler`
+moves the call from one to the other. What "the other agent" is made of differs by
+runtime, because Pipecat's own machinery differs:
+
+  cascaded              Pipecat Flows (`pipecat.flows`). One text LLM, one node per
+                        blueprint agent, each node carrying its own `task_messages`
+                        and its own `functions`. The consolidated handler returns
+                        `(result, next_node)` and FlowManager swaps the context and
+                        the advertised tool set (`LLMSetToolsFrame`).
+  openai-realtime-2.1   Two `OpenAIRealtimeLLMService` instances behind an
+  gemini-flash-live-3.1 `LLMSwitcher`, one per blueprint agent, each with its own
+                        websocket session, its own `instructions` and its own
+                        `tools`. `ManuallySwitchServiceFrame` moves the call.
+                        Flows explicitly does not support S2S services ("Gemini
+                        Live, OpenAI Realtime, Ultravox, AWS Nova Sonic"), because
+                        it transitions by mutating one live session — which is the
+                        exact thing two sessions make unnecessary.
+
+Either way the receptionist's model never sees `schedule_appointment`.
 
 Runtimes:
   cascaded              Deepgram Flux flux-general-en → gpt-4.1 → ElevenLabs eleven_flash_v2_5
@@ -33,6 +50,8 @@ RUNTIMES = {
     "gemini-flash-live-3.1": "gemini-3.1-flash-live-preview",
 }
 DEFAULT_RUNTIME = "cascaded"
+# The runtimes whose "agent" is a speech-to-speech session rather than a text LLM.
+S2S_RUNTIMES = frozenset({"openai-realtime-2.1", "gemini-flash-live-3.1"})
 
 STT_MODEL = os.environ.get("PIPECAT_STT_MODEL", "flux-general-en")
 TTS_MODEL = os.environ.get("PIPECAT_TTS_MODEL", "eleven_flash_v2_5")
@@ -45,12 +64,6 @@ TTS_VOICE_ID = os.environ.get("PIPECAT_TTS_VOICE_ID", "21m00Tcm4TlvDq8ikWAM")
 # (`session.say(GREETING)`), for the same plugin limitation.
 GREETING = "Welcome to Bluejay's Repair Services!"
 GREETING_TTS_RUNTIMES = frozenset({"gemini-flash-live-3.1"})
-
-HANDOFF_NOTE = (
-    "\n\n# Multi-agent note\n"
-    "Start as the receptionist. Only call schedule_appointment after "
-    "handoff_to_scheduler has succeeded and you have adopted the scheduler role."
-)
 
 
 def industry_path(name: str | Path) -> Path:
@@ -89,17 +102,26 @@ def load_blueprint(industry_dir: str | Path) -> dict[str, Any]:
     }
 
 
-def system_prompt(bp: dict[str, Any]) -> str:
-    return bp["agents"][bp["start"]]["instructions"] + HANDOFF_NOTE
+def agent_order(bp: dict[str, Any]) -> list[str]:
+    """Blueprint agents, starting agent first."""
+    return [bp["start"]] + [n for n in bp["agents"] if n != bp["start"]]
 
 
-def tool_names(bp: dict[str, Any]) -> list[str]:
-    seen: list[str] = []
-    for agent in bp["agents"].values():
-        for t in agent["tools"]:
-            if t["name"] not in seen and t["name"] in bp["catalog"]:
-                seen.append(t["name"])
-    return seen
+def instructions(bp: dict[str, Any], agent: str) -> str:
+    return bp["agents"][agent]["instructions"]
+
+
+def tool_names(bp: dict[str, Any], agent: str) -> list[str]:
+    """The tools *this* agent may call. Nobody else's."""
+    return [t["name"] for t in bp["agents"][agent]["tools"] if t["name"] in bp["catalog"]]
+
+
+def handoff_target(bp: dict[str, Any], agent: str, tool: str) -> str | None:
+    for t in bp["agents"][agent]["tools"]:
+        if t["name"] == tool and t.get("handoff"):
+            target = t.get("handoff_to")
+            return target if target in bp["agents"] else None
+    return None
 
 
 # ── tools ────────────────────────────────────────────────────────────────────
@@ -112,25 +134,18 @@ def tool_server_url() -> str:
 async def _execute_tool(
     name: str, args: dict[str, Any], bp: dict[str, Any], state: dict[str, Any]
 ) -> tuple[dict[str, Any], bool]:
-    """Run a blueprint tool. Returns (result, should_end_call)."""
+    """Run a blueprint tool. Returns (result, should_end_call).
+
+    A handoff only resolves and records the target here; moving the call is the
+    caller's job, because *how* you move it is a runtime property (a Flows node
+    transition, or an `LLMSwitcher` swap to the target agent's own S2S session).
+    """
     if name == "handoff_to_scheduler":
-        target = next(
-            (
-                t.get("handoff_to")
-                for t in bp["agents"][state["agent"]]["tools"]
-                if t["name"] == name and t.get("handoff")
-            ),
-            None,
-        )
-        if not target or target not in bp["agents"]:
+        target = handoff_target(bp, state["agent"], name)
+        if not target:
             return {"success": False, "error": "unknown handoff target"}, False
         state["agent"] = target
-        return {
-            "success": True,
-            "role": target,
-            "instructions": bp["agents"][target]["instructions"],
-            "note": "You are now the scheduler. Follow the instructions field exactly.",
-        }, False
+        return {"success": True, "role": target}, False
 
     if name == "schedule_appointment":
         async with httpx.AsyncClient(timeout=30.0) as client:
@@ -167,32 +182,72 @@ async def run_tool(
         return result, stop
 
 
-def function_schemas(bp: dict[str, Any], handler) -> list:
-    """tools.json → Pipecat FunctionSchema list, all bound to one handler."""
-    from pipecat.adapters.schemas.function_schema import FunctionSchema
+def _spec(bp: dict[str, Any], name: str) -> tuple[str, dict, list]:
+    spec = bp["catalog"][name]
+    raw = spec.get("inputSchema") or {}
+    return (
+        spec.get("description", name),
+        dict(raw.get("properties") or {}),
+        list(raw.get("required") or []),
+    )
 
-    schemas = []
-    for name in tool_names(bp):
-        spec = bp["catalog"][name]
-        raw = spec.get("inputSchema") or {}
-        schemas.append(
-            FunctionSchema(
-                name=name,
-                description=spec.get("description", name),
-                properties=dict(raw.get("properties") or {}),
-                required=list(raw.get("required") or []),
-                handler=handler,
+
+def agent_tools_schema(bp: dict[str, Any], agent: str, handler):
+    """One agent's tools as a Pipecat `ToolsSchema`, bound to `handler`.
+
+    Handed to the S2S service at construction, so the session advertises this
+    agent's tools and nothing else. Pipecat registers the handlers off the
+    service's own tools when the context advertises none
+    (`LLMService._sync_registered_tool_handlers`).
+    """
+    from pipecat.adapters.schemas.function_schema import FunctionSchema
+    from pipecat.adapters.schemas.tools_schema import ToolsSchema
+
+    return ToolsSchema(
+        standard_tools=[
+            FunctionSchema(name=name, description=d, properties=p, required=r, handler=handler)
+            for name in tool_names(bp, agent)
+            for d, p, r in [_spec(bp, name)]
+        ]
+    )
+
+
+def flows_node(bp: dict[str, Any], agent: str, handler):
+    """One agent as a Pipecat Flows node: its own prompt, its own functions.
+
+    `handler` is called as `handler(name, args, flow_manager)` and must return
+    Flows' consolidated `(result, next_node)`.
+
+    RESET, not APPEND: a handoff hands the caller to a different agent, so the
+    scheduler starts on its own prompt rather than inheriting the receptionist's.
+    That matches what the S2S runtimes get for free from a second session.
+    """
+    import functools
+
+    from pipecat.flows import FlowsFunctionSchema, NodeConfig
+    from pipecat.flows.types import ContextStrategy, ContextStrategyConfig
+
+    return NodeConfig(
+        name=agent,
+        task_messages=[{"role": "system", "content": instructions(bp, agent)}],
+        functions=[
+            FlowsFunctionSchema(
+                name=name, description=d, properties=p, required=r,
+                handler=functools.partial(handler, name),
             )
-        )
-    return schemas
+            for name in tool_names(bp, agent)
+            for d, p, r in [_spec(bp, name)]
+        ],
+        context_strategy=ContextStrategyConfig(strategy=ContextStrategy.RESET),
+    )
 
 
 # ── services ─────────────────────────────────────────────────────────────────
 
 
-def build_llm(runtime: str, instructions: str, tools: list):
-    """The runtime's LLM (or S2S) service. `tools`/`instructions` are only passed
-    here for the S2S services that need them at construction time."""
+def build_llm(runtime: str, instructions: str, tools):
+    """One agent's LLM. For the S2S runtimes this *is* the agent: its own model
+    session, opened with its own instructions and its own tool set."""
     model = RUNTIMES[runtime]
 
     if runtime == "openai-realtime-2.1":
@@ -202,7 +257,7 @@ def build_llm(runtime: str, instructions: str, tools: list):
         return OpenAIRealtimeLLMService(
             api_key=os.environ["OPENAI_API_KEY"],
             model=model,
-            session_properties=SessionProperties(instructions=instructions),
+            session_properties=SessionProperties(instructions=instructions, tools=tools),
         )
 
     if runtime == "gemini-flash-live-3.1":
@@ -217,9 +272,18 @@ def build_llm(runtime: str, instructions: str, tools: list):
             tools=tools,
         )
 
+    # cascaded: prompt and tools are per-node, set by Flows.
     from pipecat.services.openai.llm import OpenAILLMService
 
     return OpenAILLMService(api_key=os.environ["OPENAI_API_KEY"], model=model)
+
+
+def build_agent_llms(runtime: str, bp: dict[str, Any], handler) -> dict[str, Any]:
+    """One S2S service per blueprint agent, receptionist first."""
+    return {
+        agent: build_llm(runtime, instructions(bp, agent), agent_tools_schema(bp, agent, handler))
+        for agent in agent_order(bp)
+    }
 
 
 def build_tts():
@@ -246,35 +310,42 @@ def build_stt_tts(runtime: str):
 
 
 def demo() -> None:
-    """Self-check: blueprint, tool schemas and the soft handoff, no network."""
+    """Self-check: blueprint, per-agent tool split and the handoff, no network."""
     import asyncio
 
     bp = load_blueprint("control-industry")
     assert bp["start"] == "receptionist", bp["start"]
-    assert tool_names(bp) == [
-        "handoff_to_scheduler",
-        "end_call",
-        "schedule_appointment",
-    ], tool_names(bp)
-    assert "Bluejay's Repair Services" in system_prompt(bp)
+    assert agent_order(bp) == ["receptionist", "scheduler"], agent_order(bp)
     assert set(RUNTIMES) == {
         "cascaded",
         "openai-realtime-2.1",
         "gemini-flash-live-3.1",
     }
+    assert S2S_RUNTIMES < set(RUNTIMES)
+
+    # The whole point: the receptionist cannot book. Its agent never carries
+    # schedule_appointment, so no model session it drives is ever told about it.
+    assert tool_names(bp, "receptionist") == ["handoff_to_scheduler", "end_call"]
+    assert tool_names(bp, "scheduler") == ["schedule_appointment", "end_call"]
+    assert "schedule_appointment" not in tool_names(bp, "receptionist")
+    assert "handoff_to_scheduler" not in tool_names(bp, "scheduler")
+
+    assert handoff_target(bp, "receptionist", "handoff_to_scheduler") == "scheduler"
+    assert handoff_target(bp, "scheduler", "handoff_to_scheduler") is None
 
     # the scripted opener must stay verbatim from the industry prompt, and only
     # the runtimes that cannot speak first may be given a greeting TTS
-    assert f'say: "{GREETING}"' in bp["agents"]["receptionist"]["instructions"], GREETING
-    assert GREETING_TTS_RUNTIMES <= set(RUNTIMES), GREETING_TTS_RUNTIMES
-    assert "cascaded" not in GREETING_TTS_RUNTIMES
+    assert f'say: "{GREETING}"' in instructions(bp, "receptionist"), GREETING
+    assert GREETING_TTS_RUNTIMES <= S2S_RUNTIMES
 
-    # (the greeting-only TTS gate needs pipecat installed — see check.py)
+    # (the tool-set split as the services actually see it needs pipecat — see check.py)
 
     state = {"agent": bp["start"]}
     res, stop = asyncio.run(run_tool("handoff_to_scheduler", {}, bp, state))
-    assert res["success"] and state["agent"] == "scheduler" and not stop, res
-    assert "schedule_appointment" in res["instructions"]
+    assert res == {"success": True, "role": "scheduler"} and not stop, res
+    assert state["agent"] == "scheduler"
+    # no instructions blob in the tool result — the switch is the mechanism now
+    assert "instructions" not in res
 
     res, stop = asyncio.run(run_tool("end_call", {"reason": "done"}, bp, state))
     assert res == {"success": True} and stop
