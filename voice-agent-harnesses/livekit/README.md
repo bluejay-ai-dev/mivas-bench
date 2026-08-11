@@ -81,14 +81,26 @@ which includes the ~2 min the simulation can linger after we hang up.
 All three `COMPLETED` with `goal_success: true`, a linked `trace_ids`, and exactly one
 actual per expected tool (`handoff_to_scheduler`, `schedule_appointment`).
 
-| runtime | agent | sim | run | result | link |
-| --- | --- | --- | --- | --- | --- |
-| cascaded | 30519 | 30223 | 225189 | 712620 | https://app.getbluejay.ai/simulations/30223/runs/225189 |
-| openai-realtime-2.1 | 30520 | 30224 | 225198 | 712629 | https://app.getbluejay.ai/simulations/30224/runs/225198 |
-| gemini-flash-live-3.1 | 30521 | 30225 | 225188 | 712619 | https://app.getbluejay.ai/simulations/30225/runs/225188 |
+| runtime | agent | sim | run | result | duration | `end_call` | link |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| cascaded | 30519 | 30223 | 225463 | 713666 | 82 s | 81.6 s | https://app.getbluejay.ai/simulations/30223/runs/225463 |
+| openai-realtime-2.1 | 30520 | 30224 | 225462 | 713665 | 58 s | 39.5 s | https://app.getbluejay.ai/simulations/30224/runs/225462 |
+| gemini-flash-live-3.1 | 30521 | 30225 | 225464 | 713667 | 52 s | 39.8 s | https://app.getbluejay.ai/simulations/30225/runs/225464 |
 
 ## Runtime notes
 
+* **Hanging up waits for silence, not a fixed delay.** `end_call` only marks the
+  *intent* to hang up; the goodbye is still playing. `await_farewell` polls
+  `AgentSession.agent_state` and deletes the room once the agent has been neither
+  `speaking` nor `thinking` for `HANGUP_QUIET_S` (4 s), capped at
+  `HANGUP_MAX_WAIT_S` (20 s). The old flat 4 s sleep clipped all three runtimes and
+  broke `gpt-realtime-2.1` outright: it calls `end_call` in the same response turn as
+  `schedule_appointment`, so the room went away mid-sentence ("…scheduled for
+  eighteighteentwenty", 713478/713612/713652), the caller never heard a goodbye,
+  never hung up, and the run burned the full 180 s cap. `thinking` matters as much as
+  `speaking` — the gap between the tool result and the farewell audio is where a
+  single `speaking` check fires early (713652). The three proof runs above waited
+  6.3 s, 14.3 s and 7.5 s respectively.
 * **Job executor is THREAD, not PROCESS.** `spawn` pickles the entrypoint by
   reference and ours is a closure over the runtime's session/agent factories.
 * **The trace-linking POST lives in the entrypoint**, not a shutdown callback:
