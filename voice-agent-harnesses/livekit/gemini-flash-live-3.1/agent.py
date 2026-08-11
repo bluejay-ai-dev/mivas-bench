@@ -1,23 +1,30 @@
 """MIVAS LiveKit runtime — Gemini `gemini-3.1-flash-live-preview` (speech-to-speech).
 
-Two constraints the plugin imposes on any "3.1" Live model
-(`livekit/plugins/google/realtime/realtime_api.py`: `mutable = "3.1" not in model`):
+`livekit/plugins/google/realtime/realtime_api.py` sets `mutable = "3.1" not in model`,
+so `mutable_instructions` / `mutable_chat_context` are False (and `mutable_tools` is
+False for every Gemini Live model). Those flags only forbid *mutating a live session*,
+not running two of them, so this runtime does a real agent handoff by giving each
+`Agent` its own `RealtimeModel`:
 
-* `mutable_instructions` / `mutable_chat_context` / `mutable_tools` are False, so
-  the system prompt MUST go to the `RealtimeModel` constructor and the agent may
-  not be swapped mid-session — this runtime uses `harness.Combined`
-  (one agent, both blueprint prompts, soft handoff) instead of a real Agent handoff.
-* `generate_reply()` is rejected, so the agent cannot open the call from the model.
-  A TTS is attached purely so `session.say()` can deliver the scripted greeting;
-  every later turn is native Gemini audio.
+* `AgentActivity._detach_reusable_resources` reuses the realtime session only when
+  `self.llm is new_activity.llm`. Two instances => no reuse => `_start_session` calls
+  `llm.session()` and logs "created new realtime session for activity".
+* the fresh session has no active socket yet, so `update_instructions`/`update_tools`
+  land on `_opts`/`_tools` and `_build_connect_config` sends them as the connect-time
+  `system_instruction` and `tools` — the scheduler prompt and *only* the scheduler's
+  tools reach the model.
+* `generate_reply()` is still rejected, so the ElevenLabs TTS delivers the two
+  scripted lines (call greeting, scheduler opener); every other turn is Gemini audio.
 
     python gemini-flash-live-3.1/agent.py dev
 """
 
 from __future__ import annotations
 
+import asyncio
 import sys
 from pathlib import Path
+from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
@@ -36,16 +43,32 @@ AGENT_NAME = "mivas-livekit-gemini-live"
 MODEL = "gemini-3.1-flash-live-preview"
 
 
-def build_session(bp):
+def _model(instructions: str) -> lk_google.realtime.RealtimeModel:
+    return lk_google.realtime.RealtimeModel(
+        model=MODEL, voice="Puck", language="en-US", instructions=instructions
+    )
+
+
+def build_session(_bp: dict[str, Any]) -> AgentSession:
+    # no session-level llm on purpose: each agent brings its own, which is what makes
+    # the handoff open a second Gemini Live session instead of reusing the first.
     return AgentSession(
-        llm=lk_google.realtime.RealtimeModel(
-            model=MODEL,
-            voice="Puck",
-            language="en-US",
-            instructions=harness.combined_instructions(bp),
-        ),
         tts=elevenlabs.TTS(model="eleven_flash_v2_5", voice_id="21m00Tcm4TlvDq8ikWAM"),
         max_tool_steps=8,
+    )
+
+
+def build_agent(bp: dict[str, Any], hangup: asyncio.Event) -> harness.Receptionist:
+    return harness.Receptionist(
+        bp,
+        hangup,
+        llm=_model(bp["agents"]["receptionist"]["instructions"]),
+        make_scheduler=lambda: harness.Scheduler(
+            bp,
+            hangup,
+            llm=_model(bp["agents"]["scheduler"]["instructions"]),
+            opener=harness.SCHEDULER_OPENER,
+        ),
     )
 
 
@@ -53,7 +76,7 @@ if __name__ == "__main__":
     harness.serve(
         AGENT_NAME,
         build_session=build_session,
-        build_agent=lambda bp, hangup: harness.Combined(bp, hangup),
+        build_agent=build_agent,
         model=MODEL,
         greet="say",
     )

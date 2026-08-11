@@ -11,6 +11,9 @@ read from the start `body`, i.e. from the Bluejay agent's
 `simulation_id` is there because Bluejay's Pipecat dispatch passes no per-run
 metadata — `report.resolve_simulation_result_id` turns it into the live
 simulation_result_id.
+
+The receptionist → scheduler handoff is a real agent switch in all three
+runtimes; see `harness` for which Pipecat mechanism each one uses and why.
 """
 
 from __future__ import annotations
@@ -18,6 +21,7 @@ from __future__ import annotations
 import asyncio
 import os
 import sys
+import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -29,7 +33,9 @@ from pipecat.frames.frames import (
     BotStoppedSpeakingFrame,
     EndTaskFrame,
     Frame,
+    FunctionCallResultProperties,
     LLMRunFrame,
+    ManuallySwitchServiceFrame,
     TextFrame,
     TTSSpeakFrame,
     UserStartedSpeakingFrame,
@@ -37,6 +43,7 @@ from pipecat.frames.frames import (
 )
 from pipecat.processors.filters.function_filter import FunctionFilter
 from pipecat.observers.base_observer import BaseObserver, FramePushed
+from pipecat.pipeline.llm_switcher import LLMSwitcher
 from pipecat.pipeline.pipeline import Pipeline
 from pipecat.pipeline.runner import WorkerRunner
 from pipecat.pipeline.worker import PipelineParams, PipelineWorker
@@ -157,38 +164,113 @@ class SpeechSpanObserver(BaseObserver):
 async def run_bot(transport, runtime: str) -> None:
     bp = harness.load_blueprint(INDUSTRY)
     state = {"agent": bp["start"]}
-    instructions = harness.system_prompt(bp)
+    s2s = runtime in harness.S2S_RUNTIMES
 
+    observer = SpeechSpanObserver()
+    worker: PipelineWorker | None = None
+    llm = None            # the pipeline's LLM stage: one service, or an LLMSwitcher
+    agent_llms: dict = {}  # S2S only: one model session per blueprint agent
     ending = False
+    end_task: asyncio.Task | None = None
 
-    async def on_tool(params) -> None:
-        nonlocal ending
-        result, stop = await harness.run_tool(
-            params.function_name,
-            dict(params.arguments or {}),
-            bp,
-            state,
-            call_id=params.tool_call_id,
-        )
-        await params.result_callback(result)
-        # The farewell wait leaves the model free to call `end_call` again while we
-        # hold the pipeline open; honour only the first one (run 712222 hung up twice,
-        # 61915 ms and 83421 ms, and ran 90 s instead of ~70 s).
-        if stop and not ending:
-            ending = True
-            await _await_farewell(observer)
-            await params.llm.push_frame(EndTaskFrame(), FrameDirection.UPSTREAM)
+    async def _end_call() -> None:
+        await _await_farewell(observer)
+        # Push from the service that is actually speaking; behind a switcher the
+        # inactive branch's filter would swallow it.
+        src = llm.active_llm if isinstance(llm, LLMSwitcher) else llm
+        await src.push_frame(EndTaskFrame(), FrameDirection.UPSTREAM)
 
-    tools = harness.function_schemas(bp, on_tool)
-    llm = harness.build_llm(runtime, instructions, tools)
+    def schedule_end(stop: bool) -> None:
+        """Hang up once the farewell has played.
+
+        The wait runs off to the side rather than inside the tool handler: Flows
+        does not deliver a function result until its handler returns, so blocking
+        here would stop the model ever generating the farewell we are waiting for.
+
+        The wait also leaves the model free to call `end_call` again while we hold
+        the pipeline open; honour only the first one (run 712222 hung up twice,
+        61915 ms and 83421 ms, and ran 90 s instead of ~70 s).
+        """
+        nonlocal ending, end_task
+        if not stop or ending:
+            return
+        ending = True
+        end_task = asyncio.create_task(_end_call())  # noqa: RUF006 — held on `end_task`
+
+    if s2s:
+        # Each blueprint agent is its own speech-to-speech session, opened with
+        # that agent's prompt and that agent's tools. Handing off swaps which
+        # session the call is wired to — the receptionist's session is never told
+        # `schedule_appointment` exists.
+        async def on_tool(params) -> None:
+            result, stop = await harness.run_tool(
+                params.function_name,
+                dict(params.arguments or {}),
+                bp,
+                state,
+                call_id=params.tool_call_id,
+            )
+            target = result.get("role")
+            if target not in agent_llms:
+                await params.result_callback(result)
+                schedule_end(stop)
+                return
+
+            async def _switch() -> None:
+                logger.info(
+                    "handoff → {} ({} session, tools={})",
+                    target, harness.RUNTIMES[runtime], harness.tool_names(bp, target),
+                )
+                await worker.queue_frames(
+                    [ManuallySwitchServiceFrame(service=agent_llms[target]), LLMRunFrame()]
+                )
+
+            # Switch from `on_context_updated`, not inline: the handoff call and
+            # its result have to be in the shared context *before* the incoming
+            # agent first sees that context. Otherwise the result lands after,
+            # looks newly-completed to a session that never made the call, and
+            # OpenAI Realtime kills it with
+            # `invalid_tool_call_id: Tool call ID '...' not found in conversation`
+            # — which takes the receive loop down with it (run 712652).
+            # run_llm=False also keeps the outgoing agent from answering a tool
+            # result meant for its replacement.
+            await params.result_callback(
+                result,
+                properties=FunctionCallResultProperties(
+                    run_llm=False, on_context_updated=_switch
+                ),
+            )
+            schedule_end(stop)
+
+        agent_llms = harness.build_agent_llms(runtime, bp, on_tool)
+        # Order matters: ServiceSwitcher starts on services[0], the receptionist.
+        llm = LLMSwitcher(llms=list(agent_llms.values()))
+    else:
+        # Cascaded is a text LLM with function calling, which is exactly what
+        # Pipecat Flows is for. One node per blueprint agent, each with its own
+        # task_messages and its own functions; the consolidated handler returns
+        # (result, next_node) and FlowManager swaps context and advertised tools.
+        async def on_tool(name, args, _flow_manager):
+            result, stop = await harness.run_tool(name, dict(args or {}), bp, state)
+            schedule_end(stop)
+            target = result.get("role")
+            if target in bp["agents"]:
+                logger.info(
+                    "handoff → {} node (tools={})", target, harness.tool_names(bp, target)
+                )
+                return result, harness.flows_node(bp, target, on_tool)
+            return result, None
+
+        llm = harness.build_llm(runtime, "", None)
+
     stt, tts = harness.build_stt_tts(runtime)
 
-    # Gemini Live takes the prompt on the constructor; the others take it in context.
-    messages = (
-        [] if runtime == "gemini-flash-live-3.1"
-        else [{"role": "system", "content": instructions}]
-    )
-    context = LLMContext(messages=messages, tools=tools)
+    # No system message and no tools on the shared context: prompts and tool sets
+    # are per-agent, carried by the Flows node or by the S2S session itself. A
+    # context tool set would override the S2S services' own (see
+    # `OpenAIRealtimeLLMService._send_session_update`) and hand the receptionist
+    # the scheduler's tools.
+    context = LLMContext()
     aggregators = LLMContextAggregatorPair(
         context, user_params=LLMUserAggregatorParams(vad_analyzer=SileroVADAnalyzer())
     )
@@ -219,7 +301,6 @@ async def run_bot(transport, runtime: str) -> None:
     else:
         stages += [transport.output(), aggregators.assistant()]
 
-    observer = SpeechSpanObserver()
     worker = PipelineWorker(
         Pipeline(stages),
         params=PipelineParams(enable_metrics=True),
@@ -228,10 +309,22 @@ async def run_bot(transport, runtime: str) -> None:
         observers=[observer],
     )
 
+    flow_manager = None
+    if not s2s:
+        from pipecat.flows import FlowManager
+
+        flow_manager = FlowManager(
+            worker=worker, llm=llm, context_aggregator=aggregators, transport=transport
+        )
+
     @transport.event_handler("on_client_connected")
     async def _connected(_transport, _client):
         logger.info("client connected — kicking off greeting")
-        # Every runtime still gets the LLMRunFrame: Gemini will not speak first
+        if flow_manager is not None:
+            # initialize() sets the receptionist node — prompt, tools, LLMRunFrame.
+            await flow_manager.initialize(harness.flows_node(bp, bp["start"], on_tool))
+            return
+        # Every S2S runtime still gets the LLMRunFrame: Gemini will not speak first
         # regardless, but the frame is what primes its turn handling — without it
         # the service answers no user turn at all and the socket eventually closes
         # with 1008. The scripted opener rides behind it on the greeting TTS.

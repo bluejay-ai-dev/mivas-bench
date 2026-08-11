@@ -18,9 +18,35 @@ from the start `body`, i.e. from the Bluejay agent's `pipecat_agent_configuratio
 The model is a runtime setting, not a deployment property, so three copies of the
 same image would buy nothing.
 
-Handoff is soft (prompt + tool result) rather than Pipecat Flows: Flows does not
-support realtime S2S services, and two of the three runtimes are S2S. Doing it the
-same way in all three keeps the runtimes comparable.
+## Handoff
+
+`handoff_to_scheduler` is a real agent switch, not a prompt injection. Each
+blueprint agent gets its own prompt and its own tool set, and the receptionist's
+model is never told `schedule_appointment` exists. Which Pipecat mechanism does
+the switching depends on the runtime, because Pipecat's own machinery does:
+
+| runtime | mechanism |
+|---|---|
+| `cascaded` | **Pipecat Flows** (`pipecat.flows`, now in core; the standalone `pipecat-ai-flows` / `pipecat_flows` is deprecated). One `NodeConfig` per blueprint agent, each with its own `task_messages` and its own `functions`. The consolidated handler returns `(result, next_node)` — `transition_to` / `transition_callback` were removed in Flows 1.0 — and `FlowManager` swaps the context (`ContextStrategy.RESET`) and the advertised tool set (`LLMSetToolsFrame`). |
+| `openai-realtime-2.1`, `gemini-flash-live-3.1` | **`LLMSwitcher`** over one S2S service per blueprint agent. Each service opens its own websocket session with its own `instructions` and its own `tools`; the handoff pushes `ManuallySwitchServiceFrame(service=scheduler_llm)` plus an `LLMRunFrame`, and `ServiceSwitcher`'s per-branch filters wire the call to the other session. |
+
+Flows is not used for the S2S runtimes because it does not support them —
+"Speech-to-speech (realtime) models aren't supported — Gemini Live, OpenAI
+Realtime, Ultravox, and AWS Nova Sonic" — precisely because it transitions by
+mutating one live session's context and tools. Two sessions make that
+unnecessary: nothing is mutated, the call is simply rewired.
+
+Two consequences worth knowing:
+
+- The shared `LLMContext` carries **no tools and no system message**. Context
+  tools would override the S2S services' own (`OpenAIRealtimeLLMService._send_session_update`:
+  "tools given in the context override the tools in the session properties")
+  and hand the receptionist the scheduler's tools. With none set, Pipecat falls
+  back to each service's own tools, including for handler registration
+  (`LLMService._sync_registered_tool_handlers`).
+- Both S2S sessions connect at `StartFrame` (the switcher's filters pass
+  lifecycle frames) and stay connected for the call. The inactive one receives
+  no audio and its output never leaves its branch.
 
 `gemini-flash-live-3.1` additionally carries an ElevenLabs TTS used *only* to speak
 the scripted opener (`harness.GREETING`, verbatim from the receptionist prompt).
@@ -92,7 +118,7 @@ The Pipecat Cloud key stored in the org integrations must be a **public** key
 uv run python industries/control-industry/tool_server.py
 cloudflared tunnel --url http://127.0.0.1:8000 --no-autoupdate
 
-# offline checks
+# offline checks (each asserts the receptionist is never given schedule_appointment)
 uv run python voice-agent-harnesses/pipecat/harness.py                       # tools + handoff
 uv run python voice-agent-harnesses/pipecat/cascaded/agent.py                # services + pipeline
 uv run python voice-agent-harnesses/pipecat/openai-realtime-2.1/agent.py
