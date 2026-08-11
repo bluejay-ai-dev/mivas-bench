@@ -1,0 +1,166 @@
+.gitignore
+  s_92c1806412ba38::t_6cf3fa441a9279 30-35
+  s_92c1806412ba38::t_f7a10e9faf0aa7 48-49
+uv.lock
+  s_218f61232702d0::t_87181cb39fd64c 11-19,521-539,573,589,1169-1177
+voice-agent-harnesses/bland/adapters/chirp.py
+  s_218f61232702d0::t_8197a5dcb3395d 1-232
+voice-agent-harnesses/bland/base/adapters/chirp.py
+  s_218f61232702d0::t_b28381a012c6a5 1-8
+voice-agent-harnesses/bland/report.py
+  s_a5a1471f1d4fe7::t_2a9219d1c0f763 1-556
+voice-agent-harnesses/bland/requirements.txt
+  s_218f61232702d0::t_70cb0752d8d6be 1-7
+voice-agent-harnesses/cartesia/adapters/chirp.py
+  s_218f61232702d0::t_2eea512f4cdfdd 1-282
+voice-agent-harnesses/cartesia/line/adapters/chirp.py
+  s_218f61232702d0::t_884993d7337199 1-8
+voice-agent-harnesses/cartesia/line_agent/blueprint.json
+  s_218f61232702d0::t_8e4b16cf7f4505 1-113
+voice-agent-harnesses/cartesia/line_agent/cartesia.toml
+  s_218f61232702d0::t_aa71aa454821fc 1-8
+voice-agent-harnesses/cartesia/line_agent/pyproject.toml
+  s_218f61232702d0::t_82b1c0dd74ca53 1-11
+voice-agent-harnesses/cartesia/report.py
+  s_a5a1471f1d4fe7::t_4dc4810479b159 1-538
+voice-agent-harnesses/cartesia/requirements.txt
+  s_218f61232702d0::t_31c4222cfe50b3 1-9
+voice-agent-harnesses/livekit/.env.example
+  s_218f61232702d0::t_54681368c233d9 1-20
+voice-agent-harnesses/livekit/README.md
+  s_218f61232702d0::t_3b63404717a2d2 1,3-102
+voice-agent-harnesses/livekit/cascaded/agent.py
+  s_218f61232702d0::t_2c7fabafc86b06 1-47
+voice-agent-harnesses/livekit/gemini-flash-live-3.1/agent.py
+  s_218f61232702d0::t_ef3e8eca3dd1fa 1-59
+voice-agent-harnesses/livekit/harness.py
+  s_218f61232702d0::t_dcd68c4055f132 1-365
+voice-agent-harnesses/livekit/openai-realtime-2.1/agent.py
+  s_218f61232702d0::t_59e22642793d08 1-40
+voice-agent-harnesses/livekit/report.py
+  s_218f61232702d0::t_b113ae00037d4c 1-577
+voice-agent-harnesses/livekit/requirements.txt
+  s_218f61232702d0::t_da53ab222f7cf1 1-6
+voice-agent-harnesses/retell/README.md
+  s_218f61232702d0::t_06d321d4139e04 1,3-158
+voice-agent-harnesses/retell/adapters/chirp.py
+  s_218f61232702d0::t_12d94ece10ab65 1-282
+voice-agent-harnesses/retell/flux-gpt4.1-flash2.5/adapters/chirp.py
+  s_218f61232702d0::t_1fa2fa583e41f1 1-8
+voice-agent-harnesses/retell/report.py
+  s_a5a1471f1d4fe7::t_de54f166776660 1-599
+voice-agent-harnesses/retell/requirements.txt
+  s_218f61232702d0::t_c5a62f1aebe137 1-9
+voice-agent-harnesses/retell/test_platform_tools.py
+  s_218f61232702d0::t_af87abf29906ef 1-63
+voice-agent-harnesses/vapi/adapters/chirp.py
+  s_218f61232702d0::t_5e0b3c6fd317df 1-281
+voice-agent-harnesses/vapi/flux-gpt4.1-flash2.5/adapters/chirp.py
+  s_218f61232702d0::t_59a03a3f3f2ba4 1-8
+voice-agent-harnesses/vapi/flux-gpt4.1-flash2.5/agent.py
+  s_218f61232702d0::t_9cce0907e41f24 1-66
+voice-agent-harnesses/vapi/harness.py
+  s_218f61232702d0::t_a88f27646fdd85 1-315
+voice-agent-harnesses/vapi/report.py
+  s_a5a1471f1d4fe7::t_f2282673d95587 1-556
+voice-agent-harnesses/vapi/requirements.txt
+  s_218f61232702d0::t_3934ee53d09768 1-9
+.env.example
+  s_92c1806412ba38::t_133a32e387c7c3 43-81,85,92-93
+pyproject.toml
+  s_92c1806412ba38::t_6a6e26e6ee94b5 22-23,35
+voice-agent-harnesses/bland/README.md
+  s_c4802f242124f1::t_984630278fe424 1,3-135
+voice-agent-harnesses/bland/base/agent.py
+  s_c4802f242124f1::t_d66e858350cfee 1-81
+voice-agent-harnesses/bland/harness.py
+  s_c4802f242124f1::t_a9457da2c9dfd1 1-340
+voice-agent-harnesses/cartesia/README.md
+  s_cc4b32c1aa36d7::t_eda69371ce06d5 1,3-131
+voice-agent-harnesses/cartesia/harness.py
+  s_cc4b32c1aa36d7::t_2f28d0a2c0ebc3 1-172
+voice-agent-harnesses/cartesia/line/agent.py
+  s_cc4b32c1aa36d7::t_b839fce8fba84e 1-68
+voice-agent-harnesses/cartesia/line_agent/main.py
+  s_2c39b1be0f6185::t_e2a3d1e66b6c21 1-95
+voice-agent-harnesses/livekit/test_harness.py
+  s_f1ab2932f4d2cd::t_b915cc4aa0f922 1-44
+voice-agent-harnesses/retell/flux-gpt4.1-flash2.5/agent.py
+  s_2c39b1be0f6185::t_58ee9243f3b371 1-30
+voice-agent-harnesses/retell/harness.py
+  s_92c1806412ba38::t_31425f1065ebe7 1-357
+voice-agent-harnesses/vapi/README.md
+  s_9b02b8ec66acd1::t_11989be0689fe9 3-66
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "12f8f71835f7cb5d0a65009633d71629a471981f",
+  "prompts": {},
+  "sessions": {
+    "s_218f61232702d0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "03a733cf-ac6f-4e95-bd91-d1eda51f8b0f",
+        "model": "claude-opus-5"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    },
+    "s_2c39b1be0f6185": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-a7f606b130a255d44",
+        "model": "unknown"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    },
+    "s_92c1806412ba38": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7515e261-7210-4088-a905-e7178e85045f",
+        "model": "claude-opus-5"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    },
+    "s_9b02b8ec66acd1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-a76bf03731ae64bb2",
+        "model": "unknown"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    },
+    "s_a5a1471f1d4fe7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6728e3a3-6be9-4622-947c-1a4ebfb88bfb",
+        "model": "claude-opus-5"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    },
+    "s_c4802f242124f1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-a2e70e530e117f7c7",
+        "model": "unknown"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    },
+    "s_cc4b32c1aa36d7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-aa21529847ff78251",
+        "model": "unknown"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    },
+    "s_f1ab2932f4d2cd": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-ac7afc5992d68362a",
+        "model": "unknown"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
