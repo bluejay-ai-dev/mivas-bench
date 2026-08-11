@@ -45,6 +45,10 @@ CLIENT_EVENTS = [
     "agent_response",
     "agent_response_correction",
     "client_tool_call",
+    # server-side system tools (transfer_to_agent / end_call) never arrive as a
+    # `client_tool_call`; `agent_tool_response` is the only way to see them.
+    # Response only, not `agent_tool_request` — one event per tool, no double-count.
+    "agent_tool_response",
     "agent_response_complete",
     "client_error",
     "guardrail_triggered",
@@ -142,13 +146,17 @@ def _transfer_condition(bp: dict[str, Any], handoff_tool_name: str, target_name:
 def _adapt_prompt(prompt: str, *, handoff_tool_name: str | None = None) -> str:
     """rewrite industry handoff tool names to ElevenLabs' transfer_to_agent system tool."""
     text = prompt
-    if handoff_tool_name and handoff_tool_name != "transfer_to_agent":
+    if not handoff_tool_name:
+        # no transfer tool on this agent (scheduler / single-agent industry) — the
+        # note would tell it to use a tool it doesn't have.
+        return text
+    if handoff_tool_name != "transfer_to_agent":
         text = text.replace(f"`{handoff_tool_name}`", "`transfer_to_agent`")
         text = text.replace(handoff_tool_name, "transfer_to_agent")
     note = (
         "\n\n# ElevenLabs multi-agent\n"
-        "Use the `transfer_to_agent` system tool for handoffs (agent_number 0 = scheduler). "
-        "Do not invent a handoff_to_* client tool.\n"
+        "Use the `transfer_to_agent` system tool for handoffs. It takes no arguments — "
+        "the destination is preconfigured. Do not invent a handoff_to_* client tool.\n"
     )
     if "ElevenLabs multi-agent" not in text:
         text = text.rstrip() + note
