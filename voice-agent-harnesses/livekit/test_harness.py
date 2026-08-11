@@ -16,6 +16,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from livekit.agents import llm as lk_llm
 
+import harness
 from harness import Receptionist, Scheduler, load_blueprint, sim_result_id_from_job_metadata
 
 
@@ -70,8 +71,36 @@ def test_real_handoff() -> None:
     assert scheduler.llm is not receptionist.llm
 
 
+def test_await_farewell() -> None:
+    """The hangup wait must outlast the agent's goodbye, but never run forever."""
+
+    class FakeSession:
+        def __init__(self, states: list[tuple[float, str]], start: str) -> None:
+            self.agent_state = start
+            loop = asyncio.get_event_loop()
+            for at, state in states:
+                loop.call_later(at, lambda s=state: setattr(self, "agent_state", s))
+
+    async def elapsed(states: list[tuple[float, str]], start: str, max_wait: float) -> float:
+        harness.HANGUP_QUIET_S, harness.HANGUP_MAX_WAIT_S = 0.3, max_wait
+        loop = asyncio.get_running_loop()
+        t0 = loop.time()
+        await harness.await_farewell(FakeSession(states, start), asyncio.Event())
+        return loop.time() - t0
+
+    # nothing left to say -> exactly the quiet window, as the old flat sleep did
+    assert 0.3 < asyncio.run(elapsed([], "listening", 5.0)) < 0.6
+    # 713652: quiet at the old sample point, then the farewell starts -> keep waiting
+    assert 1.0 < asyncio.run(elapsed([(0.2, "thinking"), (1.0, "listening")], "listening", 5.0)) < 1.6
+    # still speaking after the quiet window -> wait for it to stop
+    assert 0.7 < asyncio.run(elapsed([(0.6, "listening")], "speaking", 5.0)) < 1.2
+    # a model that never stops talking is cut off at the cap
+    assert 0.5 < asyncio.run(elapsed([], "speaking", 0.6)) < 1.0
+
+
 if __name__ == "__main__":
     test_sim_result_id()
     test_blueprint()
     test_real_handoff()
+    test_await_farewell()
     print("ok")
