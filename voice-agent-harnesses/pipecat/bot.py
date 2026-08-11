@@ -197,6 +197,13 @@ async def run_bot(transport, runtime: str) -> None:
         ending = True
         end_task = asyncio.create_task(_end_call())  # noqa: RUF006 — held on `end_task`
 
+    async def cancel_end_task() -> None:
+        nonlocal end_task
+        if end_task is not None and not end_task.done():
+            end_task.cancel()
+            await asyncio.gather(end_task, return_exceptions=True)
+        end_task = None
+
     if s2s:
         # Each blueprint agent is its own speech-to-speech session, opened with
         # that agent's prompt and that agent's tools. Handing off swaps which
@@ -336,6 +343,7 @@ async def run_bot(transport, runtime: str) -> None:
     @transport.event_handler("on_client_disconnected")
     async def _disconnected(_transport, _client):
         logger.info("client disconnected")
+        await cancel_end_task()
         await worker.cancel()
 
     runner = WorkerRunner(handle_sigint=False)
@@ -343,6 +351,7 @@ async def run_bot(transport, runtime: str) -> None:
     try:
         await runner.run()
     finally:
+        await cancel_end_task()
         observer.close()
 
 
