@@ -49,9 +49,13 @@ def test_real_handoff() -> None:
     bp = load_blueprint("control-industry")
     hangup = asyncio.Event()
 
-    sentinel = object()  # stands in for a per-agent RealtimeModel instance
+    receptionist_model = object()  # stands in for a per-agent RealtimeModel instance
+    scheduler_model = object()
     receptionist = Receptionist(
-        bp, hangup, make_scheduler=lambda: Scheduler(bp, hangup, llm=sentinel, opener="hi")
+        bp,
+        hangup,
+        llm=receptionist_model,
+        make_scheduler=lambda: Scheduler(bp, hangup, llm=scheduler_model, opener="hi"),
     )
     assert _tool_names(receptionist) == {"handoff_to_scheduler", "end_call"}
     assert receptionist.instructions == bp["agents"]["receptionist"]["instructions"]
@@ -61,7 +65,9 @@ def test_real_handoff() -> None:
     assert _tool_names(scheduler) == {"schedule_appointment", "end_call"}
     assert scheduler.instructions == bp["agents"]["scheduler"]["instructions"]
     # each agent carries its own model => LiveKit cannot reuse the realtime session
-    assert scheduler.llm is sentinel and scheduler.llm is not receptionist.llm
+    assert receptionist.llm is receptionist_model
+    assert scheduler.llm is scheduler_model
+    assert scheduler.llm is not receptionist.llm
 
 
 if __name__ == "__main__":
