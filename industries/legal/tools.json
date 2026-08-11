@@ -1,0 +1,1032 @@
+{
+  "tools": [
+    {
+      "name": "lookup_caller",
+      "description": "Find or create the caller record. Call before anything else.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "full_name": {
+            "type": "string",
+            "description": "The caller's full name."
+          },
+          "phone": {
+            "type": "string",
+            "description": "Callback number, 10 digits."
+          }
+        },
+        "required": [
+          "full_name",
+          "phone"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "get_caller_matters",
+      "description": "The caller's existing matters, including whether any is already represented by another firm. Requires a successful lookup_caller first.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "take_message",
+      "description": "Take a message for a person at the firm, with a callback promise.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "for_whom": {
+            "type": "string",
+            "description": "Who at the firm the message is for."
+          },
+          "message": {
+            "type": "string",
+            "description": "The message text."
+          }
+        },
+        "required": [
+          "for_whom",
+          "message"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "check_conflict",
+      "description": "Screen for a conflict of interest. Must run before any facts of the matter.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "opposing_party": {
+            "type": "string",
+            "description": "The person or company the claim would be against."
+          }
+        },
+        "required": [
+          "opposing_party"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "check_practice_area",
+      "description": "Whether the firm handles this matter type and how it charges.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "practice_area": {
+            "type": "string",
+            "enum": [
+              "auto_accident",
+              "premises_liability",
+              "medical_malpractice",
+              "employment",
+              "workers_comp",
+              "product_liability",
+              "consumer",
+              "criminal",
+              "family",
+              "immigration",
+              "bankruptcy",
+              "patent"
+            ],
+            "description": "The type of matter."
+          }
+        },
+        "required": [
+          "practice_area"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "check_jurisdiction",
+      "description": "Whether the firm is licensed for this matter in this state.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "state": {
+            "type": "string",
+            "description": "Two-letter state code."
+          },
+          "practice_area": {
+            "type": "string",
+            "enum": [
+              "auto_accident",
+              "premises_liability",
+              "medical_malpractice",
+              "employment",
+              "workers_comp",
+              "product_liability",
+              "consumer",
+              "criminal",
+              "family",
+              "immigration",
+              "bankruptcy",
+              "patent"
+            ],
+            "description": "The type of matter."
+          }
+        },
+        "required": [
+          "state",
+          "practice_area"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "calculate_filing_deadline",
+      "description": "The statute of limitations. Report the result; never interpret it.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "state": {
+            "type": "string",
+            "description": "Two-letter state code."
+          },
+          "practice_area": {
+            "type": "string",
+            "enum": [
+              "auto_accident",
+              "premises_liability",
+              "medical_malpractice",
+              "employment",
+              "workers_comp",
+              "product_liability",
+              "consumer",
+              "criminal",
+              "family",
+              "immigration",
+              "bankruptcy",
+              "patent"
+            ],
+            "description": "The type of matter."
+          },
+          "incident_date": {
+            "type": "string",
+            "description": "Date of the incident, YYYY-MM-DD."
+          }
+        },
+        "required": [
+          "state",
+          "practice_area",
+          "incident_date"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "record_intake",
+      "description": "Log the intake. Leave summary empty when the conflict is unresolved.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "practice_area": {
+            "type": "string",
+            "enum": [
+              "auto_accident",
+              "premises_liability",
+              "medical_malpractice",
+              "employment",
+              "workers_comp",
+              "product_liability",
+              "consumer",
+              "criminal",
+              "family",
+              "immigration",
+              "bankruptcy",
+              "patent"
+            ],
+            "description": "The type of matter."
+          },
+          "state": {
+            "type": "string",
+            "description": "Two-letter state code."
+          },
+          "incident_date": {
+            "type": "string",
+            "description": "Date of the incident, YYYY-MM-DD."
+          },
+          "summary": {
+            "type": "string",
+            "description": "Short account of the matter, or empty when conflict unresolved."
+          }
+        },
+        "required": [
+          "practice_area",
+          "state",
+          "incident_date",
+          "summary"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "add_intake_note",
+      "description": "Attach a note to the caller's record for the attorney or case manager.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "note": {
+            "type": "string",
+            "description": "The note text."
+          }
+        },
+        "required": [
+          "note"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "send_intake_packet",
+      "description": "Send the new client packet.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "channel": {
+            "type": "string",
+            "enum": [
+              "email",
+              "sms"
+            ],
+            "description": "Delivery channel."
+          }
+        },
+        "required": [
+          "channel"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "request_records_authorization",
+      "description": "Send a medical records release for signature.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "provider": {
+            "type": "string",
+            "description": "The medical provider's name."
+          }
+        },
+        "required": [
+          "provider"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "get_attorney",
+      "description": "An attorney's name, practice areas, and bar states (internal routing lookup).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "attorney_id": {
+            "type": "string",
+            "description": "The attorney's ID from a slot result."
+          }
+        },
+        "required": [
+          "attorney_id"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "find_evaluation_slots",
+      "description": "Open case evaluation slots.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "practice_area": {
+            "type": "string",
+            "enum": [
+              "auto_accident",
+              "premises_liability",
+              "medical_malpractice",
+              "employment",
+              "workers_comp",
+              "product_liability",
+              "consumer",
+              "criminal",
+              "family",
+              "immigration",
+              "bankruptcy",
+              "patent"
+            ],
+            "description": "The type of matter."
+          },
+          "state": {
+            "type": "string",
+            "description": "Two-letter state code."
+          },
+          "earliest_date": {
+            "type": "string",
+            "description": "Earliest acceptable date, YYYY-MM-DD."
+          }
+        },
+        "required": [
+          "practice_area",
+          "state",
+          "earliest_date"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "hold_evaluation",
+      "description": "Hold and price a case evaluation. Returns a read-back summary and a confirmation token. Does not book.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "slot_id": {
+            "type": "string",
+            "description": "The slot to hold."
+          },
+          "practice_area": {
+            "type": "string",
+            "enum": [
+              "auto_accident",
+              "premises_liability",
+              "medical_malpractice",
+              "employment",
+              "workers_comp",
+              "product_liability",
+              "consumer",
+              "criminal",
+              "family",
+              "immigration",
+              "bankruptcy",
+              "patent"
+            ],
+            "description": "The type of matter."
+          }
+        },
+        "required": [
+          "slot_id",
+          "practice_area"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "confirm_evaluation",
+      "description": "Finalize the booking. Requires the token from hold_evaluation and a spoken yes.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "confirmation_token": {
+            "type": "string",
+            "description": "Exactly the token hold_evaluation returned."
+          }
+        },
+        "required": [
+          "confirmation_token"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "hold_cancellation",
+      "description": "Quote cancelling an appointment. Returns a token. Does not cancel.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "evaluation_id": {
+            "type": "string",
+            "description": "The evaluation to cancel."
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "caller_request",
+              "scheduling_conflict",
+              "no_longer_needed",
+              "referred_out"
+            ],
+            "description": "Why the evaluation is being cancelled."
+          }
+        },
+        "required": [
+          "evaluation_id",
+          "reason"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "confirm_cancellation",
+      "description": "Finalize the cancellation. Requires the token from hold_cancellation.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "confirmation_token": {
+            "type": "string",
+            "description": "Exactly the token hold_cancellation returned."
+          }
+        },
+        "required": [
+          "confirmation_token"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "get_case_status",
+      "description": "Status of one of the caller's own matters at this firm.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "matter_id": {
+            "type": "string",
+            "description": "The matter to look up."
+          }
+        },
+        "required": [
+          "matter_id"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "escalate_to_human",
+      "description": "Transfer the call to firm staff. Terminal: call nothing after this.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "reason_code": {
+            "type": "string",
+            "enum": [
+              "identity_failed",
+              "conflict",
+              "conflict_review",
+              "represented_party",
+              "adverse_party",
+              "practice_area",
+              "jurisdiction",
+              "deadline_review",
+              "legal_advice_requested",
+              "caller_request",
+              "out_of_scope"
+            ],
+            "description": "Why the call is being transferred."
+          }
+        },
+        "required": [
+          "reason_code"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "transfer_to_screening",
+      "description": "Hand the caller to Screening for a new potential matter. Only after the caller is in the system.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "handoff_summary": {
+            "type": "string",
+            "description": "One sentence on who the caller is and why they called."
+          }
+        },
+        "required": [
+          "handoff_summary"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "transfer_to_client_services",
+      "description": "Hand a verified existing client to Client Services for their own matter.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "handoff_summary": {
+            "type": "string",
+            "description": "One sentence on who the caller is and what they need."
+          }
+        },
+        "required": [
+          "handoff_summary"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "transfer_to_intake",
+      "description": "Hand the caller to Intake. Only after screening is complete.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "contact_details_only": {
+            "type": "boolean",
+            "description": "True only when the conflict check came back unclear."
+          },
+          "handoff_summary": {
+            "type": "string",
+            "description": "One sentence on the matter and the screening outcome."
+          }
+        },
+        "required": [
+          "contact_details_only",
+          "handoff_summary"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "transfer_to_scheduling",
+      "description": "Hand the caller to Scheduling to book the free case evaluation. Only after the intake is recorded.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "handoff_summary": {
+            "type": "string",
+            "description": "One sentence on the recorded matter."
+          }
+        },
+        "required": [
+          "handoff_summary"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "end_call",
+      "description": "End the call once the caller is done, or immediately if it is spam or a wrong number. Say goodbye first.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "description": "Why the call is ending."
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    }
+  ]
+}
