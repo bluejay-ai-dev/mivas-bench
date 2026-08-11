@@ -59,6 +59,7 @@ PRACTICE_AREA_ALIASES = {
 
 
 def init_db() -> None:
+    _session.clear()  # dispatch caller pin follows the DB lifecycle
     DB_PATH.parent.mkdir(parents=True, exist_ok=True)
     if DB_PATH.exists():
         DB_PATH.unlink()
@@ -521,6 +522,93 @@ def escalate_to_human(body: EscalationCreate) -> dict[str, Any]:
             "reason_code": body.reason_code}
 
 
+# ------------------------------------------------------------------ dispatch
+# POST /tools/{tool_name} {"arguments": {...}} — the industry-agnostic contract
+# every harness speaks. Wraps the REST handlers above in the tools.json envelope:
+# {"ok": bool, "data": ..., "error_code": str|null, "caller_safe_message": str|null}.
+# Session (end_call) and handoff (transfer_to_*) tools never land here → 404.
+
+# tools.json industry tools carry no caller_id — lookup_caller pins the caller
+# for the rest of the call. ponytail: module-level session, one call at a time
+# (benchmark runs are max_concurrent=1); key by call id if that ever changes.
+_session: dict[str, str] = {}
+
+
+def _cid() -> str:
+    return _session.get("caller_id", "")
+
+
+def _d_lookup_caller(a: dict[str, Any]) -> dict[str, Any]:
+    result = lookup_caller(CallerLookup(**a))
+    _session["caller_id"] = result["caller_id"]
+    return result
+
+
+DISPATCH = {
+    "lookup_caller": _d_lookup_caller,
+    "get_caller_matters": lambda a: get_caller_matters(_cid()),
+    "take_message": lambda a: take_message(
+        MessageCreate(caller_id=_cid(), for_whom=a["for_whom"], message=a["message"])
+    ),
+    "check_conflict": lambda a: check_conflict(a["opposing_party"]),
+    "check_practice_area": lambda a: check_practice_area(a["practice_area"]),
+    "check_jurisdiction": lambda a: check_jurisdiction(a["state"], a["practice_area"]),
+    "calculate_filing_deadline": lambda a: calculate_filing_deadline(
+        a["state"], a["practice_area"], a["incident_date"]
+    ),
+    "record_intake": lambda a: record_intake(IntakeCreate(caller_id=_cid(), **a)),
+    "add_intake_note": lambda a: add_intake_note(NoteCreate(caller_id=_cid(), note=a["note"])),
+    "send_intake_packet": lambda a: send_document(
+        DocumentCreate(caller_id=_cid(), kind="intake_packet", target=a.get("channel", ""))
+    ),
+    "request_records_authorization": lambda a: send_document(
+        DocumentCreate(caller_id=_cid(), kind="records_authorization", target=a.get("provider", ""))
+    ),
+    "get_attorney": lambda a: get_attorney(a["attorney_id"]),
+    "find_evaluation_slots": lambda a: find_evaluation_slots(
+        a["practice_area"], a["state"], a.get("earliest_date", "")
+    ),
+    "hold_evaluation": lambda a: create_hold(
+        HoldCreate(kind="evaluation", caller_id=_cid(), slot_id=a["slot_id"],
+                   practice_area=a["practice_area"])
+    ),
+    "confirm_evaluation": lambda a: confirm(ConfirmCreate(**a)),
+    "hold_cancellation": lambda a: create_hold(
+        HoldCreate(kind="cancellation", caller_id=_cid(),
+                   evaluation_id=a["evaluation_id"], reason=a.get("reason"))
+    ),
+    "confirm_cancellation": lambda a: confirm(ConfirmCreate(**a)),
+    "get_case_status": lambda a: get_case_status(a["matter_id"], caller_id=_cid()),
+    "escalate_to_human": lambda a: escalate_to_human(
+        EscalationCreate(reason_code=a["reason_code"], caller_id=_cid())
+    ),
+}
+
+
+class ToolCall(BaseModel):
+    arguments: dict[str, Any] = {}
+
+
+@app.post("/tools/{tool_name}")
+def dispatch_tool(tool_name: str, body: ToolCall) -> dict[str, Any]:
+    handler = DISPATCH.get(tool_name)
+    if handler is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"unknown tool {tool_name!r} — session and handoff tools are "
+            "harness-native and industry tools must be listed in DISPATCH",
+        )
+    try:
+        data = handler(dict(body.arguments or {}))
+        return {"ok": True, "data": data, "error_code": None, "caller_safe_message": None}
+    except HTTPException as e:
+        return {"ok": False, "data": None, "error_code": f"HTTP_{e.status_code}",
+                "caller_safe_message": str(e.detail)}
+    except Exception as e:  # soft-fail: a broken tool must not 500 into the call
+        return {"ok": False, "data": None, "error_code": "INVALID_ARGUMENTS",
+                "caller_safe_message": f"{type(e).__name__}: {e}"}
+
+
 # ------------------------------------------------------------------ selfcheck
 
 def selfcheck() -> None:
@@ -597,8 +685,44 @@ def selfcheck() -> None:
             if t.get("handoff"):
                 assert t["handoff_to"] in {a["name"] for a in blueprint["agents"]}
 
+    # dispatch route: every non-handoff non-session tool is callable, unknown
+    # names 404, and the guards survive the envelope.
+    init_db()
+    flags: dict[str, dict] = {}
+    for agent in blueprint["agents"]:
+        for t in agent["tools"]:
+            flags.setdefault(t["name"], t)
+    dispatchable = {n for n in names
+                    if not flags.get(n, {}).get("handoff") and not flags.get(n, {}).get("session")}
+    assert dispatchable == set(DISPATCH), (dispatchable ^ set(DISPATCH))
+
+    d = dispatch_tool("lookup_caller", ToolCall(
+        arguments={"full_name": "Dana Whitfield", "phone": "5105550142"}))
+    assert d["ok"] and d["data"]["caller_id"] == "c_001", d
+    d = dispatch_tool("get_caller_matters", ToolCall())
+    assert d["ok"] and isinstance(d["data"]["matters"], list), "session caller must pin"
+    assert isinstance(http(dispatch_tool, "not_a_tool", ToolCall()), HTTPException)
+    assert isinstance(http(dispatch_tool, "end_call", ToolCall()), HTTPException), \
+        "session tools must not be dispatchable"
+    assert isinstance(http(dispatch_tool, "transfer_to_intake", ToolCall()), HTTPException), \
+        "handoff tools must not be dispatchable"
+    # guard preserved through dispatch: cross-tool token still refused, single-use held
+    held = dispatch_tool("hold_evaluation", ToolCall(
+        arguments={"slot_id": "s_110", "practice_area": "auto_accident"}))
+    assert held["ok"], held
+    bad = dispatch_tool("confirm_evaluation", ToolCall(
+        arguments={"confirmation_token": TOKENS["cancellation"]}))
+    assert bad["ok"] is False and bad["error_code"] and bad["caller_safe_message"], bad
+    good = dispatch_tool("confirm_evaluation", ToolCall(
+        arguments={"confirmation_token": held["data"]["confirmation_token"]}))
+    assert good["ok"] and good["data"]["status"] == "booked", good
+    reuse = dispatch_tool("confirm_evaluation", ToolCall(
+        arguments={"confirmation_token": held["data"]["confirmation_token"]}))
+    assert reuse["ok"] is False, "token must stay single-use through dispatch"
+
     print(f"ok — {len(names)} tools, {len(blueprint['agents'])} agents, "
-          "gate/token/filter traps all hold")
+          "gate/token/filter traps all hold, dispatch covers "
+          f"{len(DISPATCH)} tools")
 
 
 if __name__ == "__main__":

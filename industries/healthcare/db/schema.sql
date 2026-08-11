@@ -49,3 +49,12 @@ CREATE TABLE IF NOT EXISTS waitlist (
     latest TEXT,
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
+-- Generic sink for dispatch tools with no dedicated table (messages, SMS,
+-- callbacks, transfers, dispositions, ...) so GET /state still shows the write.
+CREATE TABLE IF NOT EXISTS tool_events (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    kind TEXT NOT NULL,
+    payload TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
