@@ -1,0 +1,4 @@
+pipecat-ai[daily,deepgram,elevenlabs,google,openai,runner,silero]==1.7.0
+opentelemetry-sdk>=1.30
+opentelemetry-exporter-otlp-proto-http>=1.30
+httpx>=0.27
