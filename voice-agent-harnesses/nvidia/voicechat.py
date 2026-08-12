@@ -262,26 +262,6 @@ _SLOT_OFFER_RE = re.compile(
     r"(opening|slot|does\s+that\s+work|two\s+thirty|three\s+thirty|\d{1,2}:\d{2}\s*pm)",
     re.IGNORECASE,
 )
-_GREET_RE = re.compile(
-    r"(hello|hi|hey)([!.?]|\b).{0,60}(how can i help|what can i (do|help))",
-    re.IGNORECASE | re.DOTALL,
-)
-
-
-def looks_like_open_greeting(text: str) -> bool:
-    """True for cold openers we must not play mid-call after handoff."""
-    t = " ".join((text or "").split())
-    if not t:
-        return False
-    if _GREET_RE.search(t):
-        return True
-    low = t.lower().strip()
-    if low in {"hello", "hello.", "hello?", "hi", "hi.", "hey"}:
-        return True
-    # Variants like "Yes, I'm here. How can I help you today?"
-    if re.search(r"how can i help( you)?( today)?\??$", low):
-        return len(t) < 80
-    return False
 _WEEKDAYS = (
     "monday",
     "tuesday",
@@ -526,64 +506,8 @@ def handoff_role(result: dict[str, Any], bp: dict[str, Any]) -> str | None:
     return role if isinstance(role, str) and role in bp["agents"] else None
 
 
-def handoff_continue_events(*, prior_agent_said: str = "") -> list[dict[str, Any]]:
-    """Seed mid-call history for a cold dual-session target (no response.create).
-
-    `response.create` on a fresh VoiceChat session open-greets ("Hello, how can I
-    help?") even with transfer instructions. Chirp waits for the DH to go quiet,
-    then optionally nudges — history alone is usually enough once user audio flows.
-    """
-    prior = " ".join((prior_agent_said or "").split()).strip()
-    prior_line = prior[:280] if prior else (
-        "One moment — I'm transferring you to our scheduler now."
-    )
-    notice = (
-        "SYSTEM: Live mid-call transfer. The caller already asked to schedule a "
-        "repair appointment. You are the scheduler taking over an active call. "
-        "FORBIDDEN: hello, hi, welcome, 'how can I help', or any open greeting. "
-        "REQUIRED: continue booking immediately (ask for or confirm a concrete date)."
-    )
-    return [
-        {
-            "type": "conversation.item.create",
-            "event_id": _event_id(),
-            "item": {
-                "type": "message",
-                "role": "user",
-                "content": [{"type": "input_text", "text": notice}],
-            },
-        },
-        {
-            "type": "conversation.item.create",
-            "event_id": _event_id(),
-            "item": {
-                "type": "message",
-                "role": "assistant",
-                "content": [{"type": "text", "text": prior_line}],
-            },
-        },
-        {
-            "type": "conversation.item.create",
-            "event_id": _event_id(),
-            "item": {
-                "type": "message",
-                "role": "user",
-                "content": [
-                    {
-                        "type": "input_text",
-                        "text": (
-                            "Yes — I want to schedule a repair appointment. "
-                            "Please continue; do not greet me."
-                        ),
-                    }
-                ],
-            },
-        },
-    ]
-
-
 def handoff_nudge_event() -> dict[str, Any]:
-    """Bare response.create — only after the DH is quiet post-transfer."""
+    """Bare response.create after same-session session.update (call history intact)."""
     return {"type": "response.create", "event_id": _event_id()}
 
 
@@ -709,12 +633,6 @@ def demo() -> None:
     ) == [{"name": "handoff_to_scheduler", "arguments": {}}]
     nxt = extract_appointment_date("next Tuesday at two thirty")
     assert nxt and len(nxt) == 10
-    cont = handoff_continue_events(prior_agent_said="One moment while I transfer you.")
-    assert all(c["type"] == "conversation.item.create" for c in cont)
-    roles = [c["item"]["role"] for c in cont]
-    assert roles == ["user", "assistant", "user"]
-    notice = cont[0]["item"]["content"][0]["text"]
-    assert "FORBIDDEN" in notice and "hello" in notice.lower()
     assert handoff_nudge_event()["type"] == "response.create"
     assert extract_appointment_date("appointment is set for Tuesday") == extract_appointment_date(
         "next Tuesday"
@@ -727,10 +645,6 @@ def demo() -> None:
     assert wrap and wrap[0]["name"] == "schedule_appointment"
     if len(bp["agents"]) > 1 and all_names - set(start_tools):
         assert set(start_tools) != all_names
-    assert looks_like_open_greeting("Hello! How can I help you today?")
-    assert not looks_like_open_greeting(
-        "Sure thing. Let me check our availability for next Tuesday."
-    )
     print(
         f"voicechat self-check ok start={start} tools={start_tools} "
         f"agents={list(bp['agents'])} speaks_first={speaks_first()} ws={ws_url()}"

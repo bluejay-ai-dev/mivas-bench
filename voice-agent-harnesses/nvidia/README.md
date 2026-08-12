@@ -6,7 +6,7 @@ Two NVIDIA runtimes over industry `agent_blueprint.json` packs, same MIVAS inter
 | Folder | Stack | Multi-agent |
 |---|---|---|
 | `nemotron/` | Cascaded: Nemotron ASR → `nemotron-3-nano-30b-a3b` → Magpie TTS ([voice-agent blueprint](https://github.com/NVIDIA-AI-Blueprints/nemotron-voice-agent)) | Pipecat Flows (hard handoff) |
-| `nemotron-voicechat/` | Full-duplex S2S: [`nvidia/nemotron-voicechat`](https://build.nvidia.com/nvidia/nemotron-voicechat) / [HF 11B](https://huggingface.co/nvidia/NVIDIA-NemotronLabs-VoiceChat-11B) | Dual-session switch (one WS per blueprint agent; idle gets no audio) |
+| `nemotron-voicechat/` | Full-duplex S2S: [`nvidia/nemotron-voicechat`](https://build.nvidia.com/nvidia/nemotron-voicechat) / [HF 11B](https://huggingface.co/nvidia/NVIDIA-NemotronLabs-VoiceChat-11B) | One WS for the call; handoff = `session.update` (keeps history) |
 
 Shared: `harness.py` (blueprint + industry tools), `report.py` (OTel → Bluejay).
 
@@ -27,17 +27,17 @@ OpenAI Realtime–compatible WebSocket. Default is the hosted NVCF endpoint
 (`wss://grpc.nvcf.nvidia.com/v1/realtime`, function `ai-nemotron-voicechat`) —
 needs `NVIDIA_API_KEY` only (no local GPU).
 
-**Multi-agent:** opens one VoiceChat session per blueprint agent at call start. Each
-session gets that agent’s pack instructions + tools only (industry-agnostic; no
-harness prompt hacks). Handoff rewires CHIRP audio to the target session; idle
-sessions receive no input. Uses N NVCF sessions for an N-agent pack.
+**Multi-agent:** one VoiceChat WS for the whole call. The start agent gets that
+agent’s pack instructions + tools only (industry-agnostic; no harness prompt hacks).
+Handoff sends `session.update` with the target pack on the **same** socket so
+conversation history stays — a cold second session + `response.create` is what
+caused mid-call “Hello, how can I help?”.
 
 **Speak-first:** VoiceChat is full-duplex — it only speaks while input audio flows.
 Zero-PCM alone yields near-silent frames. With `VOICECHAT_SPEAKS_FIRST=true` (default),
 **call open** sends a short speech-shaped kick (`assets/speak_first_kick.wav`) + trail
-silence. **Handoff** must not kick — a cold specialist session would open-greet mid-call
-("Hello, how can I help?"). Instead the bridge primes the target with a transfer notice
-and nudges via `response.create` (same idea as Grok).
+silence. After handoff the bridge waits for the DH to go quiet, then nudges with
+`response.create` (history already on the socket — no greeting seed / drop hacks).
 
 `agent.speech` / `customer.speech` are exclusive siblings under `voice.call`. Agent
 spans open on transcript or sustained RMS (not kick glitches); customer spans coalesce
@@ -47,7 +47,7 @@ over text deltas so spans don't double words.
 Idle CHIRP PCM is **not** forwarded to VoiceChat (it would barge-in on noise). Agent
 audio is muted the moment the DH is live so both sides hear a real gap.
 
-**Tools:** each session advertises that agent’s catalog tools. Hosted NVCF does not
+**Tools:** the active session advertises that agent’s catalog tools. Hosted NVCF does not
 run the local NIM jinja, so the harness also appends NVIDIA’s trained
 `<AVAILABLE_TOOLS>` / `<TOOLCALL>` protocol from those same decls (not pack policy).
 Tool spans come from `response.function_call_arguments.done`, parsed `<TOOLCALL>`,
@@ -87,7 +87,7 @@ Wire format is 24 kHz PCM both ways (server resamples internally); CHIRP stays 1
 | `NVIDIA_API_KEY` | cascaded NIM cloud + hosted VoiceChat NVCF |
 | `VOICECHAT_WS_URL` | VoiceChat Realtime WS (default `wss://grpc.nvcf.nvidia.com/v1/realtime`) |
 | `VOICECHAT_FUNCTION_ID` | NVCF function id (default `ai-nemotron-voicechat`) |
-| `VOICECHAT_SPEAKS_FIRST` | `true`/`false` (default `true`) — speech-kick active agent at start/handoff |
+| `VOICECHAT_SPEAKS_FIRST` | `true`/`false` (default `true`) — speech-kick at call open only |
 | `VOICECHAT_SPEAK_FIRST_KICK_WAV` | optional override path for the speak-first kick (mono pcm16) |
 | `VOICECHAT_AGENT_RMS_ON` | RMS gate for `agent.speech` (default `400`) |
 | `VOICECHAT_USER_RMS_ON` | RMS gate for inbound CHIRP → VoiceChat (default `350`) |
