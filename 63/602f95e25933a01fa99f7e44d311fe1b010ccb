@@ -1,0 +1,33 @@
+voice-agent-harnesses/grok/voice/agent.py
+  s_c79cf5dec48fff::t_914c4ca5f02b92 1-49
+.env.example
+  s_c79cf5dec48fff::t_e34917c9786b63 102-103
+  s_c79cf5dec48fff::t_b6ae0f8cc62ad4 67-75
+  s_c79cf5dec48fff::t_d863e508248f5b 94
+voice-agent-harnesses/grok/harness.py
+  s_c79cf5dec48fff::t_0bc1c615b66aa1 1-533
+pyproject.toml
+  s_c79cf5dec48fff::t_b3fc7f7e90eb72 35
+voice-agent-harnesses/grok/voice/adapters/chirp.py
+  s_c79cf5dec48fff::t_4785218214e2b9 1-837
+voice-agent-harnesses/grok/README.md
+  s_c79cf5dec48fff::t_0bc1c615b66aa1 3-38
+voice-agent-harnesses/grok/report.py
+  s_c79cf5dec48fff::t_0bc1c615b66aa1 1-566
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "63602f95e25933a01fa99f7e44d311fe1b010ccb",
+  "prompts": {},
+  "sessions": {
+    "s_c79cf5dec48fff": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "2f4d4ac6-8ea9-42ba-b59e-72d2fb2ebce6",
+        "model": "grok-4.5"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}
