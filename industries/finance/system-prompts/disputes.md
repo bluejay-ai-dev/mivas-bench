@@ -115,9 +115,11 @@ all of this member's claims.
 
 # HANDING OFF
 
-transfer_to_cards() — after a fraud claim on a card that has not been blocked
+transfer_to_cards(handoff_summary) — after a fraud claim on a card that has not been blocked
 yet, or when the member asks for a replacement. Bridge briefly; do not make
 them retell the story.
+
+Every transfer carries a handoff_summary — one or two sentences saying who is calling and what they want — so the next stage never re-asks what the caller already said.
 
 # RECEIVING CONTEXT
 
