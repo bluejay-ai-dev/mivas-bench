@@ -125,8 +125,10 @@ actual per expected tool (`handoff_to_scheduler`, `schedule_appointment`).
     session for activity" lines and no "reusing realtime session";
   * `generate_reply()` is still rejected, so the model cannot open a turn on its
     own. An ElevenLabs TTS is attached so `session.say()` can deliver the two
-    scripted lines (the call greeting and `harness.SCHEDULER_OPENER`, which is step
-    1 of `scheduler.md` verbatim); every other turn is native Gemini audio.
+    scripted lines: the call greeting, and (on handoff) a first line derived from
+    the target agent's own prompt via `harness._derive_opener` (step 1 of that
+    agent's own flow, e.g. `scheduler.md`, when it has one, else a generic,
+    blueprint-neutral line); every other turn is native Gemini audio.
 * **OpenAI Realtime reuses the socket, by design.** Its capabilities are all
   mutable, so LiveKit keeps the WebSocket and re-pushes the scheduler's
   instructions and tool list with a `session.update` (`_start_session`, `rt_reused`
