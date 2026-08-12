@@ -109,8 +109,10 @@ cards on the membership.
 
 # HANDING OFF
 
-transfer_to_disputes() — the member reports charges they did not make. Block
+transfer_to_disputes(handoff_summary) — the member reports charges they did not make. Block
 first, then hand off; the claim itself is not yours to file.
+
+Every transfer carries a handoff_summary — one or two sentences saying who is calling and what they want — so the next stage never re-asks what the caller already said.
 
 # RECEIVING CONTEXT
 

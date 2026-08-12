@@ -25,6 +25,7 @@ from typing import Any, Awaitable, Callable
 import httpx
 from agents import FunctionTool
 from agents.realtime import RealtimeAgent, RealtimeRunner, realtime_handoff
+from pydantic import Field, create_model
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 TOOL_SERVER_URL = os.environ.get("TOOL_SERVER_URL", "http://127.0.0.1:8000").rstrip("/")
@@ -66,6 +67,22 @@ def industry_path(name: str | Path) -> Path:
 def _tool_catalog(industry_dir: Path) -> dict[str, dict]:
     data = json.loads((industry_dir / "tools.json").read_text())
     return {t["name"]: t for t in data["tools"]}
+
+
+def _handoff_input_type(spec: dict[str, Any]) -> type[Any] | None:
+    """Build a pydantic model from a tools.json handoff inputSchema, if any."""
+    props = (spec.get("inputSchema") or {}).get("properties") or {}
+    if not props:
+        return None
+    required = set((spec.get("inputSchema") or {}).get("required") or [])
+    fields: dict[str, Any] = {}
+    for name, prop in props.items():
+        desc = (prop or {}).get("description") or ""
+        if name in required:
+            fields[name] = (str, Field(description=desc))
+        else:
+            fields[name] = (str | None, Field(default=None, description=desc))
+    return create_model(f"{spec['name']}HandoffInput", **fields)
 
 
 def _session_from_ctx(tool_ctx: Any) -> Any:
@@ -141,16 +158,41 @@ def build_agents(industry_dir: str | Path) -> tuple[RealtimeAgent, dict[str, Rea
         for t in entry["tools"]:
             if not t.get("handoff"):
                 continue
-            desc = catalog.get(t["name"], {}).get(
-                "description", f"Hand off to {t['handoff_to']}"
-            )
-            handoffs.append(
-                realtime_handoff(
-                    agents[t["handoff_to"]],
-                    tool_name_override=t["name"],
-                    tool_description_override=desc,
+            spec = catalog.get(t["name"], {})
+            desc = spec.get("description", f"Hand off to {t['handoff_to']}")
+            input_type = _handoff_input_type(spec) if spec else None
+            target = t["handoff_to"]
+            if input_type is not None:
+                # the SDK requires on_handoff to take exactly (context, input),
+                # so bind the target via a factory rather than a default arg
+                def _make_on_handoff(handoff_target: str) -> Callable[[Any, Any], None]:
+                    def _on_handoff(ctx: Any, data: Any) -> None:
+                        # history already carries the tool args for the next agent;
+                        # stash on context for harness/debug use.
+                        payload = data.model_dump() if hasattr(data, "model_dump") else data
+                        context = getattr(ctx, "context", None)
+                        if isinstance(context, dict):
+                            context["last_handoff"] = {"to": handoff_target, "input": payload}
+
+                    return _on_handoff
+
+                handoffs.append(
+                    realtime_handoff(
+                        agents[target],
+                        tool_name_override=t["name"],
+                        tool_description_override=desc,
+                        input_type=input_type,
+                        on_handoff=_make_on_handoff(target),
+                    )
                 )
-            )
+            else:
+                handoffs.append(
+                    realtime_handoff(
+                        agents[target],
+                        tool_name_override=t["name"],
+                        tool_description_override=desc,
+                    )
+                )
         if handoffs:
             agents[entry["name"]].handoffs = handoffs
 

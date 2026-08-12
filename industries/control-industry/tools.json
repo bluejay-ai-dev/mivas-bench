@@ -5,7 +5,15 @@
       "description": "Hand off the caller to the Bluejay's Repair Services scheduler agent",
       "inputSchema": {
         "type": "object",
-        "additionalProperties": false
+        "properties": {
+          "handoff_summary": {
+            "type": "string",
+            "description": "One or two sentences: who is calling and what they want scheduled (any date already mentioned), so the next desk never re-asks."
+          }
+        },
+        "required": [
+          "handoff_summary"
+        ]
       },
       "outputSchema": {
         "type": "object",
