@@ -24,4 +24,10 @@ flowchart TD
     clinical -->|transfer_to_scheduling| scheduling
     clinical -->|transfer_to_identity| identity
 
-    human["human (via transfer to human)"]
+    reception -.->|transfer_to_human| human["human"]
+    identity -.->|transfer_to_human| human
+    scheduling -.->|transfer_to_human| human
+    coverage -.->|transfer_to_human| human
+    cosmetic -.->|transfer_to_human| human
+    billing -.->|transfer_to_human| human
+    clinical -.->|transfer_to_human| human

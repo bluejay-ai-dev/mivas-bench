@@ -6,7 +6,7 @@ Deepgram Voice Agent harness via raw `websockets` (no SDK) — one WS session
 
 | Folder | Model |
 |---|---|
-| `voice-agent/` | `deepgram-voice-agent` (nova-3 listen, gpt-4o-mini think, aura-2-thalia-en speak) |
+| `voice-agent/` | `deepgram-voice-agent` (flux-general-en listen, gpt-4.1 think, aura-2-thalia-en speak) |
 
 Shared: `harness.py` (builds the `Settings` payload from the blueprint). Tracing: `report.py`
 (GenAI-native OTel → Bluejay OTLP; `gen_ai.provider.name=deepgram`). Run a runtime with

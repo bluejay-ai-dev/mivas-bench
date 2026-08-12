@@ -1,10 +1,11 @@
-"""control-industry blueprint → LiveKit Agents, shared by all three runtimes.
+"""industry blueprint → LiveKit Agents, shared by all three runtimes.
 
 LiveKit runs our code, so unlike the Vapi/Retell/Bland/Cartesia harnesses there is
 no tool webhook and no tunnel: every tool body runs in this process and is wrapped
-directly in an `execute_tool` span. Multi-agent handoff is in-framework — the
-receptionist's `handoff_to_scheduler` returns the `Scheduler` agent instance — so
-the handoff is a real, timed tool call rather than a provider-internal jump.
+directly in an `execute_tool` span. Industry tools dispatch generically to the
+tool server's POST /tools/{name} route. Multi-agent handoff is in-framework — a
+handoff tool returns the target `BlueprintAgent` instance — so the handoff is a
+real, timed tool call rather than a provider-internal jump.
 
 Transport is native Bluejay `LIVEKIT` dispatch: Bluejay creates the room, mints a
 token with a `RoomAgentDispatch` for our `agent_name`, and puts
@@ -26,6 +27,7 @@ import asyncio
 import json
 import logging
 import os
+import re
 from pathlib import Path
 from typing import Any, Callable
 
@@ -38,7 +40,6 @@ from livekit.agents import (
     JobContext,
     JobExecutorType,
     NotGivenOr,
-    RunContext,
     cli,
     function_tool,
 )
@@ -51,9 +52,34 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 TOOL_SERVER_URL = os.environ.get("TOOL_SERVER_URL", "http://127.0.0.1:8000").rstrip("/")
 INDUSTRY = os.environ.get("INDUSTRY", "control-industry")
 GREETING = "Welcome to Bluejay's Repair Services!"
-# step 1 of system-prompts/scheduler.md, verbatim. Only used by runtimes whose model
-# rejects generate_reply() (see Scheduler.on_enter); every other turn is model-generated.
-SCHEDULER_OPENER = "Hey, when do you want to schedule your repair appointment?"
+# Matches *step 1* of an agent's own flow, e.g.
+# `1. Ask: "Hey, when do you want to schedule your repair appointment?"` in
+# system-prompts/scheduler.md. Anchored to step 1 specifically (not any numbered
+# `Ask:`/`Say:` line) so this doesn't pick up an unrelated mid-prompt instruction,
+# e.g. a later "call 911, then say ..." escalation step. Used to give handoff
+# targets a target-specific opener on runtimes whose model rejects
+# generate_reply() (see BlueprintAgent.on_enter and `_derive_opener` below); every
+# other turn is model-generated.
+_OPENER_RE = re.compile(r'(?:^|\n)\s*1\.\s*(?:Ask|Say):\s*"([^"]+)"', re.IGNORECASE)
+# Last-resort opener when an agent's prompt has no quoted `Ask:`/`Say:` line to pull
+# from. Deliberately industry- and blueprint-neutral so it never announces another
+# agent's task (e.g. a scheduling line) on a target that doesn't do that job.
+GENERIC_OPENER = "Okay, I can help you with that."
+
+
+def _derive_opener(instructions: str) -> str:
+    """Pull a natural, spoken opening line out of `instructions` for `session.say()`.
+
+    Every `BlueprintAgent` derives its *own* opener from its *own* prompt, so a
+    handoff target never inherits another agent's scripted line (e.g. Gemini Live
+    used to open every handoff with the control-industry scheduler's "when do you
+    want to schedule your repair appointment?" line regardless of which agent, or
+    industry, it had actually landed on).
+    """
+    match = _OPENER_RE.search(instructions)
+    return match.group(1) if match else GENERIC_OPENER
+
+
 # Seconds of *silence* the agent must reach after `end_call` before we tear the room
 # down. This was a flat sleep, which deleted the room mid-farewell on gpt-realtime-2.1
 # (see README "Hanging up waits for silence"). Same env knobs as the pipecat harness.
@@ -100,25 +126,31 @@ def load_blueprint(industry_dir: str | Path = INDUSTRY) -> dict[str, Any]:
 # ── tools (in-process, each under an execute_tool span) ──────────────────────
 
 
-async def _execute(name: str, args: dict[str, Any]) -> dict[str, Any]:
-    if name == "schedule_appointment":
-        async with httpx.AsyncClient(timeout=30.0) as client:
-            r = await client.post(f"{TOOL_SERVER_URL}/appointments", json={"date": args["date"]})
-            r.raise_for_status()
-            return {"success": True, "date": r.json()["date"]}
-    if name in ("handoff_to_scheduler", "end_call"):
-        # harness-local: no industry state to mutate, the span is the artifact
+async def _execute(name: str, args: dict[str, Any], *, local: bool) -> dict[str, Any]:
+    if local:
+        # harness-native (handoff / session): no industry state to mutate,
+        # the span is the artifact
         return {"success": True}
-    return {"success": False, "error": f"unknown tool {name}"}
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        r = await client.post(f"{TOOL_SERVER_URL}/tools/{name}", json={"arguments": args})
+        return r.json()
 
 
-async def run_tool(name: str, args: dict[str, Any]) -> dict[str, Any]:
-    """Run one blueprint tool under an `execute_tool` span. Never raises."""
+async def run_tool(name: str, args: dict[str, Any], *, local: bool = False) -> dict[str, Any]:
+    """Run one blueprint tool under an `execute_tool` span. Never raises.
+
+    `local=True` marks harness-native tools (handoffs, session tools); everything
+    else dispatches to POST {TOOL_SERVER_URL}/tools/{name} and returns the
+    server's envelope verbatim.
+    """
     offset = report.call_offset_ms()
     with report.tool_span(name, args) as span:
         try:
-            result = await _execute(name, args)
-            ok = True
+            result = await _execute(name, args, local=local)
+            # default to False, not True: a 404/error envelope from POST /tools/{name}
+            # (e.g. an unknown tool name) has neither `ok` nor `success`, and treating
+            # that as a successful call would hide the failure from the trace.
+            ok = bool(result.get("ok", result.get("success", False)))
         except Exception as e:  # soft-fail: the call (and its trace) must still finish
             result, ok = {"success": False, "error": f"{type(e).__name__}: {e}"}, False
         report.finish_tool_span(span, result, ok=ok)
@@ -126,104 +158,130 @@ async def run_tool(name: str, args: dict[str, Any]) -> dict[str, Any]:
     return result
 
 
-async def _end_call(reason: str, hangup: asyncio.Event) -> dict[str, Any]:
-    result = await run_tool("end_call", {"reason": reason})
-    hangup.set()
-    return result
-
-
 # ── agents ───────────────────────────────────────────────────────────────────
 
 
-class Scheduler(Agent):
-    """Books the appointment. Reached by handoff from the receptionist.
+def _param_schema(spec: dict[str, Any]) -> dict[str, Any]:
+    raw = dict(spec.get("inputSchema") or {})
+    schema: dict[str, Any] = {"type": "object", "properties": dict(raw.get("properties") or {})}
+    if raw.get("required"):
+        schema["required"] = list(raw["required"])
+    return schema
 
-    `llm` is the per-agent model override. Passing a distinct instance is what makes
-    the handoff a real switch on models that cannot be mutated mid-session: LiveKit
-    only carries the realtime session across a handoff when the two activities share
-    the *same* model object, so a fresh instance means a fresh provider session
-    configured with this agent's prompt and this agent's tools.
+
+def _blueprint_tools(
+    bp: dict[str, Any],
+    agent_name: str,
+    hangup: asyncio.Event,
+    llm_factory: Callable[[str], Any] | None,
+    scripted_opener: bool,
+) -> list[Any]:
+    """One agent's blueprint tools as LiveKit raw function tools.
+
+    Handoffs return the target `BlueprintAgent` and nothing else: any non-Agent
+    output sets reply_required, which makes the outgoing agent announce the
+    transfer on top of the incoming agent's own opener — the blueprint forbids
+    that, and the two overlapping turns let the caller's "okay, thank you" land
+    on the new agent as "I'm done" -> end_call before anything is booked.
+
+    `scripted_opener` only says whether *this runtime's model* rejects
+    generate_reply() and therefore needs its handoff targets to speak a scripted
+    first line at all; it carries no agent-specific text. Each target derives its
+    own opener from its own prompt (see `BlueprintAgent.on_enter`/`_derive_opener`)
+    so a handoff never announces another agent's task.
+    """
+    tools: list[Any] = []
+    for t in bp["agents"][agent_name]["tools"]:
+        name = t["name"]
+        spec = bp["catalog"].get(name) or {}
+        raw = {
+            "name": name,
+            "description": spec.get(
+                "description",
+                f"Hand off to the {t.get('handoff_to')} agent." if t.get("handoff") else name,
+            ),
+            "parameters": _param_schema(spec),
+        }
+
+        if t.get("handoff"):
+            def _make_handoff(tool_name: str, target: str):
+                async def _handoff(raw_arguments: dict[str, Any]) -> Agent:
+                    await run_tool(tool_name, dict(raw_arguments), local=True)
+                    return BlueprintAgent(
+                        bp, target, hangup,
+                        llm_factory=llm_factory,
+                        scripted_opener=scripted_opener,
+                        entered_by_handoff=True,
+                    )
+                return _handoff
+
+            tools.append(function_tool(_make_handoff(name, t["handoff_to"]), raw_schema=raw))
+        elif t.get("session"):
+            def _make_session(tool_name: str):
+                async def _session_tool(raw_arguments: dict[str, Any]) -> dict[str, Any]:
+                    result = await run_tool(tool_name, dict(raw_arguments), local=True)
+                    hangup.set()
+                    return result
+                return _session_tool
+
+            tools.append(function_tool(_make_session(name), raw_schema=raw))
+        else:
+            def _make_industry(tool_name: str):
+                async def _industry(raw_arguments: dict[str, Any]) -> dict[str, Any]:
+                    return await run_tool(tool_name, dict(raw_arguments))
+                return _industry
+
+            tools.append(function_tool(_make_industry(name), raw_schema=raw))
+    return tools
+
+
+class BlueprintAgent(Agent):
+    """One blueprint agent: its own prompt, its own tools, generic dispatch.
+
+    `llm_factory(agent_name)` gives each agent its own model instance, which is
+    what makes a handoff a real switch on models that cannot be mutated
+    mid-session: LiveKit only carries the realtime session across a handoff when
+    the two activities share the *same* model object, so a fresh instance means
+    a fresh provider session configured with this agent's prompt and tools.
+
+    `scripted_opener=True` means this runtime's model rejects generate_reply()
+    (mutable_chat_context=False), so a handoff target must speak a scripted first
+    line via `session.say()` instead; everyone else model-generates the opener.
+    That scripted line is always derived from *this* agent's own instructions
+    (`_derive_opener`), never inherited from whichever agent handed off to it — a
+    flat, runtime-wide literal here would put another agent's task in this one's
+    mouth on any blueprint with more than one possible handoff target. The start
+    agent's greeting is `run_call`'s job, not this one's.
     """
 
     def __init__(
         self,
         bp: dict[str, Any],
+        name: str,
         hangup: asyncio.Event,
         *,
-        llm: NotGivenOr[Any] = NOT_GIVEN,
-        opener: str | None = None,
+        llm_factory: Callable[[str], Any] | None = None,
+        scripted_opener: bool = False,
+        entered_by_handoff: bool = False,
     ):
-        super().__init__(instructions=bp["agents"]["scheduler"]["instructions"], llm=llm)
-        self._hangup = hangup
-        self._opener = opener
+        instructions = bp["agents"][name]["instructions"]
+        llm: NotGivenOr[Any] = llm_factory(name) if llm_factory else NOT_GIVEN
+        super().__init__(
+            instructions=instructions,
+            llm=llm,
+            tools=_blueprint_tools(bp, name, hangup, llm_factory, scripted_opener),
+        )
+        self.agent_name = name
+        self._opener = _derive_opener(instructions) if scripted_opener else None
+        self._entered_by_handoff = entered_by_handoff
 
     async def on_enter(self) -> None:
-        # generate_reply() is rejected by realtime models with mutable_chat_context=False
-        # (google plugin, any "3.1" model); those runtimes pass `opener` and the session
-        # TTS speaks the scheduler's scripted first line instead.
+        if not self._entered_by_handoff:
+            return  # the call-opening greeting is run_call's job
         if self._opener:
             self.session.say(self._opener)
         else:
             self.session.generate_reply()
-
-    @function_tool
-    async def schedule_appointment(self, context: RunContext, date: str) -> dict[str, Any]:
-        """Schedule a repair appointment and store it in the database.
-
-        Args:
-            date: Repair appointment date in MM/DD/YYYY format
-        """
-        return await run_tool("schedule_appointment", {"date": date})
-
-    @function_tool
-    async def end_call(self, context: RunContext, reason: str) -> dict[str, Any]:
-        """End the call once the caller is done, or immediately if it is spam or a
-        wrong number. Say goodbye first.
-
-        Args:
-            reason: Why the call is ending
-        """
-        return await _end_call(reason, self._hangup)
-
-
-class Receptionist(Agent):
-    """Greets, then hands off in-framework by returning the Scheduler instance."""
-
-    def __init__(
-        self,
-        bp: dict[str, Any],
-        hangup: asyncio.Event,
-        *,
-        llm: NotGivenOr[Any] = NOT_GIVEN,
-        make_scheduler: Callable[[], Agent] | None = None,
-    ):
-        super().__init__(instructions=bp["agents"]["receptionist"]["instructions"], llm=llm)
-        self._hangup = hangup
-        # runtimes whose model can't be mutated mid-session pass a factory that gives the
-        # Scheduler its own model instance; everyone else shares the session's.
-        self._make_scheduler = make_scheduler or (lambda: Scheduler(bp, hangup))
-
-    @function_tool
-    async def handoff_to_scheduler(self, context: RunContext) -> Agent:
-        """Hand off the caller to the Bluejay's Repair Services scheduler agent."""
-        await run_tool("handoff_to_scheduler", {})
-        # return the Agent and nothing else: any non-Agent output sets
-        # reply_required, which makes the receptionist announce the transfer
-        # ("I'll connect you with our scheduler") on top of the scheduler's own
-        # opener. The blueprint forbids that, and the two overlapping turns let the
-        # caller's "okay, thank you" land on the scheduler as "I'm done" -> end_call
-        # before anything is booked.
-        return self._make_scheduler()
-
-    @function_tool
-    async def end_call(self, context: RunContext, reason: str) -> dict[str, Any]:
-        """End the call once the caller is done, or immediately if it is spam or a
-        wrong number. Say goodbye first.
-
-        Args:
-            reason: Why the call is ending
-        """
-        return await _end_call(reason, self._hangup)
 
 
 # ── job plumbing ─────────────────────────────────────────────────────────────

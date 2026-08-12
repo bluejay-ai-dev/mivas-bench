@@ -25,10 +25,6 @@
           "session": true
         },
         {
-          "name": "detect_language",
-          "handoff": false
-        },
-        {
           "name": "classify_visit_request",
           "handoff": false
         },

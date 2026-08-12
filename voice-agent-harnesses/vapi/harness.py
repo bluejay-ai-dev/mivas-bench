@@ -5,9 +5,10 @@ harness only (re)pushes blueprint config and then serves the webhook Vapi calls
 back on. Multi-agent is a **squad**: the receptionist member carries a `handoff`
 tool whose destination is the scheduler member, and the first member answers the
 call. `end_call` is Vapi's built-in `endCall` tool, so it never reaches the
-harness — `schedule_appointment` is the only tool we execute, and it arrives as
-an HTTPS POST from Vapi to `adapters/chirp.py`'s `/tool/{name}` route (which is
-also where its `execute_tool` span comes from).
+harness — every industry tool arrives as an HTTPS POST from Vapi to
+`adapters/chirp.py`'s `/tool/{name}` route (which is also where its
+`execute_tool` span comes from) and is forwarded verbatim to the industry tool
+server's POST /tools/{name} dispatch.
 
 Tool URLs point at the current cloudflared tunnel, which is ephemeral, so
 `ensure_squad` re-pushes the whole assistant config on every chirp boot; only the
@@ -281,18 +282,22 @@ def start_websocket_call(squad_id: str) -> tuple[str, str]:
     return resp["transport"]["websocketCallUrl"], resp["id"]
 
 
-async def _post_appointment(date: str) -> dict[str, Any]:
-    async with httpx.AsyncClient(timeout=30.0) as client:
-        resp = await client.post(f"{TOOL_SERVER_URL}/appointments", json={"date": date})
-        resp.raise_for_status()
-        body = resp.json()
-    return {"success": True, "date": body["date"]}
+def webhook_tool_names(bp: dict[str, Any]) -> set[str]:
+    """The tools that execute through our webhook: every non-handoff,
+    non-session blueprint tool (handoff/endCall run Vapi-side)."""
+    return {
+        t["name"]
+        for entry in bp["agents"].values()
+        for t in entry["tools"]
+        if not t.get("handoff") and not t.get("session") and t["name"] in bp["catalog"]
+    }
 
 
 async def _execute_tool(name: str, args: dict[str, Any]) -> dict[str, Any]:
-    if name == "schedule_appointment":
-        return await _post_appointment(args["date"])
-    return {"success": False, "error": f"unknown tool {name}"}
+    """Generic dispatch: POST /tools/{name}; the server's envelope is the result."""
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        resp = await client.post(f"{TOOL_SERVER_URL}/tools/{name}", json={"arguments": args})
+        return resp.json()
 
 
 async def run_tool(name: str, args: dict[str, Any], *, call_id: str | None = None) -> dict[str, Any]:
@@ -301,11 +306,12 @@ async def run_tool(name: str, args: dict[str, Any], *, call_id: str | None = Non
     Never raises — failures become `{success: false, error: ...}` so the call (and
     its OTel tree) still finishes cleanly.
     """
-    from report import call_offset_ms, finish_tool_span, tool_span
+    from report import finish_tool_span, tool_span
     with tool_span(name, args, call_id=call_id) as span:
         try:
             result = await _execute_tool(name, args)
-            finish_tool_span(span, result, ok=True)
+            ok = bool(result.get("ok", result.get("success", True)))
+            finish_tool_span(span, result, ok=ok)
             return result
         except Exception as e:
             err = {"success": False, "error": f"{type(e).__name__}: {e}"}

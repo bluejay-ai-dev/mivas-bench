@@ -6,11 +6,11 @@ them (Retell exposes the transition to the model as `transition_to_scheduler`,
 server-side — the harness never routes it). `end_call` is the built-in
 `{type: "end_call"}` tool, also server-side.
 
-Only `schedule_appointment` reaches us, and it does so as an HTTPS callback:
-Retell tools are *platform* tools, so the tool `url` points back at the chirp
-process (`{PUBLIC_URL}/tool/schedule_appointment`). The tunnel URL is ephemeral,
-so `ensure_agent` re-PATCHes the tool URLs on every boot; the cached llm/agent
-ids in `.agents.json` survive.
+Industry tools reach us as HTTPS callbacks: Retell tools are *platform* tools,
+so each tool `url` points back at the chirp process (`{PUBLIC_URL}/tool/<name>`),
+which forwards verbatim to the industry tool server's POST /tools/{name}
+dispatch. The tunnel URL is ephemeral, so `ensure_agent` re-PATCHes the tool
+URLs on every boot; the cached llm/agent ids in `.agents.json` survive.
 """
 
 from __future__ import annotations
@@ -333,22 +333,21 @@ async def report_platform_tools(call_id: str, bp: dict[str, Any]) -> list[str]:
 
 
 async def _execute_tool(name: str, args: dict[str, Any]) -> dict[str, Any]:
-    if name == "schedule_appointment":
-        async with httpx.AsyncClient(timeout=30.0) as client:
-            resp = await client.post(f"{TOOL_SERVER_URL}/appointments", json={"date": args["date"]})
-            resp.raise_for_status()
-            return {"success": True, "date": resp.json()["date"]}
-    return {"success": False, "error": f"unknown tool {name}"}
+    """Generic dispatch: POST /tools/{name}; the server's envelope is the result."""
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        resp = await client.post(f"{TOOL_SERVER_URL}/tools/{name}", json={"arguments": args})
+        return resp.json()
 
 
 async def run_tool(name: str, args: dict[str, Any], *, call_id: str | None = None) -> dict[str, Any]:
     """Execute a webhook tool under a GenAI execute_tool span. Never raises — a tool
     failure becomes `{success: false, error: ...}` so the call (and OTel tree) finishes."""
-    from report import call_offset_ms, finish_tool_span, tool_span
+    from report import finish_tool_span, tool_span
     with tool_span(name, args, call_id=call_id) as span:
         try:
             result = await _execute_tool(name, args)
-            finish_tool_span(span, result, ok=True)
+            ok = bool(result.get("ok", result.get("success", True)))
+            finish_tool_span(span, result, ok=ok)
             return result
         except Exception as e:
             err = {"success": False, "error": f"{type(e).__name__}: {e}"}

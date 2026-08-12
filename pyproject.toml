@@ -5,8 +5,10 @@ description = "Multi-Industry Voice Agent Simulation Bench"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    # control-industry state API
     "fastapi>=0.115.0",
     "uvicorn>=0.32.0",
+    # openai harness + voice converse
     "openai-agents>=0.18.0",
     "httpx>=0.27.0",
     "numpy>=1.26.0",
@@ -15,15 +17,13 @@ dependencies = [
     "opentelemetry-api>=1.27.0",
     "opentelemetry-sdk>=1.27.0",
     "opentelemetry-exporter-otlp-proto-http>=1.27.0",
+    # gemini harness
     "google-genai>=1.0.0",
+    # retell harness — web calls run over LiveKit, so the bridge joins the room
     "livekit>=1.1.0",
 ]
 [dependency-groups]
-dev = [
-    "livekit-agents[deepgram,openai,elevenlabs,silero,google]>=1.5.14,<2",
-    "pipecat-ai[nvidia,silero,websocket,fastapi,daily,deepgram,elevenlabs,google,openai,runner]==1.7.0",
-    "loguru>=0.7.0",
-]
+dev = ["pytest>=8.0.0"]
 
 [tool.uv]
 package = false
@@ -32,20 +32,4 @@ package = false
 venvPath = "."
 venv = ".venv"
 pythonVersion = "3.12"
-typeCheckingMode = "standard"
-reportImplicitRelativeImport = "none"
-executionEnvironments = [
-    { root = "voice-agent-harnesses/openai", extraPaths = ["voice-agent-harnesses/openai"] },
-    { root = "voice-agent-harnesses/gemini", extraPaths = ["voice-agent-harnesses/gemini"] },
-    { root = "voice-agent-harnesses/assemblyai", extraPaths = ["voice-agent-harnesses/assemblyai"] },
-    { root = "voice-agent-harnesses/deepgram", extraPaths = ["voice-agent-harnesses/deepgram"] },
-    { root = "voice-agent-harnesses/elevenlabs", extraPaths = ["voice-agent-harnesses/elevenlabs"] },
-    { root = "voice-agent-harnesses/vapi", extraPaths = ["voice-agent-harnesses/vapi"] },
-    { root = "voice-agent-harnesses/retell", extraPaths = ["voice-agent-harnesses/retell"] },
-    { root = "voice-agent-harnesses/bland", extraPaths = ["voice-agent-harnesses/bland"] },
-    { root = "voice-agent-harnesses/cartesia", extraPaths = ["voice-agent-harnesses/cartesia"] },
-    { root = "voice-agent-harnesses/livekit", extraPaths = ["voice-agent-harnesses/livekit"] },
-    { root = "voice-agent-harnesses/pipecat", extraPaths = ["voice-agent-harnesses/pipecat"] },
-    { root = "voice-agent-harnesses/nvidia", extraPaths = ["voice-agent-harnesses/nvidia"] },
-    { root = "tests", extraPaths = ["tests", "industries/control-industry"] },
-]
+extraPaths = ["voice-agent-harnesses/openai", "voice-agent-harnesses/gemini", "voice-agent-harnesses/assemblyai", "voice-agent-harnesses/deepgram", "voice-agent-harnesses/elevenlabs", "voice-agent-harnesses/vapi", "voice-agent-harnesses/retell", "voice-agent-harnesses/bland", "voice-agent-harnesses/cartesia", "voice-agent-harnesses/livekit", "voice-agent-harnesses/pipecat", "voice-agent-harnesses/nvidia"]
