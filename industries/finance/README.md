@@ -3,8 +3,9 @@
 Copperline Credit Union — a hypothetical member-owned credit union in southeastern
 Pennsylvania for MIVAS, structurally modelled on a real ~$6.6B credit union with a
 production phone voice AI (fee schedule, dispute clocks, waiver thresholds, and call
-taxonomy kept identical; every name, place, and number replaced — see
-`docs/RESEARCH.md` for the replica map). Multi-agent member service behind a GLBA
+taxonomy kept identical; every name, place, and number replaced — the full replica
+map lives in the repo's internal `docs/finance/RESEARCH.md`, which is gitignored and
+not shipped). Multi-agent member service behind a GLBA
 identity gate: balances and fees, money movement with two-step gates, card lifecycle,
 and Reg E / Reg Z dispute intake. All backing systems are deterministic fixtures.
 
@@ -79,7 +80,9 @@ predictions, or discretionary fee waivers.
 | `agent_blueprint.json` | Wires tools: industry / `handoff` / `session` |
 | `agent_blueprint.mmd` | Mermaid graph generated from the blueprint's handoff edges |
 | `system-prompts/*.md` | Full per-node prompts (shared CORE rules in each) |
-| `docs/` | RESEARCH, SPEC, SPEC_TRACE, ONEPAGER |
+
+Research, spec, spec trace, and the digital-human one-pager live in the repo's
+internal `docs/finance/` (gitignored, not shipped).
 
 Envelope: `{ok, data, error_code, member_safe_message}` — the safe message is what
 the agent may say verbatim on failure. Fixed clock `TODAY = 2026-08-01`.
