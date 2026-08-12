@@ -135,14 +135,16 @@ def flush() -> None:
 
 
 def _parent_span() -> Span | None:
+    """Always the voice.call root — never the current speech/tool span.
+
+    Falling back to get_current_span() nests customer.speech under agent.speech
+    (and vice versa) in Bluejay's waterfall.
+    """
     parent = _root_span.get()
     if parent is not None and parent.get_span_context().is_valid:
         return parent
     if _active_root is not None and _active_root.get_span_context().is_valid:
         return _active_root
-    cur = otel_trace.get_current_span()
-    if cur is not None and cur.get_span_context().is_valid:
-        return cur
     return None
 
 
@@ -177,37 +179,44 @@ def tool_span(
     parameters: Any = None,
     *,
     call_id: str | None = None,
+    parent: Span | None = None,
 ) -> Iterator[Span | None]:
-    """Child span under the active voice.call root. No-op outside traced_run."""
-    parent = _parent_span()
-    if parent is None:
+    """Sibling of speech spans under voice.call. No-op outside traced_run."""
+    root = parent if parent is not None and parent.get_span_context().is_valid else _parent_span()
+    if root is None:
         yield None
         return
 
     tracer = otel_trace.get_tracer(TRACER_NAME)
-    parent_ctx = otel_trace.set_span_in_context(parent)
+    parent_ctx = otel_trace.set_span_in_context(root)
     attrs: dict[str, Any] = {
         "gen_ai.operation.name": "execute_tool",
         "gen_ai.provider.name": PROVIDER,
         "gen_ai.tool.name": name,
         "gen_ai.tool.call.arguments": _json_attr(parameters if parameters is not None else {}),
-        # conversation timestamps come from span start vs voice.call (OTel extraction)
+        "bluejay.speech.start_offset_ms": call_offset_ms(),
     }
     if call_id:
         attrs["gen_ai.tool.call.id"] = str(call_id)
 
-    with tracer.start_as_current_span(
+    # start_span (not start_as_current) so later speech stays a sibling of this tool.
+    span = tracer.start_span(
         f"execute_tool {name}",
         context=parent_ctx,
         kind=SpanKind.CLIENT,
         attributes=attrs,
-    ) as span:
-        try:
-            yield span
-        except Exception as e:
-            span.record_exception(e)
-            span.set_status(Status(StatusCode.ERROR, str(e)[:400]))
-            raise
+    )
+    try:
+        yield span
+    except Exception as e:
+        span.record_exception(e)
+        span.set_status(Status(StatusCode.ERROR, str(e)[:400]))
+        span.end()
+        raise
+    else:
+        if span.is_recording():
+            span.set_attribute("bluejay.speech.end_offset_ms", call_offset_ms())
+            span.end()
 
 
 def finish_tool_span(
@@ -219,23 +228,26 @@ def finish_tool_span(
     parameters: Any = None,
     start_offset_ms: int | None = None,
 ) -> None:
-    if span is not None:
-        span.set_attribute("gen_ai.tool.call.result", _json_attr(output))
-        if ok:
-            span.set_status(Status(StatusCode.OK))
-        else:
-            span.set_status(Status(StatusCode.ERROR, _json_attr(output)[:400]))
+    if span is None:
+        return
+    span.set_attribute("gen_ai.tool.call.result", _json_attr(output))
+    span.set_attribute("bluejay.speech.end_offset_ms", call_offset_ms())
+    if ok:
+        span.set_status(Status(StatusCode.OK))
+    else:
+        span.set_status(Status(StatusCode.ERROR, _json_attr(output)[:400]))
+    # tool_span ends the span on exit; this only fills attributes.
 
 
 def start_speech_span(
-    utterance_id: str, *, speaker: str = "agent"
+    utterance_id: str, *, speaker: str = "agent", parent: Span | None = None
 ) -> Span | None:
-    """Begin agent.speech or customer.speech under voice.call."""
-    parent = _parent_span()
-    if parent is None:
+    """Begin agent.speech or customer.speech as a direct child of voice.call."""
+    root = parent if parent is not None and parent.get_span_context().is_valid else _parent_span()
+    if root is None:
         return None
     tracer = otel_trace.get_tracer(TRACER_NAME)
-    parent_ctx = otel_trace.set_span_in_context(parent)
+    parent_ctx = otel_trace.set_span_in_context(root)
     is_customer = speaker in ("customer", "user", "digital_human")
     span_name = "customer.speech" if is_customer else "agent.speech"
     attrs: dict[str, Any] = {
@@ -464,13 +476,13 @@ async def traced_run(
     *,
     simulation_result_id: str | None = None,
     model: str | None = None,
-) -> AsyncIterator[None]:
+) -> AsyncIterator[Span | None]:
     """OTel voice.call root; flush + link trace_ids/tool_calls on exit."""
     global _active_root, _active_t0, _active_tools
 
     provider = setup_otel()
     if provider is None:
-        yield
+        yield None
         return
 
     tracer = otel_trace.get_tracer(TRACER_NAME)
@@ -516,7 +528,7 @@ async def traced_run(
                     model,
                 )
             try:
-                yield
+                yield root
             except Exception as e:
                 if type(e).__name__.startswith("ConnectionClosed"):
                     root.set_status(Status(StatusCode.OK))
