@@ -1,0 +1,22 @@
+industries/finance/README.md
+  s_e9341b759171e6::t_d144c5cfe39571 6-8
+  s_e9341b759171e6::t_f117f14b83d956 83-85
+.gitignore
+  s_e9341b759171e6::t_2db414b5222393 49
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "cce74cf673c2bd79629d071b9e63194e4705ef1d",
+  "prompts": {},
+  "sessions": {
+    "s_e9341b759171e6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "252fc55f-8dc4-4450-85dd-b357f7faf790",
+        "model": "claude-fable-5"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
