@@ -25,14 +25,9 @@ ROOT = Path(__file__).resolve().parents[1]
 INDUSTRY_ROOT = ROOT / "industries"
 
 # Documented debt, not contract exceptions. Remove an entry when the gap is fixed.
-# - healthcare "handoff_tools_in_catalog": agent_blueprint.json wires transfer_to_*
-#   handoff tools that tools.json never declares (harnesses fall back to a default
-#   description today).
-# - travel "orphan_prompts": system-prompts/reservations.md is referenced by no agent.
 KNOWN_GAPS: dict[str, set[str]] = {
-    "control-industry": {"mmd", "selfcheck", "seeded_reference"},
-    "healthcare": {"selfcheck", "handoff_tools_in_catalog"},
-    "travel": {"orphan_prompts"},
+    "control-industry": {"selfcheck", "seeded_reference"},
+    "healthcare": {"selfcheck"},
 }
 
 REQUIRED_FILES = {"README.md", "agent_blueprint.json", "tools.json",
@@ -191,16 +186,29 @@ def test_blueprint_prompts_and_tools(industry: str) -> None:
         assert prompt.is_file(), f"{agent['name']}: {agent['system_prompt']} missing"
         referenced.append(prompt.resolve())
         for t in agent["tools"]:
-            if not (t.get("handoff") and "handoff_tools_in_catalog" in _gaps(industry)):
-                assert t["name"] in tool_names, \
-                    f"{agent['name']}: {t['name']} not in tools.json"
+            assert t["name"] in tool_names, \
+                f"{agent['name']}: {t['name']} not in tools.json"
             if t.get("handoff"):
                 assert t["handoff_to"] in agent_names
     on_disk = sorted(p.resolve() for p in (d / "system-prompts").glob("*.md"))
-    if "orphan_prompts" in _gaps(industry):
-        assert set(referenced) <= set(on_disk)
-    else:
-        assert sorted(referenced) == on_disk, "every prompt file referenced exactly once"
+    assert sorted(referenced) == on_disk, "every prompt file referenced exactly once"
+
+
+@industry
+def test_handoff_tools_carry_summary(industry: str) -> None:
+    """The handoff standard: every handoff tool is declared in tools.json and its
+    inputSchema requires handoff_summary, so context crosses every handoff on
+    every harness."""
+    specs = {t["name"]: t for t in _tools(industry)}
+    for agent in _blueprint(industry)["agents"]:
+        for t in agent["tools"]:
+            if not t.get("handoff"):
+                continue
+            spec = specs.get(t["name"])
+            assert spec is not None, f"{t['name']} not declared in tools.json"
+            required = set((spec.get("inputSchema") or {}).get("required") or [])
+            assert "handoff_summary" in required, \
+                f"{t['name']} must require handoff_summary"
 
 
 @industry
@@ -225,11 +233,10 @@ _EDGE = re.compile(r"^\s*(\w[\w-]*)\s*-->\s*\|(.+?)\|\s*(\w[\w-]*)")
 
 @industry
 def test_mermaid_matches_blueprint(industry: str) -> None:
-    if "mmd" in _gaps(industry):
-        pytest.skip(f"{industry} has no .mmd yet (KNOWN_GAPS)")
     bp = _blueprint(industry)
     expected = {(a["name"], t["name"], t["handoff_to"])
                 for a in bp["agents"] for t in a["tools"] if t.get("handoff")}
+    handoff_tools = {name for _, name, _ in expected}
     found = set()
     for line in (INDUSTRY_ROOT / industry / "agent_blueprint.mmd").read_text().splitlines():
         m = _EDGE.match(line)
@@ -237,7 +244,7 @@ def test_mermaid_matches_blueprint(industry: str) -> None:
             continue
         src, label, dst = m.groups()
         tool = label.strip().strip('"').split("(")[0].strip()
-        if tool.startswith("transfer_to_"):
+        if tool in handoff_tools:
             found.add((src, tool, dst))
     assert found == expected, (
         f"mmd/blueprint edge drift — only in mmd: {sorted(found - expected)}, "

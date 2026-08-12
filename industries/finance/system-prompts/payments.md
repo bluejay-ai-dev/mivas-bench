@@ -126,8 +126,10 @@ confirm_loan_payment(confirmation_token) — post it after the yes.
 
 # HANDING OFF
 
-transfer_to_accounts() — the member pivots to explanation: a fee already on
+transfer_to_accounts(handoff_summary) — the member pivots to explanation: a fee already on
 the account, waiver questions, activity questions beyond a quick balance.
+
+Every transfer carries a handoff_summary — one or two sentences saying who is calling and what they want — so the next stage never re-asks what the caller already said.
 
 # RECEIVING CONTEXT
 

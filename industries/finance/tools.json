@@ -1084,8 +1084,20 @@
       "description": "Hand the caller to identity verification the moment they need anything account-bound: balances, transactions, cards, payments, disputes. Bridge in a few words; never announce a transfer.",
       "inputSchema": {
         "type": "object",
-        "properties": {},
-        "required": []
+        "properties": {
+          "handoff_summary": {
+            "type": "string",
+            "description": "One or two sentences: who is calling and what they want, so the next desk never re-asks."
+          },
+          "next_intent": {
+            "type": "string",
+            "description": "Where to continue after verification: accounts, payments, cards, or disputes."
+          }
+        },
+        "required": [
+          "handoff_summary",
+          "next_intent"
+        ]
       },
       "outputSchema": {
         "type": "object",
@@ -1113,8 +1125,15 @@
       "description": "Hand a verified member to account services: balances, transactions, fee explanations and reversals, monthly-fee waiver questions.",
       "inputSchema": {
         "type": "object",
-        "properties": {},
-        "required": []
+        "properties": {
+          "handoff_summary": {
+            "type": "string",
+            "description": "One or two sentences: who is calling and what they want explained (balance, activity, a fee, waiver math), so the next desk never re-asks."
+          }
+        },
+        "required": [
+          "handoff_summary"
+        ]
       },
       "outputSchema": {
         "type": "object",
@@ -1142,8 +1161,15 @@
       "description": "Hand a verified member to payments: transfers between accounts, wires, stop payments, loan payments by phone.",
       "inputSchema": {
         "type": "object",
-        "properties": {},
-        "required": []
+        "properties": {
+          "handoff_summary": {
+            "type": "string",
+            "description": "One or two sentences: who is calling and what money they want moved (amounts and accounts already discussed), so the next desk never re-asks."
+          }
+        },
+        "required": [
+          "handoff_summary"
+        ]
       },
       "outputSchema": {
         "type": "object",
@@ -1171,8 +1197,15 @@
       "description": "Hand a verified member to card services: lost or stolen cards, replacements, travel notices.",
       "inputSchema": {
         "type": "object",
-        "properties": {},
-        "required": []
+        "properties": {
+          "handoff_summary": {
+            "type": "string",
+            "description": "One or two sentences: who is calling and which card and what happened to it (lost vs stolen, replacement urgency), so the next desk never re-asks."
+          }
+        },
+        "required": [
+          "handoff_summary"
+        ]
       },
       "outputSchema": {
         "type": "object",
@@ -1200,8 +1233,15 @@
       "description": "Hand a verified member to disputes: unauthorized transactions and billing errors on debit or credit.",
       "inputSchema": {
         "type": "object",
-        "properties": {},
-        "required": []
+        "properties": {
+          "handoff_summary": {
+            "type": "string",
+            "description": "One or two sentences: who is calling and which transaction they dispute (merchant, amount, date if known) and whether the card is already blocked, so the next desk never re-asks."
+          }
+        },
+        "required": [
+          "handoff_summary"
+        ]
       },
       "outputSchema": {
         "type": "object",
