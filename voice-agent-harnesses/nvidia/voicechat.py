@@ -528,10 +528,20 @@ async def handle_function_call(
             args = json.loads(arguments or "{}")
         except json.JSONDecodeError:
             args = {}
+    elif isinstance(arguments, dict):
+        args = dict(arguments)
     else:
-        args = dict(arguments or {})
+        args = {}
 
-    result, stop = await run_tool(name, args, bp, state, call_id=call_id)
+    allowed = tool_names(bp, state["agent"])
+    if name not in allowed:
+        result: dict[str, Any] = {
+            "success": False,
+            "error": f"tool {name!r} not available to agent {state['agent']!r}",
+        }
+        stop = False
+    else:
+        result, stop = await run_tool(name, args, bp, state, call_id=call_id)
 
     output = _ascii(f"<TOOL_RESPONSE>[{json.dumps(result, separators=(',', ':'))}]</TOOL_RESPONSE>")
     output = re.sub(r"[^\x20-\x7E]", " ", output)

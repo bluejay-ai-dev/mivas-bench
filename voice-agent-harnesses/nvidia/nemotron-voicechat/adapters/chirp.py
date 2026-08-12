@@ -307,6 +307,7 @@ async def _bridge(ws, industry: str) -> None:
             }
             rate: dict[str, dict] = {}
             deferred_tools: list[dict[str, Any]] = []
+            pending_user_pcm: list[bytes] = []
             agent_tools = {
                 a: session_update_for_agent(bp, a)["session"]["tools"] for a in bp["agents"]
             }
@@ -327,7 +328,11 @@ async def _bridge(ws, industry: str) -> None:
                 )
 
             async def _send_pcm24(pcm24: bytes) -> None:
-                if not pcm24 or end.is_set() or ctl["reconfiguring"]:
+                if not pcm24 or end.is_set():
+                    return
+                if ctl["reconfiguring"]:
+                    # Keep caller audio across session.update — dropping it loses barge-in.
+                    pending_user_pcm.append(pcm24)
                     return
                 await vc.send(
                     json.dumps(
@@ -338,6 +343,25 @@ async def _bridge(ws, industry: str) -> None:
                         }
                     )
                 )
+
+            async def _flush_pending_user_pcm() -> None:
+                if not pending_user_pcm or end.is_set() or ctl["reconfiguring"]:
+                    return
+                chunks = list(pending_user_pcm)
+                pending_user_pcm.clear()
+                for pcm24 in chunks:
+                    if end.is_set() or ctl["reconfiguring"]:
+                        pending_user_pcm.append(pcm24)
+                        break
+                    await vc.send(
+                        json.dumps(
+                            {
+                                "type": "input_audio_buffer.append",
+                                "event_id": _eid(),
+                                "audio": base64.b64encode(pcm24).decode("ascii"),
+                            }
+                        )
+                    )
 
             async def _send_silence_chunk() -> None:
                 if end.is_set() or _user_live() or ctl["reconfiguring"]:
@@ -426,13 +450,18 @@ async def _bridge(ws, industry: str) -> None:
                     ctl["awaiting_agent"] = True
                     ctl["agent_heard"] = False
                     await vc.send(json.dumps(session_update_for_agent(bp, target)))
-                    # Wait briefly for session.updated (also handled in outbound).
+                    # Wait for session.updated (also handled in outbound).
                     deadline = time.monotonic() + 8.0
                     while time.monotonic() < deadline and not end.is_set():
                         if not ctl["reconfiguring"]:
                             break
                         await asyncio.sleep(0.05)
-                    ctl["reconfiguring"] = False
+                    if ctl["reconfiguring"]:
+                        ctl["reconfiguring"] = False
+                        await _flush_pending_user_pcm()
+                        _log(f"handoff FAILED no session.updated → {target}")
+                        return
+                    await _flush_pending_user_pcm()
                     # Nudge only after DH is quiet so we don't talk over them.
                     wait_t0 = time.monotonic()
                     while not end.is_set() and ctl["kick_generation"] == gen:
@@ -464,6 +493,8 @@ async def _bridge(ws, industry: str) -> None:
                         await asyncio.sleep(SILENCE_CHUNK_MS / 1000.0)
                 except Exception as e:
                     ctl["reconfiguring"] = False
+                    with contextlib.suppress(Exception):
+                        await _flush_pending_user_pcm()
                     _log(f"handoff ERROR {type(e).__name__}: {e}")
 
             async def _close_call() -> None:
@@ -492,7 +523,9 @@ async def _bridge(ws, industry: str) -> None:
                     if isinstance(arguments, dict)
                     else str(arguments)
                 )
-                key = f"{state['agent']}:{name}"
+                # Dedup by tool name only — agent flips on handoff before a native
+                # retry can arrive, so `{agent}:{name}` would miss the duplicate.
+                key = name
                 if key in handled_tools:
                     _log(f"tool DEDUP skip {name} source={source}")
                     return
@@ -507,13 +540,14 @@ async def _bridge(ws, industry: str) -> None:
                         }
                     )
                     return
-                handled_tools.add(key)
                 outgoing = state["agent"]
                 _log(f"tool DISPATCH {name} source={source} args={_clip(args_key)}")
                 await turns.end_agent(why=f"tool:{name}")
                 result, stop, reply = await handle_function_call(
                     name, arguments, call_id, bp, state
                 )
+                if result.get("success"):
+                    handled_tools.add(key)
                 _log(
                     f"tool RESULT {name} success={result.get('success')} "
                     f"active={state['agent']} stop={stop}"
@@ -660,6 +694,7 @@ async def _bridge(ws, industry: str) -> None:
                             tools = (event.get("session") or {}).get("tools") or []
                             # After handoff reconfigure, mark ready.
                             ctl["reconfiguring"] = False
+                            await _flush_pending_user_pcm()
                             _log(
                                 f"session.updated agent={state['agent']} "
                                 f"tools={len(tools)}"
