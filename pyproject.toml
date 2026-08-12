@@ -23,7 +23,7 @@ dependencies = [
     "livekit>=1.1.0",
 ]
 [dependency-groups]
-dev = []
+dev = ["pytest>=8.0.0"]
 
 [tool.uv]
 package = false
