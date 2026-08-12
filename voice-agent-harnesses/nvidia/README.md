@@ -86,12 +86,12 @@ Wire format is 24 kHz PCM both ways (server resamples internally); CHIRP stays 1
 |---|---|
 | `NVIDIA_API_KEY` | cascaded NIM cloud + hosted VoiceChat NVCF |
 | `VOICECHAT_WS_URL` | VoiceChat Realtime WS (default `wss://grpc.nvcf.nvidia.com/v1/realtime`) |
-| `VOICECHAT_FUNCTION_ID` | NVCF function id (default `ai-nemotron-voicechat`) |
+| `VOICECHAT_FUNCTION_ID` | NVCF function id (default `42c86b5f-545a-4b2f-a83b-90fd71da9912`) |
 | `VOICECHAT_SPEAKS_FIRST` | `true`/`false` (default `true`) — speech-kick at call open only |
 | `VOICECHAT_SPEAK_FIRST_KICK_WAV` | optional override path for the speak-first kick (mono pcm16) |
-| `VOICECHAT_AGENT_RMS_ON` | RMS gate for `agent.speech` (default `400`) |
+| `VOICECHAT_AGENT_RMS_ON` | RMS gate for `agent.speech` (default `500`) |
 | `VOICECHAT_USER_RMS_ON` | RMS gate for inbound CHIRP → VoiceChat (default `350`) |
-| `VOICECHAT_CUSTOMER_HANG_S` | Coalesce CHIRP VAD blips into one `customer.speech` (default `1.25`) |
+| `VOICECHAT_CUSTOMER_HANG_S` | Coalesce CHIRP VAD blips into one `customer.speech` (default `2.0`) |
 | `VOICECHAT_KICK_TRAIL_SILENCE_S` | Max trail silence after speak-first kick (default `3.5`) |
 | `TOOL_SERVER_URL` | industry state API |
 | `BLUEJAY_API_KEY` | OTel + `update-simulation-result` |

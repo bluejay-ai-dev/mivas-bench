@@ -104,7 +104,7 @@ def main(model: str | None = None) -> None:
     a = p.parse_args()
     if not os.environ.get("NVIDIA_API_KEY"):
         raise SystemExit("need NVIDIA_API_KEY")
-    os.environ.setdefault("INDUSTRY", a.industry)
+    os.environ["INDUSTRY"] = a.industry
     industry_path(a.industry)
     logger.info(
         "ws↔Nemotron × {} :{} auth={}",
