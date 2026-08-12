@@ -46,4 +46,4 @@ Thumbs.db
 *.local.yaml
 
 # internal handoff docs, not shipped
-/docs/
+docs/
