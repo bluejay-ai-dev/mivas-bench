@@ -19,7 +19,7 @@ from typing import Any
 from fastapi.testclient import TestClient
 
 ROOT = Path(__file__).resolve().parents[1]
-INDUSTRIES = ("control-industry", "healthcare", "legal", "travel")
+INDUSTRIES = ("control-industry", "finance", "healthcare", "legal", "travel")
 
 
 @contextmanager
@@ -107,6 +107,18 @@ _KNOWN_GOOD_ARGS: dict[str, dict[str, dict[str, Any]]] = {
         "explain_charge": {"line_item_id": "li_noshow"},
         "search_practice_kb": {"query": "open"},
     },
+    "finance": {
+        "search_kb": {"query": "routing number"},
+        "get_branch_info": {"branch": "Granford"},
+        "get_fee": {"fee": "overdraft"},
+        "check_membership_eligibility": {"county": "Chester"},
+        "identify_member": {"full_name": "Marisol Vega", "phone": "6105550142"},
+        "verify_identity": {"dob": "1988-03-14", "member_number_last4": "4471"},
+        "get_member_summary": {},
+        "get_balance": {"account": "checking"},
+        "get_transactions": {"account": "checking"},
+        "get_cards": {},
+    },
     "travel": {
         "find_reservation": {"last_name": "Solberg", "confirmation_code": "RT2LKD"},
         "get_reservation": {"confirmation_code": "RT2LKD"},
@@ -132,6 +144,7 @@ def _dispatch_args(industry: str, spec: dict[str, Any]) -> tuple[dict[str, Any],
 # silently depend on tools.json's declaration order.
 _DISPATCH_BEFORE: dict[str, list[str]] = {
     "healthcare": ["verify_identity"],
+    "finance": ["identify_member", "verify_identity"],
 }
 
 
@@ -272,6 +285,54 @@ def test_healthcare_flow_through_dispatch() -> None:
                    for a in state["appointments"])
 
 
+def test_finance_guards_survive_dispatch() -> None:
+    with _load_tool_server("finance") as module, TestClient(module.app) as client:
+        def tool(name: str, args: dict[str, Any]) -> dict[str, Any]:
+            resp = client.post(f"/tools/{name}", json={"arguments": args})
+            assert resp.status_code == 200, resp.text
+            return resp.json()
+
+        # GLBA gate: identified is not verified; verified unlocks
+        locked = tool("get_member_summary", {})
+        assert locked["ok"] is False and locked["error_code"] == "IDENTITY_NOT_VERIFIED"
+        found = tool("identify_member", {"full_name": "Marisol Vegga", "phone": "0142"})
+        assert found["ok"] and found["data"]["record_found"]
+        assert tool("get_balance", {"account": "checking"})["ok"] is False
+        assert tool("verify_identity",
+                    {"dob": "1988-03-14", "member_number_last4": "4471"})["ok"]
+        bal = tool("get_balance", {"account": "checking"})
+        assert bal["ok"] and bal["data"]["available_cents"] == 238012
+
+        # wire: tier math, warning gate, token single-use
+        q = tool("quote_wire", {"destination_type": "domestic", "amount": 2500,
+                                "beneficiary": "Test Person"})
+        assert q["ok"] and q["data"]["fee"] == "$30.00"
+        token = q["data"]["confirmation_token"]
+        needs_warning = tool("confirm_wire", {"confirmation_token": token,
+                                              "fraud_warning_acknowledged": False})
+        assert needs_warning["error_code"] == "WIRE_WARNING_REQUIRED"
+        sent = tool("confirm_wire", {"confirmation_token": token,
+                                     "fraud_warning_acknowledged": True})
+        assert sent["ok"] and sent["data"]["status"] == "sent"
+        reuse = tool("confirm_wire", {"confirmation_token": token,
+                                      "fraud_warning_acknowledged": True})
+        assert reuse["ok"] is False and reuse["error_code"] == "TOKEN_ALREADY_USED"
+
+        # dispute: disclosure gate, Reg E script, durable claim row
+        tool("identify_member", {"full_name": "Alma Reyes", "phone": "6105550129"})
+        tool("verify_identity", {"dob": "1992-12-05", "member_number_last4": "5518"})
+        first = tool("file_dispute", {"transaction_id": "t_701",
+                                      "reason": "unauthorized"})
+        assert first["error_code"] == "DISCLOSURE_REQUIRED"
+        assert "10 business days" in first["member_safe_message"]
+        filed = tool("file_dispute", {"transaction_id": "t_701",
+                                      "reason": "unauthorized",
+                                      "disclosures_acknowledged": True})
+        assert filed["ok"] and filed["data"]["regulation"] == "reg_e"
+        state = client.get("/state").json()
+        assert any(c["transaction_id"] == "t_701" for c in state["claims"])
+
+
 def test_travel_guards_survive_dispatch() -> None:
     with _load_tool_server("travel") as module, TestClient(module.app) as client:
         def tool(name: str, args: dict[str, Any]) -> dict[str, Any]:
@@ -297,6 +358,7 @@ if __name__ == "__main__":
     test_dispatch_every_industry_tool()
     test_control_industry_rest_and_dispatch()
     test_legal_guards_survive_dispatch()
+    test_finance_guards_survive_dispatch()
     test_healthcare_flow_through_dispatch()
     test_travel_guards_survive_dispatch()
     print("ok test_tool_server")
