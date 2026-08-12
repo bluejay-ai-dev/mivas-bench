@@ -1,0 +1,75 @@
+industries/finance/system-prompts/cards.md
+  s_5eccc6d962ed74::t_98b40d5ea5d2b4 112,115
+  s_5eccc6d962ed74::t_10e0954f9ded0e 116
+industries/healthcare/tools.json
+  s_e9341b759171e6::t_3c6b4602532bea 40,1368-1588
+industries/finance/system-prompts/identity.md
+  s_5eccc6d962ed74::t_98b40d5ea5d2b4 119,121,123-124,129
+  s_5eccc6d962ed74::t_10e0954f9ded0e 130
+industries/finance/system-prompts/payments.md
+  s_5eccc6d962ed74::t_98b40d5ea5d2b4 129,132
+  s_5eccc6d962ed74::t_10e0954f9ded0e 133
+industries/finance/system-prompts/disputes.md
+  s_5eccc6d962ed74::t_10e0954f9ded0e 123
+  s_5eccc6d962ed74::t_98b40d5ea5d2b4 118,122
+industries/healthcare/system-prompts/reception.md
+  s_e9341b759171e6::t_3c6b4602532bea 3-4,6,8-12,14-29,33-35,37-40,42,45-80,83,85,87-90,95-96,100-101,103-104,107-109,111-114,116-117,120-122,124-129,132-133,135-144,147-149,151-153,156
+tests/test_industry_contract.py
+  s_5eccc6d962ed74::t_f01c65dc8fe308 29-30
+  s_5eccc6d962ed74::t_12c848e5961ff7 239,247
+  s_5eccc6d962ed74::t_5879ad5c44c32f 189-190,194-211
+industries/healthcare/system-prompts/coverage.md
+  s_e9341b759171e6::t_3c6b4602532bea 3-28,32-37,40-71,74,76,78-81,85-91,94-95,99-100,103-117,119-120,123-130,133-139,142-145,148
+industries/healthcare/system-prompts/scheduling.md
+  s_e9341b759171e6::t_3c6b4602532bea 3-4,6,8-12,14-28,32-33,35-37,40-69,72,74,76-79,83-90,97-99,102-123,126-128,130,132-134,137-149,153,155-160,163-167,170
+voice-agent-harnesses/openai/harness.py
+  s_e9341b759171e6::t_3c6b4602532bea 28,72-87,161-194
+industries/control-industry/tools.json
+  s_5eccc6d962ed74::t_2f2582a2f04849 8-16
+industries/finance/system-prompts/reception.md
+  s_5eccc6d962ed74::t_98b40d5ea5d2b4 121,126
+  s_5eccc6d962ed74::t_10e0954f9ded0e 127
+industries/finance/tools.json
+  s_5eccc6d962ed74::t_2f2582a2f04849 1087-1100,1128-1136,1164-1172,1200-1208,1236-1244
+industries/healthcare/system-prompts/clinical.md
+  s_e9341b759171e6::t_3c6b4602532bea 3-28,32-37,40-71,74,76,78-81,85-90,99,101-108,110-112,116-118,120-122,124-125,128-135,139-145,149-150,153
+industries/healthcare/system-prompts/cosmetic.md
+  s_e9341b759171e6::t_3c6b4602532bea 3-28,32-37,40-69,72,74,76-79,83-89,95,99-104,106,108,110,113-114,116-117,119,125-132,136-141,144-146,149
+industries/finance/system-prompts/accounts.md
+  s_5eccc6d962ed74::t_98b40d5ea5d2b4 122,124-125,128
+  s_5eccc6d962ed74::t_10e0954f9ded0e 129
+industries/healthcare/README.md
+  s_e9341b759171e6::t_3c6b4602532bea 9,17-20
+industries/healthcare/system-prompts/identity.md
+  s_e9341b759171e6::t_3c6b4602532bea 3-28,32-39,42-74,77,79,81-84,88-94,100-102,107-122,124,127-133,136,142-146,149-151,154-157
+industries/healthcare/agent_blueprint.mmd
+  s_e9341b759171e6::t_3c6b4602532bea 27-33
+industries/healthcare/system-prompts/billing.md
+  s_e9341b759171e6::t_3c6b4602532bea 3-28,32-37,40-71,74,76,78-81,85-90,96-97,100-114,117-125,128-135,138-139,142-143
+industries/control-industry/agent_blueprint.mmd
+  s_5eccc6d962ed74::t_fa5bde3e24aacd 1-4
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "ef3a8531ac2cbfa174b734e7ff84a800726e489a",
+  "prompts": {},
+  "sessions": {
+    "s_5eccc6d962ed74": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "267578ae-dbdf-4140-b891-a68f7da465cc",
+        "model": "claude-fable-5"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    },
+    "s_e9341b759171e6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "252fc55f-8dc4-4450-85dd-b357f7faf790",
+        "model": "claude-fable-5"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
