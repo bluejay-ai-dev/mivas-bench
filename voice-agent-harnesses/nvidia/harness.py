@@ -152,7 +152,8 @@ async def run_tool(
 ) -> tuple[dict[str, Any], bool]:
     from report import finish_tool_span, tool_span
 
-    with tool_span(name, args, call_id=call_id) as span:
+    parent = state.get("_otel_root")
+    with tool_span(name, args, call_id=call_id, parent=parent) as span:
         try:
             result, stop = await _execute_tool(name, args, bp, state)
             ok = bool(result.get("success"))
