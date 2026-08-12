@@ -3,9 +3,10 @@
 Model: https://build.nvidia.com/nvidia/nemotron-voicechat
        https://huggingface.co/nvidia/NVIDIA-NemotronLabs-VoiceChat-11B
 
-Multi-agent: one VoiceChat session per blueprint agent (dual-session switch).
-Needs hosted NVCF VoiceChat (`VOICECHAT_WS_URL`, default wss://grpc.nvcf.nvidia.com/v1/realtime)
-or a local NIM on ws://127.0.0.1:9000/v1/realtime. Speak-first: VOICECHAT_SPEAKS_FIRST.
+Multi-agent: one VoiceChat WS for the call; handoff is session.update on that
+socket (keeps history). Needs hosted NVCF VoiceChat (`VOICECHAT_WS_URL`, default
+wss://grpc.nvcf.nvidia.com/v1/realtime) or a local NIM on
+ws://127.0.0.1:9000/v1/realtime. Speak-first: VOICECHAT_SPEAKS_FIRST.
 """
 
 from __future__ import annotations

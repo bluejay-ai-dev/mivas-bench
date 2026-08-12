@@ -275,15 +275,14 @@ def end_speech_span(span: Span | None) -> None:
     span.end()
 
 
-async def _await_terminal_upsert(
-    client: httpx.AsyncClient, simulation_result_id: str, timeout: float = 300.0
+async def _await_upsert_ready(
+    client: httpx.AsyncClient, simulation_result_id: str, timeout: float = 120.0
 ) -> str | None:
-    """Wait for a *final* status, then POST once.
+    """Wait until the sim is linkable (conversation over), not until COMPLETED.
 
-    Not TERMINAL_STATUSES (it counts EVALUATING) and not 18 s: posting mid-eval gets
-    trace_ids wiped, and the relink then re-extracts every execute_tool span on top of
-    the first POST's, so each tool lands twice. Eval needs ~175 s; CHIRP has no session
-    cap, so the wait is free.
+    Waiting for FINAL blocked the CHIRP handler for minutes after CALL END, so
+    trace_ids/tool actuals stayed empty through CONVERSATION_ENDED / EVALUATING.
+    Post as soon as conversation ends; `_relink_after_final` repairs eval wipes.
     """
     deadline = time.monotonic() + timeout
     key = _api_key()
@@ -299,11 +298,11 @@ async def _await_terminal_upsert(
                 st = str(
                     ((r.json() or {}).get("simulation_result") or {}).get("status")
                 )
-                if st in FINAL_STATUSES:
+                if st in FINAL_STATUSES or st in EARLY_UPSERT_STATUSES:
                     return st
         except Exception:
             pass
-        await asyncio.sleep(1.0)
+        await asyncio.sleep(0.5)
     return None
 
 
@@ -344,7 +343,7 @@ async def post_simulation_enrichment(
     for attempt in range(1, 4):
         try:
             async with httpx.AsyncClient(timeout=20) as client:
-                st = await _await_terminal_upsert(client, simulation_result_id)
+                st = await _await_upsert_ready(client, simulation_result_id)
                 if st is None:
                     check = await client.get(
                         f"{_api_url()}/retrieve-simulation-result/{simulation_result_id}",
@@ -372,7 +371,7 @@ async def post_simulation_enrichment(
                         return
                 else:
                     logger.info(
-                        "update-simulation-result ok trace=%s sim=%s terminal=%s attempt=%s",
+                        "update-simulation-result ok trace=%s sim=%s status=%s attempt=%s",
                         trace_id,
                         simulation_result_id,
                         st,
@@ -544,18 +543,22 @@ async def traced_run(
             _reported_tools.reset(tools_token)
         _call_t0.reset(t0_token)
         flush()
+        # Do not await enrichment here — waiting for Bluejay status held the CHIRP
+        # handler open for minutes after CALL END and delayed the next dial.
         if simulation_result_id and (otel_tid or tool_buf):
-            try:
-                await post_simulation_enrichment(
-                    simulation_result_id,
-                    trace_id=otel_tid,
-                                    )
-            except Exception as e:
-                logger.error(
-                    "post_simulation_enrichment crashed: %s: %s",
-                    type(e).__name__,
-                    e,
-                )
+            tid, sim = otel_tid, simulation_result_id
+
+            async def _enrich() -> None:
+                try:
+                    await post_simulation_enrichment(sim, trace_id=tid)
+                except Exception as e:
+                    logger.error(
+                        "post_simulation_enrichment crashed: %s: %s",
+                        type(e).__name__,
+                        e,
+                    )
+
+            asyncio.create_task(_enrich(), name=f"otel-enrich-{sim}")
         elif simulation_result_id and not otel_tid:
             logger.error(
                 "have simulation_result_id=%s but no otel trace id to post",
