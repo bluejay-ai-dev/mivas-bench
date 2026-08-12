@@ -54,6 +54,13 @@ spec:
                 secretKeyRef:
                   name: mivas-secrets
                   key: OPENAI_API_KEY
+                  optional: true
+            - name: NVIDIA_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: mivas-secrets
+                  key: NVIDIA_API_KEY
+                  optional: true
             - name: BLUEJAY_API_KEY
               valueFrom:
                 secretKeyRef:

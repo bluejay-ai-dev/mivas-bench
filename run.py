@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import base64
 import json
 import os
 import signal
@@ -36,12 +37,16 @@ def _redact_cmd(cmd: list[str]) -> str:
     for part in cmd:
         if part.startswith("--from-literal=OPENAI_API_KEY="):
             out.append("--from-literal=OPENAI_API_KEY=***")
+        elif part.startswith("--from-literal=NVIDIA_API_KEY="):
+            out.append("--from-literal=NVIDIA_API_KEY=***")
         elif part.startswith("--from-literal=BLUEJAY_API_KEY="):
             out.append("--from-literal=BLUEJAY_API_KEY=***")
         elif part.startswith("--from-literal=CHIRP_PASS="):
             out.append("--from-literal=CHIRP_PASS=***")
         elif "OPENAI_API_KEY=" in part and not part.startswith("OPENAI_API_KEY=***"):
             out.append("OPENAI_API_KEY=***")
+        elif "NVIDIA_API_KEY=" in part and not part.startswith("NVIDIA_API_KEY=***"):
+            out.append("NVIDIA_API_KEY=***")
         else:
             out.append(part)
     return " ".join(out)
@@ -133,37 +138,75 @@ def secret_exists() -> bool:
 
 
 def ensure_secret() -> None:
-    """Create or refresh mivas-secrets from env (OPENAI required; Bluejay/CHIRP optional)."""
+    """Create or refresh mivas-secrets from env (provider keys + Bluejay/CHIRP).
+
+    Merges into any existing Secret so a NVIDIA-only refresh cannot wipe
+    OPENAI_API_KEY / custom CHIRP credentials already on the cluster.
+    """
     api_key = os.environ.get("OPENAI_API_KEY", "")
-    if not secret_exists() and not api_key:
+    nvidia_key = os.environ.get("NVIDIA_API_KEY", "")
+    exists = secret_exists()
+    if not exists and not api_key and not nvidia_key:
         print(
-            "missing Secret mivas-secrets and OPENAI_API_KEY unset\n"
+            "missing Secret mivas-secrets and no OPENAI_API_KEY/NVIDIA_API_KEY in env\n"
             "create with: kubectl create secret generic mivas-secrets "
-            "--from-literal=OPENAI_API_KEY=...",
+            "--from-literal=OPENAI_API_KEY=... and/or --from-literal=NVIDIA_API_KEY=...",
             file=sys.stderr,
         )
         sys.exit(1)
-    if not api_key:
+    if not api_key and not nvidia_key and not os.environ.get("BLUEJAY_API_KEY"):
         # Secret already exists; nothing to sync from env.
         return
+
+    literals: dict[str, str] = {}
+    if exists:
+        try:
+            raw = subprocess.run(
+                ["kubectl", "get", "secret", "mivas-secrets", "-o", "json"],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            data = (json.loads(raw.stdout or "{}").get("data") or {})
+            for key, b64 in data.items():
+                if isinstance(b64, str):
+                    literals[key] = base64.b64decode(b64).decode("utf-8", errors="replace")
+        except (subprocess.CalledProcessError, json.JSONDecodeError, ValueError) as e:
+            print(f"warn: could not read existing mivas-secrets ({e}); writing env keys only", file=sys.stderr)
+
+    if api_key:
+        literals["OPENAI_API_KEY"] = api_key
+    if nvidia_key:
+        literals["NVIDIA_API_KEY"] = nvidia_key
+    if os.environ.get("BLUEJAY_API_KEY"):
+        literals["BLUEJAY_API_KEY"] = os.environ["BLUEJAY_API_KEY"]
+    if os.environ.get("CHIRP_USER"):
+        literals["CHIRP_USER"] = os.environ["CHIRP_USER"]
+    elif "CHIRP_USER" not in literals:
+        literals["CHIRP_USER"] = "mivas"
+    if os.environ.get("CHIRP_PASS"):
+        literals["CHIRP_PASS"] = os.environ["CHIRP_PASS"]
+    elif "CHIRP_PASS" not in literals:
+        literals["CHIRP_PASS"] = "mivas"
+
     cmd = [
         "kubectl",
         "create",
         "secret",
         "generic",
         "mivas-secrets",
-        f"--from-literal=OPENAI_API_KEY={api_key}",
         "--dry-run=client",
         "-o",
         "yaml",
     ]
-    if os.environ.get("BLUEJAY_API_KEY"):
-        cmd.append(f"--from-literal=BLUEJAY_API_KEY={os.environ['BLUEJAY_API_KEY']}")
-    chirp_user = os.environ.get("CHIRP_USER", "mivas")
-    chirp_pass = os.environ.get("CHIRP_PASS", "mivas")
-    cmd.append(f"--from-literal=CHIRP_USER={chirp_user}")
-    cmd.append(f"--from-literal=CHIRP_PASS={chirp_pass}")
-    rendered = subprocess.run(cmd, check=True, capture_output=True, text=True)
+    for key, value in literals.items():
+        cmd.append(f"--from-literal={key}={value}")
+    try:
+        rendered = subprocess.run(cmd, check=True, capture_output=True, text=True)
+    except subprocess.CalledProcessError as e:
+        print(f"kubectl create secret failed: {_redact_cmd(cmd)}", file=sys.stderr)
+        print(e.stderr or e.stdout or str(e), file=sys.stderr)
+        sys.exit(e.returncode)
     apply = subprocess.run(
         ["kubectl", "apply", "-f", "-"],
         input=rendered.stdout,

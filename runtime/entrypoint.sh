@@ -63,16 +63,22 @@ if [[ "${MIVAS_MODE}" == "chirp" ]]; then
     echo "no chirp adapter at ${HARNESS_DIR}/adapters/chirp.py" >&2
     exit 1
   fi
-  if [[ -z "${OPENAI_REALTIME_MODEL}" ]]; then
-    echo "OPENAI_REALTIME_MODEL unset (and no default for runtime=${HARNESS_RUNTIME})" >&2
-    exit 1
-  fi
-  echo "starting CHIRP (${VOICE_AGENT} model=${OPENAI_REALTIME_MODEL}) on :${CHIRP_PORT}"
-  exec python "${HARNESS_DIR}/adapters/chirp.py" \
-    --model "${OPENAI_REALTIME_MODEL}" \
-    --industry "${INDUSTRY}" \
-    --host 0.0.0.0 \
-    --port "${CHIRP_PORT}"
+  HARNESS_FAMILY="${HARNESS_FAMILY:-${VOICE_AGENT%%/*}}"
+  CHIRP_ARGS=(--industry "${INDUSTRY}" --host 0.0.0.0 --port "${CHIRP_PORT}")
+  case "${HARNESS_FAMILY}" in
+    openai)
+      if [[ -z "${OPENAI_REALTIME_MODEL}" ]]; then
+        echo "OPENAI_REALTIME_MODEL unset (and no default for runtime=${HARNESS_RUNTIME})" >&2
+        exit 1
+      fi
+      CHIRP_ARGS+=(--model "${OPENAI_REALTIME_MODEL}")
+      echo "starting CHIRP (${VOICE_AGENT} model=${OPENAI_REALTIME_MODEL}) on :${CHIRP_PORT}"
+      ;;
+    *)
+      echo "starting CHIRP (${VOICE_AGENT}) on :${CHIRP_PORT}"
+      ;;
+  esac
+  exec python "${HARNESS_DIR}/adapters/chirp.py" "${CHIRP_ARGS[@]}"
 fi
 
 echo "starting harness agent (${VOICE_AGENT}) mode=${MIVAS_MODE}"
