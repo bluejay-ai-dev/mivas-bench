@@ -32,4 +32,4 @@ package = false
 venvPath = "."
 venv = ".venv"
 pythonVersion = "3.12"
-extraPaths = ["voice-agent-harnesses/openai", "voice-agent-harnesses/gemini", "voice-agent-harnesses/assemblyai", "voice-agent-harnesses/deepgram", "voice-agent-harnesses/elevenlabs", "voice-agent-harnesses/vapi", "voice-agent-harnesses/retell", "voice-agent-harnesses/bland", "voice-agent-harnesses/cartesia", "voice-agent-harnesses/livekit", "voice-agent-harnesses/pipecat", "voice-agent-harnesses/nvidia"]
+extraPaths = ["voice-agent-harnesses/openai", "voice-agent-harnesses/gemini", "voice-agent-harnesses/assemblyai", "voice-agent-harnesses/deepgram", "voice-agent-harnesses/elevenlabs", "voice-agent-harnesses/vapi", "voice-agent-harnesses/retell", "voice-agent-harnesses/bland", "voice-agent-harnesses/cartesia", "voice-agent-harnesses/livekit", "voice-agent-harnesses/pipecat", "voice-agent-harnesses/nvidia", "voice-agent-harnesses/grok"]
