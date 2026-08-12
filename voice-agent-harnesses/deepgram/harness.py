@@ -22,8 +22,8 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 TOOL_SERVER_URL = os.environ.get("TOOL_SERVER_URL", "http://127.0.0.1:8000").rstrip("/")
 
 WS_URL = "wss://agent.deepgram.com/v1/agent/converse"
-DEEPGRAM_LISTEN_MODEL = os.environ.get("DEEPGRAM_LISTEN_MODEL", "nova-3")
-DEEPGRAM_THINK_MODEL = os.environ.get("DEEPGRAM_THINK_MODEL", "gpt-4o-mini")
+DEEPGRAM_LISTEN_MODEL = os.environ.get("DEEPGRAM_LISTEN_MODEL", "flux-general-en")
+DEEPGRAM_THINK_MODEL = os.environ.get("DEEPGRAM_THINK_MODEL", "gpt-4.1")
 DEEPGRAM_SPEAK_MODEL = os.environ.get("DEEPGRAM_SPEAK_MODEL", "aura-2-thalia-en")
 DEEPGRAM_GREETING = os.environ.get("DEEPGRAM_GREETING", "Thanks for calling! How can I help you today?")
 
