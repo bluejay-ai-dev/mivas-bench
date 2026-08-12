@@ -37,7 +37,7 @@
     },
     {
       "name": "detect_language",
-      "description": "Detect the caller's language when they open in something other than English, then switch and stay switched. Never ask them to press a number for Spanish.",
+      "description": "Detect the caller's language. Not wired into the healthcare blueprint (English-only eval); kept for future multilingual industries.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -1347,6 +1347,227 @@
             "type": "string"
           }
         }
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "patient_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "transfer_to_identity",
+      "description": "Invisible handoff to Identity & Verification when chart access is required before the real work (existing patient scheduling, billing, clinical, or insurance update). Pass next_intent so identity knows where to continue after verification.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "handoff_summary": {
+            "type": "string",
+            "description": "one or two sentences: who is calling and what they want, so identity never re-asks."
+          },
+          "next_intent": {
+            "type": "string",
+            "description": "where to continue after verification: scheduling, billing, clinical, coverage, or cosmetic."
+          }
+        },
+        "required": [
+          "handoff_summary",
+          "next_intent"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "patient_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "transfer_to_scheduling",
+      "description": "Invisible handoff to Scheduling & Access for booking, rescheduling, cancelling, waitlist, or allergy visits.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "handoff_summary": {
+            "type": "string",
+            "description": "one or two sentences: patient name if known, what they want booked/moved/cancelled, office or carrier already discussed."
+          }
+        },
+        "required": [
+          "handoff_summary"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "patient_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "transfer_to_coverage",
+      "description": "Invisible handoff to Coverage & Benefits for plan acceptance, referrals, eligibility, or capturing a new insurance card.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "handoff_summary": {
+            "type": "string",
+            "description": "one or two sentences: carrier if known, office in play, and the coverage question."
+          }
+        },
+        "required": [
+          "handoff_summary"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "patient_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "transfer_to_cosmetic",
+      "description": "Invisible handoff to Cosmetic Concierge for Botox, fillers, lasers, peels, cosmetic pricing, or cosmetic consult booking.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "handoff_summary": {
+            "type": "string",
+            "description": "one or two sentences: the cosmetic service they asked about and any price or consult intent."
+          }
+        },
+        "required": [
+          "handoff_summary"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "patient_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "transfer_to_billing",
+      "description": "Invisible handoff to Billing & Payments for balances, charge explanations, payment links, financing, or fee waivers. Caller must already be identity-verified.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "handoff_summary": {
+            "type": "string",
+            "description": "one or two sentences: patient name, balance or charge in question, and what they want done."
+          }
+        },
+        "required": [
+          "handoff_summary"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "patient_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "transfer_to_clinical",
+      "description": "Invisible handoff to Clinical Liaison for results status, refills, nurse messages, prior auth, portal, or records. Caller must already be identity-verified.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "handoff_summary": {
+            "type": "string",
+            "description": "one or two sentences: patient name, open orders or flags that matter, and what they want (results, refill, nurse callback)."
+          }
+        },
+        "required": [
+          "handoff_summary"
+        ]
       },
       "outputSchema": {
         "type": "object",

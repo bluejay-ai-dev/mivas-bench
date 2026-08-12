@@ -6,7 +6,7 @@ Prompts are written as real customer production prompts — not shortened for a 
 
 ## Agents
 
-1. `reception` — greet, AI disclosure once, language, intent, KB, route
+1. `reception` — greet, AI disclosure once, intent, KB, route
 2. `identity` — PHI gate (name + DOB); only path to `billing` and `clinical`
 3. `scheduling` — book / reschedule / cancel / waitlist / allergy
 4. `coverage` — carrier × plan × office × provider
@@ -14,7 +14,10 @@ Prompts are written as real customer production prompts — not shortened for a 
 6. `billing` — balance, charge explainers, payment link / financing / fee waiver
 7. `clinical` — results status only, refills never approved, nurse messages, portal
 
-There is **no safety agent**. Escalation is a single global tool, `transfer_to_human`.
+English only for this industry. There is **no safety agent**. Escalation is a
+single global tool, `transfer_to_human`. Handoffs between specialists are
+invisible: every `transfer_to_*` takes a `handoff_summary`, and the receiving
+agent continues mid-call (never re-greets).
 
 ## Escalation and refusal
 

@@ -5,7 +5,7 @@ and APPENDS them, so a second POST gives each expected tool two actuals. Two way
 to trip it: the wait returning mid-eval, or the relink firing when eval never wiped
 the link. See §6b of PROVIDER_INTEGRATION_HANDOFF.md.
 
-Run: ./.venv/bin/python voice-agent-harnesses/test_await_terminal.py
+Run: ./.venv/bin/python scripts/test_await_terminal.py
 """
 
 import asyncio
@@ -14,7 +14,7 @@ import os
 import pathlib
 import sys
 
-BASE = pathlib.Path(__file__).resolve().parent
+BASE = pathlib.Path(__file__).resolve().parent.parent / "voice-agent-harnesses"
 HARNESSES = (
     "openai gemini deepgram assemblyai elevenlabs "
     "vapi bland cartesia retell livekit pipecat"
