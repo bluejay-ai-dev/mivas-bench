@@ -1053,7 +1053,7 @@ def dispatch_tool(tool_name: str, body: ToolCall) -> dict[str, Any]:
 
 def selfcheck() -> None:
     """Every server-enforced guard, asserted against a fresh DB."""
-    with db.scope("selfcheck"):
+    with db.scope("selfcheck", fresh=True):
         _selfcheck()
 
 
