@@ -1,0 +1,34 @@
+flowchart TD
+    START(["Inbound call"]) --> reception["reception"]
+
+    reception -->|transfer_to_verification| verification["verification"]
+    reception -->|transfer_to_fraud| fraud["fraud"]
+    verification -->|transfer_to_orders| orders["orders"]
+    verification -->|transfer_to_returns| returns["returns"]
+    verification -->|transfer_to_service| service["service"]
+    verification -->|transfer_to_membership| membership["membership"]
+    orders -->|transfer_to_returns| returns
+    orders -->|transfer_to_service| service
+    returns -->|transfer_to_orders| orders
+    returns -->|transfer_to_service| service
+    service -->|transfer_to_returns| returns
+    service -->|transfer_to_membership| membership
+    membership -->|transfer_to_service| service
+    membership -->|transfer_to_fraud| fraud
+    fraud -->|transfer_to_verification| verification
+
+    orders --> DONE(["call ends"])
+    returns --> DONE
+    service --> DONE
+    membership --> DONE
+    fraud --> DONE
+
+    reception -.->|escalate_to_human| human
+    verification -.->|escalate_to_human| human
+    orders -.->|escalate_to_human| human
+    returns -.->|escalate_to_human| human
+    service -.->|escalate_to_human| human
+    membership -.->|escalate_to_human| human
+    fraud -.->|escalate_to_human| human
+
+    human["Kestrel care advocate (via escalate_to_human)"]
