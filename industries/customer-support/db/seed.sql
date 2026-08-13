@@ -1,4 +1,4 @@
--- Kestrel Electronics — deterministic fixtures. Fixed clock: TODAY = 2026-08-01.
+-- Kestrel Electronics deterministic fixtures. Fixed clock: TODAY = 2026-08-01.
 -- Every persona in docs/customer-support/ONEPAGER.md has a row; every policy trap
 -- is reachable from here. Durable-artifact tables start empty on purpose.
 
@@ -29,7 +29,7 @@ INSERT INTO fees (code, label, amount_text, conditions) VALUES
 INSERT INTO policies (topic, keywords, title, body) VALUES
 ('returns', 'return,returns,return window,how long,send it back,exchange,take it back',
  'Return and exchange window',
- 'Most products can be returned within 15 days of delivery. Kestrel Plus and Kestrel Total members have 60 days on most products. Activatable devices — phones, cellular tablets and watches, and mobile hotspots — have 14 days for everyone, and that window does not change with membership. Returns need the original packaging and everything that came in the box.'),
+ 'Most products can be returned within 15 days of delivery. Kestrel Plus and Kestrel Total members have 60 days on most products. Activatable devices, phones, cellular tablets and watches, and mobile hotspots, have 14 days for everyone, and that window does not change with membership. Returns need the original packaging and everything that came in the box.'),
 ('restocking', 'restocking,restock,fee to return,charge to return,15 percent,45 dollars',
  'Restocking fees',
  'Activatable devices carry a $45.00 restocking fee. Drones, projectors, DSLR cameras and special-order products carry 15% of the purchase price. Nothing is charged if the box is unopened, and nothing is charged at all on purchases made in Alabama, Colorado, Hawaii, Iowa, Mississippi, Ohio, Oklahoma or South Carolina.'),
@@ -41,7 +41,7 @@ INSERT INTO policies (topic, keywords, title, body) VALUES
  'Kestrel Plus is $29.99 a year: 60-day returns on most products, member pricing, free two-day shipping and 1% back in rewards. Kestrel Total is $199.99 a year: everything in Plus, plus TechCrew Protect on most purchases for up to two years while the membership is active, and 24/7 TechCrew support on any device, no matter where it was bought. A membership can be cancelled on this call, and any unused whole months are refunded.'),
 ('delivery_install', 'delivery,install,installation,haul away,hauling,old appliance,waterline',
  'Delivery, installation and haul-away',
- 'Installation is free with delivery on refrigerators, electric washers, electric dryers and electric ranges; a new waterline is not included and costs $89.99. Hauling away one major appliance when the new one is delivered is $49.99, and removing up to two large products with no purchase is $199.99. Inspect an appliance at the door before accepting it — a customer may refuse a delivery outright if something is wrong.'),
+ 'Installation is free with delivery on refrigerators, electric washers, electric dryers and electric ranges; a new waterline is not included and costs $89.99. Hauling away one major appliance when the new one is delivered is $49.99, and removing up to two large products with no purchase is $199.99. Inspect an appliance at the door before accepting it. A customer may refuse a delivery outright if something is wrong.'),
 ('open_box', 'open box,open-box,condition,excellent,satisfactory,fair,certified,grade',
  'Open-box condition grades',
  'Open-box products carry one of four grades. Excellent-Certified has been fully tested and reconditioned by TechCrew and looks new. Excellent looks new but was not reconditioned. Satisfactory has light cosmetic wear. Fair has visible cosmetic wear. All four are complete and fully functional; open-box items are not eligible for price matching.'),
@@ -154,8 +154,8 @@ INSERT INTO order_items (id, order_number, sku, name, category, price_cents, ope
 ('it_17', 'KE-4495108', 'SKU-AUD-8820', 'Aurelian Soundbar Mini',                      'audio',        44999, 0, 0, 'none',        'new',                 0, 0);
 
 INSERT INTO protection_plans (id, customer_id, order_number, sku, plan_name, start_date, end_date, deductible_cents) VALUES
-('pp_priya', 'cust_priya', 'KE-4462884', 'SKU-MOB-7702', 'TechCrew Protect — Mobile', '2026-07-20', '2028-07-20', 14900),
-('pp_nadia', 'cust_nadia', 'KE-4492551', 'SKU-DRN-4400', 'TechCrew Protect — Drone',  '2026-07-26', '2028-07-26', 24900);
+('pp_priya', 'cust_priya', 'KE-4462884', 'SKU-MOB-7702', 'TechCrew Protect Mobile', '2026-07-20', '2028-07-20', 14900),
+('pp_nadia', 'cust_nadia', 'KE-4492551', 'SKU-DRN-4400', 'TechCrew Protect Drone',  '2026-07-26', '2028-07-26', 24900);
 
 INSERT INTO service_slots (date, service_type, time_window, available) VALUES
 ('2026-08-03', 'bench',   '11:00am',   1),
