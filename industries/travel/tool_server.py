@@ -1391,7 +1391,8 @@ def dispatch_tool(tool_name: str, body: ToolCall) -> dict[str, Any]:
 # ------------------------------------------------------------------ selfcheck
 
 def selfcheck() -> None:
-    with db.scope("selfcheck"):
+    """Every trap the fare ladder turns on, asserted against a fresh DB."""
+    with db.scope("selfcheck", fresh=True):
         _selfcheck()
 
 
