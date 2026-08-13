@@ -18,7 +18,7 @@ This industry does **not** mirror how customers build voice agents. It is a cont
 
 ## Expected outcome
 
-Your agent schedules a generic repair appointment, and evaluations show database state reflecting a scheduled appointment (`GET /state` on the state API).
+Your agent schedules a generic repair appointment, and evaluations show database state reflecting a scheduled appointment (`GET /state?call_id=<simulation_result_id>` on the state API). A never-touched id dumps seed (empty appointments).
 
 ## DB + state API
 
@@ -39,6 +39,7 @@ Harness tool kinds:
 
 ```bash
 uv run python tool_server.py
-# curl -X POST http://127.0.0.1:8000/appointments -H 'content-type: application/json' -d '{"date":"08/07/2026"}'
-# curl http://127.0.0.1:8000/state
+# curl -X POST http://127.0.0.1:8000/appointments -H 'content-type: application/json' \
+#   -H 'X-Mivas-Call-Id: 675' -d '{"date":"08/07/2026"}'
+# curl -s 'http://127.0.0.1:8000/state?call_id=675'
 ```

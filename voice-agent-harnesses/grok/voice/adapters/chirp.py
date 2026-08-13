@@ -54,6 +54,7 @@ from harness import (  # noqa: E402
     load_blueprint,
     nudge_greeting,
     run_tool,
+    set_call_id,
     tool_names,
     ws_url,
 )
@@ -296,6 +297,7 @@ async def _bridge(ws, industry: str, model: str) -> None:
     sim_id = _simulation_result_id(ws)
     if sim_id:
         _log(f"chirp sim_result_id={sim_id}")
+    set_call_id(sim_id)
 
     _log(
         f"grok ws={ws_url(model)} agents={list(bp['agents'])} start={bp['start']} "

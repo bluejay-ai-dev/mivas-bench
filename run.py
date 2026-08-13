@@ -102,17 +102,32 @@ def harness_paths(harness: str) -> tuple[Path, Path]:
     return family_dir, agent_dir
 
 
-# LiveKit / Pipecat workers register with LiveKit Cloud. They do not serve CHIRP
-# and do not need a public Ingress hostname.
+# LiveKit / Pipecat workers register with LiveKit Cloud. They do not serve a
+# public ingress adapter and do not need a public Ingress hostname.
 WORKER_FAMILIES = frozenset({"livekit", "pipecat"})
+PLATFORM_FAMILIES = frozenset({"vapi", "retell", "bland", "cartesia"})
 
 
 def pair_needs_ingress(harness: str) -> bool:
     return split_harness(harness)[0] not in WORKER_FAMILIES
 
 
+def ingress_adapter(harness: str) -> Path:
+    """Public ingress script. adapters/chirp.py is Bluejay CHIRP only."""
+    _, agent_dir = harness_paths(harness)
+    conversationrelay = agent_dir / "adapters" / "conversationrelay.py"
+    if conversationrelay.is_file():
+        return conversationrelay
+    return agent_dir / "adapters" / "chirp.py"
+
+
 def pair_mivas_mode(harness: str) -> str:
-    return "agent" if split_harness(harness)[0] in WORKER_FAMILIES else "chirp"
+    family = split_harness(harness)[0]
+    if family in WORKER_FAMILIES:
+        return "agent"
+    if ingress_adapter(harness).name == "conversationrelay.py":
+        return "conversationrelay"
+    return "chirp"
 
 
 def slug(harness: str, industry: str) -> str:
@@ -133,26 +148,31 @@ def image_ref(harness: str, industry: str) -> str:
     return f"mivas-bench:{tag}"
 
 
-def pair_host(harness: str, industry: str) -> str | None:
-    """Stable DNS host for a harness×industry pair, or None if ingress mode is off."""
-    if not pair_needs_ingress(harness):
-        return None
+def pair_dns_host(harness: str, industry: str) -> str | None:
+    """DNS host for a pair when MIVAS_BASE_DOMAIN is set (CHIRP and worker families)."""
     base = os.environ.get("MIVAS_BASE_DOMAIN", "").strip().lower().strip(".")
     if not base:
         return None
     return f"{slug(harness, industry)}.{base}"
 
 
+def pair_host(harness: str, industry: str) -> str | None:
+    """Stable DNS host Bluejay should dial (CHIRP / ConversationRelay only)."""
+    if not pair_needs_ingress(harness):
+        return None
+    return pair_dns_host(harness, industry)
+
+
 def pair_public_url(harness: str, industry: str) -> str:
-    """HTTPS base for tool webhooks (Vapi/Retell/…). Prefers stable ingress host."""
-    host = pair_host(harness, industry)
+    """HTTPS base for tool webhooks and Pipecat Cloud TOOL_SERVER_URL."""
+    host = pair_dns_host(harness, industry) or pair_host(harness, industry)
     if host:
         return f"https://{host}"
     return os.environ.get("PUBLIC_URL", "").strip()
 
 
 def pair_websocket_url(harness: str, industry: str) -> str | None:
-    """Stable wss:// URL Bluejay should dial when ingress mode is on."""
+    """Stable wss:// URL Bluejay should dial when CHIRP ingress is on."""
     host = pair_host(harness, industry)
     if host:
         return f"wss://{host}"
@@ -244,7 +264,7 @@ def build_image(harness: str, industry: str, image: str) -> None:
 def _render(template_name: str, harness: str, industry: str, image: str, service_type: str) -> str:
     family, runtime = split_harness(harness)
     pair_slug = slug(harness, industry)
-    host = pair_host(harness, industry) or ""
+    host = pair_dns_host(harness, industry) or ""
     public_url = pair_public_url(harness, industry)
     acm = os.environ.get("MIVAS_ACM_CERTIFICATE_ARN", "").strip()
     bluejay_api_url = (
@@ -275,7 +295,48 @@ def _render(template_name: str, harness: str, industry: str, image: str, service
         .replace("__BLUEJAY_API_URL__", bluejay_api_url)
         .replace("__BLUEJAY_OTLP_ENDPOINT__", bluejay_otlp)
         .replace("__MIVAS_MODE__", pair_mivas_mode(harness))
+        .replace("__TWILIO_WELCOME_GREETING__", _twilio_welcome(industry))
+        .replace("__REPLICAS__", str(replica_count()))
+        .replace("__TOOLS_REPLICAS__", str(tools_replica_count()))
     )
+
+
+def replica_count() -> int:
+    """Harness Deployment replicas from MIVAS_REPLICAS (default 1)."""
+    raw = os.environ.get("MIVAS_REPLICAS", "1").strip() or "1"
+    try:
+        n = int(raw)
+    except ValueError:
+        raise ValueError(f"MIVAS_REPLICAS must be a positive integer, got {raw!r}") from None
+    if n < 1:
+        raise ValueError(f"MIVAS_REPLICAS must be >= 1, got {n}")
+    return n
+
+
+def tools_replica_count() -> int:
+    """Tools Deployment replicas. v1 is one writer: must be 1."""
+    raw = os.environ.get("MIVAS_TOOLS_REPLICAS", "1").strip() or "1"
+    try:
+        n = int(raw)
+    except ValueError:
+        raise ValueError(
+            f"MIVAS_TOOLS_REPLICAS must be a positive integer, got {raw!r}"
+        ) from None
+    if n != 1:
+        raise ValueError(
+            f"MIVAS_TOOLS_REPLICAS must be 1 in v1 (one SQLite writer per pair), got {n}"
+        )
+    return n
+
+
+def _twilio_welcome(industry: str) -> str:
+    return {
+        "control-industry": "Welcome to Bluejay's Repair Services!",
+        "healthcare": "Thank you for calling Straus Dermatology.",
+        "finance": "Thank you for calling Copperline Credit Union.",
+        "legal": "Thank you for calling Halverson and Reed.",
+        "travel": "Thank you for calling Summit Air.",
+    }.get(industry, "Hello.")
 
 
 def secret_exists() -> bool:
@@ -463,14 +524,14 @@ def parse_agents(raw: str) -> list[tuple[str, str]]:
     return pairs
 
 
-def validate_pair(harness: str, industry: str, *, require_chirp: bool) -> None:
+def validate_pair(harness: str, industry: str, *, require_ingress: bool) -> None:
     family_dir, agent_dir = harness_paths(harness)
     if not family_dir.is_dir():
         raise ValueError(f"unknown harness family: {family_dir.name}")
     if not (agent_dir / "agent.py").is_file():
         raise ValueError(f"unknown harness runtime (missing agent.py): {harness}")
-    if require_chirp and not (agent_dir / "adapters" / "chirp.py").is_file():
-        raise ValueError(f"no chirp adapter for harness={harness}")
+    if require_ingress and not ingress_adapter(harness).is_file():
+        raise ValueError(f"no ingress adapter for harness={harness}")
     industry_dir = ROOT / "industries" / industry
     if not industry_dir.is_dir():
         raise ValueError(f"unknown industry: {industry}")
@@ -501,10 +562,14 @@ def render_agents_yaml(pairs: list[tuple[str, str]], service_type: str) -> str:
         docs.append(_render("ingressclass.yaml", h0, i0, image_ref(h0, i0), service_type))
     for harness, industry in pairs:
         image = image_ref(harness, industry)
+        docs.append(_render("deployment-tools.yaml", harness, industry, image, service_type))
+        docs.append(_render("service-tools.yaml", harness, industry, image, service_type))
         docs.append(_render("deployment.yaml", harness, industry, image, service_type))
         docs.append(_render("service.yaml", harness, industry, image, service_type))
         if use_ingress and pair_needs_ingress(harness):
             docs.append(_render("ingress.yaml", harness, industry, image, service_type))
+        elif use_ingress:
+            docs.append(_render("ingress-tools.yaml", harness, industry, image, service_type))
     return "\n---\n".join(docs) + "\n"
 
 
@@ -523,6 +588,21 @@ def apply_agents(pairs: list[tuple[str, str]], *, follow_logs: bool) -> None:
         print(e, file=sys.stderr)
         sys.exit(1)
 
+    n = replica_count()
+    if n > 1:
+        families = {split_harness(h)[0] for h, _ in pairs}
+        print(
+            f"MIVAS_REPLICAS={n} harness pods; tools Deployment stays at "
+            f"{tools_replica_count()} (ClusterIP mivas-{{slug}}-tools).",
+            file=sys.stderr,
+        )
+        if families & PLATFORM_FAMILIES:
+            print(
+                "warning: vapi/retell/bland/cartesia webhooks still hit a random "
+                "CHIRP replica; bind is stored on the tools Service.",
+                file=sys.stderr,
+            )
+
     path = Path(tempfile.mkstemp(suffix=".yaml", prefix="mivas-agents-")[1])
     try:
         path.write_text(yaml_text)
@@ -539,6 +619,10 @@ def apply_agents(pairs: list[tuple[str, str]], *, follow_logs: bool) -> None:
     for harness, industry in pairs:
         name = f"mivas-{slug(harness, industry)}"
         subprocess.run(
+            ["kubectl", "rollout", "status", f"deployment/{name}-tools", "--timeout=180s"],
+            check=False,
+        )
+        subprocess.run(
             ["kubectl", "rollout", "status", f"deployment/{name}", "--timeout=180s"],
             check=False,
         )
@@ -547,8 +631,10 @@ def apply_agents(pairs: list[tuple[str, str]], *, follow_logs: bool) -> None:
         if split_harness(harness)[0] in WORKER_FAMILIES:
             print(
                 f"LiveKit Cloud worker ({name}): connection_type=LIVEKIT "
-                f"(no Ingress; pod registers with LIVEKIT_URL)"
+                f"(pod registers with LIVEKIT_URL)"
             )
+            if public:
+                print(f"PUBLIC_URL / tools ({name}): {public}/tools")
             continue
         if stable:
             print(f"Bluejay websocket_url ({name}): {stable}")
@@ -615,8 +701,11 @@ def run_local(harness: str, industry: str, agent_check: bool, mode: str) -> None
             "HARNESS_FAMILY": family,
             "HARNESS_RUNTIME": runtime,
             "MIVAS_MODE": mode,
-            "PYTHONPATH": str(family_dir)
-            + (os.pathsep + env["PYTHONPATH"] if env.get("PYTHONPATH") else ""),
+            "PYTHONPATH": os.pathsep.join(
+                [str(ROOT / "runtime"), str(family_dir)]
+                + ([env["PYTHONPATH"]] if env.get("PYTHONPATH") else [])
+            ),
+            "MIVAS_DB_SHARED": env.get("MIVAS_DB_SHARED", "1"),
         }
     )
 
@@ -656,13 +745,18 @@ def run_local(harness: str, industry: str, agent_check: bool, mode: str) -> None
             run(agent_cmd, env=env, cwd=str(ROOT))
             return
 
-        if mode == "chirp":
-            chirp = agent_dir / "adapters" / "chirp.py"
-            if not chirp.is_file():
-                print(f"no chirp adapter for harness={harness}", file=sys.stderr)
+        if mode in ("chirp", "conversationrelay"):
+            adapter = ingress_adapter(harness)
+            if not adapter.is_file():
+                print(f"no ingress adapter for harness={harness}", file=sys.stderr)
                 sys.exit(1)
-            print(f"starting local CHIRP ({harness}) — Ctrl+C to stop")
-            run([sys.executable, str(chirp)], env=env, cwd=str(ROOT))
+            label = (
+                "ConversationRelay"
+                if adapter.name == "conversationrelay.py"
+                else "CHIRP"
+            )
+            print(f"starting local {label} ({harness}) — Ctrl+C to stop")
+            run([sys.executable, str(adapter)], env=env, cwd=str(ROOT))
             return
 
         agent_cmd = [sys.executable, str(agent_dir / "agent.py"), industry]
@@ -698,13 +792,13 @@ def main() -> None:
     parser.add_argument(
         "--local",
         action="store_true",
-        help="Run tool server + chirp/agent locally (default when no --build/--apply)",
+        help="Run tool server + ingress adapter/agent locally (default when no --build/--apply)",
     )
     parser.add_argument(
         "--mode",
-        choices=("chirp", "agent", "check"),
+        choices=("chirp", "conversationrelay", "agent", "check"),
         default=os.environ.get("MIVAS_MODE", "chirp"),
-        help="Runtime mode (default: chirp for Bluejay WebSocket sims)",
+        help="Runtime mode (default: chirp for Bluejay CHIRP; Twilio uses conversationrelay)",
     )
     parser.add_argument("--check", action="store_true", help="Shortcut for --mode check")
     parser.add_argument(
@@ -725,11 +819,11 @@ def main() -> None:
 
     for harness, industry in pairs:
         family = split_harness(harness)[0]
-        require_chirp = family not in WORKER_FAMILIES and (
-            args.apply or (do_local and mode == "chirp")
+        require_ingress = family not in WORKER_FAMILIES and (
+            args.apply or (do_local and mode in ("chirp", "conversationrelay"))
         )
         try:
-            validate_pair(harness, industry, require_chirp=require_chirp)
+            validate_pair(harness, industry, require_ingress=require_ingress)
         except ValueError as e:
             print(e, file=sys.stderr)
             sys.exit(1)

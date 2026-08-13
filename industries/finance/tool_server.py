@@ -31,7 +31,7 @@ import os
 import re
 import sqlite3
 import sys
-from contextlib import asynccontextmanager, contextmanager
+from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -42,10 +42,15 @@ from pydantic import BaseModel, Field
 logger = logging.getLogger("finance.tool_server")
 
 INDUSTRY_DIR = Path(__file__).resolve().parent
-DB_DIR = INDUSTRY_DIR / "db"
-SCHEMA_PATH = DB_DIR / "schema.sql"
-SEED_PATH = DB_DIR / "seed.sql"
-DB_PATH = Path(os.environ.get("MIVAS_DB_PATH", str(DB_DIR / "runtime.db")))
+
+for _runtime in (Path("/app/runtime"), Path(__file__).resolve().parents[2] / "runtime"):
+    if (_runtime / "db_service.py").is_file():
+        if str(_runtime) not in sys.path:
+            sys.path.insert(0, str(_runtime))
+        break
+from db_service import DBService  # noqa: E402
+
+db = DBService.for_industry(INDUSTRY_DIR)
 
 # Fixed "now" so dispute-window and waiver math is deterministic across runs.
 TODAY = "2026-08-01"
@@ -115,39 +120,18 @@ ESCALATION_REASONS = {
 
 
 def init_db() -> None:
-    _session.clear()  # dispatch identity pin follows the DB lifecycle
-    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
-    if DB_PATH.exists():
-        DB_PATH.unlink()
-    conn = sqlite3.connect(DB_PATH)
-    try:
-        conn.executescript(SCHEMA_PATH.read_text())
-        seed = SEED_PATH.read_text().strip()
-        if seed:
-            conn.executescript(seed)
-        conn.commit()
-    finally:
-        conn.close()
+    _sessions.clear()
 
 
 @contextmanager
 def _db() -> Any:
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    try:
+    with db.connect() as conn:
         yield conn
-        conn.commit()
-    finally:
-        conn.close()
 
 
-@asynccontextmanager
-async def lifespan(_app: FastAPI):
-    init_db()
-    yield
-
-
-app = FastAPI(title="finance state API", lifespan=lifespan)
+app = FastAPI(title="finance state API")
+app.middleware("http")(db.http_middleware)
+db.mount_cluster_routes(app)
 
 
 # ------------------------------------------------------------------ matching
@@ -196,9 +180,12 @@ def _parse_date(value: str) -> datetime:
 
 # ------------------------------------------------------------------ session + errors
 
-# ponytail: module-level session, one call at a time (benchmark runs are
-# max_concurrent=1); key by call id if that ever changes.
-_session: dict[str, Any] = {}
+# Identity pin per call id (empty key = shared/no-header session).
+_sessions: dict[str, dict[str, Any]] = {}
+
+
+def _session() -> dict[str, Any]:
+    return _sessions.setdefault(db.current_call_id() or "", {})
 
 
 class ToolError(Exception):
@@ -208,8 +195,8 @@ class ToolError(Exception):
 
 
 def _member() -> sqlite3.Row:
-    mid = _session.get("member_id")
-    if not mid or not _session.get("verified"):
+    mid = _session().get("member_id")
+    if not mid or not _session().get("verified"):
         raise ToolError("IDENTITY_NOT_VERIFIED",
                         "Verify the caller's identity first — name and phone, then "
                         "date of birth and the last four of the member number.")
@@ -419,12 +406,12 @@ def identify_member(a: dict[str, Any]) -> dict[str, Any]:
         if _name_close(row["name"], name) and (
             row["phone"] == ph or (len(ph) >= 4 and row["phone"][-4:] == ph[-4:])
         ):
-            _session.update(member_id=row["id"], verified=False, verify_failures=0)
+            _session().update(member_id=row["id"], verified=False, verify_failures=0)
             return {"record_found": True,
                     "next": "Verify with date of birth and the last four of the "
                             "member number before any account information."}
-    _session.pop("member_id", None)
-    _session["verified"] = False
+    _session().pop("member_id", None)
+    _session()["verified"] = False
     return {"record_found": False,
             "note": "No record matched. Do not say whether anyone banks at "
                     "Copperline. Re-ask the name and number once; after a second "
@@ -432,11 +419,11 @@ def identify_member(a: dict[str, Any]) -> dict[str, Any]:
 
 
 def verify_identity(a: dict[str, Any]) -> dict[str, Any]:
-    mid = _session.get("member_id")
+    mid = _session().get("member_id")
     if not mid:
         raise ToolError("NO_CANDIDATE",
                         "Call identify_member first with the caller's name and phone.")
-    if _session.get("verify_failures", 0) >= 2:
+    if _session().get("verify_failures", 0) >= 2:
         raise ToolError("VERIFICATION_FAILED",
                         "Verification has failed twice. Do not keep trying — escalate "
                         "with reason identity_failed.")
@@ -445,11 +432,11 @@ def verify_identity(a: dict[str, Any]) -> dict[str, Any]:
     with _db() as conn:
         row = conn.execute("SELECT * FROM members WHERE id = ?", (mid,)).fetchone()
     if row and row["dob"] == dob and row["member_number_last4"] == last4:
-        _session.update(verified=True, verify_failures=0)
+        _session().update(verified=True, verify_failures=0)
         return {"verified": True, "member_first_name": row["name"].split(" ")[0],
                 "member_since": row["member_since"]}
-    _session["verify_failures"] = _session.get("verify_failures", 0) + 1
-    remaining = 2 - _session["verify_failures"]
+    _session()["verify_failures"] = _session().get("verify_failures", 0) + 1
+    remaining = 2 - _session()["verify_failures"]
     raise ToolError("VERIFICATION_MISMATCH",
                     "That didn't match what's on file. "
                     + ("Ask them to double-check and try once more."
@@ -973,7 +960,7 @@ def escalate_to_human(a: dict[str, Any]) -> dict[str, Any]:
     with _db() as conn:
         cur = conn.execute(
             "INSERT INTO escalations (member_id, reason_code) VALUES (?, ?)",
-            (_session.get("member_id") or "", reason))
+            (_session().get("member_id") or "", reason))
     return {"escalation_id": cur.lastrowid, "transferred": True, "reason_code": reason}
 
 
@@ -1066,6 +1053,12 @@ def dispatch_tool(tool_name: str, body: ToolCall) -> dict[str, Any]:
 
 def selfcheck() -> None:
     """Every server-enforced guard, asserted against a fresh DB."""
+    with db.scope("selfcheck"):
+        _selfcheck()
+
+
+def _selfcheck() -> None:
+    """Every server-enforced guard, asserted against a fresh DB."""
     init_db()
 
     def err(fn, args) -> ToolError:
@@ -1076,12 +1069,12 @@ def selfcheck() -> None:
         raise AssertionError(f"{fn.__name__} should have raised")
 
     def login(name: str, phone: str, dob: str, last4: str) -> None:
-        _session.clear()
+        _session().clear()
         assert identify_member({"full_name": name, "phone": phone})["record_found"]
         assert verify_identity({"dob": dob, "member_number_last4": last4})["verified"]
 
     # identity gate closed, then open
-    _session.clear()
+    _session().clear()
     assert err(get_member_summary, {}).code == "IDENTITY_NOT_VERIFIED"
     assert identify_member({"full_name": "Marisol Vegga", "phone": "0142"})["record_found"]
     assert err(get_balance, {"account": "checking"}).code == "IDENTITY_NOT_VERIFIED"
@@ -1093,7 +1086,7 @@ def selfcheck() -> None:
     assert "member_number" not in json.dumps(summary), "no full identifiers in summary"
 
     # two failures then hard stop
-    _session.clear()
+    _session().clear()
     identify_member({"full_name": "Ray Delgado", "phone": "4845550117"})
     for _ in range(2):
         err(verify_identity, {"dob": "1979-01-01", "member_number_last4": "0000"})
@@ -1101,7 +1094,7 @@ def selfcheck() -> None:
                ).code == "VERIFICATION_FAILED"
 
     # unknown caller: no record, nothing disclosed
-    _session.clear()
+    _session().clear()
     assert identify_member({"full_name": "Nobody Realman",
                             "phone": "9995550000"})["record_found"] is False
 

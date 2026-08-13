@@ -23,13 +23,20 @@ INDUSTRIES = ("control-industry", "finance", "healthcare", "legal", "travel")
 
 
 @contextmanager
-def _load_tool_server(industry: str):
+def _load_tool_server(industry: str, *, shared: bool = True):
     """Import industries/<industry>/tool_server.py under a unique module name,
     pointing MIVAS_DB_PATH at a temp file (DB_PATH is read at import).
-    Restores the previous MIVAS_DB_PATH value and deletes the temp dir on exit."""
+    Restores the previous MIVAS_DB_PATH value and deletes the temp dir on exit.
+    shared=True (default) keeps existing tests working without a call-id header.
+    Isolation tests pass shared=False and send X-Mivas-Call-Id."""
     original = os.environ.get("MIVAS_DB_PATH")
+    original_shared = os.environ.get("MIVAS_DB_SHARED")
     with tempfile.TemporaryDirectory(prefix=f"mivas-{industry}-") as tmp:
         os.environ["MIVAS_DB_PATH"] = str(Path(tmp) / "runtime.db")
+        if shared:
+            os.environ["MIVAS_DB_SHARED"] = "1"
+        else:
+            os.environ.pop("MIVAS_DB_SHARED", None)
         try:
             name = f"tool_server_{industry.replace('-', '_')}"
             if name in sys.modules:
@@ -45,6 +52,10 @@ def _load_tool_server(industry: str):
                 os.environ.pop("MIVAS_DB_PATH", None)
             else:
                 os.environ["MIVAS_DB_PATH"] = original
+            if original_shared is None:
+                os.environ.pop("MIVAS_DB_SHARED", None)
+            else:
+                os.environ["MIVAS_DB_SHARED"] = original_shared
 
 
 def _tool_flags(industry: str) -> dict[str, dict[str, Any]]:
@@ -268,8 +279,9 @@ def test_healthcare_calls_are_isolated() -> None:
 
     Without X-Mivas-Call-Id isolation, call B's get_account_balance reads call A's
     verified patient and call B's cancel hits a row A already cancelled.
+    GET /state is scoped the same way so evals dump one conversation, not the pod.
     """
-    with _load_tool_server("healthcare") as module, TestClient(module.app) as client:
+    with _load_tool_server("healthcare", shared=False) as module, TestClient(module.app) as client:
         def tool(name: str, args: dict[str, Any], call: str | None = None) -> dict[str, Any]:
             headers = {"X-Mivas-Call-Id": call} if call else {}
             resp = client.post(f"/tools/{name}", json={"arguments": args}, headers=headers)
@@ -313,6 +325,25 @@ def test_healthcare_calls_are_isolated() -> None:
         # financing gate: only Maria clears $250
         assert tool("offer_financing", {"amount_cents": 48000}, "call_b")["data"]["eligible"] is True
         assert tool("offer_financing", {"amount_cents": 12500}, "call_a")["data"]["eligible"] is False
+
+        def state(call: str) -> dict[str, Any]:
+            resp = client.get("/state", params={"call_id": call})
+            assert resp.status_code == 200, resp.text
+            return resp.json()
+
+        dumped = state("call_d")
+        seed = state("call_fresh")
+        by_header = client.get("/state", headers={"X-Mivas-Call-Id": "call_d"})
+        assert by_header.status_code == 200
+        assert by_header.json() == dumped
+        statuses = {row["id"]: row["status"] for row in dumped["appointments"]}
+        seed_statuses = {row["id"]: row["status"] for row in seed["appointments"]}
+        assert statuses[3] == "cancelled"
+        assert seed_statuses[3] == "booked"
+        assert seed_statuses == {
+            row["id"]: row["status"] for row in state("call_a")["appointments"]
+        }
+        assert client.get("/state").status_code == 400
 
 
 def test_healthcare_flow_through_dispatch() -> None:
@@ -423,6 +454,111 @@ def test_travel_guards_survive_dispatch() -> None:
         assert tool("confirm_change", {"confirmation_token": token})["data"]["status"] == "changed"
         reuse = tool("confirm_change", {"confirmation_token": token})
         assert reuse["ok"] is False and reuse["error_code"] == "TOKEN_ALREADY_USED"
+
+
+def test_control_industry_calls_are_isolated() -> None:
+    """Two overlapping bookings must not share a SQLite file."""
+    with _load_tool_server("control-industry", shared=False) as module:
+        with TestClient(module.app) as client:
+            def book(call: str, date: str) -> dict[str, Any]:
+                resp = client.post(
+                    "/tools/schedule_appointment",
+                    json={"arguments": {"date": date}},
+                    headers={"X-Mivas-Call-Id": call},
+                )
+                assert resp.status_code == 200, resp.text
+                return resp.json()
+
+            def state(call: str) -> dict[str, Any]:
+                resp = client.get("/state", headers={"X-Mivas-Call-Id": call})
+                assert resp.status_code == 200, resp.text
+                return resp.json()
+
+            assert book("675", "08/15/2026")["success"] is True
+            assert book("676", "08/16/2026")["success"] is True
+            a = state("675")["appointments"]
+            b = state("676")["appointments"]
+            c = state("677")["appointments"]
+            assert [row["date"] for row in a] == ["08/15/2026"]
+            assert [row["date"] for row in b] == ["08/16/2026"]
+            assert c == []
+
+
+def test_state_query_alias_scopes_control_industry() -> None:
+    """Evals dump one conversation via GET /state?call_id= — no prior tool still seed."""
+    with _load_tool_server("control-industry", shared=False) as module:
+        with TestClient(module.app) as client:
+            booked = client.post(
+                "/tools/schedule_appointment",
+                json={"arguments": {"date": "08/15/2026"}},
+                headers={"X-Mivas-Call-Id": "675"},
+            )
+            assert booked.status_code == 200, booked.text
+            assert booked.json()["success"] is True
+
+            via_query = client.get("/state?call_id=675")
+            via_header = client.get("/state", headers={"X-Mivas-Call-Id": "675"})
+            untouched = client.get("/state?call_id=676")
+            assert via_query.status_code == 200, via_query.text
+            assert via_header.json() == via_query.json()
+            assert [row["date"] for row in via_query.json()["appointments"]] == [
+                "08/15/2026"
+            ]
+            assert untouched.status_code == 200, untouched.text
+            assert untouched.json()["appointments"] == []
+            assert client.get("/state").status_code == 400
+
+
+def test_missing_call_id_is_400() -> None:
+    with _load_tool_server("control-industry", shared=False) as module:
+        with TestClient(module.app) as client:
+            assert client.get("/health").status_code == 200
+            assert client.get("/state").status_code == 400
+            assert client.post(
+                "/tools/schedule_appointment",
+                json={"arguments": {"date": "08/15/2026"}},
+            ).status_code == 400
+
+
+def test_industry_writes_do_not_leak_across_call_ids() -> None:
+    """Each industry: a write on call A is invisible to call B; call C matches seed."""
+    writers: dict[str, list[tuple[str, dict[str, Any]]]] = {
+        "control-industry": [("schedule_appointment", {"date": "08/15/2026"})],
+        "healthcare": [("log_call_disposition", {"intents": "booking"})],
+        "finance": [("escalate_to_human", {"reason_code": "caller_request"})],
+        "legal": [
+            ("lookup_caller", {"full_name": "Dana Whitfield", "phone": "5105550142"}),
+            ("take_message", {"for_whom": "reception", "message": "please call back"}),
+        ],
+        "travel": [("escalate_to_human", {"reason_code": "caller_request"})],
+    }
+    for industry, steps in writers.items():
+        with _load_tool_server(industry, shared=False) as module:
+            with TestClient(module.app) as client:
+                def tool(call: str) -> None:
+                    for name, args in steps:
+                        resp = client.post(
+                            f"/tools/{name}",
+                            json={"arguments": args},
+                            headers={"X-Mivas-Call-Id": call},
+                        )
+                        assert resp.status_code == 200, (
+                            f"{industry}/{name}: {resp.text[:200]}"
+                        )
+
+                def state(call: str) -> dict[str, Any]:
+                    resp = client.get("/state", headers={"X-Mivas-Call-Id": call})
+                    assert resp.status_code == 200, resp.text
+                    return resp.json()
+
+                seed = state("call_c")
+                tool("call_a")
+                after_a = state("call_a")
+                after_b = state("call_b")
+                after_c = state("call_c")
+                assert after_b == seed, industry
+                assert after_c == seed, industry
+                assert after_a != seed, industry
 
 
 if __name__ == "__main__":

@@ -1,18 +1,18 @@
 """Twilio ConversationRelay bridge (TwiML + WebSocket) ↔ GPT-4.1.
 
-Named adapters/chirp.py to match the MIVAS family layout. Unlike PCM CHIRP
-harnesses, this process speaks the ConversationRelay JSON protocol:
+This is not Bluejay CHIRP. Bluejay dials SIP; Twilio POSTs TwiML here, then
+opens a ConversationRelay WebSocket:
 
-  Twilio SIP/phone call → GET/POST /  (TwiML <ConversationRelay>)
-                        → WS /ws      (setup / prompt / interrupt → text / end)
+  Twilio SIP INVITE → GET/POST /  (TwiML <ConversationRelay>)
+                    → WS /ws      (setup / prompt / interrupt → text / end)
 
 Soft multi-agent: one OpenAI chat session; handoff swaps system + tools while
 keeping history. Speak-first is ConversationRelay welcomeGreeting.
 
 Env:
   OPENAI_API_KEY, PUBLIC_URL|HOST, INDUSTRY, TOOL_SERVER_URL
-  CHIRP_PORT (default 8773), TWILIO_LLM_MODEL, TWILIO_WELCOME_GREETING
-  BLUEJAY_* for OTel
+  CHIRP_PORT (listen port, default 8773; k8s maps this to container port 8765)
+  TWILIO_LLM_MODEL, TWILIO_WELCOME_GREETING, BLUEJAY_* for OTel
 """
 
 from __future__ import annotations
@@ -26,7 +26,7 @@ import time
 import uuid
 from pathlib import Path
 from typing import Any
-from urllib.parse import parse_qs
+from urllib.parse import parse_qs, parse_qsl
 
 from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import PlainTextResponse, Response
@@ -46,7 +46,10 @@ from harness import (  # noqa: E402
     openai_tools_for_agent,
     public_base_url,
     run_tool,
+    sim_id_from_mapping,
+    sip_header_keys,
     transcript_blob,
+    set_call_id,
     truncate_assistant_on_interrupt,
     twiml_connect,
     welcome_greeting,
@@ -93,23 +96,15 @@ def build_app(industry: str | None = None) -> FastAPI:
                 scheme = "wss"
             ws = f"{scheme}://{host}/ws"
 
-        # Bluejay SIP → Twilio SIP Domain forwards X-* SIP headers as SipHeader_*.
-        sim_id = ""
-        try:
-            form = await request.form()
-            form_map = {str(k): str(v) for k, v in form.items()}
-        except Exception:
-            form_map = {}
-        for key in (
-            "SipHeader_X-Simulation-Result-Id",
-            "SipHeader_X-Simulation-Result-ID",
-            "SipHeader_X-Simulation-Result-id",
-        ):
-            if form_map.get(key):
-                sim_id = form_map[key].strip()
-                break
-        if not sim_id:
-            sim_id = (request.query_params.get("simulation_result_id") or "").strip()
+        # Bluejay LiveKit stamps X-Simulation-Result-Id on the SIP INVITE.
+        # Twilio VoiceUrl forwards X-* INVITE headers as SipHeader_* (POST form
+        # or GET query). Merge every source; empty form is common on GET.
+        webhook = await _twilio_webhook_params(request)
+        header_map = {str(k): str(v) for k, v in request.headers.items()}
+        sim_id = (
+            sim_id_from_mapping(webhook)
+            or sim_id_from_mapping(header_map)
+        )
         params: dict[str, str] = {}
         if sim_id:
             sep = "&" if "?" in ws else "?"
@@ -119,7 +114,10 @@ def build_app(industry: str | None = None) -> FastAPI:
         body = twiml_connect(ws_url=ws, parameters=params or None)
         print(
             f"TwiML → ConversationRelay url={ws} sim={sim_id or '-'} "
-            f"welcome={welcome_greeting()!r}",
+            f"method={request.method} ctype={request.headers.get('content-type') or '-'} "
+            f"welcome={welcome_greeting()!r} "
+            f"sip_headers={sip_header_keys(webhook) or sip_header_keys(header_map)} "
+            f"form_keys={','.join(sorted(webhook)) or '-'}",
             flush=True,
         )
         return Response(content=body, media_type="application/xml")
@@ -134,6 +132,29 @@ def build_app(industry: str | None = None) -> FastAPI:
 
         sim_id = _sim_id_from_ws(ws)
         call_sid: str | None = None
+        pending: dict[str, Any] | None = None
+        try:
+            raw = await asyncio.wait_for(ws.receive_text(), timeout=20.0)
+            try:
+                pending = json.loads(raw)
+            except json.JSONDecodeError:
+                log(f"bad json: {raw[:120]!r}")
+                pending = None
+            if pending and pending.get("type") == "setup":
+                call_sid = pending.get("callSid")
+                custom = pending.get("customParameters") or {}
+                sim_id = sim_id or sim_id_from_mapping(custom) or None
+                log(f"setup callSid={call_sid} sim={sim_id} from={pending.get('from')}")
+                pending = None
+        except TimeoutError:
+            log("no CR setup in 20s")
+        except WebSocketDisconnect:
+            log("WS closed before setup")
+            return
+
+        # Pin X-Mivas-Call-Id to Bluejay's SIP header when present; mint only if omitted.
+        resolved = set_call_id(sim_id)
+        sim_id = resolved
         state: dict[str, Any] = {
             "agent": bp["start"],
             "mid_call": False,
@@ -148,25 +169,29 @@ def build_app(industry: str | None = None) -> FastAPI:
         workflow = f"mivas twilio {bp['industry_dir'].name} {MODEL}".replace(".", "-")
         log(f"WS open sim={sim_id} industry={bp['industry_dir'].name}")
 
-        async with traced_run(workflow, simulation_result_id=sim_id, model=MODEL) as root:
+        otel_sim = sim_id if str(sim_id).isdigit() else None
+        async with traced_run(workflow, simulation_result_id=otel_sim, model=MODEL) as root:
             state["_otel_root"] = root
             try:
                 while True:
-                    raw = await ws.receive_text()
-                    try:
-                        msg = json.loads(raw)
-                    except json.JSONDecodeError:
-                        log(f"bad json: {raw[:120]!r}")
-                        continue
+                    if pending is not None:
+                        msg = pending
+                        pending = None
+                    else:
+                        raw = await ws.receive_text()
+                        try:
+                            msg = json.loads(raw)
+                        except json.JSONDecodeError:
+                            log(f"bad json: {raw[:120]!r}")
+                            continue
                     mtype = msg.get("type")
                     if mtype == "setup":
                         call_sid = msg.get("callSid")
                         custom = msg.get("customParameters") or {}
                         if not sim_id:
-                            sim_id = (
-                                str(custom.get("simulation_result_id") or "").strip()
-                                or None
-                            )
+                            sim_id = sim_id_from_mapping(custom) or None
+                        if sim_id:
+                            set_call_id(sim_id)
                         log(f"setup callSid={call_sid} sim={sim_id} from={msg.get('from')}")
                     elif mtype == "prompt":
                         text = (msg.get("voicePrompt") or "").strip()
@@ -199,18 +224,32 @@ def build_app(industry: str | None = None) -> FastAPI:
     return app
 
 
+async def _twilio_webhook_params(request: Request) -> dict[str, str]:
+    """Twilio VoiceUrl params: GET query plus POST urlencoded body.
+
+    Do not use request.form() — Starlette requires python-multipart even for
+    application/x-www-form-urlencoded, which this image does not install.
+    """
+    merged: dict[str, str] = {}
+    for key, val in request.query_params.items():
+        if val not in (None, ""):
+            merged[str(key)] = str(val)
+    raw = (await request.body()).decode("utf-8", errors="replace")
+    if raw:
+        for key, val in parse_qsl(raw, keep_blank_values=False):
+            merged[str(key)] = str(val)
+    return merged
+
+
 def _sim_id_from_ws(ws: WebSocket) -> str | None:
     q = parse_qs(ws.scope.get("query_string", b"").decode())
-    for key in ("simulation_result_id", "sim_id"):
-        vals = q.get(key) or []
-        if vals and str(vals[0]).strip():
-            return str(vals[0]).strip()
+    flat = {k: (vals[0] if vals else "") for k, vals in q.items()}
+    found = sim_id_from_mapping(flat)
+    if found:
+        return found
     headers = dict(ws.headers) if hasattr(ws, "headers") else {}
-    for key in ("x-simulation-result-id", "X-Simulation-Result-Id"):
-        val = headers.get(key) or headers.get(key.lower())
-        if val:
-            return str(val).strip()
-    return None
+    found = sim_id_from_mapping({str(k): str(v) for k, v in headers.items()})
+    return found or None
 
 
 async def _send_text(ws: WebSocket, token: str, *, last: bool) -> None:

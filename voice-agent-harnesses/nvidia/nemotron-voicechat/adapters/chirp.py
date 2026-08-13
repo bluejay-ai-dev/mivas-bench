@@ -29,7 +29,7 @@ from typing import Any
 from websockets.asyncio.server import serve
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from harness import industry_path, load_blueprint  # noqa: E402
+from harness import industry_path, load_blueprint, set_call_id  # noqa: E402
 from report import end_speech_span, start_speech_span, traced_run  # noqa: E402
 from voicechat import (  # noqa: E402
     MODEL,
@@ -275,6 +275,7 @@ async def _bridge(ws, industry: str) -> None:
     industry_dir = industry_path(industry)
     workflow = f"mivas-{Path(industry_dir).name}-{MODEL}"
     sim_id = _simulation_result_id(ws)
+    set_call_id(sim_id)
     speak_first = speaks_first()
     kick_pcm = _load_kick_pcm() if speak_first else b""
 

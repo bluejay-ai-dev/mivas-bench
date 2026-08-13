@@ -22,7 +22,7 @@ import os
 import re
 import sqlite3
 import sys
-from contextlib import asynccontextmanager, contextmanager
+from contextlib import contextmanager
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any
@@ -31,10 +31,15 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
 INDUSTRY_DIR = Path(__file__).resolve().parent
-DB_DIR = INDUSTRY_DIR / "db"
-SCHEMA_PATH = DB_DIR / "schema.sql"
-SEED_PATH = DB_DIR / "seed.sql"
-DB_PATH = Path(os.environ.get("MIVAS_DB_PATH", str(DB_DIR / "runtime.db")))
+
+for _runtime in (Path("/app/runtime"), Path(__file__).resolve().parents[2] / "runtime"):
+    if (_runtime / "db_service.py").is_file():
+        if str(_runtime) not in sys.path:
+            sys.path.insert(0, str(_runtime))
+        break
+from db_service import DBService  # noqa: E402
+
+db = DBService.for_industry(INDUSTRY_DIR)
 
 # Fixed "now" so deadline math is deterministic across runs.
 TODAY = "2026-08-01"
@@ -59,39 +64,18 @@ PRACTICE_AREA_ALIASES = {
 
 
 def init_db() -> None:
-    _session.clear()  # dispatch caller pin follows the DB lifecycle
-    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
-    if DB_PATH.exists():
-        DB_PATH.unlink()
-    conn = sqlite3.connect(DB_PATH)
-    try:
-        conn.executescript(SCHEMA_PATH.read_text())
-        seed = SEED_PATH.read_text().strip()
-        if seed:
-            conn.executescript(seed)
-        conn.commit()
-    finally:
-        conn.close()
+    _sessions.clear()
 
 
 @contextmanager
 def _db() -> Any:
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    try:
+    with db.connect() as conn:
         yield conn
-        conn.commit()
-    finally:
-        conn.close()
 
 
-@asynccontextmanager
-async def lifespan(_app: FastAPI):
-    init_db()
-    yield
-
-
-app = FastAPI(title="legal state API", lifespan=lifespan)
+app = FastAPI(title="legal state API")
+app.middleware("http")(db.http_middleware)
+db.mount_cluster_routes(app)
 
 
 # ------------------------------------------------------------------ matching
@@ -528,14 +512,16 @@ def escalate_to_human(body: EscalationCreate) -> dict[str, Any]:
 # {"ok": bool, "data": ..., "error_code": str|null, "caller_safe_message": str|null}.
 # Session (end_call) and handoff (transfer_to_*) tools never land here → 404.
 
-# tools.json industry tools carry no caller_id — lookup_caller pins the caller
-# for the rest of the call. ponytail: module-level session, one call at a time
-# (benchmark runs are max_concurrent=1); key by call id if that ever changes.
-_session: dict[str, str] = {}
+# Caller pin per call id (empty key = shared/no-header session).
+_sessions: dict[str, dict[str, str]] = {}
+
+
+def _session() -> dict[str, str]:
+    return _sessions.setdefault(db.current_call_id() or "", {})
 
 
 def _cid() -> str:
-    caller_id = _session.get("caller_id")
+    caller_id = _session().get("caller_id")
     if not caller_id:
         raise HTTPException(status_code=400, detail="Identify the caller first.")
     return caller_id
@@ -543,7 +529,7 @@ def _cid() -> str:
 
 def _d_lookup_caller(a: dict[str, Any]) -> dict[str, Any]:
     result = lookup_caller(CallerLookup(**a))
-    _session["caller_id"] = result["caller_id"]
+    _session()["caller_id"] = result["caller_id"]
     return result
 
 
@@ -615,6 +601,12 @@ def dispatch_tool(tool_name: str, body: ToolCall) -> dict[str, Any]:
 # ------------------------------------------------------------------ selfcheck
 
 def selfcheck() -> None:
+    """Every trap the port had to preserve, asserted against a fresh DB."""
+    with db.scope("selfcheck"):
+        _selfcheck()
+
+
+def _selfcheck() -> None:
     """Every trap the port had to preserve, asserted against a fresh DB."""
     init_db()
 

@@ -28,6 +28,7 @@ import json
 import logging
 import os
 import re
+import sys
 from pathlib import Path
 from typing import Any, Callable
 
@@ -45,6 +46,14 @@ from livekit.agents import (
 )
 
 import report
+
+for _root in (Path("/app"), *Path(__file__).resolve().parents):
+    _runtime = _root / "runtime"
+    if (_runtime / "call_id.py").is_file():
+        if str(_runtime) not in sys.path:
+            sys.path.insert(0, str(_runtime))
+        break
+from call_id import begin_session, headers as tool_headers, set_call_id  # noqa: E402
 
 logger = logging.getLogger("mivas.livekit")
 
@@ -132,7 +141,11 @@ async def _execute(name: str, args: dict[str, Any], *, local: bool) -> dict[str,
         # the span is the artifact
         return {"success": True}
     async with httpx.AsyncClient(timeout=30.0) as client:
-        r = await client.post(f"{TOOL_SERVER_URL}/tools/{name}", json={"arguments": args})
+        r = await client.post(
+            f"{TOOL_SERVER_URL}/tools/{name}",
+            json={"arguments": args},
+            headers=tool_headers(),
+        )
         return r.json()
 
 
@@ -377,6 +390,8 @@ async def run_call(
     """
     sim_result_id = sim_result_id_from_job_metadata(ctx.job.metadata)
     logger.info("job start room=%s sim_result_id=%s model=%s", ctx.room.name, sim_result_id, model)
+    set_call_id(sim_result_id)
+    begin_session(sim_result_id, session_key=getattr(ctx.room, "name", None) or "job")
 
     bp = load_blueprint()
     async with report.traced_run(

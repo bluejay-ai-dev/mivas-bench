@@ -18,7 +18,9 @@ from run import (  # noqa: E402
     pair_websocket_url,
     parse_agents,
     render_agents_yaml,
+    replica_count,
     slug,
+    tools_replica_count,
 )
 
 
@@ -45,7 +47,8 @@ def test_parse_agents_rejects_bad_entry() -> None:
         parse_agents("openai:healthcare")  # missing runtime slash
 
 
-def test_render_agents_yaml_two_pairs() -> None:
+def test_render_agents_yaml_two_pairs(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("MIVAS_REPLICAS", raising=False)
     yaml_text = render_agents_yaml(
         [
             ("openai/realtime-2.1", "healthcare"),
@@ -53,18 +56,27 @@ def test_render_agents_yaml_two_pairs() -> None:
         ],
         "LoadBalancer",
     )
-    assert yaml_text.count("kind: Deployment") == 2
-    assert yaml_text.count("kind: Service") == 2
+    assert yaml_text.count("kind: Deployment") == 4
+    assert yaml_text.count("kind: Service") == 4
     assert "name: tools" in yaml_text
     assert "---" in yaml_text
     assert f"name: mivas-{slug('openai/realtime-2.1', 'healthcare')}" in yaml_text
+    assert f"name: mivas-{slug('openai/realtime-2.1', 'healthcare')}-tools" in yaml_text
     assert f"name: mivas-{slug('nvidia/nemotron', 'control-industry')}" in yaml_text
+    assert f"name: mivas-{slug('nvidia/nemotron', 'control-industry')}-tools" in yaml_text
     assert 'mivas.harness_family: "openai"' in yaml_text
     assert 'mivas.harness_runtime: "realtime-2.1"' in yaml_text
     assert 'mivas.harness_family: "nvidia"' in yaml_text
     assert 'mivas.harness_runtime: "nemotron"' in yaml_text
     assert "__SLUG__" not in yaml_text
     assert "__HARNESS_RUNTIME__" not in yaml_text
+    assert "Thank you for calling Straus Dermatology." in yaml_text
+    assert "Welcome to Bluejay's Repair Services!" in yaml_text
+    assert "__TWILIO_WELCOME_GREETING__" not in yaml_text
+    assert yaml_text.count("\n  replicas: 1\n") == 4
+    assert "__REPLICAS__" not in yaml_text
+    assert "__TOOLS_REPLICAS__" not in yaml_text
+    assert "http://mivas-" in yaml_text and "-tools:8000" in yaml_text
 
 
 def test_stable_ingress_urls(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -92,6 +104,18 @@ def test_stable_ingress_urls(monkeypatch: pytest.MonkeyPatch) -> None:
     assert 'alb.ingress.kubernetes.io/healthcheck-port: "8000"' in yaml_text
     assert "https://otlp.getbluejay.ai/v1/traces" in yaml_text
     assert "https://api.getbluejay.ai/v1" in yaml_text
+    assert "maxUnavailable: 0" in yaml_text
+    assert "maxSurge: 1" in yaml_text
+    assert (
+        "alb.ingress.kubernetes.io/target-group-attributes: "
+        "load_balancing.algorithm.type=least_outstanding_requests"
+    ) in yaml_text
+    assert "stickiness.enabled" not in yaml_text
+    assert f"name: mivas-{s}-tools" in yaml_text
+    assert "path: /tools" in yaml_text
+    assert "path: /state" in yaml_text
+    assert "path: /snapshot" in yaml_text
+    assert yaml_text.index("path: /tools") < yaml_text.index("path: /\n")
 
 
 def test_worker_families_skip_ingress(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -109,12 +133,14 @@ def test_worker_families_skip_ingress(monkeypatch: pytest.MonkeyPatch) -> None:
         "ClusterIP",
     )
     # "kind: Ingress" is a prefix of IngressClass / IngressClassParams; match the
-    # resource kind line exactly.
-    assert yaml_text.count("\nkind: Ingress\n") == 1
-    assert yaml_text.count("kind: Deployment") == 3
+    # resource kind line exactly. CHIRP pair gets chirp+tools Ingress; workers
+    # get tools-only Ingress (Pipecat Cloud POSTs https://host/tools/...).
+    assert yaml_text.count("\nkind: Ingress\n") == 3
+    assert yaml_text.count("kind: Deployment") == 6
     assert "host: openai-realtime-2-1-control-industry.benchmarks.example.com" in yaml_text
-    assert "livekit-cascaded-control-industry.benchmarks.example.com" not in yaml_text
-    assert "pipecat-openai-realtime-2-1-control-industry.benchmarks.example.com" not in yaml_text
+    assert "host: livekit-cascaded-control-industry.benchmarks.example.com" in yaml_text
+    assert "host: pipecat-openai-realtime-2-1-control-industry.benchmarks.example.com" in yaml_text
+    assert yaml_text.count("path: /tools") == 3
     assert 'name: MIVAS_MODE\n              value: "chirp"' in yaml_text
     assert 'name: MIVAS_MODE\n              value: "agent"' in yaml_text
     from run import pair_host, pair_mivas_mode, pair_needs_ingress
@@ -122,7 +148,28 @@ def test_worker_families_skip_ingress(monkeypatch: pytest.MonkeyPatch) -> None:
     assert pair_needs_ingress("openai/realtime-2.1")
     assert not pair_needs_ingress("livekit/cascaded")
     assert pair_mivas_mode("pipecat/cascaded") == "agent"
+    assert pair_mivas_mode("openai/realtime-2.1") == "chirp"
     assert pair_host("livekit/cascaded", "control-industry") is None
+    from run import pair_dns_host, pair_public_url
+
+    assert (
+        pair_dns_host("livekit/cascaded", "control-industry")
+        == "livekit-cascaded-control-industry.benchmarks.example.com"
+    )
+    assert pair_public_url("pipecat/cascaded", "control-industry") == (
+        "https://pipecat-cascaded-control-industry.benchmarks.example.com"
+    )
+
+
+def test_twilio_ingress_is_conversationrelay() -> None:
+    from run import ingress_adapter, pair_mivas_mode
+
+    harness = "twilio/conversationrelay-gpt4.1"
+    assert pair_mivas_mode(harness) == "conversationrelay"
+    assert ingress_adapter(harness).name == "conversationrelay.py"
+    yaml_text = render_agents_yaml([(harness, "control-industry")], "LoadBalancer")
+    assert 'name: MIVAS_MODE\n              value: "conversationrelay"' in yaml_text
+    assert 'name: MIVAS_MODE\n              value: "chirp"' not in yaml_text
 
 
 def test_image_ref_registry(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -148,3 +195,46 @@ def test_ecr_registry_host() -> None:
         == "148660429236.dkr.ecr.us-west-1.amazonaws.com"
     )
     assert _ecr_registry_host("ghcr.io/bluejay/mivas-bench") is None
+
+
+def test_replica_count_defaults_to_one(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("MIVAS_REPLICAS", raising=False)
+    assert replica_count() == 1
+    monkeypatch.setenv("MIVAS_REPLICAS", "")
+    assert replica_count() == 1
+    monkeypatch.setenv("MIVAS_REPLICAS", " 2 ")
+    assert replica_count() == 2
+
+
+def test_replica_count_rejects_invalid(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("MIVAS_REPLICAS", "0")
+    with pytest.raises(ValueError, match="MIVAS_REPLICAS"):
+        replica_count()
+    monkeypatch.setenv("MIVAS_REPLICAS", "-1")
+    with pytest.raises(ValueError, match="MIVAS_REPLICAS"):
+        replica_count()
+    monkeypatch.setenv("MIVAS_REPLICAS", "two")
+    with pytest.raises(ValueError, match="MIVAS_REPLICAS"):
+        replica_count()
+
+
+def test_render_respects_mivas_replicas(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("MIVAS_REPLICAS", "3")
+    yaml_text = render_agents_yaml(
+        [("openai/realtime-2.1", "control-industry")],
+        "LoadBalancer",
+    )
+    s = slug("openai/realtime-2.1", "control-industry")
+    assert f"name: mivas-{s}-tools" in yaml_text
+    assert "\n  replicas: 3\n" in yaml_text
+    assert "\n  replicas: 1\n" in yaml_text
+    assert f"http://mivas-{s}-tools:8000" in yaml_text
+    assert "__REPLICAS__" not in yaml_text
+    assert "__TOOLS_REPLICAS__" not in yaml_text
+    assert tools_replica_count() == 1
+
+
+def test_tools_replicas_must_be_one(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("MIVAS_TOOLS_REPLICAS", "2")
+    with pytest.raises(ValueError, match="MIVAS_TOOLS_REPLICAS"):
+        tools_replica_count()

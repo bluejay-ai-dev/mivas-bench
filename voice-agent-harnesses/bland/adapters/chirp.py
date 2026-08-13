@@ -32,7 +32,18 @@ import websockets
 from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from harness import ensure_agent, industry_path, load_blueprint, run_tool, session_ws_url  # noqa: E402
+from harness import (  # noqa: E402
+    begin_session,
+    bind_provider,
+    end_session,
+    ensure_agent,
+    for_provider,
+    industry_path,
+    load_blueprint,
+    provider_id_from_request,
+    run_tool,
+    session_ws_url,
+)
 from report import end_speech_span, start_speech_span, traced_run  # noqa: E402
 
 W, R_BLAND, R_CHIRP = 2, 44_100, 16_000
@@ -68,6 +79,7 @@ async def tool_webhook(name: str, request: Request) -> dict:
         args = await request.json()
     except Exception:
         args = {}
+    for_provider(provider_id_from_request(args, query=request.query_params, headers=request.headers))
     result = await run_tool(name, {k: v for k, v in (args or {}).items() if v not in (None, "")})
     print(f"chirp tool {name} args={args} -> {result}", flush=True)
     return result
@@ -98,111 +110,119 @@ async def _bridge(ws: WebSocket, sim_id: str | None) -> None:
     url = await session_ws_url(CFG["agent_id"])
     end = asyncio.Event()
     sent = {"to_bland": 0, "to_chirp": 0}
+    session_key = uuid.uuid4().hex
+    resolved = begin_session(sim_id, session_key=session_key)
 
-    async with traced_run(workflow, simulation_result_id=sim_id, model=model):
-        async with websockets.connect(url, max_size=None) as bland:
+    try:
+        async with traced_run(workflow, simulation_result_id=sim_id, model=model):
+            async with websockets.connect(url, max_size=None) as bland:
 
-            async def inbound() -> None:
-                """chirp 16 kHz pcm → Bland 44.1 kHz; Bluejay speech.* → customer.speech."""
-                up = None
-                customer = None
-
-                def _close_customer() -> None:
-                    nonlocal customer
-                    end_speech_span(customer)
+                async def inbound() -> None:
+                    """chirp 16 kHz pcm → Bland 44.1 kHz; Bluejay speech.* → customer.speech."""
+                    up = None
                     customer = None
 
-                try:
-                    while not end.is_set():
-                        msg = await ws.receive()
-                        if msg["type"] == "websocket.disconnect":
-                            break
-                        if (pcm := msg.get("bytes")):
-                            out, up = audioop.ratecv(pcm, W, 1, R_CHIRP, R_BLAND, up)
-                            if out:
-                                await bland.send(out)
-                                sent["to_bland"] += len(out)
-                            continue
-                        if not msg.get("text"):
-                            continue
-                        try:
-                            event = json.loads(msg["text"])
-                        except json.JSONDecodeError:
-                            continue
-                        etype = event.get("type")
-                        if etype == "speech.started":
-                            _close_customer()
-                            uid = (event.get("data") or {}).get("utterance_id") or f"c_{uuid.uuid4().hex[:12]}"
-                            customer = start_speech_span(uid, speaker="customer")
-                        elif etype == "speech.completed":
-                            _close_customer()
-                finally:
-                    _close_customer()
-                    end.set()
-                    with contextlib.suppress(Exception):
-                        await bland.close()
+                    def _close_customer() -> None:
+                        nonlocal customer
+                        end_speech_span(customer)
+                        customer = None
 
-            async def outbound() -> None:
-                """Bland 44.1 kHz pcm → chirp 16 kHz; RMS gate drives agent.speech."""
-                down = None
-                utt: str | None = None
-                speech = None
-                last_loud = 0.0
-
-                async def _close_utt() -> None:
-                    nonlocal utt, speech
-                    if utt:
+                    try:
+                        while not end.is_set():
+                            msg = await ws.receive()
+                            if msg["type"] == "websocket.disconnect":
+                                break
+                            if (pcm := msg.get("bytes")):
+                                out, up = audioop.ratecv(pcm, W, 1, R_CHIRP, R_BLAND, up)
+                                if out:
+                                    await bland.send(out)
+                                    sent["to_bland"] += len(out)
+                                continue
+                            if not msg.get("text"):
+                                continue
+                            try:
+                                event = json.loads(msg["text"])
+                            except json.JSONDecodeError:
+                                continue
+                            etype = event.get("type")
+                            if etype == "speech.started":
+                                _close_customer()
+                                uid = (event.get("data") or {}).get("utterance_id") or f"c_{uuid.uuid4().hex[:12]}"
+                                customer = start_speech_span(uid, speaker="customer")
+                            elif etype == "speech.completed":
+                                _close_customer()
+                    finally:
+                        _close_customer()
+                        end.set()
                         with contextlib.suppress(Exception):
-                            await ws.send_text(_event("speech.completed", {"utterance_id": utt}))
-                    end_speech_span(speech)
-                    utt, speech = None, None
+                            await bland.close()
 
-                try:
-                    async for msg in bland:
-                        if end.is_set():
-                            break
-                        if isinstance(msg, str):
-                            # `payload` is a dict for update frames, a bare string for callID.
-                            payload = (json.loads(msg) or {}).get("payload")
-                            if isinstance(payload, dict) and payload.get("text"):
-                                print(f"bland {payload.get('type')}: {payload['text']}", flush=True)
-                            continue
-                        if not msg:
-                            continue
-                        now = time.monotonic()
-                        if audioop.rms(msg, W) >= AGENT_RMS_ON:
-                            last_loud = now
-                            if utt is None:
-                                utt = f"u_{uuid.uuid4().hex[:12]}"
-                                speech = start_speech_span(utt, speaker="agent")
-                                await ws.send_text(_event("speech.started", {"utterance_id": utt}))
-                        elif utt and now - last_loud > AGENT_SILENCE_S:
-                            await _close_utt()
-                        out, down = audioop.ratecv(msg, W, 1, R_BLAND, R_CHIRP, down)
-                        if out:
-                            await ws.send_bytes(out)
-                            sent["to_chirp"] += len(out)
-                finally:
-                    await _close_utt()
-                    end.set()
-                    with contextlib.suppress(Exception):
-                        await ws.close(1000)
+                async def outbound() -> None:
+                    """Bland 44.1 kHz pcm → chirp 16 kHz; RMS gate drives agent.speech."""
+                    down = None
+                    utt: str | None = None
+                    speech = None
+                    last_loud = 0.0
 
-            tasks = [asyncio.create_task(inbound()), asyncio.create_task(outbound())]
-            done, pending = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
-            for t in pending:
-                t.cancel()
-            await asyncio.gather(*pending, return_exceptions=True)
-            print(
-                f"chirp audio bytes to_bland={sent['to_bland']} to_chirp={sent['to_chirp']}",
-                flush=True,
-            )
-            for t in done:
-                exc = None if t.cancelled() else t.exception()
-                if exc is not None and not type(exc).__name__.startswith(
-                    ("ConnectionClosed", "WebSocketDisconnect")
-                ):
-                    raise exc
+                    async def _close_utt() -> None:
+                        nonlocal utt, speech
+                        if utt:
+                            with contextlib.suppress(Exception):
+                                await ws.send_text(_event("speech.completed", {"utterance_id": utt}))
+                        end_speech_span(speech)
+                        utt, speech = None, None
+
+                    try:
+                        async for msg in bland:
+                            if end.is_set():
+                                break
+                            if isinstance(msg, str):
+                                # `payload` is a dict for update frames, a bare string for callID.
+                                payload = (json.loads(msg) or {}).get("payload")
+                                if isinstance(payload, str) and payload.strip():
+                                    bind_provider(payload.strip(), resolved)
+                                    print(f"bland callID={payload.strip()}", flush=True)
+                                elif isinstance(payload, dict) and payload.get("text"):
+                                    print(f"bland {payload.get('type')}: {payload['text']}", flush=True)
+                                continue
+                            if not msg:
+                                continue
+                            now = time.monotonic()
+                            if audioop.rms(msg, W) >= AGENT_RMS_ON:
+                                last_loud = now
+                                if utt is None:
+                                    utt = f"u_{uuid.uuid4().hex[:12]}"
+                                    speech = start_speech_span(utt, speaker="agent")
+                                    await ws.send_text(_event("speech.started", {"utterance_id": utt}))
+                            elif utt and now - last_loud > AGENT_SILENCE_S:
+                                await _close_utt()
+                            out, down = audioop.ratecv(msg, W, 1, R_BLAND, R_CHIRP, down)
+                            if out:
+                                await ws.send_bytes(out)
+                                sent["to_chirp"] += len(out)
+                    finally:
+                        await _close_utt()
+                        end.set()
+                        with contextlib.suppress(Exception):
+                            await ws.close(1000)
+
+                tasks = [asyncio.create_task(inbound()), asyncio.create_task(outbound())]
+                done, pending = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
+                for t in pending:
+                    t.cancel()
+                await asyncio.gather(*pending, return_exceptions=True)
+                print(
+                    f"chirp audio bytes to_bland={sent['to_bland']} to_chirp={sent['to_chirp']}",
+                    flush=True,
+                )
+                for t in done:
+                    exc = None if t.cancelled() else t.exception()
+                    if exc is not None and not type(exc).__name__.startswith(
+                        ("ConnectionClosed", "WebSocketDisconnect")
+                    ):
+                        raise exc
+    finally:
+        end_session(session_key)
 
 
 def main(model: str | None = None) -> None:

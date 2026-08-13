@@ -42,7 +42,12 @@ def start_tool_server(industry: str, port: int = 8000) -> subprocess.Popen[bytes
     env["TOOL_SERVER_PORT"] = str(port)
     env["TOOL_SERVER_URL"] = f"http://127.0.0.1:{port}"
     env["MIVAS_DB_PATH"] = str(industry_dir / "db" / "runtime.db")
+    env.setdefault("MIVAS_DB_SHARED", "1")
     env["INDUSTRY_DIR"] = str(industry_dir)
+    runtime = str(ROOT / "runtime")
+    env["PYTHONPATH"] = runtime + (
+        os.pathsep + env["PYTHONPATH"] if env.get("PYTHONPATH") else ""
+    )
 
     proc = subprocess.Popen(
         [sys.executable, str(industry_dir / "tool_server.py")],

@@ -33,7 +33,17 @@ import websockets
 from fastapi import FastAPI, Request, WebSocket
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from harness import ensure_agent, industry_path, load_blueprint, run_tool  # noqa: E402
+from harness import (  # noqa: E402
+    begin_session,
+    bind_provider,
+    end_session,
+    ensure_agent,
+    for_provider,
+    industry_path,
+    load_blueprint,
+    provider_id_from_request,
+    run_tool,
+)
 from report import (  # noqa: E402
     end_speech_span,
     finish_tool_span,
@@ -77,9 +87,12 @@ def _authorized(ws: WebSocket) -> bool:
 
 @app.post("/tool/{name}")
 async def tool_webhook(name: str, request: Request) -> dict[str, Any]:
-    """Line's http_server_tool calls this; it produces the execute_tool span."""
+    """Line's http_server_tool calls this. SQLite only — the execute_tool span is
+    emitted on the CHIRP WebSocket from turn_ended.tool_calls so it stays on the
+    voice.call tree even when ALB sends this POST to a sibling replica."""
     args = await request.json() if await request.body() else {}
-    result = await run_tool(name, dict(args))
+    for_provider(provider_id_from_request(args, query=request.query_params, headers=request.headers))
+    result = await run_tool(name, dict(args), emit_span=False)
     print(f"chirp tool {name} args={args} -> {result}", flush=True)
     return result
 
@@ -106,6 +119,9 @@ async def _bridge(ws: WebSocket) -> None:
     if sim_id:
         print(f"chirp sim_result_id={sim_id}", flush=True)
 
+    session_key = uuid.uuid4().hex
+    resolved = begin_session(sim_id, session_key=session_key)
+
     url = STREAM_URL.format(agent_id=STATE["agent_id"], version=CARTESIA_VERSION)
     end = asyncio.Event()
     agent_span = None
@@ -114,136 +130,164 @@ async def _bridge(ws: WebSocket) -> None:
     audio = {"in": 0, "out": 0}
     seen_tools: set[str] = set()
 
-    async with traced_run(workflow, simulation_result_id=sim_id, model=model):
-        async with websockets.connect(
-            url, additional_headers={"Authorization": f"Bearer {os.environ['CARTESIA_API_KEY']}"}
-        ) as agent_ws:
-            await agent_ws.send(
-                json.dumps({"event": "start", "config": _start_config()})
-            )
+    try:
+        async with traced_run(workflow, simulation_result_id=sim_id, model=model):
+            async with websockets.connect(
+                url, additional_headers={"Authorization": f"Bearer {os.environ['CARTESIA_API_KEY']}"}
+            ) as agent_ws:
+                await agent_ws.send(
+                    json.dumps(
+                        {
+                            "event": "start",
+                            "stream_id": resolved,
+                            "config": _start_config(),
+                        }
+                    )
+                )
 
-            async def inbound() -> None:
-                """Bluejay pcm → media_input; Bluejay speech.* → customer.speech."""
-                nonlocal customer_span
-                try:
-                    while not end.is_set():
-                        msg = await ws.receive()
-                        if msg["type"] == "websocket.disconnect":
-                            break
-                        if (pcm := msg.get("bytes")):
-                            audio["in"] += len(pcm)
-                            await agent_ws.send(
-                                json.dumps(
-                                    {
-                                        "event": "media_input",
-                                        "media": {"payload": base64.b64encode(pcm).decode()},
-                                    }
+                async def inbound() -> None:
+                    """Bluejay pcm → media_input; Bluejay speech.* → customer.speech."""
+                    nonlocal customer_span
+                    try:
+                        while not end.is_set():
+                            msg = await ws.receive()
+                            if msg["type"] == "websocket.disconnect":
+                                break
+                            if (pcm := msg.get("bytes")):
+                                audio["in"] += len(pcm)
+                                await agent_ws.send(
+                                    json.dumps(
+                                        {
+                                            "event": "media_input",
+                                            "media": {"payload": base64.b64encode(pcm).decode()},
+                                        }
+                                    )
                                 )
-                            )
-                            continue
-                        if not msg.get("text"):
-                            continue
-                        try:
-                            event = json.loads(msg["text"])
-                        except json.JSONDecodeError:
-                            continue
-                        if event.get("type") == "speech.started":
-                            end_speech_span(customer_span)
-                            uid = (event.get("data") or {}).get("utterance_id") or f"c_{uuid.uuid4().hex[:12]}"
-                            customer_span = start_speech_span(uid, speaker="customer")
-                            print(f"chirp customer speech.started {uid}", flush=True)
-                        elif event.get("type") == "speech.completed":
-                            end_speech_span(customer_span)
-                            customer_span = None
-                finally:
-                    end_speech_span(customer_span)
-                    customer_span = None
-                    end.set()
-                    with contextlib.suppress(Exception):
-                        await agent_ws.close()
+                                continue
+                            if not msg.get("text"):
+                                continue
+                            try:
+                                event = json.loads(msg["text"])
+                            except json.JSONDecodeError:
+                                continue
+                            if event.get("type") == "speech.started":
+                                end_speech_span(customer_span)
+                                uid = (event.get("data") or {}).get("utterance_id") or f"c_{uuid.uuid4().hex[:12]}"
+                                customer_span = start_speech_span(uid, speaker="customer")
+                                print(f"chirp customer speech.started {uid}", flush=True)
+                            elif event.get("type") == "speech.completed":
+                                end_speech_span(customer_span)
+                                customer_span = None
+                    finally:
+                        end_speech_span(customer_span)
+                        customer_span = None
+                        end.set()
+                        with contextlib.suppress(Exception):
+                            await agent_ws.close()
 
-            async def outbound() -> None:
-                """Cartesia turn/audio events → chirp pcm + speech.* + tool spans."""
-                nonlocal agent_span, utt
-                try:
-                    async for raw in agent_ws:
-                        if end.is_set():
-                            break
-                        event = json.loads(raw)
-                        etype = event.get("event")
-                        if etype == "media_output":
-                            pcm = base64.b64decode(event["media"]["payload"])
-                            if pcm:
-                                audio["out"] += len(pcm)
-                                await ws.send_bytes(pcm)
-                        elif etype == "turn_started" and event["turn_started"]["role"] == "assistant":
-                            utt = f"u_{uuid.uuid4().hex[:12]}"
-                            agent_span = start_speech_span(utt, speaker="agent")
-                            await ws.send_text(_event("speech.started", {"utterance_id": utt}))
-                        elif etype == "turn_ended" and event["turn_ended"]["role"] == "assistant":
-                            turn = event["turn_ended"]
-                            print(f"chirp agent: {turn.get('text')!r}", flush=True)
-                            if agent_span is not None:
-                                agent_span.set_attribute("mivas.speech.text", turn.get("text") or "")
-                            end_speech_span(agent_span)
-                            agent_span = None
-                            if utt:
-                                await ws.send_text(_event("speech.completed", {"utterance_id": utt}))
-                                utt = None
-                            _record_native_tools(turn.get("tool_calls") or [], seen_tools)
-                        elif etype == "turn_ended":
-                            turn = event["turn_ended"]
-                            print(f"chirp {turn['role']}: {turn.get('text')!r}", flush=True)
-                        elif etype == "clear":
-                            # Cartesia barge-in: the caller started talking over the agent.
-                            print(f"chirp clear (interrupted={bool(utt)})", flush=True)
-                            if utt:
+                async def outbound() -> None:
+                    """Cartesia turn/audio events → chirp pcm + speech.* + tool spans."""
+                    nonlocal agent_span, utt
+                    try:
+                        async for raw in agent_ws:
+                            if end.is_set():
+                                break
+                            event = json.loads(raw)
+                            etype = event.get("event")
+                            if etype == "media_output":
+                                pcm = base64.b64decode(event["media"]["payload"])
+                                if pcm:
+                                    audio["out"] += len(pcm)
+                                    await ws.send_bytes(pcm)
+                            elif etype == "turn_started" and event["turn_started"]["role"] == "assistant":
+                                utt = f"u_{uuid.uuid4().hex[:12]}"
+                                agent_span = start_speech_span(utt, speaker="agent")
+                                await ws.send_text(_event("speech.started", {"utterance_id": utt}))
+                            elif etype == "turn_ended" and event["turn_ended"]["role"] == "assistant":
+                                turn = event["turn_ended"]
+                                print(f"chirp agent: {turn.get('text')!r}", flush=True)
+                                if agent_span is not None:
+                                    agent_span.set_attribute("mivas.speech.text", turn.get("text") or "")
                                 end_speech_span(agent_span)
                                 agent_span = None
-                                await ws.send_text(_event("speech.completed", {"utterance_id": utt}))
-                                utt = None
-                        elif etype == "ack":
-                            print(f"chirp cartesia call_id={event.get('call_id')}", flush=True)
-                        elif etype in ("error", "call_ended", "end_call"):
-                            print(f"chirp cartesia {etype}: {raw[:300]}", flush=True)
-                            break
-                finally:
-                    end_speech_span(agent_span)
-                    agent_span = None
-                    end.set()
-                    with contextlib.suppress(Exception):
-                        await ws.close(1000)
+                                if utt:
+                                    await ws.send_text(_event("speech.completed", {"utterance_id": utt}))
+                                    utt = None
+                                _record_line_tools(turn.get("tool_calls") or [], seen_tools)
+                            elif etype == "turn_ended":
+                                turn = event["turn_ended"]
+                                print(f"chirp {turn['role']}: {turn.get('text')!r}", flush=True)
+                            elif etype == "clear":
+                                # Cartesia barge-in: the caller started talking over the agent.
+                                print(f"chirp clear (interrupted={bool(utt)})", flush=True)
+                                if utt:
+                                    end_speech_span(agent_span)
+                                    agent_span = None
+                                    await ws.send_text(_event("speech.completed", {"utterance_id": utt}))
+                                    utt = None
+                            elif etype == "ack":
+                                for key in ("call_id", "stream_id"):
+                                    cid = event.get(key)
+                                    if cid:
+                                        bind_provider(str(cid), resolved)
+                                print(
+                                    f"chirp cartesia call_id={event.get('call_id')} "
+                                    f"stream_id={event.get('stream_id')}",
+                                    flush=True,
+                                )
+                            elif etype in ("error", "call_ended", "end_call"):
+                                print(f"chirp cartesia {etype}: {raw[:300]}", flush=True)
+                                break
+                    finally:
+                        end_speech_span(agent_span)
+                        agent_span = None
+                        end.set()
+                        with contextlib.suppress(Exception):
+                            await ws.close(1000)
 
-            tasks = [asyncio.create_task(inbound()), asyncio.create_task(outbound())]
-            done, pending = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
-            for t in pending:
-                t.cancel()
-            await asyncio.gather(*pending, return_exceptions=True)
-            print(f"chirp audio bytes in={audio['in']} out={audio['out']}", flush=True)
-            for t in done:
-                exc = None if t.cancelled() else t.exception()
-                if exc is not None and not type(exc).__name__.startswith(
-                    ("ConnectionClosed", "WebSocketDisconnect")
-                ):
-                    raise exc
+                tasks = [asyncio.create_task(inbound()), asyncio.create_task(outbound())]
+                done, pending = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
+                for t in pending:
+                    t.cancel()
+                await asyncio.gather(*pending, return_exceptions=True)
+                print(f"chirp audio bytes in={audio['in']} out={audio['out']}", flush=True)
+                for t in done:
+                    exc = None if t.cancelled() else t.exception()
+                    if exc is not None and not type(exc).__name__.startswith(
+                        ("ConnectionClosed", "WebSocketDisconnect")
+                    ):
+                        raise exc
+    finally:
+        end_session(session_key)
 
 
-def _record_native_tools(calls: list[dict[str, Any]], seen: set[str]) -> None:
-    """Line-native tools (handoff, end_call) run inside Cartesia and never hit the
-    webhook, so their only trace is the turn they were reported on. A handoff is
-    reported again on the target agent's first turn — dedupe on the call id."""
+def _record_line_tools(calls: list[dict[str, Any]], seen: set[str]) -> None:
+    """Every Line tool on this turn, including http_server_tool.
+
+    Handoff/end_call never hit our webhook. schedule_appointment does, but that
+    POST lands on a random replica whose process has the wrong (or no)
+    voice.call root. Reconstruct the execute_tool span here so Bluejay actuals
+    attach to this call's trace. Dedupe on Line's tool-call id — a handoff is
+    reported again on the target agent's first turn.
+    """
     for call in calls:
         name = call.get("name") or call.get("tool_name")
-        if not name or name not in STATE["native_tools"]:
+        if not name:
             continue
         key = str(call.get("id") or name)
         if key in seen:
             continue
         seen.add(key)
         args = call.get("arguments") or call.get("args") or {}
+        result = call.get("result")
+        if result is None:
+            result = {"success": True, "source": "line"}
+        ok = True
+        if isinstance(result, dict):
+            ok = bool(result.get("ok", result.get("success", True)))
         print(f"chirp line tool {name} {args}", flush=True)
         with tool_span(name, args, call_id=call.get("id")) as span:
-            finish_tool_span(span, {"success": True, "source": "line"}, ok=True)
+            finish_tool_span(span, result, ok=ok)
 
 
 def main(model: str | None = None) -> None:

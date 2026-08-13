@@ -74,9 +74,10 @@ Harness tool kinds:
 ```bash
 uv run python tool_server.py
 # curl -X POST http://127.0.0.1:8000/reservations/find -H 'content-type: application/json' \
+#   -H 'X-Mivas-Call-Id: 675' \
 #   -d '{"last_name":"Sollberg","confirmation_code":"RT2LKD"}'
-# curl http://127.0.0.1:8000/reservations/RT2LKD/fare-rules
-# curl http://127.0.0.1:8000/state
+# curl 'http://127.0.0.1:8000/reservations/RT2LKD/fare-rules?call_id=675'
+# curl -s 'http://127.0.0.1:8000/state?call_id=675'
 
 uv run python tool_server.py --selfcheck   # every trap, against a fresh DB
 ```

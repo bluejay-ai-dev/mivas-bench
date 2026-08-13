@@ -25,7 +25,7 @@ import os
 import re
 import sqlite3
 import sys
-from contextlib import asynccontextmanager, contextmanager
+from contextlib import contextmanager
 from datetime import date
 from pathlib import Path
 from typing import Any
@@ -34,10 +34,15 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
 INDUSTRY_DIR = Path(__file__).resolve().parent
-DB_DIR = INDUSTRY_DIR / "db"
-SCHEMA_PATH = DB_DIR / "schema.sql"
-SEED_PATH = DB_DIR / "seed.sql"
-DB_PATH = Path(os.environ.get("MIVAS_DB_PATH", str(DB_DIR / "runtime.db")))
+
+for _runtime in (Path("/app/runtime"), Path(__file__).resolve().parents[2] / "runtime"):
+    if (_runtime / "db_service.py").is_file():
+        if str(_runtime) not in sys.path:
+            sys.path.insert(0, str(_runtime))
+        break
+from db_service import DBService  # noqa: E402
+
+db = DBService.for_industry(INDUSTRY_DIR)
 
 # Fixed strings, so token discipline is checkable from a transcript alone.
 TOKENS = {
@@ -52,38 +57,18 @@ DISRUPTED = ("cancelled", "delayed_180", "schedule_change_180")
 
 
 def init_db() -> None:
-    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
-    if DB_PATH.exists():
-        DB_PATH.unlink()
-    conn = sqlite3.connect(DB_PATH)
-    try:
-        conn.executescript(SCHEMA_PATH.read_text())
-        seed = SEED_PATH.read_text().strip()
-        if seed:
-            conn.executescript(seed)
-        conn.commit()
-    finally:
-        conn.close()
+    return
 
 
 @contextmanager
 def _db() -> Any:
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    try:
+    with db.connect() as conn:
         yield conn
-        conn.commit()
-    finally:
-        conn.close()
 
 
-@asynccontextmanager
-async def lifespan(_app: FastAPI):
-    init_db()
-    yield
-
-
-app = FastAPI(title="travel state API", lifespan=lifespan)
+app = FastAPI(title="travel state API")
+app.middleware("http")(db.http_middleware)
+db.mount_cluster_routes(app)
 
 
 # ------------------------------------------------------------------ helpers
@@ -626,6 +611,12 @@ def dispatch_tool(tool_name: str, body: ToolCall) -> dict[str, Any]:
 # ------------------------------------------------------------------ selfcheck
 
 def selfcheck() -> None:
+    """Every trap the fare ladder turns on, asserted against a fresh DB."""
+    with db.scope("selfcheck"):
+        _selfcheck()
+
+
+def _selfcheck() -> None:
     """Every trap the fare ladder turns on, asserted against a fresh DB."""
     init_db()
 
