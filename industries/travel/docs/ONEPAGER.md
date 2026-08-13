@@ -82,13 +82,14 @@ Strict DAG, no back edges. `payments` is terminal.
 
 ## 4. Cross-node rules
 
-The prompts follow the `healthcare` section format: seven shared sections
-(`WHO YOU ARE`, `PERSONALITY`, `GUARDRAILS`, `HANDOFFS ARE INVISIBLE`,
-`HARD RULES`, `SECURITY`, `AIRLINE FACTS YOU MAY STATE WITHOUT A TOOL`), then a
-numbered role divider, then the per-agent sections. `WHO YOU ARE` and the no-tool
-facts list are identical in all six files; `PERSONALITY`, `GUARDRAILS`,
-`HARD RULES` and `SECURITY` are deliberately tailored per node, so an assertion
-about one of them should name the agent it applies to.
+The prompts open with `WHO YOU ARE`, then the numbered role divider and the
+per-agent sections, then the remaining shared sections (`PERSONALITY`,
+`GUARDRAILS`, `HANDOFFS ARE INVISIBLE`, `HARD RULES`, `SECURITY`) with
+`AIRLINE FACTS YOU MAY STATE WITHOUT A TOOL` last. Role sits at the top so it is
+not lost under the shared preamble. `WHO YOU ARE` and the no-tool facts list are
+identical in all six files; `PERSONALITY`, `GUARDRAILS`, `HARD RULES` and
+`SECURITY` are deliberately tailored per node, so an assertion about one of them
+should name the agent it applies to.
 
 Assertable rules that hold at every node:
 
