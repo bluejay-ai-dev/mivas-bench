@@ -110,7 +110,7 @@
     },
     {
       "name": "get_fee",
-      "description": "The published fee schedule, including membership pricing. Pass the caller's own words (\"restocking fee\", \"haul away\", \"how much is Total\"). Read back the exact amount and its conditions. If it returns NO_SUCH_FEE, say there is no fee by that name in the published schedule \u2014 do not guess a number.",
+      "description": "The published fee schedule, including membership pricing. Pass the caller's own words (\"restocking fee\", \"haul away\", \"how much is Total\"). Read back the exact amount and its conditions. If it returns NO_SUCH_FEE, say there is no fee by that name in the published schedule: do not guess a number.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -146,7 +146,7 @@
     },
     {
       "name": "identify_customer",
-      "description": "Find the caller's record. Pass whatever they gave you: full name and phone number, or an order number. It tells you only whether a record exists \u2014 it never says whether an order is real, and neither may you before verification succeeds. Call it before verify_identity.",
+      "description": "Find the caller's record. Pass whatever they gave you: full name and phone number, or an order number. It tells you only whether a record exists. It never says whether an order is real, and neither may you before verification succeeds. Call it before verify_identity.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -188,7 +188,7 @@
     },
     {
       "name": "verify_identity",
-      "description": "Verify the caller with the ZIP code on the order and the last four digits of the card it was paid with. Ask for both in one question. Two failures lock the call \u2014 hand it to a person with reason identity_failed. Never ask for a full card number.",
+      "description": "Verify the caller with the ZIP code on the order and the last four digits of the card it was paid with. Ask for both in one question. Two failures lock the call. Hand it to a person with reason identity_failed. Never ask for a full card number.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -368,7 +368,7 @@
     },
     {
       "name": "cancel_order",
-      "description": "Cancel an order that has not shipped. One step, no fee, no confirmation token \u2014 cancelling costs the caller nothing. If it has already shipped this refuses with ORDER_ALREADY_SHIPPED; take it to the return path instead.",
+      "description": "Cancel an order that has not shipped. One step, no fee, no confirmation token, because cancelling costs the caller nothing. If it has already shipped this refuses with ORDER_ALREADY_SHIPPED; take it to the return path instead.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -402,7 +402,7 @@
     },
     {
       "name": "quote_price_match",
-      "description": "Test a competitor's price against the Price Match Guarantee and work out the difference. Qualified competitors only, identical new in-stock items only, inside the return window, one match per identical item per customer. Open-box, clearance, refurbished and Marketplace items are excluded and this will say so \u2014 deliver that refusal as given rather than making an exception.",
+      "description": "Test a competitor's price against the Price Match Guarantee and work out the difference. Qualified competitors only, identical new in-stock items only, inside the return window, one match per identical item per customer. Open-box, clearance, refurbished and Marketplace items are excluded and this will say so. Deliver that refusal as given rather than making an exception.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -491,7 +491,7 @@
     },
     {
       "name": "check_return_eligibility",
-      "description": "The whole return computation for one item: which window applies and why (15 days standard, 60 for Plus and Total members, 14 for activatable devices no matter the tier), how many days are left or how many days over, and the restocking fee given the product class, whether the box was opened, and the state it was bought in. An ineligible item comes back as a normal answer with the arithmetic \u2014 read it out, including how far past the window they are.",
+      "description": "The whole return computation for one item: which window applies and why (15 days standard, 60 for Plus and Total members, 14 for activatable devices no matter the tier), how many days are left or how many days over, and the restocking fee given the product class, whether the box was opened, and the state it was bought in. An ineligible item comes back as a normal answer with the arithmetic. Read it out, including how far past the window they are.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -619,7 +619,7 @@
     },
     {
       "name": "create_return_label",
-      "description": "Email a free prepaid return label for an open RMA. If the item is a damaged or swollen lithium battery this refuses with HAZMAT_NO_LABEL and hands you the safety wording \u2014 say it as written, do not offer a label or a store drop-off, and escalate with reason product_safety.",
+      "description": "Email a free prepaid return label for an open RMA. If the item is a damaged or swollen lithium battery this refuses with HAZMAT_NO_LABEL and hands you the safety wording. Say it as written, do not offer a label or a store drop-off, and escalate with reason product_safety.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -653,7 +653,7 @@
     },
     {
       "name": "get_refund_status",
-      "description": "Where a refund is: the stage it is at and the date range it posts by. Say only what this returns \u2014 never promise a date it did not give you.",
+      "description": "Where a refund is: the stage it is at and the date range it posts by. Say only what this returns. Never promise a date it did not give you.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -716,7 +716,7 @@
     },
     {
       "name": "check_coverage",
-      "description": "Whether a specific failure on a specific item is covered, and who pays: a TechCrew Protect plan (deductible), Kestrel Total (nothing), the manufacturer warranty (nothing, defects only), or nobody (a $39.99 bench diagnostic). It returns a verdict, never a promise about the repair. The reply always carries the line that a third-party repair does not void the manufacturer warranty \u2014 never say otherwise.",
+      "description": "Whether a specific failure on a specific item is covered, and who pays: a TechCrew Protect plan (deductible), Kestrel Total (nothing), the manufacturer warranty (nothing, defects only), or nobody (a $39.99 bench diagnostic). It returns a verdict, never a promise about the repair. The reply always carries the line that a third-party repair does not void the manufacturer warranty. Never say otherwise.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -760,7 +760,7 @@
     },
     {
       "name": "book_service_appointment",
-      "description": "Book TechCrew: bench (in a store), in_home, or remote. Refuses for a recalled unit (RECALLED_NO_SERVICE) or a damaged battery (HAZMAT_NO_SERVICE) and hands you the wording to say \u2014 a recalled product is never repaired. If the requested day is not open it books the first day that is and tells you so.",
+      "description": "Book TechCrew: bench (in a store), in_home, or remote. Refuses for a recalled unit (RECALLED_NO_SERVICE) or a damaged battery (HAZMAT_NO_SERVICE) and hands you the wording to say. A recalled product is never repaired. If the requested day is not open it books the first day that is and tells you so.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -774,7 +774,7 @@
           },
           "service_type": {
             "type": "string",
-            "description": "bench, in_home or remote \u2014 the caller's words are fine (\"bring it in\", \"come to the house\")."
+            "description": "bench, in_home or remote. The caller's words are fine (\"bring it in\", \"come to the house\")."
           },
           "date": {
             "type": "string",
@@ -969,7 +969,7 @@
     },
     {
       "name": "quote_membership_cancellation",
-      "description": "The cancellation math: the refund for unused whole months, and what the caller gives up. Call it as soon as a caller asks to cancel \u2014 never make them ask twice, never send them to a store or tell them to write in.",
+      "description": "The cancellation math: the refund for unused whole months, and what the caller gives up. Call it as soon as a caller asks to cancel. Never make them ask twice, never send them to a store or tell them to write in.",
       "inputSchema": {
         "type": "object",
         "properties": {},
@@ -1038,7 +1038,7 @@
     },
     {
       "name": "check_subscription_charge",
-      "description": "Whether Kestrel actually bills this person the amount they were told about. Use it the moment someone describes a renewal invoice, a charge they did not make, or a refund they are being asked to send back. NO_SUCH_CHARGE means no such charge exists \u2014 say that plainly and say the message was not from Kestrel. Never confirm a charge a caller read off an email.",
+      "description": "Whether Kestrel actually bills this person the amount they were told about. Use it the moment someone describes a renewal invoice, a charge they did not make, or a refund they are being asked to send back. NO_SUCH_CHARGE means no such charge exists. Say that plainly and say the message was not from Kestrel. Never confirm a charge a caller read off an email.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -1080,7 +1080,7 @@
     },
     {
       "name": "check_outbound_contact",
-      "description": "Whether Kestrel or TechCrew genuinely contacted this person. NO_OUTBOUND_CONTACT means nobody here reached out \u2014 deliver that as given.",
+      "description": "Whether Kestrel or TechCrew contacted this person at all. NO_OUTBOUND_CONTACT means nobody here reached out. Deliver that as given.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -1118,7 +1118,7 @@
     },
     {
       "name": "report_scam_contact",
-      "description": "File an impersonation report. Fill in what the caller told you. There is no field for card or bank details and you must never ask for any. If they gave someone remote access or already sent money, set those flags \u2014 the next steps come back different.",
+      "description": "File an impersonation report. Fill in what the caller told you. There is no field for card or bank details and you must never ask for any. If they gave someone remote access or already sent money, set those flags. The next steps come back different.",
       "inputSchema": {
         "type": "object",
         "properties": {

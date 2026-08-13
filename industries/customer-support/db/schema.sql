@@ -1,4 +1,4 @@
--- Kestrel Electronics — SQLite schema.
+-- Kestrel Electronics SQLite schema.
 -- Two groups, following legal and finance: seeded reference data (the replica's
 -- world) and durable call artifacts (what calls write; GET /state and the e2e
 -- assert on these).
@@ -119,7 +119,7 @@ CREATE TABLE refunds (
     method          TEXT NOT NULL
 );
 
--- Every genuine outbound contact Kestrel made. Absence is the point: it is what
+-- Every real outbound contact Kestrel made. Absence is the point: it is what
 -- lets the fraud desk say "we never called you".
 CREATE TABLE outbound_contacts (
     id              TEXT PRIMARY KEY,
