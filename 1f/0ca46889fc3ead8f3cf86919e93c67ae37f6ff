@@ -1,0 +1,67 @@
+industries/travel/system-prompts/pass_services.md
+  s_40d50343b62182::t_1e711f2c2b4891 43-44
+  s_40d50343b62182::t_b89d44bfb5a8c0 11-13
+voice-agent-harnesses/twilio/harness.py
+  s_40d50343b62182::t_f960c588ad49c9 162
+industries/travel/README.md
+  s_40d50343b62182::t_01a6e32abddd8d 60
+industries/travel/docs/SPEC.md
+  s_40d50343b62182::t_2f7d0c1c019e59 357
+  s_40d50343b62182::t_d82501b17ecf00 373
+run.py
+  s_40d50343b62182::t_39b64d22852ce6 338
+industries/travel/system-prompts/irrops.md
+  s_40d50343b62182::t_113139913a19e7 11-13
+  s_40d50343b62182::t_a0ea1654a11d17 44-45
+industries/travel/tool_server.py
+  s_40d50343b62182::t_ed631e26c13411 1145-1147
+  s_40d50343b62182::t_b16bfdcaffbf0d 1331-1332
+  s_40d50343b62182::t_0a867842c09159 758,760,762-773
+industries/travel/system-prompts/ancillaries.md
+  s_40d50343b62182::t_d5f8cde9c7dac0 11-13
+  s_40d50343b62182::t_0dae3b0cdc7c58 43-44
+industries/travel/system-prompts/reception.md
+  s_40d50343b62182::t_254cee66e067b7 67-68
+  s_40d50343b62182::t_beb85e9c46242c 53-54
+  s_40d50343b62182::t_945754b2bd4313 70-71
+  s_40d50343b62182::t_b0ad4b72de386f 204-205
+  s_40d50343b62182::t_18a6d4c1d94a87 11-13
+  s_40d50343b62182::t_a71930e6882e5b 73-74
+industries/travel/docs/RESEARCH.md
+  s_40d50343b62182::t_affbd67d28a6f0 139
+  s_40d50343b62182::t_1c2e69c95913e4 56
+  s_40d50343b62182::t_e5a64ab49ec043 342-343
+industries/travel/tools.json
+  s_40d50343b62182::t_a5906d81bc514d 563,570-573,576
+  s_40d50343b62182::t_53f29752e9770a 569,607,894,930,981
+industries/travel/system-prompts/ticketing.md
+  s_40d50343b62182::t_bd8e1b41d25ff7 184-186
+  s_40d50343b62182::t_6f9cfc9b24944d 11-13
+  s_40d50343b62182::t_2c076ca0bb2827 43-44
+industries/travel/db/schema.sql
+  s_40d50343b62182::t_ba385bdb739244 160-165
+industries/travel/system-prompts/payments.md
+  s_40d50343b62182::t_76c4b053366bf1 143-146
+  s_40d50343b62182::t_4d754b40041e5c 42-43
+  s_40d50343b62182::t_d5a08e9c46c743 166
+  s_40d50343b62182::t_77ba0119abb4b4 128-130
+  s_40d50343b62182::t_e5c29911097a0b 11-13
+industries/travel/docs/SPEC_TRACE.md
+  s_40d50343b62182::t_d8a297ba191524 154,156
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "1f0ca46889fc3ead8f3cf86919e93c67ae37f6ff",
+  "prompts": {},
+  "sessions": {
+    "s_40d50343b62182": {
+      "agent_id": {
+        "tool": "windsurf",
+        "id": "regal-reading",
+        "model": "unknown"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
