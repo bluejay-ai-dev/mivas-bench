@@ -1,5 +1,7 @@
 # Tools-only public hostname for worker families (Pipecat Cloud / LiveKit).
-# They do not serve Bluejay CHIRP; the bot POSTs https://__HOST__/tools/{name}.
+# Combined pod: the industry FastAPI still listens on :8000 in the same container.
+# One Prefix `/tools` — extra FastAPI routes must live under /tools so they
+# do not cost another ALB rule. Evals still read S3, not this host.
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -27,27 +29,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: mivas-__SLUG__-tools
-                port:
-                  name: tools
-          - path: /state
-            pathType: Prefix
-            backend:
-              service:
-                name: mivas-__SLUG__-tools
-                port:
-                  name: tools
-          - path: /snapshot
-            pathType: Prefix
-            backend:
-              service:
-                name: mivas-__SLUG__-tools
-                port:
-                  name: tools
-          - path: /health
-            pathType: Prefix
-            backend:
-              service:
-                name: mivas-__SLUG__-tools
+                name: mivas-__SLUG__
                 port:
                   name: tools

@@ -37,11 +37,11 @@ curl -s http://127.0.0.1:8000/state -H 'X-Mivas-Call-Id: 675'
 curl -s 'http://127.0.0.1:8000/state?call_id=675'
 # never-touched id → seed only
 curl -s 'http://127.0.0.1:8000/state?call_id=676'
-# frozen dump written at CHIRP teardown (eval path when replicas > 1)
+# frozen dump written at CHIRP teardown (eval path when replicas > 1 is S3)
 curl -s http://127.0.0.1:8000/snapshot/675
 ```
 
-On EKS, Ingress sends `/state` and `/snapshot` to the tools Service (one writer),
-not a random CHIRP replica. Evals should prefer `GET /snapshot/{id}` so they
-read the teardown freeze even if the SQLite file is later mutated or the
-harness pod is gone.
+On EKS, evals **do not** GET the public hostname for `/state` or `/snapshot`
+(ALB would pick a random replica). Hangup PUTs
+`s3://$MIVAS_SNAPSHOT_BUCKET/mivas/{slug}/{id}.final.json` and `{id}.db`.
+Local `GET /state?call_id=` is for debug on the pod that owned the call.

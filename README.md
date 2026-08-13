@@ -55,27 +55,20 @@ MIVAS_ACM_CERTIFICATE_ARN=arn:aws:acm:us-west-1:148660429236:certificate/6e3690b
 MIVAS_IMAGE_PREFIX=148660429236.dkr.ecr.us-west-1.amazonaws.com/mivas-bench
 
 # ACM cert must be ISSUED first (Cloudflare validation CNAME). Then:
-uv run python run.py --build --apply --no-logs
+uv run python run.py --codebuild --apply --no-logs
 ```
 
-`--build` with `MIVAS_IMAGE_PREFIX` builds `linux/arm64`, logs into ECR, and pushes. `--apply` creates IngressClassParams + one Ingress per pair; Auto Mode provisions **one** internet-facing ALB (`group.name: mivas-chirp`).
+`--codebuild` zips the repo to S3 and starts a CodeBuild batch: one `linux/amd64` child per `AGENTS` pair, registry cache per family (`:cache-<family>`), push to ECR. `--apply` waits for the batch then kubectl-applies. Local `--build` is the fallback (also amd64 by default; override with `MIVAS_IMAGE_PLATFORMS`). `--apply` creates IngressClassParams + one Ingress per pair; Auto Mode provisions **one** internet-facing ALB (`group.name: mivas-chirp`). See [docs/codebuild-images.md](docs/codebuild-images.md).
 
-`MIVAS_REPLICAS` (default `1`) sets `spec.replicas` on each pair’s **harness** Deployment. The industry tool server is a separate Deployment `mivas-{slug}-tools` with `MIVAS_TOOLS_REPLICAS=1` (ClusterIP only). Harness pods call `http://mivas-{slug}-tools:8000`. Capacity is:
+`MIVAS_REPLICAS` (default `1`) sets `spec.replicas` on each pair’s **one** Deployment. The industry tool server runs **in that pod** (`TOOL_SERVER_URL=http://127.0.0.1:8000`). Capacity is:
 
 ```
 max_concurrent ≈ replicas × in_process_ws_limit
 ```
 
-`in_process_ws_limit` is empirical per family (start conservative: 2–4). Leave unused pairs at 1. Proven pairs (openai × control-industry, cartesia/line × control-industry) run at harness=3. Do not set `MIVAS_REPLICAS>1` on vapi/retell/bland until those families are live-proven. Re-apply a proven pair with `MIVAS_REPLICAS=3` or you will scale it back to 1 and drop in-flight sockets. See [docs/per-call-db-and-replicas.md](docs/per-call-db-and-replicas.md).
+`in_process_ws_limit` is empirical per family (start conservative: 2–4). Leave unused pairs at 1. Do not set `MIVAS_REPLICAS>1` on vapi/retell/bland/cartesia (webhooks land on a random replica). Re-apply a scaled pair with `MIVAS_REPLICAS=3` or you will scale it back to 1 and drop in-flight sockets. See [docs/per-call-db-and-replicas.md](docs/per-call-db-and-replicas.md).
 
-Evals load a call’s final DB dump without knowing which harness pod ran it:
-
-```
-GET https://{slug}.{domain}/snapshot/{simulation_result_id}
-GET https://{slug}.{domain}/state?call_id={simulation_result_id}
-```
-
-Ingress sends `/snapshot` and `/state` to the tools Service. `/snapshot/{id}` is the teardown freeze; `/state` is live SQLite.
+At hangup the replica that owned the WebSocket PUTs `{id}.final.json` and `{id}.db` to `s3://$MIVAS_SNAPSHOT_BUCKET/mivas/{slug}/{id}…`. Evals read S3. Do not `GET https://{host}/state` or `/snapshot` — ALB would pick a random replica.
 
 Rolling updates use `maxUnavailable: 0` / `maxSurge: 1`. An in-flight WebSocket **dies** if its pod is deleted; scale by adding replicas rather than cycling them mid-run. New dials use ALB `least_outstanding_requests`; an upgraded socket stays on that target for the TCP lifetime (idle timeout 3600s). Cookie stickiness is not used.
 
@@ -105,7 +98,7 @@ uv run python run.py --build --apply --no-logs
 
 ```bash
 # AGENTS=openai/realtime-2.1:healthcare,nvidia/nemotron:control-industry
-uv run python run.py --build --apply --no-logs
+uv run python run.py --codebuild --apply --no-logs
 # → kubectl get deploy,svc,ingress -l app=mivas-bench
 ```
 

@@ -58,19 +58,17 @@ Tool kinds, from the blueprint entry's flags:
   tool server.
 
 The industry's REST routes (`GET /health`, `GET /state`, the domain routes)
-remain for evals and debugging — harnesses only speak `/tools/{name}`. After
-each call the harness freezes `GET /state` onto `GET /snapshot/{id}` on the
-tools replica. Evals load that snapshot (or live `/state?call_id=`) through
-the public hostname; both paths hit the tools Service, not a random CHIRP pod.
+remain for evals and debugging **on that pod** — harnesses only speak `/tools/{name}`.
+After each call the harness freezes `GET /state` plus the SQLite file to S3
+(`s3://$MIVAS_SNAPSHOT_BUCKET/mivas/{slug}/{id}.final.json`). Evals load S3.
+Do not `GET` the public hostname for `/state` or `/snapshot`.
 
 Concurrency on EKS is `max_concurrent ≈ MIVAS_REPLICAS × in_process_ws_limit`
 (default replicas `1`; start `in_process_ws_limit` at 2–4). Raising replicas
 is how overlapping Bluejay calls stay on isolated SQLite files without sharing
-one process. Proven pairs (openai × control-industry, cartesia/line ×
-control-industry) run at `MIVAS_REPLICAS=3` / `MIVAS_TOOLS_REPLICAS=1`. Leave
-the default at 1 for unused pairs. Do not set `MIVAS_REPLICAS>1` on
-vapi/retell/bland until those families are live-proven; cartesia is proven.
-See [docs/per-call-db-and-replicas.md](../docs/per-call-db-and-replicas.md).
+one process. Do not set `MIVAS_REPLICAS>1` on vapi/retell/bland/cartesia —
+those webhooks hit a random replica. See
+[docs/per-call-db-and-replicas.md](../docs/per-call-db-and-replicas.md).
 
 Platform harnesses (vapi/retell/bland/cartesia) receive tool invocations as
 provider webhooks on `{PUBLIC_URL}/tool/{name}` and forward them to

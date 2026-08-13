@@ -102,8 +102,34 @@ def _call(method: str, path: str, body: dict[str, Any] | None = None) -> dict[st
         json=body,
         timeout=30.0,
     )
-    r.raise_for_status()
+    if r.status_code >= 400:
+        raise RuntimeError(f"retell {method} {path} -> {r.status_code} {r.text[:800]}")
+    if r.status_code == 204 or not r.content:
+        return {}
     return r.json()
+
+
+_SCHEMA_KEYS = {"type", "description", "enum", "items", "properties", "required"}
+
+
+def _prop(prop: dict[str, Any]) -> dict[str, Any]:
+    """One tools.json property → JSON Schema Retell will accept.
+
+    Retell 400s `Array type must have items property defined`. `find_slots` and
+    `join_waitlist` use `location_ids: {type: array, items: {type: string}}`;
+    stripping `items` is what crashed healthcare create-retell-llm.
+    """
+    out = {k: v for k, v in prop.items() if k in _SCHEMA_KEYS}
+    out.setdefault("type", "string")
+    if isinstance(out.get("items"), dict):
+        out["items"] = _prop(out["items"])
+    if isinstance(out.get("properties"), dict):
+        out["properties"] = {
+            k: _prop(v) for k, v in out["properties"].items() if isinstance(v, dict)
+        }
+    if out["type"] == "array" and not out.get("items"):
+        out["items"] = {"type": "string"}
+    return out
 
 
 def _custom_tool(spec: dict[str, Any], public_url: str) -> dict[str, Any]:
@@ -111,9 +137,7 @@ def _custom_tool(spec: dict[str, Any], public_url: str) -> dict[str, Any]:
     raw = dict(spec.get("inputSchema") or {"type": "object"})
     props = {}
     for key, prop in (raw.get("properties") or {}).items():
-        p = {k: v for k, v in dict(prop).items() if k in {"type", "description", "enum"}}
-        p.setdefault("type", "string")
-        props[key] = p
+        props[key] = _prop(dict(prop))
     parameters: dict[str, Any] = {"type": "object", "properties": props}
     if raw.get("required"):
         parameters["required"] = list(raw["required"])
@@ -164,25 +188,32 @@ def _adapt_prompt(prompt: str, handoff_tool_name: str | None, target_state: str)
 def _states(bp: dict[str, Any], public_url: str) -> list[dict[str, Any]]:
     states = []
     for name, entry in bp["agents"].items():
-        handoff = next((t for t in entry["tools"] if t.get("handoff")), None)
+        handoffs = [t for t in entry["tools"] if t.get("handoff")]
+        prompt = entry["instructions"]
+        for handoff in handoffs:
+            prompt = _adapt_prompt(prompt, handoff["name"], handoff["handoff_to"])
         state: dict[str, Any] = {
             "name": name,
-            "state_prompt": _adapt_prompt(
-                entry["instructions"],
-                handoff["name"] if handoff else None,
-                handoff["handoff_to"] if handoff else "",
-            ),
+            "state_prompt": prompt,
             "tools": _state_tools(entry, bp, public_url),
         }
-        if handoff:
+        edges = []
+        seen: set[str] = set()
+        for handoff in handoffs:
+            dest = handoff["handoff_to"]
+            if dest in seen:
+                continue
+            seen.add(dest)
             spec = bp["catalog"].get(handoff["name"]) or {}
-            state["edges"] = [
+            edges.append(
                 {
-                    "destination_state_name": handoff["handoff_to"],
+                    "destination_state_name": dest,
                     "description": spec.get("description")
-                    or f"Transition when the caller should be handled by {handoff['handoff_to']}.",
+                    or f"Transition when the caller should be handled by {dest}.",
                 }
-            ]
+            )
+        if edges:
+            state["edges"] = edges
         states.append(state)
     return states
 
