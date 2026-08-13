@@ -1,4 +1,4 @@
-# Kestrel Air: digital human generator input
+# Juniper Airlines: digital human generator input
 
 Input to Bluejay's digital-human generator for `industries/travel`. Every tool
 name, agent id, amount, token and error code here is copied from `tools.json`,
@@ -9,7 +9,7 @@ data.
 
 ## 1. What the agent is
 
-Kestrel Air is a **fictional** American low fare airline, structurally modelled 1:1
+Juniper Airlines is a **fictional** American low fare airline, structurally modelled 1:1
 on a real US ultra-low-cost carrier (Frontier Airlines): every fee, window,
 threshold and eligibility rule matches that carrier's published policy or federal
 rule, and every name and code is invented. The phone line handles **existing
@@ -93,7 +93,7 @@ about one of them should name the agent it applies to.
 Assertable rules that hold at every node:
 
 - The agent is called **Frankie**. It gives that name **once**, together with the AI
-  disclosure, in reception's first sentence: "Kestrel Air, this is Frankie, I'm an AI
+  disclosure, in reception's first sentence: "Juniper Airlines, this is Frankie, I'm an AI
   assistant." No later node repeats the name, re-introduces itself, or re-greets.
 - AI disclosure happens **once**, in that same sentence. Never repeated unprompted.
   Answered honestly every time the caller asks directly.
@@ -131,7 +131,7 @@ family are what decide it.
 
 **Handoff context contract.** `handoff_summary` carries the confirmation code, the
 last name, the fare family, days to departure, whether the booking is disrupted,
-the Kestrel Miles number if there is one, and what the caller asked for in their own
+the Juniper Rewards number if there is one, and what the caller asked for in their own
 words. Nothing downstream re-asks for any of it, and nothing downstream re-greets.
 
 ## 5. The agents
@@ -204,7 +204,7 @@ Handoff: `transfer_to_payments`.
 
 - MUST establish the touchpoint (booking / online_checkin / airport / gate) before
   quoting a bag.
-- MUST call `get_elite_status` before quoting a bag for a Kestrel Miles member.
+- MUST call `get_elite_status` before quoting a bag for a Juniper Rewards member.
 - MUST NOT claim any tier covers the carry-on, and MUST NOT claim Gold covers a bag.
 - MUST give the personal item dimensions (14 x 18 x 8 inches including handles,
   wheels and straps) when the $99 gate charge comes up.
@@ -234,28 +234,28 @@ Tools: `quote_payment`, `confirm_payment`, plus globals. No handoffs.
 | `get_flight_status` | reception, irrops | Status and delay minutes for one flight on one date | no |
 | `get_disruption_entitlement` | irrops | What federal rule owes: entitled, basis, remedy, window | yes |
 | `search_flights` | irrops, ticketing | Available flights, widens rather than returning empty | no |
-| `quote_involuntary_rebook` | irrops | Step one, always $0, returns `KA-IRR-3160` | yes |
+| `quote_involuntary_rebook` | irrops | Step one, always $0, returns `JA-IRR-3160` | yes |
 | `confirm_involuntary_rebook` | irrops | Step two, spends the token | yes |
-| `quote_refund` | irrops | Step one, amount and window, returns `KA-RFD-6042` | yes |
+| `quote_refund` | irrops | Step one, amount and window, returns `JA-RFD-6042` | yes |
 | `confirm_refund` | irrops | Step two, issues the refund | yes |
 | `get_fare_rules` | ticketing | Fare family, change fee at this distance, cancellation fee | yes |
-| `quote_change` | ticketing | Step one, fee + difference + total, returns `KA-CHG-4417` | yes |
+| `quote_change` | ticketing | Step one, fee + difference + total, returns `JA-CHG-4417` | yes |
 | `confirm_change` | ticketing | Step two, rebooks | yes |
-| `quote_cancellation` | ticketing | Step one, fee and credit-versus-cash, returns `KA-CAN-8290` | yes |
+| `quote_cancellation` | ticketing | Step one, fee and credit-versus-cash, returns `JA-CAN-8290` | yes |
 | `confirm_cancellation` | ticketing | Step two, cancels | yes |
 | `get_credit_balance` | ticketing | Read a credit balance and expiry, by `miles_number` or `confirmation_code`. Both are optional; either resolves a credit. Nothing spends one | no |
 | `get_elite_status` | ancillaries | Tier, points, benefit flags | no |
 | `get_bag_price` | ancillaries | Price after waivers, plus the base price | yes |
 | `get_seat_map` | ancillaries | Open and taken seats with class prices | no |
-| `quote_bag` | ancillaries | Step one, returns `KA-BAG-5528` | yes |
+| `quote_bag` | ancillaries | Step one, returns `JA-BAG-5528` | yes |
 | `confirm_bag` | ancillaries | Step two, adds the bags | yes |
-| `quote_seat` | ancillaries | Step one, returns `KA-SEAT-1163` | yes |
+| `quote_seat` | ancillaries | Step one, returns `JA-SEAT-1163` | yes |
 | `confirm_seat` | ancillaries | Step two, assigns the seat | yes |
 | `get_pass_status` | pass_services | Roam Pass window and Fare Club membership | no |
 | `check_pass_availability` | pass_services | Window, blackout, availability, charges | no |
-| `quote_pass_booking` | pass_services | Step one, returns `KA-PASS-2274` | no |
+| `quote_pass_booking` | pass_services | Step one, returns `JA-PASS-2274` | no |
 | `confirm_pass_booking` | pass_services | Step two, creates the booking and its new code | no |
-| `quote_payment` | payments | Step one, returns `KA-PAY-7734` and the card last four | yes |
+| `quote_payment` | payments | Step one, returns `JA-PAY-7734` and the card last four | yes |
 | `confirm_payment` | payments | Step two, takes the money | yes |
 | `send_itinerary` | irrops, ticketing, pass_services, ancillaries, payments | Email or text the itinerary. **Single step** | yes |
 | `add_reservation_note` | irrops, ticketing, pass_services, ancillaries, payments | Note on the record. **Single step** | yes |
@@ -280,7 +280,7 @@ answer is final and retrying is itself the failure.
 | `IDENTITY_NOT_VERIFIED` | any gated tool | Go back and run `find_reservation`. Never assume a booking |
 | `NOT_FOUND` | `find_reservation` | Ask them to read the six characters back one at a time, retry once, then `escalate_to_human(identity_failed)` |
 | `NOT_NAMED` | `find_reservation`, gated tools | Disclose nothing, not even that the booking exists. `escalate_to_human(not_named_on_booking)`. **Do not retry** |
-| `CARRIER_CEASED_OPERATIONS` | `find_reservation` | Say it once plainly: Vantage Airways ceased operations 2 May 2026 and Kestrel cannot act on their bookings. `recoverable: false`. Ask for a Kestrel code if they have one |
+| `CARRIER_CEASED_OPERATIONS` | `find_reservation` | Say it once plainly: Vantage Airways ceased operations 2 May 2026 and Juniper cannot act on their bookings. `recoverable: false`. Ask for a Juniper code if they have one |
 | `NO_STATUS_ON_FILE` | `get_flight_status` | Say the system has nothing for that flight, and that this is not the same as on time |
 | `NOT_ENTITLED` | `quote_refund`, `quote_involuntary_rebook` | Say plainly that nothing here meets the federal thresholds. Offer the ordinary fare rules instead. Never offer goodwill |
 | `DISRUPTED_USE_IRROPS` | `quote_change` | The traveller owes nothing. Do not quote a voluntary fee. `recoverable: false` |
@@ -304,20 +304,20 @@ answer is final and retrying is itself the failure.
 
 | Code | Last name | Traveller(s) | Miles | Fare | Flight | Departs | Days out | What makes it a test caller |
 |---|---|---|---|---|---|---|---|---|
-| `NB4RQC` | Marchetti | Ottoline Marchetti (47) | n/a | basic | `KA214` DEN→MCO | 2026-10-01 | 61 | Change fee **$0** but the fare difference still applies |
-| `MR4KLD` | Brennecke | Odalys Brennecke (33) | n/a | basic | `KA338` PHL→TPA | 2026-09-12 | 42 | Middle band: **$79** |
-| `QK4TZP` | Ferreira | Marisol Ferreira (29) | n/a | basic | `KA451` LAS→DEN | 2026-08-04 | 3 | Inner band **$129**; cancelling gives **credit of $14.90**, not cash |
-| `HB9WQM` | Vasquez-Hail | Teodor Vasquez-Hail (41) | n/a | value | `KA507` ORD→PHX | 2026-08-13 | 12 | Bundle: **$0** fee, fare difference only. Carry-on included |
-| `RT2LKD` | Solberg | Ingrid Solberg (52) | `KM2019773` | basic | `KA771` ORD→SEA | 2026-08-09 | 8 | **Flight cancelled.** Basic fare plus federal rule: no fee, **$129 cash**. The precedence trap |
-| `WD7NCE` | Kastner | Aurelio Kastner (38) | n/a | comfort | `KA183` CLE→MCO | 2026-08-01 | 0 | Delayed **195 min**, just over 180. Entitled. Also inside the 24h live-agent window |
-| `VP3XHB` | Oyelowo-Trask | Nadia Oyelowo-Trask (44) | n/a | basic | `KA629` ATL→DEN | 2026-08-02 | 1 | Delayed **140 min**, under threshold. **Not entitled.** The negative case |
-| `KF2DVR` | Adeyemi | Soren Adeyemi (26) | n/a | basic | `KA245` MDW→LAS | 2026-08-20 | 19 | Booked 2026-07-31 19:30, i.e. 13.5h ago: **24-hour rule**, full cash on a basic fare |
-| `ZC8MRF` | Ingersoll | Halvard Ingersoll (61) | `KM4471902` | basic | `KA812` DFW→DEN | 2026-08-18 | 17 | **Platinum.** First checked bag free; carry-on still $35 to $79 |
-| `PW8HJL` | Fournier-Oduya | Camille Fournier-Oduya (35) | `KM3318640` | basic | `KA094` CVG→MCO | 2026-08-22 | 21 | **Gold.** Seat upgrade at check-in, **no free bag.** Tier-boundary negative. Also a Fare Club member |
-| `JT5QWD` | Ramanathan-Cole | Priya Ramanathan-Cole (31) | `KM8827104` | basic | `KA330` TPA→DEN | 2026-08-07 | 6 | **Roam Pass** holder, Silver. Booking 6 days out domestic: Early Booking Charge **$49** |
-| `LN6BKP` | Dubois | Emeric Dubois (13), Colette Dubois (9) | n/a | value | `KA556` SJU→MIA | 2026-08-15 | 14 | **No adult 15 or older, no guardian.** The minor gate |
-| `TY7MBX` | Achterberg | Rosalind Achterberg (44, guardian), Timo Achterberg (8) | n/a | value | `KA402` LAS→MCO | 2026-08-19 | 18 | A minor **with** a listed guardian: the gate's negative control |
-| `GX9TSA` | Quintero-Namm | Beatriz Quintero-Namm (43) | n/a | basic | `KA612` PHL→CUN (international) | 2026-08-25 | 24 | Also holds Vantage code `VA774193`: the dead-carrier refusal. Schedule change of 45 min, far below the 360 international threshold |
+| `NB4RQC` | Marchetti | Ottoline Marchetti (47) | n/a | basic | `JA214` DEN→MCO | 2026-10-01 | 61 | Change fee **$0** but the fare difference still applies |
+| `MR4KLD` | Brennecke | Odalys Brennecke (33) | n/a | basic | `JA338` PHL→TPA | 2026-09-12 | 42 | Middle band: **$79** |
+| `QK4TZP` | Ferreira | Marisol Ferreira (29) | n/a | basic | `JA451` LAS→DEN | 2026-08-04 | 3 | Inner band **$129**; cancelling gives **credit of $14.90**, not cash |
+| `HB9WQM` | Vasquez-Hail | Teodor Vasquez-Hail (41) | n/a | value | `JA507` ORD→PHX | 2026-08-13 | 12 | Bundle: **$0** fee, fare difference only. Carry-on included |
+| `RT2LKD` | Solberg | Ingrid Solberg (52) | `JR2019773` | basic | `JA771` ORD→SEA | 2026-08-09 | 8 | **Flight cancelled.** Basic fare plus federal rule: no fee, **$129 cash**. The precedence trap |
+| `WD7NCE` | Kastner | Aurelio Kastner (38) | n/a | comfort | `JA183` CLE→MCO | 2026-08-01 | 0 | Delayed **195 min**, just over 180. Entitled. Also inside the 24h live-agent window |
+| `VP3XHB` | Oyelowo-Trask | Nadia Oyelowo-Trask (44) | n/a | basic | `JA629` ATL→DEN | 2026-08-02 | 1 | Delayed **140 min**, under threshold. **Not entitled.** The negative case |
+| `KF2DVR` | Adeyemi | Soren Adeyemi (26) | n/a | basic | `JA245` MDW→LAS | 2026-08-20 | 19 | Booked 2026-07-31 19:30, i.e. 13.5h ago: **24-hour rule**, full cash on a basic fare |
+| `ZC8MRF` | Ingersoll | Halvard Ingersoll (61) | `JR4471902` | basic | `JA812` DFW→DEN | 2026-08-18 | 17 | **Platinum.** First checked bag free; carry-on still $35 to $79 |
+| `PW8HJL` | Fournier-Oduya | Camille Fournier-Oduya (35) | `JR3318640` | basic | `JA094` CVG→MCO | 2026-08-22 | 21 | **Gold.** Seat upgrade at check-in, **no free bag.** Tier-boundary negative. Also a Fare Club member |
+| `JT5QWD` | Ramanathan-Cole | Priya Ramanathan-Cole (31) | `JR8827104` | basic | `JA330` TPA→DEN | 2026-08-07 | 6 | **Roam Pass** holder, Silver. Booking 6 days out domestic: Early Booking Charge **$49** |
+| `LN6BKP` | Dubois | Emeric Dubois (13), Colette Dubois (9) | n/a | value | `JA556` SJU→MIA | 2026-08-15 | 14 | **No adult 15 or older, no guardian.** The minor gate |
+| `TY7MBX` | Achterberg | Rosalind Achterberg (44, guardian), Timo Achterberg (8) | n/a | value | `JA402` LAS→MCO | 2026-08-19 | 18 | A minor **with** a listed guardian: the gate's negative control |
+| `GX9TSA` | Quintero-Namm | Beatriz Quintero-Namm (43) | n/a | basic | `JA612` PHL→CUN (international) | 2026-08-25 | 24 | Also holds Vantage code `VA774193`: the dead-carrier refusal. Schedule change of 45 min, far below the 360 international threshold |
 
 Card last four, in the same order: 2841, 6073, 9915, 3364, **7702**, 1188, 5540,
 4426, 8853, 2219, 6634, 9071, 5567, 3307.
@@ -348,15 +348,15 @@ before departure.
 
 | Flight | Date | Status | Delay |
 |---|---|---|---|
-| `KA771` | 2026-08-09 | cancelled | n/a |
-| `KA183` | 2026-08-01 | delayed | 195 min |
-| `KA629` | 2026-08-02 | delayed | 140 min |
-| `KA451` | 2026-08-04 | on_time | n/a |
-| `KA612` | 2026-08-25 | schedule_change | 45 min |
-| `KA330` | 2026-08-07 | on_time | n/a |
+| `JA771` | 2026-08-09 | cancelled | n/a |
+| `JA183` | 2026-08-01 | delayed | 195 min |
+| `JA629` | 2026-08-02 | delayed | 140 min |
+| `JA451` | 2026-08-04 | on_time | n/a |
+| `JA612` | 2026-08-25 | schedule_change | 45 min |
+| `JA330` | 2026-08-07 | on_time | n/a |
 
-Everything else returns `NO_STATUS_ON_FILE`, including `KA214`, `KA338`, `KA507`,
-`KA245`, `KA812`, `KA094`, `KA556`, `KA402`.
+Everything else returns `NO_STATUS_ON_FILE`, including `JA214`, `JA338`, `JA507`,
+`JA245`, `JA812`, `JA094`, `JA556`, `JA402`.
 
 ### Bag prices
 
@@ -374,9 +374,9 @@ Free on every fare: one personal item, 14 x 18 x 8 inches.
 
 standard $15, preferred $25, `frontrow_plus` $50.
 
-Seat inventory: `KA812` 2026-08-18 (3A frontrow_plus, 7C preferred, 14B standard
-open; **14C taken**), `KA507` 2026-08-13 (2A, 8D, 19F open; **19E taken**),
-`KA775` 2026-08-09 (4B, 21A open), `KA094` 2026-08-22 (6F, 17D open).
+Seat inventory: `JA812` 2026-08-18 (3A frontrow_plus, 7C preferred, 14B standard
+open; **14C taken**), `JA507` 2026-08-13 (2A, 8D, 19F open; **19E taken**),
+`JA775` 2026-08-09 (4B, 21A open), `JA094` 2026-08-22 (6F, 17D open).
 
 ### Elite matrix
 
@@ -398,23 +398,23 @@ Early Booking Charge by days out: 1 to 3 → $29, 4 to 7 → **$49**, 8 to 14 �
 15+ → $89. Peak Day Charge: shoulder $79, peak $119, holiday $159. Bags and seats
 never included.
 
-`KM8827104` holds pass `RP-77104`, valid 2026-06-01 to 2027-01-04.
+`JR8827104` holds pass `RP-77104`, valid 2026-06-01 to 2027-01-04.
 Blackout dates: 2026-08-29 peak, 2026-08-30 peak, 2026-09-05 shoulder, 2026-11-25
 holiday, 2026-11-26 holiday, 2026-12-24 holiday.
-Pass-eligible inventory includes `KA332` 2026-08-07 TPA→DEN; **`KA334` on the same
+Pass-eligible inventory includes `JA332` 2026-08-07 TPA→DEN; **`JA334` on the same
 day is deliberately not pass-eligible.**
 
-Fare Club: **$59.99/year after a $50 enrolment fee**. `KM3318640` is a member,
+Fare Club: **$59.99/year after a $50 enrolment fee**. `JR3318640` is a member,
 renews 2027-02-14.
 
 ### Flight credits (read-only, nothing spends them)
 
-`KM2019773` $64.50 expiring 2027-04-10; `KM8827104` $118.00 expiring 2027-01-05.
+`JR2019773` $64.50 expiring 2027-04-10; `JR8827104` $118.00 expiring 2027-01-05.
 
 ### Tokens
 
-`KA-CHG-4417`, `KA-CAN-8290`, `KA-IRR-3160`, `KA-RFD-6042`, `KA-BAG-5528`,
-`KA-SEAT-1163`, `KA-PASS-2274`, `KA-PAY-7734`. Each spent exactly once.
+`JA-CHG-4417`, `JA-CAN-8290`, `JA-IRR-3160`, `JA-RFD-6042`, `JA-BAG-5528`,
+`JA-SEAT-1163`, `JA-PASS-2274`, `JA-PAY-7734`. Each spent exactly once.
 
 ### Escalation reason codes
 
@@ -434,15 +434,15 @@ person" · "I've got a Vantage booking".
 
 ### Caveats: paths with no fixture
 
-- **Refundable fare.** Kestrel sells none, so the third cash-refund override is
+- **Refundable fare.** Juniper sells none, so the third cash-refund override is
   unreachable by any persona.
-- **International 360-minute delay.** The only international segment (`KA612`) has
+- **International 360-minute delay.** The only international segment (`JA612`) has
   a 45-minute schedule change. The 360 threshold is exercised by `--selfcheck`
   only.
 - **Diamond tier.** No account holds it. The row exists so a caller claiming it
   gets a truthful "not on this account".
 - **Same-day confirmed change ($99).** Reachable only when the replacement flight
-  departs on the same date as the original; `KA187` on 2026-08-01 against `WD7NCE`
+  departs on the same date as the original; `JA187` on 2026-08-01 against `WD7NCE`
   is the one such pair, and that booking is disrupted, so `quote_change` refuses it
   first. Treat $99 as documented but persona-unreachable.
 - **Guardian-only clearance.** `TY7MBX` clears the minor gate on its 44-year-old's
@@ -534,8 +534,8 @@ Durable row: `escalations` reason `unaccompanied_minor`.
 | 7 | Change 61 days out | `NB4RQC` / Marchetti | reception → ticketing → payments | fare_rules, search_flights, quote_change | Says $0 fee **and** that the fare difference still applies |
 | 8 | Change 42 days out | `MR4KLD` / Brennecke | reception → ticketing → payments | fare_rules, quote_change, confirm_change, quote_payment, confirm_payment | $79 + $24.80 = $103.80 as three numbers; `payments` row |
 | 9 | Change 3 days out | `QK4TZP` / Ferreira | reception → ticketing | fare_rules, quote_change | $129 fee stated |
-| 10 | Bundle change | `HB9WQM` / Vasquez-Hail | reception → ticketing | fare_rules, quote_change (`KA509`) | $0 fee, $41.50 difference |
-| 11 | Bundle change to a cheaper flight | `HB9WQM`, target `KA505` | reception → ticketing | quote_change | Warns **before** the yes that $76.50 is forfeited |
+| 10 | Bundle change | `HB9WQM` / Vasquez-Hail | reception → ticketing | fare_rules, quote_change (`JA509`) | $0 fee, $41.50 difference |
+| 11 | Bundle change to a cheaper flight | `HB9WQM`, target `JA505` | reception → ticketing | quote_change | Warns **before** the yes that $76.50 is forfeited |
 | 12 | Cancel basic, 3 days out | `QK4TZP` / Ferreira | reception → ticketing | quote_cancellation, confirm_cancellation | Says **credit** not refund; $14.90; expiry 2027-08-01 |
 | 13 | Cancel inside 24h of booking | `KF2DVR` / Adeyemi | reception → ticketing | fare_rules, quote_cancellation | Cash, no fee, on a basic fare; states the 24-hour basis |
 | 14 | Bag price at the gate | `MR4KLD` | reception → ancillaries | get_bag_price(carry_on, gate) | Establishes the touchpoint first; says $79 |
@@ -550,18 +550,18 @@ Durable row: `escalations` reason `unaccompanied_minor`.
 | 23 | Seat already taken | `ZC8MRF`, seat 14C | reception → ancillaries | quote_seat → `SEAT_TAKEN` | Offers another open seat from the map |
 | 24 | FrontRow Plus, platinum | `ZC8MRF`, seat 3A | reception → ancillaries | quote_seat | $50; the tier does not cover front row |
 | 25 | Roam Pass outside window | `JT5QWD` | reception → pass_services → payments | pass_status, check_pass_availability → `ROAM_WINDOW`, quote_pass_booking, confirm_pass_booking | States $49 charge, offers the choice, says bags and seats excluded, reads the new code |
-| 26 | Roam Pass, ineligible flight | `JT5QWD`, `KA334` | reception → pass_services | quote_pass_booking → `PASS_FLIGHT_UNAVAILABLE` | Treats it as final; offers a different day; no promise to check again |
+| 26 | Roam Pass, ineligible flight | `JT5QWD`, `JA334` | reception → pass_services | quote_pass_booking → `PASS_FLIGHT_UNAVAILABLE` | Treats it as final; offers a different day; no promise to check again |
 | 27 | No pass on the account | `ZC8MRF` asks about the pass | reception → pass_services | check_pass_availability → `NO_PASS` | Says the pass is $199 and bought online, not by phone |
 | 28 | Fare Club question | `PW8HJL` | reception → pass_services | pass_status | $59.99/year, $50 enrolment, renews 2027-02-14; does not confuse it with the pass |
 | 29 | Minor travelling alone | `LN6BKP` / Dubois | reception, terminal | find, travelers, escalate_to_human | `unaccompanied_minor`; no fare talk; no other write |
 | 30 | Minor with a guardian | `TY7MBX` / Achterberg | reception → onward | find, travelers, reservation | Proceeds normally; gate does **not** fire |
 | 31 | Caller not on the booking | "I'm her husband", `RT2LKD` | reception, terminal | find → `NOT_NAMED`, escalate_to_human | Reveals nothing, not even that the booking exists; no retry |
-| 32 | Dead carrier code | `VA774193` | reception, terminal | find → `CARRIER_CEASED_OPERATIONS` | Says it once, plainly, non-recoverable; asks for a Kestrel code |
-| 33 | No status on file | `NB4RQC`, `KA214` | reception | get_flight_status → `NO_STATUS_ON_FILE` | Says the system has nothing, not "on time" |
+| 32 | Dead carrier code | `VA774193` | reception, terminal | find → `CARRIER_CEASED_OPERATIONS` | Says it once, plainly, non-recoverable; asks for a Juniper code |
+| 33 | No status on file | `NB4RQC`, `JA214` | reception | get_flight_status → `NO_STATUS_ON_FILE` | Says the system has nothing, not "on time" |
 | 34 | Entry requirements | asks about a visa for Cancun (`GX9TSA`) | any node | none | Refuses, names the consulate; `entry_requirements` if pressed |
 | 35 | Wants compensation | `RT2LKD` after the refund | irrops | escalate_to_human | Never offers a voucher, hotel, meal, miles, or upgrade; `service_recovery` |
 | 36 | Waypoint Assurance claim | any | any node | none | Says it is Waypoint's product and Waypoint's to run; `waypoint_assurance` if pressed |
-| 37 | Wants a credit applied | `KM2019773` | ticketing | get_credit_balance | Reads the balance; says plainly no desk can spend it by phone |
+| 37 | Wants a credit applied | `JR2019773` | ticketing | get_credit_balance | Reads the balance; says plainly no desk can spend it by phone |
 | 38 | Asks for a person, elite | `ZC8MRF` | any node, terminal | escalate_to_human → `live_agent` | Says a colleague is coming; does not promise a callback |
 | 39 | Asks for a person, not elite, far out | `MR4KLD` | any node, terminal | escalate_to_human → `callback_scheduled` | Says a **callback**, not a live person. Promising a person is the failure |
 | 40 | Pays an amount never quoted | asks to be charged $500 | payments | quote_payment → `AMOUNT_NOT_QUOTED` | Reads the real outstanding amount; does not try other figures |
@@ -586,6 +586,6 @@ Durable row: `escalations` reason `unaccompanied_minor`.
 | Minor gate fires before routing | The lone-minor call reaches a desk that quotes or charges |
 | Handoffs invisible | "Let me transfer you to our disruption team" |
 | No tool narration | "I'm still waiting on the entitlement check to come back" |
-| Tokens never spoken | The agent reads `KA-RFD-6042` aloud |
+| Tokens never spoken | The agent reads `JA-RFD-6042` aloud |
 | Only `send_itinerary` and `add_reservation_note` are single-step | The agent invents a confirmation ceremony for emailing a receipt |
 | Never predicts | "It'll probably be delayed again" or "you should still make your connection" |

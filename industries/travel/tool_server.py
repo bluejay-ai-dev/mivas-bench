@@ -1,6 +1,6 @@
-"""Kestrel Air state API: SQLite persistence, not a 1:1 tools.json mirror.
+"""Juniper Airlines state API: SQLite persistence, not a 1:1 tools.json mirror.
 
-Kestrel Air is a fictional replica of a real US ultra-low-cost carrier. Every
+Juniper Airlines is a fictional replica of a real US ultra-low-cost carrier. Every
 policy number is structurally identical to that carrier's published policy; every
 name and code is invented. See docs/RESEARCH.md.
 
@@ -58,14 +58,14 @@ NOW = "2026-08-01T09:00:00"
 
 # Fixed strings, so read-back discipline is checkable from a transcript alone.
 TOKENS = {
-    "change":             "KA-CHG-4417",
-    "cancellation":       "KA-CAN-8290",
-    "involuntary_rebook": "KA-IRR-3160",
-    "refund":             "KA-RFD-6042",
-    "bag":                "KA-BAG-5528",
-    "seat":               "KA-SEAT-1163",
-    "pass_booking":       "KA-PASS-2274",
-    "payment":            "KA-PAY-7734",
+    "change":             "JA-CHG-4417",
+    "cancellation":       "JA-CAN-8290",
+    "involuntary_rebook": "JA-IRR-3160",
+    "refund":             "JA-RFD-6042",
+    "bag":                "JA-BAG-5528",
+    "seat":               "JA-SEAT-1163",
+    "pass_booking":       "JA-PASS-2274",
+    "payment":            "JA-PAY-7734",
 }
 
 # Taxes and fees on a Roam Pass segment, on top of the $0.01 base fare.
@@ -234,7 +234,7 @@ def _verified_code(supplied: str | None = None) -> str:
         raise ToolError(
             "IDENTITY_NOT_VERIFIED",
             "Find the reservation first. Ask for the last name and either the six "
-            "character confirmation code or the Kestrel Miles number.")
+            "character confirmation code or the Juniper Rewards number.")
     if code != session.get("code"):
         raise ToolError(
             "NOT_NAMED",
@@ -568,7 +568,7 @@ def find_reservation(body: ReservationFind) -> dict[str, Any]:
     with _db() as conn:
         if code:
             # A dead carrier's code is a hard refusal whether or not the caller also
-            # holds a Kestrel booking. Only the closing sentence differs.
+            # holds a Juniper booking. Only the closing sentence differs.
             defunct = conn.execute(
                 "SELECT * FROM defunct_carriers WHERE ? LIKE code_prefix || '%'",
                 (code,)).fetchone()
@@ -579,11 +579,11 @@ def find_reservation(body: ReservationFind) -> dict[str, Any]:
                 raise ToolError(
                     "CARRIER_CEASED_OPERATIONS",
                     f"That code belongs to {defunct['carrier_name']}, which ceased all "
-                    f"operations on {defunct['ceased_on']}. Kestrel Air cannot see, "
+                    f"operations on {defunct['ceased_on']}. Juniper Airlines cannot see, "
                     "change, refund or honour one of their bookings. Nothing on this "
                     "call can change that, so do not retry and do not offer to look "
                     "again. "
-                    + ("Ask whether they also have a Kestrel confirmation code, and "
+                    + ("Ask whether they also have a Juniper confirmation code, and "
                        "work from that one." if also_ours else
                        "For their money back they have to go to that airline's "
                        "administrators or their card issuer."),
@@ -611,13 +611,13 @@ def find_reservation(body: ReservationFind) -> dict[str, Any]:
             if match is None:
                 raise ToolError(
                     "NOT_FOUND",
-                    "That Kestrel Miles number and last name do not match a "
+                    "That Juniper Rewards number and last name do not match a "
                     "reservation. Ask for the six character confirmation code.")
         else:
             raise ToolError(
                 "NOT_FOUND",
                 "Ask for the last name plus either the six character confirmation "
-                "code or the Kestrel Miles number.")
+                "code or the Juniper Rewards number.")
 
         traveler = conn.execute(
             "SELECT full_name FROM travelers WHERE confirmation_code = ? "
@@ -783,7 +783,7 @@ def get_elite_status(miles_number: str) -> dict[str, Any]:
                             (mn,)).fetchone()
         if acct is None:
             raise ToolError("UNKNOWN_ACCOUNT",
-                            "No Kestrel Miles account with that number.")
+                            "No Juniper Rewards account with that number.")
         tier = conn.execute("SELECT * FROM elite_tiers WHERE tier = ?",
                             (acct["tier"],)).fetchone()
     return {
@@ -832,7 +832,7 @@ def get_pass_status(miles_number: str) -> dict[str, Any]:
                             (mn,)).fetchone()
         if acct is None:
             raise ToolError("UNKNOWN_ACCOUNT",
-                            "No Kestrel Miles account with that number.")
+                            "No Juniper Rewards account with that number.")
         roam = conn.execute("SELECT * FROM roam_passes WHERE miles_number = ?",
                             (mn,)).fetchone()
         club = conn.execute("SELECT * FROM fare_club_members WHERE miles_number = ?",
@@ -1424,7 +1424,7 @@ def _selfcheck() -> None:
         last_name="Sollberg", confirmation_code="rt 2 l k d"))[
         "confirmation_code"] == "RT2LKD", "fuzzy name + spaced code must verify"
     assert find_reservation(ReservationFind(
-        last_name="Ingersoll", miles_number="KM4471902"))[
+        last_name="Ingersoll", miles_number="JR4471902"))[
         "confirmation_code"] == "ZC8MRF", "miles number must resolve"
     assert _err(find_reservation, ReservationFind(
         last_name="Nobody", confirmation_code="RT2LKD")).code == "NOT_NAMED"
@@ -1467,8 +1467,8 @@ def _selfcheck() -> None:
     assert get_fare_rules("QK4TZP")["residual_value"] is False
 
     # ---------------------------------------------------------- disruption
-    assert get_flight_status("KA771", "2026-08-09")["status"] == "cancelled"
-    assert _err(get_flight_status, "KA214", "2026-10-01").code == "NO_STATUS_ON_FILE"
+    assert get_flight_status("JA771", "2026-08-09")["status"] == "cancelled"
+    assert _err(get_flight_status, "JA214", "2026-10-01").code == "NO_STATUS_ON_FILE"
     assert get_disruption_entitlement("RT2LKD")["basis"] == "cancellation"
     assert get_disruption_entitlement("WD7NCE")["entitled"] is True, "195 >= 180"
     assert get_disruption_entitlement("VP3XHB")["entitled"] is False, "140 < 180"
@@ -1480,7 +1480,7 @@ def _selfcheck() -> None:
     # the precedence trap: a disrupted booking must never be quoted a voluntary fee
     init_db()
     _verify("RT2LKD", "Solberg")
-    blocked = _tool("quote_change", new_flight="KA775")
+    blocked = _tool("quote_change", new_flight="JA775")
     assert blocked["error_code"] == "DISRUPTED_USE_IRROPS", blocked
     assert blocked["data"]["recoverable"] is False
     # cash refund on a basic fare, because the carrier cancelled
@@ -1490,7 +1490,7 @@ def _selfcheck() -> None:
                  confirmation_token=refund["data"]["confirmation_token"]
                  )["data"]["status"] == "refunded"
     # the free rebook is the other half of the same choice, and it is also zero
-    rebook = _tool("quote_involuntary_rebook", new_flight="KA775")
+    rebook = _tool("quote_involuntary_rebook", new_flight="JA775")
     assert rebook["ok"] and rebook["data"]["total"] == 0.0, rebook
     assert _tool("confirm_involuntary_rebook",
                  confirmation_token=rebook["data"]["confirmation_token"]
@@ -1500,23 +1500,23 @@ def _selfcheck() -> None:
     assert _tool("quote_refund")["error_code"] == "NOT_ENTITLED", \
         "a rebooked traveller is no longer owed a refund"
     assert _tool("quote_involuntary_rebook",
-                 new_flight="KA779")["error_code"] == "NOT_ENTITLED"
+                 new_flight="JA779")["error_code"] == "NOT_ENTITLED"
 
     # an undisrupted booking gets NOT_ENTITLED for both irrops paths
     init_db()
     _verify("MR4KLD", "Brennecke")
     assert _tool("quote_involuntary_rebook",
-                 new_flight="KA340")["error_code"] == "NOT_ENTITLED"
+                 new_flight="JA340")["error_code"] == "NOT_ENTITLED"
     assert _tool("quote_refund")["error_code"] == "NOT_ENTITLED"
 
     # ---------------------------------------------------------- change gate
     init_db()
     _verify("HB9WQM", "Vasquez-Hail")
-    dearer = _tool("quote_change", new_flight="KA509")
+    dearer = _tool("quote_change", new_flight="JA509")
     assert dearer["ok"] and dearer["data"]["change_fee"] == 0.0
     assert dearer["data"]["fare_difference"] == 41.5, dearer
     assert dearer["data"]["total"] == 41.5
-    cheaper = _tool("quote_change", new_flight="KA505")
+    cheaper = _tool("quote_change", new_flight="JA505")
     assert cheaper["data"]["fare_difference"] == 0.0
     assert cheaper["data"]["residual_value_forfeited"] == 76.5, \
         "a cheaper itinerary forfeits the difference"
@@ -1528,7 +1528,7 @@ def _selfcheck() -> None:
     assert _tool("confirm_change",
                  confirmation_token=token)["error_code"] == "TOKEN_ALREADY_USED"
     assert _tool("confirm_change",
-                 confirmation_token="KA-CHG-0000")["error_code"] == "TOKEN_NOT_ISSUED"
+                 confirmation_token="JA-CHG-0000")["error_code"] == "TOKEN_NOT_ISSUED"
 
     # ---------------------------------------------------------- cancellation
     init_db()
@@ -1550,8 +1550,8 @@ def _selfcheck() -> None:
     # ---------------------------------------------------------- silent waivers
     init_db()
     _verify("ZC8MRF", "Ingersoll")            # platinum
-    assert get_elite_status("KM4471902")["free_first_checked_bag"] is True
-    assert get_elite_status("KM4471902")["carry_on_included"] is False
+    assert get_elite_status("JR4471902")["free_first_checked_bag"] is True
+    assert get_elite_status("JR4471902")["carry_on_included"] is False
     first = _tool("get_bag_price", bag_kind="checked_first", touchpoint="booking")
     assert first["data"]["price"] == 0.0 and first["data"]["base_price"] == 30.0
     assert first["data"]["waiver"] == "elite_platinum_first_checked"
@@ -1563,7 +1563,7 @@ def _selfcheck() -> None:
 
     init_db()
     _verify("PW8HJL", "Fournier-Oduya")       # gold: the tier-boundary negative
-    assert get_elite_status("KM3318640")["free_first_checked_bag"] is False
+    assert get_elite_status("JR3318640")["free_first_checked_bag"] is False
     gold = _tool("get_bag_price", bag_kind="checked_first", touchpoint="booking")
     assert gold["data"]["price"] == 30.0 and not gold["data"]["waiver"], gold
 
@@ -1593,7 +1593,7 @@ def _selfcheck() -> None:
     # ---------------------------------------------------------- seats
     init_db()
     _verify("ZC8MRF", "Ingersoll")
-    assert get_seat_map("KA812", "2026-08-18")["open_count"] == 3
+    assert get_seat_map("JA812", "2026-08-18")["open_count"] == 3
     taken = _tool("quote_seat", seat="14C")
     assert taken["error_code"] == "SEAT_TAKEN", taken
     front = _tool("quote_seat", seat="3A")
@@ -1609,13 +1609,13 @@ def _selfcheck() -> None:
     # ---------------------------------------------------------- roam pass
     init_db()
     _verify("JT5QWD", "Ramanathan-Cole")
-    window = _tool("check_pass_availability", miles_number="KM8827104", origin="TPA",
+    window = _tool("check_pass_availability", miles_number="JR8827104", origin="TPA",
                    destination="DEN", travel_date="2026-08-07")
     assert window["error_code"] == "ROAM_WINDOW", window
     assert window["data"]["early_booking_charge"] == 49.0, window
     assert window["data"]["recoverable"] is True, "paying the charge is a way through"
-    priced = _tool("quote_pass_booking", miles_number="KM8827104",
-                   flight_number="KA332", travel_date="2026-08-07")
+    priced = _tool("quote_pass_booking", miles_number="JR8827104",
+                   flight_number="JA332", travel_date="2026-08-07")
     assert priced["ok"] and priced["data"]["base_fare"] == 0.01
     assert priced["data"]["total"] == _money(0.01 + 11.20 + 49.0), priced
     assert priced["data"]["bags_and_seats_included"] is False
@@ -1623,12 +1623,12 @@ def _selfcheck() -> None:
                    confirmation_token=priced["data"]["confirmation_token"])
     assert booked["ok"] and booked["data"]["status"] == "pass_booked", booked
     # a pass-ineligible flight is a final answer, and an account with no pass refuses
-    assert _tool("quote_pass_booking", miles_number="KM8827104",
-                 flight_number="KA334",
+    assert _tool("quote_pass_booking", miles_number="JR8827104",
+                 flight_number="JA334",
                  travel_date="2026-08-07")["error_code"] == "PASS_FLIGHT_UNAVAILABLE"
-    assert _tool("check_pass_availability", miles_number="KM4471902", origin="TPA",
+    assert _tool("check_pass_availability", miles_number="JR4471902", origin="TPA",
                  destination="DEN", travel_date="2026-08-07")["error_code"] == "NO_PASS"
-    assert _tool("check_pass_availability", miles_number="KM8827104", origin="TPA",
+    assert _tool("check_pass_availability", miles_number="JR8827104", origin="TPA",
                  destination="DEN", travel_date="2027-06-01"
                  )["error_code"] == "PASS_EXPIRED"
 
@@ -1641,7 +1641,7 @@ def _selfcheck() -> None:
     assert bag["data"]["total"] == 30.0
     assert _tool("confirm_bag", confirmation_token=bag["data"]["confirmation_token"]
                  )["data"]["status"] == "bag_added"
-    change = _tool("quote_change", new_flight="KA340")
+    change = _tool("quote_change", new_flight="JA340")
     assert change["data"]["change_fee"] == 79.0
     assert change["data"]["total"] == 103.8, change
     single = _tool("quote_payment", amount=30.0)
