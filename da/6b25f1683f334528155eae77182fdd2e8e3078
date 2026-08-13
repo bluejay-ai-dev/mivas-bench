@@ -1,0 +1,147 @@
+voice-agent-harnesses/deepgram/voice-agent/Dockerfile
+  s_23683cdf99cb99::t_b571c205da2600 1,50-56,60
+runtime/db_service.py
+  s_23683cdf99cb99::t_32edf2c4b7a66f 176
+industries/legal/requirements.txt
+  s_23683cdf99cb99::t_93e198330e89cc 4
+voice-agent-harnesses/livekit/openai-realtime-2.1/Dockerfile
+  s_23683cdf99cb99::t_b571c205da2600 1,49-55,59
+tests/test_call_id.py
+  s_23683cdf99cb99::t_a4c8ae41661f47 35,37
+  s_23683cdf99cb99::t_34fea03c4e9266 103-105,110
+voice-agent-harnesses/grok/voice/Dockerfile
+  s_23683cdf99cb99::t_b571c205da2600 1,50-56,60
+industries/healthcare/requirements.txt
+  s_23683cdf99cb99::t_dc297452c93e46 4
+runtime/snapshot.py
+  s_23683cdf99cb99::t_3d11f934940bd6 1,3-8,18,22-51,53,75-79,81-99
+tests/test_snapshot.py
+  s_23683cdf99cb99::t_68cd4b3d6d02af 131-160
+  s_23683cdf99cb99::t_0c83f965973ff9 1,21,33,38-40,83,104-110,120-125,129-130,161-164,166-193
+  s_23683cdf99cb99::t_c3aa05f8ff32c2 165,194-195
+k8s/ingress-tools.yaml
+  s_23683cdf99cb99::t_37e8643fd45ba5 2-4,32
+voice-agent-harnesses/bland/base/Dockerfile
+  s_23683cdf99cb99::t_b571c205da2600 1,47-53,57
+voice-agent-harnesses/twilio/conversationrelay-gpt4.1/Dockerfile
+  s_23683cdf99cb99::t_b571c205da2600 1,53-59,63
+voice-agent-harnesses/pipecat/openai-realtime-2.1/Dockerfile
+  s_23683cdf99cb99::t_21169dc2c5d57e 52-58,62
+  s_23683cdf99cb99::t_273b16fd5ada50 1
+voice-agent-harnesses/nvidia/nemotron-voicechat/Dockerfile
+  s_23683cdf99cb99::t_b571c205da2600 1,51-57,61
+pyproject.toml
+  s_23683cdf99cb99::t_bead5cbf7c56ea 20
+codebuild/buildspec.yml
+  s_23683cdf99cb99::t_754fe52486ffb4 1-43
+voice-agent-harnesses/gemini/2.5-flash-native-audio/Dockerfile
+  s_23683cdf99cb99::t_b571c205da2600 1,48-54,58
+voice-agent-harnesses/cartesia/line/Dockerfile
+  s_23683cdf99cb99::t_b571c205da2600 1,52-58,62
+tests/test_retell_payload.py
+  s_23683cdf99cb99::t_236b3e703026f8 1-65
+voice-agent-harnesses/elevenlabs/convai/Dockerfile
+  s_23683cdf99cb99::t_b571c205da2600 1,48-54,58
+codebuild/fleet.py
+  s_23683cdf99cb99::t_ae4b6ccc7067fb 364-377
+  s_23683cdf99cb99::t_cf6be849134314 170-171,184
+  s_23683cdf99cb99::t_68c5d6ecada981 317
+  s_23683cdf99cb99::t_e745da78aab068 1-169,172-183,185-316,318-363,378-381
+industries/README.md
+  s_23683cdf99cb99::t_442ffa4bfd35fd 40,44-47
+README.md
+  s_23683cdf99cb99::t_1ea70006a96991 101
+  s_23683cdf99cb99::t_650d311f493bab 58,61
+  s_23683cdf99cb99::t_459a77a369cc62 63,69,71
+voice-agent-harnesses/assemblyai/voice-agent/Dockerfile
+  s_23683cdf99cb99::t_b571c205da2600 1,48-54,58
+industries/finance/requirements.txt
+  s_23683cdf99cb99::t_3ce8fc4e1d7641 4
+voice-agent-harnesses/retell/harness.py
+  s_23683cdf99cb99::t_faa6ac88c543a3 105-108,112-134,140
+  s_23683cdf99cb99::t_6d817d4eeaca35 191-194,197,200-206,208,210,212,214-216
+k8s/deployment.yaml
+  s_23683cdf99cb99::t_ca4d431d3ae3fd 53,55,62-69
+  s_23683cdf99cb99::t_ac9296b98a6051 230,236-241
+voice-agent-harnesses/pipecat/gemini-flash-live-3.1/Dockerfile
+  s_23683cdf99cb99::t_d10c06dc061a31 52-58,62
+  s_23683cdf99cb99::t_71a4830576a554 1
+voice-agent-harnesses/gemini/flash-live-3.1/Dockerfile
+  s_23683cdf99cb99::t_b571c205da2600 1,48-54,58
+runtime/entrypoint.sh
+  s_23683cdf99cb99::t_530e0ceea7197d 2-3
+voice-agent-harnesses/livekit/gemini-flash-live-3.1/Dockerfile
+  s_23683cdf99cb99::t_b571c205da2600 1,49-55,59
+run.py
+  s_23683cdf99cb99::t_5fa8631a3e6ab4 836-837
+  s_23683cdf99cb99::t_c01dc4765f7c25 782-787
+  s_23683cdf99cb99::t_a57935dc231155 304-306
+  s_23683cdf99cb99::t_c6b08ad0616fec 604-615
+  s_23683cdf99cb99::t_478ed8f991ace1 813
+  s_23683cdf99cb99::t_9202f1783df4cd 311
+  s_23683cdf99cb99::t_f8fed30febf976 835,838-847
+  s_23683cdf99cb99::t_91820764926a9a 583-584,589-590
+  s_23683cdf99cb99::t_05d07e30e39b3d 224-225,227-228,240-241
+voice-agent-harnesses/openai/realtime-2.1/Dockerfile
+  s_23683cdf99cb99::t_b571c205da2600 1,47-53,57
+tests/test_dockerfiles.py
+  s_23683cdf99cb99::t_24853323f2812d 33-42
+  s_23683cdf99cb99::t_00cb1e947a3439 1-4,6-8,11-32
+  s_23683cdf99cb99::t_1d872ec02c9f65 5
+  s_23683cdf99cb99::t_caa3648ae32948 9-10
+voice-agent-harnesses/nvidia/nemotron/Dockerfile
+  s_23683cdf99cb99::t_b571c205da2600 1,48-54,58
+voice-agent-harnesses/vapi/flux-gpt4.1-flash2.5/Dockerfile
+  s_23683cdf99cb99::t_b571c205da2600 1,54-60,64
+voice-agent-harnesses/pipecat/adapters/livekit_worker.py
+  s_23683cdf99cb99::t_52a9b77a303263 5-6
+voice-agent-harnesses/pipecat/cascaded/Dockerfile
+  s_23683cdf99cb99::t_6a423cc8106d1a 52-58,62
+  s_23683cdf99cb99::t_4b68c0cb35c3fc 1
+voice-agent-harnesses/retell/flux-gpt4.1-flash2.5/Dockerfile
+  s_23683cdf99cb99::t_b571c205da2600 1,56-62,66
+voice-agent-harnesses/README.md
+  s_23683cdf99cb99::t_3187baf90e689a 61-64,69-71
+voice-agent-harnesses/livekit/cascaded/Dockerfile
+  s_23683cdf99cb99::t_b571c205da2600 1,49-55,59
+industries/control-industry/requirements.txt
+  s_23683cdf99cb99::t_e63a89759518e7 4
+.env.example
+  s_23683cdf99cb99::t_b5268e0cc6e327 142,144-148
+voice-agent-harnesses/openai/realtime-2.1-mini/Dockerfile
+  s_23683cdf99cb99::t_b571c205da2600 1,47-53,57
+industries/travel/requirements.txt
+  s_23683cdf99cb99::t_04fc71f99317e0 4
+k8s/ingress.yaml
+  s_23683cdf99cb99::t_7f9360b204c0a5 4-7,23
+tests/test_agents.py
+  s_23683cdf99cb99::t_f057e5a9960d2c 134,136,140
+  s_23683cdf99cb99::t_f82101d554de53 241
+  s_23683cdf99cb99::t_84c0f9d5595677 58-59,63,65,75,77-78
+  s_23683cdf99cb99::t_4dc6fafa5cc1d4 113-117
+  s_23683cdf99cb99::t_b9b907d2ee9bc6 235
+  s_23683cdf99cb99::t_d66a34fe63adef 225,227-228,230,233-234,236-240,242
+uv.lock
+  s_23683cdf99cb99::t_d676bf5de4d183 60-87,531-539,616,638,1031-1042,1205-1225
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "da6b25f1683f334528155eae77182fdd2e8e3078",
+  "prompts": {},
+  "humans": {
+    "h_f787e3fe1ad713": {
+      "author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_23683cdf99cb99": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "0b380b47-72bc-4002-867a-9db870f5fb7c",
+        "model": "grok-4.6"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}
