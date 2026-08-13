@@ -29,7 +29,7 @@ INSERT INTO fees (code, label, amount_text, conditions) VALUES
 INSERT INTO policies (topic, keywords, title, body) VALUES
 ('returns', 'return,returns,return window,how long,send it back,exchange,take it back',
  'Return and exchange window',
- 'Most products can be returned within 15 days of delivery. Kestrel Plus and Kestrel Total members have 60 days on most products. Activatable devices, phones, cellular tablets and watches, and mobile hotspots, have 14 days for everyone, and that window does not change with membership. Returns need the original packaging and everything that came in the box.'),
+ 'Most products can be returned within 15 days of delivery. Kestrel Plus and Kestrel Total members have 60 days on most products. Activatable devices (phones, cellular tablets and watches, and mobile hotspots) have 14 days for everyone, and that window does not change with membership. Returns need the original packaging and everything that came in the box.'),
 ('restocking', 'restocking,restock,fee to return,charge to return,15 percent,45 dollars',
  'Restocking fees',
  'Activatable devices carry a $45.00 restocking fee. Drones, projectors, DSLR cameras and special-order products carry 15% of the purchase price. Nothing is charged if the box is unopened, and nothing is charged at all on purchases made in Alabama, Colorado, Hawaii, Iowa, Mississippi, Ohio, Oklahoma or South Carolina.'),
