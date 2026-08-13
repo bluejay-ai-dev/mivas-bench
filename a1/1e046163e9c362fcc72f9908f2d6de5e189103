@@ -1,0 +1,19 @@
+industries/travel/docs/HARNESS_ISSUES.md
+  s_7e9aac830cc833::t_54b8eadca5bcd2 1-159
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "a11e046163e9c362fcc72f9908f2d6de5e189103",
+  "prompts": {},
+  "sessions": {
+    "s_7e9aac830cc833": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f7cf4396-0714-4864-bd0f-370d6e3f87ec",
+        "model": "claude-opus-5"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
