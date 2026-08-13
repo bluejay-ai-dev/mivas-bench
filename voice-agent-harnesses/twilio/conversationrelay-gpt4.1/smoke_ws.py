@@ -1,6 +1,6 @@
 """Local ConversationRelay protocol smoke (no Twilio phone required).
 
-Connects to a running adapters/chirp.py and drives setup → prompt turns that
+Connects to a running adapters/conversationrelay.py and drives setup → prompt turns that
 should trigger handoff + schedule_appointment against the industry tool server.
 """
 

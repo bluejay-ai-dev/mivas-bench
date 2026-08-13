@@ -2,8 +2,9 @@
 
 Bluejay `connection_type=LIVEKIT` dispatches by `livekit_agent_name`. This process
 accepts those jobs, joins the assigned room over LiveKitTransport, and runs the
-existing `bot.run_bot` pipeline. The industry tool server stays in-process
-(`TOOL_SERVER_URL=http://127.0.0.1:8000`).
+existing `bot.run_bot` pipeline. Industry tools go to TOOL_SERVER_URL (ClusterIP
+`http://mivas-{slug}-tools:8000` on EKS). Pipecat Cloud bots use the public
+https://{host}/tools path instead.
 """
 
 from __future__ import annotations
@@ -117,6 +118,8 @@ def main() -> None:
         if not room_name:
             raise RuntimeError("LiveKit job has no room name")
         sim_id = sim_result_id_from_job_metadata(getattr(ctx.job, "metadata", None))
+        harness.set_call_id(sim_id)
+        harness.begin_session(sim_id, session_key=room_name)
         job_url, job_token = _job_url_and_token(ctx, agent_name, room_name)
         logger.info(
             "pipecat livekit job runtime=%s room=%s sim=%s",

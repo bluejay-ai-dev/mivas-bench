@@ -22,7 +22,7 @@ import websockets
 from websockets.asyncio.server import serve
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from harness import ensure_agents, get_signed_url, industry_path, load_blueprint, run_tool  # noqa: E402
+from harness import ensure_agents, get_signed_url, industry_path, load_blueprint, run_tool, set_call_id  # noqa: E402
 from report import (  # noqa: E402
     end_speech_span,
     finish_tool_span,
@@ -63,6 +63,7 @@ async def _bridge(ws, model: str, industry: str) -> None:
     sim_id = _simulation_result_id(ws)
     if sim_id:
         print(f"chirp sim_result_id={sim_id}", flush=True)
+    set_call_id(sim_id)
 
     ids = ensure_agents(industry_dir)
     signed_url = await get_signed_url(ids["receptionist_id"])

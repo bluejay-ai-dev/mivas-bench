@@ -373,6 +373,8 @@ async def bot(args) -> None:
         os.environ["TOOL_SERVER_URL"] = str(body["tool_server_url"])
 
     sim_result_id = await report.resolve_simulation_result_id(body.get("simulation_id"))
+    harness.set_call_id(sim_result_id)
+    harness.begin_session(sim_result_id, session_key=str(sim_result_id or "job"))
     logger.info(
         "pipecat bot runtime={} model={} sim_result_id={} tool_server={}",
         runtime, harness.RUNTIMES[runtime], sim_result_id, harness.tool_server_url(),

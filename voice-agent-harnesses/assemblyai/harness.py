@@ -17,6 +17,14 @@ from typing import Any
 import httpx
 import websockets
 
+for _root in (Path("/app"), *Path(__file__).resolve().parents):
+    _runtime = _root / "runtime"
+    if (_runtime / "call_id.py").is_file():
+        if str(_runtime) not in sys.path:
+            sys.path.insert(0, str(_runtime))
+        break
+from call_id import headers as tool_headers, set_call_id  # noqa: E402
+
 REPO_ROOT = Path(__file__).resolve().parents[2]
 TOOL_SERVER_URL = os.environ.get("TOOL_SERVER_URL", "http://127.0.0.1:8000").rstrip("/")
 WS_URL = "wss://agents.assemblyai.com/v1/ws"
@@ -122,7 +130,11 @@ def _tool_entry(bp: dict[str, Any], agent: str, name: str) -> dict[str, Any] | N
 async def _dispatch(name: str, args: dict[str, Any]) -> dict[str, Any]:
     """Generic dispatch: POST /tools/{name}; the server's envelope is the result."""
     async with httpx.AsyncClient(timeout=30.0) as client:
-        resp = await client.post(f"{TOOL_SERVER_URL}/tools/{name}", json={"arguments": args})
+        resp = await client.post(
+            f"{TOOL_SERVER_URL}/tools/{name}",
+            json={"arguments": args},
+            headers=tool_headers(),
+        )
         return resp.json()
 
 
