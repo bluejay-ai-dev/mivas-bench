@@ -313,7 +313,10 @@ def _resolve_order(customer_id: str, ref: str) -> sqlite3.Row:
             return row
         if said and said == row["order_number"].lower():
             return row
-    if d and len(d) >= 4:
+    if d and len(d) >= 4 and (
+        re.fullmatch(r"(?:k\s*e[\s-]*)?\d+", said) is not None
+        or re.search(r"\border(?:\s+number)?\b", said) is not None
+    ):
         # The caller gave what looks like an order number; a non-match must not
         # fall through to the single-order shortcut, which would silently hand
         # them another customer's order.
