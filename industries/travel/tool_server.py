@@ -1703,7 +1703,7 @@ def _selfcheck() -> None:
         if path.stem != entry:
             assert "WHERE YOU ARE IN THE CALL" in heads, \
                 f"{path.name}: a non-entry node must say where the call already is"
-        assert "Nell" in text, f"{path.name}: the agent is called Nell"
+        assert "Frankie" in text, f"{path.name}: the agent is called Frankie"
         shared["WHO YOU ARE"].add(text.split("\n# PERSONALITY")[0])
         shared["FACTS"].add(
             text.split("# AIRLINE FACTS YOU MAY STATE WITHOUT A TOOL")[1]
