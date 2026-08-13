@@ -1,26 +1,41 @@
-# syntax=docker/dockerfile:1
+# MIVAS image for bland/base.
+# Build from repo root:
+#   docker build -f voice-agent-harnesses/bland/base/Dockerfile \
+#     --build-arg INDUSTRY=control-industry \
+#     -t mivas-bench:bland-base-control-industry .
+#
+# Copies the whole bland/ tree (shared harness.py) and runs this runtime.
+
 FROM python:3.12-slim
 
-ARG HARNESS_FAMILY=openai
-ARG HARNESS_RUNTIME=realtime-2.1
-ARG VOICE_AGENT=openai/realtime-2.1
 ARG INDUSTRY=control-industry
 
 COPY --from=ghcr.io/astral-sh/uv:0.9.26 /uv /usr/local/bin/uv
 
-ENV VOICE_AGENT=${VOICE_AGENT} \
+ENV HARNESS=bland/base \
     INDUSTRY=${INDUSTRY} \
     APP_ROOT=/app \
     INDUSTRY_DIR=/app/industry \
+    HARNESS_FAMILY=bland \
+    HARNESS_RUNTIME=base \
     HARNESS_FAMILY_DIR=/app/harness \
-    HARNESS_DIR=/app/harness/${HARNESS_RUNTIME} \
+    HARNESS_DIR=/app/harness/base \
     PYTHONPATH=/app/harness \
     MIVAS_DB_PATH=/data/industry.db \
     TOOL_SERVER_PORT=8000 \
     TOOL_SERVER_URL=http://127.0.0.1:8000 \
     PYTHONUNBUFFERED=1 \
     UV_SYSTEM_PYTHON=1 \
-    UV_COMPILE_BYTECODE=1
+    UV_COMPILE_BYTECODE=1 \
+    BLUEJAY_SERVICE_NAME=mivas-bland \
+    BLAND_API_KEY="" \
+    PUBLIC_URL="" \
+    CHIRP_PORT=8772 \
+    CHIRP_USER="" \
+    CHIRP_PASS="" \
+    BLUEJAY_API_KEY="" \
+    BLUEJAY_API_URL="" \
+    BLUEJAY_OTLP_ENDPOINT=""
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends curl \
@@ -29,7 +44,7 @@ RUN apt-get update \
 WORKDIR /app
 
 COPY industries/${INDUSTRY}/ /app/industry/
-COPY voice-agent-harnesses/${HARNESS_FAMILY}/ /app/harness/
+COPY voice-agent-harnesses/bland/ /app/harness/
 COPY runtime/ /app/runtime/
 
 RUN uv pip install --system --no-cache \

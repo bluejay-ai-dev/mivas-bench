@@ -83,6 +83,17 @@ def _cache() -> dict[str, Any]:
         return {}
 
 
+def _agent_id_for_name(desired: str) -> str | None:
+    """Return the cloud agent id for `desired`, if it already exists."""
+    for line in _cli("agents", "ls").splitlines():
+        if desired not in line.split():
+            continue
+        match = re.search(r"agent_[A-Za-z0-9]+", line)
+        if match:
+            return match.group(0)
+    return None
+
+
 def export_blueprint(industry_dir: str | Path) -> str:
     """Bake the industry prompts + tool schemas into the deployable directory."""
     bp = load_blueprint(industry_dir)
@@ -93,23 +104,43 @@ def export_blueprint(industry_dir: str | Path) -> str:
     return name
 
 
+def _ensure_auth() -> None:
+    key = os.environ.get("CARTESIA_API_KEY", "").strip()
+    if not key:
+        raise SystemExit("CARTESIA_API_KEY is required")
+    proc = subprocess.run([CLI, "auth", "login", key], capture_output=True, text=True)
+    if proc.returncode != 0:
+        raise SystemExit(
+            f"cartesia auth login failed:\n{(proc.stdout + proc.stderr).strip()}"
+        )
+
+
 def ensure_agent(industry_dir: str | Path, *, public_url: str | None = None) -> str:
     """Deploy (once per industry) and refresh the deployed agent's environment.
 
     CARTESIA_AGENT_ID skips the cache; a cached id skips the deploy. `env set`
     runs every boot because TOOL_BASE_URL follows the cloudflared tunnel.
     """
+    _ensure_auth()
     name = export_blueprint(industry_dir)
     cache = _cache()
     cached_entry = cache.get(name, {})
     cached_agent_id = cached_entry.get("agent_id")
     agent_id = os.environ.get("CARTESIA_AGENT_ID", "").strip() or cached_agent_id
     agent_changed = bool(cached_agent_id and agent_id != cached_agent_id)
+    created_new = False
+    desired = f"mivas-{name}"
 
     if not agent_id:
-        _cli("init", "--new", f"mivas-{name}", str(AGENT_DIR))
-        # `init --new` writes .cartesia/config.toml: agent-id = 'agent_…'
-        agent_id = (AGENT_DIR / ".cartesia" / "config.toml").read_text().split("'")[1]
+        agent_id = _agent_id_for_name(desired)
+        if agent_id:
+            print(f"cartesia reusing {desired} ({agent_id})", flush=True)
+            _cli("init", "--overwrite", "--agent-id", agent_id, str(AGENT_DIR))
+        else:
+            _cli("init", "--overwrite", "--new", desired, str(AGENT_DIR))
+            # `init --new` writes .cartesia/config.toml: agent-id = 'agent_…'
+            agent_id = (AGENT_DIR / ".cartesia" / "config.toml").read_text().split("'")[1]
+            created_new = True
 
     env = {"TOOL_BASE_URL": public_url or os.environ.get("PUBLIC_URL", "")}
     for key in ("OPENAI_API_KEY", "MIVAS_MODEL", "MIVAS_GREETING"):
@@ -120,11 +151,7 @@ def ensure_agent(industry_dir: str | Path, *, public_url: str | None = None) -> 
     # by digest, so the cache file never holds the API key it carries.
     digest = hashlib.sha256(json.dumps(env, sort_keys=True).encode()).hexdigest()[:16]
     needs_env_set = agent_changed or cached_entry.get("env_digest") != digest
-    needs_deploy = (
-        agent_changed
-        or cached_agent_id != agent_id
-        or os.environ.get("CARTESIA_REDEPLOY")
-    )
+    needs_deploy = created_new or agent_changed or bool(os.environ.get("CARTESIA_REDEPLOY"))
     if needs_env_set:
         _cli("env", "set", "--agent-id", agent_id, *[f"{k}={v}" for k, v in env.items()])
         cache.setdefault(name, {}).update(agent_id=agent_id, env_digest=digest)

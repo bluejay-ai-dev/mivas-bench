@@ -1,0 +1,31 @@
+# EKS Auto Mode ALB class. All mivas Ingresses share one internet-facing ALB.
+# Applied once (cluster-scoped). Certificate + group live here — Auto Mode ignores
+# alb.ingress.kubernetes.io/group.name and certificate-arn on Ingress objects.
+apiVersion: eks.amazonaws.com/v1
+kind: IngressClassParams
+metadata:
+  name: mivas-alb
+  labels:
+    app: mivas-bench
+spec:
+  scheme: internet-facing
+  group:
+    name: mivas-chirp
+  certificateARNs:
+    - "__ACM_CERTIFICATE_ARN__"
+  loadBalancerAttributes:
+    - key: idle_timeout.timeout_seconds
+      value: "3600"
+---
+apiVersion: networking.k8s.io/v1
+kind: IngressClass
+metadata:
+  name: mivas-alb
+  labels:
+    app: mivas-bench
+spec:
+  controller: eks.amazonaws.com/alb
+  parameters:
+    apiGroup: eks.amazonaws.com
+    kind: IngressClassParams
+    name: mivas-alb

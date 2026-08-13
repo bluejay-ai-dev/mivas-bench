@@ -478,8 +478,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Speak (or type) with a MIVAS voice agent.")
     parser.add_argument(
         "--harness",
-        default=os.environ.get("VOICE_AGENT", "openai/realtime-2.1"),
-        help="Harness path family/runtime (default: $VOICE_AGENT or openai/realtime-2.1)",
+        default=os.environ.get("HARNESS")
+        or os.environ.get("VOICE_AGENT", "openai/realtime-2.1"),
+        help="Harness path family/runtime (default: $HARNESS or openai/realtime-2.1)",
     )
     parser.add_argument(
         "--industry",

@@ -69,14 +69,14 @@ def _log(msg: str) -> None:
 
 
 def _api_url() -> str:
-    base = os.environ.get("BLUEJAY_API_URL", DEFAULT_API_URL).rstrip("/")
+    base = (os.environ.get("BLUEJAY_API_URL") or DEFAULT_API_URL).rstrip("/")
     if base.endswith("/v1"):
         return base
     return f"{base}/v1"
 
 
 def _otlp_endpoint() -> str:
-    return os.environ.get("BLUEJAY_OTLP_ENDPOINT", DEFAULT_OTLP_ENDPOINT)
+    return os.environ.get("BLUEJAY_OTLP_ENDPOINT") or DEFAULT_OTLP_ENDPOINT
 
 
 def _service_name() -> str:
