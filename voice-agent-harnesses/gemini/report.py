@@ -264,6 +264,19 @@ def end_speech_span(span: Span | None) -> None:
     span.end()
 
 
+def _upsert_stop_statuses() -> set[str]:
+    """Statuses that release the pre-POST wait.
+
+    Default waits for a final status so the link is not wiped mid-eval. With
+    MIVAS_UPSERT_BEFORE_EVAL set, the POST goes out as soon as the conversation ends, so
+    the goal evaluator can see the call's tool calls — at the cost of a possible
+    double-count of execute_tool spans if eval then wipes the link and the relink fires.
+    """
+    if os.environ.get("MIVAS_UPSERT_BEFORE_EVAL", "").strip().lower() in ("1", "true", "yes"):
+        return FINAL_STATUSES | {"CONVERSATION_ENDED"}
+    return FINAL_STATUSES
+
+
 async def _await_terminal_upsert(
     client: httpx.AsyncClient, simulation_result_id: str, timeout: float = 300.0
 ) -> str | None:
@@ -288,7 +301,7 @@ async def _await_terminal_upsert(
                 st = str(
                     ((r.json() or {}).get("simulation_result") or {}).get("status")
                 )
-                if st in FINAL_STATUSES:
+                if st in _upsert_stop_statuses():
                     return st
         except Exception:
             pass
@@ -334,6 +347,14 @@ async def post_simulation_enrichment(
         try:
             async with httpx.AsyncClient(timeout=20) as client:
                 st = await _await_terminal_upsert(client, simulation_result_id)
+                if st in EARLY_UPSERT_STATUSES:
+                    # Bluejay extracts execute_tool spans at POST time, so posting the
+                    # instant the call ends can beat the OTLP spans into the store and link
+                    # a trace with no tools. force_flush() only proves the exporter accepted
+                    # them. Settle first — still inside the window before eval reads tools.
+                    await asyncio.sleep(
+                        float(os.environ.get("MIVAS_UPSERT_SETTLE_SECONDS", "10"))
+                    )
                 if st is None:
                     check = await client.get(
                         f"{_api_url()}/retrieve-simulation-result/{simulation_result_id}",

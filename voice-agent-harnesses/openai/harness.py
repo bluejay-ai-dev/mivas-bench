@@ -19,6 +19,7 @@ import asyncio
 import contextlib
 import json
 import os
+from contextvars import ContextVar
 from pathlib import Path
 from typing import Any, Awaitable, Callable
 
@@ -26,6 +27,8 @@ import httpx
 from agents import FunctionTool
 from agents.realtime import RealtimeAgent, RealtimeRunner, realtime_handoff
 from pydantic import Field, create_model
+
+from report import register_handoff_tool_names
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 TOOL_SERVER_URL = os.environ.get("TOOL_SERVER_URL", "http://127.0.0.1:8000").rstrip("/")
@@ -36,10 +39,20 @@ END_CALL_CLOSE_DELAY_S = float(os.environ.get("MIVAS_END_CALL_CLOSE_DELAY_S", "2
 SessionMapper = Callable[[dict[str, Any]], Awaitable[dict[str, Any]]]
 
 
+# Set once per CHIRP connection so the state API can isolate this call's DB and
+# identity pin from every other call in flight. Industries that keep no per-call
+# state ignore the header.
+CALL_ID: ContextVar[str] = ContextVar("mivas_call_id", default="")
+
+
 async def dispatch_industry_tool(name: str, args: dict[str, Any]) -> dict[str, Any]:
     """Generic dispatch: POST /tools/{name}; the server's envelope is the result."""
+    call_id = CALL_ID.get()
+    headers = {"X-Mivas-Call-Id": call_id} if call_id else None
     async with httpx.AsyncClient(timeout=30.0) as client:
-        resp = await client.post(f"{TOOL_SERVER_URL}/tools/{name}", json={"arguments": args})
+        resp = await client.post(
+            f"{TOOL_SERVER_URL}/tools/{name}", json={"arguments": args}, headers=headers
+        )
         return resp.json()
 
 
@@ -162,6 +175,7 @@ def build_agents(industry_dir: str | Path) -> tuple[RealtimeAgent, dict[str, Rea
             desc = spec.get("description", f"Hand off to {t['handoff_to']}")
             input_type = _handoff_input_type(spec) if spec else None
             target = t["handoff_to"]
+            register_handoff_tool_names({target: t["name"]})
             if input_type is not None:
                 # the SDK requires on_handoff to take exactly (context, input),
                 # so bind the target via a factory rather than a default arg

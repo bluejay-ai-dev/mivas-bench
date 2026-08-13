@@ -1,4 +1,5 @@
 {
+  "greeting": "Thank you for calling Straus Dermatology. This is Robin, an AI assistant. How can I help you?",
   "agents": [
     {
       "name": "reception",

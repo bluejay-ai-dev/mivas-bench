@@ -23,6 +23,8 @@ uv.toml
 # local industry DB runtime state
 **/db/runtime.db
 **/db/runtime.db-*
+# per-call SQLite copies (X-Mivas-Call-Id isolation)
+**/db/calls/
 
 # cached provider-side agent IDs (e.g. ElevenLabs ensure_agents)
 **/.agents.json
