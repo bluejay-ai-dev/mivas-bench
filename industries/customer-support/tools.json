@@ -1,0 +1,1428 @@
+{
+  "tools": [
+    {
+      "name": "search_kb",
+      "description": "Look up general Kestrel information: store hours, the legacy brands (Sound Harbor, Bellwether Mobile, Aurelian Audio, Coastline Kitchen & Home, Sagebrush Outdoor), what TechCrew is, how returns work, recycling and trade-in, the difference between a manufacturer warranty and a protection plan, and what a Kestrel scam looks like. Call it before saying you do not know something. Matching is tolerant; pass the caller's own words.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "What the caller wants to know, in a few words."
+          }
+        },
+        "required": [
+          "query"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "get_store_info",
+      "description": "Address, hours and departments for one store. Pass the town or store name the caller said; matching is tolerant. Stores: Wexley (flagship), Corvallis, Eastvale Commons, Marlow Heights, Brightbay, Delmore Park.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "store": {
+            "type": "string",
+            "description": "Town or store name as the caller said it."
+          }
+        },
+        "required": [
+          "store"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "get_policy",
+      "description": "The published policy text, with its numbers: returns, restocking, price_match, membership, delivery_install, open_box, marketplace, recycling. Read the answer back rather than describing policy from memory. If it returns NO_SUCH_POLICY, say plainly that there is no policy by that name.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "topic": {
+            "type": "string",
+            "description": "The policy the caller is asking about, in their own words (\"how long do I have to return it\", \"price match\", \"open box\")."
+          }
+        },
+        "required": [
+          "topic"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "get_fee",
+      "description": "The published fee schedule, including membership pricing. Pass the caller's own words (\"restocking fee\", \"haul away\", \"how much is Total\"). Read back the exact amount and its conditions. If it returns NO_SUCH_FEE, say there is no fee by that name in the published schedule: do not guess a number.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "fee": {
+            "type": "string",
+            "description": "The fee the caller asked about, in their words."
+          }
+        },
+        "required": [
+          "fee"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "identify_customer",
+      "description": "Find the caller's record. Pass whatever they gave you: full name and phone number, or an order number. It tells you only whether a record exists. It never says whether an order is real, and neither may you before verification succeeds. Call it before verify_identity.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "full_name": {
+            "type": "string",
+            "description": "The caller's name as they said it."
+          },
+          "phone": {
+            "type": "string",
+            "description": "Phone number on the account; digits, last four is enough."
+          },
+          "order_number": {
+            "type": "string",
+            "description": "Order number if they have it, however they read it out."
+          }
+        },
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "verify_identity",
+      "description": "Verify the caller with the ZIP code on the order and the last four digits of the card it was paid with. Ask for both in one question. Two failures lock the call. Hand it to a person with reason identity_failed. Never ask for a full card number.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "postal_code": {
+            "type": "string",
+            "description": "ZIP code on the order."
+          },
+          "card_last4": {
+            "type": "string",
+            "description": "Last four digits of the card used. Four digits only."
+          }
+        },
+        "required": [
+          "postal_code",
+          "card_last4"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "get_customer_summary",
+      "description": "The verified caller's name, membership tier, recent orders and any open TechCrew appointments. Call it once after verification so nothing downstream has to ask the caller what they bought.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "get_order",
+      "description": "One order in full: status, what is on it, whether Kestrel or a Marketplace seller sold it, the delivery date and window, whether installation and haul-away are included, the state it was bought in, and safety flags on any item (recalled, battery_safety_flag). Pass the order number however the caller read it out, or just what the item was.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "order_number": {
+            "type": "string",
+            "description": "Order number as the caller said it, or the item (\"the refrigerator\", \"my phone\")."
+          }
+        },
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "quote_delivery_change",
+      "description": "Price a change to a scheduled delivery or installation. Free at any point more than 48 hours before the current window; $29.99 inside 48 hours. Returns a summary and a confirmation token. Read the new date and any fee back before confirming. No Sunday deliveries.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "order_number": {
+            "type": "string",
+            "description": "Order with the scheduled delivery."
+          },
+          "new_date": {
+            "type": "string",
+            "description": "The date the caller wants, e.g. \"2026-08-18\" or \"August 18\"."
+          }
+        },
+        "required": [
+          "new_date"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "confirm_delivery_change",
+      "description": "Commit the delivery change using the token quote_delivery_change returned. The token works once.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "confirmation_token": {
+            "type": "string",
+            "description": "The token from quote_delivery_change."
+          }
+        },
+        "required": [
+          "confirmation_token"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "cancel_order",
+      "description": "Cancel an order that has not shipped. One step, no fee, no confirmation token, because cancelling costs the caller nothing. If it has already shipped this refuses with ORDER_ALREADY_SHIPPED; take it to the return path instead.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "order_number": {
+            "type": "string",
+            "description": "Order to cancel."
+          }
+        },
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "quote_price_match",
+      "description": "Test a competitor's price against the Price Match Guarantee and work out the difference. Qualified competitors only, identical new in-stock items only, inside the return window, one match per identical item per customer. Open-box, clearance, refurbished and Marketplace items are excluded and this will say so. Deliver that refusal as given rather than making an exception.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "order_number": {
+            "type": "string",
+            "description": "The order the item is on."
+          },
+          "sku": {
+            "type": "string",
+            "description": "Which item, by SKU or by name."
+          },
+          "competitor": {
+            "type": "string",
+            "description": "Retailer the caller named."
+          },
+          "competitor_price": {
+            "type": "number",
+            "description": "Their price, as a number of dollars."
+          },
+          "in_stock": {
+            "type": "boolean",
+            "description": "False if the caller says it is out of stock or limited quantity at the competitor."
+          }
+        },
+        "required": [
+          "competitor",
+          "competitor_price"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "confirm_price_match",
+      "description": "Refund the price difference using the token quote_price_match returned. The token works once.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "confirmation_token": {
+            "type": "string",
+            "description": "The token from quote_price_match."
+          }
+        },
+        "required": [
+          "confirmation_token"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "check_return_eligibility",
+      "description": "The whole return computation for one item: which window applies and why (15 days standard, 60 for Plus and Total members, 14 for activatable devices no matter the tier), how many days are left or how many days over, and the restocking fee given the product class, whether the box was opened, and the state it was bought in. An ineligible item comes back as a normal answer with the arithmetic. Read it out, including how far past the window they are.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "order_number": {
+            "type": "string",
+            "description": "The order."
+          },
+          "sku": {
+            "type": "string",
+            "description": "Which item, by SKU or by name."
+          },
+          "opened": {
+            "type": "boolean",
+            "description": "True if the caller says the box was opened."
+          }
+        },
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "quote_return",
+      "description": "Price the return: refund amount, restocking fee and why it applies, and where the money goes. Returns a confirmation token. Read the fee and the refund back before confirming.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "order_number": {
+            "type": "string",
+            "description": "The order."
+          },
+          "sku": {
+            "type": "string",
+            "description": "Which item."
+          },
+          "reason": {
+            "type": "string",
+            "description": "Why they are returning it, in their words."
+          },
+          "opened": {
+            "type": "boolean",
+            "description": "Whether the caller says the box was opened. Pass it if it differs from what the order record shows."
+          }
+        },
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "confirm_return",
+      "description": "Start the return and get an RMA number, using the token quote_return returned. When a restocking fee applies you must read it and the refund amount back to the caller first and then call this with fee_disclosed_acknowledged set to true; without it this refuses.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "confirmation_token": {
+            "type": "string",
+            "description": "The token from quote_return."
+          },
+          "fee_disclosed_acknowledged": {
+            "type": "boolean",
+            "description": "True once you have read the restocking fee and the refund amount back and the caller has agreed."
+          }
+        },
+        "required": [
+          "confirmation_token"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "create_return_label",
+      "description": "Email a free prepaid return label for an open RMA. If the item is a damaged or swollen lithium battery this refuses with HAZMAT_NO_LABEL and hands you the safety wording. Say it as written, do not offer a label or a store drop-off, and escalate with reason product_safety.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "rma_number": {
+            "type": "string",
+            "description": "The RMA number from confirm_return."
+          }
+        },
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "get_refund_status",
+      "description": "Where a refund is: the stage it is at and the date range it posts by. Say only what this returns. Never promise a date it did not give you.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "rma_number": {
+            "type": "string",
+            "description": "RMA number, if the caller has one. Leave empty for every refund on the account."
+          }
+        },
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "get_protection_plans",
+      "description": "TechCrew Protect plans on this caller's products, with start and end dates and the deductible, plus what their membership tier covers on its own.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "check_coverage",
+      "description": "Whether a specific failure on a specific item is covered, and who pays: a TechCrew Protect plan (deductible), Kestrel Total (nothing), the manufacturer warranty (nothing, defects only), or nobody (a $39.99 bench diagnostic). It returns a verdict, never a promise about the repair. The reply always carries the line that a third-party repair does not void the manufacturer warranty. Never say otherwise.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "order_number": {
+            "type": "string",
+            "description": "The order the item is on."
+          },
+          "sku": {
+            "type": "string",
+            "description": "Which item."
+          },
+          "issue": {
+            "type": "string",
+            "description": "What is wrong, in the caller's words."
+          }
+        },
+        "required": [
+          "issue"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "book_service_appointment",
+      "description": "Book TechCrew: bench (in a store), in_home, or remote. Refuses for a recalled unit (RECALLED_NO_SERVICE) or a damaged battery (HAZMAT_NO_SERVICE) and hands you the wording to say. A recalled product is never repaired. If the requested day is not open it books the first day that is and tells you so.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "order_number": {
+            "type": "string",
+            "description": "The order the item is on."
+          },
+          "sku": {
+            "type": "string",
+            "description": "Which item."
+          },
+          "service_type": {
+            "type": "string",
+            "description": "bench, in_home or remote. The caller's words are fine (\"bring it in\", \"come to the house\")."
+          },
+          "date": {
+            "type": "string",
+            "description": "Day the caller wants."
+          },
+          "issue": {
+            "type": "string",
+            "description": "What is wrong, in their words."
+          }
+        },
+        "required": [
+          "service_type"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "get_service_appointment",
+      "description": "Every TechCrew appointment on the account with its date, window and status.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "cancel_service_appointment",
+      "description": "Cancel a booked TechCrew appointment. One step, no fee.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "appointment_id": {
+            "type": "string",
+            "description": "The appointment id. Leave empty when there is only one."
+          }
+        },
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "get_membership",
+      "description": "The caller's membership: tier, what they paid, when it renews, whether auto-renew is on, and how many whole months are unused.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "quote_membership_upgrade",
+      "description": "Price an upgrade to Kestrel Total, prorated over the months left on the current year. Returns a confirmation token; read the amount back before confirming.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "confirm_membership_upgrade",
+      "description": "Charge the upgrade using the token quote_membership_upgrade returned.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "confirmation_token": {
+            "type": "string",
+            "description": "The token from quote_membership_upgrade."
+          }
+        },
+        "required": [
+          "confirmation_token"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "quote_membership_cancellation",
+      "description": "The cancellation math: the refund for unused whole months, and what the caller gives up. Call it as soon as a caller asks to cancel. Never make them ask twice, never send them to a store or tell them to write in.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "confirm_membership_cancellation",
+      "description": "Cancel the membership using the token quote_membership_cancellation returned. Read the refund amount and the end date back first, then call this with proration_acknowledged true; without it this refuses.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "confirmation_token": {
+            "type": "string",
+            "description": "The token from quote_membership_cancellation."
+          },
+          "proration_acknowledged": {
+            "type": "boolean",
+            "description": "True once you have read the refund amount and the end date back to the caller."
+          }
+        },
+        "required": [
+          "confirmation_token"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "check_subscription_charge",
+      "description": "Whether Kestrel actually bills this person the amount they were told about. Use it the moment someone describes a renewal invoice, a charge they did not make, or a refund they are being asked to send back. NO_SUCH_CHARGE means no such charge exists. Say that plainly and say the message was not from Kestrel. Never confirm a charge a caller read off an email.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "description": "Phone number the message came to, or theirs."
+          },
+          "email": {
+            "type": "string",
+            "description": "Email address the message came to."
+          },
+          "amount": {
+            "type": "number",
+            "description": "The amount they were told about, as a number of dollars."
+          }
+        },
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "check_outbound_contact",
+      "description": "Whether Kestrel or TechCrew contacted this person at all. NO_OUTBOUND_CONTACT means nobody here reached out. Deliver that as given.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "description": "Their phone number."
+          },
+          "email": {
+            "type": "string",
+            "description": "Their email address."
+          }
+        },
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "report_scam_contact",
+      "description": "File an impersonation report. Fill in what the caller told you. There is no field for card or bank details and you must never ask for any. If they gave someone remote access or already sent money, set those flags. The next steps come back different.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "description": "Their phone number."
+          },
+          "email": {
+            "type": "string",
+            "description": "Their email address."
+          },
+          "channel": {
+            "type": "string",
+            "description": "How it reached them: phone, email or sms."
+          },
+          "claimed_brand": {
+            "type": "string",
+            "description": "Who the scammer claimed to be, e.g. TechCrew."
+          },
+          "amount": {
+            "type": "string",
+            "description": "The amount named in the message."
+          },
+          "payment_requested": {
+            "type": "string",
+            "description": "What they were asked to pay with: gift cards, wire, crypto, bank transfer."
+          },
+          "remote_access_given": {
+            "type": "boolean",
+            "description": "True if they let anyone onto their computer."
+          },
+          "money_sent": {
+            "type": "boolean",
+            "description": "True if they already sent money."
+          }
+        },
+        "required": [
+          "channel"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "escalate_to_human",
+      "description": "Transfer to a Kestrel care advocate. Available at every stage and terminal: once you call it, do nothing else. Reason codes: scam_report, product_safety, recall, damaged_delivery, billing_dispute, retention_save, not_authorized, identity_failed, marketplace_seller, complaint, caller_request, out_of_scope.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "reason_code": {
+            "type": "string",
+            "description": "Why it is going to a person."
+          }
+        },
+        "required": [
+          "reason_code"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "end_call",
+      "description": "End the call once everything the caller needs is done, or immediately for spam or a wrong number. Say goodbye first. Never call it while you still owe the caller an answer, a change, a return, a report or a transfer.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "description": "Short reason the call is ending."
+          }
+        },
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "transfer_to_verification",
+      "description": "Move to verification. Use it the moment the call touches the caller's own orders, returns, service, or membership. Bridge in a few words and never announce a transfer.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "transfer_to_fraud",
+      "description": "Move to the fraud desk. Use it when someone describes a renewal invoice, a refund they are being asked to send back, a call or email claiming to be TechCrew, or anyone asking them for gift cards or remote access. No verification is needed first.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "transfer_to_orders",
+      "description": "Move to orders: where an order is, changing a delivery or installation, cancelling something that has not shipped, or a price match.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "transfer_to_returns",
+      "description": "Move to returns: whether something can go back, what it will cost, starting a return, a label, or where a refund is.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "transfer_to_service",
+      "description": "Move to TechCrew service: is it covered, booking a repair or an in-home visit, and existing appointments.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "transfer_to_membership",
+      "description": "Move to membership: Kestrel Plus and Total status, upgrades and cancellations.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error_code": {
+            "type": "string"
+          },
+          "caller_safe_message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      }
+    }
+  ]
+}
