@@ -18,7 +18,7 @@ Callers must `context["session"] = session` after `runner.run(context=ctx)`. Opt
 
 ```bash
 uv sync
-# set VOICE_AGENT=openai/realtime-2.1 in root .env
+# set HARNESS=openai/realtime-2.1 in root .env
 uv run python run.py --check
 uv run python tests/converse.py
 uv run python voice-agent-harnesses/openai/realtime-2.1/agent.py control-industry

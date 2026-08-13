@@ -48,8 +48,10 @@ SECRET_KEYS = (
     "BLUEJAY_OTLP_ENDPOINT",
     "BLUEJAY_SERVICE_NAME",
 )
-# Files copied into the build context (Dockerfile COPYs *.py + industries/).
-CONTEXT_FILES = ("Dockerfile", "requirements.txt", "bot.py", "harness.py", "report.py", "check.py")
+# Files copied into the build context (Pipecat Cloud Dockerfile COPYs *.py + industries/).
+# MIVAS CHIRP uses Dockerfile in this directory; Pipecat Cloud uses Dockerfile.pipecat-cloud
+# (uploaded as "Dockerfile" in the tarball below).
+CONTEXT_FILES = ("requirements.txt", "bot.py", "harness.py", "report.py", "check.py")
 
 
 def api(path: str, data: dict | None = None, method: str | None = None) -> dict:
@@ -74,6 +76,7 @@ def build_context() -> bytes:
     """tar.gz of the harness plus the industry it serves."""
     buf = io.BytesIO()
     with tarfile.open(fileobj=buf, mode="w:gz") as tar:
+        tar.add(HARNESS_DIR / "Dockerfile.pipecat-cloud", arcname="Dockerfile")
         for name in CONTEXT_FILES:
             tar.add(HARNESS_DIR / name, arcname=name)
         tar.add(

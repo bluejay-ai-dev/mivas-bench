@@ -324,8 +324,7 @@ async def run_bot(transport, runtime: str) -> None:
             worker=worker, llm=llm, context_aggregator=aggregators, transport=transport
         )
 
-    @transport.event_handler("on_client_connected")
-    async def _connected(_transport, _client):
+    async def _kickoff(_transport, *_args):
         logger.info("client connected — kicking off greeting")
         if flow_manager is not None:
             # initialize() sets the receptionist node — prompt, tools, LLMRunFrame.
@@ -340,11 +339,19 @@ async def run_bot(transport, runtime: str) -> None:
             frames.append(TTSSpeakFrame(harness.GREETING))
         await worker.queue_frames(frames)
 
-    @transport.event_handler("on_client_disconnected")
-    async def _disconnected(_transport, _client):
+    async def _hangup(_transport, *_args):
         logger.info("client disconnected")
         await cancel_end_task()
         await worker.cancel()
+
+    # Daily Cloud uses on_client_*; LiveKitTransport uses participant/room events.
+    if transport.__class__.__name__.startswith("Daily"):
+        transport.event_handler("on_client_connected")(_kickoff)
+        transport.event_handler("on_client_disconnected")(_hangup)
+    else:
+        transport.event_handler("on_first_participant_joined")(_kickoff)
+        transport.event_handler("on_participant_disconnected")(_hangup)
+        transport.event_handler("on_disconnected")(_hangup)
 
     runner = WorkerRunner(handle_sigint=False)
     await runner.add_workers(worker)
