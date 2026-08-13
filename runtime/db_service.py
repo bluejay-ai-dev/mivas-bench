@@ -3,6 +3,11 @@
 Handlers keep `with db.connect() as conn: conn.execute(...)`. This module is
 the only place that chooses a file: first touch of a call id copies schema.sql
 then seed.sql into `{data_dir}/calls/{id}.db`; later touches reuse it.
+
+Reuse is what a real call wants (many HTTP requests, one call id, one evolving
+DB). A repeatable check wants the opposite, so it says so at the call site:
+`with db.scope("selfcheck", fresh=True):` rebuilds the fixture from schema+seed
+before yielding.
 """
 
 from __future__ import annotations
@@ -80,9 +85,28 @@ class DBService:
             _write_fixture_db(path, self.schema_path, self.seed_path)
         return path
 
+    def _recreate(self, path: Path) -> Path:
+        """Replace path with a pristine fixture DB, atomically."""
+        with self._create_lock:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            # pid-unique so concurrent processes never share a half-built file;
+            # threads are serialised by _create_lock.
+            tmp = path.with_name(f"{path.name}.{os.getpid()}.tmp")
+            _unlink_db(tmp)
+            _write_fixture_db(tmp, self.schema_path, self.seed_path)
+            # Drop the old -wal/-shm first: a stale journal beside a new main
+            # file is the one combination sqlite would try to replay.
+            for suffix in ("-wal", "-shm"):
+                path.with_name(path.name + suffix).unlink(missing_ok=True)
+            os.replace(tmp, path)
+        return path
+
     @contextmanager
-    def scope(self, call_id: str) -> Iterator[str]:
+    def scope(self, call_id: str, *, fresh: bool = False) -> Iterator[str]:
+        """Bind call_id for this context. fresh=True rebuilds its fixture DB first."""
         safe = _normalise_call_id(call_id)
+        if fresh:
+            self._recreate(self.calls_dir / f"{safe}.db")
         token = _call_id.set(safe)
         try:
             yield safe
@@ -233,6 +257,12 @@ def _normalise_call_id(raw: str | None) -> str:
     if not _CALL_ID_OK.fullmatch(value):
         raise CallIdError(f"invalid call id {raw!r}")
     return value
+
+
+def _unlink_db(path: Path) -> None:
+    """Remove a sqlite file and its -wal/-shm sidecars."""
+    for p in (path, path.with_name(path.name + "-wal"), path.with_name(path.name + "-shm")):
+        p.unlink(missing_ok=True)
 
 
 def _write_fixture_db(path: Path, schema_path: Path, seed_path: Path) -> None:

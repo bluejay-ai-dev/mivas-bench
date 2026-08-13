@@ -68,6 +68,42 @@ def test_second_ensure_does_not_reseed(db: DBService) -> None:
     assert names == ["seeded", "written"]
 
 
+def _names(db: DBService, call_id: str) -> list[str]:
+    with db.connect(call_id) as conn:
+        return [r[0] for r in conn.execute("SELECT name FROM items ORDER BY id")]
+
+
+def test_scope_fresh_rebuilds_fixture(db: DBService) -> None:
+    """A repeatable check must not inherit the previous run's mutations."""
+    with db.scope("selfcheck", fresh=True):
+        with db.connect() as conn:
+            conn.execute("UPDATE items SET name = 'mutated' WHERE name = 'seeded'")
+    assert _names(db, "selfcheck") == ["mutated"]
+    with db.scope("selfcheck", fresh=True):
+        assert _names(db, "selfcheck") == ["seeded"]
+
+
+def test_scope_fresh_clears_wal_sidecars(db: DBService) -> None:
+    path = db.ensure("selfcheck")
+    with db.connect("selfcheck") as conn:
+        conn.execute("PRAGMA journal_mode=WAL")
+        conn.execute("INSERT INTO items (name) VALUES ('written')")
+    with db.scope("selfcheck", fresh=True):
+        assert _names(db, "selfcheck") == ["seeded"]
+    assert not path.with_name(path.name + "-wal").exists()
+    assert not path.with_name(path.name + "-shm").exists()
+    assert not list(path.parent.glob("*.tmp"))
+
+
+def test_scope_without_fresh_keeps_state(db: DBService) -> None:
+    """Real calls reuse their DB across requests — that must not change."""
+    with db.scope("675"):
+        with db.connect() as conn:
+            conn.execute("INSERT INTO items (name) VALUES ('written')")
+    with db.scope("675"):
+        assert _names(db, "675") == ["seeded", "written"]
+
+
 def test_distinct_ids_are_isolated(db: DBService) -> None:
     a = db.ensure("675")
     b = db.ensure("676")
