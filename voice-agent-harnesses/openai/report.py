@@ -193,11 +193,19 @@ async def _await_terminal_upsert(
     trace_ids wiped, and the relink then re-extracts every execute_tool span on top of
     the first POST's, so each tool lands twice. Eval needs ~175 s; CHIRP has no session
     cap, so the wait is free.
+
+    MIVAS_UPSERT_SETTLE_SECONDS delays the POST after the stop status is seen.
+    force_flush() guarantees the spans reached the collector, NOT that they are
+    queryable yet — the server extracts execute_tool spans at link time, so a POST that
+    beats ingest links a trace and extracts nothing. Harmless on the default path (the
+    wait for a final status already outlasts ingest), load-bearing with
+    MIVAS_UPSERT_BEFORE_EVAL, where the POST fires seconds after the last span.
     """
     deadline = time.monotonic() + timeout
     key = _api_key()
     if not key:
         return None
+    settle = float(os.environ.get("MIVAS_UPSERT_SETTLE_SECONDS", "0") or 0)
     while time.monotonic() < deadline:
         try:
             r = await client.get(
@@ -209,6 +217,8 @@ async def _await_terminal_upsert(
                     ((r.json() or {}).get("simulation_result") or {}).get("status")
                 )
                 if st in _upsert_stop_statuses():
+                    if settle > 0:
+                        await asyncio.sleep(settle)
                     return st
         except Exception:
             pass
