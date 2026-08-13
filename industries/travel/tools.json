@@ -2,7 +2,7 @@
   "tools": [
     {
       "name": "find_reservation",
-      "description": "Find the caller's reservation and check that they are named on it. Call this first, before any other tool. You need the last name plus either the six character confirmation code or the Kestrel Miles number. Last names are matched tolerantly and codes are normalised, so a mis-heard letter still verifies. Three failures are distinct and must be handled differently: NOT_FOUND means try again with better details; NOT_NAMED means the booking exists but this caller may not act on it, so disclose nothing and escalate; CARRIER_CEASED_OPERATIONS means the code belongs to an airline that no longer exists and nothing can be done with it.",
+      "description": "Find the caller's reservation and check that they are named on it. Call this first, before any other tool. You need the last name plus either the six character confirmation code or the Juniper Rewards number. Last names are matched tolerantly and codes are normalised, so a mis-heard letter still verifies. Three failures are distinct and must be handled differently: NOT_FOUND means try again with better details; NOT_NAMED means the booking exists but this caller may not act on it, so disclose nothing and escalate; CARRIER_CEASED_OPERATIONS means the code belongs to an airline that no longer exists and nothing can be done with it.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -16,7 +16,7 @@
           },
           "miles_number": {
             "type": "string",
-            "description": "Kestrel Miles number. Supply this or confirmation_code."
+            "description": "Juniper Rewards number. Supply this or confirmation_code."
           }
         },
         "required": [
@@ -120,7 +120,7 @@
         "properties": {
           "flight_number": {
             "type": "string",
-            "description": "Flight number, for example KA771."
+            "description": "Flight number, for example JA771."
           },
           "date": {
             "type": "string",
@@ -560,13 +560,13 @@
     },
     {
       "name": "get_credit_balance",
-      "description": "Flight credits on a Kestrel Miles account or by confirmation code, with amounts and expiry dates. Read-only. Nothing on any desk can spend a credit on this call, so if the caller wants one applied, say plainly that it cannot be done by phone.",
+      "description": "Flight credits on a Juniper Rewards account or by confirmation code, with amounts and expiry dates. Read-only. Nothing on any desk can spend a credit on this call, so if the caller wants one applied, say plainly that it cannot be done by phone.",
       "inputSchema": {
         "type": "object",
         "properties": {
           "miles_number": {
             "type": "string",
-            "description": "Kestrel Miles number, format KM followed by seven digits, for example KM4471902."
+            "description": "Juniper Rewards number, format JR followed by seven digits, for example JR4471902."
           },
           "confirmation_code": {
             "type": "string",
@@ -598,13 +598,13 @@
     },
     {
       "name": "get_elite_status",
-      "description": "The Kestrel Miles tier on an account and what it includes. Call this before quoting any bag price for a member: some tiers cover the first checked bag for everyone on the reservation and no tier ever covers the carry-on. The tier is never announced to the caller unprompted.",
+      "description": "The Juniper Rewards tier on an account and what it includes. Call this before quoting any bag price for a member: some tiers cover the first checked bag for everyone on the reservation and no tier ever covers the carry-on. The tier is never announced to the caller unprompted.",
       "inputSchema": {
         "type": "object",
         "properties": {
           "miles_number": {
             "type": "string",
-            "description": "Kestrel Miles number, format KM followed by seven digits, for example KM4471902."
+            "description": "Juniper Rewards number, format JR followed by seven digits, for example JR4471902."
           }
         },
         "required": [
@@ -685,7 +685,7 @@
         "properties": {
           "flight_number": {
             "type": "string",
-            "description": "Flight number, for example KA812."
+            "description": "Flight number, for example JA812."
           },
           "date": {
             "type": "string",
@@ -891,7 +891,7 @@
         "properties": {
           "miles_number": {
             "type": "string",
-            "description": "Kestrel Miles number, format KM followed by seven digits, for example KM4471902."
+            "description": "Juniper Rewards number, format JR followed by seven digits, for example JR4471902."
           }
         },
         "required": [
@@ -927,7 +927,7 @@
         "properties": {
           "miles_number": {
             "type": "string",
-            "description": "Kestrel Miles number, format KM followed by seven digits, for example KM4471902."
+            "description": "Juniper Rewards number, format JR followed by seven digits, for example JR4471902."
           },
           "origin": {
             "type": "string",
@@ -978,7 +978,7 @@
         "properties": {
           "miles_number": {
             "type": "string",
-            "description": "Kestrel Miles number, format KM followed by seven digits, for example KM4471902."
+            "description": "Juniper Rewards number, format JR followed by seven digits, for example JR4471902."
           },
           "flight_number": {
             "type": "string",

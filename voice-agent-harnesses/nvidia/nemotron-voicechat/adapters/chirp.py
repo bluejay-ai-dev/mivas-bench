@@ -785,15 +785,21 @@ async def _bridge(ws, industry: str) -> None:
                                 text_buf = ""
 
                         elif etype == "response.output_text.delta":
-                            if saw_audio_transcript:
-                                continue
                             delta = event.get("delta") or ""
                             if not delta:
                                 continue
+                            # text_buf is the TOOL-CALL channel. The model emits
+                            # <TOOLCALL> as text and never speaks it, so it MUST
+                            # accumulate even while the audio transcript carries the
+                            # spoken words — `if saw_audio_transcript: continue` skipped
+                            # this line, leaving text_buf empty for the whole call. Only
+                            # the SPOKEN accumulation is suppressed, which is all
+                            # "prefer the audio transcript" was ever for.
                             text_buf += delta
-                            _note(delta)
-                            await _commit(why="text.delta")
-                            await _maybe_hard_tools(turn_spoken, prefix="inf")
+                            if not saw_audio_transcript:
+                                _note(delta)
+                                await _commit(why="text.delta")
+                            await _maybe_hard_tools(text_buf, prefix="inf")
 
                         elif etype == "response.output_audio_transcript.done":
                             tr = (event.get("transcript") or "").strip()

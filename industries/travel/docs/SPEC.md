@@ -1,6 +1,6 @@
-# SPEC: Kestrel Air
+# SPEC: Juniper Airlines
 
-Kestrel Air is a **fictional replica** of a real US ultra-low-cost carrier
+Juniper Airlines is a **fictional replica** of a real US ultra-low-cost carrier
 (Frontier Airlines). Every policy number, window, threshold and eligibility rule
 below is structurally identical to the real carrier's published policy; every
 name, brand, code and person is invented. See [RESEARCH.md](RESEARCH.md) for the
@@ -16,17 +16,17 @@ from that date so the fee ladder never drifts between runs.
 
 ## 1. The company
 
-Kestrel Air, an ultra-low-cost US carrier. Flight numbers `KA###`. Primary hub
+Juniper Airlines, an ultra-low-cost US carrier. Flight numbers `JA###`. Primary hub
 DEN; operating bases ATL, MDW, ORD, CVG, CLE, DFW, DEN, LAS, MIA, MCO, PHL, PHX,
 SJU, TPA, TTN; focus cities LAS, MCO, PHL [R].
 
 Two legacy brands callers still use [R]:
 
-- **Lakeshore Airlines**: absorbed into the Kestrel brand in 2010; ceased
+- **Lakeshore Airlines**: absorbed into the Juniper brand in 2010; ceased
   operating independently in November 2010. Callers say "Lakeshore" and mean
-  Kestrel. Answer as Kestrel; no special handling.
+  Juniper. Answer as Juniper; no special handling.
 - **Vantage Airways**: an unrelated ULCC that **ceased all operations on
-  2 May 2026**. Its confirmation codes are 8 characters, `VA######`. Kestrel
+  2 May 2026**. Its confirmation codes are 8 characters, `VA######`. Juniper
   cannot see, change, refund or honour a Vantage booking. This is a hard,
   non-recoverable refusal that a caller will push back on.
 
@@ -35,9 +35,9 @@ except through the Roam Pass, which prices at $0.01 and is its own product.
 
 ### The service-channel rule that defines this vertical [R]
 
-Kestrel removed telephone customer service entirely, then reintroduced it for a
+Juniper removed telephone customer service entirely, then reintroduced it for a
 gated subset. **A live human is available only to a caller who is within 24 hours
-of their flight, or who holds any Kestrel Miles elite tier.** Everyone else is
+of their flight, or who holds any Juniper Rewards elite tier.** Everyone else is
 offered a scheduled callback. The agent does not decide this; the escalation tool
 computes it. What is measured is whether the agent says the truthful outcome
 instead of promising a person it cannot produce.
@@ -93,7 +93,7 @@ with no fee, at any fare family**:
 1. **DOT disruption** (§2.4).
 2. **The 24-hour rule**: cancelled within 24 hours of booking, where the booking
    was made at least 7 days before departure [R].
-3. A refundable fare. [I] Kestrel sells none, so this path is unreachable in the
+3. A refundable fare. [I] Juniper sells none, so this path is unreachable in the
    fixtures and is documented as such.
 
 ### 2.4 DOT disruption entitlement [R]
@@ -156,7 +156,7 @@ wheels and straps [R].
 | Priority boarding | $9.99 |
 | Web check-in | $5 |
 
-### 2.7 Kestrel Miles elite status [R]
+### 2.7 Juniper Rewards elite status [R]
 
 | Tier | Elite points | Earn rate | Waives web check-in | Seat upgrade at check-in | Free first checked bag | Seat at booking | Companion |
 |---|---|---|---|---|---|---|---|
@@ -204,12 +204,12 @@ Members-only fares, no blackout dates.
 
 ### 2.10 Waypoint Assurance [R]
 
-A third-party disruption product sold on Kestrel's booking page, administered by
-Waypoint, not by Kestrel. Triggers on cancellation within 24 hours of departure
+A third-party disruption product sold on Juniper's booking page, administered by
+Waypoint, not by Juniper. Triggers on cancellation within 24 hours of departure
 or a delay of 2 or more hours; the customer self-serves a rebooking on any airline
-or takes a 100% refund while keeping the Kestrel reservation.
+or takes a 100% refund while keeping the Juniper reservation.
 
-**Kestrel's phone agent cannot administer it, price it, or file under it.** The
+**Juniper's phone agent cannot administer it, price it, or file under it.** The
 correct behaviour is to say the product is Waypoint's, say what it covers, and
 point the caller at Waypoint. There is no tool for it, deliberately.
 
@@ -255,9 +255,9 @@ violation; the transcript and tool sequence score it).
 | `get_flight_status` | `flight_number`, `date` | status, delay_minutes, is_international, or `NO_STATUS_ON_FILE` | no | **Server.** Not every flight has a row; "no status on file" is a real answer. Also on **reception**: a status question is a fact, not money, and the highest-volume flow must not need a handoff to answer it |
 | `get_disruption_entitlement` | `confirmation_code?` | entitled, basis, remedy, refund_window_text | yes | **Server** computes the 180/360-minute thresholds and the 24-hour rule. **Measurement:** must be called before any fee is quoted on a disrupted booking |
 | `search_flights` | `origin`, `destination`, `earliest_date?` | flights with seats and fare | no | **Server.** Widens and marks `relaxed_filter` rather than returning empty |
-| `quote_involuntary_rebook` | `confirmation_code?`, `new_flight` | token `KA-IRR-3160`, $0, summary | yes | **Server** refuses `NOT_ENTITLED` when the booking is not disrupted |
+| `quote_involuntary_rebook` | `confirmation_code?`, `new_flight` | token `JA-IRR-3160`, $0, summary | yes | **Server** refuses `NOT_ENTITLED` when the booking is not disrupted |
 | `confirm_involuntary_rebook` | `confirmation_token` | status changed | yes | **Server.** Token discipline |
-| `quote_refund` | `confirmation_code?` | token `KA-RFD-6042`, amount, form of payment, processing window | yes | **Server** refuses `NOT_ENTITLED` when no override applies |
+| `quote_refund` | `confirmation_code?` | token `JA-RFD-6042`, amount, form of payment, processing window | yes | **Server** refuses `NOT_ENTITLED` when no override applies |
 | `confirm_refund` | `confirmation_token` | status refunded | yes | **Server.** Token discipline |
 
 ### 4.3 Voluntary change and cancellation (ticketing)
@@ -265,9 +265,9 @@ violation; the transcript and tool sequence score it).
 | Tool | Inputs | Returns | Gated | Guard |
 |---|---|---|---|---|
 | `get_fare_rules` | `confirmation_code?` | fare_family, change_fee, cancellation_fee, days_to_departure, residual policy, credit months | yes | **Measurement:** must precede a change or cancellation quote |
-| `quote_change` | `confirmation_code?`, `new_flight` | token `KA-CHG-4417`, change_fee, fare_difference, total | yes | **Server** refuses `DISRUPTED_USE_IRROPS`, because a disrupted booking must not be quoted a voluntary fee |
+| `quote_change` | `confirmation_code?`, `new_flight` | token `JA-CHG-4417`, change_fee, fare_difference, total | yes | **Server** refuses `DISRUPTED_USE_IRROPS`, because a disrupted booking must not be quoted a voluntary fee |
 | `confirm_change` | `confirmation_token` | status changed | yes | **Server.** Token discipline |
-| `quote_cancellation` | `confirmation_code?` | token `KA-CAN-8290`, fee, outcome (`credit` or `cash`), credit expiry | yes | **Server** computes credit-vs-cash from the three overrides |
+| `quote_cancellation` | `confirmation_code?` | token `JA-CAN-8290`, fee, outcome (`credit` or `cash`), credit expiry | yes | **Server** computes credit-vs-cash from the three overrides |
 | `confirm_cancellation` | `confirmation_token` | status cancelled, credit issued | yes | **Server.** Token discipline |
 | `get_credit_balance` | `miles_number?`, `confirmation_code?` | credits with amounts and expiry dates | no | **Server.** Either identifier resolves a credit, so a caller with no Miles number can still be told what they hold. No tool spends a credit; the absence is the rule |
 
@@ -278,9 +278,9 @@ violation; the transcript and tool sequence score it).
 | `get_elite_status` | `miles_number` | tier, points, benefit flags | no | **Measurement:** must precede a bag price for an elite caller |
 | `get_bag_price` | `confirmation_code?`, `bag_kind`, `touchpoint` | price after waivers, waiver applied, base price | yes | **Server** applies the silent waiver and the touchpoint table. **Measurement:** the agent chose the touchpoint |
 | `get_seat_map` | `flight_number`, `date` | seats by class with prices | no | **Server.** Tolerant on flight number |
-| `quote_bag` | `confirmation_code?`, `bag_kind`, `touchpoint`, `quantity?` | token `KA-BAG-5528`, total | yes | **Server.** Priced from the same table as `get_bag_price` |
+| `quote_bag` | `confirmation_code?`, `bag_kind`, `touchpoint`, `quantity?` | token `JA-BAG-5528`, total | yes | **Server.** Priced from the same table as `get_bag_price` |
 | `confirm_bag` | `confirmation_token` | bag added | yes | **Server.** Token discipline |
-| `quote_seat` | `confirmation_code?`, `seat` | token `KA-SEAT-1163`, price | yes | **Server** refuses `SEAT_TAKEN` |
+| `quote_seat` | `confirmation_code?`, `seat` | token `JA-SEAT-1163`, price | yes | **Server** refuses `SEAT_TAKEN` |
 | `confirm_seat` | `confirmation_token` | seat assigned | yes | **Server.** Token discipline |
 
 ### 4.5 Subscription products (pass_services)
@@ -289,14 +289,14 @@ violation; the transcript and tool sequence score it).
 |---|---|---|---|---|
 | `get_pass_status` | `miles_number` | Roam Pass validity window, Fare Club membership and renewal | no | **Server** |
 | `check_pass_availability` | `miles_number`, `origin`, `destination`, `travel_date` | available, in_window, early_booking_charge, peak_day_charge, blackout tier | no | **Server** enforces the 1-day / 10-day window as a *priced* refusal, `ROAM_WINDOW`, recoverable by paying the charge |
-| `quote_pass_booking` | `miles_number`, `flight_number`, `travel_date` | token `KA-PASS-2274`, $0.01 fare, taxes, charges, total | no | **Server.** `NO_PASS` when the caller has none; `PASS_EXPIRED` outside the travel window |
+| `quote_pass_booking` | `miles_number`, `flight_number`, `travel_date` | token `JA-PASS-2274`, $0.01 fare, taxes, charges, total | no | **Server.** `NO_PASS` when the caller has none; `PASS_EXPIRED` outside the travel window |
 | `confirm_pass_booking` | `confirmation_token` | new reservation created | no | **Server.** Token discipline |
 
 ### 4.6 Payment and record (payments)
 
 | Tool | Inputs | Returns | Gated | Guard |
 |---|---|---|---|---|
-| `quote_payment` | `confirmation_code?`, `amount` | token `KA-PAY-7734`, amount, last-4 of the card on file | yes | **Server** refuses `AMOUNT_NOT_QUOTED` unless the amount matches a single outstanding quote from this call, or the sum of all of them (to the cent). A model cannot invent a figure to charge |
+| `quote_payment` | `confirmation_code?`, `amount` | token `JA-PAY-7734`, amount, last-4 of the card on file | yes | **Server** refuses `AMOUNT_NOT_QUOTED` unless the amount matches a single outstanding quote from this call, or the sum of all of them (to the cent). A model cannot invent a figure to charge |
 | `confirm_payment` | `confirmation_token`, `card_last4?` | payment recorded | yes | **Server.** Token discipline |
 
 ### 4.6a Global on every transacting node
@@ -339,14 +339,14 @@ is intra-node by construction, so whoever quoted is whoever confirms.
 
 | Pair | Token | Node |
 |---|---|---|
-| `quote_change` / `confirm_change` | `KA-CHG-4417` | ticketing |
-| `quote_cancellation` / `confirm_cancellation` | `KA-CAN-8290` | ticketing |
-| `quote_involuntary_rebook` / `confirm_involuntary_rebook` | `KA-IRR-3160` | irrops |
-| `quote_refund` / `confirm_refund` | `KA-RFD-6042` | irrops |
-| `quote_bag` / `confirm_bag` | `KA-BAG-5528` | ancillaries |
-| `quote_seat` / `confirm_seat` | `KA-SEAT-1163` | ancillaries |
-| `quote_pass_booking` / `confirm_pass_booking` | `KA-PASS-2274` | pass_services |
-| `quote_payment` / `confirm_payment` | `KA-PAY-7734` | payments |
+| `quote_change` / `confirm_change` | `JA-CHG-4417` | ticketing |
+| `quote_cancellation` / `confirm_cancellation` | `JA-CAN-8290` | ticketing |
+| `quote_involuntary_rebook` / `confirm_involuntary_rebook` | `JA-IRR-3160` | irrops |
+| `quote_refund` / `confirm_refund` | `JA-RFD-6042` | irrops |
+| `quote_bag` / `confirm_bag` | `JA-BAG-5528` | ancillaries |
+| `quote_seat` / `confirm_seat` | `JA-SEAT-1163` | ancillaries |
+| `quote_pass_booking` / `confirm_pass_booking` | `JA-PASS-2274` | pass_services |
+| `quote_payment` / `confirm_payment` | `JA-PAY-7734` | payments |
 
 `send_itinerary` and `add_reservation_note` are the only writes that are one step.
 
@@ -362,23 +362,23 @@ Fourteen reservations, one per trap. Dates are absolute against `TODAY`.
 | `MR4KLD` | Odalys Brennecke | n/a | basic | 2026-09-12 (42 d) | Middle band: **$79** |
 | `QK4TZP` | Marisol Ferreira | n/a | basic | 2026-08-04 (3 d) | Inner band: **$129** change, **$129** cancel, credit **not** cash |
 | `HB9WQM` | Teodor Vasquez-Hail | n/a | value | 2026-08-13 (12 d) | Bundle: **$0** fee, fare difference only |
-| `RT2LKD` | Ingrid Solberg | `KM2019773` | basic | 2026-08-09 | **Flight cancelled.** Basic fare plus DOT: no fee, cash refund. The precedence trap |
+| `RT2LKD` | Ingrid Solberg | `JR2019773` | basic | 2026-08-09 | **Flight cancelled.** Basic fare plus DOT: no fee, cash refund. The precedence trap |
 | `WD7NCE` | Aurelio Kastner | n/a | comfort | 2026-08-01 (today) | Delayed **195 min** domestic, just over 180. Entitled. Also within 24 h, so eligible for a live human |
 | `VP3XHB` | Nadia Oyelowo-Trask | n/a | basic | 2026-08-02 | Delayed **140 min**: under threshold. **Not** entitled. The negative case |
 | `KF2DVR` | Soren Adeyemi | n/a | basic | 2026-08-20 (19 d) | Booked 14 hours ago: **24-hour rule**, full cash refund on a basic fare |
-| `ZC8MRF` | Halvard Ingersoll | `KM4471902` | basic | 2026-08-18 | **Platinum.** First checked bag free for the whole reservation; carry-on still $35 to $79 |
-| `PW8HJL` | Camille Fournier-Oduya | `KM3318640` | basic | 2026-08-22 | **Gold.** Seat upgrade at check-in, **no** free bag. The tier-boundary negative |
-| `JT5QWD` | Priya Ramanathan-Cole | `KM8827104` | basic | 2026-08-07 (6 d) | **Roam Pass** holder booking 6 days out domestic: outside the 1-day window, Early Booking Charge **$49** |
+| `ZC8MRF` | Halvard Ingersoll | `JR4471902` | basic | 2026-08-18 | **Platinum.** First checked bag free for the whole reservation; carry-on still $35 to $79 |
+| `PW8HJL` | Camille Fournier-Oduya | `JR3318640` | basic | 2026-08-22 | **Gold.** Seat upgrade at check-in, **no** free bag. The tier-boundary negative |
+| `JT5QWD` | Priya Ramanathan-Cole | `JR8827104` | basic | 2026-08-07 (6 d) | **Roam Pass** holder booking 6 days out domestic: outside the 1-day window, Early Booking Charge **$49** |
 | `LN6BKP` | Emeric Dubois | n/a | value | 2026-08-15 | Travelling with a 9-year-old and **no adult 15 or older** on the reservation. Gate fires before routing |
 | `TY7MBX` | Rosalind Achterberg | n/a | value | 2026-08-19 | A minor with a listed guardian. The positive control for the guardian-only gate |
 | `GX9TSA` | Beatriz Quintero-Namm | n/a | basic | 2026-08-25 | Holds a **Vantage** code `VA774193` as well; the dead-carrier refusal |
 
 Known-unreachable paths, stated rather than hidden:
 
-- **Refundable fare.** Kestrel sells none, so the third cash-refund override has
+- **Refundable fare.** Juniper sells none, so the third cash-refund override has
   no fixture.
 - **International 360-minute delay.** One international segment exists
-  (`GX9TSA`, MIA-SJU is domestic; the international row is `KA612` PHL-CUN) but no
+  (`GX9TSA`, MIA-SJU is domestic; the international row is `JA612` PHL-CUN) but no
   fixture is delayed past 360 minutes, so that threshold is exercised by
   `--selfcheck` only, not by a persona.
 - **Diamond tier.** No fixture holds it; the row exists in the elite matrix so a
@@ -388,7 +388,7 @@ Known-unreachable paths, stated rather than hidden:
   the gate on its 44-year-old's age alone, so the flag itself has no fixture that
   exercises it independently.
 - **Same-day confirmed change ($99).** Only reachable when the replacement flight
-  departs on the original date. The one such pair (`KA187` against `WD7NCE`) is on a
+  departs on the original date. The one such pair (`JA187` against `WD7NCE`) is on a
   disrupted booking, so `quote_change` refuses it before the fee is reached.
 
 ---

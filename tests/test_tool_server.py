@@ -137,11 +137,11 @@ _KNOWN_GOOD_ARGS: dict[str, dict[str, dict[str, Any]]] = {
         "get_disruption_entitlement": {"confirmation_code": "RT2LKD"},
         "get_fare_rules": {"confirmation_code": "RT2LKD"},
         "search_flights": {"origin": "ORD", "destination": "SEA", "earliest_date": "2026-08-09"},
-        "get_flight_status": {"flight_number": "KA771", "date": "2026-08-09"},
-        "get_credit_balance": {"miles_number": "KM2019773"},
-        "get_elite_status": {"miles_number": "KM4471902"},
-        "get_pass_status": {"miles_number": "KM8827104"},
-        "get_seat_map": {"flight_number": "KA812", "date": "2026-08-18"},
+        "get_flight_status": {"flight_number": "JA771", "date": "2026-08-09"},
+        "get_credit_balance": {"miles_number": "JR2019773"},
+        "get_elite_status": {"miles_number": "JR4471902"},
+        "get_pass_status": {"miles_number": "JR8827104"},
+        "get_seat_map": {"flight_number": "JA812", "date": "2026-08-18"},
         "escalate_to_human": {"reason_code": "caller_request"},
     },
 }
@@ -513,13 +513,13 @@ def test_travel_guards_survive_dispatch() -> None:
 
         # the precedence trap: RT2LKD's flight is cancelled, so a voluntary change
         # must be refused rather than quoted a fee
-        disrupted = tool("quote_change", {"new_flight": "KA775"})
+        disrupted = tool("quote_change", {"new_flight": "JA775"})
         assert disrupted["ok"] is False
         assert disrupted["error_code"] == "DISRUPTED_USE_IRROPS", disrupted
         assert disrupted["data"]["recoverable"] is False
 
         # the free rebook is what that traveller is actually owed, at zero
-        rebook = tool("quote_involuntary_rebook", {"new_flight": "KA775"})
+        rebook = tool("quote_involuntary_rebook", {"new_flight": "JA775"})
         assert rebook["ok"] and rebook["data"]["total"] == 0.0, rebook
         token = rebook["data"]["confirmation_token"]
         assert tool("confirm_involuntary_rebook",

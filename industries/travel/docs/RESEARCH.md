@@ -1,4 +1,4 @@
-# RESEARCH: airline voice AI, candidate carriers, and the Kestrel Air replica
+# RESEARCH: airline voice AI, candidate carriers, and the Juniper Airlines replica
 
 Facts are tagged **[R]** (sourced, URL kept) or **[I]** (inferred by me). The tags
 carry into `SPEC.md` and the README's honesty section.
@@ -312,8 +312,8 @@ exactly.
 
 | Real | Replica |
 |---|---|
-| Frontier Airlines | **Kestrel Air**, flight numbers `KA###` |
-| Frontier Miles | **Kestrel Miles**, tiers silver / gold / platinum / diamond |
+| Frontier Airlines | **Juniper Airlines**, flight numbers `JA###` |
+| Frontier Miles | **Juniper Rewards**, tiers silver / gold / platinum / diamond |
 | GoWild All-You-Can-Fly Pass | **Roam Pass** |
 | Discount Den | **Fare Club** |
 | Economy / Premium / Business bundles | **value** / **comfort** / **apex** bundles |
