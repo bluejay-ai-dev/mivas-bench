@@ -1,8 +1,10 @@
 # Stable public hostname per harness×industry pair.
 # Host: __HOST__  →  wss://__HOST__/  (Bluejay)  and  https://__HOST__/  (PUBLIC_URL)
 #
-# /tools /state /snapshot /health → tools ClusterIP (one SQLite writer).
-# /                    → CHIRP / ConversationRelay (Bluejay WS + platform /tool/* webhooks).
+# Combined pod: CHIRP :8765 and the industry tool server :8000 in one container.
+# Ingress `/` → CHIRP (voice + platform /tool/* on the harness process).
+# ALB health check hits :8000/health on the same pods (no extra listener rules).
+# Evals read S3, not GET /state or /snapshot on this hostname.
 #
 # TLS, ALB grouping, and idle timeout are on IngressClassParams (k8s/ingressclass.yaml).
 # EKS Auto Mode does not honor group.name / certificate-arn Ingress annotations.
@@ -18,8 +20,7 @@ metadata:
     mivas.slug: "__SLUG__"
   annotations:
     # CHIRP on :8765 is WebSocket-only; HTTP GET / there is 400 and ALB would
-    # mark the target unhealthy. Probe the harness :8000 health stub (and the
-    # tools pod /health on the tools target group). Both listen on 8000.
+    # mark the target unhealthy. Probe the in-pod tool server :8000/health.
     alb.ingress.kubernetes.io/healthcheck-protocol: HTTP
     alb.ingress.kubernetes.io/healthcheck-port: "8000"
     alb.ingress.kubernetes.io/healthcheck-path: /health
@@ -34,34 +35,6 @@ spec:
     - host: __HOST__
       http:
         paths:
-          - path: /tools
-            pathType: Prefix
-            backend:
-              service:
-                name: mivas-__SLUG__-tools
-                port:
-                  name: tools
-          - path: /state
-            pathType: Prefix
-            backend:
-              service:
-                name: mivas-__SLUG__-tools
-                port:
-                  name: tools
-          - path: /snapshot
-            pathType: Prefix
-            backend:
-              service:
-                name: mivas-__SLUG__-tools
-                port:
-                  name: tools
-          - path: /health
-            pathType: Prefix
-            backend:
-              service:
-                name: mivas-__SLUG__-tools
-                port:
-                  name: tools
           - path: /
             pathType: Prefix
             backend:

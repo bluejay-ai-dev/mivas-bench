@@ -32,8 +32,9 @@ from call_id import (  # noqa: E402
 
 
 @pytest.fixture(autouse=True)
-def _clean_call_id() -> None:
+def _clean_call_id(monkeypatch: pytest.MonkeyPatch) -> None:
     reset()
+    monkeypatch.setattr("snapshot.capture_final", lambda _cid: None)
     yield
     reset()
 
@@ -99,11 +100,14 @@ def test_two_sessions_block_sole_fallback() -> None:
     assert minted.startswith("call_")
 
 
-def test_end_session_restores_sole() -> None:
+def test_end_session_restores_sole(monkeypatch: pytest.MonkeyPatch) -> None:
+    seen: list[str] = []
+    monkeypatch.setattr("snapshot.capture_final", lambda cid: seen.append(cid))
     begin_session("675", session_key="ws-1")
     begin_session("676", session_key="ws-2")
     end_session("ws-2")
     assert sole_session() == "675"
+    assert seen == ["676"]
 
 
 def test_provider_id_from_payload() -> None:

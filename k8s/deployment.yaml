@@ -50,17 +50,23 @@ spec:
             - name: HARNESS_DIR
               value: "/app/harness/__HARNESS_RUNTIME__"
             - name: PYTHONPATH
-              value: "/app/harness"
-            - name: MIVAS_ROLE
-              value: "harness"
+              value: "/app/runtime:/app/harness"
             - name: TOOL_SERVER_URL
-              value: "http://mivas-__SLUG__-tools:8000"
+              value: "http://127.0.0.1:8000"
             - name: TOOL_SERVER_PORT
               value: "8000"
             - name: CHIRP_PORT
               value: "8765"
             - name: MIVAS_DB_PATH
               value: "/data/industry.db"
+            - name: MIVAS_SLUG
+              value: "__SLUG__"
+            - name: MIVAS_SNAPSHOT_BUCKET
+              value: "__SNAPSHOT_BUCKET__"
+            - name: MIVAS_SNAPSHOT_PREFIX
+              value: "__SNAPSHOT_PREFIX__"
+            - name: AWS_DEFAULT_REGION
+              value: "__AWS_REGION__"
             - name: INDUSTRY_DIR
               value: "/app/industry"
             - name: PUBLIC_URL
@@ -221,10 +227,15 @@ spec:
             limits:
               memory: 1536Mi
           readinessProbe:
-            # harness_health.py on :8000. The industry tool server is a
-            # separate Deployment (mivas-{slug}-tools). Do not TCP-probe :8765.
+            # In-pod industry tool server on :8000. Do not TCP-probe :8765.
             httpGet:
               path: /health
               port: tools
             initialDelaySeconds: 5
             periodSeconds: 5
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: data
+          emptyDir: {}
