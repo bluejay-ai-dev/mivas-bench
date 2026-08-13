@@ -1,12 +1,12 @@
 # travel
 
-Kestrel Air, a hypothetical American low fare airline, encoding the airline
+Juniper Airlines, a hypothetical American low fare airline, encoding the airline
 industry for MIVAS. Six agents handling an existing booking: identity and the
 unaccompanied-minor gate, federal disruption entitlements, the voluntary change and
 cancellation ladder, bags and seats priced by touchpoint and status, the Roam Pass
 and Fare Club, and payment. Every consequential change is a two-step write gate.
 
-**Kestrel Air is fictional.** It is a replica, structurally modelled 1:1 on
+**Juniper Airlines is fictional.** It is a replica, structurally modelled 1:1 on
 **Frontier Airlines**: every fee, window, threshold, tier boundary and eligibility
 rule below matches Frontier's published policy or federal rule, and every name,
 brand, code and person is invented. The backing systems are deterministic SQLite
@@ -15,7 +15,7 @@ replica map and sources, and [docs/SPEC.md](docs/SPEC.md) for which facts are
 sourced `[R]` and which are inferred `[I]`.
 
 The agent introduces itself as **Frankie**, once, in reception's first sentence
-("Kestrel Air, this is Frankie, I'm an AI assistant"). No node after reception repeats
+("Juniper Airlines, this is Frankie, I'm an AI assistant"). No node after reception repeats
 the name or the disclosure.
 
 Prompts are written as real customer production prompts, not shortened for a

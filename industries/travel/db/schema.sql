@@ -1,6 +1,6 @@
--- Kestrel Air: seeded reference data + durable call artifacts (written at runtime).
+-- Juniper Airlines: seeded reference data + durable call artifacts (written at runtime).
 --
--- Kestrel Air is a fictional replica of a real US ultra-low-cost carrier. Every
+-- Juniper Airlines is a fictional replica of a real US ultra-low-cost carrier. Every
 -- number here is structurally identical to that carrier's published policy; every
 -- name and code is invented. See docs/RESEARCH.md for the replica map.
 
@@ -83,7 +83,7 @@ CREATE TABLE IF NOT EXISTS inventory (
     PRIMARY KEY (flight_number, departs_on)
 );
 
--- Kestrel Miles elite matrix. The two load-bearing boundaries: the free first
+-- Juniper Rewards elite matrix. The two load-bearing boundaries: the free first
 -- checked bag starts at platinum, and no tier ever includes the carry-on.
 CREATE TABLE IF NOT EXISTS elite_tiers (
     tier                 TEXT PRIMARY KEY,
