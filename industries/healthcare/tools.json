@@ -184,7 +184,7 @@
     },
     {
       "name": "list_locations",
-      "description": "Offices near a zip that do cosmetic work.",
+      "description": "Offices near a zip: real address, floor, suite, hours, services and whether the office does cosmetic work. The only source of an office address, floor or location_id.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -260,7 +260,7 @@
     },
     {
       "name": "find_slots",
-      "description": "Open cosmetic consult slots. Offer two or three.",
+      "description": "Open appointment slots at the given offices. Offer two or three, never a list.",
       "inputSchema": {
         "type": "object",
         "properties": {

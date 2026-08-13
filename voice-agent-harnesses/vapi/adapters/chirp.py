@@ -39,6 +39,7 @@ from harness import (  # noqa: E402
     webhook_tool_names,
 )
 from report import (  # noqa: E402
+    bind_call,
     end_speech_span,
     finish_tool_span,
     start_speech_span,
@@ -76,12 +77,14 @@ def _payload(event: dict) -> dict:
 async def tool_webhook(name: str, request: Request) -> dict[str, Any]:
     """Vapi tool-calls webhook → run_tool (which emits the execute_tool span).
 
-    # ponytail: spans bind to report.py's module-level active root, so exactly one
-    # call may be in flight; benchmark runs are max_concurrent=1. Key the span by
-    # call id if that ever changes.
+    Spans and state both key on `message.call.id` (the conversation), so any number
+    of calls can be in flight. Note the entries of `toolCallList` carry their own
+    ids — those identify the tool call, not the conversation.
     """
     body = await request.json()
-    calls = (_payload(body).get("toolCallList")) or []
+    message = _payload(body)
+    vapi_call_id = ((message.get("call") or {}).get("id")) or None
+    calls = message.get("toolCallList") or []
     results = []
     for call in calls:
         # live payload nests name/arguments under `function`; top level is the fallback
@@ -91,7 +94,9 @@ async def tool_webhook(name: str, request: Request) -> dict[str, Any]:
             with contextlib.suppress(json.JSONDecodeError):
                 args = json.loads(args)
         tool_name = fn.get("name") or call.get("name") or name
-        result = await run_tool(tool_name, dict(args), call_id=call.get("id"))
+        result = await run_tool(
+            tool_name, dict(args), call_id=call.get("id"), vapi_call_id=vapi_call_id
+        )
         print(f"chirp tool {tool_name} args={args} -> {result}", flush=True)
         results.append({"toolCallId": call.get("id"), "result": json.dumps(result)})
     return {"results": results}
@@ -129,6 +134,9 @@ async def _bridge(ws: WebSocket) -> None:
 
     async with traced_run(workflow, simulation_result_id=sim_id, model=model):
         call_url, call_id = await asyncio.to_thread(start_websocket_call, _cfg["squad_id"])
+        # webhook tool calls arrive with no OTel/ContextVar context; this is how they
+        # find this bridge's trace root instead of whichever one started last
+        bind_call(call_id)
         print(f"chirp vapi call={call_id}", flush=True)
         async with websockets.connect(call_url, max_size=None) as vapi_ws:
 
