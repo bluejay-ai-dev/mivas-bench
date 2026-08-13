@@ -29,10 +29,10 @@ particular model.
 4. `returns`: the window computation (15 / 60 / 14 by tier × product class), the
    restocking-fee computation (class × opened × purchase state), starting the
    return, the label, and refund status
-5. `service`. TechCrew: the coverage ladder (plan → Total → manufacturer
+5. `service`: TechCrew's coverage ladder (plan → Total → manufacturer
    warranty → nobody), appointment booking, and the recall and battery-safety
    refusals
-6. `membership`. Kestrel Plus and Total: status, prorated upgrade, and
+6. `membership`: Kestrel Plus and Total status, prorated upgrade, and
    cancellation with one save offer and no runaround
 7. `fraud`: the impersonation desk, **outside the identity gate on purpose**:
    confirms no such charge exists, refuses to confirm anything read off an email,
