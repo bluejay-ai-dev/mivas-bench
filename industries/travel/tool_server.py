@@ -1688,10 +1688,12 @@ def _selfcheck() -> None:
     assert dump["itineraries"] and dump["reservation_notes"], "writes must persist"
 
     # ---------------------------------------------------------- catalog parity
-    # Prompt structure, in the healthcare section format: seven shared sections,
-    # a numbered role divider, then the per-agent sections. WHO YOU ARE and the
-    # no-tool facts list must be identical everywhere; PERSONALITY, GUARDRAILS,
-    # HARD RULES and SECURITY are deliberately tailored per node.
+    # Prompt structure: WHO YOU ARE, then the numbered role divider and the
+    # per-agent sections, then the remaining shared sections with AIRLINE FACTS
+    # last. Role sits at the top so it is not lost under the shared preamble.
+    # WHO YOU ARE and the no-tool facts list must be identical everywhere;
+    # PERSONALITY, GUARDRAILS, HARD RULES and SECURITY are deliberately tailored
+    # per node.
     prompts = sorted((INDUSTRY_DIR / "system-prompts").glob("*.md"))
     assert len(prompts) == 6, [p.name for p in prompts]
     shared: dict[str, set[str]] = {"WHO YOU ARE": set(), "FACTS": set()}
@@ -1707,6 +1709,14 @@ def _selfcheck() -> None:
         assert heads[0] == "WHO YOU ARE", f"{path.name}: must open with WHO YOU ARE"
         role = [h for h in heads if "YOUR CURRENT ROLE:" in h]
         assert len(role) == 1, f"{path.name}: expected one role divider, got {role}"
+        assert "YOUR CURRENT ROLE:" in heads[1], \
+            f"{path.name}: role must follow WHO YOU ARE immediately"
+        personality_idx = heads.index("PERSONALITY")
+        facts_idx = heads.index("AIRLINE FACTS YOU MAY STATE WITHOUT A TOOL")
+        assert personality_idx > 1, \
+            f"{path.name}: PERSONALITY must come after the role"
+        assert facts_idx == len(heads) - 1, \
+            f"{path.name}: AIRLINE FACTS must be the last section"
         # Every node except the entry states where the caller already is.
         entry = json.loads(
             (INDUSTRY_DIR / "agent_blueprint.json").read_text())["agents"][0]["name"]
@@ -1714,10 +1724,9 @@ def _selfcheck() -> None:
             assert "WHERE YOU ARE IN THE CALL" in heads, \
                 f"{path.name}: a non-entry node must say where the call already is"
         assert "Frankie" in text, f"{path.name}: the agent is called Frankie"
-        shared["WHO YOU ARE"].add(text.split("\n# PERSONALITY")[0])
+        shared["WHO YOU ARE"].add(text.split("\n# ─")[0])
         shared["FACTS"].add(
-            text.split("# AIRLINE FACTS YOU MAY STATE WITHOUT A TOOL")[1]
-                .split("\n# ─")[0])
+            text.split("# AIRLINE FACTS YOU MAY STATE WITHOUT A TOOL")[1])
     for block, seen in shared.items():
         assert len(seen) == 1, f"{block} drifted across prompts ({len(seen)} variants)"
 
