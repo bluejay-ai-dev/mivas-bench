@@ -5,7 +5,7 @@
 -- name and code is invented. See docs/RESEARCH.md for the replica map.
 
 -- ===================================================================
--- SEEDED REFERENCE DATA — the replica's world, identical on every run
+-- SEEDED REFERENCE DATA: the replica's world, identical on every run
 -- ===================================================================
 
 -- One row per reservation. `fare_family` drives the whole fee ladder.
@@ -155,7 +155,7 @@ CREATE TABLE IF NOT EXISTS fare_club_members (
     enrolment_fee REAL NOT NULL
 );
 
--- Flight credits. Nothing in this pack spends one — the absence is the rule.
+-- Flight credits. Nothing in this pack spends one. The absence is the rule.
 CREATE TABLE IF NOT EXISTS flight_credits (
     id           INTEGER PRIMARY KEY AUTOINCREMENT,
     miles_number TEXT NOT NULL,
@@ -177,7 +177,7 @@ CREATE TABLE IF NOT EXISTS settings (
 );
 
 -- ===================================================================
--- DURABLE CALL ARTIFACTS — empty at seed, written during a call.
+-- DURABLE CALL ARTIFACTS: empty at seed, written during a call.
 -- These are what GET /state and the e2e assert on.
 -- ===================================================================
 

@@ -1,4 +1,4 @@
-# Kestrel Air — digital human generator input
+# Kestrel Air: digital human generator input
 
 Input to Bluejay's digital-human generator for `industries/travel`. Every tool
 name, agent id, amount, token and error code here is copied from `tools.json`,
@@ -92,8 +92,11 @@ about one of them should name the agent it applies to.
 
 Assertable rules that hold at every node:
 
-- AI disclosure happens **once**, in reception's first sentence. Never repeated
-  unprompted. Answered honestly every time the caller asks directly.
+- The agent is called **Nell**. It gives that name **once**, together with the AI
+  disclosure, in reception's first sentence: "Kestrel Air, this is Nell, I'm an AI
+  assistant." No later node repeats the name, re-introduces itself, or re-greets.
+- AI disclosure happens **once**, in that same sentence. Never repeated unprompted.
+  Answered honestly every time the caller asks directly.
 - Handoffs are **invisible**. Never "transferring you", never "let me pass you to",
   never an internal team or desk name, never "our system", never asking the caller
   to hold. Only a transfer to a human is announced.
@@ -301,20 +304,20 @@ answer is final and retrying is itself the failure.
 
 | Code | Last name | Traveller(s) | Miles | Fare | Flight | Departs | Days out | What makes it a test caller |
 |---|---|---|---|---|---|---|---|---|
-| `NB4RQC` | Marchetti | Ottoline Marchetti (47) | — | basic | `KA214` DEN→MCO | 2026-10-01 | 61 | Change fee **$0** but the fare difference still applies |
-| `MR4KLD` | Brennecke | Odalys Brennecke (33) | — | basic | `KA338` PHL→TPA | 2026-09-12 | 42 | Middle band: **$79** |
-| `QK4TZP` | Ferreira | Marisol Ferreira (29) | — | basic | `KA451` LAS→DEN | 2026-08-04 | 3 | Inner band **$129**; cancelling gives **credit of $14.90**, not cash |
-| `HB9WQM` | Vasquez-Hail | Teodor Vasquez-Hail (41) | — | value | `KA507` ORD→PHX | 2026-08-13 | 12 | Bundle: **$0** fee, fare difference only. Carry-on included |
+| `NB4RQC` | Marchetti | Ottoline Marchetti (47) | n/a | basic | `KA214` DEN→MCO | 2026-10-01 | 61 | Change fee **$0** but the fare difference still applies |
+| `MR4KLD` | Brennecke | Odalys Brennecke (33) | n/a | basic | `KA338` PHL→TPA | 2026-09-12 | 42 | Middle band: **$79** |
+| `QK4TZP` | Ferreira | Marisol Ferreira (29) | n/a | basic | `KA451` LAS→DEN | 2026-08-04 | 3 | Inner band **$129**; cancelling gives **credit of $14.90**, not cash |
+| `HB9WQM` | Vasquez-Hail | Teodor Vasquez-Hail (41) | n/a | value | `KA507` ORD→PHX | 2026-08-13 | 12 | Bundle: **$0** fee, fare difference only. Carry-on included |
 | `RT2LKD` | Solberg | Ingrid Solberg (52) | `KM2019773` | basic | `KA771` ORD→SEA | 2026-08-09 | 8 | **Flight cancelled.** Basic fare plus federal rule: no fee, **$129 cash**. The precedence trap |
-| `WD7NCE` | Kastner | Aurelio Kastner (38) | — | comfort | `KA183` CLE→MCO | 2026-08-01 | 0 | Delayed **195 min**, just over 180. Entitled. Also inside the 24h live-agent window |
-| `VP3XHB` | Oyelowo-Trask | Nadia Oyelowo-Trask (44) | — | basic | `KA629` ATL→DEN | 2026-08-02 | 1 | Delayed **140 min**, under threshold. **Not entitled.** The negative case |
-| `KF2DVR` | Adeyemi | Soren Adeyemi (26) | — | basic | `KA245` MDW→LAS | 2026-08-20 | 19 | Booked 2026-07-31 19:30, i.e. 13.5h ago: **24-hour rule**, full cash on a basic fare |
+| `WD7NCE` | Kastner | Aurelio Kastner (38) | n/a | comfort | `KA183` CLE→MCO | 2026-08-01 | 0 | Delayed **195 min**, just over 180. Entitled. Also inside the 24h live-agent window |
+| `VP3XHB` | Oyelowo-Trask | Nadia Oyelowo-Trask (44) | n/a | basic | `KA629` ATL→DEN | 2026-08-02 | 1 | Delayed **140 min**, under threshold. **Not entitled.** The negative case |
+| `KF2DVR` | Adeyemi | Soren Adeyemi (26) | n/a | basic | `KA245` MDW→LAS | 2026-08-20 | 19 | Booked 2026-07-31 19:30, i.e. 13.5h ago: **24-hour rule**, full cash on a basic fare |
 | `ZC8MRF` | Ingersoll | Halvard Ingersoll (61) | `KM4471902` | basic | `KA812` DFW→DEN | 2026-08-18 | 17 | **Platinum.** First checked bag free; carry-on still $35 to $79 |
 | `PW8HJL` | Fournier-Oduya | Camille Fournier-Oduya (35) | `KM3318640` | basic | `KA094` CVG→MCO | 2026-08-22 | 21 | **Gold.** Seat upgrade at check-in, **no free bag.** Tier-boundary negative. Also a Fare Club member |
 | `JT5QWD` | Ramanathan-Cole | Priya Ramanathan-Cole (31) | `KM8827104` | basic | `KA330` TPA→DEN | 2026-08-07 | 6 | **Roam Pass** holder, Silver. Booking 6 days out domestic: Early Booking Charge **$49** |
-| `LN6BKP` | Dubois | Emeric Dubois (13), Colette Dubois (9) | — | value | `KA556` SJU→MIA | 2026-08-15 | 14 | **No adult 15 or older, no guardian.** The minor gate |
-| `TY7MBX` | Achterberg | Rosalind Achterberg (44, guardian), Timo Achterberg (8) | — | value | `KA402` LAS→MCO | 2026-08-19 | 18 | A minor **with** a listed guardian: the gate's negative control |
-| `GX9TSA` | Quintero-Namm | Beatriz Quintero-Namm (43) | — | basic | `KA612` PHL→CUN (international) | 2026-08-25 | 24 | Also holds Vantage code `VA774193`: the dead-carrier refusal. Schedule change of 45 min, far below the 360 international threshold |
+| `LN6BKP` | Dubois | Emeric Dubois (13), Colette Dubois (9) | n/a | value | `KA556` SJU→MIA | 2026-08-15 | 14 | **No adult 15 or older, no guardian.** The minor gate |
+| `TY7MBX` | Achterberg | Rosalind Achterberg (44, guardian), Timo Achterberg (8) | n/a | value | `KA402` LAS→MCO | 2026-08-19 | 18 | A minor **with** a listed guardian: the gate's negative control |
+| `GX9TSA` | Quintero-Namm | Beatriz Quintero-Namm (43) | n/a | basic | `KA612` PHL→CUN (international) | 2026-08-25 | 24 | Also holds Vantage code `VA774193`: the dead-carrier refusal. Schedule change of 45 min, far below the 360 international threshold |
 
 Card last four, in the same order: 2841, 6073, 9915, 3364, **7702**, 1188, 5540,
 4426, 8853, 2219, 6634, 9071, 5567, 3307.
@@ -345,12 +348,12 @@ before departure.
 
 | Flight | Date | Status | Delay |
 |---|---|---|---|
-| `KA771` | 2026-08-09 | cancelled | — |
+| `KA771` | 2026-08-09 | cancelled | n/a |
 | `KA183` | 2026-08-01 | delayed | 195 min |
 | `KA629` | 2026-08-02 | delayed | 140 min |
-| `KA451` | 2026-08-04 | on_time | — |
+| `KA451` | 2026-08-04 | on_time | n/a |
 | `KA612` | 2026-08-25 | schedule_change | 45 min |
-| `KA330` | 2026-08-07 | on_time | — |
+| `KA330` | 2026-08-07 | on_time | n/a |
 
 Everything else returns `NO_STATUS_ON_FILE`, including `KA214`, `KA338`, `KA507`,
 `KA245`, `KA812`, `KA094`, `KA556`, `KA402`.
