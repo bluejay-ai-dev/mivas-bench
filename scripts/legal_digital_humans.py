@@ -111,6 +111,14 @@ _ASK_REPEAT_NUMBER = (
     "The agent says it did not catch the phone number, or asks the caller to repeat or "
     "confirm the callback number. NOT the first time it asks for a name and number."
 )
+# Reception asks this of almost every caller, early, and it decides whether the call
+# stops dead at represented_party. Run 230572: personas without a pinned answer fell
+# through to "I'm not sure" and burned three turns arguing about it.
+_ASK_REPRESENTED = (
+    "The agent asks whether another lawyer or law firm currently represents the caller, "
+    "or whether the caller has already hired or signed with anyone. NOT any other "
+    "question."
+)
 
 
 def _pin(phrase, value):
@@ -141,6 +149,16 @@ def p_state(state):
 
 def p_book():
     return _pin(_ASK_BOOK, "Yes, that's right, go ahead and book it.")
+
+
+def p_represented(answer):
+    return _pin(_ASK_REPRESENTED, answer)
+
+
+# Callers who give no answer to the representation question at all: the emergency, the
+# wrong number, and the four who are on the other side or impersonating staff.
+NO_REPRESENT_PIN = {"L04", "L08", "L18", "L19", "L20", "L60"}
+DEFAULT_REPRESENTED = "No, nobody represents me."
 
 
 # ------------------------------------------------------------------ the 60 cases
@@ -552,7 +570,8 @@ AREAS = [
                   output=ok()),
             ],
             'handoffs': [],
-            'pins': [p_ident('Marcus Oyelaran', '415-555-0188')],
+            'pins': [p_ident('Marcus Oyelaran', '415-555-0188'),
+                     p_represented('Yes, Croft and Blake have been handling it.')],
         },
 
         {
@@ -578,7 +597,8 @@ AREAS = [
                   output=ok()),
             ],
             'handoffs': [],
-            'pins': [p_ident('Roland Pike', '480-555-0139')],
+            'pins': [p_ident('Roland Pike', '480-555-0139'),
+                     p_represented('Yes, I have a lawyer for this already.')],
         },
 
         {
@@ -605,7 +625,9 @@ AREAS = [
                   output=ok()),
             ],
             'handoffs': [],
-            'pins': [p_ident('Deborah Vance', '615-555-0421')],
+            'pins': [p_ident('Deborah Vance', '615-555-0421'),
+                     p_represented("Technically yes, but I'm calling them right "
+                                   'after this.')],
         },
 
         {
@@ -1955,7 +1977,9 @@ AREAS = [
                 t('get_case_status', parameters={'matter_id': 'm_91'}, output=ok()),
             ],
             'handoffs': ['transfer_to_client_services'],
-            'pins': [p_ident('Tomas Escobar', '312-555-0277')],
+            'pins': [p_ident('Tomas Escobar', '312-555-0277'),
+                     p_represented('No, nobody else. Halverson and Reed are the ones '
+                                   'handling it.')],
         },
 
         {
@@ -1982,7 +2006,9 @@ AREAS = [
                   parameters={'reason_code': 'legal_advice_requested'}, output=ok()),
             ],
             'handoffs': ['transfer_to_client_services'],
-            'pins': [p_ident('Tomas Escobar', '312-555-0277')],
+            'pins': [p_ident('Tomas Escobar', '312-555-0277'),
+                     p_represented('No, nobody else. Halverson and Reed are the ones '
+                                   'handling it.')],
         },
 
         {
@@ -2203,6 +2229,10 @@ def build() -> list[dict]:
     out = []
     for area, cases in AREAS:
         for case in cases:
+            pins = list(case["pins"])
+            if (case["key"] not in NO_REPRESENT_PIN
+                    and not any(p["match_phrase"] == _ASK_REPRESENTED for p in pins)):
+                pins.append(p_represented(DEFAULT_REPRESENTED))
             traits = [
                 {
                     "trait_name": "expected_handoff_path",
@@ -2242,7 +2272,7 @@ def build() -> list[dict]:
                     "allow_end_call_tool": True,
                     "allow_silence_tool": True,
                     "num_runs": 1,
-                    "scripted_responses": case["pins"],
+                    "scripted_responses": pins,
                 }
             })
     return out
