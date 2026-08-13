@@ -1,40 +1,44 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mivas-__JOB_SLUG__
+  name: mivas-__SLUG__
   labels:
     app: mivas-bench
-    mivas.harness: "__HARNESS_FAMILY__"
-    mivas.runtime: "__HARNESS_RUNTIME__"
+    mivas.harness_family: "__HARNESS_FAMILY__"
+    mivas.harness_runtime: "__HARNESS_RUNTIME__"
     mivas.industry: "__INDUSTRY__"
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: mivas-bench
-      mivas.slug: "__JOB_SLUG__"
+      mivas.slug: "__SLUG__"
   template:
     metadata:
       labels:
         app: mivas-bench
-        mivas.slug: "__JOB_SLUG__"
-        mivas.harness: "__HARNESS_FAMILY__"
-        mivas.runtime: "__HARNESS_RUNTIME__"
+        mivas.slug: "__SLUG__"
+        mivas.harness_family: "__HARNESS_FAMILY__"
+        mivas.harness_runtime: "__HARNESS_RUNTIME__"
         mivas.industry: "__INDUSTRY__"
     spec:
       containers:
         - name: mivas
           image: __IMAGE__
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: __IMAGE_PULL_POLICY__
           env:
             - name: MIVAS_MODE
-              value: "chirp"
-            - name: VOICE_AGENT
-              value: "__VOICE_AGENT__"
+              value: "__MIVAS_MODE__"
+            - name: HARNESS
+              value: "__HARNESS__"
             - name: INDUSTRY
               value: "__INDUSTRY__"
+            - name: HARNESS_FAMILY
+              value: "__HARNESS_FAMILY__"
             - name: HARNESS_RUNTIME
               value: "__HARNESS_RUNTIME__"
+            - name: HARNESS_FAMILY_DIR
+              value: "/app/harness"
             - name: HARNESS_DIR
               value: "/app/harness/__HARNESS_RUNTIME__"
             - name: PYTHONPATH
@@ -49,6 +53,8 @@ spec:
               value: "/data/industry.db"
             - name: INDUSTRY_DIR
               value: "/app/industry"
+            - name: PUBLIC_URL
+              value: "__PUBLIC_URL__"
             - name: OPENAI_API_KEY
               valueFrom:
                 secretKeyRef:
@@ -61,12 +67,122 @@ spec:
                   name: mivas-secrets
                   key: NVIDIA_API_KEY
                   optional: true
+            - name: NGC_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: mivas-secrets
+                  key: NGC_API_KEY
+                  optional: true
+            - name: VAPI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: mivas-secrets
+                  key: VAPI_API_KEY
+                  optional: true
+            - name: RETELL_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: mivas-secrets
+                  key: RETELL_API_KEY
+                  optional: true
+            - name: BLAND_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: mivas-secrets
+                  key: BLAND_API_KEY
+                  optional: true
+            - name: CARTESIA_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: mivas-secrets
+                  key: CARTESIA_API_KEY
+                  optional: true
+            - name: ELEVENLABS_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: mivas-secrets
+                  key: ELEVENLABS_API_KEY
+                  optional: true
+            - name: ELEVEN_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: mivas-secrets
+                  key: ELEVENLABS_API_KEY
+                  optional: true
+            - name: ASSEMBLYAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: mivas-secrets
+                  key: ASSEMBLYAI_API_KEY
+                  optional: true
+            - name: ASSEMBLYAI_VOICE
+              value: "alba"
+            - name: TWILIO_WELCOME_GREETING
+              value: "Welcome to Bluejay's Repair Services!"
+            - name: DEEPGRAM_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: mivas-secrets
+                  key: DEEPGRAM_API_KEY
+                  optional: true
+            - name: GOOGLE_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: mivas-secrets
+                  key: GOOGLE_API_KEY
+                  optional: true
+            - name: GROK_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: mivas-secrets
+                  key: GROK_API_KEY
+                  optional: true
+            - name: XAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: mivas-secrets
+                  key: XAI_API_KEY
+                  optional: true
+            - name: LIVEKIT_URL
+              valueFrom:
+                secretKeyRef:
+                  name: mivas-secrets
+                  key: LIVEKIT_URL
+                  optional: true
+            - name: LIVEKIT_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: mivas-secrets
+                  key: LIVEKIT_API_KEY
+                  optional: true
+            - name: LIVEKIT_API_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: mivas-secrets
+                  key: LIVEKIT_API_SECRET
+                  optional: true
+            - name: VOICECHAT_WS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: mivas-secrets
+                  key: VOICECHAT_WS_URL
+                  optional: true
+            - name: VOICECHAT_FUNCTION_ID
+              valueFrom:
+                secretKeyRef:
+                  name: mivas-secrets
+                  key: VOICECHAT_FUNCTION_ID
+                  optional: true
             - name: BLUEJAY_API_KEY
               valueFrom:
                 secretKeyRef:
                   name: mivas-secrets
                   key: BLUEJAY_API_KEY
                   optional: true
+            - name: BLUEJAY_API_URL
+              value: "__BLUEJAY_API_URL__"
+            - name: BLUEJAY_OTLP_ENDPOINT
+              value: "__BLUEJAY_OTLP_ENDPOINT__"
             - name: BLUEJAY_SERVICE_NAME
               value: "mivas-__HARNESS_FAMILY__"
             - name: CHIRP_USER
@@ -91,6 +207,12 @@ spec:
               name: tools
             - containerPort: 8765
               name: chirp
+          resources:
+            requests:
+              cpu: 250m
+              memory: 384Mi
+            limits:
+              memory: 1536Mi
           readinessProbe:
             # Probe the tool server — TCP probes on the CHIRP port spam
             # websockets with "opening handshake failed" stack traces.
