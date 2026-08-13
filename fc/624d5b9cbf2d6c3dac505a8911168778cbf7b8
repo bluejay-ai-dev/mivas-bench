@@ -1,0 +1,72 @@
+voice-agent-harnesses/glm/harness.py
+  s_641edfa400c9ae::t_83f952bad1b844 515-543,549-554
+  s_641edfa400c9ae::t_7997bedb6383d6 618,620-629
+  s_641edfa400c9ae::t_b40a4c5bad9104 366-381,383-387
+  s_641edfa400c9ae::t_f062caf22764cb 128-131
+  s_641edfa400c9ae::t_8cdbf9fe5c9d9a 399,404-407,411-438
+  s_641edfa400c9ae::t_abbc6fdceac33e 544-548
+  s_641edfa400c9ae::t_40d303f35d0692 1-127,132-365,382,388-398,400-403,408-410,439-514,555-617,619,630-635
+voice-agent-harnesses/glm/README.md
+  s_641edfa400c9ae::t_a7cfe295e21da2 3-55
+  s_641edfa400c9ae::t_840fb9797619af 56-59
+run.py
+  s_641edfa400c9ae::t_083b53028baa4e 41-42
+  s_641edfa400c9ae::t_256466ac7cf302 51-52
+pyproject.toml
+  s_641edfa400c9ae::t_6053f49fb45fef 50
+.env.example
+  s_d9a9f0ab207baa::t_04785467f15655 79,112
+  s_641edfa400c9ae::t_540bf2f6783657 74-78,80
+  s_8654bd7365d6a2::t_bbef4f4bcb5450 73
+  s_641edfa400c9ae::t_73f3847443acd7 103
+voice-agent-harnesses/glm/realtime/agent.py
+  s_641edfa400c9ae::t_acbfa52cc6640a 1-38,48-58
+  s_641edfa400c9ae::t_1413f3dfc75045 39-47
+voice-agent-harnesses/glm/report.py
+  s_641edfa400c9ae::t_1e9201c707336e 1,3,5,7
+  s_641edfa400c9ae::t_bb48c6284bef7e 80
+  s_641edfa400c9ae::t_56851995f07125 56-57,60-61,63
+  s_641edfa400c9ae::t_29ed3c9872974e 2,4,6,8-36,38-55,58-59,62,64-79,81-564
+  s_641edfa400c9ae::t_9b23896e63319b 37
+voice-agent-harnesses/glm/realtime/adapters/chirp.py
+  s_641edfa400c9ae::t_c0d460a008c155 36
+  s_641edfa400c9ae::t_d42614fccd18fd 184
+  s_641edfa400c9ae::t_2600c8c17faf14 1-35,37-183,185-407
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "fc624d5b9cbf2d6c3dac505a8911168778cbf7b8",
+  "prompts": {},
+  "humans": {
+    "h_f787e3fe1ad713": {
+      "author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_641edfa400c9ae": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "9239716e-9732-4ffd-a33f-cedb7c81c2a0",
+        "model": "default"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    },
+    "s_8654bd7365d6a2": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "9794c652-7a98-4d98-83fc-0590ddc24053",
+        "model": "default"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    },
+    "s_d9a9f0ab207baa": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "b5504672-00b2-44ae-9336-1db916840cbf",
+        "model": "grok-4.5"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}
