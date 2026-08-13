@@ -6,7 +6,11 @@ Deepgram Voice Agent harness via raw `websockets` (no SDK) — one WS session
 
 | Folder | Model |
 |---|---|
-| `voice-agent/` | `deepgram-voice-agent` (flux-general-en listen, gpt-4.1 think, aura-2-thalia-en speak) |
+| `voice-agent/` | `deepgram-voice-agent` (flux-general-en listen, gpt-4.1 think, flux-hannah-en speak) |
+
+Speak uses [Flux TTS](https://developers.deepgram.com/docs/flux-tts/overview) — any
+`flux-{voice}-{lang}` model gets `version: v2` on the speak provider automatically; set
+`DEEPGRAM_SPEAK_MODEL=aura-2-thalia-en` to fall back to Aura.
 
 Shared: `harness.py` (builds the `Settings` payload from the blueprint). Tracing: `report.py`
 (GenAI-native OTel → Bluejay OTLP; `gen_ai.provider.name=deepgram`). Run a runtime with
