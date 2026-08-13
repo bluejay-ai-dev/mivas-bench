@@ -1,0 +1,122 @@
+{
+  "agents": [
+    {
+      "name": "reception",
+      "system_prompt": "system-prompts/reception.md",
+      "tools": [
+        {"name": "search_kb", "handoff": false},
+        {"name": "get_store_info", "handoff": false},
+        {"name": "get_policy", "handoff": false},
+        {"name": "get_fee", "handoff": false},
+        {"name": "escalate_to_human", "handoff": false},
+        {"name": "end_call", "session": true},
+        {"name": "transfer_to_verification", "handoff": true, "handoff_to": "verification"},
+        {"name": "transfer_to_fraud", "handoff": true, "handoff_to": "fraud"}
+      ]
+    },
+    {
+      "name": "verification",
+      "system_prompt": "system-prompts/verification.md",
+      "tools": [
+        {"name": "search_kb", "handoff": false},
+        {"name": "identify_customer", "handoff": false},
+        {"name": "verify_identity", "handoff": false},
+        {"name": "get_customer_summary", "handoff": false},
+        {"name": "escalate_to_human", "handoff": false},
+        {"name": "end_call", "session": true},
+        {"name": "transfer_to_orders", "handoff": true, "handoff_to": "orders"},
+        {"name": "transfer_to_returns", "handoff": true, "handoff_to": "returns"},
+        {"name": "transfer_to_service", "handoff": true, "handoff_to": "service"},
+        {"name": "transfer_to_membership", "handoff": true, "handoff_to": "membership"}
+      ]
+    },
+    {
+      "name": "orders",
+      "system_prompt": "system-prompts/orders.md",
+      "tools": [
+        {"name": "search_kb", "handoff": false},
+        {"name": "get_customer_summary", "handoff": false},
+        {"name": "get_order", "handoff": false},
+        {"name": "quote_delivery_change", "handoff": false},
+        {"name": "confirm_delivery_change", "handoff": false},
+        {"name": "cancel_order", "handoff": false},
+        {"name": "quote_price_match", "handoff": false},
+        {"name": "confirm_price_match", "handoff": false},
+        {"name": "get_fee", "handoff": false},
+        {"name": "escalate_to_human", "handoff": false},
+        {"name": "end_call", "session": true},
+        {"name": "transfer_to_returns", "handoff": true, "handoff_to": "returns"},
+        {"name": "transfer_to_service", "handoff": true, "handoff_to": "service"},
+        {"name": "transfer_to_fraud", "handoff": true, "handoff_to": "fraud"}
+      ]
+    },
+    {
+      "name": "returns",
+      "system_prompt": "system-prompts/returns.md",
+      "tools": [
+        {"name": "search_kb", "handoff": false},
+        {"name": "get_order", "handoff": false},
+        {"name": "check_return_eligibility", "handoff": false},
+        {"name": "quote_return", "handoff": false},
+        {"name": "confirm_return", "handoff": false},
+        {"name": "create_return_label", "handoff": false},
+        {"name": "get_refund_status", "handoff": false},
+        {"name": "get_fee", "handoff": false},
+        {"name": "escalate_to_human", "handoff": false},
+        {"name": "end_call", "session": true},
+        {"name": "transfer_to_orders", "handoff": true, "handoff_to": "orders"},
+        {"name": "transfer_to_service", "handoff": true, "handoff_to": "service"},
+        {"name": "transfer_to_fraud", "handoff": true, "handoff_to": "fraud"}
+      ]
+    },
+    {
+      "name": "service",
+      "system_prompt": "system-prompts/service.md",
+      "tools": [
+        {"name": "search_kb", "handoff": false},
+        {"name": "get_order", "handoff": false},
+        {"name": "get_protection_plans", "handoff": false},
+        {"name": "check_coverage", "handoff": false},
+        {"name": "book_service_appointment", "handoff": false},
+        {"name": "get_service_appointment", "handoff": false},
+        {"name": "cancel_service_appointment", "handoff": false},
+        {"name": "escalate_to_human", "handoff": false},
+        {"name": "end_call", "session": true},
+        {"name": "transfer_to_returns", "handoff": true, "handoff_to": "returns"},
+        {"name": "transfer_to_membership", "handoff": true, "handoff_to": "membership"},
+        {"name": "transfer_to_fraud", "handoff": true, "handoff_to": "fraud"}
+      ]
+    },
+    {
+      "name": "membership",
+      "system_prompt": "system-prompts/membership.md",
+      "tools": [
+        {"name": "search_kb", "handoff": false},
+        {"name": "get_membership", "handoff": false},
+        {"name": "quote_membership_upgrade", "handoff": false},
+        {"name": "confirm_membership_upgrade", "handoff": false},
+        {"name": "quote_membership_cancellation", "handoff": false},
+        {"name": "confirm_membership_cancellation", "handoff": false},
+        {"name": "get_fee", "handoff": false},
+        {"name": "escalate_to_human", "handoff": false},
+        {"name": "end_call", "session": true},
+        {"name": "transfer_to_service", "handoff": true, "handoff_to": "service"},
+        {"name": "transfer_to_fraud", "handoff": true, "handoff_to": "fraud"}
+      ]
+    },
+    {
+      "name": "fraud",
+      "system_prompt": "system-prompts/fraud.md",
+      "tools": [
+        {"name": "search_kb", "handoff": false},
+        {"name": "get_fee", "handoff": false},
+        {"name": "check_subscription_charge", "handoff": false},
+        {"name": "check_outbound_contact", "handoff": false},
+        {"name": "report_scam_contact", "handoff": false},
+        {"name": "escalate_to_human", "handoff": false},
+        {"name": "end_call", "session": true},
+        {"name": "transfer_to_verification", "handoff": true, "handoff_to": "verification"}
+      ]
+    }
+  ]
+}
