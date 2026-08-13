@@ -26,6 +26,9 @@ def industry_path(name: str | Path) -> Path:
     path = Path(name)
     if path.is_dir():
         return path.resolve()
+    env_dir = os.environ.get("INDUSTRY_DIR", "").strip()
+    if env_dir and Path(env_dir).is_dir():
+        return Path(env_dir).resolve()
     return (REPO_ROOT / "industries" / name).resolve()
 
 

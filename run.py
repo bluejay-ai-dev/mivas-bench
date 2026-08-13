@@ -34,16 +34,36 @@ def load_dotenv(path: Path) -> None:
 
 def _redact_cmd(cmd: list[str]) -> str:
     out: list[str] = []
+    secret_prefixes = tuple(f"--from-literal={k}=" for k in (
+        "OPENAI_API_KEY",
+        "NVIDIA_API_KEY",
+        "NGC_API_KEY",
+        "VAPI_API_KEY",
+        "RETELL_API_KEY",
+        "BLAND_API_KEY",
+        "CARTESIA_API_KEY",
+        "ELEVENLABS_API_KEY",
+        "ASSEMBLYAI_API_KEY",
+        "DEEPGRAM_API_KEY",
+        "GOOGLE_API_KEY",
+        "GROK_API_KEY",
+        "XAI_API_KEY",
+        "LIVEKIT_API_KEY",
+        "LIVEKIT_API_SECRET",
+        "BLUEJAY_API_KEY",
+        "CHIRP_PASS",
+        "PUBLIC_URL",
+    ))
     for part in cmd:
-        if part.startswith("--from-literal=OPENAI_API_KEY="):
-            out.append("--from-literal=OPENAI_API_KEY=***")
-        elif part.startswith("--from-literal=NVIDIA_API_KEY="):
-            out.append("--from-literal=NVIDIA_API_KEY=***")
-        elif part.startswith("--from-literal=BLUEJAY_API_KEY="):
-            out.append("--from-literal=BLUEJAY_API_KEY=***")
-        elif part.startswith("--from-literal=CHIRP_PASS="):
-            out.append("--from-literal=CHIRP_PASS=***")
-        elif "OPENAI_API_KEY=" in part and not part.startswith("OPENAI_API_KEY=***"):
+        redacted = False
+        for prefix in secret_prefixes:
+            if part.startswith(prefix):
+                out.append(prefix + "***")
+                redacted = True
+                break
+        if redacted:
+            continue
+        if "OPENAI_API_KEY=" in part and not part.startswith("OPENAI_API_KEY=***"):
             out.append("OPENAI_API_KEY=***")
         elif "NVIDIA_API_KEY=" in part and not part.startswith("NVIDIA_API_KEY=***"):
             out.append("NVIDIA_API_KEY=***")
@@ -66,10 +86,10 @@ def health_ok(url: str) -> bool:
 
 
 def split_harness(harness: str) -> tuple[str, str]:
-    """VOICE_AGENT like openai/realtime-2.1 → (family, runtime)."""
+    """HARNESS like openai/realtime-2.1 → (family, runtime)."""
     if "/" not in harness:
         raise ValueError(
-            f"VOICE_AGENT must be family/runtime (e.g. openai/realtime-2.1), got {harness!r}"
+            f"HARNESS must be family/runtime (e.g. openai/realtime-2.1), got {harness!r}"
         )
     family, runtime = harness.split("/", 1)
     return family, runtime
@@ -82,6 +102,19 @@ def harness_paths(harness: str) -> tuple[Path, Path]:
     return family_dir, agent_dir
 
 
+# LiveKit / Pipecat workers register with LiveKit Cloud. They do not serve CHIRP
+# and do not need a public Ingress hostname.
+WORKER_FAMILIES = frozenset({"livekit", "pipecat"})
+
+
+def pair_needs_ingress(harness: str) -> bool:
+    return split_harness(harness)[0] not in WORKER_FAMILIES
+
+
+def pair_mivas_mode(harness: str) -> str:
+    return "agent" if split_harness(harness)[0] in WORKER_FAMILIES else "chirp"
+
+
 def slug(harness: str, industry: str) -> str:
     return (
         f"{harness.replace('/', '-')}-{industry}"
@@ -91,19 +124,114 @@ def slug(harness: str, industry: str) -> str:
     )
 
 
+def image_ref(harness: str, industry: str) -> str:
+    """Local tag, or registry image when MIVAS_IMAGE_PREFIX is set (ECR etc.)."""
+    tag = slug(harness, industry)
+    prefix = os.environ.get("MIVAS_IMAGE_PREFIX", "").strip().rstrip("/")
+    if prefix:
+        return f"{prefix}:{tag}"
+    return f"mivas-bench:{tag}"
+
+
+def pair_host(harness: str, industry: str) -> str | None:
+    """Stable DNS host for a harness×industry pair, or None if ingress mode is off."""
+    if not pair_needs_ingress(harness):
+        return None
+    base = os.environ.get("MIVAS_BASE_DOMAIN", "").strip().lower().strip(".")
+    if not base:
+        return None
+    return f"{slug(harness, industry)}.{base}"
+
+
+def pair_public_url(harness: str, industry: str) -> str:
+    """HTTPS base for tool webhooks (Vapi/Retell/…). Prefers stable ingress host."""
+    host = pair_host(harness, industry)
+    if host:
+        return f"https://{host}"
+    return os.environ.get("PUBLIC_URL", "").strip()
+
+
+def pair_websocket_url(harness: str, industry: str) -> str | None:
+    """Stable wss:// URL Bluejay should dial when ingress mode is on."""
+    host = pair_host(harness, industry)
+    if host:
+        return f"wss://{host}"
+    return None
+
+
+def ingress_enabled() -> bool:
+    return bool(os.environ.get("MIVAS_BASE_DOMAIN", "").strip())
+
+
+def _ecr_registry_host(prefix: str) -> str | None:
+    """Return the ECR registry host from MIVAS_IMAGE_PREFIX, or None if not ECR."""
+    host = prefix.strip().rstrip("/").split("/")[0]
+    if ".dkr.ecr." in host and host.endswith(".amazonaws.com"):
+        return host
+    return None
+
+
+def ecr_login(prefix: str) -> None:
+    """docker login to ECR when MIVAS_IMAGE_PREFIX is an ECR URI."""
+    host = _ecr_registry_host(prefix)
+    if not host:
+        return
+    region = host.split(".dkr.ecr.", 1)[1].split(".", 1)[0]
+    print(f"+ aws ecr get-login-password --region {region} | docker login {host}")
+    password = subprocess.check_output(
+        ["aws", "ecr", "get-login-password", "--region", region],
+        text=True,
+    ).strip()
+    subprocess.run(
+        ["docker", "login", "--username", "AWS", "--password-stdin", host],
+        input=password,
+        text=True,
+        check=True,
+    )
+
+
 def build_image(harness: str, industry: str, image: str) -> None:
-    family, runtime = split_harness(harness)
-    print(f"building {image}")
+    _, agent_dir = harness_paths(harness)
+    dockerfile = agent_dir / "Dockerfile"
+    if not dockerfile.is_file():
+        raise FileNotFoundError(
+            f"missing Dockerfile for harness {harness!r} "
+            f"(expected {dockerfile})"
+        )
+    prefix = os.environ.get("MIVAS_IMAGE_PREFIX", "").strip()
+    platforms = os.environ.get("MIVAS_IMAGE_PLATFORMS", "").strip()
+    if prefix:
+        # Auto Mode general-purpose nodes are amd64; system nodes are arm64.
+        platforms = platforms or "linux/amd64,linux/arm64"
+        print(f"building {image} (-f {dockerfile.relative_to(ROOT)}) {platforms} → push")
+        run(
+            [
+                "docker",
+                "buildx",
+                "build",
+                "--platform",
+                platforms,
+                "-f",
+                str(dockerfile),
+                "--build-arg",
+                f"INDUSTRY={industry}",
+                "-t",
+                image,
+                "--push",
+                str(ROOT),
+            ]
+        )
+        return
+    platforms = platforms or "linux/arm64"
+    print(f"building {image} (-f {dockerfile.relative_to(ROOT)}) {platforms}")
     run(
         [
             "docker",
             "build",
-            "--build-arg",
-            f"HARNESS_FAMILY={family}",
-            "--build-arg",
-            f"HARNESS_RUNTIME={runtime}",
-            "--build-arg",
-            f"VOICE_AGENT={harness}",
+            "--platform",
+            platforms,
+            "-f",
+            str(dockerfile),
             "--build-arg",
             f"INDUSTRY={industry}",
             "-t",
@@ -115,15 +243,38 @@ def build_image(harness: str, industry: str, image: str) -> None:
 
 def _render(template_name: str, harness: str, industry: str, image: str, service_type: str) -> str:
     family, runtime = split_harness(harness)
+    pair_slug = slug(harness, industry)
+    host = pair_host(harness, industry) or ""
+    public_url = pair_public_url(harness, industry)
+    acm = os.environ.get("MIVAS_ACM_CERTIFICATE_ARN", "").strip()
+    bluejay_api_url = (
+        os.environ.get("BLUEJAY_API_URL") or "https://api.getbluejay.ai/v1"
+    ).strip().rstrip("/")
+    bluejay_otlp = (
+        os.environ.get("BLUEJAY_OTLP_ENDPOINT")
+        or "https://otlp.getbluejay.ai/v1/traces"
+    ).strip()
+    pull_policy = (
+        "Always"
+        if os.environ.get("MIVAS_IMAGE_PREFIX", "").strip()
+        else "IfNotPresent"
+    )
     template = (ROOT / "k8s" / template_name).read_text()
     return (
-        template.replace("__VOICE_AGENT__", harness)
+        template.replace("__HARNESS__", harness)
         .replace("__HARNESS_FAMILY__", family)
         .replace("__HARNESS_RUNTIME__", runtime)
         .replace("__INDUSTRY__", industry)
         .replace("__IMAGE__", image)
-        .replace("__JOB_SLUG__", slug(harness, industry))
+        .replace("__IMAGE_PULL_POLICY__", pull_policy)
+        .replace("__SLUG__", pair_slug)
         .replace("__SERVICE_TYPE__", service_type)
+        .replace("__PUBLIC_URL__", public_url)
+        .replace("__HOST__", host)
+        .replace("__ACM_CERTIFICATE_ARN__", acm)
+        .replace("__BLUEJAY_API_URL__", bluejay_api_url)
+        .replace("__BLUEJAY_OTLP_ENDPOINT__", bluejay_otlp)
+        .replace("__MIVAS_MODE__", pair_mivas_mode(harness))
     )
 
 
@@ -137,24 +288,50 @@ def secret_exists() -> bool:
     return result.returncode == 0
 
 
+# Keys synced from the local environment into mivas-secrets (when present).
+_SECRET_ENV_KEYS = (
+    "OPENAI_API_KEY",
+    "NVIDIA_API_KEY",
+    "NGC_API_KEY",
+    "VAPI_API_KEY",
+    "RETELL_API_KEY",
+    "BLAND_API_KEY",
+    "CARTESIA_API_KEY",
+    "ELEVENLABS_API_KEY",
+    "ASSEMBLYAI_API_KEY",
+    "DEEPGRAM_API_KEY",
+    "GOOGLE_API_KEY",
+    "GROK_API_KEY",
+    "XAI_API_KEY",
+    "LIVEKIT_URL",
+    "LIVEKIT_API_KEY",
+    "LIVEKIT_API_SECRET",
+    "VOICECHAT_WS_URL",
+    "VOICECHAT_FUNCTION_ID",
+    "BLUEJAY_API_KEY",
+    "PUBLIC_URL",
+    "CHIRP_USER",
+    "CHIRP_PASS",
+)
+
+
 def ensure_secret() -> None:
     """Create or refresh mivas-secrets from env (provider keys + Bluejay/CHIRP).
 
     Merges into any existing Secret so a NVIDIA-only refresh cannot wipe
     OPENAI_API_KEY / custom CHIRP credentials already on the cluster.
     """
-    api_key = os.environ.get("OPENAI_API_KEY", "")
-    nvidia_key = os.environ.get("NVIDIA_API_KEY", "")
+    present = {k: os.environ.get(k, "") for k in _SECRET_ENV_KEYS if os.environ.get(k, "")}
     exists = secret_exists()
-    if not exists and not api_key and not nvidia_key:
+    if not exists and not present:
         print(
-            "missing Secret mivas-secrets and no OPENAI_API_KEY/NVIDIA_API_KEY in env\n"
+            "missing Secret mivas-secrets and no provider/Bluejay keys in env\n"
             "create with: kubectl create secret generic mivas-secrets "
-            "--from-literal=OPENAI_API_KEY=... and/or --from-literal=NVIDIA_API_KEY=...",
+            "--from-literal=OPENAI_API_KEY=... (and/or other harness keys)",
             file=sys.stderr,
         )
         sys.exit(1)
-    if not api_key and not nvidia_key and not os.environ.get("BLUEJAY_API_KEY"):
+    if not present and exists:
         # Secret already exists; nothing to sync from env.
         return
 
@@ -174,19 +351,11 @@ def ensure_secret() -> None:
         except (subprocess.CalledProcessError, json.JSONDecodeError, ValueError) as e:
             print(f"warn: could not read existing mivas-secrets ({e}); writing env keys only", file=sys.stderr)
 
-    if api_key:
-        literals["OPENAI_API_KEY"] = api_key
-    if nvidia_key:
-        literals["NVIDIA_API_KEY"] = nvidia_key
-    if os.environ.get("BLUEJAY_API_KEY"):
-        literals["BLUEJAY_API_KEY"] = os.environ["BLUEJAY_API_KEY"]
-    if os.environ.get("CHIRP_USER"):
-        literals["CHIRP_USER"] = os.environ["CHIRP_USER"]
-    elif "CHIRP_USER" not in literals:
+    for key, value in present.items():
+        literals[key] = value
+    if "CHIRP_USER" not in literals:
         literals["CHIRP_USER"] = "mivas"
-    if os.environ.get("CHIRP_PASS"):
-        literals["CHIRP_PASS"] = os.environ["CHIRP_PASS"]
-    elif "CHIRP_PASS" not in literals:
+    if "CHIRP_PASS" not in literals:
         literals["CHIRP_PASS"] = "mivas"
 
     cmd = [
@@ -270,56 +439,160 @@ def service_websocket_url(service_name: str, timeout_s: float = 120.0) -> str | 
     return None
 
 
-def apply_chirp(harness: str, industry: str, image: str, name: str, follow_logs: bool) -> None:
+def parse_agents(raw: str) -> list[tuple[str, str]]:
+    """Parse AGENTS=family/runtime:industry,family/runtime:industry,..."""
+    pairs: list[tuple[str, str]] = []
+    for part in raw.split(","):
+        entry = part.strip()
+        if not entry:
+            continue
+        if ":" not in entry:
+            raise ValueError(
+                f"AGENTS entry must be family/runtime:industry, got {entry!r}"
+            )
+        harness, _, industry = entry.partition(":")
+        harness, industry = harness.strip(), industry.strip()
+        if not harness or not industry:
+            raise ValueError(
+                f"AGENTS entry must be family/runtime:industry, got {entry!r}"
+            )
+        split_harness(harness)  # validate family/runtime shape
+        pairs.append((harness, industry))
+    if not pairs:
+        raise ValueError("AGENTS is set but empty")
+    return pairs
+
+
+def validate_pair(harness: str, industry: str, *, require_chirp: bool) -> None:
+    family_dir, agent_dir = harness_paths(harness)
+    if not family_dir.is_dir():
+        raise ValueError(f"unknown harness family: {family_dir.name}")
+    if not (agent_dir / "agent.py").is_file():
+        raise ValueError(f"unknown harness runtime (missing agent.py): {harness}")
+    if require_chirp and not (agent_dir / "adapters" / "chirp.py").is_file():
+        raise ValueError(f"no chirp adapter for harness={harness}")
+    industry_dir = ROOT / "industries" / industry
+    if not industry_dir.is_dir():
+        raise ValueError(f"unknown industry: {industry}")
+    if not (industry_dir / "tool_server.py").is_file():
+        raise ValueError(f"industry missing tool_server.py: {industry}")
+
+
+def resolve_pairs(harness: str, industry: str) -> list[tuple[str, str]]:
+    """AGENTS overrides single HARNESS/INDUSTRY when set."""
+    raw = os.environ.get("AGENTS", "").strip()
+    if raw:
+        return parse_agents(raw)
+    return [(harness, industry)]
+
+
+def render_agents_yaml(pairs: list[tuple[str, str]], service_type: str) -> str:
+    docs: list[str] = []
+    use_ingress = ingress_enabled()
+    if use_ingress and not os.environ.get("MIVAS_ACM_CERTIFICATE_ARN", "").strip():
+        raise ValueError(
+            "MIVAS_BASE_DOMAIN is set but MIVAS_ACM_CERTIFICATE_ARN is missing "
+            "(needed for HTTPS/WSS Ingress on EKS)"
+        )
+    if use_ingress:
+        # Cluster-scoped; same cert/group for every pair. Render with the first pair
+        # so __ACM_CERTIFICATE_ARN__ is filled (other pair fields unused).
+        h0, i0 = pairs[0]
+        docs.append(_render("ingressclass.yaml", h0, i0, image_ref(h0, i0), service_type))
+    for harness, industry in pairs:
+        image = image_ref(harness, industry)
+        docs.append(_render("deployment.yaml", harness, industry, image, service_type))
+        docs.append(_render("service.yaml", harness, industry, image, service_type))
+        if use_ingress and pair_needs_ingress(harness):
+            docs.append(_render("ingress.yaml", harness, industry, image, service_type))
+    return "\n---\n".join(docs) + "\n"
+
+
+def apply_agents(pairs: list[tuple[str, str]], *, follow_logs: bool) -> None:
+    """kubectl apply one Deployment+Service(+Ingress) per harness×industry pair."""
     ensure_secret()
-    service_type = os.environ.get("MIVAS_SERVICE_TYPE", "LoadBalancer")
-
-    for kind, resource in (("deploy", f"deployment/{name}"), ("svc", f"svc/{name}")):
-        subprocess.run(
-            ["kubectl", "delete", kind, name, "--ignore-not-found"],
-            check=False,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-        )
-
-    rendered_files: list[Path] = []
-    try:
-        for template in ("deployment.yaml", "service.yaml"):
-            text = _render(template, harness, industry, image, service_type)
-            path = Path(tempfile.mkstemp(suffix=".yaml", prefix=f"mivas-{template}-")[1])
-            path.write_text(text)
-            rendered_files.append(path)
-            print(f"applying {template} → {name}")
-            run(["kubectl", "apply", "-f", str(path)])
-    finally:
-        for path in rendered_files:
-            path.unlink(missing_ok=True)
-
-    subprocess.run(
-        [
-            "kubectl",
-            "rollout",
-            "status",
-            f"deployment/{name}",
-            "--timeout=180s",
-        ],
-        check=False,
-    )
-
-    url = service_websocket_url(name)
-    if url:
-        print(f"CHIRP websocket URL: {url}")
-        print("Point the Bluejay agent websocket_url at that address (auth: CHIRP_USER/CHIRP_PASS).")
+    use_ingress = ingress_enabled()
+    if use_ingress:
+        service_type = os.environ.get("MIVAS_SERVICE_TYPE", "ClusterIP")
     else:
-        print(
-            "Service has no external address yet. Check:\n"
-            f"  kubectl get svc {name}\n"
-            "Or set MIVAS_SERVICE_TYPE=NodePort and MIVAS_NODE_HOST=<reachable-ip>.",
-            file=sys.stderr,
-        )
+        service_type = os.environ.get("MIVAS_SERVICE_TYPE", "LoadBalancer")
 
-    if follow_logs:
+    try:
+        yaml_text = render_agents_yaml(pairs, service_type)
+    except ValueError as e:
+        print(e, file=sys.stderr)
+        sys.exit(1)
+
+    path = Path(tempfile.mkstemp(suffix=".yaml", prefix="mivas-agents-")[1])
+    try:
+        path.write_text(yaml_text)
+        names = [f"mivas-{slug(h, i)}" for h, i in pairs]
+        kind = "Deployment+Service+Ingress" if use_ingress else "Deployment+Service"
+        print(f"applying {len(pairs)} agent {kind} → {', '.join(names)}")
+        if use_ingress:
+            base = os.environ["MIVAS_BASE_DOMAIN"].strip().lower().strip(".")
+            print(f"stable hosts under *.{base} (same URL across redeploys for each slug)")
+        run(["kubectl", "apply", "-f", str(path)])
+    finally:
+        path.unlink(missing_ok=True)
+
+    for harness, industry in pairs:
+        name = f"mivas-{slug(harness, industry)}"
+        subprocess.run(
+            ["kubectl", "rollout", "status", f"deployment/{name}", "--timeout=180s"],
+            check=False,
+        )
+        stable = pair_websocket_url(harness, industry)
+        public = pair_public_url(harness, industry)
+        if split_harness(harness)[0] in WORKER_FAMILIES:
+            print(
+                f"LiveKit Cloud worker ({name}): connection_type=LIVEKIT "
+                f"(no Ingress; pod registers with LIVEKIT_URL)"
+            )
+            continue
+        if stable:
+            print(f"Bluejay websocket_url ({name}): {stable}")
+            if public:
+                print(f"PUBLIC_URL / tool webhooks ({name}): {public}")
+        else:
+            url = service_websocket_url(name, timeout_s=30.0)
+            if url:
+                print(f"CHIRP websocket URL ({name}): {url}")
+            else:
+                print(
+                    f"Service {name} has no external address yet. Check:\n"
+                    f"  kubectl get svc {name}\n"
+                    "Or set MIVAS_BASE_DOMAIN (+ MIVAS_ACM_CERTIFICATE_ARN) for stable EKS Ingress URLs,\n"
+                    "or MIVAS_SERVICE_TYPE=NodePort and MIVAS_NODE_HOST=<reachable-ip>.",
+                    file=sys.stderr,
+                )
+
+    chirp_pairs = [(h, i) for h, i in pairs if pair_needs_ingress(h)]
+    if chirp_pairs and use_ingress:
+        print(
+            "Point each Bluejay CHIRP agent websocket_url at the wss:// URL above "
+            "(auth: CHIRP_USER/CHIRP_PASS). Hostnames are deterministic per slug."
+        )
+        print("List: kubectl get ingress,svc,deploy -l app=mivas-bench")
+        print("ALB hostname (Cloudflare CNAME target, DNS-only / grey cloud):")
+        print(
+            "  kubectl get ingress -l app=mivas-bench "
+            "-o jsonpath='{.items[0].status.loadBalancer.ingress[0].hostname}'"
+        )
+    elif chirp_pairs:
+        print("Point each Bluejay agent websocket_url at its Service (auth: CHIRP_USER/CHIRP_PASS).")
+        print("List: kubectl get deploy,svc -l app=mivas-bench")
+    else:
+        print("List: kubectl get deploy,svc -l app=mivas-bench")
+
+    if follow_logs and len(pairs) == 1:
+        name = f"mivas-{slug(pairs[0][0], pairs[0][1])}"
         run(["kubectl", "logs", "-f", f"deployment/{name}"])
+    elif follow_logs and len(pairs) > 1:
+        print(
+            "skipping log follow (--no-logs implied for multiple AGENTS); "
+            "use kubectl logs -f deployment/<name>"
+        )
 
 
 def run_local(harness: str, industry: str, agent_check: bool, mode: str) -> None:
@@ -328,7 +601,7 @@ def run_local(harness: str, industry: str, agent_check: bool, mode: str) -> None
     url = os.environ.get("TOOL_SERVER_URL", f"http://127.0.0.1:{port}")
     industry_dir = ROOT / "industries" / industry
     db_path = os.environ.get("MIVAS_DB_PATH", str(industry_dir / "db" / "runtime.db"))
-    _, runtime = split_harness(harness)
+    family, runtime = split_harness(harness)
 
     env = os.environ.copy()
     env.update(
@@ -337,8 +610,9 @@ def run_local(harness: str, industry: str, agent_check: bool, mode: str) -> None
             "TOOL_SERVER_PORT": port,
             "MIVAS_DB_PATH": db_path,
             "INDUSTRY_DIR": str(industry_dir),
-            "VOICE_AGENT": harness,
+            "HARNESS": harness,
             "INDUSTRY": industry,
+            "HARNESS_FAMILY": family,
             "HARNESS_RUNTIME": runtime,
             "MIVAS_MODE": mode,
             "PYTHONPATH": str(family_dir)
@@ -406,19 +680,20 @@ def main() -> None:
     )
     parser.add_argument(
         "--harness",
-        default=os.environ.get("VOICE_AGENT", "openai/realtime-2.1"),
-        help="Harness path family/runtime (default: $VOICE_AGENT or openai/realtime-2.1)",
+        default=os.environ.get("HARNESS")
+        or os.environ.get("VOICE_AGENT", "openai/realtime-2.1"),
+        help="Harness path family/runtime (default: $HARNESS or openai/realtime-2.1)",
     )
     parser.add_argument(
         "--industry",
         default=os.environ.get("INDUSTRY", "control-industry"),
         help="Industry pack (default: $INDUSTRY or control-industry)",
     )
-    parser.add_argument("--build", action="store_true", help="docker build image")
+    parser.add_argument("--build", action="store_true", help="docker build image(s)")
     parser.add_argument(
         "--apply",
         action="store_true",
-        help="kubectl apply CHIRP Deployment + Service",
+        help="kubectl apply CHIRP Deployment + Service (one per AGENTS entry, or single harness/industry)",
     )
     parser.add_argument(
         "--local",
@@ -439,42 +714,56 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    harness = args.harness
-    industry = args.industry
     mode = "check" if args.check else args.mode
-    image = f"mivas-bench:{slug(harness, industry)}"
-    name = f"mivas-{slug(harness, industry)}"
-
     do_local = args.local or not (args.build or args.apply)
 
     try:
-        family_dir, agent_dir = harness_paths(harness)
+        pairs = resolve_pairs(args.harness, args.industry)
     except ValueError as e:
         print(e, file=sys.stderr)
         sys.exit(1)
 
-    if not family_dir.is_dir():
-        print(f"unknown harness family: {family_dir.name}", file=sys.stderr)
-        sys.exit(1)
-    if not (agent_dir / "agent.py").is_file():
-        print(f"unknown harness runtime (missing agent.py): {harness}", file=sys.stderr)
-        sys.exit(1)
-    if not (ROOT / "industries" / industry).is_dir():
-        print(f"unknown industry: {industry}", file=sys.stderr)
-        sys.exit(1)
-    if not (ROOT / "industries" / industry / "tool_server.py").is_file():
-        print(f"industry missing tool_server.py: {industry}", file=sys.stderr)
-        sys.exit(1)
+    for harness, industry in pairs:
+        family = split_harness(harness)[0]
+        require_chirp = family not in WORKER_FAMILIES and (
+            args.apply or (do_local and mode == "chirp")
+        )
+        try:
+            validate_pair(harness, industry, require_chirp=require_chirp)
+        except ValueError as e:
+            print(e, file=sys.stderr)
+            sys.exit(1)
+
+    if os.environ.get("AGENTS", "").strip():
+        print(f"AGENTS → {len(pairs)} pair(s): " + ", ".join(f"{h}:{i}" for h, i in pairs))
 
     if args.build:
-        build_image(harness, industry, image)
-    if do_local:
-        run_local(harness, industry, agent_check=args.check, mode=mode)
-    if args.apply:
-        if mode != "chirp":
-            print("--apply deploys the CHIRP server; use --mode chirp (default)", file=sys.stderr)
+        prefix = os.environ.get("MIVAS_IMAGE_PREFIX", "").strip()
+        if prefix:
+            try:
+                ecr_login(prefix)
+            except (subprocess.CalledProcessError, FileNotFoundError) as e:
+                print(f"ECR login failed: {e}", file=sys.stderr)
+                sys.exit(1)
+        try:
+            for harness, industry in pairs:
+                build_image(harness, industry, image_ref(harness, industry))
+        except (FileNotFoundError, subprocess.CalledProcessError) as e:
+            print(e, file=sys.stderr)
             sys.exit(1)
-        apply_chirp(harness, industry, image, name, follow_logs=not args.no_logs)
+
+    if do_local:
+        if len(pairs) > 1:
+            print(
+                "AGENTS lists multiple pairs; use --build/--apply to deploy them on Kubernetes.\n"
+                "For a single local run, unset AGENTS and use HARNESS/INDUSTRY (or --harness/--industry).",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+        run_local(pairs[0][0], pairs[0][1], agent_check=args.check, mode=mode)
+
+    if args.apply:
+        apply_agents(pairs, follow_logs=not args.no_logs)
 
 
 if __name__ == "__main__":

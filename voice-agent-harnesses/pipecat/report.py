@@ -23,6 +23,7 @@ import json
 import logging
 import os
 import sys
+import threading
 import time
 from contextlib import asynccontextmanager, contextmanager
 from contextvars import ContextVar
@@ -66,11 +67,11 @@ _active_t0: float | None = None
 
 
 def _api_url() -> str:
-    return os.environ.get("BLUEJAY_API_URL", DEFAULT_API_URL).rstrip("/")
+    return (os.environ.get("BLUEJAY_API_URL") or DEFAULT_API_URL).rstrip("/")
 
 
 def _otlp_endpoint() -> str:
-    return os.environ.get("BLUEJAY_OTLP_ENDPOINT", DEFAULT_OTLP_ENDPOINT)
+    return os.environ.get("BLUEJAY_OTLP_ENDPOINT") or DEFAULT_OTLP_ENDPOINT
 
 
 def _service_name() -> str:
@@ -479,17 +480,17 @@ async def traced_run(
         _call_t0.reset(t0_token)
         flush()
         if simulation_result_id and otel_tid:
-            try:
-                await post_simulation_enrichment(
-                    simulation_result_id,
-                    trace_id=otel_tid,
-                                    )
-            except Exception as e:
-                logger.error(
-                    "post_simulation_enrichment crashed: %s: %s",
-                    type(e).__name__,
-                    e,
-                )
+            # LiveKit cancels the entrypoint ~15 s after the room closes
+            # ("entrypoint did not exit in time"), which kills any coroutine still
+            # waiting here. A non-daemon thread outlives the job until the link lands.
+            threading.Thread(
+                target=asyncio.run,
+                args=(
+                    post_simulation_enrichment(simulation_result_id, trace_id=otel_tid),
+                ),
+                name=f"mivas-link-{simulation_result_id}",
+                daemon=False,
+            ).start()
         elif simulation_result_id and not otel_tid:
             logger.error(
                 "have simulation_result_id=%s but no otel trace id to post",

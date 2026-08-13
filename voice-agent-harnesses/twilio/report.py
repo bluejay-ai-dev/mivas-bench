@@ -105,7 +105,7 @@ def re_looks_like_tool_server(url: str) -> bool:
 
 
 def _otlp_endpoint() -> str:
-    return os.environ.get("BLUEJAY_OTLP_ENDPOINT", DEFAULT_OTLP_ENDPOINT)
+    return os.environ.get("BLUEJAY_OTLP_ENDPOINT") or DEFAULT_OTLP_ENDPOINT
 
 
 def _service_name() -> str:
