@@ -146,7 +146,7 @@ def api_key() -> str:
 
 
 def welcome_greeting() -> str:
-    return os.environ.get("TWILIO_WELCOME_GREETING", DEFAULT_WELCOME).strip()
+    return os.environ.get("TWILIO_WELCOME_GREETING", DEFAULT_WELCOME).strip() or DEFAULT_WELCOME
 
 
 def public_base_url() -> str:

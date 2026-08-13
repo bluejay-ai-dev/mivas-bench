@@ -1,19 +1,23 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: mivas-__JOB_SLUG__
+  name: mivas-__SLUG__
   labels:
     app: mivas-bench
-    mivas.harness: "__HARNESS_FAMILY__"
-    mivas.runtime: "__HARNESS_RUNTIME__"
+    mivas.harness_family: "__HARNESS_FAMILY__"
+    mivas.harness_runtime: "__HARNESS_RUNTIME__"
     mivas.industry: "__INDUSTRY__"
 spec:
   type: __SERVICE_TYPE__
   selector:
     app: mivas-bench
-    mivas.slug: "__JOB_SLUG__"
+    mivas.slug: "__SLUG__"
   ports:
     - name: chirp
       port: 8765
       targetPort: chirp
+      protocol: TCP
+    - name: tools
+      port: 8000
+      targetPort: tools
       protocol: TCP

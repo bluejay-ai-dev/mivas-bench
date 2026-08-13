@@ -103,7 +103,7 @@ def session_config(
         "greeting": greeting or os.environ.get("ASSEMBLYAI_GREETING", DEFAULT_GREETING),
         "input": {"format": {"encoding": "audio/pcm"}},
         "output": {
-            "voice": voice or os.environ.get("ASSEMBLYAI_VOICE", "alba"),
+            "voice": voice or os.environ.get("ASSEMBLYAI_VOICE") or "alba",
             "format": {"encoding": "audio/pcm"},
         },
         "tools": tools,

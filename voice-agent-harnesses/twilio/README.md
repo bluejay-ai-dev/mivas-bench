@@ -98,7 +98,7 @@ uv run python voice-agent-harnesses/twilio/conversationrelay-gpt4.1/agent.py con
 
 | | |
 |---|---|
-| `VOICE_AGENT` | `twilio/conversationrelay-gpt4.1` |
+| `HARNESS` | `twilio/conversationrelay-gpt4.1` |
 | CR port | `8773` |
 | `agent_id` | `32132` |
 | `simulation_id` | `30314` |

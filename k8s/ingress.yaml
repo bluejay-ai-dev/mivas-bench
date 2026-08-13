@@ -1,0 +1,36 @@
+# Stable public hostname per harness×industry pair.
+# Host: __HOST__  →  wss://__HOST__/  (Bluejay)  and  https://__HOST__/  (PUBLIC_URL)
+#
+# TLS, ALB grouping, and idle timeout are on IngressClassParams (k8s/ingressclass.yaml).
+# EKS Auto Mode does not honor group.name / certificate-arn Ingress annotations.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mivas-__SLUG__
+  labels:
+    app: mivas-bench
+    mivas.harness_family: "__HARNESS_FAMILY__"
+    mivas.harness_runtime: "__HARNESS_RUNTIME__"
+    mivas.industry: "__INDUSTRY__"
+    mivas.slug: "__SLUG__"
+  annotations:
+    # CHIRP on :8765 is WebSocket-only; HTTP GET / there is 400 and ALB would
+    # mark the target unhealthy. Probe the industry tool server instead.
+    alb.ingress.kubernetes.io/healthcheck-protocol: HTTP
+    alb.ingress.kubernetes.io/healthcheck-port: "8000"
+    alb.ingress.kubernetes.io/healthcheck-path: /health
+    alb.ingress.kubernetes.io/success-codes: "200"
+    alb.ingress.kubernetes.io/backend-protocol: HTTP
+spec:
+  ingressClassName: mivas-alb
+  rules:
+    - host: __HOST__
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: mivas-__SLUG__
+                port:
+                  name: chirp
