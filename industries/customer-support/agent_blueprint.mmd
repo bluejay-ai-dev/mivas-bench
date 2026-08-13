@@ -9,10 +9,13 @@ flowchart TD
     verification -->|transfer_to_membership| membership["membership"]
     orders -->|transfer_to_returns| returns
     orders -->|transfer_to_service| service
+    orders -->|transfer_to_fraud| fraud
     returns -->|transfer_to_orders| orders
     returns -->|transfer_to_service| service
+    returns -->|transfer_to_fraud| fraud
     service -->|transfer_to_returns| returns
     service -->|transfer_to_membership| membership
+    service -->|transfer_to_fraud| fraud
     membership -->|transfer_to_service| service
     membership -->|transfer_to_fraud| fraud
     fraud -->|transfer_to_verification| verification

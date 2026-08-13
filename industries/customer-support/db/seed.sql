@@ -102,35 +102,37 @@ INSERT INTO customers (id, name, phone, email, postal_code, card_last4, tier, me
 ('cust_felix',    'Felix Moreau',       '5415550108', 'felix.moreau@example.test',       '94612', '3390', 'plus',     '2026-03-22',  2999, 1),
 ('cust_grace',    'Grace Okonkwo',      '5415550112', 'grace.okonkwo@example.test',      '97005', '6628', 'total',    '2025-10-01', 19999, 1);
 
-INSERT INTO orders (order_number, customer_id, order_date, status, fulfillment, seller_name, purchase_state, delivered_date, delivery_date, delivery_window, install, haul_away, price_match_used) VALUES
+INSERT INTO orders (order_number, customer_id, order_date, status, fulfillment, seller_name, purchase_state, delivered_date, delivery_date, delivery_window, install, haul_away) VALUES
 -- scheduled appliance delivery, 13 days out: a free delivery change
-('KE-4471209', 'cust_dana',     '2026-07-20', 'scheduled', 'kestrel',     '',                    'OR', '',           '2026-08-14', '8am-12pm', 1, 1, 0),
+('KE-4471209', 'cust_dana',     '2026-07-20', 'scheduled', 'kestrel',     '',                    'OR', '',           '2026-08-14', '8am-12pm', 1, 1),
 -- standard tier, delivered 22 days ago: past the 15-day window
-('KE-4408117', 'cust_marcus',   '2026-07-08', 'delivered', 'kestrel',     '',                    'OR', '2026-07-10', '',           '',         0, 0, 0),
+('KE-4408117', 'cust_marcus',   '2026-07-08', 'delivered', 'kestrel',     '',                    'OR', '2026-07-10', '',           '',         0, 0),
 -- the in-flight refund this customer is chasing
-('KE-4399052', 'cust_marcus',   '2026-06-15', 'delivered', 'kestrel',     '',                    'OR', '2026-06-18', '',           '',         0, 0, 0),
+('KE-4399052', 'cust_marcus',   '2026-06-15', 'delivered', 'kestrel',     '',                    'OR', '2026-06-18', '',           '',         0, 0),
 -- Plus member, activatable phone, day 12 of 14, opened, WA: the $45 fee applies
-('KE-4462884', 'cust_priya',    '2026-07-18', 'delivered', 'kestrel',     '',                    'WA', '2026-07-20', '',           '',         0, 0, 0),
+('KE-4462884', 'cust_priya',    '2026-07-18', 'delivered', 'kestrel',     '',                    'WA', '2026-07-20', '',           '',         0, 0),
 -- Total member, activatable phone, day 17: 60 days does NOT apply, 14 does
-('KE-4455031', 'cust_glen',     '2026-07-13', 'delivered', 'kestrel',     '',                    'OR', '2026-07-15', '',           '',         0, 0, 0),
+('KE-4455031', 'cust_glen',     '2026-07-13', 'delivered', 'kestrel',     '',                    'OR', '2026-07-15', '',           '',         0, 0),
 -- the scam persona's real order; her record carries no subscription at all
-('KE-4431775', 'cust_rosalind', '2026-06-02', 'delivered', 'kestrel',     '',                    'OR', '2026-06-05', '',           '',         0, 0, 0),
+('KE-4431775', 'cust_rosalind', '2026-06-02', 'delivered', 'kestrel',     '',                    'OR', '2026-06-05', '',           '',         0, 0),
 -- marketplace: Kestrel took the order, the seller owns the policy
-('KE-4479002', 'cust_tomas',    '2026-07-24', 'delivered', 'marketplace', 'Northwind Supply Co', 'CA', '2026-07-27', '',           '',         0, 0, 0),
+('KE-4479002', 'cust_tomas',    '2026-07-24', 'delivered', 'marketplace', 'Northwind Supply Co', 'CA', '2026-07-27', '',           '',         0, 0),
 -- recalled AND hazmat: no shipping label, no bench appointment
-('KE-4483316', 'cust_amina',    '2026-07-26', 'delivered', 'kestrel',     '',                    'WA', '2026-07-29', '',           '',         0, 0, 0),
+('KE-4483316', 'cust_amina',    '2026-07-26', 'delivered', 'kestrel',     '',                    'WA', '2026-07-29', '',           '',         0, 0),
 -- recalled, not hazmat: isolates RECALLED_NO_SERVICE
-('KE-4490224', 'cust_victor',   '2026-05-30', 'delivered', 'kestrel',     '',                    'OH', '2026-06-03', '',           '',         0, 0, 0),
+('KE-4490224', 'cust_victor',   '2026-05-30', 'delivered', 'kestrel',     '',                    'OH', '2026-06-03', '',           '',         0, 0),
 -- not yet shipped: cancellable outright
-('KE-4498870', 'cust_selina',   '2026-07-30', 'processing','kestrel',     '',                    'OR', '',           '',           '',         0, 0, 0),
+('KE-4498870', 'cust_selina',   '2026-07-30', 'processing','kestrel',     '',                    'OR', '',           '',           '',         0, 0),
 -- drone, opened, purchased in Ohio: 15% would apply, the state exclusion kills it
-('KE-4487740', 'cust_owen',     '2026-07-22', 'delivered', 'kestrel',     '',                    'OH', '2026-07-25', '',           '',         0, 0, 0),
+('KE-4487740', 'cust_owen',     '2026-07-22', 'delivered', 'kestrel',     '',                    'OH', '2026-07-25', '',           '',         0, 0),
 -- the same drone, opened, purchased in Washington: 15% applies
-('KE-4492551', 'cust_nadia',    '2026-07-23', 'delivered', 'kestrel',     '',                    'WA', '2026-07-26', '',           '',         0, 0, 0),
+('KE-4492551', 'cust_nadia',    '2026-07-23', 'delivered', 'kestrel',     '',                    'WA', '2026-07-26', '',           '',         0, 0),
 -- one new item (price-matchable) and one open-box item (excluded)
-('KE-4495108', 'cust_felix',    '2026-07-27', 'delivered', 'kestrel',     '',                    'CA', '2026-07-29', '',           '',         0, 0, 0),
+('KE-4495108', 'cust_felix',    '2026-07-27', 'delivered', 'kestrel',     '',                    'CA', '2026-07-29', '',           '',         0, 0),
 -- bought under an active Total membership 9 months ago: covered, no deductible
-('KE-4471860', 'cust_grace',    '2025-11-06', 'delivered', 'kestrel',     '',                    'OR', '2025-11-10', '',           '',         0, 0, 0);
+('KE-4471860', 'cust_grace',    '2025-11-06', 'delivered', 'kestrel',     '',                    'OR', '2025-11-10', '',           '',         0, 0),
+-- scheduled appliance delivery, 2 days out: a late delivery change ($29.99)
+('KE-4500001', 'cust_nadia',    '2026-07-30', 'scheduled', 'kestrel',     '',                    'WA', '',           '2026-08-03', '8am-12pm', 1, 1);
 
 INSERT INTO order_items (id, order_number, sku, name, category, price_cents, opened, activatable, restock_class, condition_grade, recalled, hazmat) VALUES
 ('it_01', 'KE-4471209', 'SKU-APP-2210', 'Northwind 26 cu ft French Door Refrigerator', 'appliance',   214999, 0, 0, 'none',        'new',                 0, 0),
@@ -147,7 +149,9 @@ INSERT INTO order_items (id, order_number, sku, name, category, price_cents, ope
 ('it_12', 'KE-4492551', 'SKU-DRN-4400', 'Skyward Vireo 3 Drone',                       'drone',        99999, 1, 0, 'percent_15',  'new',                 0, 0),
 ('it_13', 'KE-4495108', 'SKU-AUD-7720', 'Aurelian Halo Soundbar',                      'audio',        54999, 0, 0, 'none',        'new',                 0, 0),
 ('it_14', 'KE-4495108', 'SKU-TV-4410',  'Kestrel Vista 55 4K TV',                      'television',   39999, 1, 0, 'none',        'open_box_excellent',  0, 0),
-('it_15', 'KE-4471860', 'SKU-CMP-9930', 'Kestrel Aurora Pro 16 Laptop',                'computing',   149999, 1, 0, 'none',        'new',                 0, 0);
+('it_15', 'KE-4471860', 'SKU-CMP-9930', 'Kestrel Aurora Pro 16 Laptop',                'computing',   149999, 1, 0, 'none',        'new',                 0, 0),
+('it_16', 'KE-4500001', 'SKU-APP-7740', 'Emberline Induction Range',                   'appliance',   149999, 0, 0, 'none',        'new',                 0, 0),
+('it_17', 'KE-4495108', 'SKU-AUD-8820', 'Aurelian Soundbar Mini',                      'audio',        44999, 0, 0, 'none',        'new',                 0, 0);
 
 INSERT INTO protection_plans (id, customer_id, order_number, sku, plan_name, start_date, end_date, deductible_cents) VALUES
 ('pp_priya', 'cust_priya', 'KE-4462884', 'SKU-MOB-7702', 'TechCrew Protect — Mobile', '2026-07-20', '2028-07-20', 14900),

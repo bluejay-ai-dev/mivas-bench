@@ -68,8 +68,7 @@ CREATE TABLE orders (
     delivery_date   TEXT NOT NULL DEFAULT '',  -- scheduled delivery, '' when none
     delivery_window TEXT NOT NULL DEFAULT '',
     install         INTEGER NOT NULL DEFAULT 0,
-    haul_away       INTEGER NOT NULL DEFAULT 0,
-    price_match_used INTEGER NOT NULL DEFAULT 0   -- one match per identical item per customer
+    haul_away       INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE TABLE order_items (

@@ -548,6 +548,10 @@
           "reason": {
             "type": "string",
             "description": "Why they are returning it, in their words."
+          },
+          "opened": {
+            "type": "boolean",
+            "description": "Whether the caller says the box was opened. Pass it if it differs from what the order record shows."
           }
         },
         "required": []
