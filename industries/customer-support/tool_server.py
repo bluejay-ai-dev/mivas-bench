@@ -313,6 +313,14 @@ def _resolve_order(customer_id: str, ref: str) -> sqlite3.Row:
             return row
         if said and said == row["order_number"].lower():
             return row
+    if d and len(d) >= 4:
+        # The caller gave what looks like an order number; a non-match must not
+        # fall through to the single-order shortcut, which would silently hand
+        # them another customer's order.
+        raise ToolError(
+            "UNKNOWN_ORDER",
+            "That order wasn't recognized. Ask for the order number, or what the item "
+            "was, and try again.")
     if said:
         with _db() as conn:
             items = conn.execute(
@@ -1574,6 +1582,8 @@ def _selfcheck() -> None:
     assert err(quote_delivery_change, {"order_number": "KE-4471209",
                                        "new_date": "2026-08-09"}
                ).code == "DATE_UNAVAILABLE", "no Sunday deliveries"
+    # The seeded 2-days-out order is on Nadia's account, not Dana's.
+    login("Nadia Grant", "5415550196", "98042", "7735")
     late_seeded = quote_delivery_change({"order_number": "KE-4500001",
                                          "new_date": "2026-08-05"})
     assert late_seeded["fee"] == "$29.99", "seeded order inside 48 hours carries late fee"
