@@ -24,7 +24,7 @@ from pipecat.transports.websocket.fastapi import (
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from chirp_serializer import ChirpFrameSerializer  # noqa: E402
 from bot import run_bot  # noqa: E402
-from harness import SAMPLE_RATE, industry_path  # noqa: E402
+from harness import SAMPLE_RATE, industry_path, set_call_id  # noqa: E402
 
 app = FastAPI(title="mivas nvidia nemotron chirp bridge")
 
@@ -56,6 +56,7 @@ async def chirp(ws: WebSocket) -> None:
     sim_id = _simulation_result_id(ws)
     if sim_id:
         logger.info("chirp sim_result_id={}", sim_id)
+    set_call_id(sim_id)
 
     async def emit(payload: str | bytes) -> None:
         if isinstance(payload, str):

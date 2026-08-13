@@ -19,7 +19,7 @@ from google.genai import types
 from websockets.asyncio.server import serve
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from harness import CALL_ID, industry_path, live_config, load_blueprint, run_tool  # noqa: E402
+from harness import industry_path, live_config, load_blueprint, run_tool, set_call_id  # noqa: E402
 from report import end_speech_span, start_speech_span, traced_run  # noqa: E402
 
 W, R_OUT, R_CHIRP = 2, 24_000, 16_000
@@ -58,7 +58,7 @@ async def _bridge(ws, model: str, industry: str) -> None:
     sim_id = _simulation_result_id(ws)
     # One state-API namespace per call: concurrent digital humans must not share
     # an identity pin or a DB.
-    CALL_ID.set(sim_id or f"call_{uuid.uuid4().hex[:12]}")
+    set_call_id(sim_id)
     if sim_id:
         print(f"chirp sim_result_id={sim_id}", flush=True)
 

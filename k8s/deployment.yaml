@@ -8,7 +8,15 @@ metadata:
     mivas.harness_runtime: "__HARNESS_RUNTIME__"
     mivas.industry: "__INDUSTRY__"
 spec:
-  replicas: 1
+  replicas: __REPLICAS__
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      # In-flight WebSockets die if their pod is deleted. Scale by adding
+      # replicas; do not cycle pods mid-run. maxUnavailable: 0 keeps the old
+      # replica until the surge pod is Ready.
+      maxUnavailable: 0
+      maxSurge: 1
   selector:
     matchLabels:
       app: mivas-bench
@@ -43,8 +51,10 @@ spec:
               value: "/app/harness/__HARNESS_RUNTIME__"
             - name: PYTHONPATH
               value: "/app/harness"
+            - name: MIVAS_ROLE
+              value: "harness"
             - name: TOOL_SERVER_URL
-              value: "http://127.0.0.1:8000"
+              value: "http://mivas-__SLUG__-tools:8000"
             - name: TOOL_SERVER_PORT
               value: "8000"
             - name: CHIRP_PORT
@@ -118,7 +128,7 @@ spec:
             - name: ASSEMBLYAI_VOICE
               value: "alba"
             - name: TWILIO_WELCOME_GREETING
-              value: "Welcome to Bluejay's Repair Services!"
+              value: "__TWILIO_WELCOME_GREETING__"
             - name: DEEPGRAM_API_KEY
               valueFrom:
                 secretKeyRef:
@@ -199,9 +209,6 @@ spec:
                   optional: true
             - name: PYTHONUNBUFFERED
               value: "1"
-          volumeMounts:
-            - name: data
-              mountPath: /data
           ports:
             - containerPort: 8000
               name: tools
@@ -214,13 +221,10 @@ spec:
             limits:
               memory: 1536Mi
           readinessProbe:
-            # Probe the tool server — TCP probes on the CHIRP port spam
-            # websockets with "opening handshake failed" stack traces.
+            # harness_health.py on :8000. The industry tool server is a
+            # separate Deployment (mivas-{slug}-tools). Do not TCP-probe :8765.
             httpGet:
               path: /health
               port: tools
             initialDelaySeconds: 5
             periodSeconds: 5
-      volumes:
-        - name: data
-          emptyDir: {}
