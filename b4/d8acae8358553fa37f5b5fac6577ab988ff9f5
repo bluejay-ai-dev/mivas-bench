@@ -1,0 +1,39 @@
+industries/travel/README.md
+  s_dec8be94946be7::t_bca18a34cfe455 17-18
+industries/travel/docs/ONEPAGER.md
+  s_dec8be94946be7::t_dd8e28207f27cc 95-96
+industries/travel/system-prompts/ancillaries.md
+  s_dec8be94946be7::t_3f50ceaacc7139 2
+industries/travel/system-prompts/irrops.md
+  s_dec8be94946be7::t_4df36db9beadb5 2
+industries/travel/system-prompts/pass_services.md
+  s_dec8be94946be7::t_8d0e77a9ef01a6 2
+industries/travel/system-prompts/payments.md
+  s_dec8be94946be7::t_d0079aaa42e44a 2
+industries/travel/system-prompts/reception.md
+  s_dec8be94946be7::t_54720687728954 2,151
+industries/travel/system-prompts/ticketing.md
+  s_dec8be94946be7::t_a17eb7f6c9146c 2
+industries/travel/tool_server.py
+  s_dec8be94946be7::t_41fa969b95e9e3 1706
+run.py
+  s_dec8be94946be7::t_ac7712a093d3da 338
+voice-agent-harnesses/twilio/harness.py
+  s_dec8be94946be7::t_82be09312b5f02 162
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "b4d8acae8358553fa37f5b5fac6577ab988ff9f5",
+  "prompts": {},
+  "sessions": {
+    "s_dec8be94946be7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8b6603b7-3e89-4369-ac83-69adb4ab10d9",
+        "model": "claude-opus-5"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
