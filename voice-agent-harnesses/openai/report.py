@@ -29,7 +29,7 @@ from opentelemetry import trace as otel_trace
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
 from opentelemetry.sdk.resources import SERVICE_NAME, Resource
 from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import SimpleSpanProcessor
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.semconv._incubating.attributes import (
     gen_ai_attributes as GenAIAttributes,
 )
@@ -137,8 +137,23 @@ def setup_otel() -> TracerProvider | None:
         resource = Resource.create({SERVICE_NAME: _service_name()})
         provider = TracerProvider(resource=resource)
         provider.add_span_processor(
-            SimpleSpanProcessor(
-                OTLPSpanExporter(_otlp_endpoint(), headers={"X-API-KEY": api_key})
+            # BatchSpanProcessor, not SimpleSpanProcessor: Simple exports every span
+            # with a BLOCKING http request from whatever thread ended the span — the
+            # asyncio loop. At max_concurrent=20 that starved the loop badly enough
+            # that calls stopped dispatching tools at all (no per-call DB was created
+            # for the last third of run 228909) and the spans that did exist landed
+            # after the trace-link POST, so Bluejay extracted 1 tool out of 7. Batching
+            # moves the export to a background thread; force_flush() before the POST
+            # still guarantees delivery.
+            BatchSpanProcessor(
+                OTLPSpanExporter(_otlp_endpoint(), headers={"X-API-KEY": api_key}),
+                # defaults (2048 queue / 512 batch / 5 s delay) overflow at 60
+                # concurrent calls — every span past the queue is dropped SILENTLY,
+                # which cost 27 of 180 samples their tool data in run 229001 while
+                # the per-call DBs proved the tools had run.
+                max_queue_size=int(os.environ.get("MIVAS_OTEL_QUEUE", "32768")),
+                max_export_batch_size=512,
+                schedule_delay_millis=1000,
             )
         )
         otel_trace.set_tracer_provider(provider)

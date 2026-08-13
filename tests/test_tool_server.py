@@ -263,6 +263,56 @@ def test_healthcare_list_locations_has_what_the_prompts_require() -> None:
         assert locations[0]["zip"] == "10016", locations[0]
 
 
+def test_healthcare_prompt_demands_are_satisfiable() -> None:
+    """Every fact a prompt orders the agent to say must be gettable from a tool.
+
+    Each assertion here is a triage defect that failed a case while the agent behaved
+    correctly (run 228930): D3 create_clinical_message returned no callback window that
+    clinical.md orders spoken; D4 the KB could not answer an hours question about the
+    office literally named "Park Avenue"; list_locations demanded a zip while
+    reception.md promised it resolved office nicknames; a rejected carrier came back
+    with sibling offices as "alternatives" that reject it too.
+    """
+    with _load_tool_server("healthcare") as module, TestClient(module.app) as client:
+        def tool(name: str, args: dict[str, Any]) -> dict[str, Any]:
+            resp = client.post(f"/tools/{name}", json={"arguments": args})
+            assert resp.status_code == 200, resp.text
+            return resp.json()
+
+        # D3 — a spoken callback window exists, and tracks priority
+        assert tool("verify_identity", {"full_name": "Sam Nguyen", "dob": "1985-11-03"})["ok"]
+        for priority, expect in (("stat", "hour"), ("urgent", "four"), ("routine", "business day")):
+            msg = tool("create_clinical_message",
+                       {"category": "nurse_question", "priority": priority, "summary": "x"})
+            assert msg["ok"], msg
+            assert expect in msg["data"]["callback_window"], (priority, msg["data"])
+            assert msg["data"]["spoken_commitment"], msg["data"]
+
+        # D4 — the hours question, phrased the way a caller phrases it, returns hours
+        for query in ("Park Avenue office hours closing time",
+                      "what time does the Park Avenue office close",
+                      "when do you open"):
+            kb = tool("search_practice_kb", {"query": query})
+            assert kb["data"]["source"] == "hours", (query, kb["data"])
+        # and parking still reaches directions
+        assert tool("search_practice_kb", {"query": "where do I park"})["data"]["source"] == "directions"
+
+        # list_locations by NAME, with no zip at all
+        by_name = tool("list_locations", {"name": "Brooklyn Heights"})
+        assert by_name["ok"], by_name
+        first = by_name["data"]["locations"][0]
+        assert first["id"] == "loc_brooklyn_heights", first
+        assert first["floor"], first
+        # zip still works and still wins for the caller's own zip
+        assert tool("list_locations", {"zip": "34786"})["data"]["locations"][0]["id"] == "loc_windermere"
+
+        # a rejected carrier gets no misleading alternatives
+        med = tool("check_plan_accepted", {"carrier": "Medicaid", "location_id": "Park Avenue"})
+        assert med["data"]["accepted"] is False
+        assert med["data"]["alternative_locations"] == [], med["data"]
+        assert "not accepted at any" in med["data"]["notes"], med["data"]
+
+
 def test_healthcare_calls_are_isolated() -> None:
     """Two concurrent calls must not share an identity pin, a balance or a row.
 
@@ -432,6 +482,7 @@ if __name__ == "__main__":
     test_finance_guards_survive_dispatch()
     test_healthcare_flow_through_dispatch()
     test_healthcare_calls_are_isolated()
+    test_healthcare_prompt_demands_are_satisfiable()
     test_healthcare_list_locations_has_what_the_prompts_require()
     test_travel_guards_survive_dispatch()
     print("ok test_tool_server")

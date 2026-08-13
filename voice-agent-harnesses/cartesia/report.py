@@ -31,7 +31,7 @@ from opentelemetry import trace as otel_trace
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
 from opentelemetry.sdk.resources import SERVICE_NAME, Resource
 from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import SimpleSpanProcessor
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.trace import Span, SpanKind, Status, StatusCode
 
 logger = logging.getLogger("mivas.otel.cartesia")
@@ -121,8 +121,15 @@ def setup_otel() -> TracerProvider | None:
     resource = Resource.create({SERVICE_NAME: _service_name()})
     provider = TracerProvider(resource=resource)
     provider.add_span_processor(
-        SimpleSpanProcessor(
-            OTLPSpanExporter(endpoint, headers={"X-API-KEY": api_key})
+        BatchSpanProcessor(
+            OTLPSpanExporter(endpoint, headers={"X-API-KEY": api_key}),
+            # defaults (2048 queue / 512 batch / 5 s delay) overflow at 60
+            # concurrent calls — every span past the queue is dropped SILENTLY,
+            # which cost 27 of 180 samples their tool data in run 229001 while
+            # the per-call DBs proved the tools had run.
+            max_queue_size=int(os.environ.get("MIVAS_OTEL_QUEUE", "32768")),
+            max_export_batch_size=512,
+            schedule_delay_millis=1000,
         )
     )
     otel_trace.set_tracer_provider(provider)

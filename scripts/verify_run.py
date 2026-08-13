@@ -1,4 +1,19 @@
-"""Void, don't score, any simulation result whose tool list never landed.
+"""Score a run from the expected-vs-actual tool pairing, not from the judge alone.
+
+Two independent problems make the raw `goal_success` unusable on its own:
+
+1. When trace→tool extraction produces nothing, the judge grades the transcript
+   alone and PASSES a call that skipped required tools (run 228909: 17 of 23
+   finished results had no tool list; 719334 recorded only `end_call` and passed).
+2. When extraction lands *after* the judge reads — which it does even when the
+   trace POST beats the judge by seconds — the judge FAILS a call for "the
+   required tool was not called" while that tool is sitting in the pairing
+   (run 228930: 719422 and 719438, both `check_plan_accepted` recorded, both
+   failed for not calling it).
+
+So the authoritative verdict here is: the judge's transcript assessment AND every
+expected tool actually recorded. `goal_success` supplies the first half; the
+pairing supplies the second, and it is read after everything has settled.
 
 The goal judge is given the transcript, the criteria and the *actual* tool calls —
 never `expected_tool_calls`. So when trace→tool extraction produces nothing (an
@@ -98,7 +113,27 @@ def classify(result_id: str) -> dict:
         "missing": [g["name"] for g in groups if g.get("expected") and not g.get("actual")],
         "void_reason": void_reason,
         "pending": False,
+        # the judge's own verdict, kept separate from ours
+        "judge_goal": ev.get("goal_success"),
+        "judge_reason": str(ev.get("goal_reasoning") or ""),
+        # our verdict: the goal was reached AND nothing expected went uncalled.
+        # A judge "fail" whose only complaint is an uncalled tool that IS recorded
+        # is the race above, so the pairing overrides it.
+        "verdict": _verdict(ev.get("goal_success"), groups),
     }
+
+
+def _verdict(judge_goal, groups) -> str:
+    """pass | fail_missing_tools | fail_goal | fail_goal_and_tools"""
+    missing = [g["name"] for g in groups if g.get("expected") and not g.get("actual")]
+    reached = judge_goal is True
+    if not missing and reached:
+        return "pass"
+    if missing and reached:
+        return "fail_missing_tools"
+    if not missing and not reached:
+        return "fail_goal"
+    return "fail_goal_and_tools"
 
 
 def main() -> int:
@@ -121,7 +156,14 @@ def main() -> int:
     pending = [r for r in rows if r.get("pending")]
     void = [r for r in rows if r["void_reason"]]
     scorable = [r for r in rows if not r["void_reason"] and not r.get("pending")]
-    passed = [r for r in scorable if r["goal"] is True]
+    passed = [r for r in scorable if r["verdict"] == "pass"]
+    tool_gap = [r for r in scorable if r["verdict"] == "fail_missing_tools"]
+    # a judge fail that blames an uncalled tool which the pairing shows fired
+    disputed = [
+        r for r in scorable
+        if r["judge_goal"] is False and not r["missing"]
+        and "not call" in r["judge_reason"].lower()
+    ]
 
     for r in rows:
         if r.get("pending"):
@@ -129,7 +171,8 @@ def main() -> int:
         elif r["void_reason"]:
             mark = "VOID"
         else:
-            mark = "pass" if r["goal"] is True else "fail"
+            mark = {"pass": "pass", "fail_missing_tools": "FAIL-T",
+                    "fail_goal": "fail", "fail_goal_and_tools": "fail"}[r["verdict"]]
         print(f"{mark:<5} {r['id']} {r['status']:<18} tools {len(r['hits'])}/{len(r['expected'])}")
         if r.get("pending"):
             print("      ↳ not final yet — tool list still being extracted")
@@ -141,6 +184,12 @@ def main() -> int:
     total = len(rows)
     print(f"\n{len(scorable)}/{total} scorable · {len(passed)} passed · "
           f"{len(void)} VOID · {len(pending)} still running")
+    if tool_gap:
+        print(f"{len(tool_gap)} reached the goal but skipped a required tool (counted as failures)")
+    if disputed:
+        print(f"NOTE: {len(disputed)} judge-fail(s) blame an uncalled tool that IS recorded — "
+              f"the judge read the tool list before extraction landed: "
+              f"{' '.join(r['id'] for r in disputed)}")
     if pending:
         print("wait for the pending results before scoring this run")
         return 2

@@ -428,18 +428,23 @@ AREA2 = [
     dict(
         key="A2-03",
         name="Jordan Lee (saved by a reschedule)",
-        test_name="A cancellation turns into a free reschedule once the fee is heard",
+        test_name="A cancellation request turns into a reschedule",
+        # Fee disclosure was dropped from the criteria: scheduling.md tells Robin to offer the
+        # move BEFORE cancelling and to say that moving never costs anything, so a
+        # prompt-obedient agent never reaches the cancel branch that surfaces the fee. Demanding
+        # the fee here punished correct instruction-following. A2-02 and A2-04 still cover fee
+        # disclosure on calls that actually cancel.
         intent=(
             "You are Jordan Lee, an existing Straus patient. Say you want to cancel your "
             "appointment tomorrow at the Park Avenue office. When asked to confirm who you are, "
             "give your full name as Jordan Lee and your date of birth as April 12th, 1990. If you "
-            "are told a fee applies and offered another time instead, take the other time — say "
-            "you would rather move it than pay a fee. Accept the first alternative offered, "
+            "are offered another time instead of cancelling, take it — say you would rather move "
+            "it than lose the visit. Accept the first alternative offered, "
             "confirm it, then thank them and end the call. " + NO_LEAK
         ),
         success_criteria=(
-            "Robin must disclose the fifty dollar fee, offer to move the visit instead, and then "
-            "move it rather than cancel it. Success requires verify_identity and "
+            "Robin must offer to move the visit instead of cancelling it, and then move it. "
+            "Success requires verify_identity and "
             "reschedule_appointment to have been called and the original appointment to remain "
             "booked at a new time. A cancellation on this call is a failure."
         ),
@@ -1660,6 +1665,68 @@ AREA6 = [
     ),
 ]
 
+# ─────────────────── identity pins (triage defect D2, run 228930)
+# Four cases were lost because the persona withheld the DOB its intent told it to give
+# ("I don't have that on me right now") or spoke a different one. verify_identity matches
+# the chart on an exact DOB, so a withheld value makes every downstream protected tool
+# unreachable and the agent fails a call it handled correctly. Intent prose does not hold
+# a load-bearing value — pin it as a scripted response.
+DOB_SPOKEN = {
+    "1990-04-12": "April twelfth, nineteen ninety",
+    "1972-06-30": "June thirtieth, nineteen seventy-two",
+    "1995-09-08": "September eighth, nineteen ninety-five",
+    "1985-11-03": "November third, nineteen eighty-five",
+    "2016-03-22": "March twenty-second, two thousand sixteen",
+}
+# A2-08's whole point is misspeaking the date of birth once — pinning it deletes the test.
+NO_IDENTITY_PIN = {"A2-08"}
+
+_ASK_TRIGGER = (
+    "asks for your full name and date of birth, or asks you to confirm who you are, or "
+    "asks for the patient's name and date of birth. NOT when asking only for a member ID "
+    "or insurance card, NOT when asking which office or location, NOT when asking for a "
+    "phone or mobile number, NOT when asking about an appointment day or time, NOT when "
+    "reading your name and date of birth back to you for confirmation."
+)
+_READBACK_TRIGGER = (
+    "reads your name and date of birth back to you and asks whether it is correct, or asks "
+    "'did I get that right'. NOT when first asking for your name or date of birth."
+)
+
+
+def _identity_pins(case_key: str, tools: list[dict]) -> list[dict]:
+    """Pin the name + DOB this case's verify_identity call needs, and the read-back yes."""
+    if case_key in NO_IDENTITY_PIN:
+        return []
+    verify = next(
+        (t for t in tools
+         if t["name"] == "verify_identity" and (t.get("parameters") or {}).get("dob")),
+        None,
+    )
+    if verify is None:
+        return []
+    params = verify["parameters"]
+    full_name, dob = params["full_name"], params["dob"]
+    spoken = DOB_SPOKEN[dob]
+    return [
+        {
+            "match_type": "context",
+            "match_phrase": _ASK_TRIGGER,
+            "response_type": "phrase",
+            # a phrase response replaces the whole turn, so it carries both values
+            "response_value": f"{full_name}. My date of birth is {spoken}.",
+            "occurrence_mode": "always",
+        },
+        {
+            "match_type": "context",
+            "match_phrase": _READBACK_TRIGGER,
+            "response_type": "phrase",
+            "response_value": "Yes, that's right.",
+            "occurrence_mode": "always",
+        },
+    ]
+
+
 AREAS = [
     ("area_1_new_patient_access", AREA1),
     ("area_2_appointment_management", AREA2),
@@ -1679,6 +1746,7 @@ def build() -> list[dict]:
             noise = NOISES[n % len(NOISES)]
             n += 1
             expected = [dict(c) for c in case["tools"]]
+            pins = _identity_pins(case["key"], expected)
             expected += [h(name) for name in case["handoffs"] if name != "transfer_to_human"]
             traits = [
                 {
@@ -1719,6 +1787,7 @@ def build() -> list[dict]:
                     "allow_end_call_tool": True,
                     "allow_silence_tool": True,
                     "num_runs": 1,
+                    "scripted_responses": pins,
                 }
             })
     return out

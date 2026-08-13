@@ -536,10 +536,22 @@ def _d_classify_visit_request(a: dict[str, Any]) -> dict[str, Any]:
 
 
 def _d_list_locations(a: dict[str, Any]) -> dict[str, Any]:
-    zip_ = str(a["zip"]).strip()
+    """Offices, best match first. Either `zip` or `name` will do.
+
+    reception.md promises this tool turns "whatever they called the office" into a real
+    location, but `zip` used to be the only way in — so an existing patient who names
+    their office ("Brooklyn Heights") gave the agent nothing to call it with, and the
+    agent stalled asking for a ZIP it did not need.
+    """
+    zip_ = str(a.get("zip") or "").strip()
+    name = str(a.get("name") or a.get("location") or "").strip().lower()
     with _db() as conn:
         rows = [dict(r) for r in conn.execute("SELECT * FROM locations ORDER BY id")]
-    rows.sort(key=lambda r: r["zip"] != zip_)  # exact-zip office first; radius ignored
+    def rank(r: dict[str, Any]) -> tuple[int, int]:
+        by_name = 0 if name and (name in r["name"].lower() or r["name"].lower() in name) else 1
+        by_zip = 0 if zip_ and r["zip"] == zip_ else 1
+        return (by_name, by_zip)
+    rows.sort(key=rank)
     for r in rows:
         r["offers_cosmetic"] = bool(r["offers_cosmetic"])
     return {"locations": rows}
@@ -812,9 +824,17 @@ def _d_check_plan_accepted(a: dict[str, Any]) -> dict[str, Any]:
         others = [r["name"] for r in conn.execute(
             "SELECT name FROM locations WHERE id != ? ORDER BY id", (loc["id"],))]
     if carrier in _NOT_ACCEPTED_CARRIERS:
+        # acceptance is carrier-level in this fixture, so no office takes it. Handing back
+        # sibling offices as "alternatives" invited a false "try Brooklyn Heights instead".
         return {"accepted": False, "must_not_assert": False,
                 "carrier": a["carrier"], "location": loc["name"],
-                "alternative_locations": others}
+                "alternative_locations": [],
+                "notes": (f"{a['carrier']} is not accepted at any Straus office. Say so "
+                          "plainly and offer self-pay pricing or a callback — do not send "
+                          "them to another office."),
+                "required_script": (f"We don't accept {a['carrier']} at any of our offices. "
+                                    "I can go over self-pay pricing or have someone call "
+                                    "you about options.")}
     if carrier in _ACCEPTED_CARRIERS:
         # We only have a carrier-level acceptance list, no real plan/provider
         # coverage matrix — a specific plan_name/plan_type can't be validated,
@@ -1018,11 +1038,25 @@ def _d_get_results_status(a: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+# clinical.md tells the agent to "say the callback window out loud" off this tool, so the
+# tool has to supply one — without it the agent either invents a window or (correctly)
+# refuses to state one and fails a criterion it could never satisfy.
+_CLINICAL_CALLBACK_WINDOW = {
+    "stat": "within the hour",
+    "urgent": "within four hours",
+    "routine": "by the end of the next business day",
+}
+
+
 def _d_create_clinical_message(a: dict[str, Any]) -> dict[str, Any]:
     patient = _patient_row()
     event_id = _event("clinical_message", {"patient_id": patient["id"], **a})
+    priority = str(a["priority"]).strip().lower()
+    window = _CLINICAL_CALLBACK_WINDOW.get(priority, _CLINICAL_CALLBACK_WINDOW["routine"])
     return {"message_id": f"cm_{event_id}", "queued": True,
-            "priority": a["priority"], "category": a["category"]}
+            "priority": a["priority"], "category": a["category"],
+            "callback_window": window,
+            "spoken_commitment": f"Someone from the clinical team will call you back {window}."}
 
 
 # --- practice / plumbing ----------------------------------------------------------
@@ -1047,9 +1081,17 @@ _KB = [
 
 
 def _d_search_practice_kb(a: dict[str, Any]) -> dict[str, Any]:
-    words = set(str(a["query"]).lower().replace("?", " ").split())
+    """Substring match, most-specific bucket first.
+
+    Exact-token intersection made the KB unable to answer its own hours question: the
+    office is named "Park Avenue", so "Park Avenue office hours closing time" hit the
+    `directions` bucket on "park" and never reached `hours` (which keys on "hour"/"open"/
+    "close" and does not stem). Buckets are now tried in _KB order — narrower topics
+    ahead of directions — and matched on substrings so "hours"/"closing" both land.
+    """
+    query = str(a["query"]).lower().replace("?", " ")
     for keywords, source, answer in _KB:
-        if words & keywords:
+        if any(k in query for k in keywords):
             return {"source": source, "answer": answer}
     return {"source": None, "answer": None,
             "note": "No grounded source — do not make one up."}
