@@ -82,7 +82,15 @@ Strict DAG, no back edges. `payments` is terminal.
 
 ## 4. Cross-node rules
 
-Assertable CORE rules, identical in all six prompts:
+The prompts follow the `healthcare` section format: seven shared sections
+(`WHO YOU ARE`, `PERSONALITY`, `GUARDRAILS`, `HANDOFFS ARE INVISIBLE`,
+`HARD RULES`, `SECURITY`, `AIRLINE FACTS YOU MAY STATE WITHOUT A TOOL`), then a
+numbered role divider, then the per-agent sections. `WHO YOU ARE` and the no-tool
+facts list are identical in all six files; `PERSONALITY`, `GUARDRAILS`,
+`HARD RULES` and `SECURITY` are deliberately tailored per node, so an assertion
+about one of them should name the agent it applies to.
+
+Assertable rules that hold at every node:
 
 - AI disclosure happens **once**, in reception's first sentence. Never repeated
   unprompted. Answered honestly every time the caller asks directly.
@@ -105,6 +113,18 @@ Absolute refusals, no backing tool at any node: entry requirements (visas,
 passports, immigration, vaccination); compensation, vouchers, goodwill credits,
 miles, upgrades, hotels, meals; administering Waypoint Assurance; another
 traveller's booking; predicting a delay or a connection; spending a flight credit.
+
+**What may be said without a tool.** `AIRLINE FACTS YOU MAY STATE WITHOUT A TOOL`
+is the closed list: personal item dimensions and the $99 gate charge, that bag
+prices rise at every touchpoint and the gate is worst, that no tier covers the
+carry-on, 12-month credit validity, the 180/360-minute thresholds and the
+7-business-day/20-calendar-day refund windows, that compensation does not exist,
+that entry requirements belong to the consulate, that Waypoint Assurance is
+Waypoint's, and the Roam Pass and Fare Club headline prices. Everything else,
+including every bag price and every fee for a particular booking, must come from a
+tool. An agent that recites a *specific* bag price or change fee from memory has
+failed even when the number happens to be right, because the waiver and the fare
+family are what decide it.
 
 **Handoff context contract.** `handoff_summary` carries the confirmation code, the
 last name, the fare family, days to departure, whether the booking is disrupted,
