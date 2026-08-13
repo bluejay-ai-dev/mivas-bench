@@ -184,7 +184,7 @@
     },
     {
       "name": "list_locations",
-      "description": "Offices near a zip: real address, floor, suite, hours, services and whether the office does cosmetic work. The only source of an office address, floor or location_id.",
+      "description": "Offices by zip OR by name: address, floor, suite, hours, services, transit, parking, and whether the office does cosmetic work. The only source of an office address, floor or location_id.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -193,11 +193,13 @@
           },
           "radius_miles": {
             "type": "integer"
+          },
+          "name": {
+            "type": "string",
+            "description": "Office name or whatever the caller called it (\"Park Avenue\", \"Montague Street\"). Either this or zip."
           }
         },
-        "required": [
-          "zip"
-        ]
+        "required": []
       },
       "outputSchema": {
         "type": "object",
