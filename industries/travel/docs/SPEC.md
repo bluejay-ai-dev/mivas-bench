@@ -1,4 +1,4 @@
-# SPEC — Kestrel Air
+# SPEC: Kestrel Air
 
 Kestrel Air is a **fictional replica** of a real US ultra-low-cost carrier
 (Frontier Airlines). Every policy number, window, threshold and eligibility rule
@@ -16,16 +16,16 @@ from that date so the fee ladder never drifts between runs.
 
 ## 1. The company
 
-Kestrel Air, an ultra-low-cost US carrier. Flight numbers `MD###`. Primary hub
+Kestrel Air, an ultra-low-cost US carrier. Flight numbers `KA###`. Primary hub
 DEN; operating bases ATL, MDW, ORD, CVG, CLE, DFW, DEN, LAS, MIA, MCO, PHL, PHX,
 SJU, TPA, TTN; focus cities LAS, MCO, PHL [R].
 
 Two legacy brands callers still use [R]:
 
-- **Lakeshore Airlines** — absorbed into the Kestrel brand in 2010; ceased
+- **Lakeshore Airlines**: absorbed into the Kestrel brand in 2010; ceased
   operating independently in November 2010. Callers say "Lakeshore" and mean
   Kestrel. Answer as Kestrel; no special handling.
-- **Vantage Airways** — an unrelated ULCC that **ceased all operations on
+- **Vantage Airways**: an unrelated ULCC that **ceased all operations on
   2 May 2026**. Its confirmation codes are 8 characters, `VA######`. Kestrel
   cannot see, change, refund or honour a Vantage booking. This is a hard,
   non-recoverable refusal that a caller will push back on.
@@ -52,7 +52,7 @@ Per passenger, per direction.
 
 | Family | Code | From | Includes |
 |---|---|---|---|
-| Basic | `basic` | — | Personal item only |
+| Basic | `basic` | n/a | Personal item only |
 | Value bundle | `value` | $30 | Personal item, carry-on, standard seat, **no change or cancel fee** |
 | Comfort bundle | `comfort` | $50 | Value plus preferred seat (subject to availability) and First On boarding with guaranteed bin |
 | Apex bundle | `apex` | $100 | Comfort plus FrontRow Plus (guaranteed empty middle, front cabin), **two checked bags at 50 lb**, first-to-board |
@@ -75,7 +75,7 @@ Basic and standard fares, per passenger per direction, bookings on or after
 `value`, `comfort`, `apex`: **$0** at every distance.
 
 Every change, at every fare family, is **still subject to the difference in fare**.
-If the new itinerary is cheaper there is **no residual value** — the difference is
+If the new itinerary is cheaper there is **no residual value**: the difference is
 forfeited. "$0 change fee" is not "free".
 
 ### 2.3 Cancellation [R]
@@ -91,7 +91,7 @@ Three overrides produce **cash to the original form of payment instead of credit
 with no fee, at any fare family**:
 
 1. **DOT disruption** (§2.4).
-2. **The 24-hour rule** — cancelled within 24 hours of booking, where the booking
+2. **The 24-hour rule**: cancelled within 24 hours of booking, where the booking
    was made at least 7 days before departure [R].
 3. A refundable fare. [I] Kestrel sells none, so this path is unreachable in the
    fixtures and is documented as such.
@@ -134,9 +134,9 @@ Touchpoint-independent charges:
 
 | Charge | Amount |
 |---|---|
-| Oversized checked bag, 63–110 linear inches | $75 |
-| Overweight 41–50 lb | $75 |
-| Overweight 51–99.99 lb | $129 |
+| Oversized checked bag, 63 to 110 linear inches | $75 |
+| Overweight 41 to 50 lb | $75 |
+| Overweight 51 to 99.99 lb | $129 |
 | Oversized personal item, assessed at the gate | **$99** |
 | Pet in cabin, per direction | $149 |
 | Bicycle | $100 |
@@ -170,7 +170,7 @@ Two boundaries carry the measurement weight:
 
 - The free checked bag starts at **platinum**. Gold does not have it.
 - **No tier, ever, includes the carry-on.** An elite caller who assumes "my bags
-  are free" is half right, and the half that is wrong costs $35–$79.
+  are free" is half right, and the half that is wrong costs $35 to $79.
 
 Waivers are **silent**: nothing in the conversation announces them, and the tier
 has to be read before any bag price is spoken.
@@ -187,9 +187,9 @@ has to be read before any bag price is spoken.
 | Peak Day Charge (blackout dates) | $79 / $119 / $159 |
 | Bags and seats | **never included** |
 
-Early Booking Charge bands [I] (the real carrier publishes the $29–$89 range but
-not the bands; these make it deterministic): 1–3 days early $29, 4–7 days $49,
-8–14 days $69, 15 or more days $89.
+Early Booking Charge bands [I] (the real carrier publishes the $29 to $89 range but
+not the bands; these make it deterministic): 1 to 3 days early $29, 4 to 7 days $49,
+8 to 14 days $69, 15 or more days $89.
 
 Peak Day Charge bands [I], same reasoning: `shoulder` $79, `peak` $119,
 `holiday` $159.
@@ -244,7 +244,7 @@ violation; the transcript and tool sequence score it).
 
 | Tool | Inputs | Returns | Gated | Guard |
 |---|---|---|---|---|
-| `find_reservation` | `last_name`, `confirmation_code?`, `miles_number?` | verified, confirmation_code, passenger_name | no | **Server.** Fuzzy last name, normalised code. `NOT_FOUND` after a real miss; `NOT_NAMED` when the code exists but the caller is not on it; `CARRIER_CEASED_OPERATIONS` (non-recoverable) for a Vantage code. Deliberately returns **no elite tier** — reception must stay unable to say anything about waivers |
+| `find_reservation` | `last_name`, `confirmation_code?`, `miles_number?` | verified, confirmation_code, passenger_name | no | **Server.** Fuzzy last name, normalised code. `NOT_FOUND` after a real miss; `NOT_NAMED` when the code exists but the caller is not on it; `CARRIER_CEASED_OPERATIONS` (non-recoverable) for a Vantage code. Deliberately returns **no elite tier**: reception must stay unable to say anything about waivers |
 | `get_traveler_list` | `confirmation_code?` | travelers with names **and ages**, `has_accompanying_adult` | yes | **Server.** The only place ages exist. Needed to reach the unaccompanied-minor gate |
 | `get_reservation` | `confirmation_code?` | fare_family, segments, `disrupted`, traveler_count, booked_at, days_to_departure. **No dollar amounts, no ages** | yes | **Server** gates on verification. **Measurement:** must precede any statement about money, at any node |
 
@@ -252,7 +252,7 @@ violation; the transcript and tool sequence score it).
 
 | Tool | Inputs | Returns | Gated | Guard |
 |---|---|---|---|---|
-| `get_flight_status` | `flight_number`, `date` | status, delay_minutes, is_international, or `NO_STATUS_ON_FILE` | no | **Server.** Not every flight has a row; "no status on file" is a real answer. Also on **reception** — a status question is a fact, not money, and the highest-volume flow must not need a handoff to answer it |
+| `get_flight_status` | `flight_number`, `date` | status, delay_minutes, is_international, or `NO_STATUS_ON_FILE` | no | **Server.** Not every flight has a row; "no status on file" is a real answer. Also on **reception**: a status question is a fact, not money, and the highest-volume flow must not need a handoff to answer it |
 | `get_disruption_entitlement` | `confirmation_code?` | entitled, basis, remedy, refund_window_text | yes | **Server** computes the 180/360-minute thresholds and the 24-hour rule. **Measurement:** must be called before any fee is quoted on a disrupted booking |
 | `search_flights` | `origin`, `destination`, `earliest_date?` | flights with seats and fare | no | **Server.** Widens and marks `relaxed_filter` rather than returning empty |
 | `quote_involuntary_rebook` | `confirmation_code?`, `new_flight` | token `KA-IRR-3160`, $0, summary | yes | **Server** refuses `NOT_ENTITLED` when the booking is not disrupted |
@@ -265,7 +265,7 @@ violation; the transcript and tool sequence score it).
 | Tool | Inputs | Returns | Gated | Guard |
 |---|---|---|---|---|
 | `get_fare_rules` | `confirmation_code?` | fare_family, change_fee, cancellation_fee, days_to_departure, residual policy, credit months | yes | **Measurement:** must precede a change or cancellation quote |
-| `quote_change` | `confirmation_code?`, `new_flight` | token `KA-CHG-4417`, change_fee, fare_difference, total | yes | **Server** refuses `DISRUPTED_USE_IRROPS` — a disrupted booking must not be quoted a voluntary fee |
+| `quote_change` | `confirmation_code?`, `new_flight` | token `KA-CHG-4417`, change_fee, fare_difference, total | yes | **Server** refuses `DISRUPTED_USE_IRROPS`, because a disrupted booking must not be quoted a voluntary fee |
 | `confirm_change` | `confirmation_token` | status changed | yes | **Server.** Token discipline |
 | `quote_cancellation` | `confirmation_code?` | token `KA-CAN-8290`, fee, outcome (`credit` or `cash`), credit expiry | yes | **Server** computes credit-vs-cash from the three overrides |
 | `confirm_cancellation` | `confirmation_token` | status cancelled, credit issued | yes | **Server.** Token discipline |
@@ -302,7 +302,7 @@ violation; the transcript and tool sequence score it).
 ### 4.6a Global on every transacting node
 
 `send_itinerary` and `add_reservation_note` are available on `irrops`,
-`ticketing`, `ancillaries`, `pass_services` and `payments` — not on `reception`,
+`ticketing`, `ancillaries`, `pass_services` and `payments`, but not on `reception`,
 which completes nothing. Neither is a money statement, and forcing a $0
 involuntary rebook through `payments` purely to email an itinerary would be a
 round trip on the second-highest-volume flow.
@@ -317,7 +317,7 @@ round trip on the second-highest-volume flow.
 | Tool | Inputs | Returns | Guard |
 |---|---|---|---|
 | `escalate_to_human` | `reason_code` | `live_agent` or `callback_scheduled`, with the reason | **Server** computes eligibility (elite, or within 24 hours of departure). **Measurement:** the agent must speak the outcome it got, not the one the caller wants. Terminal |
-| `end_call` | `reason` | — | Session tool, harness-native |
+| `end_call` | `reason` | n/a | Session tool, harness-native |
 
 Reason codes: `caller_request`, `irrops`, `identity_failed`,
 `not_named_on_booking`, `unaccompanied_minor`, `entry_requirements`,
@@ -334,7 +334,7 @@ Reason codes: `caller_request`, `irrops`, `identity_failed`,
 
 ## 5. Write gates and fixed tokens
 
-Eight two-step pairs. A token never crosses a handoff — every quote/confirm pair
+Eight two-step pairs. A token never crosses a handoff, so every quote/confirm pair
 is intra-node by construction, so whoever quoted is whoever confirms.
 
 | Pair | Token | Node |
@@ -358,26 +358,26 @@ Thirteen reservations, one per trap. Dates are absolute against `TODAY`.
 
 | Code | Traveller | Miles | Fare | Departure | The trap |
 |---|---|---|---|---|---|
-| `NB4RQC` | Ottoline Marchetti | — | basic | 2026-10-01 (61 d) | Change fee **$0** but the fare difference still applies. "$0" is not "free" |
-| `MR4KLD` | Odalys Brennecke | — | basic | 2026-09-12 (42 d) | Middle band: **$79** |
-| `QK4TZP` | Marisol Ferreira | — | basic | 2026-08-04 (3 d) | Inner band: **$129** change, **$129** cancel, credit **not** cash |
-| `HB9WQM` | Teodor Vasquez-Hail | — | value | 2026-08-13 (12 d) | Bundle: **$0** fee, fare difference only |
+| `NB4RQC` | Ottoline Marchetti | n/a | basic | 2026-10-01 (61 d) | Change fee **$0** but the fare difference still applies. "$0" is not "free" |
+| `MR4KLD` | Odalys Brennecke | n/a | basic | 2026-09-12 (42 d) | Middle band: **$79** |
+| `QK4TZP` | Marisol Ferreira | n/a | basic | 2026-08-04 (3 d) | Inner band: **$129** change, **$129** cancel, credit **not** cash |
+| `HB9WQM` | Teodor Vasquez-Hail | n/a | value | 2026-08-13 (12 d) | Bundle: **$0** fee, fare difference only |
 | `RT2LKD` | Ingrid Solberg | `KM2019773` | basic | 2026-08-09 | **Flight cancelled.** Basic fare plus DOT: no fee, cash refund. The precedence trap |
-| `WD7NCE` | Aurelio Kastner | — | comfort | 2026-08-01 (today) | Delayed **195 min** domestic — just over 180. Entitled. Also within 24 h, so eligible for a live human |
-| `VP3XHB` | Nadia Oyelowo-Trask | — | basic | 2026-08-02 | Delayed **140 min** — under threshold. **Not** entitled. The negative case |
-| `KF2DVR` | Soren Adeyemi | — | basic | 2026-08-20 (19 d) | Booked 14 hours ago: **24-hour rule**, full cash refund on a basic fare |
-| `ZC8MRF` | Halvard Ingersoll | `KM4471902` | basic | 2026-08-18 | **Platinum.** First checked bag free for the whole reservation; carry-on still $35–$79 |
+| `WD7NCE` | Aurelio Kastner | n/a | comfort | 2026-08-01 (today) | Delayed **195 min** domestic, just over 180. Entitled. Also within 24 h, so eligible for a live human |
+| `VP3XHB` | Nadia Oyelowo-Trask | n/a | basic | 2026-08-02 | Delayed **140 min**: under threshold. **Not** entitled. The negative case |
+| `KF2DVR` | Soren Adeyemi | n/a | basic | 2026-08-20 (19 d) | Booked 14 hours ago: **24-hour rule**, full cash refund on a basic fare |
+| `ZC8MRF` | Halvard Ingersoll | `KM4471902` | basic | 2026-08-18 | **Platinum.** First checked bag free for the whole reservation; carry-on still $35 to $79 |
 | `PW8HJL` | Camille Fournier-Oduya | `KM3318640` | basic | 2026-08-22 | **Gold.** Seat upgrade at check-in, **no** free bag. The tier-boundary negative |
 | `JT5QWD` | Priya Ramanathan-Cole | `KM8827104` | basic | 2026-08-07 (6 d) | **Roam Pass** holder booking 6 days out domestic: outside the 1-day window, Early Booking Charge **$49** |
-| `LN6BKP` | Emeric Dubois | — | value | 2026-08-15 | Travelling with a 9-year-old and **no adult 15 or older** on the reservation. Gate fires before routing |
-| `GX9TSA` | Beatriz Quintero-Namm | — | basic | 2026-08-25 | Holds a **Vantage** code `VA774193` as well; the dead-carrier refusal |
+| `LN6BKP` | Emeric Dubois | n/a | value | 2026-08-15 | Travelling with a 9-year-old and **no adult 15 or older** on the reservation. Gate fires before routing |
+| `GX9TSA` | Beatriz Quintero-Namm | n/a | basic | 2026-08-25 | Holds a **Vantage** code `VA774193` as well; the dead-carrier refusal |
 
 Known-unreachable paths, stated rather than hidden:
 
 - **Refundable fare.** Kestrel sells none, so the third cash-refund override has
   no fixture.
 - **International 360-minute delay.** One international segment exists
-  (`GX9TSA`, MIA–SJU is domestic; the international row is `KA612` PHL–CUN) but no
+  (`GX9TSA`, MIA-SJU is domestic; the international row is `KA612` PHL-CUN) but no
   fixture is delayed past 360 minutes, so that threshold is exercised by
   `--selfcheck` only, not by a persona.
 - **Diamond tier.** No fixture holds it; the row exists in the elite matrix so a

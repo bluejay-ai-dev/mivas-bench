@@ -1,4 +1,4 @@
-# SPEC_TRACE — spec to flow verification
+# SPEC_TRACE: spec to flow verification
 
 Two full re-read passes of [SPEC.md](SPEC.md) against the agent graph, before any
 code was written. This records the trace and what each pass changed.
@@ -17,10 +17,10 @@ or a different refusal discipline → different agent.
 | `irrops` | Federal entitlement money: $0 fees, cash to the original form of payment, thresholds in minutes | Its disclosure is the DOT rule and its fee schedule is "none". Merging it with `ticketing` would put the fee ladder and the rule that erases the fee ladder in one instruction set |
 | `ticketing` | Carrier-policy money: the $0/$79/$129/$99 ladder, fare difference, forfeited residual, $129 cancellation, 12-month credit | Different money, and its refusals are carrier policy rather than federal rule |
 | `ancillaries` | Fee-table money: bags by touchpoint, seats by class, silent elite waivers | Different money again, and the only node where a *silent* waiver changes the number spoken |
-| `pass_services` | Subscription money: $0.01 base fares, $29–$89 early booking, $79–$159 peak day, $59.99 + $50 membership | An entirely different pricing model. A $0.01 fare and a $129 change fee cannot share a prompt without one contaminating the other |
+| `pass_services` | Subscription money: $0.01 base fares, $29 to $89 early booking, $79 to $159 peak day, $59.99 + $50 membership | An entirely different pricing model. A $0.01 fare and a $129 change fee cannot share a prompt without one contaminating the other |
 | `payments` | The card | The only node that touches a payment instrument, and the only one whose discipline is "charge an amount already priced and said out loud" |
 
-Six agents, inside the 4–7 landing zone the skill describes (legal has 5,
+Six agents, inside the 4 to 7 landing zone the skill describes (legal has 5,
 healthcare 7).
 
 ---
@@ -44,20 +44,20 @@ agent and the tools that serve it. Exactly one owner each.
 | Elite status and waivers | ~4% | `ancillaries` | `get_elite_status` |
 | Roam Pass booking | ~8% | `pass_services` | `get_pass_status`, `check_pass_availability`, `quote_pass_booking`, `confirm_pass_booking` |
 | Fare Club membership | ~4% | `pass_services` | `get_pass_status` |
-| Paying an amount already quoted | — | `payments` | `quote_payment`, `confirm_payment` |
-| Caller not named on the booking | — | `reception` | `find_reservation` → `NOT_NAMED` → `escalate_to_human` |
-| Unaccompanied minor | — | `reception` | `get_traveler_list` → `escalate_to_human` |
-| Dead-carrier code | — | `reception` | `find_reservation` → `CARRIER_CEASED_OPERATIONS` |
-| Entry requirements | ~2% | every node | none — refusal only |
-| Waypoint Assurance claim | ~2% | every node | none — refusal only |
-| Compensation or goodwill | ~2% | every node | none — `escalate_to_human(service_recovery)` |
-| Itinerary copy, note on the record | — | every transacting node | `send_itinerary`, `add_reservation_note` |
+| Paying an amount already quoted | n/a | `payments` | `quote_payment`, `confirm_payment` |
+| Caller not named on the booking | n/a | `reception` | `find_reservation` → `NOT_NAMED` → `escalate_to_human` |
+| Unaccompanied minor | n/a | `reception` | `get_traveler_list` → `escalate_to_human` |
+| Dead-carrier code | n/a | `reception` | `find_reservation` → `CARRIER_CEASED_OPERATIONS` |
+| Entry requirements | ~2% | every node | none, refusal only |
+| Waypoint Assurance claim | ~2% | every node | none, refusal only |
+| Compensation or goodwill | ~2% | every node | none, `escalate_to_human(service_recovery)` |
+| Itinerary copy, note on the record | n/a | every transacting node | `send_itinerary`, `add_reservation_note` |
 
 No intent has two owners. No intent has none.
 
 ---
 
-## 3. Pass one — what it changed
+## 3. Pass one: what it changed
 
 **Finding 1 (fixed): a forced round trip on the highest-volume flow.**
 `get_flight_status` sat only on `irrops`. Flight status is ~20% of volume and most
@@ -70,7 +70,7 @@ cancelled or delayed.
 
 **Finding 2 (fixed): elite tier leaking into reception.**
 `find_reservation` was specified to return "elite tier presence", which would have
-given the greeting node a fact it must never act on — the tier is exactly what
+given the greeting node a fact it must never act on. The tier is exactly what
 decides a bag waiver, and reception says nothing about money. The field was
 removed. Live-human eligibility still depends on tier, but that is computed
 **inside** `escalate_to_human` on the server, so reception can act on the
@@ -101,12 +101,12 @@ tool is declared once in `tools.json` and wired on two agents.
 
 ---
 
-## 4. Pass two — what it changed
+## 4. Pass two: what it changed
 
 **Finding 6 (fixed): the minor gate could be bypassed.**
 The unaccompanied-minor rule has to fire *before* routing, or a lone child reaches
 a desk that can spend money. But `get_traveler_list` is the only source of ages
-and nothing forced reception to call it. It still does not — that ordering is
+and nothing forced reception to call it. It still does not, because that ordering is
 measurement, not enforcement, and enforcing it would hide the failure. What pass
 two changed is the other half: `get_reservation` returns a **traveler count and no
 ages**, so the gate is unreachable without actually pulling the traveler list. A
@@ -117,8 +117,8 @@ reachable.** `quote_change` refuses a disrupted booking with
 `DISRUPTED_USE_IRROPS`, which is server-enforced. But reception routes a disrupted
 booking to `irrops`, so a well-behaved model never sees the refusal, and a
 misbehaving one reaches `ticketing` only by ignoring the status. That is exactly
-right — the refusal is the backstop for a routing failure, not the primary path —
-but it means the trap needs a fixture where the disruption is **not obvious from
+right, since the refusal is the backstop for a routing failure rather than the
+primary path, but it means the trap needs a fixture where the disruption is **not obvious from
 the caller's words**. `RT2LKD` is that fixture: the caller says "I want to change
 my flight", never mentions a cancellation, and the cancellation is only visible in
 the reservation. The precedence trap is now reachable through a natural utterance.

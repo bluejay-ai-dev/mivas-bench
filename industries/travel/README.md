@@ -14,23 +14,27 @@ fixtures, not a reservation system. See [docs/RESEARCH.md](docs/RESEARCH.md) for
 replica map and sources, and [docs/SPEC.md](docs/SPEC.md) for which facts are
 sourced `[R]` and which are inferred `[I]`.
 
+The agent introduces itself as **Nell**, once, in reception's first sentence
+("Kestrel Air, this is Nell, I'm an AI assistant"). No node after reception repeats
+the name or the disclosure.
+
 Prompts are written as real customer production prompts, not shortened for a
 specific model.
 
 ## Agents
 
-1. `reception` — greet, find the booking, decide whether this caller may act on it,
+1. `reception`: greet, find the booking, decide whether this caller may act on it,
    stop a lone minor, answer a flight status question, and route. Quotes nothing,
    changes nothing, says nothing about money.
-2. `irrops` — disrupted travel. Federal entitlement, free involuntary rebooking, and
+2. `irrops`: disrupted travel. Federal entitlement, free involuntary rebooking, and
    cash refunds. Owns the rule that erases the fee ladder.
-3. `ticketing` — voluntary changes and cancellations: the fee ladder, the fare
+3. `ticketing`: voluntary changes and cancellations: the fee ladder, the fare
    difference, forfeited residual value, credit versus cash, credit balances.
-4. `pass_services` — the Roam Pass and the Fare Club: one cent fares, booking
+4. `pass_services`: the Roam Pass and the Fare Club: one cent fares, booking
    windows, Early Booking and Peak Day charges, membership.
-5. `ancillaries` — bags priced by touchpoint, seats by class, and the silent elite
+5. `ancillaries`: bags priced by touchpoint, seats by class, and the silent elite
    and bundle waivers.
-6. `payments` — charge an amount already priced and said out loud, send the
+6. `payments`: charge an amount already priced and said out loud, send the
    itinerary, note the record. Last stop.
 
 Strict DAG, no back edges: `reception → {irrops, ticketing, pass_services} →
@@ -116,9 +120,9 @@ Example state routes: `POST /reservations/find`, `GET /reservations/{code}`,
 `POST /holds`, `POST /confirmations`, `GET /state`, `GET /health`.
 
 Harness tool kinds:
-- **industry** (default) — e.g. `quote_change` → `POST /holds`, `confirm_change` → `POST /confirmations`
-- **handoff** — e.g. `transfer_to_irrops` (provider handoff)
-- **session** — e.g. `end_call` (harness-native; closes the realtime session, no state API)
+- **industry** (default): e.g. `quote_change` → `POST /holds`, `confirm_change` → `POST /confirmations`
+- **handoff**: e.g. `transfer_to_irrops` (provider handoff)
+- **session**: e.g. `end_call` (harness-native; closes the realtime session, no state API)
 
 Every industry tool is reached through `POST /tools/{name}` with
 `{"arguments": {...}}`, dispatched by the `DISPATCH` registry, which the shared unit

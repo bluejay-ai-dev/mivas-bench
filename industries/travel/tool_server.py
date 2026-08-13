@@ -1,4 +1,4 @@
-"""Kestrel Air state API — SQLite persistence, not a 1:1 tools.json mirror.
+"""Kestrel Air state API: SQLite persistence, not a 1:1 tools.json mirror.
 
 Kestrel Air is a fictional replica of a real US ultra-low-cost carrier. Every
 policy number is structurally identical to that carrier's published policy; every
@@ -16,7 +16,7 @@ Three behaviours are load-bearing:
   * Waivers are silent. A tier that covers the first checked bag changes the
     number this server returns and says nothing about why.
 
-Ordering rules are deliberately NOT enforced here — reservation before money,
+Ordering rules are deliberately NOT enforced here. Reservation before money,
 status before entitlement, fare rules before a change quote, elite status before a
 bag price, reading the token back before confirming. They are the measurement
 surface, scored post-hoc from the transcript and the tool sequence. So are every
@@ -80,7 +80,7 @@ BAG_KINDS = ("carry_on", "checked_first", "checked_second")
 TOUCHPOINTS = ("booking", "online_checkin", "airport", "gate")
 
 # Every enum-ish filter a model might paraphrase. Never normalises away a
-# documented format — only widens the ways of saying the same documented value.
+# documented format: only widens the ways of saying the same documented value.
 BAG_ALIASES = {
     "carry on": "carry_on", "carryon": "carry_on", "cabin bag": "carry_on",
     "overhead": "carry_on", "roller": "carry_on", "hand luggage": "carry_on",
@@ -480,7 +480,7 @@ def _pass_pricing(conn: sqlite3.Connection, miles_number: str, origin: str,
         raise ToolError(
             "PASS_FLIGHT_UNAVAILABLE",
             "That flight is not available on the pass. Not every flight and date "
-            "inside the travel window can be booked with it, and that is final — say "
+            "inside the travel window can be booked with it, and that is final. Say "
             "so and offer a different day.")
 
     intl = bool(flights[0]["is_international"])
@@ -1267,7 +1267,7 @@ def escalate_to_human(body: EscalationCreate) -> dict[str, Any]:
 
 
 # ------------------------------------------------------------------ dispatch
-# POST /tools/{tool_name} {"arguments": {...}} — the industry-agnostic contract
+# POST /tools/{tool_name} {"arguments": {...}}: the industry-agnostic contract
 # every harness speaks. Wraps the handlers above in the tools.json envelope:
 # {"ok": bool, "data": ..., "error_code": str|null, "caller_safe_message": str|null}.
 # Session (end_call) and handoff (transfer_to_*) tools never land here → 404.
@@ -1360,7 +1360,7 @@ def dispatch_tool(tool_name: str, body: ToolCall) -> dict[str, Any]:
     if handler is None:
         raise HTTPException(
             status_code=404,
-            detail=f"unknown tool {tool_name!r} — session and handoff tools are "
+            detail=f"unknown tool {tool_name!r}: session and handoff tools are "
             "harness-native and industry tools must be listed in DISPATCH",
         )
     try:
@@ -1703,14 +1703,25 @@ def _selfcheck() -> None:
         if path.stem != entry:
             assert "WHERE YOU ARE IN THE CALL" in heads, \
                 f"{path.name}: a non-entry node must say where the call already is"
-        assert "—" not in text and "–" not in text, \
-            f"{path.name}: no em or en dashes in prompt prose"
+        assert "Nell" in text, f"{path.name}: the agent is called Nell"
         shared["WHO YOU ARE"].add(text.split("\n# PERSONALITY")[0])
         shared["FACTS"].add(
             text.split("# AIRLINE FACTS YOU MAY STATE WITHOUT A TOOL")[1]
                 .split("\n# ─")[0])
     for block, seen in shared.items():
         assert len(seen) == 1, f"{block} drifted across prompts ({len(seen)} variants)"
+
+    # House style, pack-wide: no em or en dashes anywhere a human will read.
+    # Written as codepoints so this file stays clean of the characters it bans.
+    em, en = chr(0x2014), chr(0x2013)
+    dashed = [
+        p.relative_to(INDUSTRY_DIR).as_posix()
+        for p in sorted(INDUSTRY_DIR.rglob("*"))
+        if p.is_file() and p.suffix in {".md", ".py", ".sql", ".json", ".mmd", ".txt"}
+        and "__pycache__" not in p.parts
+        and (em in p.read_text() or en in p.read_text())
+    ]
+    assert not dashed, f"em or en dash found in {dashed}"
 
     catalog = json.loads((INDUSTRY_DIR / "tools.json").read_text())["tools"]
     names = {t["name"] for t in catalog}
@@ -1743,7 +1754,7 @@ def _selfcheck() -> None:
         else:
             raise AssertionError(f"{absent} must not be dispatchable")
 
-    print(f"ok — {len(names)} tools, {len(blueprint['agents'])} agents, "
+    print(f"ok: {len(names)} tools, {len(blueprint['agents'])} agents, "
           f"{len(TOKENS)} write gates, identity/entitlement/waiver/token/window "
           f"guards all hold, dispatch covers {len(DISPATCH)} tools")
 
