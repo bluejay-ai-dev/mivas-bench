@@ -1,0 +1,49 @@
+industries/customer-support/system-prompts/verification.md
+  s_9b9e165d137f9c::t_21602f5925aba4 1-146
+industries/customer-support/system-prompts/service.md
+  s_9b9e165d137f9c::t_21602f5925aba4 1-147
+industries/customer-support/db/schema.sql
+  s_9b9e165d137f9c::t_9a394d1bb43324 1-30,32-105,107-181,183-198,200-231
+  s_9b9e165d137f9c::t_018c887f976b8f 31,106,182,199
+industries/customer-support/system-prompts/membership.md
+  s_9b9e165d137f9c::t_21602f5925aba4 1-143
+industries/customer-support/system-prompts/reception.md
+  s_9b9e165d137f9c::t_21602f5925aba4 1-150
+industries/customer-support/README.md
+  s_9b9e165d137f9c::t_6d8bed42e6aa3e 3-147
+industries/customer-support/requirements.txt
+  s_9b9e165d137f9c::t_7680a3f5eb78fa 1-3
+industries/customer-support/system-prompts/fraud.md
+  s_9b9e165d137f9c::t_21602f5925aba4 1-158
+industries/customer-support/system-prompts/returns.md
+  s_9b9e165d137f9c::t_21602f5925aba4 1-151
+industries/customer-support/db/seed.sql
+  s_9b9e165d137f9c::t_4fb0ada82b4fa3 1-176
+industries/customer-support/system-prompts/orders.md
+  s_9b9e165d137f9c::t_21602f5925aba4 1-149
+industries/customer-support/tool_server.py
+  s_9b9e165d137f9c::t_ad3392d105ef3b 1513-1514,1516
+  s_9b9e165d137f9c::t_bbdb2d476639af 1-1512,1515,1517-1745
+industries/customer-support/agent_blueprint.mmd
+  s_9b9e165d137f9c::t_8881bbf7715183 1-34
+industries/customer-support/agent_blueprint.json
+  s_9b9e165d137f9c::t_70c6642673245a 1-119
+industries/customer-support/tools.json
+  s_9b9e165d137f9c::t_c1f26754335d5f 1-1424
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "452d58500d3f3ac6d5a8c02a4025f5819416f860",
+  "prompts": {},
+  "sessions": {
+    "s_9b9e165d137f9c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f525deec-ccd5-4af0-a34b-7447ac403af5",
+        "model": "claude-opus-5"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

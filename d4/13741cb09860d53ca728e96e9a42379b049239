@@ -1,0 +1,27 @@
+industries/finance/tool_server.py
+  s_6a814060c5d2c4::t_abd9342d58d64d 113-116,214-234,375-380,386-390,394-396,398-405,450
+scripts/apply_digital_humans.py
+  s_6a814060c5d2c4::t_b68e101d63cd34 30-35,68-70,72,79,81,94,97-100,110,114
+scripts/export_run_csv.py
+  s_6a814060c5d2c4::t_ace022e50941a7 42-45
+voice-agent-harnesses/gemini/harness.py
+  s_6a814060c5d2c4::t_90f89bf105f869 229,234-236
+voice-agent-harnesses/gemini/report.py
+  s_6a814060c5d2c4::t_2d8eece25bd800 19,66-69,74,186-256,562-565,579,602,609,621-622,646,649-650
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "d413741cb09860d53ca728e96e9a42379b049239",
+  "prompts": {},
+  "sessions": {
+    "s_6a814060c5d2c4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3f2df1e6-8829-448f-81ea-d18b9e84438f",
+        "model": "claude-opus-5"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

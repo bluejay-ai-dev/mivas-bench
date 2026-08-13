@@ -1,0 +1,25 @@
+voice-agent-harnesses/deepgram/harness.py
+  s_7a59407c970583::t_71eec5936fe95f 143
+  s_7a59407c970583::t_4a766d239f046d 36
+  s_7a59407c970583::t_ab43de3bd2a738 40-48
+voice-agent-harnesses/deepgram/README.md
+  s_7a59407c970583::t_411f1ced24dc0f 9-13
+voice-agent-harnesses/deepgram/voice-agent/Dockerfile
+  s_7a59407c970583::t_84e6b67965ba0f 34
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "0d53405a921a9e532d689c4a96fa76bcad9af6bf",
+  "prompts": {},
+  "sessions": {
+    "s_7a59407c970583": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "eb5fddee-8568-446d-9ae4-1c77694e9f20",
+        "model": "claude-opus-5"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

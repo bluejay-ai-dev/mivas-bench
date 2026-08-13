@@ -1,0 +1,19 @@
+voice-agent-harnesses/nvidia/nemotron-voicechat/adapters/chirp.py
+  s_dec8be94946be7::t_11fd8a74d60b11 791-797,799-802
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "df70cc73490cfe689309ad25786d0aa0cdd35fe6",
+  "prompts": {},
+  "sessions": {
+    "s_dec8be94946be7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8b6603b7-3e89-4369-ac83-69adb4ab10d9",
+        "model": "claude-opus-5"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
