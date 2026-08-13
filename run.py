@@ -335,7 +335,7 @@ def _twilio_welcome(industry: str) -> str:
         "healthcare": "Thank you for calling Straus Dermatology.",
         "finance": "Thank you for calling Copperline Credit Union.",
         "legal": "Thank you for calling Halverson and Reed.",
-        "travel": "Thanks for calling Kestrel Air, this is Frankie.",
+        "travel": "Thanks for calling Kestrel Air.",
     }.get(industry, "Hello.")
 
 

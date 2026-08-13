@@ -560,18 +560,20 @@
     },
     {
       "name": "get_credit_balance",
-      "description": "Flight credits on a Kestrel Miles account, with amounts and expiry dates. Read-only. Nothing on any desk can spend a credit on this call, so if the caller wants one applied, say plainly that it cannot be done by phone.",
+      "description": "Flight credits on a Kestrel Miles account or by confirmation code, with amounts and expiry dates. Read-only. Nothing on any desk can spend a credit on this call, so if the caller wants one applied, say plainly that it cannot be done by phone.",
       "inputSchema": {
         "type": "object",
         "properties": {
           "miles_number": {
             "type": "string",
-            "description": "Kestrel Miles number, format MM followed by seven digits."
+            "description": "Kestrel Miles number, format KM followed by seven digits, for example KM4471902."
+          },
+          "confirmation_code": {
+            "type": "string",
+            "description": "Six-character confirmation code for the original booking, used to look up a credit when no Miles number is on file."
           }
         },
-        "required": [
-          "miles_number"
-        ]
+        "required": []
       },
       "outputSchema": {
         "type": "object",
@@ -602,7 +604,7 @@
         "properties": {
           "miles_number": {
             "type": "string",
-            "description": "Kestrel Miles number, format MM followed by seven digits."
+            "description": "Kestrel Miles number, format KM followed by seven digits, for example KM4471902."
           }
         },
         "required": [
@@ -889,7 +891,7 @@
         "properties": {
           "miles_number": {
             "type": "string",
-            "description": "Kestrel Miles number, format MM followed by seven digits."
+            "description": "Kestrel Miles number, format KM followed by seven digits, for example KM4471902."
           }
         },
         "required": [
@@ -925,7 +927,7 @@
         "properties": {
           "miles_number": {
             "type": "string",
-            "description": "Kestrel Miles number, format MM followed by seven digits."
+            "description": "Kestrel Miles number, format KM followed by seven digits, for example KM4471902."
           },
           "origin": {
             "type": "string",
@@ -976,7 +978,7 @@
         "properties": {
           "miles_number": {
             "type": "string",
-            "description": "Kestrel Miles number, format MM followed by seven digits."
+            "description": "Kestrel Miles number, format KM followed by seven digits, for example KM4471902."
           },
           "flight_number": {
             "type": "string",
