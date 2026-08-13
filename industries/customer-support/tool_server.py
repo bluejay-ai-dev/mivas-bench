@@ -1508,11 +1508,8 @@ def dispatch_tool(tool_name: str, body: ToolCall) -> dict[str, Any]:
 # ------------------------------------------------------------------ selfcheck
 
 def selfcheck() -> None:
-    # DBService.ensure() reuses an existing db/calls/<id>.db, so a second run would
-    # inherit the rows this check mutates (delivery_date) and fail on assertions
-    # that passed the first time. Drop it so "fresh DB" is literal.
-    (db.calls_dir / "selfcheck.db").unlink(missing_ok=True)
-    with db.scope("selfcheck"):
+    """Every server-enforced guard, asserted against a fresh DB."""
+    with db.scope("selfcheck", fresh=True):
         _selfcheck()
 
 
