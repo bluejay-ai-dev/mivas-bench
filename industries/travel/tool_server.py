@@ -755,13 +755,22 @@ def get_fare_rules(code: str) -> dict[str, Any]:
 
 
 @app.get("/miles/{miles_number}/credits")
-def get_credit_balance(miles_number: str) -> dict[str, Any]:
+def get_credit_balance(miles_number: str, confirmation_code: str = "") -> dict[str, Any]:
     mn = str(miles_number or "").strip().upper()
+    code = str(confirmation_code or "").strip().upper()
     with _db() as conn:
-        rows = [dict(r) for r in conn.execute(
-            "SELECT amount, issued_on, expires_on FROM flight_credits "
-            "WHERE miles_number = ? ORDER BY expires_on", (mn,))]
-    return {"miles_number": mn, "credits": rows,
+        if code:
+            rows = [dict(r) for r in conn.execute(
+                "SELECT amount, issued_on, expires_on, miles_number, confirmation_code "
+                "FROM flight_credits "
+                "WHERE miles_number = ? OR confirmation_code = ? ORDER BY expires_on",
+                (mn, code))]
+        else:
+            rows = [dict(r) for r in conn.execute(
+                "SELECT amount, issued_on, expires_on, miles_number, confirmation_code "
+                "FROM flight_credits "
+                "WHERE miles_number = ? ORDER BY expires_on", (mn,))]
+    return {"miles_number": mn, "confirmation_code": code, "credits": rows,
             "total": _money(sum(r["amount"] for r in rows)), "count": len(rows),
             "note": "Read-only. No tool on any desk can spend a credit on this call."}
 
@@ -1133,9 +1142,9 @@ def confirm(body: ConfirmCreate) -> dict[str, Any]:
                 res = conn.execute("SELECT miles_number FROM reservations "
                                    "WHERE confirmation_code = ?", (code,)).fetchone()
                 conn.execute(
-                    "INSERT INTO flight_credits (miles_number, amount, issued_on, "
-                    "expires_on) VALUES (?, ?, ?, ?)",
-                    (res["miles_number"], payload["amount_returned"], TODAY,
+                    "INSERT INTO flight_credits (miles_number, confirmation_code, "
+                    "amount, issued_on, expires_on) VALUES (?, ?, ?, ?, ?)",
+                    (res["miles_number"], code, payload["amount_returned"], TODAY,
                      payload["credit_expires_on"]))
             result = {"confirmation_code": code, "status": "cancelled",
                       "outcome": payload["outcome"],
@@ -1319,7 +1328,8 @@ DISPATCH: dict[str, Callable[[dict[str, Any]], dict[str, Any]]] = {
     "confirm_change": _d_confirm("change"),
     "quote_cancellation": _d_hold("cancellation"),
     "confirm_cancellation": _d_confirm("cancellation"),
-    "get_credit_balance": lambda a: get_credit_balance(a.get("miles_number", "")),
+    "get_credit_balance": lambda a: get_credit_balance(
+        a.get("miles_number", ""), a.get("confirmation_code", "")),
     "get_elite_status": lambda a: get_elite_status(a.get("miles_number", "")),
     "get_bag_price": lambda a: get_bag_price(
         _verified_code(a.get("confirmation_code")), a.get("bag_kind", ""),

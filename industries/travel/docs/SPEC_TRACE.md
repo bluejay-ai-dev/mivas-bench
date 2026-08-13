@@ -151,9 +151,9 @@ persona.
 ```
 reception ──> irrops ──────────┐
     │                          │
-    ├──────> ticketing ────────┤
+    ├──────> ticketing ────────┤──> payments
     │             │            │
-    ├──────> pass_services ────┤
+    ├──────> pass_services ────┤──> payments
     │             │            │
     └─────────────┴────────────┴──> ancillaries ──> payments
 ```

@@ -53,7 +53,7 @@ state where 80% of live-agent tasks are automated by April 2026 [R].
 **Highest call volume.** Lufthansa Group, at 375,000 peak-day interactions [R].
 Ultra-low-cost carriers are the other volume pole: their per-passenger ancillary
 model generates a call about money on nearly every booking, and Frontier grew
-15 to 30 % annually while running customer service through an AI agent instead of a
+15 to 30% annually while running customer service through an AI agent instead of a
 call centre [R].
 
 **Broadest adoption / named vendors.** Cognigy (acquired by NICE in September
@@ -136,7 +136,7 @@ onto a call centre. Frontier **eliminated telephone customer service in November
 2022** and moved to 24/7 chat, social, and WhatsApp fronted by a Cognigy-built
 agent [R]. The Cognigy case study describes a bot handling hundreds of thousands
 of concurrent conversations, a substantial NPS increase, and a more cost-efficient
-contact centre while the airline grew 15 to 30 % annually [R]. In 2025 to 26, under a
+contact centre while the airline grew 15 to 30% annually [R]. In 2025 to 2026, under a
 programme branded "The New Frontier," it **reintroduced live phone support, but
 only for customers within 24 hours of their flight or holding Elite status**, with
 a callback service for everyone else [R]. What it refuses: the public complaint
@@ -339,7 +339,8 @@ departure or elite status.
 ### Fidelity test
 
 Someone who knows Frontier's published policies reads `SPEC.md` and recognises
-every rule and every number. Someone who greps this folder for "Frontier",
+every rule and every number. Someone who greps the replica-facing deliverables
+(prompts, tools, fixtures, system-prompts, and tool_server.py) for "Frontier",
 "GoWild", "Discount Den", "Spirit", "Denver-based ULCC" or any real person finds
 nothing but the airport codes.
 
