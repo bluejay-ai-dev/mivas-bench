@@ -17,11 +17,20 @@ import datetime as _dt
 import json
 import os
 import re
+import sys
 import uuid
 from pathlib import Path
 from typing import Any
 
 import httpx
+
+for _root in (Path("/app"), *Path(__file__).resolve().parents):
+    _runtime = _root / "runtime"
+    if (_runtime / "call_id.py").is_file():
+        if str(_runtime) not in sys.path:
+            sys.path.insert(0, str(_runtime))
+        break
+from call_id import headers as tool_headers, set_call_id  # noqa: E402
 
 # Verbal booking confirm without a function-call event (same failure mode as
 # hosted VoiceChat). Recover schedule_appointment for tool-server + OTel.
@@ -304,18 +313,16 @@ async def _execute_tool(
         state["agent"] = target
         return {"success": True, "role": target}, False
 
-    if name == "schedule_appointment":
-        async with httpx.AsyncClient(timeout=30.0) as client:
-            resp = await client.post(
-                f"{tool_server_url()}/appointments", json={"date": args["date"]}
-            )
-            resp.raise_for_status()
-            return {"success": True, "date": resp.json()["date"]}, False
-
     if name == "end_call" or is_session_tool(bp, state["agent"], name):
         return {"success": True}, True
 
-    return {"success": False, "error": f"unknown tool {name}"}, False
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        resp = await client.post(
+            f"{tool_server_url()}/tools/{name}",
+            json={"arguments": args},
+            headers=tool_headers(),
+        )
+        return resp.json(), False
 
 
 async def run_tool(

@@ -31,11 +31,16 @@ from fastapi import FastAPI, Request, WebSocket
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from harness import (  # noqa: E402
+    begin_session,
+    bind_provider,
+    end_session,
     ensure_squad,
+    for_provider,
     industry_path,
     load_blueprint,
     run_tool,
     start_websocket_call,
+    unbind_provider,
     webhook_tool_names,
 )
 from report import (  # noqa: E402
@@ -84,6 +89,7 @@ async def tool_webhook(name: str, request: Request) -> dict[str, Any]:
     body = await request.json()
     message = _payload(body)
     vapi_call_id = ((message.get("call") or {}).get("id")) or None
+    for_provider(vapi_call_id)
     calls = message.get("toolCallList") or []
     results = []
     for call in calls:
@@ -125,6 +131,10 @@ async def _bridge(ws: WebSocket) -> None:
     if sim_id:
         print(f"chirp sim_result_id={sim_id}", flush=True)
 
+    session_key = uuid.uuid4().hex
+    resolved = begin_session(sim_id, session_key=session_key)
+    provider_id: str | None = None
+
     utt: str | None = None
     speech_otel = None
     customer_otel = None
@@ -132,111 +142,117 @@ async def _bridge(ws: WebSocket) -> None:
     end = asyncio.Event()
     audio_in = audio_out = 0
 
-    async with traced_run(workflow, simulation_result_id=sim_id, model=model):
-        call_url, call_id = await asyncio.to_thread(start_websocket_call, _cfg["squad_id"])
-        # webhook tool calls arrive with no OTel/ContextVar context; this is how they
-        # find this bridge's trace root instead of whichever one started last
-        bind_call(call_id)
-        print(f"chirp vapi call={call_id}", flush=True)
-        async with websockets.connect(call_url, max_size=None) as vapi_ws:
+    try:
+        async with traced_run(workflow, simulation_result_id=sim_id, model=model):
+            call_url, call_id = await asyncio.to_thread(start_websocket_call, _cfg["squad_id"])
+            # webhook tool calls arrive with no OTel/ContextVar context; this is how they
+            # find this bridge's trace root instead of whichever one started last
+            bind_call(call_id)
+            bind_provider(call_id, resolved)
+            provider_id = call_id
+            print(f"chirp vapi call={call_id}", flush=True)
+            async with websockets.connect(call_url, max_size=None) as vapi_ws:
 
-            async def inbound() -> None:
-                """chirp pcm + Bluejay speech.* → Vapi; customer.speech spans."""
-                nonlocal customer_otel, audio_in
-                try:
-                    while not end.is_set():
-                        msg = await ws.receive()
-                        if msg["type"] == "websocket.disconnect":
-                            break
-                        if msg.get("bytes"):
-                            audio_in += len(msg["bytes"])
-                            await vapi_ws.send(msg["bytes"])
-                            continue
-                        if not msg.get("text"):
-                            continue
-                        try:
-                            event = json.loads(msg["text"])
-                        except json.JSONDecodeError:
-                            continue
-                        etype = event.get("type")
-                        data = event.get("data") or {}
-                        if etype == "speech.started":
-                            end_speech_span(customer_otel)
-                            customer_otel = start_speech_span(
-                                data.get("utterance_id") or f"c_{uuid.uuid4().hex[:12]}",
-                                speaker="customer",
-                            )
-                        elif etype == "speech.completed":
-                            end_speech_span(customer_otel)
-                            customer_otel = None
-                finally:
-                    end_speech_span(customer_otel)
-                    customer_otel = None
-                    end.set()
-                    with contextlib.suppress(Exception):
-                        await vapi_ws.close()
+                async def inbound() -> None:
+                    """chirp pcm + Bluejay speech.* → Vapi; customer.speech spans."""
+                    nonlocal customer_otel, audio_in
+                    try:
+                        while not end.is_set():
+                            msg = await ws.receive()
+                            if msg["type"] == "websocket.disconnect":
+                                break
+                            if msg.get("bytes"):
+                                audio_in += len(msg["bytes"])
+                                await vapi_ws.send(msg["bytes"])
+                                continue
+                            if not msg.get("text"):
+                                continue
+                            try:
+                                event = json.loads(msg["text"])
+                            except json.JSONDecodeError:
+                                continue
+                            etype = event.get("type")
+                            data = event.get("data") or {}
+                            if etype == "speech.started":
+                                end_speech_span(customer_otel)
+                                customer_otel = start_speech_span(
+                                    data.get("utterance_id") or f"c_{uuid.uuid4().hex[:12]}",
+                                    speaker="customer",
+                                )
+                            elif etype == "speech.completed":
+                                end_speech_span(customer_otel)
+                                customer_otel = None
+                    finally:
+                        end_speech_span(customer_otel)
+                        customer_otel = None
+                        end.set()
+                        with contextlib.suppress(Exception):
+                            await vapi_ws.close()
 
-            async def outbound() -> None:
-                """Vapi audio + events → chirp pcm, speech.*, agent.speech spans."""
-                nonlocal utt, speech_otel, audio_out
-                try:
-                    async for raw in vapi_ws:
-                        if end.is_set():
-                            break
-                        if isinstance(raw, bytes):
-                            audio_out += len(raw)
-                            await ws.send_bytes(raw)
-                            continue
-                        try:
-                            event = json.loads(raw)
-                        except json.JSONDecodeError:
-                            continue
-                        etype = _msg_type(event)
-                        body = _payload(event)
-                        if etype == "speech-update" and body.get("role") == "assistant":
-                            if body.get("status") == "started" and utt is None:
-                                utt = f"u_{uuid.uuid4().hex[:12]}"
-                                speech_otel = start_speech_span(utt, speaker="agent")
-                                await ws.send_text(_event("speech.started", {"utterance_id": utt}))
-                            elif body.get("status") == "stopped" and utt:
-                                await ws.send_text(_event("speech.completed", {"utterance_id": utt}))
-                                end_speech_span(speech_otel)
-                                speech_otel, utt = None, None
-                        elif etype == "conversation-update":
-                            _trace_server_tools(body, seen_tools)
-                        elif etype == "transcript" and body.get("transcriptType") == "final":
-                            print(
-                                f"chirp transcript [{body.get('role')}] {body.get('transcript')}",
-                                flush=True,
-                            )
-                        elif etype in ("hangup", "end-of-call-report"):
-                            print(f"chirp vapi {etype}", flush=True)
-                            break
-                        elif etype == "status-update" and body.get("status") == "ended":
-                            print(f"chirp vapi ended: {body.get('endedReason')}", flush=True)
-                            break
-                        elif etype == "error":
-                            print(f"chirp vapi error: {body}", flush=True)
-                            break
-                finally:
-                    if utt:
-                        await ws.send_text(_event("speech.completed", {"utterance_id": utt}))
-                        end_speech_span(speech_otel)
-                        speech_otel, utt = None, None
-                    end.set()
-                    with contextlib.suppress(Exception):
-                        await ws.close(1000)
+                async def outbound() -> None:
+                    """Vapi audio + events → chirp pcm, speech.*, agent.speech spans."""
+                    nonlocal utt, speech_otel, audio_out
+                    try:
+                        async for raw in vapi_ws:
+                            if end.is_set():
+                                break
+                            if isinstance(raw, bytes):
+                                audio_out += len(raw)
+                                await ws.send_bytes(raw)
+                                continue
+                            try:
+                                event = json.loads(raw)
+                            except json.JSONDecodeError:
+                                continue
+                            etype = _msg_type(event)
+                            body = _payload(event)
+                            if etype == "speech-update" and body.get("role") == "assistant":
+                                if body.get("status") == "started" and utt is None:
+                                    utt = f"u_{uuid.uuid4().hex[:12]}"
+                                    speech_otel = start_speech_span(utt, speaker="agent")
+                                    await ws.send_text(_event("speech.started", {"utterance_id": utt}))
+                                elif body.get("status") == "stopped" and utt:
+                                    await ws.send_text(_event("speech.completed", {"utterance_id": utt}))
+                                    end_speech_span(speech_otel)
+                                    speech_otel, utt = None, None
+                            elif etype == "conversation-update":
+                                _trace_server_tools(body, seen_tools)
+                            elif etype == "transcript" and body.get("transcriptType") == "final":
+                                print(
+                                    f"chirp transcript [{body.get('role')}] {body.get('transcript')}",
+                                    flush=True,
+                                )
+                            elif etype in ("hangup", "end-of-call-report"):
+                                print(f"chirp vapi {etype}", flush=True)
+                                break
+                            elif etype == "status-update" and body.get("status") == "ended":
+                                print(f"chirp vapi ended: {body.get('endedReason')}", flush=True)
+                                break
+                            elif etype == "error":
+                                print(f"chirp vapi error: {body}", flush=True)
+                                break
+                    finally:
+                        if utt:
+                            await ws.send_text(_event("speech.completed", {"utterance_id": utt}))
+                            end_speech_span(speech_otel)
+                            speech_otel, utt = None, None
+                        end.set()
+                        with contextlib.suppress(Exception):
+                            await ws.close(1000)
 
-            tasks = [asyncio.create_task(inbound()), asyncio.create_task(outbound())]
-            done, pending = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
-            for t in pending:
-                t.cancel()
-            await asyncio.gather(*pending, return_exceptions=True)
-            print(f"chirp audio in={audio_in}B out={audio_out}B", flush=True)
-            for t in done:
-                exc = None if t.cancelled() else t.exception()
-                if exc is not None and not type(exc).__name__.startswith("ConnectionClosed"):
-                    raise exc
+                tasks = [asyncio.create_task(inbound()), asyncio.create_task(outbound())]
+                done, pending = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
+                for t in pending:
+                    t.cancel()
+                await asyncio.gather(*pending, return_exceptions=True)
+                print(f"chirp audio in={audio_in}B out={audio_out}B", flush=True)
+                for t in done:
+                    exc = None if t.cancelled() else t.exception()
+                    if exc is not None and not type(exc).__name__.startswith("ConnectionClosed"):
+                        raise exc
+    finally:
+        unbind_provider(provider_id)
+        end_session(session_key)
 
 
 def _trace_server_tools(body: dict, seen: set[str]) -> None:

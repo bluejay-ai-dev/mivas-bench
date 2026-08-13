@@ -19,7 +19,7 @@ import asyncio
 import contextlib
 import json
 import os
-from contextvars import ContextVar
+import sys
 from pathlib import Path
 from typing import Any, Awaitable, Callable
 
@@ -30,6 +30,14 @@ from pydantic import Field, create_model
 
 from report import register_handoff_tool_names
 
+for _root in (Path("/app"), *Path(__file__).resolve().parents):
+    _runtime = _root / "runtime"
+    if (_runtime / "call_id.py").is_file():
+        if str(_runtime) not in sys.path:
+            sys.path.insert(0, str(_runtime))
+        break
+from call_id import headers as tool_headers, log_ws_accept, set_call_id  # noqa: E402
+
 REPO_ROOT = Path(__file__).resolve().parents[2]
 TOOL_SERVER_URL = os.environ.get("TOOL_SERVER_URL", "http://127.0.0.1:8000").rstrip("/")
 # Let farewell audio finish before tearing down Realtime after end_call.
@@ -39,19 +47,13 @@ END_CALL_CLOSE_DELAY_S = float(os.environ.get("MIVAS_END_CALL_CLOSE_DELAY_S", "2
 SessionMapper = Callable[[dict[str, Any]], Awaitable[dict[str, Any]]]
 
 
-# Set once per CHIRP connection so the state API can isolate this call's DB and
-# identity pin from every other call in flight. Industries that keep no per-call
-# state ignore the header.
-CALL_ID: ContextVar[str] = ContextVar("mivas_call_id", default="")
-
-
 async def dispatch_industry_tool(name: str, args: dict[str, Any]) -> dict[str, Any]:
     """Generic dispatch: POST /tools/{name}; the server's envelope is the result."""
-    call_id = CALL_ID.get()
-    headers = {"X-Mivas-Call-Id": call_id} if call_id else None
     async with httpx.AsyncClient(timeout=30.0) as client:
         resp = await client.post(
-            f"{TOOL_SERVER_URL}/tools/{name}", json={"arguments": args}, headers=headers
+            f"{TOOL_SERVER_URL}/tools/{name}",
+            json={"arguments": args},
+            headers=tool_headers(),
         )
         return resp.json()
 

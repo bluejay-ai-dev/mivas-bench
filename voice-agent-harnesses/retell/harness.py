@@ -18,11 +18,29 @@ from __future__ import annotations
 import asyncio
 import json
 import os
+import sys
 import time
 from pathlib import Path
 from typing import Any
 
 import httpx
+
+for _root in (Path("/app"), *Path(__file__).resolve().parents):
+    _runtime = _root / "runtime"
+    if (_runtime / "call_id.py").is_file():
+        if str(_runtime) not in sys.path:
+            sys.path.insert(0, str(_runtime))
+        break
+from call_id import (  # noqa: E402
+    begin_session,
+    bind_provider,
+    end_session,
+    for_provider,
+    headers as tool_headers,
+    provider_id_from_payload,
+    set_call_id,
+    unbind_provider,
+)
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 HARNESS_DIR = Path(__file__).resolve().parent
@@ -335,7 +353,11 @@ async def report_platform_tools(call_id: str, bp: dict[str, Any]) -> list[str]:
 async def _execute_tool(name: str, args: dict[str, Any]) -> dict[str, Any]:
     """Generic dispatch: POST /tools/{name}; the server's envelope is the result."""
     async with httpx.AsyncClient(timeout=30.0) as client:
-        resp = await client.post(f"{TOOL_SERVER_URL}/tools/{name}", json={"arguments": args})
+        resp = await client.post(
+            f"{TOOL_SERVER_URL}/tools/{name}",
+            json={"arguments": args},
+            headers=tool_headers(),
+        )
         return resp.json()
 
 
@@ -345,6 +367,7 @@ async def run_tool(name: str, args: dict[str, Any], *, call_id: str | None = Non
     from report import finish_tool_span, tool_span
     with tool_span(name, args, call_id=call_id) as span:
         try:
+            for_provider(call_id)
             result = await _execute_tool(name, args)
             ok = bool(result.get("ok", result.get("success", True)))
             finish_tool_span(span, result, ok=ok)

@@ -36,10 +36,19 @@ from __future__ import annotations
 
 import json
 import os
+import sys
 from pathlib import Path
 from typing import Any
 
 import httpx
+
+for _root in (Path("/app"), *Path(__file__).resolve().parents):
+    _runtime = _root / "runtime"
+    if (_runtime / "call_id.py").is_file():
+        if str(_runtime) not in sys.path:
+            sys.path.insert(0, str(_runtime))
+        break
+from call_id import begin_session, headers as tool_headers, set_call_id  # noqa: E402
 
 HARNESS_DIR = Path(__file__).resolve().parent
 # In the repo this is mivas-bench/; in the deployed image the harness IS the root.
@@ -170,7 +179,9 @@ async def _execute_tool(
 
     async with httpx.AsyncClient(timeout=30.0) as client:
         resp = await client.post(
-            f"{tool_server_url()}/tools/{name}", json={"arguments": args}
+            f"{tool_server_url()}/tools/{name}",
+            json={"arguments": args},
+            headers=tool_headers(),
         )
         return resp.json(), False
 

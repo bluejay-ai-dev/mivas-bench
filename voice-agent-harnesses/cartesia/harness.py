@@ -23,11 +23,30 @@ import json
 import os
 import re
 import subprocess
+import sys
 import time
 from pathlib import Path
 from typing import Any
 
 import httpx
+
+for _root in (Path("/app"), *Path(__file__).resolve().parents):
+    _runtime = _root / "runtime"
+    if (_runtime / "call_id.py").is_file():
+        if str(_runtime) not in sys.path:
+            sys.path.insert(0, str(_runtime))
+        break
+from call_id import (  # noqa: E402
+    begin_session,
+    bind_provider,
+    end_session,
+    for_provider,
+    headers as tool_headers,
+    provider_id_from_payload,
+    provider_id_from_request,
+    set_call_id,
+    unbind_provider,
+)
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 HARNESS_DIR = Path(__file__).resolve().parent
@@ -115,6 +134,17 @@ def _ensure_auth() -> None:
         )
 
 
+def _line_src_digest() -> str:
+    """Hash the deployed Line agent so a main.py change triggers `cartesia deploy`."""
+    hasher = hashlib.sha256()
+    for rel in ("main.py", "pyproject.toml", "blueprint.json"):
+        path = AGENT_DIR / rel
+        if path.is_file():
+            hasher.update(rel.encode())
+            hasher.update(path.read_bytes())
+    return hasher.hexdigest()[:16]
+
+
 def ensure_agent(industry_dir: str | Path, *, public_url: str | None = None) -> str:
     """Deploy (once per industry) and refresh the deployed agent's environment.
 
@@ -150,17 +180,40 @@ def ensure_agent(industry_dir: str | Path, *, public_url: str | None = None) -> 
     # `env set` rolls a new deployment version (~2 min), so only push on change —
     # by digest, so the cache file never holds the API key it carries.
     digest = hashlib.sha256(json.dumps(env, sort_keys=True).encode()).hexdigest()[:16]
+    src_digest = _line_src_digest()
     needs_env_set = agent_changed or cached_entry.get("env_digest") != digest
-    needs_deploy = created_new or agent_changed or bool(os.environ.get("CARTESIA_REDEPLOY"))
+    needs_deploy = (
+        created_new
+        or agent_changed
+        or bool(os.environ.get("CARTESIA_REDEPLOY"))
+        or cached_entry.get("src_digest") != src_digest
+    )
+    # New pods have an empty emptyDir cache, so both digests always miss.
+    # Re-running `env set` / `deploy` 3× races Cartesia's API (HTTP 500). Skip
+    # when the cloud agent is already Ready unless CARTESIA_REDEPLOY=1 (use
+    # that when line_agent/ or TOOL_BASE_URL actually changed).
+    already_ready = False
+    if not created_new and not os.environ.get("CARTESIA_REDEPLOY"):
+        try:
+            status = _cli("status", agent_id)
+        except SystemExit:
+            status = ""
+        already_ready = bool(re.search(r"Status\s+Ready", status))
     if needs_env_set:
-        _cli("env", "set", "--agent-id", agent_id, *[f"{k}={v}" for k, v in env.items()])
+        if already_ready:
+            print(f"cartesia skip env set, {agent_id} already Ready", flush=True)
+        else:
+            _cli("env", "set", "--agent-id", agent_id, *[f"{k}={v}" for k, v in env.items()])
         cache.setdefault(name, {}).update(agent_id=agent_id, env_digest=digest)
         AGENT_CACHE_PATH.write_text(json.dumps(cache, indent=2) + "\n")
 
     if needs_deploy:
-        print(f"cartesia deploy {agent_id} …", flush=True)
-        print(_cli("deploy", "--agent-id", agent_id, str(AGENT_DIR)), flush=True)
-        cache.setdefault(name, {})["agent_id"] = agent_id
+        if already_ready:
+            print(f"cartesia skip deploy, {agent_id} already Ready", flush=True)
+        else:
+            print(f"cartesia deploy {agent_id} …", flush=True)
+            print(_cli("deploy", "--agent-id", agent_id, str(AGENT_DIR)), flush=True)
+        cache.setdefault(name, {}).update(agent_id=agent_id, src_digest=src_digest)
         AGENT_CACHE_PATH.write_text(json.dumps(cache, indent=2) + "\n")
 
     # `env set` and `deploy` both roll a new version; calls hit the old one (or
@@ -183,16 +236,35 @@ async def _execute_tool(name: str, args: dict[str, Any]) -> dict[str, Any]:
     run_tool's `default=False` fallback (not an exception here) is what turns
     it into a failure, matching how the other harnesses handle the same case."""
     async with httpx.AsyncClient(timeout=30.0) as client:
-        resp = await client.post(f"{TOOL_SERVER_URL}/tools/{name}", json={"arguments": args})
+        resp = await client.post(
+            f"{TOOL_SERVER_URL}/tools/{name}",
+            json={"arguments": args},
+            headers=tool_headers(),
+        )
         return resp.json()
 
 
-async def run_tool(name: str, args: dict[str, Any], *, call_id: str | None = None) -> dict[str, Any]:
+async def run_tool(
+    name: str,
+    args: dict[str, Any],
+    *,
+    call_id: str | None = None,
+    emit_span: bool = True,
+) -> dict[str, Any]:
     """Run an industry tool under an execute_tool span. Never raises — a failed
     tool must not take down the bridge before OTel flushes."""
     from report import finish_tool_span, tool_span
+    if not emit_span:
+        if call_id:
+            for_provider(call_id)
+        try:
+            return await _execute_tool(name, args)
+        except Exception as e:
+            return {"success": False, "error": f"{type(e).__name__}: {e}"}
     with tool_span(name, args, call_id=call_id) as span:
         try:
+            if call_id:
+                for_provider(call_id)
             result = await _execute_tool(name, args)
             ok = bool(result.get("ok", result.get("success", False)))
             finish_tool_span(span, result, ok=ok)

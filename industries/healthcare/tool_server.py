@@ -16,90 +16,36 @@ import json
 import logging
 import os
 import re
-import shutil
 import sqlite3
-import threading
-from contextlib import asynccontextmanager, contextmanager
-from contextvars import ContextVar
+import sys
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
 
-from fastapi import FastAPI, Header, HTTPException
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
 INDUSTRY_DIR = Path(__file__).resolve().parent
-DB_DIR = INDUSTRY_DIR / "db"
-SCHEMA_PATH = DB_DIR / "schema.sql"
-SEED_PATH = DB_DIR / "seed.sql"
-DB_PATH = Path(os.environ.get("MIVAS_DB_PATH", str(DB_DIR / "runtime.db")))
-# One SQLite file + one identity pin per concurrent call, so a simulation run at
-# max_concurrent > 1 can't leak a verified patient, a balance, a verify-failure
-# count or an appointment row from one caller into another.
-CALLS_DIR = DB_PATH.parent / "calls"
 
-# Set from the X-Mivas-Call-Id header on POST /tools/{name}. Empty = the shared
-# DB, which is what the REST routes and every harness that doesn't send the
-# header still use.
-_call_id: ContextVar[str] = ContextVar("mivas_call_id", default="")
-_db_create_lock = threading.Lock()
+for _runtime in (Path("/app/runtime"), Path(__file__).resolve().parents[2] / "runtime"):
+    if (_runtime / "db_service.py").is_file():
+        if str(_runtime) not in sys.path:
+            sys.path.insert(0, str(_runtime))
+        break
+from db_service import DBService  # noqa: E402
 
-
-def _write_fixture_db(path: Path) -> None:
-    conn = sqlite3.connect(path)
-    try:
-        conn.executescript(SCHEMA_PATH.read_text())
-        seed = SEED_PATH.read_text().strip()
-        if seed:
-            conn.executescript(seed)
-        conn.commit()
-    finally:
-        conn.close()
-
-
-def init_db() -> None:
-    _sessions.clear()  # dispatch identity pins follow the DB lifecycle
-    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
-    if DB_PATH.exists():
-        DB_PATH.unlink()
-    # ponytail: per-call DBs are wiped at boot, not per call — they are a few KB
-    # each and a run is bounded. Drop them on end_call if that stops holding.
-    shutil.rmtree(CALLS_DIR, ignore_errors=True)
-    _write_fixture_db(DB_PATH)
-
-
-def _call_db_path(call_id: str) -> Path:
-    path = CALLS_DIR / f"{call_id}.db"
-    if not path.exists():
-        with _db_create_lock:
-            if not path.exists():
-                CALLS_DIR.mkdir(parents=True, exist_ok=True)
-                _write_fixture_db(path)
-    return path
-
-
-def _active_db_path() -> Path:
-    call_id = _call_id.get()
-    return _call_db_path(call_id) if call_id else DB_PATH
+db = DBService.for_industry(INDUSTRY_DIR)
 
 
 @contextmanager
 def _db() -> Any:
-    conn = sqlite3.connect(_active_db_path())
-    conn.row_factory = sqlite3.Row
-    try:
+    with db.connect() as conn:
         yield conn
-        conn.commit()
-    finally:
-        conn.close()
 
 
-@asynccontextmanager
-async def lifespan(_app: FastAPI):
-    init_db()
-    yield
-
-
-app = FastAPI(title="healthcare state API", lifespan=lifespan)
+app = FastAPI(title="healthcare state API")
+app.middleware("http")(db.http_middleware)
+db.mount_cluster_routes(app)
 
 logger = logging.getLogger(__name__)
 
@@ -332,7 +278,7 @@ _sessions: dict[str, dict[str, Any]] = {}
 
 
 def _session_state() -> dict[str, Any]:
-    return _sessions.setdefault(_call_id.get(), {})
+    return _sessions.setdefault(db.current_call_id() or "", {})
 
 
 class ToolError(Exception):
@@ -1168,20 +1114,8 @@ class ToolCall(BaseModel):
     arguments: dict[str, Any] = Field(default_factory=dict)
 
 
-_CALL_ID_SAFE = re.compile(r"[^A-Za-z0-9_-]")
-
-
-def _normalise_call_id(raw: str | None) -> str:
-    """Header → filesystem-safe key. Empty means "use the shared DB"."""
-    return _CALL_ID_SAFE.sub("_", str(raw or "").strip())[:64]
-
-
 @app.post("/tools/{tool_name}")
-def dispatch_tool(
-    tool_name: str,
-    body: ToolCall,
-    x_mivas_call_id: str | None = Header(default=None),
-) -> dict[str, Any]:
+def dispatch_tool(tool_name: str, body: ToolCall) -> dict[str, Any]:
     handler = DISPATCH.get(tool_name)
     if handler is None:
         raise HTTPException(
@@ -1189,7 +1123,6 @@ def dispatch_tool(
             detail=f"unknown tool {tool_name!r} — session and handoff tools are "
             "harness-native and industry tools must be listed in DISPATCH",
         )
-    token = _call_id.set(_normalise_call_id(x_mivas_call_id))
     try:
         data = handler(dict(body.arguments or {}))
         return {"ok": True, "data": data, "error_code": None, "patient_safe_message": None}
@@ -1206,8 +1139,6 @@ def dispatch_tool(
         return {"ok": False, "data": None, "error_code": "INVALID_ARGUMENTS",
                 "patient_safe_message": "Something went wrong handling that request. "
                 "Please try again or ask for a callback."}
-    finally:
-        _call_id.reset(token)
 
 
 if __name__ == "__main__":

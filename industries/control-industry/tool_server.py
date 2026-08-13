@@ -8,8 +8,8 @@ GET /health). Session tools (end_call) and handoff tools never hit this server.
 from __future__ import annotations
 
 import os
-import sqlite3
-from contextlib import asynccontextmanager, contextmanager
+import sys
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
 
@@ -17,45 +17,26 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
 INDUSTRY_DIR = Path(__file__).resolve().parent
-DB_DIR = INDUSTRY_DIR / "db"
-SCHEMA_PATH = DB_DIR / "schema.sql"
-SEED_PATH = DB_DIR / "seed.sql"
-DB_PATH = Path(os.environ.get("MIVAS_DB_PATH", str(DB_DIR / "runtime.db")))
 
+for _runtime in (Path("/app/runtime"), Path(__file__).resolve().parents[2] / "runtime"):
+    if (_runtime / "db_service.py").is_file():
+        if str(_runtime) not in sys.path:
+            sys.path.insert(0, str(_runtime))
+        break
+from db_service import DBService  # noqa: E402
 
-def init_db() -> None:
-    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
-    if DB_PATH.exists():
-        DB_PATH.unlink()
-    conn = sqlite3.connect(DB_PATH)
-    try:
-        conn.executescript(SCHEMA_PATH.read_text())
-        seed = SEED_PATH.read_text().strip()
-        if seed:
-            conn.executescript(seed)
-        conn.commit()
-    finally:
-        conn.close()
+db = DBService.for_industry(INDUSTRY_DIR)
 
 
 @contextmanager
 def _db() -> Any:
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    try:
+    with db.connect() as conn:
         yield conn
-        conn.commit()
-    finally:
-        conn.close()
 
 
-@asynccontextmanager
-async def lifespan(_app: FastAPI):
-    init_db()
-    yield
-
-
-app = FastAPI(title="control-industry state API", lifespan=lifespan)
+app = FastAPI(title="control-industry state API")
+app.middleware("http")(db.http_middleware)
+db.mount_cluster_routes(app)
 
 
 class AppointmentCreate(BaseModel):

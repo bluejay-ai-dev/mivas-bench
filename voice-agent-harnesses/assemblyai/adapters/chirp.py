@@ -18,7 +18,7 @@ import websockets
 from websockets.asyncio.server import serve
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from harness import WS_URL, industry_path, load_blueprint, run_tool, session_config  # noqa: E402
+from harness import WS_URL, industry_path, load_blueprint, run_tool, session_config, set_call_id  # noqa: E402
 from report import end_speech_span, start_speech_span, traced_run  # noqa: E402
 
 W, R_OUT, R_CHIRP = 2, 24_000, 16_000
@@ -53,6 +53,7 @@ async def _bridge(ws, model: str, industry: str) -> None:
     sim_id = _simulation_result_id(ws)
     if sim_id:
         print(f"chirp sim_result_id={sim_id}", flush=True)
+    set_call_id(sim_id)
 
     key = os.environ.get("ASSEMBLYAI_API_KEY")
     if not key:

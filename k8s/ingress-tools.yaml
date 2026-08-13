@@ -1,33 +1,22 @@
-# Stable public hostname per harness×industry pair.
-# Host: __HOST__  →  wss://__HOST__/  (Bluejay)  and  https://__HOST__/  (PUBLIC_URL)
-#
-# /tools /state /snapshot /health → tools ClusterIP (one SQLite writer).
-# /                    → CHIRP / ConversationRelay (Bluejay WS + platform /tool/* webhooks).
-#
-# TLS, ALB grouping, and idle timeout are on IngressClassParams (k8s/ingressclass.yaml).
-# EKS Auto Mode does not honor group.name / certificate-arn Ingress annotations.
+# Tools-only public hostname for worker families (Pipecat Cloud / LiveKit).
+# They do not serve Bluejay CHIRP; the bot POSTs https://__HOST__/tools/{name}.
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: mivas-__SLUG__
   labels:
     app: mivas-bench
+    mivas.component: tools
     mivas.harness_family: "__HARNESS_FAMILY__"
     mivas.harness_runtime: "__HARNESS_RUNTIME__"
     mivas.industry: "__INDUSTRY__"
     mivas.slug: "__SLUG__"
   annotations:
-    # CHIRP on :8765 is WebSocket-only; HTTP GET / there is 400 and ALB would
-    # mark the target unhealthy. Probe the harness :8000 health stub (and the
-    # tools pod /health on the tools target group). Both listen on 8000.
     alb.ingress.kubernetes.io/healthcheck-protocol: HTTP
     alb.ingress.kubernetes.io/healthcheck-port: "8000"
     alb.ingress.kubernetes.io/healthcheck-path: /health
     alb.ingress.kubernetes.io/success-codes: "200"
     alb.ingress.kubernetes.io/backend-protocol: HTTP
-    # New dials: least outstanding requests. An upgraded WebSocket stays on
-    # that target for the TCP lifetime — do not use cookie stickiness.
-    alb.ingress.kubernetes.io/target-group-attributes: load_balancing.algorithm.type=least_outstanding_requests
 spec:
   ingressClassName: mivas-alb
   rules:
@@ -62,10 +51,3 @@ spec:
                 name: mivas-__SLUG__-tools
                 port:
                   name: tools
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: mivas-__SLUG__
-                port:
-                  name: chirp
