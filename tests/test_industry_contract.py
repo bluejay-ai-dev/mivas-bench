@@ -172,6 +172,8 @@ def test_dispatch_parity_both_directions(industry: str) -> None:
 
 @industry
 def test_selfcheck_passes(industry: str) -> None:
+    """Twice against the SAME MIVAS_DB_PATH: a selfcheck that mutates seeded rows
+    must not inherit its own leftovers from the previous run."""
     if "selfcheck" in _gaps(industry):
         pytest.skip(f"{industry} has no --selfcheck yet (KNOWN_GAPS)")
     with tempfile.TemporaryDirectory() as tmp:
@@ -181,11 +183,12 @@ def test_selfcheck_passes(industry: str) -> None:
             "PYTHONPATH": str(ROOT / "runtime")
             + (os.pathsep + os.environ["PYTHONPATH"] if os.environ.get("PYTHONPATH") else ""),
         }
-        proc = subprocess.run(
-            [sys.executable, str(INDUSTRY_ROOT / industry / "tool_server.py"),
-             "--selfcheck"],
-            capture_output=True, text=True, env=env, timeout=120)
-    assert proc.returncode == 0, proc.stdout + proc.stderr
+        for run in (1, 2):
+            proc = subprocess.run(
+                [sys.executable, str(INDUSTRY_ROOT / industry / "tool_server.py"),
+                 "--selfcheck"],
+                capture_output=True, text=True, env=env, timeout=120)
+            assert proc.returncode == 0, f"run {run}: " + proc.stdout + proc.stderr
 
 
 @industry
