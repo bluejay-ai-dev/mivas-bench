@@ -23,7 +23,7 @@ from agents.realtime import RealtimeModelSendRawMessage
 from websockets.asyncio.server import serve
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from harness import build_from_blueprint, industry_path  # noqa: E402
+from harness import CALL_ID, build_from_blueprint, industry_path  # noqa: E402
 from report import traced_run  # noqa: E402
 
 W, R_IN, R_OUT = 2, 16_000, 24_000
@@ -66,6 +66,10 @@ async def _bridge(ws, model: str, industry: str) -> None:
     sim_id = _simulation_result_id(ws)
     if sim_id:
         print(f"chirp sim_result_id={sim_id}", flush=True)
+    # One state-API namespace per call: concurrent digital humans must not share
+    # an identity pin or a DB. Contextvar, so every tool task under this bridge
+    # inherits it.
+    CALL_ID.set(sim_id or f"call_{uuid.uuid4().hex[:12]}")
     async with traced_run(workflow, simulation_result_id=sim_id) as tracer:
         ctx: dict = {}
         up = down = None

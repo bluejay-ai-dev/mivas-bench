@@ -15,12 +15,16 @@ from __future__ import annotations
 import json
 import logging
 import os
+import re
+import shutil
 import sqlite3
+import threading
 from contextlib import asynccontextmanager, contextmanager
+from contextvars import ContextVar
 from pathlib import Path
 from typing import Any
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, Header, HTTPException
 from pydantic import BaseModel, Field
 
 INDUSTRY_DIR = Path(__file__).resolve().parent
@@ -28,14 +32,20 @@ DB_DIR = INDUSTRY_DIR / "db"
 SCHEMA_PATH = DB_DIR / "schema.sql"
 SEED_PATH = DB_DIR / "seed.sql"
 DB_PATH = Path(os.environ.get("MIVAS_DB_PATH", str(DB_DIR / "runtime.db")))
+# One SQLite file + one identity pin per concurrent call, so a simulation run at
+# max_concurrent > 1 can't leak a verified patient, a balance, a verify-failure
+# count or an appointment row from one caller into another.
+CALLS_DIR = DB_PATH.parent / "calls"
+
+# Set from the X-Mivas-Call-Id header on POST /tools/{name}. Empty = the shared
+# DB, which is what the REST routes and every harness that doesn't send the
+# header still use.
+_call_id: ContextVar[str] = ContextVar("mivas_call_id", default="")
+_db_create_lock = threading.Lock()
 
 
-def init_db() -> None:
-    _session.clear()  # dispatch identity pin follows the DB lifecycle
-    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
-    if DB_PATH.exists():
-        DB_PATH.unlink()
-    conn = sqlite3.connect(DB_PATH)
+def _write_fixture_db(path: Path) -> None:
+    conn = sqlite3.connect(path)
     try:
         conn.executescript(SCHEMA_PATH.read_text())
         seed = SEED_PATH.read_text().strip()
@@ -46,9 +56,35 @@ def init_db() -> None:
         conn.close()
 
 
+def init_db() -> None:
+    _sessions.clear()  # dispatch identity pins follow the DB lifecycle
+    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+    if DB_PATH.exists():
+        DB_PATH.unlink()
+    # ponytail: per-call DBs are wiped at boot, not per call — they are a few KB
+    # each and a run is bounded. Drop them on end_call if that stops holding.
+    shutil.rmtree(CALLS_DIR, ignore_errors=True)
+    _write_fixture_db(DB_PATH)
+
+
+def _call_db_path(call_id: str) -> Path:
+    path = CALLS_DIR / f"{call_id}.db"
+    if not path.exists():
+        with _db_create_lock:
+            if not path.exists():
+                CALLS_DIR.mkdir(parents=True, exist_ok=True)
+                _write_fixture_db(path)
+    return path
+
+
+def _active_db_path() -> Path:
+    call_id = _call_id.get()
+    return _call_db_path(call_id) if call_id else DB_PATH
+
+
 @contextmanager
 def _db() -> Any:
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(_active_db_path())
     conn.row_factory = sqlite3.Row
     try:
         yield conn
@@ -291,9 +327,12 @@ def join_waitlist(body: WaitlistCreate) -> dict[str, Any]:
 # seeded MED_FOLLOWUP on 2026-08-20T10:00 is inside the 24 h medical window.
 TODAY = "2026-08-19T12:00:00"
 
-# ponytail: module-level session, one call at a time (benchmark runs are
-# max_concurrent=1); key by call id if that ever changes.
-_session: dict[str, Any] = {}
+# Identity pin per call id (empty key = the shared/no-header session).
+_sessions: dict[str, dict[str, Any]] = {}
+
+
+def _session_state() -> dict[str, Any]:
+    return _sessions.setdefault(_call_id.get(), {})
 
 
 class ToolError(Exception):
@@ -313,8 +352,8 @@ def _event(kind: str, payload: dict[str, Any]) -> int:
 
 
 def _patient_row() -> sqlite3.Row:
-    pid = _session.get("patient_id")
-    if not pid or not _session.get("verified"):
+    pid = _session_state().get("patient_id")
+    if not pid or not _session_state().get("verified"):
         raise ToolError("NOT_VERIFIED", "Verify the caller's identity first.")
     with _db() as conn:
         row = conn.execute("SELECT * FROM patients WHERE id = ?", (pid,)).fetchone()
@@ -370,7 +409,7 @@ _SPANISH = {"hola", "gracias", "buenos", "buenas", "cita", "necesito", "español
 def _d_detect_language(a: dict[str, Any]) -> dict[str, Any]:
     words = set(str(a["utterance"]).lower().split())
     lang = "es" if words & _SPANISH else "en"
-    _session["language"] = lang
+    _session_state()["language"] = lang
     return {"language": lang, "note": "Switch to this language and stay switched."}
 
 
@@ -404,7 +443,7 @@ def _d_identify_patient(a: dict[str, Any]) -> dict[str, Any]:
 
 
 def _d_verify_identity(a: dict[str, Any]) -> dict[str, Any]:
-    if _session.get("verify_failures", 0) >= 3:
+    if _session_state().get("verify_failures", 0) >= 3:
         raise ToolError(
             "IDENTITY_LOCKED",
             "Verification is locked after three failures. Offer the front desk or a callback.",
@@ -418,9 +457,9 @@ def _d_verify_identity(a: dict[str, Any]) -> dict[str, Any]:
             if name and name[0] == full[0] and name[-1] == full[-1] and row["dob"] == dob:
                 if second and second != row["zip"] and second != (row["phone_e164"] or "")[-4:]:
                     break
-                _session.update(patient_id=row["id"], verified=True, verify_failures=0)
+                _session_state().update(patient_id=row["id"], verified=True, verify_failures=0)
                 return {"verified": True, "patient_id": row["id"]}
-    _session["verify_failures"] = _session.get("verify_failures", 0) + 1
+    _session_state()["verify_failures"] = _session_state().get("verify_failures", 0) + 1
     raise ToolError(
         "NO_MATCH",
         "That name and date of birth don't match a record. Re-confirm the spelling "
@@ -591,7 +630,7 @@ def _d_book_appointment(a: dict[str, Any]) -> dict[str, Any]:
         )
     created = create_appointment(
         AppointmentCreate(
-            patient_id=_session.get("patient_id"),
+            patient_id=_session_state().get("patient_id"),
             location_id=slot["location_id"],
             provider_id=slot["provider_id"],
             appointment_type_code=a["appointment_type_code"],
@@ -678,7 +717,7 @@ def _d_cancel_appointment(a: dict[str, Any]) -> dict[str, Any]:
 def _d_join_waitlist(a: dict[str, Any]) -> dict[str, Any]:
     entry = join_waitlist(
         WaitlistCreate(
-            patient_id=_session.get("patient_id"),
+            patient_id=_session_state().get("patient_id"),
             appointment_type_code=a["appointment_type_code"],
             location_ids=[str(x) for x in a["location_ids"]],
             earliest=a.get("earliest"),
@@ -718,7 +757,7 @@ def _d_schedule_allergy_service(a: dict[str, Any]) -> dict[str, Any]:
     start = str(a.get("window_start") or _SLOT_TIMES[0])
     created = create_appointment(
         AppointmentCreate(
-            patient_id=_session.get("patient_id"),
+            patient_id=_session_state().get("patient_id"),
             location_id=loc["id"],
             provider_id=prov["id"],
             appointment_type_code=f"ALLERGY_{service.upper()}",
@@ -930,7 +969,7 @@ def _d_book_cosmetic_consult(a: dict[str, Any]) -> dict[str, Any]:
     start = a["start"]
     created = create_appointment(
         AppointmentCreate(
-            patient_id=_session.get("patient_id"),
+            patient_id=_session_state().get("patient_id"),
             location_id=loc["id"],
             provider_id=a["provider_id"],
             appointment_type_code="COS_CONSULT",
@@ -1059,8 +1098,8 @@ _TRANSFER_DESTINATIONS = {"patient_support_center", "billing_team", "location_fr
 
 
 def _d_authenticate_for_transfer(a: dict[str, Any]) -> dict[str, Any]:
-    return {"authenticated": bool(_session.get("verified")),
-            "patient_id": _session.get("patient_id"),
+    return {"authenticated": bool(_session_state().get("verified")),
+            "patient_id": _session_state().get("patient_id"),
             "transfer_packet": dict(a)}
 
 
@@ -1129,8 +1168,20 @@ class ToolCall(BaseModel):
     arguments: dict[str, Any] = Field(default_factory=dict)
 
 
+_CALL_ID_SAFE = re.compile(r"[^A-Za-z0-9_-]")
+
+
+def _normalise_call_id(raw: str | None) -> str:
+    """Header → filesystem-safe key. Empty means "use the shared DB"."""
+    return _CALL_ID_SAFE.sub("_", str(raw or "").strip())[:64]
+
+
 @app.post("/tools/{tool_name}")
-def dispatch_tool(tool_name: str, body: ToolCall) -> dict[str, Any]:
+def dispatch_tool(
+    tool_name: str,
+    body: ToolCall,
+    x_mivas_call_id: str | None = Header(default=None),
+) -> dict[str, Any]:
     handler = DISPATCH.get(tool_name)
     if handler is None:
         raise HTTPException(
@@ -1138,6 +1189,7 @@ def dispatch_tool(tool_name: str, body: ToolCall) -> dict[str, Any]:
             detail=f"unknown tool {tool_name!r} — session and handoff tools are "
             "harness-native and industry tools must be listed in DISPATCH",
         )
+    token = _call_id.set(_normalise_call_id(x_mivas_call_id))
     try:
         data = handler(dict(body.arguments or {}))
         return {"ok": True, "data": data, "error_code": None, "patient_safe_message": None}
@@ -1154,6 +1206,8 @@ def dispatch_tool(tool_name: str, body: ToolCall) -> dict[str, Any]:
         return {"ok": False, "data": None, "error_code": "INVALID_ARGUMENTS",
                 "patient_safe_message": "Something went wrong handling that request. "
                 "Please try again or ask for a callback."}
+    finally:
+        _call_id.reset(token)
 
 
 if __name__ == "__main__":

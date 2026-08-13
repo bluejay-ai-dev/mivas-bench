@@ -66,6 +66,9 @@ def load_blueprint(industry_dir: str | Path) -> dict[str, Any]:
         "start": blueprint["agents"][0]["name"],
         "agents": agents,
         "catalog": catalog,
+        # the brand line the answering node speaks; without it every industry
+        # would open with the control-industry repair-shop greeting
+        "greeting": blueprint.get("greeting"),
     }
 
 
@@ -89,14 +92,32 @@ def _request(method: str, path: str, body: dict[str, Any] | None = None) -> dict
     return r.json()
 
 
+_SCHEMA_KEYS = {"type", "description", "enum", "items", "properties", "required"}
+
+
+def _prop(prop: dict[str, Any]) -> dict[str, Any]:
+    """One tools.json property → the schema subset a Vapi function tool takes.
+
+    `items` must survive: an array parameter with no item type (find_slots'
+    location_ids, join_waitlist's) leaves the model guessing what to put in it.
+    """
+    out = {k: v for k, v in prop.items() if k in _SCHEMA_KEYS}
+    out.setdefault("type", "string")
+    if isinstance(out.get("items"), dict):
+        out["items"] = _prop(out["items"])
+    if isinstance(out.get("properties"), dict):
+        out["properties"] = {k: _prop(v) for k, v in out["properties"].items() if isinstance(v, dict)}
+    if out["type"] == "array" and not out.get("items"):
+        out["items"] = {"type": "string"}
+    return out
+
+
 def _function_tool(spec: dict[str, Any], public_url: str) -> dict[str, Any]:
     """tools.json entry → Vapi custom function tool pointed at our webhook."""
     raw = dict(spec.get("inputSchema") or {"type": "object"})
     props = {}
     for key, prop in (raw.get("properties") or {}).items():
-        p = {k: v for k, v in dict(prop).items() if k in {"type", "description", "enum"}}
-        p.setdefault("type", "string")
-        props[key] = p
+        props[key] = _prop(dict(prop))
     parameters: dict[str, Any] = {"type": "object", "properties": props}
     if raw.get("required"):
         parameters["required"] = list(raw["required"])
@@ -126,18 +147,25 @@ def _build_tools(
     bp: dict[str, Any],
     public_url: str,
     *,
-    handoff_target_id: str | None = None,
+    assistant_ids: dict[str, str] | None = None,
 ) -> list[dict[str, Any]]:
+    """Blueprint tools → Vapi tools for one assistant.
+
+    `assistant_ids` maps blueprint agent name → Vapi assistant id. Handoff edges
+    are only emitted for targets present there, so the first (id-less) pass can
+    create the assistants and the second pass can wire the real graph.
+    """
     tools: list[dict[str, Any]] = []
     for t in agent_entry["tools"]:
         name = t["name"]
         if t.get("handoff"):
-            if handoff_target_id:
+            target_id = (assistant_ids or {}).get(t["handoff_to"])
+            if target_id:
                 spec = bp["catalog"].get(name) or {}
                 tools.append(
                     _handoff_tool(
                         name,
-                        handoff_target_id,
+                        target_id,
                         spec.get("description") or f"Hand off to the {t['handoff_to']} agent.",
                     )
                 )
@@ -203,50 +231,55 @@ def _upsert_assistant(assistant_id: str | None, payload: dict[str, Any]) -> str:
 
 
 def ensure_squad(industry_dir: str | Path, public_url: str, *, voice_id: str | None = None) -> dict[str, str]:
-    """Create or refresh the receptionist/scheduler assistants + squad for an industry.
+    """Create or refresh one Vapi assistant per blueprint agent, plus the squad.
 
-    Always re-pushes the full config so the `schedule_appointment` webhook points
-    at this run's tunnel; only ids are reused from `.agents.json`.
+    Two passes, because a handoff tool needs its target's assistant id: pass one
+    creates/patches every assistant with its industry tools only, pass two patches
+    each one again with the handoff edges resolved against the ids from pass one.
+    An industry with N nodes gets N assistants and every edge in the blueprint —
+    a 7-node graph is not collapsible to receptionist + scheduler.
+
+    Always re-pushes the full config so every tool webhook points at this run's
+    tunnel; only ids are reused from `.agents.json`.
     """
     bp = load_blueprint(industry_dir)
     industry_name = Path(bp["industry_dir"]).name
     voice_id = voice_id or os.environ.get("VAPI_VOICE_ID", DEFAULT_VOICE_ID)
+    greeting = os.environ.get("VAPI_GREETING") or bp.get("greeting") or DEFAULT_GREETING
 
     cache = _load_cache()
     entry = dict(cache.get(industry_name) or {})
+    cached_ids: dict[str, str] = dict(entry.get("assistants") or {})
+    # pre-`assistants` cache layout, so an existing industry keeps its ids
+    if not cached_ids and entry.get("receptionist_id"):
+        cached_ids[bp["start"]] = entry["receptionist_id"]
 
-    start_agent = bp["agents"][bp["start"]]
-    handoff = next((t for t in start_agent["tools"] if t.get("handoff")), None)
-    target_name = handoff["handoff_to"] if handoff else bp["start"]
-    target_agent = bp["agents"][target_name]
+    start = bp["start"]
+    order = [start] + [n for n in bp["agents"] if n != start]
 
-    scheduler_id = _upsert_assistant(
-        entry.get("scheduler_id"),
-        _assistant_payload(
-            name=f"mivas-{industry_name}-{target_name}",
-            prompt=target_agent["instructions"],
-            first_message=None,
-            tools=_build_tools(target_agent, bp, public_url),
+    def payload_for(name: str, ids: dict[str, str] | None) -> dict[str, Any]:
+        agent = bp["agents"][name]
+        return _assistant_payload(
+            name=f"mivas-{industry_name}-{name}",
+            prompt=agent["instructions"],
+            # only the node that answers the call speaks a scripted greeting;
+            # every other node is reached mid-call and must never re-greet
+            first_message=greeting if name == start else None,
+            tools=_build_tools(agent, bp, public_url, assistant_ids=ids),
             voice_id=voice_id,
-        ),
-    )
-    receptionist_id = _upsert_assistant(
-        entry.get("receptionist_id"),
-        _assistant_payload(
-            name=f"mivas-{industry_name}-{bp['start']}",
-            prompt=start_agent["instructions"],
-            first_message=os.environ.get("VAPI_GREETING", DEFAULT_GREETING),
-            tools=_build_tools(
-                start_agent, bp, public_url, handoff_target_id=scheduler_id if handoff else None
-            ),
-            voice_id=voice_id,
-        ),
-    )
+        )
+
+    assistant_ids: dict[str, str] = {}
+    for name in order:
+        assistant_ids[name] = _upsert_assistant(cached_ids.get(name), payload_for(name, None))
+    for name in order:
+        if any(t.get("handoff") for t in bp["agents"][name]["tools"]):
+            _upsert_assistant(assistant_ids[name], payload_for(name, assistant_ids))
 
     squad_payload = {
         "name": f"mivas-{industry_name}",
         # first member answers the call
-        "members": [{"assistantId": receptionist_id}, {"assistantId": scheduler_id}],
+        "members": [{"assistantId": assistant_ids[name]} for name in order],
     }
     squad_id = entry.get("squad_id")
     if squad_id:
@@ -260,8 +293,10 @@ def ensure_squad(industry_dir: str | Path, public_url: str, *, voice_id: str | N
         squad_id = _request("POST", "/squad", squad_payload)["id"]
 
     entry = {
-        "receptionist_id": receptionist_id,
-        "scheduler_id": scheduler_id,
+        "assistants": assistant_ids,
+        # kept so the runtime agent.py smoke print keeps working on two-node blueprints
+        "receptionist_id": assistant_ids[start],
+        "scheduler_id": assistant_ids[order[1]] if len(order) > 1 else assistant_ids[start],
         "squad_id": squad_id,
     }
     cache[industry_name] = entry
@@ -293,23 +328,43 @@ def webhook_tool_names(bp: dict[str, Any]) -> set[str]:
     }
 
 
-async def _execute_tool(name: str, args: dict[str, Any]) -> dict[str, Any]:
-    """Generic dispatch: POST /tools/{name}; the server's envelope is the result."""
+async def _execute_tool(
+    name: str, args: dict[str, Any], call_id: str | None = None
+) -> dict[str, Any]:
+    """Generic dispatch: POST /tools/{name}; the server's envelope is the result.
+
+    The Vapi call id becomes X-Mivas-Call-Id so the state API keeps this call's DB
+    and identity pin separate from every other call in flight.
+    """
+    headers = {"X-Mivas-Call-Id": call_id} if call_id else None
     async with httpx.AsyncClient(timeout=30.0) as client:
-        resp = await client.post(f"{TOOL_SERVER_URL}/tools/{name}", json={"arguments": args})
+        resp = await client.post(
+            f"{TOOL_SERVER_URL}/tools/{name}", json={"arguments": args}, headers=headers
+        )
         return resp.json()
 
 
-async def run_tool(name: str, args: dict[str, Any], *, call_id: str | None = None) -> dict[str, Any]:
+async def run_tool(
+    name: str,
+    args: dict[str, Any],
+    *,
+    call_id: str | None = None,
+    vapi_call_id: str | None = None,
+) -> dict[str, Any]:
     """Execute a Vapi function tool under an execute_tool span.
+
+    `call_id` identifies the tool call; `vapi_call_id` identifies the conversation.
+    The conversation id is what the state API namespaces on and what picks this
+    call's trace root — keying either on the tool-call id gives every single tool
+    call its own DB, so a verified caller looks unverified one tool later.
 
     Never raises — failures become `{success: false, error: ...}` so the call (and
     its OTel tree) still finishes cleanly.
     """
     from report import finish_tool_span, tool_span
-    with tool_span(name, args, call_id=call_id) as span:
+    with tool_span(name, args, call_id=call_id, vapi_call_id=vapi_call_id) as span:
         try:
-            result = await _execute_tool(name, args)
+            result = await _execute_tool(name, args, vapi_call_id)
             ok = bool(result.get("ok", result.get("success", True)))
             finish_tool_span(span, result, ok=ok)
             return result

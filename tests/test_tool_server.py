@@ -244,6 +244,77 @@ def test_legal_guards_survive_dispatch() -> None:
         assert reuse["ok"] is False and reuse["error_code"], "token must stay single-use"
 
 
+def test_healthcare_list_locations_has_what_the_prompts_require() -> None:
+    """Prompts forbid guessing an office address/floor and require reading the
+    office back "WITH THE FLOOR" before booking, so list_locations must supply
+    them. When it did not, a correct agent looped on the lookup and gave up
+    instead of booking (openai result 716985)."""
+    with _load_tool_server("healthcare") as module, TestClient(module.app) as client:
+        resp = client.post("/tools/list_locations", json={"arguments": {"zip": "10016"}})
+        assert resp.status_code == 200, resp.text
+        body = resp.json()
+        assert body["ok"], body
+        locations = body["data"]["locations"]
+        assert locations, body
+        for loc in locations:
+            for field in ("address", "floor", "suite", "hours", "services", "transit", "parking"):
+                assert loc.get(field), f"{loc['id']} has no {field}: {loc}"
+        # the caller's own zip sorts first, so the office they named is the one read back
+        assert locations[0]["zip"] == "10016", locations[0]
+
+
+def test_healthcare_calls_are_isolated() -> None:
+    """Two concurrent calls must not share an identity pin, a balance or a row.
+
+    Without X-Mivas-Call-Id isolation, call B's get_account_balance reads call A's
+    verified patient and call B's cancel hits a row A already cancelled.
+    """
+    with _load_tool_server("healthcare") as module, TestClient(module.app) as client:
+        def tool(name: str, args: dict[str, Any], call: str | None = None) -> dict[str, Any]:
+            headers = {"X-Mivas-Call-Id": call} if call else {}
+            resp = client.post(f"/tools/{name}", json={"arguments": args}, headers=headers)
+            assert resp.status_code == 200, resp.text
+            return resp.json()
+
+        a = tool("verify_identity", {"full_name": "Jordan Lee", "dob": "1990-04-12"}, "call_a")
+        assert a["ok"] and a["data"]["patient_id"] == "pat_jordan_lee"
+
+        # call B has verified nobody: A's pin must not leak in
+        leaked = tool("get_account_balance", {}, "call_b")
+        assert leaked["ok"] is False and leaked["error_code"] == "NOT_VERIFIED", leaked
+
+        b = tool("verify_identity", {"full_name": "Maria Alvarez", "dob": "1972-06-30"}, "call_b")
+        assert b["ok"] and b["data"]["patient_id"] == "pat_maria_alvarez"
+        assert tool("get_account_balance", {}, "call_a")["data"]["balance_cents"] == 12500
+        assert tool("get_account_balance", {}, "call_b")["data"]["balance_cents"] == 48000
+
+        # both calls cancel appointment 1 / 2 in their own DB copy, twice over
+        for call, appt in (("call_a", "1"), ("call_b", "2")):
+            args = {"appointment_id": appt, "cancellation_reason_code": "patient_request"}
+            assert tool("cancel_appointment", args, call)["data"]["status"] == "fee_disclosure_required"
+        third = tool("verify_identity", {"full_name": "Jordan Lee", "dob": "1990-04-12"}, "call_c")
+        assert third["ok"], third
+        fresh = tool("cancel_appointment",
+                     {"appointment_id": "1", "cancellation_reason_code": "patient_request"}, "call_c")
+        assert fresh["data"]["status"] == "fee_disclosure_required", fresh
+        assert fresh["data"]["fee_cents"] == 5000
+
+        # cosmetic window: appointment 2 is inside 72 h → $125
+        cos = tool("cancel_appointment",
+                   {"appointment_id": "2", "cancellation_reason_code": "patient_request"}, "call_b")
+        assert cos["data"]["fee_cents"] == 12500, cos
+        # appointment 3 is outside every window → straight to cancelled, no fee
+        alice = tool("verify_identity", {"full_name": "Alice Romano", "dob": "1995-09-08"}, "call_d")
+        assert alice["ok"], alice
+        free = tool("cancel_appointment",
+                    {"appointment_id": "3", "cancellation_reason_code": "patient_request"}, "call_d")
+        assert free["data"]["status"] == "cancelled" and free["data"]["fee_charged_cents"] == 0, free
+
+        # financing gate: only Maria clears $250
+        assert tool("offer_financing", {"amount_cents": 48000}, "call_b")["data"]["eligible"] is True
+        assert tool("offer_financing", {"amount_cents": 12500}, "call_a")["data"]["eligible"] is False
+
+
 def test_healthcare_flow_through_dispatch() -> None:
     with _load_tool_server("healthcare") as module, TestClient(module.app) as client:
         def tool(name: str, args: dict[str, Any]) -> dict[str, Any]:
@@ -360,5 +431,7 @@ if __name__ == "__main__":
     test_legal_guards_survive_dispatch()
     test_finance_guards_survive_dispatch()
     test_healthcare_flow_through_dispatch()
+    test_healthcare_calls_are_isolated()
+    test_healthcare_list_locations_has_what_the_prompts_require()
     test_travel_guards_survive_dispatch()
     print("ok test_tool_server")

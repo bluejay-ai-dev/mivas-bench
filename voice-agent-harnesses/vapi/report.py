@@ -61,6 +61,20 @@ _call_t0: ContextVar[float | None] = ContextVar("mivas_vapi_otel_t0", default=No
 # module fallbacks when asyncio tasks don't inherit ContextVars
 _active_root: Span | None = None
 _active_t0: float | None = None
+# Vapi call id → (voice.call root, t0). Tool calls arrive on an HTTP webhook with
+# no OTel context and no ContextVar, so without this every concurrent call's tool
+# spans would hang off whichever bridge happened to start last.
+_calls: dict[str, tuple[Span, float]] = {}
+
+
+def bind_call(vapi_call_id: str | None) -> None:
+    """Route this Vapi call's webhook tool spans to the running voice.call root."""
+    if not vapi_call_id:
+        return
+    root = _root_span.get() or _active_root
+    t0 = _call_t0.get() or _active_t0
+    if root is not None and t0 is not None:
+        _calls[str(vapi_call_id)] = (root, t0)
 
 
 def _api_url() -> str:
@@ -88,7 +102,11 @@ def _json_attr(value: Any) -> str:
         return str(value)
 
 
-def call_offset_ms() -> int:
+def call_offset_ms(vapi_call_id: str | None = None) -> int:
+    if vapi_call_id:
+        entry = _calls.get(str(vapi_call_id))
+        if entry is not None:
+            return max(0, int((time.monotonic() - entry[1]) * 1000))
     t0 = _call_t0.get()
     if t0 is None:
         t0 = _active_t0
@@ -130,7 +148,11 @@ def flush() -> None:
             logger.error("otel flush failed: %s", e)
 
 
-def _parent_span() -> Span | None:
+def _parent_span(vapi_call_id: str | None = None) -> Span | None:
+    if vapi_call_id:
+        entry = _calls.get(str(vapi_call_id))
+        if entry is not None and entry[0].get_span_context().is_valid:
+            return entry[0]
     parent = _root_span.get()
     if parent is not None and parent.get_span_context().is_valid:
         return parent
@@ -148,9 +170,14 @@ def tool_span(
     parameters: Any = None,
     *,
     call_id: str | None = None,
+    vapi_call_id: str | None = None,
 ) -> Iterator[Span | None]:
-    """Child span under the active voice.call root. No-op outside traced_run."""
-    parent = _parent_span()
+    """Child span under this call's voice.call root. No-op outside traced_run.
+
+    `call_id` is the tool-call id (an attribute); `vapi_call_id` is the
+    conversation, and is what picks the right root when calls overlap.
+    """
+    parent = _parent_span(vapi_call_id)
     if parent is None:
         yield None
         return
@@ -231,6 +258,19 @@ def end_speech_span(span: Span | None) -> None:
     span.end()
 
 
+def _upsert_stop_statuses() -> set[str]:
+    """Statuses that release the pre-POST wait.
+
+    Default waits for a final status so the link is not wiped mid-eval. With
+    MIVAS_UPSERT_BEFORE_EVAL set, the POST goes out as soon as the conversation ends, so
+    the goal evaluator can see the call's tool calls — at the cost of a possible
+    double-count of execute_tool spans if eval then wipes the link and the relink fires.
+    """
+    if os.environ.get("MIVAS_UPSERT_BEFORE_EVAL", "").strip().lower() in ("1", "true", "yes"):
+        return FINAL_STATUSES | {"CONVERSATION_ENDED"}
+    return FINAL_STATUSES
+
+
 async def _await_terminal_upsert(
     client: httpx.AsyncClient, simulation_result_id: str, timeout: float = 300.0
 ) -> str | None:
@@ -259,7 +299,7 @@ async def _await_terminal_upsert(
                 st = str(
                     ((r.json() or {}).get("simulation_result") or {}).get("status")
                 )
-                if st in FINAL_STATUSES:
+                if st in _upsert_stop_statuses():
                     return st
         except Exception:
             pass
@@ -303,6 +343,14 @@ async def post_simulation_enrichment(
         try:
             async with httpx.AsyncClient(timeout=20) as client:
                 st = await _await_terminal_upsert(client, simulation_result_id)
+                if st in EARLY_UPSERT_STATUSES:
+                    # Bluejay extracts execute_tool spans at POST time, so posting the
+                    # instant the call ends can beat the OTLP spans into the store and link
+                    # a trace with no tools. force_flush() only proves the exporter accepted
+                    # them. Settle first — still inside the window before eval reads tools.
+                    await asyncio.sleep(
+                        float(os.environ.get("MIVAS_UPSERT_SETTLE_SECONDS", "10"))
+                    )
                 if st is None:
                     check = await client.get(
                         f"{_api_url()}/retrieve-simulation-result/{simulation_result_id}",
@@ -383,6 +431,7 @@ async def traced_run(
 
     otel_tid: str | None = None
     root_token = None
+    root_holder: dict[str, Any] = {}
     t0 = time.monotonic()
     t0_token = _call_t0.set(t0)
     prev_active = _active_root
@@ -394,6 +443,7 @@ async def traced_run(
             attributes=attrs,
         ) as root:
             root_token = _root_span.set(root)
+            root_holder["root"] = root
             _active_root = root
             _active_t0 = t0
             ctx = root.get_span_context()
@@ -414,6 +464,8 @@ async def traced_run(
                 else:
                     raise
     finally:
+        for cid in [k for k, (r, _) in _calls.items() if r is root_holder.get("root")]:
+            _calls.pop(cid, None)
         _active_root = prev_active
         _active_t0 = prev_t0
         if root_token is not None:

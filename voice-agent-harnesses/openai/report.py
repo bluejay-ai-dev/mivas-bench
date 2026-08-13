@@ -50,6 +50,15 @@ FINAL_STATUSES = {
 EARLY_UPSERT_STATUSES = {"EVALUATING", "EVALUATED", "CONVERSATION_ENDED"}
 _MAX_ATTR = 4000
 
+# target agent name → the blueprint's handoff tool name, so a handoff is reported under
+# the name the industry declares (`transfer_to_identity`) rather than a synthesized one.
+# Populated by build_from_blueprint; unknown targets fall back to handoff_to_<target>.
+_HANDOFF_TOOL_NAMES: dict[str, str] = {}
+
+
+def register_handoff_tool_names(mapping: dict[str, str]) -> None:
+    _HANDOFF_TOOL_NAMES.update(mapping)
+
 _provider: TracerProvider | None = None
 
 
@@ -147,6 +156,19 @@ def flush() -> None:
             logger.error("otel flush failed: %s", e)
 
 
+def _upsert_stop_statuses() -> set[str]:
+    """Statuses that release the pre-POST wait.
+
+    Default waits for a final status so the link is not wiped mid-eval. With
+    MIVAS_UPSERT_BEFORE_EVAL set, the POST goes out as soon as the conversation ends, so
+    the goal evaluator can see the call's tool calls — at the cost of a possible
+    double-count of execute_tool spans if eval then wipes the link and the relink fires.
+    """
+    if os.environ.get("MIVAS_UPSERT_BEFORE_EVAL", "").strip().lower() in ("1", "true", "yes"):
+        return FINAL_STATUSES | {"CONVERSATION_ENDED"}
+    return FINAL_STATUSES
+
+
 async def _await_terminal_upsert(
     client: httpx.AsyncClient, simulation_result_id: str, timeout: float = 300.0
 ) -> str | None:
@@ -171,7 +193,7 @@ async def _await_terminal_upsert(
                 st = str(
                     ((r.json() or {}).get("simulation_result") or {}).get("status")
                 )
-                if st in FINAL_STATUSES:
+                if st in _upsert_stop_statuses():
                     return st
         except Exception:
             pass
@@ -266,6 +288,12 @@ async def post_trace_ids(simulation_result_id: str, trace_id: str) -> None:
     }
     async with httpx.AsyncClient(timeout=20) as client:
         st = await _await_terminal_upsert(client, simulation_result_id)
+        if st in EARLY_UPSERT_STATUSES:
+            # Bluejay extracts execute_tool spans at POST time, so posting the instant the
+            # call ends can beat the OTLP spans into the store and link a trace with no
+            # tools. force_flush() only proves the exporter accepted them. Settle first —
+            # still well inside the window before evaluation reads the tool list.
+            await asyncio.sleep(float(os.environ.get("MIVAS_UPSERT_SETTLE_SECONDS", "10")))
         r = await client.post(
             f"{_api_url()}/update-simulation-result",
             json=body,
@@ -412,7 +440,7 @@ class RealtimeEventTracer:
             to = getattr(event, "to_agent", None)
             from_name = getattr(frm, "name", None) or "Unknown"
             to_name = getattr(to, "name", None) or "Unknown"
-            tool_name = f"handoff_to_{to_name}"
+            tool_name = _HANDOFF_TOOL_NAMES.get(to_name) or f"handoff_to_{to_name}"
             # Bluejay tool_calls path: handoffs show up as execute_tool.
             with self._tracer.start_as_current_span(
                 f"execute_tool {tool_name}",

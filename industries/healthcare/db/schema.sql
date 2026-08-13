@@ -1,8 +1,19 @@
+-- Every prompt says office address, floor, suite and hours come ONLY from
+-- list_locations and must never be guessed, and scheduling must read the office
+-- back "WITH THE FLOOR" before booking. So they have to live here: without them a
+-- correct agent cannot complete a booking at all.
 CREATE TABLE IF NOT EXISTS locations (
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
     zip TEXT NOT NULL,
-    offers_cosmetic INTEGER NOT NULL DEFAULT 0
+    offers_cosmetic INTEGER NOT NULL DEFAULT 0,
+    address TEXT NOT NULL DEFAULT '',
+    floor TEXT NOT NULL DEFAULT '',
+    suite TEXT NOT NULL DEFAULT '',
+    hours TEXT NOT NULL DEFAULT '',
+    services TEXT NOT NULL DEFAULT '',
+    transit TEXT NOT NULL DEFAULT '',
+    parking TEXT NOT NULL DEFAULT ''
 );
 
 CREATE TABLE IF NOT EXISTS providers (

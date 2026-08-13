@@ -10,6 +10,7 @@ import asyncio
 import json
 import os
 import sys
+from contextvars import ContextVar
 from pathlib import Path
 from typing import Any
 
@@ -64,14 +65,34 @@ def _multiagent_note(bp: dict[str, Any]) -> str:
     )
 
 
+_SCHEMA_KEYS = {"type", "description", "enum", "items", "properties", "required"}
+
+
+def _prop(prop: dict[str, Any]) -> dict[str, Any]:
+    """One tools.json property → the subset of JSON Schema Gemini Live accepts.
+
+    `items` has to survive: Live rejects the whole setup with
+    `properties[<name>].items: missing field` for a bare array (that killed every
+    healthcare call, since find_slots takes location_ids). Nested objects and
+    arrays-of-objects recurse for the same reason.
+    """
+    out = {k: v for k, v in prop.items() if k in _SCHEMA_KEYS}
+    if isinstance(out.get("items"), dict):
+        out["items"] = _prop(out["items"]) or {"type": "string"}
+    if isinstance(out.get("properties"), dict):
+        out["properties"] = {k: _prop(v) for k, v in out["properties"].items() if isinstance(v, dict)}
+    if out.get("type") == "array" and not out.get("items"):
+        out["items"] = {"type": "string"}
+    return out
+
+
 def _decl(spec: dict) -> types.FunctionDeclaration:
     # Gemini Live rejects JSON-Schema keys like additionalProperties.
     raw = dict(spec.get("inputSchema") or {})
     raw.pop("additionalProperties", None)
     props = {}
     for key, prop in (raw.get("properties") or {}).items():
-        p = {k: v for k, v in dict(prop).items() if k in {"type", "description", "enum"}}
-        props[key] = p
+        props[key] = _prop(dict(prop))
     schema: dict[str, Any] = {"type": "object", "properties": props}
     if raw.get("required"):
         schema["required"] = list(raw["required"])
@@ -133,10 +154,20 @@ def _tool_entry(bp: dict[str, Any], agent: str, name: str,
     return None
 
 
+# Set once per CHIRP connection so the state API can isolate this call's DB and
+# identity pin from every other call in flight. Industries that keep no per-call
+# state ignore the header.
+CALL_ID: ContextVar[str] = ContextVar("mivas_call_id", default="")
+
+
 async def _dispatch(name: str, args: dict[str, Any]) -> dict[str, Any]:
     """Generic dispatch: POST /tools/{name}; the server's envelope is the result."""
+    call_id = CALL_ID.get()
+    headers = {"X-Mivas-Call-Id": call_id} if call_id else None
     async with httpx.AsyncClient(timeout=30.0) as client:
-        resp = await client.post(f"{TOOL_SERVER_URL}/tools/{name}", json={"arguments": args})
+        resp = await client.post(
+            f"{TOOL_SERVER_URL}/tools/{name}", json={"arguments": args}, headers=headers
+        )
         return resp.json()
 
 
