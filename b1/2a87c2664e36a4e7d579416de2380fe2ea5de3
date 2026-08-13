@@ -1,0 +1,19 @@
+industries/travel/system-prompts/payments.md
+  s_40d50343b62182::t_6ee2526c38913d 143-147,150-152
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "b12a87c2664e36a4e7d579416de2380fe2ea5de3",
+  "prompts": {},
+  "sessions": {
+    "s_40d50343b62182": {
+      "agent_id": {
+        "tool": "windsurf",
+        "id": "regal-reading",
+        "model": "unknown"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
