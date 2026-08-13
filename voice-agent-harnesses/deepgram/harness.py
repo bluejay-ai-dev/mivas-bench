@@ -33,8 +33,17 @@ TOOL_SERVER_URL = os.environ.get("TOOL_SERVER_URL", "http://127.0.0.1:8000").rst
 WS_URL = "wss://agent.deepgram.com/v1/agent/converse"
 DEEPGRAM_LISTEN_MODEL = os.environ.get("DEEPGRAM_LISTEN_MODEL", "flux-general-en")
 DEEPGRAM_THINK_MODEL = os.environ.get("DEEPGRAM_THINK_MODEL", "gpt-4.1")
-DEEPGRAM_SPEAK_MODEL = os.environ.get("DEEPGRAM_SPEAK_MODEL", "aura-2-thalia-en")
+DEEPGRAM_SPEAK_MODEL = os.environ.get("DEEPGRAM_SPEAK_MODEL", "flux-hannah-en")
 DEEPGRAM_GREETING = os.environ.get("DEEPGRAM_GREETING", "Thanks for calling! How can I help you today?")
+
+
+def _speak_provider() -> dict[str, Any]:
+    """Flux TTS (`flux-{voice}-{lang}`) is served on /v2/speak, so the provider
+    needs `version: v2`; aura-* stays on the default v1."""
+    provider: dict[str, Any] = {"type": "deepgram", "model": DEEPGRAM_SPEAK_MODEL}
+    if DEEPGRAM_SPEAK_MODEL.startswith("flux-"):
+        provider["version"] = "v2"
+    return provider
 
 
 def industry_path(name: str | Path) -> Path:
@@ -131,7 +140,7 @@ def settings_payload(bp: dict[str, Any], model: str | None = None) -> dict[str, 
                 "prompt": prompt,
                 "functions": functions,
             },
-            "speak": {"provider": {"type": "deepgram", "model": DEEPGRAM_SPEAK_MODEL}},
+            "speak": {"provider": _speak_provider()},
             "greeting": DEEPGRAM_GREETING,
         },
     }
