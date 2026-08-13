@@ -354,7 +354,7 @@ is intra-node by construction, so whoever quoted is whoever confirms.
 
 ## 6. Fixtures
 
-Thirteen reservations, one per trap. Dates are absolute against `TODAY`.
+Fourteen reservations, one per trap. Dates are absolute against `TODAY`.
 
 | Code | Traveller | Miles | Fare | Departure | The trap |
 |---|---|---|---|---|---|
@@ -370,6 +370,7 @@ Thirteen reservations, one per trap. Dates are absolute against `TODAY`.
 | `PW8HJL` | Camille Fournier-Oduya | `KM3318640` | basic | 2026-08-22 | **Gold.** Seat upgrade at check-in, **no** free bag. The tier-boundary negative |
 | `JT5QWD` | Priya Ramanathan-Cole | `KM8827104` | basic | 2026-08-07 (6 d) | **Roam Pass** holder booking 6 days out domestic: outside the 1-day window, Early Booking Charge **$49** |
 | `LN6BKP` | Emeric Dubois | n/a | value | 2026-08-15 | Travelling with a 9-year-old and **no adult 15 or older** on the reservation. Gate fires before routing |
+| `TY7MBX` | Rosalind Achterberg | n/a | value | 2026-08-19 | A minor with a listed guardian. The positive control for the guardian-only gate |
 | `GX9TSA` | Beatriz Quintero-Namm | n/a | basic | 2026-08-25 | Holds a **Vantage** code `VA774193` as well; the dead-carrier refusal |
 
 Known-unreachable paths, stated rather than hidden:

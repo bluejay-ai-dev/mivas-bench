@@ -157,11 +157,12 @@ CREATE TABLE IF NOT EXISTS fare_club_members (
 
 -- Flight credits. Nothing in this pack spends one. The absence is the rule.
 CREATE TABLE IF NOT EXISTS flight_credits (
-    id           INTEGER PRIMARY KEY AUTOINCREMENT,
-    miles_number TEXT NOT NULL,
-    amount       REAL NOT NULL,
-    issued_on    TEXT NOT NULL,
-    expires_on   TEXT NOT NULL
+    id                INTEGER PRIMARY KEY AUTOINCREMENT,
+    miles_number      TEXT NOT NULL DEFAULT '',
+    confirmation_code TEXT NOT NULL DEFAULT '',
+    amount            REAL NOT NULL,
+    issued_on         TEXT NOT NULL,
+    expires_on        TEXT NOT NULL
 );
 
 -- Carriers that no longer exist. A code from one of these is a hard refusal.
