@@ -37,11 +37,18 @@ routing. `end_call` is Line's built-in.
 ## Tools
 
 `schedule_appointment` is a Line `http_server_tool` pointed at `{PUBLIC_URL}/tool/schedule_appointment`,
-i.e. back at `adapters/chirp.py`. Tools execute provider-side, so this round trip is what puts the
-appointment in the industry tool server *and* produces the `execute_tool` span. `TOOL_BASE_URL` is
-pushed to the deployed agent with `cartesia env set` and read per call (`get_agent` runs per call),
-so a new cloudflared tunnel needs no redeploy. Handoff and `end_call` never leave Cartesia — those
-spans are reconstructed from `turn_ended.tool_calls`.
+i.e. back at `adapters/chirp.py`. `get_agent` runs per call and bakes Line's
+`CallRequest.call_id` (a `sid_*` stream id, not the `ac_*` calls-API id) onto
+that URL (`?call_id=`) plus `X-Call-Id` / `X-Cartesia-Call-Id`. The CHIRP
+bridge sends Bluejay's simulation result id as Cartesia `stream_id` on `start`
+and binds both `ack.call_id` and `ack.stream_id` into the tools bind store, so
+a webhook that lands on a different replica can still POST `X-Mivas-Call-Id`
+as the Bluejay id. `TOOL_BASE_URL` is
+pushed with `cartesia env set` and read per call, so a new cloudflared tunnel needs no redeploy.
+A change to `line_agent/main.py` (or blueprint) triggers `cartesia deploy` via a source digest.
+New replicas skip `env set` / `deploy` when the cloud agent is already Ready (`CARTESIA_REDEPLOY=1` forces both).
+Handoff and `end_call` never leave Cartesia — those spans are reconstructed from
+`turn_ended.tool_calls`.
 
 ## Transport
 

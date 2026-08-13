@@ -18,10 +18,19 @@ import datetime as _dt
 import json
 import os
 import re
+import sys
 from pathlib import Path
 from typing import Any
 
 import httpx
+
+for _root in (Path("/app"), *Path(__file__).resolve().parents):
+    _runtime = _root / "runtime"
+    if (_runtime / "call_id.py").is_file():
+        if str(_runtime) not in sys.path:
+            sys.path.insert(0, str(_runtime))
+        break
+from call_id import headers as tool_headers, set_call_id  # noqa: E402
 
 HARNESS_DIR = Path(__file__).resolve().parent
 REPO_ROOT = HARNESS_DIR.parents[1] if len(HARNESS_DIR.parents) > 1 else HARNESS_DIR
@@ -145,8 +154,104 @@ def api_key() -> str:
     return key
 
 
+_PACK_WELCOME = {
+    "control-industry": DEFAULT_WELCOME,
+    "healthcare": "Thank you for calling Straus Dermatology.",
+    "finance": "Thank you for calling Copperline Credit Union.",
+    "legal": "Thank you for calling Halverson and Reed.",
+    "travel": "Thank you for calling Summit Air.",
+}
+
+
+def _industry_name() -> str:
+    named = os.environ.get("INDUSTRY", "").strip()
+    if named:
+        return named
+    env_dir = os.environ.get("INDUSTRY_DIR", "").strip()
+    if env_dir:
+        return Path(env_dir).name
+    return "control-industry"
+
+
 def welcome_greeting() -> str:
-    return os.environ.get("TWILIO_WELCOME_GREETING", DEFAULT_WELCOME).strip() or DEFAULT_WELCOME
+    raw = os.environ.get("TWILIO_WELCOME_GREETING", "").strip()
+    pack = _PACK_WELCOME.get(_industry_name(), "Hello.")
+    # k8s used to stamp the control-industry greeting on every industry.
+    if not raw or (raw == DEFAULT_WELCOME and _industry_name() != "control-industry"):
+        return pack
+    return raw
+
+
+TWILIO_SIP_HOST_SUFFIX = "sip.twilio.com"
+
+
+def twilio_sip_domain(industry: str | None = None) -> str:
+    """Twilio SIP Domain host for a pack: mivas-twilio-<industry>.sip.twilio.com."""
+    name = (industry or _industry_name()).strip() or "control-industry"
+    return f"mivas-twilio-{name}.{TWILIO_SIP_HOST_SUFFIX}"
+
+
+def twilio_sip_uri(industry: str | None = None, *, user: str = "mivas") -> str:
+    """Bluejay agent sip_uri: sip:mivas@mivas-twilio-<industry>.sip.twilio.com."""
+    return f"sip:{user}@{twilio_sip_domain(industry)}"
+
+
+def sim_id_from_mapping(mapping: dict[str, Any] | None) -> str:
+    """Bluejay X-Simulation-Result-Id from a Twilio webhook form or CR customParameters.
+
+    LiveKit puts the id on the SIP INVITE as X-Simulation-Result-Id. Twilio Programmable
+    Voice forwards X-* INVITE headers as SipHeader_<Name> on the VoiceUrl POST.
+    Nested JSON (SipHeader_X-Custom-Headers) is scanned too.
+    """
+    if not mapping:
+        return ""
+    exact = (
+        "SipHeader_X-Simulation-Result-Id",
+        "SipHeader_X-Simulation-Result-ID",
+        "SipHeader_X-Simulation-Result-id",
+        "X-Simulation-Result-Id",
+        "x-simulation-result-id",
+        "simulation_result_id",
+        "Simulation-Result-Id",
+    )
+    for key in exact:
+        val = mapping.get(key)
+        if val not in (None, "") and not isinstance(val, (dict, list)):
+            return str(val).strip()
+    nested: list[dict[str, Any]] = []
+    for key, val in mapping.items():
+        if isinstance(val, dict):
+            nested.append(val)
+            continue
+        if val in (None, "") or isinstance(val, list):
+            continue
+        norm = str(key).lower().replace("_", "-")
+        if "simulation-result-id" in norm:
+            return str(val).strip()
+        text = str(val).strip()
+        if text.startswith("{") and text.endswith("}"):
+            try:
+                blob = json.loads(text)
+            except json.JSONDecodeError:
+                continue
+            if isinstance(blob, dict):
+                nested.append(blob)
+    for blob in nested:
+        found = sim_id_from_mapping(blob)
+        if found:
+            return found
+    return ""
+
+
+def sip_header_keys(mapping: dict[str, Any] | None) -> list[str]:
+    """Form/header names Twilio stamped from the SIP INVITE (for logs)."""
+    if not mapping:
+        return []
+    return sorted(
+        str(k)
+        for k in mapping
+        if str(k).lower().startswith("sipheader") or str(k).lower().startswith("x-")
+    )
 
 
 def public_base_url() -> str:
@@ -420,7 +525,9 @@ def infer_schedule_appointment(text: str) -> dict[str, Any] | None:
 async def dispatch_industry_tool(name: str, args: dict[str, Any]) -> dict[str, Any]:
     async with httpx.AsyncClient(timeout=30.0) as client:
         resp = await client.post(
-            f"{tool_server_url()}/tools/{name}", json={"arguments": args}
+            f"{tool_server_url()}/tools/{name}",
+            json={"arguments": args},
+            headers=tool_headers(),
         )
         return resp.json()
 
@@ -581,15 +688,15 @@ def twiml_connect(
     )
 
 
-def demo() -> None:
-    """Offline smoke used by agent.py --check."""
-    bp = load_blueprint("control-industry")
-    assert bp["start"] == "receptionist"
-    assert tool_names(bp, "receptionist") == ["handoff_to_scheduler", "end_call"]
-    assert tool_names(bp, "scheduler") == ["schedule_appointment", "end_call"]
-    assert handoff_target(bp, "receptionist", "handoff_to_scheduler") == "scheduler"
-    tools = openai_tools_for_agent(bp, "receptionist")
-    assert tools[0]["function"]["name"] == "handoff_to_scheduler"
+def demo(industry: str | Path | None = None) -> None:
+    """Offline smoke used by agent.py --check. Industry-agnostic plus control asserts."""
+    bp = load_blueprint(industry or os.environ.get("INDUSTRY") or "control-industry")
+    start = bp["start"]
+    assert start in bp["agents"], start
+    start_tools = tool_names(bp, start)
+    assert start_tools, start
+    tools = openai_tools_for_agent(bp, start)
+    assert [t["function"]["name"] for t in tools] == start_tools
     assert today_context_line()
     inferred = infer_schedule_appointment(
         "Your appointment is scheduled for 08/18/2026."
@@ -597,3 +704,7 @@ def demo() -> None:
     assert inferred == {"date": "08/18/2026"}, inferred
     xml = twiml_connect(ws_url="wss://example.trycloudflare.com/ws")
     assert "ConversationRelay" in xml and "wss://example.trycloudflare.com/ws" in xml
+    if start == "receptionist" and "scheduler" in bp["agents"]:
+        assert start_tools == ["handoff_to_scheduler", "end_call"]
+        assert tool_names(bp, "scheduler") == ["schedule_appointment", "end_call"]
+        assert handoff_target(bp, "receptionist", "handoff_to_scheduler") == "scheduler"

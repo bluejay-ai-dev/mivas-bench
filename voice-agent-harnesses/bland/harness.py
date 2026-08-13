@@ -20,11 +20,30 @@ from __future__ import annotations
 import json
 import os
 import re
+import sys
 from collections.abc import Iterable
 from pathlib import Path
 from typing import Any
 
 import httpx
+
+for _root in (Path("/app"), *Path(__file__).resolve().parents):
+    _runtime = _root / "runtime"
+    if (_runtime / "call_id.py").is_file():
+        if str(_runtime) not in sys.path:
+            sys.path.insert(0, str(_runtime))
+        break
+from call_id import (  # noqa: E402
+    begin_session,
+    bind_provider,
+    end_session,
+    for_provider,
+    headers as tool_headers,
+    provider_id_from_payload,
+    provider_id_from_request,
+    set_call_id,
+    unbind_provider,
+)
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 HARNESS_DIR = Path(__file__).resolve().parent
@@ -419,7 +438,11 @@ async def _execute_tool(name: str, args: dict[str, Any]) -> dict[str, Any]:
     if flags.get("handoff") or flags.get("session"):
         return {"success": True}
     async with httpx.AsyncClient(timeout=30.0) as client:
-        resp = await client.post(f"{TOOL_SERVER_URL}/tools/{name}", json={"arguments": args})
+        resp = await client.post(
+            f"{TOOL_SERVER_URL}/tools/{name}",
+            json={"arguments": args},
+            headers=tool_headers(),
+        )
         return resp.json()
 
 

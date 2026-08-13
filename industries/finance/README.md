@@ -117,8 +117,9 @@ the transcript and tool sequence.
 ```bash
 uv run python industries/finance/tool_server.py
 # curl -X POST http://127.0.0.1:8000/tools/get_fee \
-#   -H 'content-type: application/json' -d '{"arguments":{"fee":"overdraft"}}'
-# curl http://127.0.0.1:8000/state
+#   -H 'content-type: application/json' -H 'X-Mivas-Call-Id: 675' \
+#   -d '{"arguments":{"fee":"overdraft"}}'
+# curl -s 'http://127.0.0.1:8000/state?call_id=675'
 
 uv run python industries/finance/tool_server.py --selfcheck   # every trap, fresh DB
 ```

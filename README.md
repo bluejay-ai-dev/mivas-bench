@@ -11,7 +11,7 @@ Pick a **harness** from `voice-agent-harnesses/` (e.g. `openai/realtime-2.1`) an
 - `tool_server.py` (FastAPI **state API** over SQLite — not a 1:1 tools.json mirror)
 
 The harness adapts the blueprint into a voice runtime:
-- **industry** tools → industry state API
+- **industry** tools → industry state API (`POST /tools/{name}` with `X-Mivas-Call-Id` = Bluejay `X-Simulation-Result-Id`; see [industries/README.md](industries/README.md) and [voice-agent-harnesses/README.md](voice-agent-harnesses/README.md))
 - **session** tools (`session: true`, e.g. `end_call`) → harness-native + hang up
 - **handoff** tools → provider handoffs
 
@@ -59,6 +59,27 @@ uv run python run.py --build --apply --no-logs
 ```
 
 `--build` with `MIVAS_IMAGE_PREFIX` builds `linux/arm64`, logs into ECR, and pushes. `--apply` creates IngressClassParams + one Ingress per pair; Auto Mode provisions **one** internet-facing ALB (`group.name: mivas-chirp`).
+
+`MIVAS_REPLICAS` (default `1`) sets `spec.replicas` on each pair’s **harness** Deployment. The industry tool server is a separate Deployment `mivas-{slug}-tools` with `MIVAS_TOOLS_REPLICAS=1` (ClusterIP only). Harness pods call `http://mivas-{slug}-tools:8000`. Capacity is:
+
+```
+max_concurrent ≈ replicas × in_process_ws_limit
+```
+
+`in_process_ws_limit` is empirical per family (start conservative: 2–4). Leave unused pairs at 1. Proven pairs (openai × control-industry, cartesia/line × control-industry) run at harness=3. Do not set `MIVAS_REPLICAS>1` on vapi/retell/bland until those families are live-proven. Re-apply a proven pair with `MIVAS_REPLICAS=3` or you will scale it back to 1 and drop in-flight sockets. See [docs/per-call-db-and-replicas.md](docs/per-call-db-and-replicas.md).
+
+Evals load a call’s final DB dump without knowing which harness pod ran it:
+
+```
+GET https://{slug}.{domain}/snapshot/{simulation_result_id}
+GET https://{slug}.{domain}/state?call_id={simulation_result_id}
+```
+
+Ingress sends `/snapshot` and `/state` to the tools Service. `/snapshot/{id}` is the teardown freeze; `/state` is live SQLite.
+
+Rolling updates use `maxUnavailable: 0` / `maxSurge: 1`. An in-flight WebSocket **dies** if its pod is deleted; scale by adding replicas rather than cycling them mid-run. New dials use ALB `least_outstanding_requests`; an upgraded socket stays on that target for the TCP lifetime (idle timeout 3600s). Cookie stickiness is not used.
+
+
 
 **Cloudflare (two records, both DNS-only / grey cloud — never orange-cloud proxy):**
 

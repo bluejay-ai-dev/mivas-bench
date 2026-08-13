@@ -34,7 +34,7 @@ if __name__ == "__main__":
     industry = next((a for a in sys.argv[1:] if not a.startswith("-")), "control-industry")
     industry_dir = Path(os.environ.get("INDUSTRY_DIR", str(industry_path(industry))))
     if "--check" in sys.argv:
-        demo()
+        demo(industry_dir)
         start, agents = build_agents(industry_dir)
         bp = load_blueprint(industry_dir)
         tools = advertised_tools(industry_dir)
@@ -45,11 +45,11 @@ if __name__ == "__main__":
             f"welcome={welcome_greeting()!r} tool_server={tool_server_url() or TOOL_SERVER_URL}"
         )
     else:
-        # Live traffic is served by adapters/chirp.py (TwiML + ConversationRelay WS).
+        # Live traffic is served by adapters/conversationrelay.py (TwiML + CR WS).
         print(
             "Run the ConversationRelay server:\n"
-            "  uv run python voice-agent-harnesses/twilio/conversationrelay-gpt4.1/adapters/chirp.py\n"
-            "Or: uv run python voice-agent-harnesses/twilio/adapters/chirp.py",
+            "  uv run python voice-agent-harnesses/twilio/conversationrelay-gpt4.1/adapters/conversationrelay.py\n"
+            "Or: uv run python voice-agent-harnesses/twilio/adapters/conversationrelay.py",
             file=sys.stderr,
         )
         sys.exit(2)

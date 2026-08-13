@@ -249,14 +249,26 @@ async def _relink_after_final(
             pass
         await asyncio.sleep(2.0)
     if final is not None and linked:
-        logger.info(
-            "relink not needed after %s — trace=%s still linked sim=%s final=%s",
-            early_status,
-            trace_id,
-            simulation_result_id,
-            final,
-        )
-        return
+        await asyncio.sleep(float(os.environ.get("MIVAS_RELINK_SETTLE_SECONDS", "15")))
+        try:
+            r = await client.get(
+                f"{_api_url()}/retrieve-simulation-result/{simulation_result_id}",
+                headers={"X-API-Key": key},
+            )
+            if r.status_code == 200:
+                result = (r.json() or {}).get("simulation_result") or {}
+                linked = trace_id in (result.get("trace_ids") or [])
+        except Exception:
+            pass
+        if linked:
+            logger.info(
+                "relink not needed after %s — trace=%s still linked sim=%s final=%s",
+                early_status,
+                trace_id,
+                simulation_result_id,
+                final,
+            )
+            return
     if final is None:
         logger.warning(
             "relink skipped — still not final after early upsert terminal=%s sim=%s",
@@ -735,6 +747,13 @@ async def traced_run(
             event_tracer.close()
     finally:
         flush()
+        if simulation_result_id:
+            try:
+                from snapshot import capture_final
+
+                await asyncio.to_thread(capture_final, str(simulation_result_id))
+            except Exception:
+                logger.exception("final snapshot failed sim=%s", simulation_result_id)
         if simulation_result_id and otel_tid:
             await post_trace_ids(simulation_result_id, otel_tid)
         elif simulation_result_id and not otel_tid:

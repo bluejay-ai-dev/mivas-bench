@@ -1,0 +1,22 @@
+# ClusterIP only — harness pods call this in-cluster. Not on the public ALB.
+apiVersion: v1
+kind: Service
+metadata:
+  name: mivas-__SLUG__-tools
+  labels:
+    app: mivas-bench
+    mivas.component: tools
+    mivas.slug: "__SLUG__-tools"
+    mivas.harness_family: "__HARNESS_FAMILY__"
+    mivas.harness_runtime: "__HARNESS_RUNTIME__"
+    mivas.industry: "__INDUSTRY__"
+spec:
+  type: ClusterIP
+  selector:
+    app: mivas-bench
+    mivas.slug: "__SLUG__-tools"
+  ports:
+    - name: tools
+      port: 8000
+      targetPort: tools
+      protocol: TCP
