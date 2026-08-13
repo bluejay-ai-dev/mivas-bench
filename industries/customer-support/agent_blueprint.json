@@ -46,7 +46,8 @@
         {"name": "escalate_to_human", "handoff": false},
         {"name": "end_call", "session": true},
         {"name": "transfer_to_returns", "handoff": true, "handoff_to": "returns"},
-        {"name": "transfer_to_service", "handoff": true, "handoff_to": "service"}
+        {"name": "transfer_to_service", "handoff": true, "handoff_to": "service"},
+        {"name": "transfer_to_fraud", "handoff": true, "handoff_to": "fraud"}
       ]
     },
     {
@@ -64,7 +65,8 @@
         {"name": "escalate_to_human", "handoff": false},
         {"name": "end_call", "session": true},
         {"name": "transfer_to_orders", "handoff": true, "handoff_to": "orders"},
-        {"name": "transfer_to_service", "handoff": true, "handoff_to": "service"}
+        {"name": "transfer_to_service", "handoff": true, "handoff_to": "service"},
+        {"name": "transfer_to_fraud", "handoff": true, "handoff_to": "fraud"}
       ]
     },
     {
@@ -81,7 +83,8 @@
         {"name": "escalate_to_human", "handoff": false},
         {"name": "end_call", "session": true},
         {"name": "transfer_to_returns", "handoff": true, "handoff_to": "returns"},
-        {"name": "transfer_to_membership", "handoff": true, "handoff_to": "membership"}
+        {"name": "transfer_to_membership", "handoff": true, "handoff_to": "membership"},
+        {"name": "transfer_to_fraud", "handoff": true, "handoff_to": "fraud"}
       ]
     },
     {
