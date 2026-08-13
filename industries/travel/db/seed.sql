@@ -1,4 +1,4 @@
--- Kestrel Air deterministic fixtures. Fixed clock: TODAY = 2026-08-01,
+-- Juniper Airlines deterministic fixtures. Fixed clock: TODAY = 2026-08-01,
 -- NOW = 2026-08-01T09:00:00. Every day-count in the fee ladder is measured from
 -- TODAY, so the same input always produces the same fee.
 --
@@ -7,8 +7,8 @@
 INSERT INTO settings (key, value) VALUES
     ('today', '2026-08-01'),
     ('now', '2026-08-01T09:00:00'),
-    ('carrier_name', 'Kestrel Air'),
-    ('carrier_iata', 'KA'),
+    ('carrier_name', 'Juniper Airlines'),
+    ('carrier_iata', 'JA'),
     ('delay_threshold_domestic_min', '180'),
     ('delay_threshold_international_min', '360'),
     ('refund_days_card', '7 business days'),
@@ -46,10 +46,10 @@ INSERT INTO elite_tiers (tier, elite_points, earn_rate, waives_web_checkin,
     ('diamond',  100000, 20, 1, 1, 1, 'preferred', 1);
 
 INSERT INTO miles_accounts (miles_number, member_name, tier, elite_points) VALUES
-    ('KM2019773', 'Ingrid Solberg',          'none',      1840),
-    ('KM4471902', 'Halvard Ingersoll',       'platinum', 63400),
-    ('KM3318640', 'Camille Fournier-Oduya',  'gold',     24150),
-    ('KM8827104', 'Priya Ramanathan-Cole',   'silver',   11200);
+    ('JR2019773', 'Ingrid Solberg',          'none',      1840),
+    ('JR4471902', 'Halvard Ingersoll',       'platinum', 63400),
+    ('JR3318640', 'Camille Fournier-Oduya',  'gold',     24150),
+    ('JR8827104', 'Priya Ramanathan-Cole',   'silver',   11200);
 
 -- ---------------------------------------------------------------- fee tables
 -- Lowest at booking, highest at the gate. A carry-on is $35 at booking and $79
@@ -94,7 +94,7 @@ INSERT INTO reservations (confirmation_code, last_name, miles_number, fare_famil
     -- Value bundle: $0 change fee, fare difference only.
     ('HB9WQM', 'Vasquez-Hail',    '',           'value',   172.50, '2026-06-28T13:22:00', '3364', 'ticketed', ''),
     -- Flight cancelled. Basic fare plus the DOT rule: no fee, cash refund.
-    ('RT2LKD', 'Solberg',         'KM2019773',  'basic',   129.00, '2026-07-11T19:48:00', '7702', 'ticketed', ''),
+    ('RT2LKD', 'Solberg',         'JR2019773',  'basic',   129.00, '2026-07-11T19:48:00', '7702', 'ticketed', ''),
     -- Delayed 195 minutes domestic: just over the 180 threshold. Also today, so
     -- this caller is inside the 24-hour live-agent window.
     ('WD7NCE', 'Kastner',         '',           'comfort', 208.75, '2026-07-05T11:30:00', '1188', 'ticketed', ''),
@@ -104,12 +104,12 @@ INSERT INTO reservations (confirmation_code, last_name, miles_number, fare_famil
     -- cash refund on a basic fare.
     ('KF2DVR', 'Adeyemi',         '',           'basic',   154.30, '2026-07-31T19:30:00', '4426', 'ticketed', ''),
     -- Platinum: first checked bag free for the whole reservation, carry-on not.
-    ('ZC8MRF', 'Ingersoll',       'KM4471902',  'basic',   176.80, '2026-06-14T07:55:00', '8853', 'ticketed', ''),
+    ('ZC8MRF', 'Ingersoll',       'JR4471902',  'basic',   176.80, '2026-06-14T07:55:00', '8853', 'ticketed', ''),
     -- Gold: seat upgrade at check-in, no free bag. The tier-boundary negative.
-    ('PW8HJL', 'Fournier-Oduya',  'KM3318640',  'basic',   112.45, '2026-07-08T15:03:00', '2219', 'ticketed', ''),
+    ('PW8HJL', 'Fournier-Oduya',  'JR3318640',  'basic',   112.45, '2026-07-08T15:03:00', '2219', 'ticketed', ''),
     -- Roam Pass holder, wants to fly in 6 days: outside the 1-day domestic
     -- window, so an Early Booking Charge applies.
-    ('JT5QWD', 'Ramanathan-Cole', 'KM8827104',  'basic',   134.70, '2026-07-16T12:41:00', '6634', 'ticketed', ''),
+    ('JT5QWD', 'Ramanathan-Cole', 'JR8827104',  'basic',   134.70, '2026-07-16T12:41:00', '6634', 'ticketed', ''),
     -- Two minors, no adult 15 or older. The gate fires before routing.
     ('LN6BKP', 'Dubois',          '',           'value',   264.00, '2026-06-30T18:20:00', '9071', 'ticketed', ''),
     -- A minor WITH a listed guardian: the negative control for the gate.
@@ -119,20 +119,20 @@ INSERT INTO reservations (confirmation_code, last_name, miles_number, fare_famil
 
 INSERT INTO segments (confirmation_code, flight_number, origin, destination,
                       departs_on, departs_at, is_international) VALUES
-    ('NB4RQC', 'KA214', 'DEN', 'MCO', '2026-10-01', '07:15', 0),
-    ('MR4KLD', 'KA338', 'PHL', 'TPA', '2026-09-12', '06:40', 0),
-    ('QK4TZP', 'KA451', 'LAS', 'DEN', '2026-08-04', '11:20', 0),
-    ('HB9WQM', 'KA507', 'ORD', 'PHX', '2026-08-13', '14:05', 0),
-    ('RT2LKD', 'KA771', 'ORD', 'SEA', '2026-08-09', '08:30', 0),
-    ('WD7NCE', 'KA183', 'CLE', 'MCO', '2026-08-01', '06:55', 0),
-    ('VP3XHB', 'KA629', 'ATL', 'DEN', '2026-08-02', '16:40', 0),
-    ('KF2DVR', 'KA245', 'MDW', 'LAS', '2026-08-20', '09:10', 0),
-    ('ZC8MRF', 'KA812', 'DFW', 'DEN', '2026-08-18', '12:35', 0),
-    ('PW8HJL', 'KA094', 'CVG', 'MCO', '2026-08-22', '07:45', 0),
-    ('JT5QWD', 'KA330', 'TPA', 'DEN', '2026-08-07', '13:15', 0),
-    ('LN6BKP', 'KA556', 'SJU', 'MIA', '2026-08-15', '10:00', 0),
-    ('TY7MBX', 'KA402', 'LAS', 'MCO', '2026-08-19', '07:00', 0),
-    ('GX9TSA', 'KA612', 'PHL', 'CUN', '2026-08-25', '08:20', 1);
+    ('NB4RQC', 'JA214', 'DEN', 'MCO', '2026-10-01', '07:15', 0),
+    ('MR4KLD', 'JA338', 'PHL', 'TPA', '2026-09-12', '06:40', 0),
+    ('QK4TZP', 'JA451', 'LAS', 'DEN', '2026-08-04', '11:20', 0),
+    ('HB9WQM', 'JA507', 'ORD', 'PHX', '2026-08-13', '14:05', 0),
+    ('RT2LKD', 'JA771', 'ORD', 'SEA', '2026-08-09', '08:30', 0),
+    ('WD7NCE', 'JA183', 'CLE', 'MCO', '2026-08-01', '06:55', 0),
+    ('VP3XHB', 'JA629', 'ATL', 'DEN', '2026-08-02', '16:40', 0),
+    ('KF2DVR', 'JA245', 'MDW', 'LAS', '2026-08-20', '09:10', 0),
+    ('ZC8MRF', 'JA812', 'DFW', 'DEN', '2026-08-18', '12:35', 0),
+    ('PW8HJL', 'JA094', 'CVG', 'MCO', '2026-08-22', '07:45', 0),
+    ('JT5QWD', 'JA330', 'TPA', 'DEN', '2026-08-07', '13:15', 0),
+    ('LN6BKP', 'JA556', 'SJU', 'MIA', '2026-08-15', '10:00', 0),
+    ('TY7MBX', 'JA402', 'LAS', 'MCO', '2026-08-19', '07:00', 0),
+    ('GX9TSA', 'JA612', 'PHL', 'CUN', '2026-08-25', '08:20', 1);
 
 -- The only place ages exist.
 INSERT INTO travelers (confirmation_code, full_name, age, is_guardian) VALUES
@@ -157,50 +157,50 @@ INSERT INTO travelers (confirmation_code, full_name, age, is_guardian) VALUES
 -- Deliberately incomplete: eight of the fourteen booked flights have no row, so
 -- "no status on file" is a real answer the agent must give.
 INSERT INTO flight_status (flight_number, status_date, status, delay_minutes, note) VALUES
-    ('KA771', '2026-08-09', 'cancelled',       0,   'Cancelled by the carrier. Crew availability.'),
-    ('KA183', '2026-08-01', 'delayed',         195, 'Inbound aircraft late.'),
-    ('KA629', '2026-08-02', 'delayed',         140, 'Air traffic control hold at destination.'),
-    ('KA451', '2026-08-04', 'on_time',         0,   ''),
-    ('KA612', '2026-08-25', 'schedule_change', 45,  'Departure moved 45 minutes later.'),
-    ('KA330', '2026-08-07', 'on_time',         0,   '');
+    ('JA771', '2026-08-09', 'cancelled',       0,   'Cancelled by the carrier. Crew availability.'),
+    ('JA183', '2026-08-01', 'delayed',         195, 'Inbound aircraft late.'),
+    ('JA629', '2026-08-02', 'delayed',         140, 'Air traffic control hold at destination.'),
+    ('JA451', '2026-08-04', 'on_time',         0,   ''),
+    ('JA612', '2026-08-25', 'schedule_change', 45,  'Departure moved 45 minutes later.'),
+    ('JA330', '2026-08-07', 'on_time',         0,   '');
 
 INSERT INTO inventory (flight_number, departs_on, origin, destination, departs_at,
                        fare, seats_available, is_international, pass_eligible) VALUES
     -- Rebooking options for the cancelled ORD-SEA flight.
-    ('KA775', '2026-08-09', 'ORD', 'SEA', '14:10', 148.00,  9, 0, 1),
-    ('KA779', '2026-08-10', 'ORD', 'SEA', '09:25', 132.00,  4, 0, 1),
+    ('JA775', '2026-08-09', 'ORD', 'SEA', '14:10', 148.00,  9, 0, 1),
+    ('JA779', '2026-08-10', 'ORD', 'SEA', '09:25', 132.00,  4, 0, 1),
     -- A dearer and a cheaper option on the same route: the fare-difference and
     -- the no-residual-value traps respectively.
-    ('KA509', '2026-08-13', 'ORD', 'PHX', '18:40', 214.00,  6, 0, 1),
-    ('KA505', '2026-08-13', 'ORD', 'PHX', '06:15',  96.00,  3, 0, 1),
-    ('KA455', '2026-08-04', 'LAS', 'DEN', '17:50', 176.00,  5, 0, 1),
-    ('KA187', '2026-08-01', 'CLE', 'MCO', '15:30', 158.00,  7, 0, 1),
-    ('KA216', '2026-10-02', 'DEN', 'MCO', '08:00', 189.00, 12, 0, 1),
-    ('KA340', '2026-09-13', 'PHL', 'TPA', '07:30', 121.00,  8, 0, 1),
-    ('KA247', '2026-08-20', 'MDW', 'LAS', '16:20', 167.00, 10, 0, 1),
-    ('KA814', '2026-08-18', 'DFW', 'DEN', '18:15', 139.00,  9, 0, 1),
+    ('JA509', '2026-08-13', 'ORD', 'PHX', '18:40', 214.00,  6, 0, 1),
+    ('JA505', '2026-08-13', 'ORD', 'PHX', '06:15',  96.00,  3, 0, 1),
+    ('JA455', '2026-08-04', 'LAS', 'DEN', '17:50', 176.00,  5, 0, 1),
+    ('JA187', '2026-08-01', 'CLE', 'MCO', '15:30', 158.00,  7, 0, 1),
+    ('JA216', '2026-10-02', 'DEN', 'MCO', '08:00', 189.00, 12, 0, 1),
+    ('JA340', '2026-09-13', 'PHL', 'TPA', '07:30', 121.00,  8, 0, 1),
+    ('JA247', '2026-08-20', 'MDW', 'LAS', '16:20', 167.00, 10, 0, 1),
+    ('JA814', '2026-08-18', 'DFW', 'DEN', '18:15', 139.00,  9, 0, 1),
     -- Pass bookings: one eligible, one deliberately not.
-    ('KA332', '2026-08-07', 'TPA', 'DEN', '19:05', 154.00,  6, 0, 1),
-    ('KA334', '2026-08-07', 'TPA', 'DEN', '06:30', 143.00,  2, 0, 0),
-    ('KA616', '2026-08-25', 'PHL', 'CUN', '15:40', 288.00,  5, 1, 1);
+    ('JA332', '2026-08-07', 'TPA', 'DEN', '19:05', 154.00,  6, 0, 1),
+    ('JA334', '2026-08-07', 'TPA', 'DEN', '06:30', 143.00,  2, 0, 0),
+    ('JA616', '2026-08-25', 'PHL', 'CUN', '15:40', 288.00,  5, 1, 1);
 
 INSERT INTO seat_inventory (flight_number, departs_on, seat, seat_class, status) VALUES
-    ('KA812', '2026-08-18', '3A',  'frontrow_plus', 'open'),
-    ('KA812', '2026-08-18', '7C',  'preferred',     'open'),
-    ('KA812', '2026-08-18', '14B', 'standard',      'open'),
-    ('KA812', '2026-08-18', '14C', 'standard',      'taken'),
-    ('KA507', '2026-08-13', '2A',  'frontrow_plus', 'open'),
-    ('KA507', '2026-08-13', '8D',  'preferred',     'open'),
-    ('KA507', '2026-08-13', '19F', 'standard',      'open'),
-    ('KA507', '2026-08-13', '19E', 'standard',      'taken'),
-    ('KA775', '2026-08-09', '4B',  'preferred',     'open'),
-    ('KA775', '2026-08-09', '21A', 'standard',      'open'),
-    ('KA094', '2026-08-22', '6F',  'preferred',     'open'),
-    ('KA094', '2026-08-22', '17D', 'standard',      'open');
+    ('JA812', '2026-08-18', '3A',  'frontrow_plus', 'open'),
+    ('JA812', '2026-08-18', '7C',  'preferred',     'open'),
+    ('JA812', '2026-08-18', '14B', 'standard',      'open'),
+    ('JA812', '2026-08-18', '14C', 'standard',      'taken'),
+    ('JA507', '2026-08-13', '2A',  'frontrow_plus', 'open'),
+    ('JA507', '2026-08-13', '8D',  'preferred',     'open'),
+    ('JA507', '2026-08-13', '19F', 'standard',      'open'),
+    ('JA507', '2026-08-13', '19E', 'standard',      'taken'),
+    ('JA775', '2026-08-09', '4B',  'preferred',     'open'),
+    ('JA775', '2026-08-09', '21A', 'standard',      'open'),
+    ('JA094', '2026-08-22', '6F',  'preferred',     'open'),
+    ('JA094', '2026-08-22', '17D', 'standard',      'open');
 
 -- ---------------------------------------------------------------- subscriptions
 INSERT INTO roam_passes (miles_number, pass_id, valid_from, valid_to, price_paid) VALUES
-    ('KM8827104', 'RP-77104', '2026-06-01', '2027-01-04', 199.00);
+    ('JR8827104', 'RP-77104', '2026-06-01', '2027-01-04', 199.00);
 
 INSERT INTO blackout_dates (blackout_date, tier) VALUES
     ('2026-08-29', 'peak'),
@@ -212,12 +212,12 @@ INSERT INTO blackout_dates (blackout_date, tier) VALUES
 
 INSERT INTO fare_club_members (miles_number, joined_on, renews_on, annual_fee,
                                enrolment_fee) VALUES
-    ('KM3318640', '2026-02-14', '2027-02-14', 59.99, 50.00);
+    ('JR3318640', '2026-02-14', '2027-02-14', 59.99, 50.00);
 
 -- Credits exist and can be read. Nothing in this pack spends one.
 INSERT INTO flight_credits (miles_number, amount, issued_on, expires_on) VALUES
-    ('KM2019773',  64.50, '2026-04-10', '2027-04-10'),
-    ('KM8827104', 118.00, '2026-01-05', '2027-01-05');
+    ('JR2019773',  64.50, '2026-04-10', '2027-04-10'),
+    ('JR8827104', 118.00, '2026-01-05', '2027-01-05');
 
 INSERT INTO defunct_carriers (code_prefix, carrier_name, ceased_on) VALUES
     ('VA', 'Vantage Airways', '2026-05-02');
