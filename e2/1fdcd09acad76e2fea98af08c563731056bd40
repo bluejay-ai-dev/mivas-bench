@@ -1,0 +1,289 @@
+voice-agent-harnesses/cartesia/line/Dockerfile
+  s_386659c36c85dd::t_414c036a2d9d5e 15,20,22
+  s_386659c36c85dd::t_bb3f0325fde9c3 40
+  s_386659c36c85dd::t_a1731ccf7aa126 1-14,16-19,21,23-39,41,48-64
+  s_386659c36c85dd::t_f61d02883ab920 42-47
+voice-agent-harnesses/cartesia/report.py
+  s_386659c36c85dd::t_2b5683f6842696 72
+  s_386659c36c85dd::t_33ba6ab1e75eaf 79
+voice-agent-harnesses/gemini/report.py
+  s_386659c36c85dd::t_a41ac1216d0426 72,76
+voice-agent-harnesses/grok/voice/Dockerfile
+  s_386659c36c85dd::t_a1731ccf7aa126 1-14,16-19,21,23-41,43-62
+  s_386659c36c85dd::t_414c036a2d9d5e 15,20,22
+  s_386659c36c85dd::t_bb3f0325fde9c3 42
+voice-agent-harnesses/twilio/report.py
+  s_386659c36c85dd::t_3a3cfeceedbe25 108
+voice-agent-harnesses/openai/README.md
+  s_386659c36c85dd::t_23b6f9b06e7507 21
+voice-agent-harnesses/gemini/requirements.txt
+  s_386659c36c85dd::t_fe54fd75ec4652 4-6
+k8s/ingress.yaml
+  s_386659c36c85dd::t_4d326a9339c43e 3,6-15,24,26-36
+  s_386659c36c85dd::t_5e11e8c8b7286b 1-2,4-5,25
+  s_386659c36c85dd::t_247f78762df899 16-23
+voice-agent-harnesses/pipecat/deploy.py
+  s_386659c36c85dd::t_184a1c8fae8bac 51-54
+  s_386659c36c85dd::t_9afff6edcacf98 79
+voice-agent-harnesses/pipecat/cascaded/Dockerfile
+  s_386659c36c85dd::t_18c7667522bc3d 60-61
+  s_386659c36c85dd::t_d462266561aa73 38-40
+  s_386659c36c85dd::t_a1731ccf7aa126 1-14,16-19,21,23-37,41-43,45,47-59,62-65
+  s_386659c36c85dd::t_7a8a8bb82fae71 46
+  s_386659c36c85dd::t_414c036a2d9d5e 15,20,22
+  s_386659c36c85dd::t_bb3f0325fde9c3 44
+.env.example
+  s_386659c36c85dd::t_ed3be8c36caccc 148
+  s_386659c36c85dd::t_306767c87eb287 8
+  s_386659c36c85dd::t_6adcbe0d84c439 138-141
+  s_386659c36c85dd::t_66cb1da6df1cec 147,149-150
+  s_386659c36c85dd::t_a2aa1cd1d9e33a 136-137,142-144
+voice-agent-harnesses/nvidia/nemotron/Dockerfile
+  s_386659c36c85dd::t_414c036a2d9d5e 16,21,23
+  s_386659c36c85dd::t_a1731ccf7aa126 1-15,17-20,22,24-39,41-60
+  s_386659c36c85dd::t_bb3f0325fde9c3 40
+tests/test_agents.py
+  s_386659c36c85dd::t_6a4d191ca5d4d1 141-150
+  s_386659c36c85dd::t_15132e6cb4bd49 91-92
+  s_386659c36c85dd::t_855b19722e2891 14-22,68-83,87-89,95-96,128-140
+  s_386659c36c85dd::t_0b8df45d4c7887 97-110,115-127
+  s_386659c36c85dd::t_8bc54276ccc958 111-114
+  s_386659c36c85dd::t_52c2d91711c06e 1-4,8,13,23-57,59-67
+  s_386659c36c85dd::t_7fa190305193e3 93-94
+  s_386659c36c85dd::t_ed15af9a4c800c 5-7,9-12
+  s_386659c36c85dd::t_c11412e594b42f 84-86,90
+  s_386659c36c85dd::t_8acf2806a00ee6 58
+voice-agent-harnesses/vapi/report.py
+  s_386659c36c85dd::t_315a2d332706a1 81,85
+k8s/service.yaml
+  s_386659c36c85dd::t_e72c81b0b20861 8
+  s_386659c36c85dd::t_8da932d2738a24 7
+  s_386659c36c85dd::t_b660dd332b187e 4,14
+  s_386659c36c85dd::t_d00ee23c16b967 20-23
+voice-agent-harnesses/pipecat/requirements.txt
+  s_386659c36c85dd::t_28e06995e9a88e 1-2
+voice-agent-harnesses/pipecat/gemini-flash-live-3.1/Dockerfile
+  s_386659c36c85dd::t_7352b1172be3d5 38-40
+  s_386659c36c85dd::t_bb3f0325fde9c3 44
+  s_386659c36c85dd::t_a1731ccf7aa126 1-14,16-19,21,23-37,41-43,45,47-59,62-65
+  s_386659c36c85dd::t_414c036a2d9d5e 15,20,22
+  s_386659c36c85dd::t_a8bfcb1ff2994d 46
+  s_386659c36c85dd::t_5b8e0790fa8278 60-61
+voice-agent-harnesses/retell/flux-gpt4.1-flash2.5/Dockerfile
+  s_386659c36c85dd::t_414c036a2d9d5e 17,22,24
+  s_386659c36c85dd::t_bb3f0325fde9c3 48
+  s_386659c36c85dd::t_a1731ccf7aa126 1-16,18-21,23,25-47,49-68
+voice-agent-harnesses/pipecat/report.py
+  s_386659c36c85dd::t_effaaaaa65c279 70,74
+  s_386659c36c85dd::t_f4e41625001478 26
+  s_386659c36c85dd::t_8a2c972042b098 483-493
+voice-agent-harnesses/nvidia/report.py
+  s_386659c36c85dd::t_6fac4e21e170e1 71,75
+runtime/entrypoint.sh
+  s_386659c36c85dd::t_9b0d80d14789cb 60,65,74,77,96
+  s_386659c36c85dd::t_c900f19c348587 22,29
+  s_386659c36c85dd::t_9836ff6f387155 5-6,20
+  s_386659c36c85dd::t_59faaa2e4a8a14 70
+  s_386659c36c85dd::t_be3da09b00b64f 94-95
+  s_386659c36c85dd::t_35026c37eb0197 64,83-93
+voice-agent-harnesses/pipecat/Dockerfile.pipecat-cloud
+  s_386659c36c85dd::t_be3da09b00b64f 1-12
+voice-agent-harnesses/openai/realtime-2.1-mini/Dockerfile
+  s_386659c36c85dd::t_a1731ccf7aa126 1-14,16-19,21,23-38,40-59
+  s_386659c36c85dd::t_bb3f0325fde9c3 39
+  s_386659c36c85dd::t_414c036a2d9d5e 15,20,22
+voice-agent-harnesses/livekit/report.py
+  s_386659c36c85dd::t_67d7c600b198a1 78,82
+k8s/secret.example.yaml
+  s_386659c36c85dd::t_709f090255e581 2-3,5-7,16-35
+voice-agent-harnesses/gemini/flash-live-3.1/Dockerfile
+  s_386659c36c85dd::t_414c036a2d9d5e 15,20,22
+  s_386659c36c85dd::t_bb3f0325fde9c3 40
+  s_386659c36c85dd::t_a1731ccf7aa126 1-14,16-19,21,23-39,41-60
+k8s/deployment.yaml
+  s_386659c36c85dd::t_488525c3e2c200 118-119
+  s_386659c36c85dd::t_e3fbda99356cbc 120-121
+  s_386659c36c85dd::t_11fd5b2707c05f 28
+  s_386659c36c85dd::t_09972d1fc65314 182-185
+  s_386659c36c85dd::t_2bb8f946867636 4,15,20
+  s_386659c36c85dd::t_b168d24f4b1671 210-215
+  s_386659c36c85dd::t_d8b764e4acb448 32-33
+  s_386659c36c85dd::t_57b6e41aa20323 31
+  s_386659c36c85dd::t_be3da09b00b64f 175
+  s_386659c36c85dd::t_f19e58dcef0247 106-111
+  s_386659c36c85dd::t_25ade199d74940 8,22
+  s_386659c36c85dd::t_004657838d4b75 40-41
+  s_386659c36c85dd::t_0aa9d046a63d6e 56-57,70-105,112-117,122-174
+  s_386659c36c85dd::t_8ff4fbdb0dc89a 7,21,36-37
+README.md
+  s_386659c36c85dd::t_26b86c0e7fe883 35,77-79,82,84-86,92
+  s_386659c36c85dd::t_8ad6571dcf4ffc 72
+  s_386659c36c85dd::t_b23cff4dd74c06 39,41-42,44,52-57,60-61,63,65-66,68
+  s_386659c36c85dd::t_3d2eceff4f6d15 37-38,40,43,45-51,58-59,62,64,67,69-71,81,83,88,91,93,95
+  s_386659c36c85dd::t_301f21cee66c17 18
+  s_386659c36c85dd::t_8107fdbfe0925e 76
+  s_386659c36c85dd::t_cb5546d68ec85d 80
+  s_386659c36c85dd::t_d6c395de82ba42 25
+  s_386659c36c85dd::t_be3da09b00b64f 94
+  s_386659c36c85dd::t_d600d2ebb977f3 36
+voice-agent-harnesses/livekit/cascaded/Dockerfile
+  s_386659c36c85dd::t_bb3f0325fde9c3 41
+  s_386659c36c85dd::t_a1731ccf7aa126 1-14,16-19,21,23-40,42,44-61
+  s_386659c36c85dd::t_414c036a2d9d5e 15,20,22
+  s_386659c36c85dd::t_b634ef7e18332b 43
+voice-agent-harnesses/pipecat/openai-realtime-2.1/Dockerfile
+  s_386659c36c85dd::t_bb3f0325fde9c3 44
+  s_386659c36c85dd::t_567570096679cc 38-40
+  s_386659c36c85dd::t_d4b75824e2f566 46
+  s_386659c36c85dd::t_d95adfb726729a 60-61
+  s_386659c36c85dd::t_a1731ccf7aa126 1-14,16-19,21,23-37,41-43,45,47-59,62-65
+  s_386659c36c85dd::t_414c036a2d9d5e 15,20,22
+voice-agent-harnesses/elevenlabs/report.py
+  s_386659c36c85dd::t_0aa73ce05186fc 82
+  s_386659c36c85dd::t_5541179d007580 75
+voice-agent-harnesses/cartesia/harness.py
+  s_386659c36c85dd::t_60ffe8226b5c6f 86-96
+  s_386659c36c85dd::t_12feca49999e37 154
+  s_386659c36c85dd::t_df8dee65492774 107-117,124
+  s_386659c36c85dd::t_2b240c159cb754 131-132,135-143
+voice-agent-harnesses/assemblyai/harness.py
+  s_386659c36c85dd::t_09fb8989946d12 106
+voice-agent-harnesses/nvidia/nemotron-voicechat/Dockerfile
+  s_386659c36c85dd::t_414c036a2d9d5e 16,21,23
+  s_386659c36c85dd::t_bb3f0325fde9c3 43
+  s_386659c36c85dd::t_a1731ccf7aa126 1-15,17-20,22,24-42,44-63
+voice-agent-harnesses/pipecat/adapters/livekit_worker.py
+  s_386659c36c85dd::t_6bd31753e1d83b 72-83,86-88,103
+  s_386659c36c85dd::t_f6377277ea15df 1-71,84-85,89-102,104-119,121-127,130-154
+  s_386659c36c85dd::t_4b6fda8b6eb215 120,128-129
+run.py
+  s_386659c36c85dd::t_177bfb12dc18ec 105-117
+  s_386659c36c85dd::t_7cc26eec48b929 194-195,198
+  s_386659c36c85dd::t_be3da09b00b64f 513,541,543-544,569,765
+  s_386659c36c85dd::t_e2e7aef7f1dbb3 264
+  s_386659c36c85dd::t_9d64b7a98bcb76 482
+  s_386659c36c85dd::t_c6b10c199eab3a 570-571,573,582,584-585
+  s_386659c36c85dd::t_a396d7b461ee7c 683-685
+  s_386659c36c85dd::t_e65ae39dd6ede7 741-747,751
+  s_386659c36c85dd::t_6e673cf0596043 759
+  s_386659c36c85dd::t_436adb47fa793f 250-256
+  s_386659c36c85dd::t_ddefd306a3f3e1 37-56,58-66
+  s_386659c36c85dd::t_86a8bf44d4a02d 201-226,232
+  s_386659c36c85dd::t_9658aa14fa6800 547-552
+  s_386659c36c85dd::t_285fadc04166e9 442-463,465-481,483-490,502,504-505,508-511,526-529,535-537,539-540,542,557,588-589,591
+  s_386659c36c85dd::t_08a2c43667677a 491-495,503,507,512,514-518,521-524,530-534,545-546,553-556,558-568,574-576,583,586,592-595
+  s_386659c36c85dd::t_b4d62086edc33f 138-139
+  s_386659c36c85dd::t_f8be6bf4c1d523 613
+  s_386659c36c85dd::t_dc1e2a97db6703 692,696,721,726,731-738,754,756-758,760-761,763-764,766
+  s_386659c36c85dd::t_2f27a807ff0d06 577-580
+  s_386659c36c85dd::t_60f890c6590bdb 277
+  s_386659c36c85dd::t_d0a4a9d338729e 89,92
+  s_386659c36c85dd::t_81023c9694884b 166-192,231
+  s_386659c36c85dd::t_f964a6e26e4725 127-137,140-165
+  s_386659c36c85dd::t_582fbe26680ce4 497-501
+  s_386659c36c85dd::t_50ecf6029ba043 604
+  s_386659c36c85dd::t_03eb287b7b1024 246-249,257-261,269-270,272-274
+  s_386659c36c85dd::t_b5f0d4f11967ab 615
+  s_386659c36c85dd::t_48a38bc4f43136 196-197,199-200,233-234
+  s_386659c36c85dd::t_9cc3511052a8d3 750
+  s_386659c36c85dd::t_691e5222736645 506
+  s_386659c36c85dd::t_c9a504a0159234 275-276
+  s_386659c36c85dd::t_ffdb11e0ed8e37 727-730
+  s_386659c36c85dd::t_8878fdd75197d4 748-749,752-753
+  s_386659c36c85dd::t_62f96563a9b610 291-317,324,326,328,330,334,354-356,358
+voice-agent-harnesses/vapi/flux-gpt4.1-flash2.5/Dockerfile
+  s_386659c36c85dd::t_bb3f0325fde9c3 46
+  s_386659c36c85dd::t_414c036a2d9d5e 17,22,24
+  s_386659c36c85dd::t_a1731ccf7aa126 1-16,18-21,23,25-45,47-66
+voice-agent-harnesses/openai/report.py
+  s_386659c36c85dd::t_0fae3ac86d5990 66,70
+voice-agent-harnesses/livekit/openai-realtime-2.1/Dockerfile
+  s_386659c36c85dd::t_e6ef6256208c07 43
+  s_386659c36c85dd::t_a1731ccf7aa126 1-14,16-19,21,23-40,42,44-61
+  s_386659c36c85dd::t_bb3f0325fde9c3 41
+  s_386659c36c85dd::t_414c036a2d9d5e 15,20,22
+voice-agent-harnesses/gemini/2.5-flash-native-audio/Dockerfile
+  s_386659c36c85dd::t_414c036a2d9d5e 15,20,22
+  s_386659c36c85dd::t_bb3f0325fde9c3 40
+  s_386659c36c85dd::t_a1731ccf7aa126 1-14,16-19,21,23-39,41-60
+k8s/ingressclass.yaml
+  s_386659c36c85dd::t_bd940654a49ca9 1-31
+voice-agent-harnesses/twilio/conversationrelay-gpt4.1/Dockerfile
+  s_386659c36c85dd::t_414c036a2d9d5e 15,20,22
+  s_386659c36c85dd::t_a1731ccf7aa126 1-14,16-19,21,23-44,46-65
+  s_386659c36c85dd::t_bb3f0325fde9c3 45
+voice-agent-harnesses/assemblyai/voice-agent/Dockerfile
+  s_386659c36c85dd::t_414c036a2d9d5e 15,20,22
+  s_386659c36c85dd::t_bb3f0325fde9c3 40
+  s_386659c36c85dd::t_a1731ccf7aa126 1-14,16-19,21,23-39,41-60
+voice-agent-harnesses/grok/report.py
+  s_386659c36c85dd::t_7269c59d28e256 73,77
+voice-agent-harnesses/grok/requirements.txt
+  s_386659c36c85dd::t_8ab7dc477e4fa9 1-6
+voice-agent-harnesses/openai/realtime-2.1/Dockerfile
+  s_386659c36c85dd::t_bb3f0325fde9c3 39
+  s_386659c36c85dd::t_414c036a2d9d5e 15,20,22
+  s_386659c36c85dd::t_a1731ccf7aa126 1-14,16-19,21,23-38,40-59
+tests/converse.py
+  s_386659c36c85dd::t_43ed0bea552364 481-483
+voice-agent-harnesses/twilio/README.md
+  s_386659c36c85dd::t_975271fb8c14c6 101
+voice-agent-harnesses/assemblyai/report.py
+  s_386659c36c85dd::t_970c25ba2481f1 71,75
+voice-agent-harnesses/twilio/harness.py
+  s_386659c36c85dd::t_fae65794a0b0b8 149
+voice-agent-harnesses/deepgram/report.py
+  s_386659c36c85dd::t_28a6d09dff9d4e 71,75
+voice-agent-harnesses/elevenlabs/convai/Dockerfile
+  s_386659c36c85dd::t_a1731ccf7aa126 1-14,16-19,21,23-39,41-60
+  s_386659c36c85dd::t_414c036a2d9d5e 15,20,22
+  s_386659c36c85dd::t_bb3f0325fde9c3 40
+voice-agent-harnesses/bland/base/Dockerfile
+  s_386659c36c85dd::t_a1731ccf7aa126 1-14,16-19,21,23-38,40-59
+  s_386659c36c85dd::t_bb3f0325fde9c3 39
+  s_386659c36c85dd::t_414c036a2d9d5e 15,20,22
+voice-agent-harnesses/gemini/harness.py
+  s_386659c36c85dd::t_70e874dd6d2b41 29-31
+voice-agent-harnesses/bland/report.py
+  s_386659c36c85dd::t_1a9d3494111fc9 67,71
+voice-agent-harnesses/retell/report.py
+  s_386659c36c85dd::t_1ec2fd685ffe09 67,71
+voice-agent-harnesses/livekit/gemini-flash-live-3.1/Dockerfile
+  s_386659c36c85dd::t_414c036a2d9d5e 15,20,22
+  s_386659c36c85dd::t_bb3f0325fde9c3 41
+  s_386659c36c85dd::t_202a68eafaabc5 43
+  s_386659c36c85dd::t_a1731ccf7aa126 1-14,16-19,21,23-40,42,44-61
+voice-agent-harnesses/deepgram/voice-agent/Dockerfile
+  s_386659c36c85dd::t_414c036a2d9d5e 15,20,22
+  s_386659c36c85dd::t_a1731ccf7aa126 1-14,16-19,21,23-41,43-62
+  s_386659c36c85dd::t_bb3f0325fde9c3 42
+k8s/job.yaml
+  s_386659c36c85dd::t_422c107d99b033 6
+  s_386659c36c85dd::t_acf36ade59c9b8 9,19,36-37
+  s_386659c36c85dd::t_d030d184532885 10,20
+  s_386659c36c85dd::t_8c8aada7a64d0a 32-33
+voice-agent-harnesses/pipecat/bot.py
+  s_386659c36c85dd::t_eb58453d9d7831 327,342,347-354
+  s_386659c36c85dd::t_6dc5c961f18efc 355
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "e21fdcd09acad76e2fea98af08c563731056bd40",
+  "prompts": {},
+  "humans": {
+    "h_f787e3fe1ad713": {
+      "author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_386659c36c85dd": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "5b05b7f4-e6c1-49ca-a8d9-0fa100f95c15",
+        "model": "grok-4.6"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}
