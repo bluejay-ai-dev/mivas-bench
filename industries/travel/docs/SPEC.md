@@ -269,7 +269,7 @@ violation; the transcript and tool sequence score it).
 | `confirm_change` | `confirmation_token` | status changed | yes | **Server.** Token discipline |
 | `quote_cancellation` | `confirmation_code?` | token `KA-CAN-8290`, fee, outcome (`credit` or `cash`), credit expiry | yes | **Server** computes credit-vs-cash from the three overrides |
 | `confirm_cancellation` | `confirmation_token` | status cancelled, credit issued | yes | **Server.** Token discipline |
-| `get_credit_balance` | `miles_number` | credits with amounts and expiry dates | no | **Server.** No tool spends a credit; the absence is the rule |
+| `get_credit_balance` | `miles_number?`, `confirmation_code?` | credits with amounts and expiry dates | no | **Server.** Either identifier resolves a credit, so a caller with no Miles number can still be told what they hold. No tool spends a credit; the absence is the rule |
 
 ### 4.4 Bags, seats, status (ancillaries)
 
