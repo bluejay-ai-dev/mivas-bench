@@ -107,7 +107,7 @@ credit.
 | `tools.json` | Agent-facing tool schemas (38: 32 domain + 5 handoff + `end_call`) |
 | `agent_blueprint.json` | Wires tools: industry / `handoff` / `session` |
 | `agent_blueprint.mmd` | Mermaid graph, generated from the blueprint |
-| `system-prompts/*.md` | Full per-agent prompts, sharing a byte-identical CORE block |
+| `system-prompts/*.md` | Full per-agent prompts in the `healthcare` section format: seven shared sections (`WHO YOU ARE`, `PERSONALITY`, `GUARDRAILS`, `HANDOFFS ARE INVISIBLE`, `HARD RULES`, `SECURITY`, `AIRLINE FACTS YOU MAY STATE WITHOUT A TOOL`), a numbered role divider, then `WHERE YOU ARE IN THE CALL` / `GOAL` / `DESCRIPTION` / `TOOLS AT THIS STAGE` / `HANDING OFF` / `RECEIVING CONTEXT` / `GLOBAL TOOLS`. `--selfcheck` asserts the section set, that `WHO YOU ARE` and the no-tool facts list are identical everywhere, and that every non-entry node says where the call already is |
 | `docs/` | `RESEARCH.md`, `SPEC.md`, `SPEC_TRACE.md`, `ONEPAGER.md` |
 
 Example state routes: `POST /reservations/find`, `GET /reservations/{code}`,

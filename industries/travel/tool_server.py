@@ -1678,6 +1678,40 @@ def _selfcheck() -> None:
     assert dump["itineraries"] and dump["reservation_notes"], "writes must persist"
 
     # ---------------------------------------------------------- catalog parity
+    # Prompt structure, in the healthcare section format: seven shared sections,
+    # a numbered role divider, then the per-agent sections. WHO YOU ARE and the
+    # no-tool facts list must be identical everywhere; PERSONALITY, GUARDRAILS,
+    # HARD RULES and SECURITY are deliberately tailored per node.
+    prompts = sorted((INDUSTRY_DIR / "system-prompts").glob("*.md"))
+    assert len(prompts) == 6, [p.name for p in prompts]
+    shared: dict[str, set[str]] = {"WHO YOU ARE": set(), "FACTS": set()}
+    for path in prompts:
+        text = path.read_text()
+        heads = [ln[2:].strip() for ln in text.splitlines() if ln.startswith("# ")]
+        for required in ("WHO YOU ARE", "PERSONALITY", "GUARDRAILS",
+                         "HANDOFFS ARE INVISIBLE", "HARD RULES", "SECURITY",
+                         "AIRLINE FACTS YOU MAY STATE WITHOUT A TOOL", "GOAL",
+                         "DESCRIPTION", "TOOLS AT THIS STAGE", "HANDING OFF",
+                         "RECEIVING CONTEXT", "GLOBAL TOOLS"):
+            assert required in heads, f"{path.name}: missing section {required!r}"
+        assert heads[0] == "WHO YOU ARE", f"{path.name}: must open with WHO YOU ARE"
+        role = [h for h in heads if "YOUR CURRENT ROLE:" in h]
+        assert len(role) == 1, f"{path.name}: expected one role divider, got {role}"
+        # Every node except the entry states where the caller already is.
+        entry = json.loads(
+            (INDUSTRY_DIR / "agent_blueprint.json").read_text())["agents"][0]["name"]
+        if path.stem != entry:
+            assert "WHERE YOU ARE IN THE CALL" in heads, \
+                f"{path.name}: a non-entry node must say where the call already is"
+        assert "—" not in text and "–" not in text, \
+            f"{path.name}: no em or en dashes in prompt prose"
+        shared["WHO YOU ARE"].add(text.split("\n# PERSONALITY")[0])
+        shared["FACTS"].add(
+            text.split("# AIRLINE FACTS YOU MAY STATE WITHOUT A TOOL")[1]
+                .split("\n# ─")[0])
+    for block, seen in shared.items():
+        assert len(seen) == 1, f"{block} drifted across prompts ({len(seen)} variants)"
+
     catalog = json.loads((INDUSTRY_DIR / "tools.json").read_text())["tools"]
     names = {t["name"] for t in catalog}
     for banned in ("compensation", "voucher", "goodwill", "visa", "passport",
