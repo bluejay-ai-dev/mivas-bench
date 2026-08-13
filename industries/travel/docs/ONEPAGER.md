@@ -243,7 +243,7 @@ Tools: `quote_payment`, `confirm_payment`, plus globals. No handoffs.
 | `confirm_change` | ticketing | Step two, rebooks | yes |
 | `quote_cancellation` | ticketing | Step one, fee and credit-versus-cash, returns `KA-CAN-8290` | yes |
 | `confirm_cancellation` | ticketing | Step two, cancels | yes |
-| `get_credit_balance` | ticketing | Read a credit balance and expiry. Nothing spends one | no |
+| `get_credit_balance` | ticketing | Read a credit balance and expiry, by `miles_number` or `confirmation_code`. Both are optional; either resolves a credit. Nothing spends one | no |
 | `get_elite_status` | ancillaries | Tier, points, benefit flags | no |
 | `get_bag_price` | ancillaries | Price after waivers, plus the base price | yes |
 | `get_seat_map` | ancillaries | Open and taken seats with class prices | no |
