@@ -1,0 +1,84 @@
+voice-agent-harnesses/retell/report.py
+  s_92c82cd07029f6::t_1bf03bf8bb3a02 34,115
+  s_92c82cd07029f6::t_56c9a63dbd18e4 116-123
+voice-agent-harnesses/twilio/report.py
+  s_92c82cd07029f6::t_56c9a63dbd18e4 153-160
+  s_92c82cd07029f6::t_1bf03bf8bb3a02 35,152
+tests/test_tool_server.py
+  s_92c82cd07029f6::t_285350b4bf35f3 266-315,485
+voice-agent-harnesses/assemblyai/report.py
+  s_92c82cd07029f6::t_1bf03bf8bb3a02 33,119
+  s_92c82cd07029f6::t_56c9a63dbd18e4 120-127
+voice-agent-harnesses/vapi/report.py
+  s_92c82cd07029f6::t_56c9a63dbd18e4 134-141
+  s_92c82cd07029f6::t_1bf03bf8bb3a02 34,133
+industries/healthcare/tools.json
+  s_92c82cd07029f6::t_3355ff230ae565 187,196-199,202
+scripts/apply_digital_humans.py
+  s_92c82cd07029f6::t_94c93bd04829c4 121-125
+  s_92c82cd07029f6::t_96c3e301f85aa7 1-120,126-135
+scripts/verify_run.py
+  s_92c82cd07029f6::t_478c3bf7afd77b 1-16,116-122,126-138,159-166,174-175,187-192
+industries/healthcare/tool_server.py
+  s_92c82cd07029f6::t_3355ff230ae565 539-547,550-554,827-828,831-837,1041-1050,1054-1055,1057-1059,1084-1092,1094
+scripts/healthcare_digital_humans.py
+  s_92c82cd07029f6::t_9b6a97c982e11e 431-436,441-442,446-447
+  s_92c82cd07029f6::t_d05b1fd3fec9a4 1668-1729,1749,1790
+voice-agent-harnesses/livekit/report.py
+  s_92c82cd07029f6::t_1bf03bf8bb3a02 45,126
+  s_92c82cd07029f6::t_56c9a63dbd18e4 127-134
+scripts/export_run_csv.py
+  s_92c82cd07029f6::t_e74fb51c06c52a 86-92,106
+  s_92c82cd07029f6::t_dc0f9f62b26ef4 1-67,69-71,73,78-82,84-85,93-94,96-105,107-155,166-236,242,247-249,252-303
+  s_92c82cd07029f6::t_0a1389385bbe19 156-165
+  s_92c82cd07029f6::t_99f995bbaf0d5f 237-241,243-246,250-251
+  s_92c82cd07029f6::t_fe5c4b65372265 68,72,74-77,83,95
+scripts/consistency.py
+  s_92c82cd07029f6::t_7279e94d491caf 77-78,86,100
+  s_92c82cd07029f6::t_fefd35d038e6ba 1-33,37-61,69-76,101-150
+  s_92c82cd07029f6::t_3435db745af3f5 34-36,79-85,87-99
+  s_92c82cd07029f6::t_3581b107c19d7c 62-68
+voice-agent-harnesses/elevenlabs/report.py
+  s_92c82cd07029f6::t_1bf03bf8bb3a02 32,127
+  s_92c82cd07029f6::t_56c9a63dbd18e4 128-135
+voice-agent-harnesses/gemini/report.py
+  s_92c82cd07029f6::t_1bf03bf8bb3a02 33,120
+  s_92c82cd07029f6::t_56c9a63dbd18e4 121-128
+voice-agent-harnesses/grok/report.py
+  s_92c82cd07029f6::t_1bf03bf8bb3a02 35,121
+  s_92c82cd07029f6::t_56c9a63dbd18e4 122-129
+voice-agent-harnesses/pipecat/report.py
+  s_92c82cd07029f6::t_1bf03bf8bb3a02 36,117
+  s_92c82cd07029f6::t_56c9a63dbd18e4 118-125
+voice-agent-harnesses/openai/report.py
+  s_92c82cd07029f6::t_56c9a63dbd18e4 149-156
+  s_92c82cd07029f6::t_1bf03bf8bb3a02 32,140-148
+voice-agent-harnesses/bland/report.py
+  s_92c82cd07029f6::t_1bf03bf8bb3a02 34,115
+  s_92c82cd07029f6::t_56c9a63dbd18e4 116-123
+voice-agent-harnesses/cartesia/report.py
+  s_92c82cd07029f6::t_1bf03bf8bb3a02 34,124
+  s_92c82cd07029f6::t_56c9a63dbd18e4 125-132
+voice-agent-harnesses/deepgram/report.py
+  s_92c82cd07029f6::t_56c9a63dbd18e4 120-127
+  s_92c82cd07029f6::t_1bf03bf8bb3a02 33,119
+voice-agent-harnesses/nvidia/report.py
+  s_92c82cd07029f6::t_1bf03bf8bb3a02 33,119
+  s_92c82cd07029f6::t_56c9a63dbd18e4 120-127
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "1eeddc61ab48b8e58d8db60bcb47ce9b2169da4b",
+  "prompts": {},
+  "sessions": {
+    "s_92c82cd07029f6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "00c236a5-34d1-400c-8e58-30426c55d543",
+        "model": "claude-opus-5"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
