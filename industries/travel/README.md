@@ -14,8 +14,8 @@ fixtures, not a reservation system. See [docs/RESEARCH.md](docs/RESEARCH.md) for
 replica map and sources, and [docs/SPEC.md](docs/SPEC.md) for which facts are
 sourced `[R]` and which are inferred `[I]`.
 
-The agent introduces itself as **Nell**, once, in reception's first sentence
-("Kestrel Air, this is Nell, I'm an AI assistant"). No node after reception repeats
+The agent introduces itself as **Frankie**, once, in reception's first sentence
+("Kestrel Air, this is Frankie, I'm an AI assistant"). No node after reception repeats
 the name or the disclosure.
 
 Prompts are written as real customer production prompts, not shortened for a
