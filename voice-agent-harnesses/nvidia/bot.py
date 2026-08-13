@@ -101,6 +101,8 @@ async def run_bot(
     *,
     simulation_result_id: str | None = None,
 ) -> None:
+    harness.set_call_id(simulation_result_id)
+    harness.begin_session(simulation_result_id, session_key=str(simulation_result_id or "job"))
     bp = harness.load_blueprint(industry)
     state: dict[str, Any] = {"agent": bp["start"]}
     observer = SpeechSpanObserver()

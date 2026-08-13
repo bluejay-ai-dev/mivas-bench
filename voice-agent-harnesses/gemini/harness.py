@@ -10,13 +10,20 @@ import asyncio
 import json
 import os
 import sys
-from contextvars import ContextVar
 from pathlib import Path
 from typing import Any
 
 import httpx
 import google.genai as genai
 from google.genai import types
+
+for _root in (Path("/app"), *Path(__file__).resolve().parents):
+    _runtime = _root / "runtime"
+    if (_runtime / "call_id.py").is_file():
+        if str(_runtime) not in sys.path:
+            sys.path.insert(0, str(_runtime))
+        break
+from call_id import headers as tool_headers, set_call_id  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 TOOL_SERVER_URL = os.environ.get("TOOL_SERVER_URL", "http://127.0.0.1:8000").rstrip("/")
@@ -157,19 +164,13 @@ def _tool_entry(bp: dict[str, Any], agent: str, name: str,
     return None
 
 
-# Set once per CHIRP connection so the state API can isolate this call's DB and
-# identity pin from every other call in flight. Industries that keep no per-call
-# state ignore the header.
-CALL_ID: ContextVar[str] = ContextVar("mivas_call_id", default="")
-
-
 async def _dispatch(name: str, args: dict[str, Any]) -> dict[str, Any]:
     """Generic dispatch: POST /tools/{name}; the server's envelope is the result."""
-    call_id = CALL_ID.get()
-    headers = {"X-Mivas-Call-Id": call_id} if call_id else None
     async with httpx.AsyncClient(timeout=30.0) as client:
         resp = await client.post(
-            f"{TOOL_SERVER_URL}/tools/{name}", json={"arguments": args}, headers=headers
+            f"{TOOL_SERVER_URL}/tools/{name}",
+            json={"arguments": args},
+            headers=tool_headers(),
         )
         return resp.json()
 

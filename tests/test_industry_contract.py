@@ -37,7 +37,7 @@ KNOWN_GAPS: dict[str, set[str]] = {
 
 REQUIRED_FILES = {"README.md", "agent_blueprint.json", "tools.json",
                   "tool_server.py", "requirements.txt"}
-ALLOWED_EXTRA = {"agent_blueprint.mmd", "db", "system-prompts", "docs", "__pycache__"}
+ALLOWED_EXTRA = {"agent_blueprint.mmd", "db", "system-prompts", "docs", "__pycache__", ".DS_Store"}
 
 
 def _industry_params():
@@ -79,8 +79,10 @@ def _tool_flags(name: str) -> dict[str, dict]:
 def _load_tool_server(name: str):
     """Import tool_server.py under a unique module name with a temp DB."""
     original = os.environ.get("MIVAS_DB_PATH")
+    original_shared = os.environ.get("MIVAS_DB_SHARED")
     tmp = tempfile.mkdtemp(prefix=f"mivas-contract-{name}-")
     os.environ["MIVAS_DB_PATH"] = str(Path(tmp) / "runtime.db")
+    os.environ["MIVAS_DB_SHARED"] = "1"
     try:
         mod_name = f"contract_tool_server_{name.replace('-', '_')}"
         sys.modules.pop(mod_name, None)
@@ -95,6 +97,10 @@ def _load_tool_server(name: str):
             os.environ.pop("MIVAS_DB_PATH", None)
         else:
             os.environ["MIVAS_DB_PATH"] = original
+        if original_shared is None:
+            os.environ.pop("MIVAS_DB_SHARED", None)
+        else:
+            os.environ["MIVAS_DB_SHARED"] = original_shared
 
 
 @industry
@@ -141,7 +147,7 @@ def test_server_boots_and_serves_fixtures(industry: str) -> None:
     module = _load_tool_server(industry)
     with TestClient(module.app) as client:
         assert client.get("/health").status_code == 200
-        state = client.get("/state")
+        state = client.get("/state", headers={"X-Mivas-Call-Id": "contract"})
         assert state.status_code == 200
         assert isinstance(state.json(), dict)
 
@@ -171,7 +177,12 @@ def test_selfcheck_passes(industry: str) -> None:
     if "selfcheck" in _gaps(industry):
         pytest.skip(f"{industry} has no --selfcheck yet (KNOWN_GAPS)")
     with tempfile.TemporaryDirectory() as tmp:
-        env = {**os.environ, "MIVAS_DB_PATH": str(Path(tmp) / "runtime.db")}
+        env = {
+            **os.environ,
+            "MIVAS_DB_PATH": str(Path(tmp) / "runtime.db"),
+            "PYTHONPATH": str(ROOT / "runtime")
+            + (os.pathsep + os.environ["PYTHONPATH"] if os.environ.get("PYTHONPATH") else ""),
+        }
         proc = subprocess.run(
             [sys.executable, str(INDUSTRY_ROOT / industry / "tool_server.py"),
              "--selfcheck"],

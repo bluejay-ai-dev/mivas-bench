@@ -19,10 +19,27 @@ from __future__ import annotations
 
 import json
 import os
+import sys
 from pathlib import Path
 from typing import Any
 
 import httpx
+
+for _root in (Path("/app"), *Path(__file__).resolve().parents):
+    _runtime = _root / "runtime"
+    if (_runtime / "call_id.py").is_file():
+        if str(_runtime) not in sys.path:
+            sys.path.insert(0, str(_runtime))
+        break
+from call_id import (  # noqa: E402
+    begin_session,
+    bind_provider,
+    end_session,
+    for_provider,
+    headers as tool_headers,
+    set_call_id,
+    unbind_provider,
+)
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 HARNESS_DIR = Path(__file__).resolve().parent
@@ -333,13 +350,14 @@ async def _execute_tool(
 ) -> dict[str, Any]:
     """Generic dispatch: POST /tools/{name}; the server's envelope is the result.
 
-    The Vapi call id becomes X-Mivas-Call-Id so the state API keeps this call's DB
-    and identity pin separate from every other call in flight.
+    `call_id` is the Bluejay simulation result id, looked up from the Vapi call
+    id on the webhook. Never a Vapi tool-call id.
     """
-    headers = {"X-Mivas-Call-Id": call_id} if call_id else None
     async with httpx.AsyncClient(timeout=30.0) as client:
         resp = await client.post(
-            f"{TOOL_SERVER_URL}/tools/{name}", json={"arguments": args}, headers=headers
+            f"{TOOL_SERVER_URL}/tools/{name}",
+            json={"arguments": args},
+            headers=tool_headers(call_id),
         )
         return resp.json()
 
@@ -364,7 +382,7 @@ async def run_tool(
     from report import finish_tool_span, tool_span
     with tool_span(name, args, call_id=call_id, vapi_call_id=vapi_call_id) as span:
         try:
-            result = await _execute_tool(name, args, vapi_call_id)
+            result = await _execute_tool(name, args, for_provider(vapi_call_id))
             ok = bool(result.get("ok", result.get("success", True)))
             finish_tool_span(span, result, ok=ok)
             return result

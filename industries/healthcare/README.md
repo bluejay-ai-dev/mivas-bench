@@ -48,7 +48,8 @@ Harness tool kinds:
 
 ```bash
 uv run python tool_server.py
-# curl http://127.0.0.1:8000/state
+# curl http://127.0.0.1:8000/state?call_id=675
 # curl -X POST http://127.0.0.1:8000/appointments -H 'content-type: application/json' \
+#   -H 'X-Mivas-Call-Id: 675' \
 #   -d '{"location_id":"loc_park_ave","provider_id":"prov_chen","appointment_type_code":"MED_NEW","start":"2026-09-01T09:00:00","end":"2026-09-01T09:30:00","description":"New patient visit"}'
 ```
