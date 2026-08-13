@@ -3,11 +3,11 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: mivas-__JOB_SLUG__-check
+  name: mivas-__SLUG__-check
   labels:
     app: mivas-bench
-    mivas.harness: "__HARNESS_FAMILY__"
-    mivas.runtime: "__HARNESS_RUNTIME__"
+    mivas.harness_family: "__HARNESS_FAMILY__"
+    mivas.harness_runtime: "__HARNESS_RUNTIME__"
     mivas.industry: "__INDUSTRY__"
 spec:
   ttlSecondsAfterFinished: 3600
@@ -16,8 +16,8 @@ spec:
     metadata:
       labels:
         app: mivas-bench
-        mivas.harness: "__HARNESS_FAMILY__"
-        mivas.runtime: "__HARNESS_RUNTIME__"
+        mivas.harness_family: "__HARNESS_FAMILY__"
+        mivas.harness_runtime: "__HARNESS_RUNTIME__"
         mivas.industry: "__INDUSTRY__"
     spec:
       restartPolicy: Never
@@ -29,10 +29,12 @@ spec:
           env:
             - name: MIVAS_MODE
               value: "check"
-            - name: VOICE_AGENT
-              value: "__VOICE_AGENT__"
+            - name: HARNESS
+              value: "__HARNESS__"
             - name: INDUSTRY
               value: "__INDUSTRY__"
+            - name: HARNESS_FAMILY
+              value: "__HARNESS_FAMILY__"
             - name: HARNESS_RUNTIME
               value: "__HARNESS_RUNTIME__"
             - name: HARNESS_DIR

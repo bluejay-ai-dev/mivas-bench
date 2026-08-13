@@ -2,7 +2,8 @@
 # Start industry tool server, then either the CHIRP adapter (Bluejay) or agent.py.
 set -euo pipefail
 
-: "${VOICE_AGENT:?VOICE_AGENT is required}"
+: "${HARNESS:=${VOICE_AGENT:-}}"
+: "${HARNESS:?HARNESS is required (family/runtime, e.g. openai/realtime-2.1)}"
 : "${INDUSTRY:?INDUSTRY is required}"
 
 APP_ROOT="${APP_ROOT:-/app}"
@@ -16,14 +17,16 @@ export MIVAS_DB_PATH="${MIVAS_DB_PATH:-/data/industry.db}"
 export TOOL_SERVER_URL
 export INDUSTRY_DIR
 export INDUSTRY
+export HARNESS
 
-# Derive Realtime model from runtime folder when unset.
+# Derive Realtime model from harness runtime folder when unset.
 HARNESS_RUNTIME="${HARNESS_RUNTIME:-$(basename "${HARNESS_DIR}")}"
 case "${HARNESS_RUNTIME}" in
   realtime-2.1) : "${OPENAI_REALTIME_MODEL:=gpt-realtime-2.1}" ;;
   realtime-2.1-mini) : "${OPENAI_REALTIME_MODEL:=gpt-realtime-2.1-mini}" ;;
 esac
 export OPENAI_REALTIME_MODEL="${OPENAI_REALTIME_MODEL:-}"
+export HARNESS_RUNTIME
 
 mkdir -p "$(dirname "$MIVAS_DB_PATH")"
 
@@ -54,32 +57,41 @@ if ! curl -sf "${TOOL_SERVER_URL}/health" >/dev/null; then
 fi
 
 if [[ "${AGENT_CHECK:-}" == "1" || "${MIVAS_MODE}" == "check" ]]; then
-  echo "starting harness agent check (${VOICE_AGENT})"
+  echo "starting harness agent check (${HARNESS})"
   exec python "${HARNESS_DIR}/agent.py" "${INDUSTRY}" --check
 fi
 
-if [[ "${MIVAS_MODE}" == "chirp" ]]; then
-  if [[ ! -f "${HARNESS_DIR}/adapters/chirp.py" ]]; then
-    echo "no chirp adapter at ${HARNESS_DIR}/adapters/chirp.py" >&2
-    exit 1
-  fi
-  HARNESS_FAMILY="${HARNESS_FAMILY:-${VOICE_AGENT%%/*}}"
+if [[ "${MIVAS_MODE}" == "chirp" && -f "${HARNESS_DIR}/adapters/chirp.py" ]]; then
+  HARNESS_FAMILY="${HARNESS_FAMILY:-${HARNESS%%/*}}"
   CHIRP_ARGS=(--industry "${INDUSTRY}" --host 0.0.0.0 --port "${CHIRP_PORT}")
   case "${HARNESS_FAMILY}" in
     openai)
       if [[ -z "${OPENAI_REALTIME_MODEL}" ]]; then
-        echo "OPENAI_REALTIME_MODEL unset (and no default for runtime=${HARNESS_RUNTIME})" >&2
+        echo "OPENAI_REALTIME_MODEL unset (and no default for harness_runtime=${HARNESS_RUNTIME})" >&2
         exit 1
       fi
       CHIRP_ARGS+=(--model "${OPENAI_REALTIME_MODEL}")
-      echo "starting CHIRP (${VOICE_AGENT} model=${OPENAI_REALTIME_MODEL}) on :${CHIRP_PORT}"
+      echo "starting CHIRP (${HARNESS} model=${OPENAI_REALTIME_MODEL}) on :${CHIRP_PORT}"
       ;;
     *)
-      echo "starting CHIRP (${VOICE_AGENT}) on :${CHIRP_PORT}"
+      echo "starting CHIRP (${HARNESS}) on :${CHIRP_PORT}"
       ;;
   esac
   exec python "${HARNESS_DIR}/adapters/chirp.py" "${CHIRP_ARGS[@]}"
 fi
 
-echo "starting harness agent (${VOICE_AGENT}) mode=${MIVAS_MODE}"
+HARNESS_FAMILY="${HARNESS_FAMILY:-${HARNESS%%/*}}"
+HARNESS_FAMILY_DIR="${HARNESS_FAMILY_DIR:-${APP_ROOT}/harness}"
+
+if [[ "${HARNESS_FAMILY}" == "livekit" ]]; then
+  echo "starting LiveKit Cloud worker (${HARNESS})"
+  exec python "${HARNESS_DIR}/agent.py" start
+fi
+
+if [[ "${HARNESS_FAMILY}" == "pipecat" ]]; then
+  echo "starting Pipecat LiveKit Cloud worker (${HARNESS})"
+  exec python "${HARNESS_FAMILY_DIR}/adapters/livekit_worker.py"
+fi
+
+echo "starting harness agent (${HARNESS}) mode=${MIVAS_MODE}"
 exec python "${HARNESS_DIR}/agent.py" "${INDUSTRY}"

@@ -78,11 +78,11 @@ def bind_call(vapi_call_id: str | None) -> None:
 
 
 def _api_url() -> str:
-    return os.environ.get("BLUEJAY_API_URL", DEFAULT_API_URL).rstrip("/")
+    return (os.environ.get("BLUEJAY_API_URL") or DEFAULT_API_URL).rstrip("/")
 
 
 def _otlp_endpoint() -> str:
-    return os.environ.get("BLUEJAY_OTLP_ENDPOINT", DEFAULT_OTLP_ENDPOINT)
+    return os.environ.get("BLUEJAY_OTLP_ENDPOINT") or DEFAULT_OTLP_ENDPOINT
 
 
 def _service_name() -> str:
