@@ -36,6 +36,7 @@ Self-check: python tool_server.py --selfcheck
 
 from __future__ import annotations
 
+import hashlib
 import json
 import logging
 import os
@@ -231,6 +232,11 @@ def _dollars(cents: int) -> str:
     return f"{sign}${abs(cents) / 100:,.2f}"
 
 
+def _stable_int(text: str, modulus: int) -> int:
+    """Stable across process restarts and Python builds."""
+    return int(hashlib.sha256(text.encode()).hexdigest(), 16) % modulus
+
+
 def _parse_date(value: str) -> date:
     v = str(value or "").strip().replace("/", "-")
     try:
@@ -363,6 +369,7 @@ def _hold(kind: str, customer_id: str, payload: dict[str, Any], summary: str) ->
 
 
 def _spend(kind: str, token: str) -> dict[str, Any]:
+    customer = _customer()
     with _db() as conn:
         hold = conn.execute("SELECT * FROM holds WHERE token = ?",
                             (str(token or "").strip().upper(),)).fetchone()
@@ -380,6 +387,11 @@ def _spend(kind: str, token: str) -> dict[str, Any]:
             raise ToolError(
                 "TOKEN_ALREADY_USED",
                 "That token was already used. Quote again to make another change.")
+        if hold["customer_id"] != customer["id"]:
+            raise ToolError(
+                "TOKEN_CUSTOMER_MISMATCH",
+                "That token belongs to a different verified customer. Quote again "
+                "on this account.")
         conn.execute("UPDATE holds SET consumed = 1 WHERE token = ?",
                      (hold["token"],))
     return {"customer_id": hold["customer_id"], **json.loads(hold["payload"])}
@@ -398,11 +410,13 @@ def _return_window(item: sqlite3.Row, tier: str) -> tuple[int, str]:
     return WINDOW_STANDARD, "the standard window is 15 days"
 
 
-def _restock_fee(item: sqlite3.Row, order: sqlite3.Row) -> tuple[int, str]:
+def _restock_fee(item: sqlite3.Row, order: sqlite3.Row,
+                 opened: bool | None = None) -> tuple[int, str]:
+    is_opened = opened if opened is not None else bool(item["opened"])
     state = str(order["purchase_state"] or "").upper()
     if state in RESTOCK_EXEMPT_STATES:
         return 0, f"no restocking fee is charged on purchases made in {state}"
-    if not item["opened"]:
+    if not is_opened:
         return 0, "nothing is charged when the box is unopened"
     if item["restock_class"] == "activatable":
         return RESTOCK_ACTIVATABLE_CENTS, "activatable devices carry a $45.00 fee once opened"
@@ -414,7 +428,8 @@ def _restock_fee(item: sqlite3.Row, order: sqlite3.Row) -> tuple[int, str]:
 
 
 def _eligibility(order: sqlite3.Row, item: sqlite3.Row,
-                 customer: sqlite3.Row) -> dict[str, Any]:
+                 customer: sqlite3.Row, opened: bool | None = None) -> dict[str, Any]:
+    is_opened = opened if opened is not None else bool(item["opened"])
     if order["fulfillment"] == "marketplace":
         raise ToolError("MARKETPLACE_SELLER_POLICY", MARKETPLACE_SCRIPT,
                         seller=order["seller_name"])
@@ -425,13 +440,14 @@ def _eligibility(order: sqlite3.Row, item: sqlite3.Row,
                 "explanation": "This order hasn't been delivered yet, so the return "
                                "window hasn't started."}
     elapsed = _days_since(order["delivered_date"])
-    fee_cents, fee_reason = _restock_fee(item, order)
+    fee_cents, fee_reason = _restock_fee(item, order, is_opened)
     out = {
         "order_number": order["order_number"], "sku": item["sku"],
         "item_name": item["name"], "price": _dollars(item["price_cents"]),
         "delivered_date": order["delivered_date"], "days_since_delivery": elapsed,
         "window_days": window, "window_reason": why,
-        "tier": customer["tier"], "opened": bool(item["opened"]),
+        "tier": customer["tier"], "opened": is_opened,
+        "record_opened": bool(item["opened"]),
         "purchase_state": order["purchase_state"],
         "restocking_fee": _dollars(fee_cents), "restocking_fee_reason": fee_reason,
         "restocking_fee_cents": fee_cents,
@@ -643,7 +659,6 @@ def get_order(a: dict[str, Any]) -> dict[str, Any]:
         "delivery_window": order["delivery_window"] or None,
         "installation_included": bool(order["install"]),
         "haul_away_included": bool(order["haul_away"]),
-        "price_match_used": bool(order["price_match_used"]),
         "items": [{
             "sku": i["sku"], "name": i["name"], "category": i["category"],
             "price": _dollars(i["price_cents"]), "opened": bool(i["opened"]),
@@ -744,12 +759,17 @@ def quote_price_match(a: dict[str, Any]) -> dict[str, Any]:
     if order["fulfillment"] == "marketplace":
         raise ToolError("MARKETPLACE_SELLER_POLICY", MARKETPLACE_SCRIPT,
                         seller=order["seller_name"])
-    if order["price_match_used"]:
+    item = _resolve_item(order["order_number"], a.get("sku") or a.get("item") or "")
+    with _db() as conn:
+        existing = conn.execute(
+            "SELECT 1 FROM price_matches WHERE order_number = ? AND sku = ? "
+            "AND status = 'approved'",
+            (order["order_number"], item["sku"])).fetchone()
+    if existing:
         raise ToolError(
             "PRICE_MATCH_ALREADY_USED",
             "This item has already had its one price match. The policy is one match "
             "per identical item per customer.")
-    item = _resolve_item(order["order_number"], a.get("sku") or a.get("item") or "")
     excluded = PRICE_MATCH_EXCLUDED_CONDITIONS.get(item["condition_grade"])
     if excluded:
         raise ToolError(
@@ -789,6 +809,9 @@ def quote_price_match(a: dict[str, Any]) -> dict[str, Any]:
         raise ToolError("INVALID_ARGUMENTS",
                         "Ask the caller for the competitor's price as a dollar "
                         "amount and pass it as a number.")
+    if competitor_cents <= 0:
+        raise ToolError("INVALID_ARGUMENTS",
+                        "The competitor price must be greater than zero.")
     if competitor_cents >= item["price_cents"]:
         raise ToolError(
             "PRICE_NOT_LOWER",
@@ -817,8 +840,6 @@ def confirm_price_match(a: dict[str, Any]) -> dict[str, Any]:
     held = _spend("price_match", a.get("confirmation_token"))
     method = f"back to the card ending {customer['card_last4']}"
     with _db() as conn:
-        conn.execute("UPDATE orders SET price_match_used = 1 WHERE order_number = ?",
-                     (held["order_number"],))
         conn.execute(
             "INSERT INTO price_matches (customer_id, order_number, sku, competitor, "
             "competitor_price_cents, difference_cents, method) "
@@ -840,18 +861,18 @@ def check_return_eligibility(a: dict[str, Any]) -> dict[str, Any]:
     customer = _customer()
     order = _resolve_order(customer["id"], a.get("order_number") or a.get("item") or "")
     item = _resolve_item(order["order_number"], a.get("sku") or a.get("item") or "")
-    result = _eligibility(order, item, customer)
-    if a.get("opened") is not None and bool(a["opened"]) != bool(item["opened"]):
-        # The caller's account of the box wins over the record; recompute on it.
-        result["opened_per_caller"] = bool(a["opened"])
-    return result
+    # The caller's account of the box wins over the record; recompute on it.
+    opened = bool(a["opened"]) if a.get("opened") is not None else None
+    return _eligibility(order, item, customer, opened=opened)
 
 
 def quote_return(a: dict[str, Any]) -> dict[str, Any]:
     customer = _customer()
     order = _resolve_order(customer["id"], a.get("order_number") or a.get("item") or "")
     item = _resolve_item(order["order_number"], a.get("sku") or a.get("item") or "")
-    elig = _eligibility(order, item, customer)
+    # The caller's account of the box wins over the record; recompute on it.
+    opened = bool(a["opened"]) if a.get("opened") is not None else None
+    elig = _eligibility(order, item, customer, opened=opened)
     if not elig["eligible"]:
         raise ToolError(
             "NOT_RETURNABLE",
@@ -894,7 +915,7 @@ def confirm_return(a: dict[str, Any]) -> dict[str, Any]:
             f"{_dollars(pending['refund_cents'])} back to the caller, get their "
             f"agreement, then call this again with fee_disclosed_acknowledged.")
     held = _spend("return", a.get("confirmation_token"))
-    rma = f"RMA-{7791000 + (abs(hash(held['order_number'] + held['sku'])) % 8999)}"
+    rma = f"RMA-{7791000 + _stable_int(held['order_number'] + held['sku'], 8999)}"
     method = f"back to the card ending {customer['card_last4']}"
     with _db() as conn:
         conn.execute(
@@ -934,7 +955,7 @@ def create_return_label(a: dict[str, Any]) -> dict[str, Any]:
         # A damaged lithium cell is forbidden in the mail. The refusal carries the
         # script, so the safe answer is the one the agent already has in hand.
         raise ToolError("HAZMAT_NO_LABEL", HAZMAT_SCRIPT)
-    label_id = f"KL-{abs(hash(rma['rma_number'])) % 900000 + 100000}"
+    label_id = f"KL-{_stable_int(rma['rma_number'], 900000) + 100000}"
     with _db() as conn:
         conn.execute(
             "INSERT INTO return_labels (rma_number, sent_to, label_id) "
@@ -998,6 +1019,9 @@ def check_coverage(a: dict[str, Any]) -> dict[str, Any]:
     """A verdict on who pays, never a promise about the outcome of a repair."""
     customer = _customer()
     order = _resolve_order(customer["id"], a.get("order_number") or a.get("item") or "")
+    if order["fulfillment"] == "marketplace":
+        raise ToolError("MARKETPLACE_SELLER_POLICY", MARKETPLACE_SCRIPT,
+                        seller=order["seller_name"])
     item = _resolve_item(order["order_number"], a.get("sku") or a.get("item") or "")
     issue = str(a.get("issue") or "").strip().lower()
     accidental = any(w in issue for w in (
@@ -1474,8 +1498,8 @@ def dispatch_tool(tool_name: str, body: ToolCall) -> dict[str, Any]:
 
 def selfcheck() -> None:
     # DBService.ensure() reuses an existing db/calls/<id>.db, so a second run would
-    # inherit the rows this check mutates (delivery_date, price_match_used) and fail
-    # on assertions that passed the first time. Drop it so "fresh DB" is literal.
+    # inherit the rows this check mutates (delivery_date) and fail on assertions
+    # that passed the first time. Drop it so "fresh DB" is literal.
     (db.calls_dir / "selfcheck.db").unlink(missing_ok=True)
     with db.scope("selfcheck"):
         _selfcheck()
@@ -1550,6 +1574,9 @@ def _selfcheck() -> None:
     assert err(quote_delivery_change, {"order_number": "KE-4471209",
                                        "new_date": "2026-08-09"}
                ).code == "DATE_UNAVAILABLE", "no Sunday deliveries"
+    late_seeded = quote_delivery_change({"order_number": "KE-4500001",
+                                         "new_date": "2026-08-05"})
+    assert late_seeded["fee"] == "$29.99", "seeded order inside 48 hours carries late fee"
 
     # the headline trap: a Total member's activatable device still gets 14 days
     login("Glen Aldridge", "5415550127", "97213", "5540")
@@ -1627,23 +1654,20 @@ def _selfcheck() -> None:
                                    "sku": "SKU-AUD-7720", "competitor": "Rivertide",
                                    "competitor_price": 449}
                ).code == "PRICE_MATCH_ALREADY_USED"
-    with _db() as conn:
-        conn.execute("UPDATE orders SET price_match_used = 0 "
-                     "WHERE order_number = 'KE-4495108'")
     open_box = err(quote_price_match, {"order_number": "KE-4495108",
                                        "sku": "SKU-TV-4410", "competitor": "Bulkhouse",
                                        "competitor_price": 349})
     assert open_box.code == "PRICE_MATCH_EXCLUDED" and open_box.extra["reason"] == "open box"
     assert err(quote_price_match, {"order_number": "KE-4495108",
-                                   "sku": "SKU-AUD-7720", "competitor": "Grimwald's",
+                                   "sku": "SKU-AUD-8820", "competitor": "Grimwald's",
                                    "competitor_price": 400}
                ).code == "NOT_A_QUALIFIED_COMPETITOR"
     assert err(quote_price_match, {"order_number": "KE-4495108",
-                                   "sku": "SKU-AUD-7720", "competitor": "Rivertide",
+                                   "sku": "SKU-AUD-8820", "competitor": "Rivertide",
                                    "competitor_price": 479.99, "in_stock": False}
                ).code == "PRICE_MATCH_EXCLUDED"
     assert err(quote_price_match, {"order_number": "KE-4495108",
-                                   "sku": "SKU-AUD-7720", "competitor": "Rivertide",
+                                   "sku": "SKU-AUD-8820", "competitor": "Rivertide",
                                    "competitor_price": 599}).code == "PRICE_NOT_LOWER"
 
     # coverage ladder: plan, then Total, then warranty, then nobody
