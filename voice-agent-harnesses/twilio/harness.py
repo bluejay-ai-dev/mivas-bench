@@ -159,7 +159,7 @@ _PACK_WELCOME = {
     "healthcare": "Thank you for calling Straus Dermatology.",
     "finance": "Thank you for calling Copperline Credit Union.",
     "legal": "Thank you for calling Halverson and Reed.",
-    "travel": "Thank you for calling Summit Air.",
+    "travel": "Thank you for calling Kestrel Air.",
 }
 
 

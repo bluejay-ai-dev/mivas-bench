@@ -28,11 +28,9 @@ INDUSTRY_ROOT = ROOT / "industries"
 # - healthcare "handoff_tools_in_catalog": agent_blueprint.json wires transfer_to_*
 #   handoff tools that tools.json never declares (harnesses fall back to a default
 #   description today).
-# - travel "orphan_prompts": system-prompts/reservations.md is referenced by no agent.
 KNOWN_GAPS: dict[str, set[str]] = {
     "control-industry": {"mmd", "selfcheck", "seeded_reference"},
     "healthcare": {"selfcheck", "handoff_tools_in_catalog"},
-    "travel": {"orphan_prompts"},
 }
 
 REQUIRED_FILES = {"README.md", "agent_blueprint.json", "tools.json",

@@ -133,9 +133,16 @@ _KNOWN_GOOD_ARGS: dict[str, dict[str, dict[str, Any]]] = {
     "travel": {
         "find_reservation": {"last_name": "Solberg", "confirmation_code": "RT2LKD"},
         "get_reservation": {"confirmation_code": "RT2LKD"},
+        "get_traveler_list": {"confirmation_code": "RT2LKD"},
+        "get_disruption_entitlement": {"confirmation_code": "RT2LKD"},
+        "get_fare_rules": {"confirmation_code": "RT2LKD"},
         "search_flights": {"origin": "ORD", "destination": "SEA", "earliest_date": "2026-08-09"},
-        "get_flight_status": {"flight_number": "CX771", "date": "2026-08-09"},
-        "get_credit_balance": {"summit_number": "SC2019773"},
+        "get_flight_status": {"flight_number": "KA771", "date": "2026-08-09"},
+        "get_credit_balance": {"miles_number": "KM2019773"},
+        "get_elite_status": {"miles_number": "KM4471902"},
+        "get_pass_status": {"miles_number": "KM8827104"},
+        "get_seat_map": {"flight_number": "KA812", "date": "2026-08-18"},
+        "escalate_to_human": {"reason_code": "caller_request"},
     },
 }
 
@@ -156,6 +163,7 @@ def _dispatch_args(industry: str, spec: dict[str, Any]) -> tuple[dict[str, Any],
 _DISPATCH_BEFORE: dict[str, list[str]] = {
     "healthcare": ["verify_identity"],
     "finance": ["identify_member", "verify_identity"],
+    "travel": ["find_reservation"],
 }
 
 
@@ -486,24 +494,64 @@ def test_finance_guards_survive_dispatch() -> None:
 
 
 def test_travel_guards_survive_dispatch() -> None:
+    """Identity gate, the disrupted-booking precedence trap, silent elite waivers,
+    and token discipline, all through POST /tools/{name}."""
     with _load_tool_server("travel") as module, TestClient(module.app) as client:
         def tool(name: str, args: dict[str, Any]) -> dict[str, Any]:
             resp = client.post(f"/tools/{name}", json={"arguments": args})
             assert resp.status_code == 200, resp.text
             return resp.json()
 
-        found = tool("find_reservation", {"last_name": "Solberg", "confirmation_code": "RT2LKD"})
+        # protected data is closed until a reservation is verified on this call
+        assert tool("get_reservation", {})["error_code"] == "IDENTITY_NOT_VERIFIED"
+
+        # tolerant on spelling and on a spaced-out code, strict on identity
+        found = tool("find_reservation",
+                     {"last_name": "Sollberg", "confirmation_code": "rt 2 l k d"})
         assert found["ok"] and found["data"]["verified"]
+        assert found["data"]["confirmation_code"] == "RT2LKD"
 
-        saver = tool("quote_change", {"confirmation_code": "QK4TZP", "new_flight": "CX119"})
-        assert saver["ok"] is False and saver["error_code"] == "SAVER_NOT_CHANGEABLE"
+        # the precedence trap: RT2LKD's flight is cancelled, so a voluntary change
+        # must be refused rather than quoted a fee
+        disrupted = tool("quote_change", {"new_flight": "KA775"})
+        assert disrupted["ok"] is False
+        assert disrupted["error_code"] == "DISRUPTED_USE_IRROPS", disrupted
+        assert disrupted["data"]["recoverable"] is False
 
-        quote = tool("quote_change", {"confirmation_code": "HB9WQM", "new_flight": "CX404"})
-        assert quote["ok"], quote
-        token = quote["data"]["confirmation_token"]
-        assert tool("confirm_change", {"confirmation_token": token})["data"]["status"] == "changed"
-        reuse = tool("confirm_change", {"confirmation_token": token})
+        # the free rebook is what that traveller is actually owed, at zero
+        rebook = tool("quote_involuntary_rebook", {"new_flight": "KA775"})
+        assert rebook["ok"] and rebook["data"]["total"] == 0.0, rebook
+        token = rebook["data"]["confirmation_token"]
+        assert tool("confirm_involuntary_rebook",
+                    {"confirmation_token": token})["data"]["status"] == "rebooked"
+        reuse = tool("confirm_involuntary_rebook", {"confirmation_token": token})
         assert reuse["ok"] is False and reuse["error_code"] == "TOKEN_ALREADY_USED"
+
+        # a dead carrier's code is a non-recoverable refusal, not a NOT_FOUND
+        ceased = tool("find_reservation",
+                      {"last_name": "Quintero-Namm", "confirmation_code": "VA774193"})
+        assert ceased["error_code"] == "CARRIER_CEASED_OPERATIONS", ceased
+        assert ceased["data"]["recoverable"] is False
+
+    # silent waivers and touchpoint pricing, on a fresh server so the session is clean
+    with _load_tool_server("travel") as module, TestClient(module.app) as client:
+        def tool(name: str, args: dict[str, Any]) -> dict[str, Any]:
+            resp = client.post(f"/tools/{name}", json={"arguments": args})
+            assert resp.status_code == 200, resp.text
+            return resp.json()
+
+        assert tool("find_reservation",
+                    {"last_name": "Ingersoll", "confirmation_code": "ZC8MRF"})["ok"]
+        first = tool("get_bag_price",
+                     {"bag_kind": "checked_first", "touchpoint": "booking"})
+        assert first["data"]["price"] == 0.0, "platinum covers the first checked bag"
+        assert first["data"]["base_price"] == 30.0
+        carry = tool("get_bag_price", {"bag_kind": "carry on", "touchpoint": "gate"})
+        assert carry["data"]["price"] == 79.0, "no tier ever covers the carry-on"
+
+        # a charge has to have been quoted on this call
+        assert tool("quote_payment",
+                    {"amount": 500})["error_code"] == "AMOUNT_NOT_QUOTED"
 
 
 def test_control_industry_calls_are_isolated() -> None:

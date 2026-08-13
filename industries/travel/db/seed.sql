@@ -1,90 +1,223 @@
--- Cascade Air baseline. Eight reservations, one per trap in the fare ladder.
-
-INSERT INTO reservations (
-  confirmation_code, summit_number, fare_brand, booked_at, disruption_status,
-  void_window_open, bags_included, fare_paid, status
-) VALUES
-  -- Saver + disrupted. The precedence trap: Saver is normally unchangeable, but a
-  -- cancelled flight frees it entirely.
-  ('RT2LKD', 'SC4471902', 'saver', '2026-06-14T08:00', 'cancelled',            0, 0, 189, 'active'),
-  -- Saver, not disrupted, 11 days out -> no value at all on cancellation.
-  ('QK4TZP', NULL,        'saver', '2026-07-02T11:00', 'none',                 0, 0, 214, 'active'),
-  -- Main, not disrupted. Ordinary change: fare difference only, no change fee.
-  ('HB9WQM', 'SC8830114', 'main',  '2026-07-28T09:30', 'none',                 0, 1, 512, 'active'),
-  -- Main, booked yesterday -> 24h void window still open, full refund.
-  ('NW7PXB', 'SC2019773', 'main',  '2026-07-30T14:10', 'none',                 1, 1, 328, 'active'),
-  -- First, refundable. Also the Gold account -> bag and seat fees waived.
-  ('LM5CTQ', 'SC6677001', 'first', '2026-05-20T10:00', 'none',                 0, 2, 940, 'active'),
-  -- Saver, 30 days out -> 50% credit on cancellation.
-  ('ZD3HRV', NULL,        'saver', '2026-07-01T12:00', 'none',                 0, 0, 156, 'active'),
-  -- Main with a 3h+ schedule change -> same free-rebook treatment as a cancellation.
-  ('YF8KNP', 'SC5512348', 'main',  '2026-06-25T16:00', 'schedule_change_180',  0, 1, 402, 'active'),
-  -- Unaccompanied minor travelling alone. No adult on the record at all.
-  ('GP6VXT', NULL,        'main',  '2026-07-10T09:00', 'none',                 0, 1, 275, 'active');
-
-INSERT INTO segments (confirmation_code, flight, origin, destination, depart) VALUES
-  ('RT2LKD', 'CX771', 'ORD', 'SEA', '2026-08-09T13:05'),
-  ('QK4TZP', 'CX118', 'SFO', 'DEN', '2026-08-11T07:15'),
-  ('HB9WQM', 'CX402', 'JFK', 'LAX', '2026-08-05T16:40'),
-  ('NW7PXB', 'CX615', 'SEA', 'ORD', '2026-09-02T06:20'),
-  ('LM5CTQ', 'CX220', 'ANC', 'SEA', '2026-08-18T11:45'),
-  ('ZD3HRV', 'CX905', 'PDX', 'PHX', '2026-08-30T15:30'),
-  ('YF8KNP', 'CX330', 'LAX', 'SEA', '2026-08-14T09:00'),
-  ('GP6VXT', 'CX144', 'SAN', 'SFO', '2026-08-22T10:15');
-
-INSERT INTO travelers (confirmation_code, name, age, guardian) VALUES
-  ('RT2LKD', 'Ingrid Sollberg',   58, 0),
-  ('QK4TZP', 'Alma Reyes',        41, 1),
-  ('QK4TZP', 'Nico Reyes',        12, 0),
-  ('HB9WQM', 'Desmond Okafor',    33, 0),
-  ('NW7PXB', 'Priya Raghunathan', 37, 0),
-  ('LM5CTQ', 'Ruth Kealoha',      64, 0),
-  ('ZD3HRV', 'Tomas Escobar',     29, 0),
-  ('YF8KNP', 'Marcus Oyelaran',   45, 0),
-  ('GP6VXT', 'Lena Whitfield',    11, 0);
-
-INSERT INTO fare_rules (brand, changeable, refundable, credit_pct_15plus_days, credit_pct_under_15_days, change_fee) VALUES
-  ('saver', 0, 0,  50,   0, 0),
-  ('main',  1, 0, 100, 100, 0),
-  ('first', 1, 1, 100, 100, 0);
-
-INSERT INTO inventory (flight, origin, destination, depart, cabin, fare_diff, seats) VALUES
-  ('CX772', 'ORD', 'SEA', '2026-08-09T18:20', 'main',  210,  6),
-  ('CX773', 'ORD', 'SEA', '2026-08-10T07:40', 'main',    0, 12),
-  ('CX119', 'SFO', 'DEN', '2026-08-11T12:40', 'main',   60,  4),
-  ('CX403', 'JFK', 'LAX', '2026-08-06T09:10', 'main',    0,  5),
-  ('CX404', 'JFK', 'LAX', '2026-08-05T21:15', 'main',  145,  2),
-  ('CX616', 'SEA', 'ORD', '2026-09-02T13:05', 'main',   75,  8),
-  ('CX221', 'ANC', 'SEA', '2026-08-18T17:30', 'first',   0,  3),
-  ('CX906', 'PDX', 'PHX', '2026-08-30T20:10', 'main',   40,  9),
-  ('CX331', 'LAX', 'SEA', '2026-08-14T14:20', 'main',  130,  7),
-  ('CX145', 'SAN', 'SFO', '2026-08-22T16:00', 'main',   25,  5);
-
-INSERT INTO flight_status (flight, scheduled, current, delay_minutes, cancelled) VALUES
-  ('CX771', '2026-08-09T13:05', NULL,               0,   1),
-  ('CX330', '2026-08-14T09:00', '2026-08-14T12:40', 220, 0),
-  ('CX118', '2026-08-11T07:15', '2026-08-11T07:35', 20,  0),
-  ('CX402', '2026-08-05T16:40', '2026-08-05T16:40', 0,   0);
-
-INSERT INTO summit_accounts (summit_number, tier, waives_bag_fee, waives_seat_fee) VALUES
-  ('SC4471902', 'member', 0, 0),
-  ('SC8830114', 'silver', 1, 0),
-  ('SC2019773', 'member', 0, 0),
-  ('SC6677001', 'gold',   1, 1),
-  ('SC5512348', 'member', 0, 0);
-
-INSERT INTO travel_credits (summit_number, amount, expires) VALUES
-  ('SC2019773',  85, '2026-11-30'),
-  ('SC6677001', 240, '2027-02-14');
-
-INSERT INTO seat_inventory (seat, seat_type, fee) VALUES
-  ('8A',  'exit_row',  45),
-  ('12C', 'preferred', 29),
-  ('22B', 'standard',   0),
-  ('24F', 'standard',   0);
+-- Kestrel Air deterministic fixtures. Fixed clock: TODAY = 2026-08-01,
+-- NOW = 2026-08-01T09:00:00. Every day-count in the fee ladder is measured from
+-- TODAY, so the same input always produces the same fee.
+--
+-- Fourteen reservations, one per trap. See docs/SPEC.md §6 for the trap table.
 
 INSERT INTO settings (key, value) VALUES
-  ('departure_ref',   '2026-08-11'),
-  ('bag_fee_first',   '35'),
-  ('bag_fee_second',  '45'),
-  ('card_last_four',  '4417');
+    ('today', '2026-08-01'),
+    ('now', '2026-08-01T09:00:00'),
+    ('carrier_name', 'Kestrel Air'),
+    ('carrier_iata', 'KA'),
+    ('delay_threshold_domestic_min', '180'),
+    ('delay_threshold_international_min', '360'),
+    ('refund_days_card', '7 business days'),
+    ('refund_days_other', '20 calendar days'),
+    ('credit_months', '12'),
+    ('live_agent_window_hours', '24'),
+    ('roam_pass_price', '199.00'),
+    ('roam_pass_base_fare', '0.01'),
+    ('roam_window_domestic_days', '1'),
+    ('roam_window_international_days', '10'),
+    ('fare_club_annual', '59.99'),
+    ('fare_club_enrolment', '50.00');
+
+-- ---------------------------------------------------------------- fare rules
+-- Basic fare: the published 60+ / 59-7 / 6-or-fewer / same-day ladder.
+-- Bundles: zero at every distance, but a fare difference still applies and a
+-- cheaper new itinerary forfeits the difference (residual_value = 0 everywhere).
+INSERT INTO fare_rules (fare_family, change_fee_60plus, change_fee_59_7,
+                        change_fee_6_less, change_fee_sameday, cancellation_fee,
+                        credit_months, residual_value) VALUES
+    ('basic',   0, 79, 129, 99, 129, 12, 0),
+    ('value',   0,  0,   0,  0,   0, 12, 0),
+    ('comfort', 0,  0,   0,  0,   0, 12, 0),
+    ('apex',    0,  0,   0,  0,   0, 12, 0);
+
+-- ---------------------------------------------------------------- elite matrix
+-- The free first checked bag starts at platinum. No tier includes the carry-on.
+INSERT INTO elite_tiers (tier, elite_points, earn_rate, waives_web_checkin,
+                         seat_upgrade_checkin, free_first_checked, seat_at_booking,
+                         companion) VALUES
+    ('none',          0, 10, 0, 0, 0, '',          0),
+    ('silver',    10000, 12, 1, 0, 0, '',          0),
+    ('gold',      20000, 14, 1, 1, 0, '',          0),
+    ('platinum',  50000, 16, 1, 1, 1, 'preferred', 0),
+    ('diamond',  100000, 20, 1, 1, 1, 'preferred', 1);
+
+INSERT INTO miles_accounts (miles_number, member_name, tier, elite_points) VALUES
+    ('KM2019773', 'Ingrid Solberg',          'none',      1840),
+    ('KM4471902', 'Halvard Ingersoll',       'platinum', 63400),
+    ('KM3318640', 'Camille Fournier-Oduya',  'gold',     24150),
+    ('KM8827104', 'Priya Ramanathan-Cole',   'silver',   11200);
+
+-- ---------------------------------------------------------------- fee tables
+-- Lowest at booking, highest at the gate. A carry-on is $35 at booking and $79
+-- at the gate; quoting the wrong touchpoint is a wrong answer that sounds right.
+INSERT INTO bag_prices (bag_kind, touchpoint, price) VALUES
+    ('carry_on',       'booking',        35),
+    ('carry_on',       'online_checkin', 50),
+    ('carry_on',       'airport',        65),
+    ('carry_on',       'gate',           79),
+    ('checked_first',  'booking',        30),
+    ('checked_first',  'online_checkin', 45),
+    ('checked_first',  'airport',        60),
+    ('checked_first',  'gate',           75),
+    ('checked_second', 'booking',        45),
+    ('checked_second', 'online_checkin', 60),
+    ('checked_second', 'airport',        75),
+    ('checked_second', 'gate',           90);
+
+INSERT INTO bag_penalties (code, price, label) VALUES
+    ('oversize',           75,  'Oversized checked bag, 63 to 110 linear inches'),
+    ('overweight_41_50',   75,  'Overweight checked bag, 41 to 50 pounds'),
+    ('overweight_51_100',  129, 'Overweight checked bag, 51 to 99.99 pounds'),
+    ('personal_item_gate', 99,  'Oversized personal item, assessed at the gate'),
+    ('pet',                149, 'Pet in cabin, per direction'),
+    ('bicycle',            100, 'Bicycle'),
+    ('antlers',            100, 'Antlers');
+
+INSERT INTO seat_prices (seat_class, price) VALUES
+    ('standard',       15),
+    ('preferred',      25),
+    ('frontrow_plus',  50);
+
+-- ---------------------------------------------------------------- reservations
+INSERT INTO reservations (confirmation_code, last_name, miles_number, fare_family,
+                          fare_paid, booked_at, card_last4, status, legacy_code) VALUES
+    -- 61 days out: change fee $0, but the fare difference still applies.
+    ('NB4RQC', 'Marchetti',       '',           'basic',   118.40, '2026-05-02T10:15:00', '2841', 'ticketed', ''),
+    -- 42 days out: the middle band, $79.
+    ('MR4KLD', 'Brennecke',       '',           'basic',    96.20, '2026-06-19T16:40:00', '6073', 'ticketed', ''),
+    -- 3 days out: $129 change, $129 cancel, and the value comes back as credit.
+    ('QK4TZP', 'Ferreira',        '',           'basic',   143.90, '2026-07-02T08:05:00', '9915', 'ticketed', ''),
+    -- Value bundle: $0 change fee, fare difference only.
+    ('HB9WQM', 'Vasquez-Hail',    '',           'value',   172.50, '2026-06-28T13:22:00', '3364', 'ticketed', ''),
+    -- Flight cancelled. Basic fare plus the DOT rule: no fee, cash refund.
+    ('RT2LKD', 'Solberg',         'KM2019773',  'basic',   129.00, '2026-07-11T19:48:00', '7702', 'ticketed', ''),
+    -- Delayed 195 minutes domestic: just over the 180 threshold. Also today, so
+    -- this caller is inside the 24-hour live-agent window.
+    ('WD7NCE', 'Kastner',         '',           'comfort', 208.75, '2026-07-05T11:30:00', '1188', 'ticketed', ''),
+    -- Delayed 140 minutes: under the threshold. Owed nothing. The negative case.
+    ('VP3XHB', 'Oyelowo-Trask',   '',           'basic',    88.60, '2026-07-20T09:12:00', '5540', 'ticketed', ''),
+    -- Booked 13.5 hours ago, 19 days before departure: the 24-hour rule, full
+    -- cash refund on a basic fare.
+    ('KF2DVR', 'Adeyemi',         '',           'basic',   154.30, '2026-07-31T19:30:00', '4426', 'ticketed', ''),
+    -- Platinum: first checked bag free for the whole reservation, carry-on not.
+    ('ZC8MRF', 'Ingersoll',       'KM4471902',  'basic',   176.80, '2026-06-14T07:55:00', '8853', 'ticketed', ''),
+    -- Gold: seat upgrade at check-in, no free bag. The tier-boundary negative.
+    ('PW8HJL', 'Fournier-Oduya',  'KM3318640',  'basic',   112.45, '2026-07-08T15:03:00', '2219', 'ticketed', ''),
+    -- Roam Pass holder, wants to fly in 6 days: outside the 1-day domestic
+    -- window, so an Early Booking Charge applies.
+    ('JT5QWD', 'Ramanathan-Cole', 'KM8827104',  'basic',   134.70, '2026-07-16T12:41:00', '6634', 'ticketed', ''),
+    -- Two minors, no adult 15 or older. The gate fires before routing.
+    ('LN6BKP', 'Dubois',          '',           'value',   264.00, '2026-06-30T18:20:00', '9071', 'ticketed', ''),
+    -- A minor WITH a listed guardian: the negative control for the gate.
+    ('TY7MBX', 'Achterberg',      '',           'value',   241.00, '2026-07-03T10:47:00', '5567', 'ticketed', ''),
+    -- Also holds a dead carrier's code. International segment.
+    ('GX9TSA', 'Quintero-Namm',   '',           'basic',   198.30, '2026-06-21T14:09:00', '3307', 'ticketed', 'VA774193');
+
+INSERT INTO segments (confirmation_code, flight_number, origin, destination,
+                      departs_on, departs_at, is_international) VALUES
+    ('NB4RQC', 'KA214', 'DEN', 'MCO', '2026-10-01', '07:15', 0),
+    ('MR4KLD', 'KA338', 'PHL', 'TPA', '2026-09-12', '06:40', 0),
+    ('QK4TZP', 'KA451', 'LAS', 'DEN', '2026-08-04', '11:20', 0),
+    ('HB9WQM', 'KA507', 'ORD', 'PHX', '2026-08-13', '14:05', 0),
+    ('RT2LKD', 'KA771', 'ORD', 'SEA', '2026-08-09', '08:30', 0),
+    ('WD7NCE', 'KA183', 'CLE', 'MCO', '2026-08-01', '06:55', 0),
+    ('VP3XHB', 'KA629', 'ATL', 'DEN', '2026-08-02', '16:40', 0),
+    ('KF2DVR', 'KA245', 'MDW', 'LAS', '2026-08-20', '09:10', 0),
+    ('ZC8MRF', 'KA812', 'DFW', 'DEN', '2026-08-18', '12:35', 0),
+    ('PW8HJL', 'KA094', 'CVG', 'MCO', '2026-08-22', '07:45', 0),
+    ('JT5QWD', 'KA330', 'TPA', 'DEN', '2026-08-07', '13:15', 0),
+    ('LN6BKP', 'KA556', 'SJU', 'MIA', '2026-08-15', '10:00', 0),
+    ('TY7MBX', 'KA402', 'LAS', 'MCO', '2026-08-19', '07:00', 0),
+    ('GX9TSA', 'KA612', 'PHL', 'CUN', '2026-08-25', '08:20', 1);
+
+-- The only place ages exist.
+INSERT INTO travelers (confirmation_code, full_name, age, is_guardian) VALUES
+    ('NB4RQC', 'Ottoline Marchetti',       47, 0),
+    ('MR4KLD', 'Odalys Brennecke',         33, 0),
+    ('QK4TZP', 'Marisol Ferreira',         29, 0),
+    ('HB9WQM', 'Teodor Vasquez-Hail',      41, 0),
+    ('RT2LKD', 'Ingrid Solberg',           52, 0),
+    ('WD7NCE', 'Aurelio Kastner',          38, 0),
+    ('VP3XHB', 'Nadia Oyelowo-Trask',      44, 0),
+    ('KF2DVR', 'Soren Adeyemi',            26, 0),
+    ('ZC8MRF', 'Halvard Ingersoll',        61, 0),
+    ('PW8HJL', 'Camille Fournier-Oduya',   35, 0),
+    ('JT5QWD', 'Priya Ramanathan-Cole',    31, 0),
+    ('LN6BKP', 'Emeric Dubois',            13, 0),
+    ('LN6BKP', 'Colette Dubois',            9, 0),
+    ('TY7MBX', 'Rosalind Achterberg',      44, 1),
+    ('TY7MBX', 'Timo Achterberg',           8, 0),
+    ('GX9TSA', 'Beatriz Quintero-Namm',    43, 0);
+
+-- ---------------------------------------------------------------- operations
+-- Deliberately incomplete: eight of the fourteen booked flights have no row, so
+-- "no status on file" is a real answer the agent must give.
+INSERT INTO flight_status (flight_number, status_date, status, delay_minutes, note) VALUES
+    ('KA771', '2026-08-09', 'cancelled',       0,   'Cancelled by the carrier. Crew availability.'),
+    ('KA183', '2026-08-01', 'delayed',         195, 'Inbound aircraft late.'),
+    ('KA629', '2026-08-02', 'delayed',         140, 'Air traffic control hold at destination.'),
+    ('KA451', '2026-08-04', 'on_time',         0,   ''),
+    ('KA612', '2026-08-25', 'schedule_change', 45,  'Departure moved 45 minutes later.'),
+    ('KA330', '2026-08-07', 'on_time',         0,   '');
+
+INSERT INTO inventory (flight_number, departs_on, origin, destination, departs_at,
+                       fare, seats_available, is_international, pass_eligible) VALUES
+    -- Rebooking options for the cancelled ORD-SEA flight.
+    ('KA775', '2026-08-09', 'ORD', 'SEA', '14:10', 148.00,  9, 0, 1),
+    ('KA779', '2026-08-10', 'ORD', 'SEA', '09:25', 132.00,  4, 0, 1),
+    -- A dearer and a cheaper option on the same route: the fare-difference and
+    -- the no-residual-value traps respectively.
+    ('KA509', '2026-08-13', 'ORD', 'PHX', '18:40', 214.00,  6, 0, 1),
+    ('KA505', '2026-08-13', 'ORD', 'PHX', '06:15',  96.00,  3, 0, 1),
+    ('KA455', '2026-08-04', 'LAS', 'DEN', '17:50', 176.00,  5, 0, 1),
+    ('KA187', '2026-08-01', 'CLE', 'MCO', '15:30', 158.00,  7, 0, 1),
+    ('KA216', '2026-10-02', 'DEN', 'MCO', '08:00', 189.00, 12, 0, 1),
+    ('KA340', '2026-09-13', 'PHL', 'TPA', '07:30', 121.00,  8, 0, 1),
+    ('KA247', '2026-08-20', 'MDW', 'LAS', '16:20', 167.00, 10, 0, 1),
+    ('KA814', '2026-08-18', 'DFW', 'DEN', '18:15', 139.00,  9, 0, 1),
+    -- Pass bookings: one eligible, one deliberately not.
+    ('KA332', '2026-08-07', 'TPA', 'DEN', '19:05', 154.00,  6, 0, 1),
+    ('KA334', '2026-08-07', 'TPA', 'DEN', '06:30', 143.00,  2, 0, 0),
+    ('KA616', '2026-08-25', 'PHL', 'CUN', '15:40', 288.00,  5, 1, 1);
+
+INSERT INTO seat_inventory (flight_number, departs_on, seat, seat_class, status) VALUES
+    ('KA812', '2026-08-18', '3A',  'frontrow_plus', 'open'),
+    ('KA812', '2026-08-18', '7C',  'preferred',     'open'),
+    ('KA812', '2026-08-18', '14B', 'standard',      'open'),
+    ('KA812', '2026-08-18', '14C', 'standard',      'taken'),
+    ('KA507', '2026-08-13', '2A',  'frontrow_plus', 'open'),
+    ('KA507', '2026-08-13', '8D',  'preferred',     'open'),
+    ('KA507', '2026-08-13', '19F', 'standard',      'open'),
+    ('KA507', '2026-08-13', '19E', 'standard',      'taken'),
+    ('KA775', '2026-08-09', '4B',  'preferred',     'open'),
+    ('KA775', '2026-08-09', '21A', 'standard',      'open'),
+    ('KA094', '2026-08-22', '6F',  'preferred',     'open'),
+    ('KA094', '2026-08-22', '17D', 'standard',      'open');
+
+-- ---------------------------------------------------------------- subscriptions
+INSERT INTO roam_passes (miles_number, pass_id, valid_from, valid_to, price_paid) VALUES
+    ('KM8827104', 'RP-77104', '2026-06-01', '2027-01-04', 199.00);
+
+INSERT INTO blackout_dates (blackout_date, tier) VALUES
+    ('2026-08-29', 'peak'),
+    ('2026-08-30', 'peak'),
+    ('2026-09-05', 'shoulder'),
+    ('2026-11-25', 'holiday'),
+    ('2026-11-26', 'holiday'),
+    ('2026-12-24', 'holiday');
+
+INSERT INTO fare_club_members (miles_number, joined_on, renews_on, annual_fee,
+                               enrolment_fee) VALUES
+    ('KM3318640', '2026-02-14', '2027-02-14', 59.99, 50.00);
+
+-- Credits exist and can be read. Nothing in this pack spends one.
+INSERT INTO flight_credits (miles_number, amount, issued_on, expires_on) VALUES
+    ('KM2019773',  64.50, '2026-04-10', '2027-04-10'),
+    ('KM8827104', 118.00, '2026-01-05', '2027-01-05');
+
+INSERT INTO defunct_carriers (code_prefix, carrier_name, ceased_on) VALUES
+    ('VA', 'Vantage Airways', '2026-05-02');
