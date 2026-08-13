@@ -1,0 +1,49 @@
+industries/customer-support/system-prompts/service.md
+  s_24397dfabc2136::t_84bbd9d53b0585 80-83
+industries/customer-support/agent_blueprint.mmd
+  s_24397dfabc2136::t_1211872bac7342 12,15,18
+industries/customer-support/db/schema.sql
+  s_24397dfabc2136::t_c13ae07d3b394d 71
+industries/customer-support/tool_server.py
+  s_24397dfabc2136::t_20dd4fa8e28b1c 413-415,419,431-432,443,449-450
+  s_24397dfabc2136::t_80481d751c2907 1577-1579
+  s_24397dfabc2136::t_63245ebdacbcdc 918
+  s_24397dfabc2136::t_65012e751ef9d5 372,390-394
+  s_24397dfabc2136::t_5e189b83dce2c2 1022-1024
+  s_24397dfabc2136::t_e3f266a56c772e 864-866
+  s_24397dfabc2136::t_e885c049a58d87 39
+  s_24397dfabc2136::t_ada1b4c96a55af 762-768,812-814
+  s_24397dfabc2136::t_02961ee47de531 873-875
+  s_24397dfabc2136::t_3f38c8b7f82eda 958
+  s_24397dfabc2136::t_f6aa538a3fcfdd 235-239
+  s_24397dfabc2136::t_ae342bb32993da 1501-1502
+  s_24397dfabc2136::t_0918a910045cf6 1662,1666,1670
+industries/customer-support/system-prompts/fraud.md
+  s_24397dfabc2136::t_8845299adca56b 49-52
+industries/customer-support/agent_blueprint.json
+  s_24397dfabc2136::t_f473239369ea15 49-50
+  s_24397dfabc2136::t_9bc48607f9a335 86-87
+  s_24397dfabc2136::t_f07afeffd6b7a9 68-69
+industries/customer-support/tools.json
+  s_24397dfabc2136::t_f617c6c7aba0cf 551-554
+industries/customer-support/db/seed.sql
+  s_24397dfabc2136::t_67b9cef7d9d9fc 105,107,109,111,113,115,117,119,121,123,125,127,129,131,133-135
+  s_24397dfabc2136::t_c0a42964901e99 152
+  s_24397dfabc2136::t_4c7ee52990c2a5 153-154
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "48048d798740f2360d61cdcd264ca19c02fedcb0",
+  "prompts": {},
+  "sessions": {
+    "s_24397dfabc2136": {
+      "agent_id": {
+        "tool": "windsurf",
+        "id": "jasper-poultry",
+        "model": "unknown"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
