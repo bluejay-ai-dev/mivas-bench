@@ -58,6 +58,7 @@ def load_blueprint(industry_dir: str | Path) -> dict[str, Any]:
         "start": blueprint["agents"][0]["name"],
         "agents": agents,
         "catalog": catalog,
+        "greeting": (blueprint.get("greeting") or "").strip(),
     }
 
 
@@ -90,25 +91,41 @@ def _tool_decl(spec: dict) -> dict[str, Any]:
 
 
 def session_config(
-    bp: dict[str, Any], *, voice: str | None = None, greeting: str | None = None
+    bp: dict[str, Any],
+    *,
+    voice: str | None = None,
+    greeting: str | None = None,
+    agent: str | None = None,
 ) -> dict[str, Any]:
-    """All blueprint tools are declared up front (config is fixed at connect)."""
+    """All blueprint tools are declared up front (config is fixed at connect).
+
+    Pass greeting="" on a mid-call handoff update so the specialist does not
+    re-play the opening line. Omit greeting to use env / pack / default.
+    """
     tools = []
     seen: set[str] = set()
-    for agent in bp["agents"].values():
-        for t in agent["tools"]:
+    for entry in bp["agents"].values():
+        for t in entry["tools"]:
             name = t["name"]
             if name in seen or name not in bp["catalog"]:
                 continue
             seen.add(name)
             tools.append(_tool_decl(bp["catalog"][name]))
 
-    start = bp["agents"][bp["start"]]
-    # note soft-handoff: other agents' tools are visible; prompt still starts as bp["start"]
-    instruction = start["instructions"] + _multiagent_note(bp)
+    role_name = agent if agent in bp["agents"] else bp["start"]
+    role = bp["agents"][role_name]
+    instruction = role["instructions"] + _multiagent_note(bp)
+    if greeting is not None:
+        spoken = greeting.strip()
+    else:
+        spoken = (
+            os.environ.get("ASSEMBLYAI_GREETING", "").strip()
+            or (bp.get("greeting") or "").strip()
+            or DEFAULT_GREETING
+        )
     return {
         "system_prompt": instruction,
-        "greeting": greeting or os.environ.get("ASSEMBLYAI_GREETING", DEFAULT_GREETING),
+        "greeting": spoken,
         "input": {"format": {"encoding": "audio/pcm"}},
         "output": {
             "voice": voice or os.environ.get("ASSEMBLYAI_VOICE") or "alba",
