@@ -37,6 +37,17 @@ def test_line_agent_reads_pack_greeting() -> None:
     assert "BLUEPRINT.get(\"greeting\")" in text
     assert "_introduction" in text
     assert "next_stack" in text
+    assert "_continue_as_handoff" in text
+    assert "is_background=False" in text
+    assert "agent_as_handoff(" not in text
+
+
+def test_chirp_gates_pcm_on_bluejay_speech_events() -> None:
+    text = (FAMILY / "adapters" / "chirp.py").read_text()
+    assert "listening = False" in text
+    assert "if not listening:" in text
+    assert "speech.completed" in text
+    assert 'audio["held"]' in text
 
 
 def test_healthcare_handoff_graph_is_cyclic_but_walkable() -> None:
