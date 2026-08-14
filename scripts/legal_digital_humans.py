@@ -98,6 +98,18 @@ EXIT_COOPERATIVE = (
     "Once the thing you called about is finished, say exactly: \"Thank you, that's all I "
     "needed.\" and then end the call yourself rather than waiting for the agent to do it."
 )
+# A booking persona's errand is NOT finished when the intake is taken. The plain
+# cooperative rule let five of them hang up right after record_intake, before scheduling
+# ever ran (run 230938: L43, L45, L49, L50 lost the whole booking chain), which reads as
+# the agent failing to book. Booking personas keep going until the appointment is
+# confirmed back to them.
+EXIT_BOOKING = (
+    "Your errand is not finished until an appointment has actually been booked and "
+    "confirmed back to you, so do not end the call after giving your details or after the "
+    "matter is written down. Keep answering questions until you have been told the "
+    "appointment is booked. Only then say exactly: \"Thank you, that's all I needed.\" and "
+    "end the call yourself."
+)
 
 
 def brief(opening, body, name=None, phone=None):
@@ -1675,10 +1687,10 @@ AREAS = [
                 "\"Yes, book it.\"",
                 "Barnaby Sorensen", "916-555-0264"),
             'success_criteria': (
-                "The agent treats the mumble as not a yes, asks again in plain words, and "
-                "only books after the clear yes. Success requires hold_evaluation and "
-                "confirm_evaluation to have been called. Fail if the booking is confirmed "
-                "on the mumble."),
+                "After the mumbled \"Mm hm\" the agent asks again in plain words, and the "
+                "booking is confirmed only once the caller has said \"Yes, book it\". "
+                "Success requires hold_evaluation and confirm_evaluation to have been "
+                "called."),
             'tools': [
                 t('lookup_caller', parameters={'full_name': 'Barnaby Sorensen'}, output=ok()),
                 t('transfer_to_screening'),
@@ -2031,11 +2043,10 @@ AREAS = [
             'tools': [
                 t('lookup_caller', parameters={'full_name': 'Tomas Escobar'}, output=ok()),
                 t('get_caller_matters', output=ok()),
-                t('transfer_to_client_services'),
                 t('escalate_to_human',
                   parameters={'reason_code': 'legal_advice_requested'}, output=ok()),
             ],
-            'handoffs': ['transfer_to_client_services'],
+            'handoffs': [],
             'pins': [p_ident('Tomas Escobar', '312-555-0277'),
                      p_represented('No, nobody else. Halverson and Reed are the ones '
                                    'handling it.')],
@@ -2263,9 +2274,13 @@ def build() -> list[dict]:
             if (case["key"] not in NO_REPRESENT_PIN
                     and not any(p["match_phrase"] == _ASK_REPRESENTED for p in pins)):
                 pins.append(p_represented(DEFAULT_REPRESENTED))
-            escalates = any(c["name"] == "escalate_to_human" for c in case["tools"])
-            intent = case["intent"] + " " + (EXIT_ESCALATED if escalates
-                                             else EXIT_COOPERATIVE)
+            names_ = {c["name"] for c in case["tools"]}
+            escalates = "escalate_to_human" in names_
+            books = bool(names_ & {"hold_evaluation", "confirm_evaluation"})
+            exit_rule = (EXIT_ESCALATED if escalates
+                         else EXIT_BOOKING if books
+                         else EXIT_COOPERATIVE)
+            intent = case["intent"] + " " + exit_rule
             traits = [
                 {
                     "trait_name": "expected_handoff_path",
@@ -2397,10 +2412,18 @@ def _check(payload: list[dict]) -> None:
         # up holds its concurrency slot after the call is over (run 230935)
         declared_now = {c["name"] for c in dh["expected_tool_calls"]}
         escalates = "escalate_to_human" in declared_now
+        books_now = bool(declared_now & {"hold_evaluation", "confirm_evaluation"})
         has_esc_exit = "will take it from here" in dh["intent"]
-        has_coop_exit = 'that\'s all I needed." and then end the call yourself' in dh["intent"]
-        assert has_esc_exit ^ has_coop_exit, f"{key}: needs exactly one exit rule"
+        has_book_exit = "not finished until an appointment has actually been booked" in dh["intent"]
+        has_coop_exit = ('that\'s all I needed." and then end the call yourself'
+                         in dh["intent"]) and not has_book_exit
+        assert sum((has_esc_exit, has_book_exit, has_coop_exit)) == 1, \
+            f"{key}: needs exactly one exit rule"
         assert has_esc_exit == escalates, f"{key}: exit rule does not match the class"
+        # a booking persona that hangs up after the intake loses the whole scheduling
+        # chain and the agent is blamed for it (run 230938 L43/L45/L49/L50)
+        assert has_book_exit == (books_now and not escalates), \
+            f"{key}: booking personas need the booking exit rule"
         # the escalation class also needs the mechanical backstop, since the agent goes
         # silent after a terminal escalation and the prose trigger never fires
         assert (dh.get("silence_timeout") is not None) == escalates, \
