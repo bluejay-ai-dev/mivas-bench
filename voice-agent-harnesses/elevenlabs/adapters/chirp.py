@@ -33,6 +33,13 @@ from report import (  # noqa: E402
 
 POLL_TIMEOUT_S = 0.25
 SILENCE_GAP_S = 0.9
+# 200ms of 16 kHz s16le silence so ElevenLabs VAD commits the user turn.
+SILENCE_FLUSH = b"\x00" * (16_000 * 2 // 5)
+
+
+def _forward_user_pcm(*, ready: bool, listening: bool) -> bool:
+    """hold-noise PCM before the greeting (or between DH turns) delays first_message."""
+    return ready and listening
 
 
 def _auth() -> str | None:
@@ -65,13 +72,23 @@ async def _bridge(ws, model: str, industry: str) -> None:
         print(f"chirp sim_result_id={sim_id}", flush=True)
     set_call_id(sim_id)
 
+    t0 = time.monotonic()
     ids = ensure_agents(industry_dir)
     signed_url = await get_signed_url(ids["receptionist_id"])
+    print(
+        f"chirp signed_url_ms={int((time.monotonic() - t0) * 1000)} "
+        f"receptionist={ids['receptionist_id']}",
+        flush=True,
+    )
 
     utt: str | None = None
     speech_otel = None
     customer_otel = None
     end = asyncio.Event()
+    ready = asyncio.Event()
+    listening = False
+    seen_system_tools: set[str] = set()
+    first_audio_logged = False
 
     def _close_utt() -> None:
         nonlocal utt, speech_otel
@@ -93,16 +110,24 @@ async def _bridge(ws, model: str, industry: str) -> None:
             await agent_ws.send(json.dumps({"type": "conversation_initiation_client_data"}))
 
             async def inbound() -> None:
-                """chirp pcm + Bluejay speech.* → ElevenLabs; customer.speech spans."""
-                nonlocal customer_otel
+                """chirp pcm + Bluejay speech.* → ElevenLabs; customer.speech spans.
+
+                Do not forward hold-noise PCM until the ConvAI session is up and
+                Bluejay marks the caller as speaking. Early bytes make ElevenLabs
+                treat the line as a user turn and delay the scripted greeting.
+                """
+                nonlocal customer_otel, listening
                 try:
                     async for msg in ws:
                         if end.is_set():
                             break
                         if isinstance(msg, bytes) and msg:
-                            await agent_ws.send(
-                                json.dumps({"user_audio_chunk": base64.b64encode(msg).decode()})
-                            )
+                            if _forward_user_pcm(ready=ready.is_set(), listening=listening):
+                                await agent_ws.send(
+                                    json.dumps(
+                                        {"user_audio_chunk": base64.b64encode(msg).decode()}
+                                    )
+                                )
                             continue
                         if not isinstance(msg, str):
                             continue
@@ -113,10 +138,22 @@ async def _bridge(ws, model: str, industry: str) -> None:
                         etype = event.get("type")
                         data = event.get("data") or {}
                         if etype == "speech.started":
+                            listening = True
                             _close_customer()
                             uid = data.get("utterance_id") or f"c_{uuid.uuid4().hex[:12]}"
                             customer_otel = start_speech_span(uid, speaker="customer")
                         elif etype == "speech.completed":
+                            listening = False
+                            if ready.is_set():
+                                await agent_ws.send(
+                                    json.dumps(
+                                        {
+                                            "user_audio_chunk": base64.b64encode(
+                                                SILENCE_FLUSH
+                                            ).decode()
+                                        }
+                                    )
+                                )
                             _close_customer()
                 finally:
                     _close_customer()
@@ -130,7 +167,7 @@ async def _bridge(ws, model: str, industry: str) -> None:
                 promptly (notably for a scripted `first_message` turn), so a silence-gap
                 fallback (no `audio` chunk for SILENCE_GAP_S) is the real signal.
                 """
-                nonlocal utt, speech_otel
+                nonlocal utt, speech_otel, first_audio_logged
                 last_audio_ts: float | None = None
                 try:
                     while not end.is_set():
@@ -144,7 +181,20 @@ async def _bridge(ws, model: str, industry: str) -> None:
                             continue
                         event = json.loads(raw)
                         etype = event.get("type")
-                        if etype == "audio":
+                        if etype == "conversation_initiation_metadata":
+                            ready.set()
+                            print(
+                                f"chirp conversation_ready_ms={int((time.monotonic() - t0) * 1000)}",
+                                flush=True,
+                            )
+                        elif etype == "audio":
+                            ready.set()
+                            if not first_audio_logged:
+                                first_audio_logged = True
+                                print(
+                                    f"chirp first_audio_ms={int((time.monotonic() - t0) * 1000)}",
+                                    flush=True,
+                                )
                             if utt is None:
                                 utt = f"u_{uuid.uuid4().hex[:12]}"
                                 speech_otel = start_speech_span(utt, speaker="agent")
@@ -185,6 +235,12 @@ async def _bridge(ws, model: str, industry: str) -> None:
                                     }
                                 )
                             )
+                            # CHIRP smoke has no human to join. Leaving the socket
+                            # open after transfer_to_human is dead air, and Bluejay
+                            # can leave the result RUNNING with no start_time.
+                            if tool_name == "transfer_to_human":
+                                print("chirp hangup after transfer_to_human", flush=True)
+                                break
                         elif etype == "agent_tool_response":
                             # System tools (transfer_to_agent / end_call) run server-side
                             # and never hit client_tool_call — this is the only event that
@@ -197,6 +253,13 @@ async def _bridge(ws, model: str, industry: str) -> None:
                             print(f"chirp elevenlabs agent_tool_response {payload}", flush=True)
                             fired = payload.get("is_called", True) and not payload.get("is_blocked")
                             if fired and tool_name in ("transfer_to_agent", "end_call"):
+                                call_key = str(
+                                    payload.get("tool_call_id") or payload.get("event_id") or ""
+                                )
+                                if call_key and call_key in seen_system_tools:
+                                    continue
+                                if call_key:
+                                    seen_system_tools.add(call_key)
                                 ok = not payload.get("is_error")
                                 params = {"tool_type": payload.get("tool_type", "system")}
                                 with tool_span(
@@ -207,6 +270,9 @@ async def _bridge(ws, model: str, industry: str) -> None:
                                         {"success": ok, "source": "elevenlabs_system_tool"},
                                         ok=ok,
                                     )
+                                if tool_name == "end_call":
+                                    print("chirp hangup after end_call", flush=True)
+                                    break
                         elif etype in ("client_error", "guardrail_triggered"):
                             print(f"chirp elevenlabs {etype}: {event}", flush=True)
                             break
@@ -257,7 +323,13 @@ def main(model: str | None = None) -> None:
     if not os.environ.get("ELEVENLABS_API_KEY"):
         raise SystemExit("need ELEVENLABS_API_KEY")
     industry_path(a.industry)
-    print(f"ws↔ElevenLabs {a.model} × {a.industry} :{a.port} auth={bool(_auth())}", flush=True)
+    print(f"chirp warmup elevenlabs agents for {a.industry}", flush=True)
+    ids = ensure_agents(a.industry)
+    print(
+        f"ws↔ElevenLabs {a.model} × {a.industry} :{a.port} "
+        f"receptionist={ids['receptionist_id']} auth={bool(_auth())}",
+        flush=True,
+    )
 
     async def run() -> None:
         async with serve(lambda ws: _handler(ws, a.model, a.industry), a.host, a.port):

@@ -322,7 +322,13 @@ async def _execute_tool(
             json={"arguments": args},
             headers=tool_headers(),
         )
-        return resp.json(), False
+        result = resp.json()
+        # transfer_to_human is an industry POST (so Bluejay records actual),
+        # then the model stops talking. CHIRP smoke has no human to join, so
+        # leave the socket open and the DH nudges after 25s+ of dead air.
+        if name == "transfer_to_human":
+            return result, True
+        return result, False
 
 
 async def run_tool(
