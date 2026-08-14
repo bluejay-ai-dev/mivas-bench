@@ -26,29 +26,39 @@ def check(industry: str) -> None:
     graph = pathway_graph(bp, "https://example.test")
     nodes = {n["id"]: n for n in graph["nodes"]}
     # A Default node has no tools bound, so a prompt naming one gets read out loud.
-    for nid in ("receptionist", "scheduler"):
-        prompt = nodes[nid]["data"]["prompt"]
+    for agent_name in bp["agents"]:
+        prompt = nodes[agent_name]["data"]["prompt"]
         assert not any(tool in prompt for tool in bp["catalog"]), prompt
-    assert nodes["receptionist"]["data"]["isStart"], "receptionist must be the start node"
-    assert nodes["end"]["type"] == "End Call"
-    for nid, tool in (("handoff", "handoff_to_scheduler"), ("book", "schedule_appointment")):
-        assert nodes[nid]["type"] == "Webhook"
-        assert nodes[nid]["data"]["url"] == f"https://example.test/tool/{tool}", nodes[nid]
-    assert nodes["book"]["data"]["extractVars"][0][0] == "date"
-    # Default nodes route on edge descriptions, Webhook nodes on responsePathways.
-    hops = {(e["source"], e["target"]) for e in graph["edges"]}
-    assert hops == {
-        ("receptionist", "handoff"),
-        ("scheduler", "book"),
-        ("receptionist", "end_receptionist"),
-        ("scheduler", "end_scheduler"),
-    }, hops
-    # top-level, not under `data` — Bland drops nested edge fields
+    assert nodes[bp["start"]]["data"]["isStart"], f"{bp['start']} must be the start node"
     assert all(e.get("description") and "data" not in e for e in graph["edges"])
-    assert [
-        (n, nodes[n]["data"]["responsePathways"][0][3]["id"]) for n in ("handoff", "book")
-    ] == [("handoff", "scheduler"), ("book", "end")]
-    assert nodes["book"]["data"]["responsePathways"][1][3]["id"] == "scheduler"
+    if bp["start"] == "receptionist" and "handoff_to_scheduler" in bp["catalog"]:
+        assert nodes["end"]["type"] == "End Call"
+        for nid, tool in (("handoff", "handoff_to_scheduler"), ("book", "schedule_appointment")):
+            assert nodes[nid]["type"] == "Webhook"
+            assert nodes[nid]["data"]["url"] == f"https://example.test/tool/{tool}", nodes[nid]
+        assert nodes["book"]["data"]["extractVars"][0][0] == "date"
+        hops = {(e["source"], e["target"]) for e in graph["edges"]}
+        assert hops == {
+            ("receptionist", "handoff"),
+            ("scheduler", "book"),
+            ("receptionist", "end_receptionist"),
+            ("scheduler", "end_scheduler"),
+        }, hops
+        assert [
+            (n, nodes[n]["data"]["responsePathways"][0][3]["id"]) for n in ("handoff", "book")
+        ] == [("handoff", "scheduler"), ("book", "end")]
+        assert nodes["book"]["data"]["responsePathways"][1][3]["id"] == "scheduler"
+    else:
+        for name, agent in bp["agents"].items():
+            assert nodes[name]["type"] == "Default"
+            for tool in agent["tools"]:
+                if tool.get("handoff"):
+                    nid = f"{name}__{tool['name']}"
+                    assert nodes[nid]["type"] == "Webhook"
+                    assert nodes[nid]["data"]["url"] == (
+                        f"https://example.test/tool/{tool['name']}"
+                    )
+                    assert nodes[nid]["data"]["responsePathways"][0][3]["id"] == tool["handoff_to"]
     print(f"ok — {len(graph['nodes'])} nodes, {len(graph['edges'])} edges")
 
 
