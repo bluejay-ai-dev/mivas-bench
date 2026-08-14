@@ -58,6 +58,28 @@ def _simulation_result_id(ws) -> str | None:
 # check that this one still converts.
 NUDGE_GREETING = RealtimeModelSendRawMessage(message={"type": "response.create"})
 
+# One nudge is a race. `run()` returns before the Realtime socket is necessarily ready,
+# and a raw message that arrives early is DROPPED with a log line rather than an error —
+# so the agent never opens, the digital human (speaks_first: false) waits for a greeting
+# that will not come, and the call sits at zero turns until something kills it. Serialised
+# smoke tests hide this; at 20 concurrent sessions setup is slow enough that it bit 19 of
+# 31 calls in run 230926. Re-nudge until the agent actually produces audio.
+NUDGE_RETRY_DELAY_S = float(os.environ.get("MIVAS_NUDGE_RETRY_DELAY_S", "3"))
+NUDGE_MAX_ATTEMPTS = int(os.environ.get("MIVAS_NUDGE_MAX_ATTEMPTS", "5"))
+
+
+async def _nudge_until_open(session, opened: asyncio.Event) -> None:
+    """Re-send the opening nudge until the agent speaks (or attempts run out)."""
+    for _ in range(NUDGE_MAX_ATTEMPTS):
+        if opened.is_set() or getattr(session, "_closed", False):
+            return
+        with contextlib.suppress(Exception):
+            await session.model.send_event(NUDGE_GREETING)
+        with contextlib.suppress(asyncio.TimeoutError):
+            await asyncio.wait_for(opened.wait(), timeout=NUDGE_RETRY_DELAY_S)
+        if opened.is_set():
+            return
+
 
 async def _bridge(ws, model: str, industry: str) -> None:
     industry_dir = industry_path(industry)
@@ -90,7 +112,8 @@ async def _bridge(ws, model: str, industry: str) -> None:
         ) as session:
             ctx["session"] = session
             events = tracer.wrap(session) if tracer is not None else session
-            await session.model.send_event(NUDGE_GREETING)
+            opened = asyncio.Event()
+            nudge_task = asyncio.create_task(_nudge_until_open(session, opened))
 
             async def inbound() -> None:
                 nonlocal up
@@ -135,6 +158,7 @@ async def _bridge(ws, model: str, industry: str) -> None:
                 try:
                     async for event in events:
                         if event.type == "audio":
+                            opened.set()
                             if utt is None:
                                 utt = f"u_{uuid.uuid4().hex[:12]}"
                                 await ws.send(
@@ -162,6 +186,9 @@ async def _bridge(ws, model: str, industry: str) -> None:
 
             tasks = [asyncio.create_task(inbound()), asyncio.create_task(outbound())]
             done, pending = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
+            opened.set()  # release the nudge watchdog before teardown
+            nudge_task.cancel()
+            await asyncio.gather(nudge_task, return_exceptions=True)
             for t in pending:
                 t.cancel()
             await asyncio.gather(*pending, return_exceptions=True)
