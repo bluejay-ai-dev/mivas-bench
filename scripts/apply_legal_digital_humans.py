@@ -36,7 +36,7 @@ OWNED = [
     "gender", "fluency", "voice_speed", "verbosity", "audio_quality",
     "background_noise", "background_noise_volume", "interruptions",
     "allow_dtmf_tool", "allow_end_call_tool", "allow_silence_tool", "num_runs",
-    "test_name",
+    "test_name", "silence_timeout",
 ]
 
 
