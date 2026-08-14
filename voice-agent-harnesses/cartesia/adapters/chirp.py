@@ -39,7 +39,7 @@ from harness import (  # noqa: E402
     end_session,
     ensure_agent,
     for_provider,
-    industry_path,
+    industry_name,
     load_blueprint,
     provider_id_from_request,
     run_tool,
@@ -114,7 +114,7 @@ async def chirp(ws: WebSocket) -> None:
 
 async def _bridge(ws: WebSocket) -> None:
     industry, model = STATE["industry"], STATE["model"]
-    workflow = f"mivas-{Path(industry_path(industry)).name}-{model}"
+    workflow = f"mivas-{industry_name(industry)}-{model}"
     sim_id = ws.headers.get("x-simulation-result-id")
     if sim_id:
         print(f"chirp sim_result_id={sim_id}", flush=True)
@@ -127,8 +127,12 @@ async def _bridge(ws: WebSocket) -> None:
     agent_span = None
     customer_span = None
     utt: str | None = None
-    audio = {"in": 0, "out": 0}
+    audio = {"in": 0, "out": 0, "held": 0}
     seen_tools: set[str] = set()
+    # Cartesia Ink ends a user turn when media_input stops. Bluejay keeps
+    # sending PCM after speech.completed (hold noise), so Ink never commits
+    # and the Line agent sits silent until the DH asks "are you still there?".
+    listening = False
 
     try:
         async with traced_run(workflow, simulation_result_id=sim_id, model=model):
@@ -147,13 +151,16 @@ async def _bridge(ws: WebSocket) -> None:
 
                 async def inbound() -> None:
                     """Bluejay pcm → media_input; Bluejay speech.* → customer.speech."""
-                    nonlocal customer_span
+                    nonlocal customer_span, listening
                     try:
                         while not end.is_set():
                             msg = await ws.receive()
                             if msg["type"] == "websocket.disconnect":
                                 break
                             if (pcm := msg.get("bytes")):
+                                if not listening:
+                                    audio["held"] += len(pcm)
+                                    continue
                                 audio["in"] += len(pcm)
                                 await agent_ws.send(
                                     json.dumps(
@@ -171,13 +178,26 @@ async def _bridge(ws: WebSocket) -> None:
                             except json.JSONDecodeError:
                                 continue
                             if event.get("type") == "speech.started":
+                                listening = True
                                 end_speech_span(customer_span)
                                 uid = (event.get("data") or {}).get("utterance_id") or f"c_{uuid.uuid4().hex[:12]}"
                                 customer_span = start_speech_span(uid, speaker="customer")
                                 print(f"chirp customer speech.started {uid}", flush=True)
                             elif event.get("type") == "speech.completed":
+                                listening = False
+                                # 200ms of zeros so Ink sees a clean end of speech.
+                                silence = b"\x00" * (16000 * 2 // 5)
+                                await agent_ws.send(
+                                    json.dumps(
+                                        {
+                                            "event": "media_input",
+                                            "media": {"payload": base64.b64encode(silence).decode()},
+                                        }
+                                    )
+                                )
                                 end_speech_span(customer_span)
                                 customer_span = None
+                                print("chirp customer speech.completed", flush=True)
                     finally:
                         end_speech_span(customer_span)
                         customer_span = None
@@ -250,7 +270,10 @@ async def _bridge(ws: WebSocket) -> None:
                 for t in pending:
                     t.cancel()
                 await asyncio.gather(*pending, return_exceptions=True)
-                print(f"chirp audio bytes in={audio['in']} out={audio['out']}", flush=True)
+                print(
+                    f"chirp audio bytes in={audio['in']} out={audio['out']} held={audio['held']}",
+                    flush=True,
+                )
                 for t in done:
                     exc = None if t.cancelled() else t.exception()
                     if exc is not None and not type(exc).__name__.startswith(
