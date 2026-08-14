@@ -272,13 +272,11 @@ AREAS = [
                 "why. If you are asked anything about what happened, say exactly: \"I'd "
                 "rather talk to a person about that.\""),
             'success_criteria': (
-                "The agent tries the lookup, fails, asks once more, and after the second "
-                "failure hands the caller to a person. Success requires lookup_caller and "
-                "escalate_to_human with reason_code identity_failed to have been called. "
-                "Fail if the agent takes the details of the matter anyway."),
+                "The agent asks for the callback number a second time and, still without a "
+                "usable one, hands the caller to a person rather than taking the matter. "
+                "Success requires escalate_to_human with reason_code identity_failed to "
+                "have been called."),
             'tools': [
-                t('lookup_caller', parameters={'full_name': 'Curtis Beaumont'},
-                  output={'ok': False}),
                 t('escalate_to_human', parameters={'reason_code': 'identity_failed'},
                   output=ok()),
             ],
