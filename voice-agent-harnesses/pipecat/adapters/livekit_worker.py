@@ -2,8 +2,8 @@
 
 Bluejay `connection_type=LIVEKIT` dispatches by `livekit_agent_name`. This process
 accepts those jobs, joins the assigned room over LiveKitTransport, and runs the
-existing `bot.run_bot` pipeline. Industry tools go to TOOL_SERVER_URL (ClusterIP
-`http://mivas-{slug}-tools:8000` on EKS). Pipecat Cloud bots use the public
+existing `bot.run_bot` pipeline. Industry tools go to TOOL_SERVER_URL
+(`http://127.0.0.1:8000` in the combined pod). Pipecat Cloud bots use the public
 https://{host}/tools path instead.
 """
 

@@ -23,7 +23,7 @@ for _root in (Path("/app"), *Path(__file__).resolve().parents):
         if str(_runtime) not in sys.path:
             sys.path.insert(0, str(_runtime))
         break
-from call_id import headers as tool_headers, set_call_id  # noqa: E402
+from call_id import call_session, headers as tool_headers, set_call_id  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 TOOL_SERVER_URL = os.environ.get("TOOL_SERVER_URL", "http://127.0.0.1:8000").rstrip("/")

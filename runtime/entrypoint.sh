@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
-# MIVAS_ROLE=tools  → industry FastAPI only (separate Deployment).
-# MIVAS_ROLE=harness → wait for tools Service, ALB /health stub, then CHIRP/agent.
-# unset / combined   → local --local: tool server + ingress in one process tree.
+# Combined pod: industry FastAPI on :8000, then CHIRP/agent in the same process tree.
+# MIVAS_ROLE=tools / harness remain for one-off local debugging only.
 set -euo pipefail
 
 : "${HARNESS:=${VOICE_AGENT:-}}"
@@ -32,6 +31,9 @@ export OPENAI_REALTIME_MODEL="${OPENAI_REALTIME_MODEL:-}"
 export HARNESS_RUNTIME
 
 mkdir -p "$(dirname "$MIVAS_DB_PATH")"
+
+# Fail here, not silently at hangup, when the image cannot reach the snapshot bucket.
+python -c "import snapshot; snapshot.preflight()"
 
 wait_for_tools() {
   local url="$1"

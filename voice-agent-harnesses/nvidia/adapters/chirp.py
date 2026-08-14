@@ -8,9 +8,11 @@ industry `agent_blueprint.json`.
 from __future__ import annotations
 
 import argparse
+import asyncio
 import base64
 import os
 import sys
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 import uvicorn
@@ -24,9 +26,23 @@ from pipecat.transports.websocket.fastapi import (
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from chirp_serializer import ChirpFrameSerializer  # noqa: E402
 from bot import run_bot  # noqa: E402
-from harness import SAMPLE_RATE, industry_path, set_call_id  # noqa: E402
+from harness import (  # noqa: E402
+    SAMPLE_RATE,
+    industry_path,
+    install_io_executor,
+    set_call_id,
+    warm_magpie,
+)
 
-app = FastAPI(title="mivas nvidia nemotron chirp bridge")
+
+@asynccontextmanager
+async def _lifespan(_app: FastAPI):
+    install_io_executor()
+    await asyncio.to_thread(warm_magpie)
+    yield
+
+
+app = FastAPI(title="mivas nvidia nemotron chirp bridge", lifespan=_lifespan)
 
 
 def _auth_expected() -> str | None:

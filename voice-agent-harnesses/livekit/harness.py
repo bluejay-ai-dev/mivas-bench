@@ -53,7 +53,7 @@ for _root in (Path("/app"), *Path(__file__).resolve().parents):
         if str(_runtime) not in sys.path:
             sys.path.insert(0, str(_runtime))
         break
-from call_id import begin_session, headers as tool_headers, set_call_id  # noqa: E402
+from call_id import begin_session, end_session, headers as tool_headers, set_call_id  # noqa: E402
 
 logger = logging.getLogger("mivas.livekit")
 
@@ -391,7 +391,14 @@ async def run_call(
     sim_result_id = sim_result_id_from_job_metadata(ctx.job.metadata)
     logger.info("job start room=%s sim_result_id=%s model=%s", ctx.room.name, sim_result_id, model)
     set_call_id(sim_result_id)
-    begin_session(sim_result_id, session_key=getattr(ctx.room, "name", None) or "job")
+    session_key = getattr(ctx.room, "name", None) or "job"
+    begin_session(sim_result_id, session_key=session_key)
+    # Shutdown callback, not the traced_run finally: this fires on error and on
+    # LiveKit's entrypoint cancel too. The freeze is a local GET + one S3 PUT, so
+    # it fits the 10 s shutdown_process_timeout that the enrichment POST cannot.
+    ctx.add_shutdown_callback(
+        lambda *_: asyncio.to_thread(end_session, session_key)
+    )
 
     bp = load_blueprint()
     async with report.traced_run(

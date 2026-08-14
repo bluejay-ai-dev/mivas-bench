@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 # MIVAS image for bland/base.
 # Build from repo root:
 #   docker build -f voice-agent-harnesses/bland/base/Dockerfile \
@@ -43,14 +44,17 @@ RUN apt-get update \
 
 WORKDIR /app
 
+COPY industries/${INDUSTRY}/requirements.txt /tmp/industry-requirements.txt
+COPY voice-agent-harnesses/bland/requirements.txt /tmp/harness-requirements.txt
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv pip install --system \
+      -r /tmp/industry-requirements.txt \
+      -r /tmp/harness-requirements.txt
+
 COPY industries/${INDUSTRY}/ /app/industry/
 COPY voice-agent-harnesses/bland/ /app/harness/
 COPY runtime/ /app/runtime/
-
-RUN uv pip install --system --no-cache \
-      -r /app/industry/requirements.txt \
-      -r /app/harness/requirements.txt \
-    && chmod +x /app/runtime/entrypoint.sh \
+RUN chmod +x /app/runtime/entrypoint.sh \
     && mkdir -p /data \
     && test -f "${HARNESS_DIR}/agent.py"
 
