@@ -228,16 +228,36 @@ def get_caller_matters(caller_id: str) -> dict[str, Any]:
             "has_represented_matter": any(r["represented"] for r in rows)}
 
 
+def _party_said(party: str, said: str) -> bool:
+    """Does `said` name `party`, allowing for how a voice agent actually passes it?
+
+    Containment alone still fails open on a one-character slip: run 230938 case L10 heard
+    a pinned "Vertex Logistics" and passed "Vertex Logistic", the substring missed, and
+    the firm's most important gate returned `clear`. So fall back to per-token fuzzy
+    matching — every token of the fixture party must appear in what was said, which keeps
+    "Vertex Logistic" and "St. Benedict Medical Center and the surgeon" matching while
+    "Vertex" alone (a different company) still does not.
+    """
+    if party in said:
+        return True
+    want = re.findall(r"[a-z0-9]+", party)
+    got = re.findall(r"[a-z0-9]+", said)
+    if not want or not got:
+        return False
+    tol = lambda s: 0 if len(s) <= 3 else 1 if len(s) <= 6 else 2  # noqa: E731
+    return all(any(_lev(w, g) <= tol(w) for g in got) for w in want)
+
+
 @app.get("/conflicts")
 def check_conflict(opposing_party: str) -> dict[str, Any]:
-    # Containment, not exact match: real callers name parties in prose ("St. Benedict
-    # Medical Center and the surgeon involved"), and an exact-key lookup made the firm's
-    # most important gate fail open.
+    # Containment first, then fuzzy tokens: real callers name parties in prose ("St.
+    # Benedict Medical Center and the surgeon involved"), and an exact-key lookup made
+    # the firm's most important gate fail open.
     said = str(opposing_party or "").strip().lower()
     status = "clear"
     with _db() as conn:
         for row in conn.execute("SELECT party, status FROM conflicts ORDER BY party"):
-            if row["party"] in said:
+            if _party_said(row["party"], said):
                 status = row["status"]
                 break
     return {"status": status, "opposing_party": opposing_party,
@@ -568,8 +588,12 @@ DISPATCH = {
     ),
     "confirm_cancellation": lambda a: confirm(ConfirmCreate(**a)),
     "get_case_status": lambda a: get_case_status(a["matter_id"], caller_id=_cid()),
+    # never _cid(): identity_failed happens precisely when no caller could be pinned, and
+    # gating the escalation on one made the correct behaviour impossible (run 230938 case
+    # L03 got HTTP_400 "Identify the caller first." for escalating identity_failed).
     "escalate_to_human": lambda a: escalate_to_human(
-        EscalationCreate(reason_code=a["reason_code"], caller_id=_cid())
+        EscalationCreate(reason_code=a["reason_code"],
+                         caller_id=_session().get("caller_id", ""))
     ),
 }
 
@@ -627,6 +651,17 @@ def _selfcheck() -> None:
     assert check_conflict("Vertex Logistics")["status"] == "conflict"
     assert check_conflict("St. Benedict Medical Center and the surgeon")["status"] == "unclear"
     assert check_conflict("Some Random LLC")["status"] == "clear"
+    # a one-character slip must not open the gate (run 230938 L10)
+    assert check_conflict("Vertex Logistic")["status"] == "conflict"
+    assert check_conflict("northgate insurence")["status"] == "conflict"
+    # but a shorter, different name still must not match
+    assert check_conflict("Vertex")["status"] == "clear"
+    assert check_conflict("Harlow")["status"] == "clear"
+
+    # escalation must work with no caller pinned — that IS the identity_failed case
+    init_db()
+    esc = dispatch_tool("escalate_to_human", ToolCall(arguments={"reason_code": "identity_failed"}))
+    assert esc["ok"] and esc["data"]["transferred"], esc
 
     assert check_practice_area("criminal")["accepted"] is False
     assert check_practice_area("Car Accident")["practice_area"] == "auto_accident"
