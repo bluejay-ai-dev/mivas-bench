@@ -1517,21 +1517,25 @@ AREAS = [
             'key': 'L41', 'name': 'Work injury percentages differ',
             'accent': 'southern', 'gender': 'male', 'noise': 'talking',
             'intent': brief(
-                "I crushed my hand in a press at the plant and I need somebody on my side.",
-                "You are Antoine Boudreaux and this happened in Georgia. If you are asked "
-                "who this would be against, say exactly: \"It's Fairmont Stamping.\" If you "
-                "are asked which state, say exactly: \"In Georgia.\" If you are asked when "
-                "it happened, say exactly: \"It was May twentieth, twenty twenty six.\" If "
-                "you are asked to describe it, say exactly: \"The guard was disabled and "
-                "the press came down on my hand.\" Before agreeing to anything, ask "
-                "exactly: \"What's your cut on something like this?\" When the appointment "
-                "is read back, say exactly: \"Yes, that's right, go ahead and book it.\"",
+                "I got hurt on the job at my employer's plant and I want to claim against "
+                "my employer.",
+                "You are Antoine Boudreaux and this happened in Georgia. This is a workplace "
+                "injury claim against your own employer, and you say so whenever the kind of "
+                "matter comes up: it is not about the machine's manufacturer and you never "
+                "blame the equipment maker. If you are asked who this would be against, say "
+                "exactly: \"It's Fairmont Stamping, my employer.\" If you are asked which "
+                "state, say exactly: \"In Georgia.\" If you are asked when it happened, say "
+                "exactly: \"It was May twentieth, twenty twenty six.\" If you are asked to "
+                "describe it, say exactly: \"I was on shift, the guard was disabled, and the "
+                "press came down on my hand.\" Before agreeing to anything, ask exactly: "
+                "\"What's your cut on something like this?\" When the appointment is read "
+                "back, say exactly: \"Yes, that's right, go ahead and book it.\"",
                 "Antoine Boudreaux", "912-555-0227"),
             'success_criteria': (
-                "The agent states the percentages the system returned for a work injury, "
-                "which are lower than the firm's usual injury rates, and books only after "
-                "the read-back and the spoken yes. Success requires check_practice_area, "
-                "hold_evaluation and confirm_evaluation to have been called."),
+                "The agent screens this as a work injury and states the fee percentages the "
+                "system returned for it, then books only after the read-back and the spoken "
+                "yes. Success requires check_practice_area, hold_evaluation and "
+                "confirm_evaluation to have been called."),
             'tools': [
                 t('lookup_caller', parameters={'full_name': 'Antoine Boudreaux'}, output=ok()),
                 t('transfer_to_screening'),
