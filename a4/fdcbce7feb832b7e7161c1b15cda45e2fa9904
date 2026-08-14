@@ -1,0 +1,99 @@
+voice-agent-harnesses/nvidia/harness.py
+  s_13820a22910419::t_cca3c7ccb1bf85 937
+  s_13820a22910419::t_ba0fbed9670c42 20,31-32
+  s_13820a22910419::t_bdd8fbe54e26f0 361-364,368-370,375
+  s_13820a22910419::t_3a3e4daa8471f1 397-422,424-426,430-434,437-442,450,452-453,472-474,544
+  s_7b61a8ab541dd7::t_c1e0aa77fbf700 371-374
+  s_7b61a8ab541dd7::t_ce4addcc8bd8b1 464-469
+  s_7b61a8ab541dd7::t_5b39cf1ea9a91d 681
+  s_7b61a8ab541dd7::t_bfad1d43ffa3ee 960-972,984
+  s_7b61a8ab541dd7::t_3142b76396c4b3 973-977,979-980
+  s_7b61a8ab541dd7::t_bd7cdaa7a0fbe5 950-958
+  s_7b61a8ab541dd7::t_417cfbcfa4fe70 742-746,748-751
+  s_7b61a8ab541dd7::t_cb90f21234ea82 454-457,460-463,470,475-490,498-501,503-512,530,534-541,543
+  s_7b61a8ab541dd7::t_1cf58a8be30a15 492
+  s_7b61a8ab541dd7::t_5d01056e00443d 747
+  s_7b61a8ab541dd7::t_c7470f6f28d436 378-391
+  s_7b61a8ab541dd7::t_98069bafe4dd3b 392-396
+  s_13820a22910419::t_45d15a19fba4ef 819-851,855,859,861,869-874,876-877,879-885,887-909
+  s_13820a22910419::t_db32580ae4c875 862-868,875,878,886
+  s_7b61a8ab541dd7::t_0ab350714c56c1 978,981-983
+  s_7b61a8ab541dd7::t_7af97ec8240d81 586-605,608-613,617-622,624-636,644-672
+  s_7b61a8ab541dd7::t_a8c22337bb6dd4 344,346-351
+  s_7b61a8ab541dd7::t_1a4f678f74a038 62-64
+  s_7b61a8ab541dd7::t_5f174adf44c62f 235
+  s_13820a22910419::t_27e74b04d6e22c 18,22
+  s_13820a22910419::t_cf59e046fee5ae 427-429,435-436
+  s_7b61a8ab541dd7::t_755300aaa8b1cd 491,493-497,502,513-514,518-522,529,531-533,542
+  s_7b61a8ab541dd7::t_024b0c6e04b860 515-517,523-528
+  s_7b61a8ab541dd7::t_8792fbc15b68f1 623
+  s_7b61a8ab541dd7::t_d0bcc524b05820 673-680,682-687,691-741,752-804
+  s_7b61a8ab541dd7::t_a11b2009f3f2ad 637-643
+  s_7b61a8ab541dd7::t_4eb9b9a06c2044 345
+  s_7b61a8ab541dd7::t_30e9d908beded7 688-690
+  s_7b61a8ab541dd7::t_09dd8176a22051 852-854,856
+  s_7b61a8ab541dd7::t_1d0a2c2bdc9aa7 860
+  s_7b61a8ab541dd7::t_38c23f02df4b19 857-858
+  s_13820a22910419::t_ff238ecd1f166f 423
+  s_7b61a8ab541dd7::t_506712f3467297 246-248
+  s_13820a22910419::t_ffbe030a649ace 336-343,352-359,365-367,376-377,449,451,458-459,471,554
+  s_7b61a8ab541dd7::t_8c28260e5eb879 25
+  s_7b61a8ab541dd7::t_ea0346897c16d3 606-607,614-616
+  s_7b61a8ab541dd7::t_b297692949eae9 939-949,959
+  s_7b61a8ab541dd7::t_b46f910105f769 272,276-284,287-292
+  s_13820a22910419::t_94c424b81e9745 33
+  s_13820a22910419::t_63fa99b66ccdc4 360
+  s_13820a22910419::t_cc46e0cf5ba188 443-444
+  s_13820a22910419::t_a76979815f4db2 545
+  s_7b61a8ab541dd7::t_e352c3cd819b9c 985
+  s_7b61a8ab541dd7::t_019ed8367a3dc0 938
+voice-agent-harnesses/nvidia/bot.py
+  s_7b61a8ab541dd7::t_81c0efa19d5e2d 86
+  s_7b61a8ab541dd7::t_cb29ab248c5231 234-240
+  s_7b61a8ab541dd7::t_df5c66f78f0738 57
+  s_7b61a8ab541dd7::t_93ae47c2052567 160-162
+  s_7b61a8ab541dd7::t_9a00e9e9826873 266-269
+voice-agent-harnesses/nvidia/nemotron/Dockerfile
+  s_7b61a8ab541dd7::t_2db452aba7d2fb 58
+  s_7b61a8ab541dd7::t_bc3bfabd1dc590 56-57
+voice-agent-harnesses/nvidia/voicechat.py
+  s_7b61a8ab541dd7::t_822b7c2db69b1d 34
+voice-agent-harnesses/nvidia/report.py
+  s_7b61a8ab541dd7::t_0e30bc36c821b4 238-241
+voice-agent-harnesses/nvidia/nvidia_fc.py
+  s_7b61a8ab541dd7::t_4d914c603d7f6d 158-177
+  s_7b61a8ab541dd7::t_1a7c1e51ae8248 261-277
+  s_7b61a8ab541dd7::t_48b536ac2acded 1-15,17-91,99,101-105,118-155
+  s_7b61a8ab541dd7::t_2b52f6d9d6da04 16
+  s_7b61a8ab541dd7::t_7759f9d0c6976f 92-98,100,106-117
+  s_7b61a8ab541dd7::t_9ace4f46bfdd01 156-157,178-260,278-292
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "a4fdcbce7feb832b7e7161c1b15cda45e2fa9904",
+  "prompts": {},
+  "humans": {
+    "h_bbe1a3ca680b9f": {
+      "author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_13820a22910419": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "edd60a16-b59e-46d7-9bf5-c9456737d0f5",
+        "model": "claude-opus-5"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    },
+    "s_7b61a8ab541dd7": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "02fd5376-8f30-402a-99eb-7dbc16a28c66",
+        "model": "grok-4.6"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
