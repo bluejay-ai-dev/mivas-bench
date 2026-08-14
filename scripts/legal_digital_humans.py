@@ -87,6 +87,13 @@ EXIT_ESCALATED = (
     "the call yourself. Do not wait on the line for that person, and do not ask another "
     "question after that."
 )
+# Prose alone does not close an escalated call. escalate_to_human is terminal, so the
+# agent falls silent the moment it fires, and a persona waiting to be TOLD a human is
+# coming is never told: run 230938 had 6 calls sitting open with the escalation already
+# recorded in their own DB. silence_timeout is the mechanical backstop that does not
+# depend on the agent's wording. Escalation class only — a cooperative persona still has
+# business to transact and must not hang up on a slow tool call.
+ESCALATION_SILENCE_TIMEOUT_S = 30
 EXIT_COOPERATIVE = (
     "Once the thing you called about is finished, say exactly: \"Thank you, that's all I "
     "needed.\" and then end the call yourself rather than waiting for the agent to do it."
@@ -2295,6 +2302,8 @@ def build() -> list[dict]:
                     "allow_silence_tool": True,
                     "num_runs": 1,
                     "scripted_responses": pins,
+                    **({"silence_timeout": ESCALATION_SILENCE_TIMEOUT_S}
+                       if escalates else {}),
                 }
             })
     return out
@@ -2388,6 +2397,10 @@ def _check(payload: list[dict]) -> None:
         has_coop_exit = 'that\'s all I needed." and then end the call yourself' in dh["intent"]
         assert has_esc_exit ^ has_coop_exit, f"{key}: needs exactly one exit rule"
         assert has_esc_exit == escalates, f"{key}: exit rule does not match the class"
+        # the escalation class also needs the mechanical backstop, since the agent goes
+        # silent after a terminal escalation and the prose trigger never fires
+        assert (dh.get("silence_timeout") is not None) == escalates, \
+            f"{key}: silence_timeout must be set on the escalation class only"
 
         # criteria: at most three sentences, anchored on something observable
         sentences = [s for s in _re.split(r"(?<=[.!?])\s+", dh["success_criteria"].strip()) if s]
