@@ -1,4 +1,4 @@
-"""Bland CHIRP bridge must pace resampled TTS at realtime 20 ms frames."""
+"""Vapi CHIRP bridge must pace Flash TTS bursts at realtime 20 ms frames."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-FAMILY = ROOT / "voice-agent-harnesses" / "bland"
+FAMILY = ROOT / "voice-agent-harnesses" / "vapi"
 
 
 def _load(name: str, path: Path):
@@ -19,7 +19,7 @@ def _load(name: str, path: Path):
     return mod
 
 
-pcm = _load("bland_pcm", FAMILY / "pcm.py")
+pcm = _load("vapi_pcm", FAMILY / "pcm.py")
 FRAME_BYTES = pcm.FRAME_BYTES
 PcmPacer = pcm.PcmPacer
 take_frames = pcm.take_frames
@@ -48,7 +48,7 @@ def test_pacer_emits_burst_as_realtime_20ms_frames() -> None:
     async def go() -> None:
         pacer = PcmPacer(send)
         task = asyncio.create_task(pacer.run())
-        pacer.push(b"\x00" * (FRAME_BYTES * 5))
+        pacer.push(b"\x00" * (FRAME_BYTES * 5))  # 100 ms dumped at once
         await pacer.wait_until_idle()
         pacer.close()
         await task
@@ -61,34 +61,34 @@ def test_pacer_emits_burst_as_realtime_20ms_frames() -> None:
     assert (times[-1] - times[0]) >= 0.070
 
 
-def test_pacer_fills_underrun_with_silence_while_holding() -> None:
-    sent: list[bytes] = []
+def test_pacer_restarts_clock_after_a_turn_gap() -> None:
     times: list[float] = []
 
     async def send(frame: bytes) -> None:
-        sent.append(frame)
         times.append(time.monotonic())
 
     async def go() -> None:
         pacer = PcmPacer(send)
         task = asyncio.create_task(pacer.run())
-        pacer.hold(True)
-        pacer.push(b"\x11" * FRAME_BYTES)
-        await asyncio.sleep(0.085)  # ~4 frames: 1 pcm + 3 silence
-        pacer.hold(False)
+        pacer.push(b"\x00" * FRAME_BYTES)
+        await pacer.wait_until_idle()
+        await asyncio.sleep(0.30)
+        t1 = time.monotonic()
+        pacer.push(b"\x00" * (FRAME_BYTES * 3))
         await pacer.wait_until_idle()
         pacer.close()
         await task
+        return t1
 
-    asyncio.run(go())
-    assert len(sent) >= 3
-    assert sent[0] == b"\x11" * FRAME_BYTES
-    assert any(f == b"\x00" * FRAME_BYTES for f in sent[1:])
-    gaps = [times[i + 1] - times[i] for i in range(len(times) - 1)]
-    assert all(0.010 < g < 0.045 for g in gaps), gaps
+    t1 = asyncio.run(go())
+    assert len(times) == 4
+    # the new utterance must start near t1, not dump all three frames instantly
+    assert times[1] - t1 < 0.050
+    later = [times[i + 1] - times[i] for i in range(1, 3)]
+    assert all(0.012 < g < 0.040 for g in later), later
 
 
-def test_pacer_does_not_fill_when_not_holding() -> None:
+def test_pacer_flushes_odd_tail_on_close() -> None:
     sent: list[bytes] = []
 
     async def send(frame: bytes) -> None:
@@ -97,20 +97,18 @@ def test_pacer_does_not_fill_when_not_holding() -> None:
     async def go() -> None:
         pacer = PcmPacer(send)
         task = asyncio.create_task(pacer.run())
-        pacer.push(b"\x11" * FRAME_BYTES)
-        await pacer.wait_until_idle()
-        await asyncio.sleep(0.08)
+        pacer.push(b"\x00" * 5)
         pacer.close()
         await task
 
     asyncio.run(go())
-    assert sent == [b"\x11" * FRAME_BYTES]
+    assert len(sent) == 1
+    assert len(sent[0]) == 6
+    assert sent[0][-1] == 0
 
 
-def test_chirp_bridge_holds_pacer_during_agent_turn() -> None:
+def test_chirp_bridge_paces_outbound_pcm() -> None:
     text = (FAMILY / "adapters" / "chirp.py").read_text()
     assert "PcmPacer" in text
-    assert "pacer.hold(True)" in text
-    assert "pacer.hold(False)" in text
-    assert "AGENT_RMS_OFF" in text
-    assert "pacer.push" in text
+    assert "wait_until_idle" in text
+    assert "take_frames" in text
