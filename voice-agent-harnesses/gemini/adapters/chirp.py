@@ -15,6 +15,7 @@ import uuid
 from pathlib import Path
 
 import google.genai as genai
+from google.genai import errors as genai_errors
 from google.genai import types
 from websockets.asyncio.server import serve
 
@@ -63,7 +64,9 @@ async def _bridge(ws, model: str, industry: str) -> None:
         print(f"chirp sim_result_id={sim_id}", flush=True)
 
     client = genai.Client(api_key=os.environ.get("GOOGLE_API_KEY") or os.environ.get("GEMINI_API_KEY"))
-    config = live_config(bp)
+    resume_handle: str | None = None
+    reconnects = 0
+    MAX_RECONNECTS = 3
 
     customer_otel = None
 
@@ -83,11 +86,34 @@ async def _bridge(ws, model: str, industry: str) -> None:
     async with traced_run(
         workflow, simulation_result_id=sim_id, model=model
     ), call_session(sim_id):
-        async with client.aio.live.connect(model=model, config=config) as session:
-            # Live waits for a turn before speaking — nudge the scripted greeting.
-            await session.send_realtime_input(
-                text="[Call connected. Greet the caller now per your instructions.]"
-            )
+      # Live can drop a session mid-call (the native-audio preview closes with
+      # 1007 CONTENT_TYPE_AUDIO). The caller's websocket is still open, so
+      # reconnect on the resumption handle and keep the call going rather than
+      # hanging up on them.
+      while not end.is_set():
+        async with client.aio.live.connect(
+            model=model, config=live_config(bp, resume=resume_handle)
+        ) as session:
+            # Live waits for a turn before speaking, so the opening needs a nudge.
+            # It has to be a client *turn*: send_realtime_input is for audio and
+            # video chunks. A resumed session already carries the conversation and
+            # needs nothing; a reconnect without a handle lost it, so the model is
+            # told where the call had got to instead of greeting again.
+            nudge = None
+            if reconnects == 0:
+                nudge = "[Call connected. Greet the caller now per your instructions.]"
+            elif resume_handle is None:
+                nudge = (
+                    f"[The audio link dropped for a moment and is back. You are "
+                    f"mid-call as the {state['agent']} agent. Do not greet or "
+                    f"introduce yourself again — ask the caller to repeat their "
+                    f"last point and carry on.]"
+                )
+            if nudge:
+                await session.send_client_content(
+                    turns=types.Content(role="user", parts=[types.Part(text=nudge)]),
+                    turn_complete=True,
+                )
 
             async def inbound() -> None:
                 nonlocal customer_otel
@@ -119,9 +145,15 @@ async def _bridge(ws, model: str, industry: str) -> None:
                 finally:
                     _close_customer()
                     end.set()
+                    print(
+                        f"chirp inbound end sim={sim_id} "
+                        f"close_code={getattr(ws, 'close_code', None)} "
+                        f"reason={getattr(ws, 'close_reason', None)!r}",
+                        flush=True,
+                    )
 
             async def outbound() -> None:
-                nonlocal down, utt, speech_otel
+                nonlocal down, utt, speech_otel, resume_handle
                 try:
                     while not end.is_set():
                         async for response in session.receive():
@@ -139,6 +171,9 @@ async def _bridge(ws, model: str, industry: str) -> None:
                                 )
                                 if pcm:
                                     await ws.send(pcm)
+                            upd = getattr(response, "session_resumption_update", None)
+                            if upd is not None and getattr(upd, "new_handle", None):
+                                resume_handle = upd.new_handle
                             sc = response.server_content
                             if sc is not None and getattr(sc, "turn_complete", False) and utt:
                                 await ws.send(
@@ -177,22 +212,53 @@ async def _bridge(ws, model: str, industry: str) -> None:
                     if utt:
                         _close_utt()
                     end.set()
-                    with contextlib.suppress(Exception):
-                        await ws.close(1000)
 
-            tasks = [asyncio.create_task(inbound()), asyncio.create_task(outbound())]
+            tasks = [
+                asyncio.create_task(inbound(), name="inbound"),
+                asyncio.create_task(outbound(), name="outbound"),
+            ]
             done, pending = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
             for t in pending:
                 t.cancel()
             await asyncio.gather(*pending, return_exceptions=True)
+
+            # While the caller's socket is still open, a closed Live socket is
+            # the Gemini side dropping, not a hangup — resume instead of ending.
+            # The same drop surfaces as ConnectionClosed on the sending task and
+            # as APIError on the receiving one, so both count.
+            caller_gone = getattr(ws, "close_code", None) is not None
+            gemini_dropped = False
+            fatal: BaseException | None = None
             for t in done:
-                if t.cancelled():
+                exc = None if t.cancelled() else t.exception()
+                print(
+                    f"chirp call end sim={sim_id} first={t.get_name()} "
+                    f"exc={type(exc).__name__ if exc else 'none'}: {exc}",
+                    flush=True,
+                )
+                if exc is None:
                     continue
-                exc = t.exception()
-                if isinstance(exc, BaseException) and not type(exc).__name__.startswith(
-                    "ConnectionClosed"
+                if type(exc).__name__.startswith("ConnectionClosed") or isinstance(
+                    exc, genai_errors.APIError
                 ):
-                    raise exc
+                    gemini_dropped = gemini_dropped or not caller_gone
+                else:
+                    fatal = fatal or exc
+            if fatal is not None and not gemini_dropped:
+                raise fatal
+
+            if not gemini_dropped or reconnects >= MAX_RECONNECTS:
+                break
+            reconnects += 1
+            print(
+                f"chirp resume sim={sim_id} attempt={reconnects} "
+                f"handle={'yes' if resume_handle else 'no'}",
+                flush=True,
+            )
+            end.clear()
+
+      with contextlib.suppress(Exception):
+          await ws.close(1000)
 
 
 async def _handler(ws, model: str, industry: str) -> None:

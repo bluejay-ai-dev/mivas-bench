@@ -113,7 +113,9 @@ def _decl(spec: dict) -> types.FunctionDeclaration:
     )
 
 
-def live_config(bp: dict[str, Any], *, voice: str = "Puck") -> types.LiveConnectConfig:
+def live_config(
+    bp: dict[str, Any], *, voice: str = "Puck", resume: str | None = None
+) -> types.LiveConnectConfig:
     """All blueprint tools are declared up front (Live config is fixed at connect)."""
     decls = []
     seen: set[str] = set()
@@ -137,6 +139,11 @@ def live_config(bp: dict[str, Any], *, voice: str = "Puck") -> types.LiveConnect
         ),
         system_instruction=types.Content(parts=[types.Part(text=instruction)]),
         tools=[types.Tool(function_declarations=decls)] if decls else None,
+        # Always on, so the server hands out resumption handles: Live drops a
+        # session mid-call (the native-audio preview closes with 1007
+        # CONTENT_TYPE_AUDIO), and a handle is what lets the bridge reconnect
+        # with the conversation intact instead of dropping the caller.
+        session_resumption=types.SessionResumptionConfig(handle=resume),
     )
 
 
