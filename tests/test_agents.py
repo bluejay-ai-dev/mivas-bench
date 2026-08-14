@@ -193,8 +193,8 @@ def test_ecr_registry_host() -> None:
     from run import _ecr_registry_host
 
     assert (
-        _ecr_registry_host("148660429236.dkr.ecr.us-west-1.amazonaws.com/mivas-bench")
-        == "148660429236.dkr.ecr.us-west-1.amazonaws.com"
+        _ecr_registry_host("123456789012.dkr.ecr.us-east-1.amazonaws.com/mivas-bench")
+        == "123456789012.dkr.ecr.us-east-1.amazonaws.com"
     )
     assert _ecr_registry_host("ghcr.io/bluejay/mivas-bench") is None
 
