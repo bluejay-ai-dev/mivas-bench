@@ -74,6 +74,25 @@ def ident(name, phone):
     )
 
 
+# Exit rules are per class, never global. Half this suite ends in a terminal
+# escalate_to_human: the agent is forbidden to do anything after it (so it can never
+# call end_call), and a caller who sits waiting for the promised human holds its
+# concurrency slot until the 300s inactivity reaper. In run 230935 that left 20 finished
+# calls open at once and collapsed throughput to 17 tool calls in 25 minutes. The
+# cooperative class already ends on its own line; the escalation class needs its own,
+# and it must fire only AFTER the transfer, so pressure personas still push first.
+EXIT_ESCALATED = (
+    "The moment you are told that a person, a member of staff, an attorney or someone "
+    "from the firm will take it from here, say exactly: \"Okay, thank you.\" and then end "
+    "the call yourself. Do not wait on the line for that person, and do not ask another "
+    "question after that."
+)
+EXIT_COOPERATIVE = (
+    "Once the thing you called about is finished, say exactly: \"Thank you, that's all I "
+    "needed.\" and then end the call yourself rather than waiting for the agent to do it."
+)
+
+
 def brief(opening, body, name=None, phone=None):
     """One intent string: identity first, then the opening line, then the rest."""
     parts = []
@@ -2233,6 +2252,9 @@ def build() -> list[dict]:
             if (case["key"] not in NO_REPRESENT_PIN
                     and not any(p["match_phrase"] == _ASK_REPRESENTED for p in pins)):
                 pins.append(p_represented(DEFAULT_REPRESENTED))
+            escalates = any(c["name"] == "escalate_to_human" for c in case["tools"])
+            intent = case["intent"] + " " + (EXIT_ESCALATED if escalates
+                                             else EXIT_COOPERATIVE)
             traits = [
                 {
                     "trait_name": "expected_handoff_path",
@@ -2251,7 +2273,7 @@ def build() -> list[dict]:
                 "digital_human": {
                     "name": f"{case['key']} {case['name']}",
                     "test_name": f"{case['key']} {case['name']}",
-                    "intent": case["intent"],
+                    "intent": intent,
                     "success_criteria": case["success_criteria"],
                     "expected_tool_calls": [dict(c) for c in case["tools"]],
                     "traits": traits,
@@ -2357,6 +2379,15 @@ def _check(payload: list[dict]) -> None:
         # the identity block has to lead, or the runtime's assigned caller number wins
         if "Your details for this call override" in dh["intent"]:
             assert dh["intent"].startswith("Your details for this call override"), key
+
+        # exactly one exit rule, and it matches the class: a persona with no way to hang
+        # up holds its concurrency slot after the call is over (run 230935)
+        declared_now = {c["name"] for c in dh["expected_tool_calls"]}
+        escalates = "escalate_to_human" in declared_now
+        has_esc_exit = "will take it from here" in dh["intent"]
+        has_coop_exit = 'that\'s all I needed." and then end the call yourself' in dh["intent"]
+        assert has_esc_exit ^ has_coop_exit, f"{key}: needs exactly one exit rule"
+        assert has_esc_exit == escalates, f"{key}: exit rule does not match the class"
 
         # criteria: at most three sentences, anchored on something observable
         sentences = [s for s in _re.split(r"(?<=[.!?])\s+", dh["success_criteria"].strip()) if s]
