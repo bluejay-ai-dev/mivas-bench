@@ -30,31 +30,29 @@ uv run python run.py --check      # blueprint wiring only
 uv run python tests/converse.py   # speak to the agent (mic + speakers)
 ```
 
-## Kubernetes (CHIRP for Bluejay)
+## Kubernetes
 
-`--apply` deploys a long-running **Deployment + Service** per harness×industry pair (industry tool server + CHIRP WebSocket adapter for Bluejay).
+`--apply` deploys a long-running **Deployment + Service** per harness×industry pair (industry tool server + CHIRP WebSocket adapter).
 
-### Stable public URLs on EKS (recommended)
-
-This cluster is **EKS Auto Mode** in `us-west-1`. Cloudflare holds DNS for `getbluejay.ai`; AWS ACM + one shared ALB terminate TLS. There is no Route53 hosted zone and no self-managed AWS Load Balancer Controller.
+### Stable public URLs (Ingress)
 
 Each pair gets a **deterministic** hostname that stays the same across redeploys:
 
 `{slug}.{MIVAS_BASE_DOMAIN}`  
-e.g. `openai-realtime-2-1-healthcare.benchmarks.getbluejay.ai`
+e.g. `openai-realtime-2-1-healthcare.chirp.example.com`
 
 | Use | URL |
 |-----|-----|
-| Bluejay `websocket_url` | `wss://{slug}.{domain}` |
+| Evaluator `websocket_url` | `wss://{slug}.{domain}` |
 | `PUBLIC_URL` (Vapi/Retell tool webhooks) | `https://{slug}.{domain}` |
 
 ```bash
-# .env (EKS Auto Mode, us-west-1)
-MIVAS_BASE_DOMAIN=benchmarks.getbluejay.ai
-MIVAS_ACM_CERTIFICATE_ARN=arn:aws:acm:us-west-1:148660429236:certificate/6e3690bc-d776-40b0-8ca7-5741e648c5c8
-MIVAS_IMAGE_PREFIX=148660429236.dkr.ecr.us-west-1.amazonaws.com/mivas-bench
+# .env — fill from your cluster (do not commit live values)
+MIVAS_BASE_DOMAIN=chirp.example.com
+MIVAS_ACM_CERTIFICATE_ARN=arn:aws:acm:REGION:ACCOUNT:certificate/ID
+MIVAS_IMAGE_PREFIX=ACCOUNT.dkr.ecr.REGION.amazonaws.com/mivas-bench
 
-# ACM cert must be ISSUED first (Cloudflare validation CNAME). Then:
+# ACM cert must be ISSUED first. Then:
 uv run python run.py --codebuild --apply --no-logs
 ```
 
@@ -72,14 +70,7 @@ At hangup the replica that owned the WebSocket PUTs `{id}.final.json` and `{id}.
 
 Rolling updates use `maxUnavailable: 0` / `maxSurge: 1`. An in-flight WebSocket **dies** if its pod is deleted; scale by adding replicas rather than cycling them mid-run. New dials use ALB `least_outstanding_requests`; an upgraded socket stays on that target for the TCP lifetime (idle timeout 3600s). Cookie stickiness is not used.
 
-
-
-**Cloudflare (two records, both DNS-only / grey cloud — never orange-cloud proxy):**
-
-1. ACM validation CNAME (once, until the cert is `ISSUED`).
-2. After `--apply`, wildcard `*.benchmarks.getbluejay.ai` CNAME → the ALB hostname from `kubectl get ingress`.
-
-Orange-cloud proxy idle-timeouts kill long CHIRP WebSockets. Grey cloud means Cloudflare is only DNS; TLS is ACM on the ALB.
+After `--apply`, point a wildcard DNS CNAME `*.{MIVAS_BASE_DOMAIN}` at the ALB hostname from `kubectl get ingress`. TLS terminates on the load balancer (ACM). Do not put a CDN or proxy in front of CHIRP WebSockets — idle timeouts kill long-lived connections.
 
 ### Local / kind (no stable DNS)
 

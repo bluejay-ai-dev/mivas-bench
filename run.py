@@ -672,7 +672,7 @@ def apply_agents(pairs: list[tuple[str, str]], *, follow_logs: bool) -> None:
             "(auth: CHIRP_USER/CHIRP_PASS). Hostnames are deterministic per slug."
         )
         print("List: kubectl get ingress,svc,deploy -l app=mivas-bench")
-        print("ALB hostname (Cloudflare CNAME target, DNS-only / grey cloud):")
+        print("ALB hostname (wildcard CNAME target for MIVAS_BASE_DOMAIN):")
         print(
             "  kubectl get ingress -l app=mivas-bench "
             "-o jsonpath='{.items[0].status.loadBalancer.ingress[0].hostname}'"
