@@ -23,6 +23,11 @@ spec:
       mivas.slug: "__SLUG__"
   template:
     metadata:
+      annotations:
+        # Karpenter consolidation evicted a pod mid-run ("Evicted pod:
+        # Underutilized"), dropping six live calls and the trace POST in the
+        # harness's finally block. maxUnavailable above only guards rollouts.
+        karpenter.sh/do-not-disrupt: "true"
       labels:
         app: mivas-bench
         mivas.slug: "__SLUG__"
@@ -30,6 +35,9 @@ spec:
         mivas.harness_runtime: "__HARNESS_RUNTIME__"
         mivas.industry: "__INDUSTRY__"
     spec:
+      # EKS Pod Identity: grants s3:PutObject on the snapshot bucket. Node IMDS
+      # runs at hop limit 1, so the instance profile is unreachable from a pod.
+      serviceAccountName: mivas-bench
       containers:
         - name: mivas
           image: __IMAGE__
@@ -50,17 +58,23 @@ spec:
             - name: HARNESS_DIR
               value: "/app/harness/__HARNESS_RUNTIME__"
             - name: PYTHONPATH
-              value: "/app/harness"
-            - name: MIVAS_ROLE
-              value: "harness"
+              value: "/app/runtime:/app/harness"
             - name: TOOL_SERVER_URL
-              value: "http://mivas-__SLUG__-tools:8000"
+              value: "http://127.0.0.1:8000"
             - name: TOOL_SERVER_PORT
               value: "8000"
             - name: CHIRP_PORT
               value: "8765"
             - name: MIVAS_DB_PATH
               value: "/data/industry.db"
+            - name: MIVAS_SLUG
+              value: "__SLUG__"
+            - name: MIVAS_SNAPSHOT_BUCKET
+              value: "__SNAPSHOT_BUCKET__"
+            - name: MIVAS_SNAPSHOT_PREFIX
+              value: "__SNAPSHOT_PREFIX__"
+            - name: AWS_DEFAULT_REGION
+              value: "__AWS_REGION__"
             - name: INDUSTRY_DIR
               value: "/app/industry"
             - name: PUBLIC_URL
@@ -216,15 +230,20 @@ spec:
               name: chirp
           resources:
             requests:
-              cpu: 250m
-              memory: 384Mi
+              cpu: __CPU_REQUEST__
+              memory: __MEMORY_REQUEST__
             limits:
-              memory: 1536Mi
+              memory: __MEMORY_LIMIT__
           readinessProbe:
-            # harness_health.py on :8000. The industry tool server is a
-            # separate Deployment (mivas-{slug}-tools). Do not TCP-probe :8765.
+            # In-pod industry tool server on :8000. Do not TCP-probe :8765.
             httpGet:
               path: /health
               port: tools
             initialDelaySeconds: 5
             periodSeconds: 5
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: data
+          emptyDir: {}

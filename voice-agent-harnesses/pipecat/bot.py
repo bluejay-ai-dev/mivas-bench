@@ -396,7 +396,13 @@ async def bot(args) -> None:
         simulation_result_id=sim_result_id,
         model=harness.RUNTIMES[runtime],
     ):
-        await run_bot(transport, runtime)
+        try:
+            await run_bot(transport, runtime)
+        finally:
+            # end_session freezes the call DB to S3; it does blocking HTTP.
+            await asyncio.to_thread(
+                harness.end_session, str(sim_result_id or "job")
+            )
 
 
 if __name__ == "__main__":

@@ -44,6 +44,7 @@ from harness import (  # noqa: E402
     END_CALL_CLOSE_DELAY_S,
     MODEL,
     SAMPLE_RATE,
+    call_session,
     configure_session,
     connect_grok,
     handle_function_call,
@@ -307,9 +308,10 @@ async def _bridge(ws, industry: str, model: str) -> None:
     sessions: dict[str, Any] = {}
     session_cms: list[Any] = []
     try:
+        # call_session freezes this call's DB to S3 on exit.
         async with traced_run(
             workflow, simulation_result_id=sim_id, model=model
-        ) as otel_root:
+        ) as otel_root, call_session(sim_id):
             state["_otel_root"] = otel_root
             sessions, session_cms = await _open_sessions(bp, model)
             turns = _Turns(ws, otel_root, stats)

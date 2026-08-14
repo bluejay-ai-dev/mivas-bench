@@ -173,7 +173,7 @@ class DBService:
         return _call_id.get()
 
     def mount_cluster_routes(self, app) -> None:
-        """Provider-call-id → Bluejay sim id, stored on the one tools replica."""
+        """Provider-call-id → Bluejay sim id (in-process; same pod as CHIRP)."""
         from starlette.requests import Request
         from starlette.responses import JSONResponse
         from starlette.routing import Route
