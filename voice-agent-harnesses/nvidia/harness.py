@@ -637,7 +637,9 @@ def build_tts():
                     if started:
                         break
                     if is_magpie_bad_text_error(e):
-                        log.warning("Magpie rejected stitched text; dropping: %s", e)
+                        log.warning(
+                            "Magpie rejected stitched text; dropping: %s", e
+                        )
                         last_exc = None
                         break
                     if not is_magpie_capacity_error(e):
