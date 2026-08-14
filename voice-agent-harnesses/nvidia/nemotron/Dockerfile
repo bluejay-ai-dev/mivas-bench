@@ -53,6 +53,9 @@ RUN --mount=type=cache,target=/root/.cache/uv \
       -r /tmp/harness-requirements.txt
 
 COPY industries/${INDUSTRY}/ /app/industry/
+# CACHE_BUST: registry cache reused an older nvidia/ COPY (run 231249 image
+# still had the pre-retry harness.py). Changing this line forces a miss.
+ARG CACHE_BUST=gloria-727614-magpie-ascii
 COPY voice-agent-harnesses/nvidia/ /app/harness/
 COPY runtime/ /app/runtime/
 RUN chmod +x /app/runtime/entrypoint.sh \
