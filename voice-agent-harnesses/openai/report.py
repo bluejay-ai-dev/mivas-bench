@@ -48,6 +48,7 @@ FINAL_STATUSES = {
     "NO_CONNECTION",
 }
 EARLY_UPSERT_STATUSES = {"EVALUATING", "EVALUATED", "CONVERSATION_ENDED"}
+_RETRYABLE_UPSERT_STATUS = {429, 500, 502, 503, 504}
 _MAX_ATTR = 4000
 
 # target agent name → the blueprint's handoff tool name, so a handoff is reported under
@@ -216,6 +217,48 @@ async def _await_terminal_upsert(
     return None
 
 
+async def _post_update_simulation_result(
+    client: httpx.AsyncClient,
+    body: dict[str, Any],
+    key: str,
+    *,
+    attempts: int = 4,
+) -> httpx.Response:
+    """POST trace_ids to Bluejay, retrying transient 5xx/429 so a single 502 does not drop the link."""
+    last: httpx.Response | None = None
+    for i in range(attempts):
+        try:
+            last = await client.post(
+                f"{_api_url()}/update-simulation-result",
+                json=body,
+                headers={"X-API-Key": key, "Content-Type": "application/json"},
+            )
+        except httpx.TransportError as exc:
+            if i == attempts - 1:
+                raise
+            logger.warning(
+                "update-simulation-result transport error attempt %s/%s: %s",
+                i + 1,
+                attempts,
+                exc,
+            )
+            await asyncio.sleep(2**i)
+            continue
+        if last.status_code < 400 or last.status_code not in _RETRYABLE_UPSERT_STATUS:
+            return last
+        if i == attempts - 1:
+            return last
+        logger.warning(
+            "update-simulation-result %s attempt %s/%s, retrying",
+            last.status_code,
+            i + 1,
+            attempts,
+        )
+        await asyncio.sleep(2**i)
+    assert last is not None
+    return last
+
+
 async def _relink_after_final(
     client: httpx.AsyncClient,
     simulation_result_id: str,
@@ -276,11 +319,7 @@ async def _relink_after_final(
             simulation_result_id,
         )
         return
-    r = await client.post(
-        f"{_api_url()}/update-simulation-result",
-        json=body,
-        headers={"X-API-Key": key, "Content-Type": "application/json"},
-    )
+    r = await _post_update_simulation_result(client, body, key)
     if r.status_code >= 400:
         logger.error(
             "relink after %s FAILED sim=%s %s %s",
@@ -321,11 +360,7 @@ async def post_trace_ids(simulation_result_id: str, trace_id: str) -> None:
             # tools. force_flush() only proves the exporter accepted them. Settle first —
             # still well inside the window before evaluation reads the tool list.
             await asyncio.sleep(float(os.environ.get("MIVAS_UPSERT_SETTLE_SECONDS", "10")))
-        r = await client.post(
-            f"{_api_url()}/update-simulation-result",
-            json=body,
-            headers={"X-API-Key": key, "Content-Type": "application/json"},
-        )
+        r = await _post_update_simulation_result(client, body, key)
         if r.status_code >= 400:
             logger.error(
                 "update-simulation-result FAILED %s %s (status=%s)",
