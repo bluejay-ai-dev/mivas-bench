@@ -1,0 +1,24 @@
+voice-agent-harnesses/openai/test_nudge_retry.py
+  s_845b352bcf124c::t_cab78d995c3a64 1-83
+voice-agent-harnesses/openai/adapters/chirp.py
+  s_845b352bcf124c::t_073204405027a7 61-82
+  s_845b352bcf124c::t_d029c7e06aec7f 115-116
+  s_845b352bcf124c::t_9d21962f71d8ab 189-191
+  s_845b352bcf124c::t_154d099893d88d 161
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "d2d78113f2cef1731d93a4f5142b19d148023656",
+  "prompts": {},
+  "sessions": {
+    "s_845b352bcf124c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "bc9a6540-d54c-41c0-8c82-b14b272c7508",
+        "model": "claude-opus-5"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
