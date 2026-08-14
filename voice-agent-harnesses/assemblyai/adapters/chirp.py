@@ -19,6 +19,7 @@ from websockets.asyncio.server import serve
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from harness import call_session, WS_URL, industry_path, load_blueprint, run_tool, session_config, set_call_id  # noqa: E402
+from pcm import PcmPacer  # noqa: E402
 from report import end_speech_span, start_speech_span, traced_run  # noqa: E402
 
 W, R_OUT, R_CHIRP = 2, 24_000, 16_000
@@ -67,6 +68,10 @@ async def _bridge(ws, model: str, industry: str) -> None:
     should_end = False
     ready = asyncio.Event()
     end = asyncio.Event()
+    # Bluejay keeps sending PCM after speech.completed (hold noise). If that
+    # reaches AssemblyAI, VAD never sees a quiet open and the pack greeting
+    # does not play — DH waits ~60s and nudges.
+    listening = False
 
     def _close_utt() -> None:
         nonlocal utt, speech_otel
@@ -85,18 +90,22 @@ async def _bridge(ws, model: str, industry: str) -> None:
         workflow, simulation_result_id=sim_id, model=model
     ), call_session(sim_id):
         async with websockets.connect(f"{WS_URL}?token={key}") as agent_ws:
-            await agent_ws.send(
-                json.dumps({"type": "session.update", "session": session_config(bp)})
-            )
+            cfg = session_config(bp)
+            print(f"chirp greeting={cfg['greeting']!r}", flush=True)
+            await agent_ws.send(json.dumps({"type": "session.update", "session": cfg}))
+            pacer = PcmPacer(ws.send)
+            pacer_task = asyncio.create_task(pacer.run())
 
             async def inbound() -> None:
                 """chirp 16 khz pcm → assemblyai 24 khz base64 input.audio (only once ready)."""
-                nonlocal up, customer_otel
+                nonlocal up, customer_otel, listening
                 try:
                     async for msg in ws:
                         if end.is_set():
                             break
                         if isinstance(msg, bytes) and msg and ready.is_set():
+                            if not listening:
+                                continue
                             pcm, up = audioop.ratecv(msg, W, 1, R_CHIRP, R_OUT, up)
                             if pcm:
                                 await agent_ws.send(
@@ -117,10 +126,23 @@ async def _bridge(ws, model: str, industry: str) -> None:
                         etype = event.get("type")
                         data = event.get("data") or {}
                         if etype == "speech.started":
+                            listening = True
                             _close_customer()
                             uid = data.get("utterance_id") or f"c_{uuid.uuid4().hex[:12]}"
                             customer_otel = start_speech_span(uid, speaker="customer")
                         elif etype == "speech.completed":
+                            listening = False
+                            if ready.is_set():
+                                # 200ms of zeros so AssemblyAI VAD commits the turn.
+                                silence = b"\x00" * (R_OUT * W // 5)
+                                await agent_ws.send(
+                                    json.dumps(
+                                        {
+                                            "type": "input.audio",
+                                            "audio": base64.b64encode(silence).decode(),
+                                        }
+                                    )
+                                )
                             _close_customer()
                 finally:
                     _close_customer()
@@ -138,6 +160,7 @@ async def _bridge(ws, model: str, industry: str) -> None:
                         event = json.loads(raw)
                         etype = event.get("type")
                         if etype == "session.ready":
+                            print("chirp session.ready", flush=True)
                             ready.set()
                         elif etype == "reply.audio":
                             if utt is None:
@@ -148,11 +171,13 @@ async def _bridge(ws, model: str, industry: str) -> None:
                                 base64.b64decode(event["data"]), W, 1, R_OUT, R_CHIRP, down
                             )
                             if pcm:
-                                await ws.send(pcm)
+                                pacer.push(pcm)
                         elif etype == "tool.call":
                             pending.append(event)
                         elif etype == "reply.done":
                             if utt:
+                                await pacer.wait_until_idle()
+                                pacer.reset_clock()
                                 await ws.send(_event("speech.completed", {"utterance_id": utt}))
                                 _close_utt()
                             if pending:
@@ -165,7 +190,17 @@ async def _bridge(ws, model: str, industry: str) -> None:
                                         state,
                                         call_id=call.get("call_id"),
                                     )
-                                    should_end = should_end or stop
+                                    should_end = should_end or stop or call["name"] in (
+                                        "transfer_to_human",
+                                        "end_call",
+                                    )
+                                    role = result.get("role")
+                                    if role:
+                                        print(f"chirp handoff → {role}", flush=True)
+                                        cfg = session_config(bp, agent=role, greeting="")
+                                        await agent_ws.send(
+                                            json.dumps({"type": "session.update", "session": cfg})
+                                        )
                                     await agent_ws.send(
                                         json.dumps(
                                             {
@@ -175,8 +210,7 @@ async def _bridge(ws, model: str, industry: str) -> None:
                                             }
                                         )
                                     )
-                                # let the farewell reply (if any) play before ending
-                            elif should_end:
+                            if should_end:
                                 with contextlib.suppress(Exception):
                                     await agent_ws.send(json.dumps({"type": "session.end"}))
                         elif etype == "session.ended":
@@ -185,6 +219,10 @@ async def _bridge(ws, model: str, industry: str) -> None:
                         elif etype == "session.error":
                             print(f"chirp assemblyai error: {event}", flush=True)
                 finally:
+                    await pacer.wait_until_idle()
+                    pacer.close()
+                    with contextlib.suppress(Exception):
+                        await asyncio.wait_for(pacer_task, timeout=15)
                     if utt:
                         _close_utt()
                     end.set()
