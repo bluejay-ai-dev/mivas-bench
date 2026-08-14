@@ -54,6 +54,7 @@ class SpeechSpanObserver(BaseObserver):
         self._seen: set[int] = set()
         self._spans: dict[str, object] = {}
         self._n = 0
+        self.parent = None
         self.agent_idle = asyncio.Event()
         self.agent_idle.set()
 
@@ -82,7 +83,7 @@ class SpeechSpanObserver(BaseObserver):
                 return
             self._n += 1
             self._spans[speaker] = report.start_speech_span(
-                f"{speaker}-{self._n}", speaker=speaker
+                f"{speaker}-{self._n}", speaker=speaker, parent=self.parent
             )
         else:
             speaker = "agent" if isinstance(frame, BotStoppedSpeakingFrame) else "customer"
@@ -156,7 +157,9 @@ async def run_bot(
         end_task = None
 
     async def on_tool(name, args, _flow_manager):
-        result, stop = await harness.run_tool(name, dict(args or {}), bp, state)
+        result, stop = await harness.run_tool(
+            name, dict(args or {}), bp, state, call_id=simulation_result_id
+        )
         schedule_end(stop)
         target = result.get("role")
         if target in bp["agents"]:
@@ -228,7 +231,13 @@ async def run_bot(
         name,
         simulation_result_id=simulation_result_id,
         model=harness.MODEL,
-    ):
+    ) as otel_root:
+        # Pipecat runs tool handlers on a different task than this block, so
+        # ContextVar / process-global _active_root is the last call on the pod.
+        # Pin the per-call root on state (and the speech observer) the same way
+        # nemotron-voicechat does.
+        state["_otel_root"] = otel_root
+        observer.parent = otel_root
         runner = WorkerRunner(handle_sigint=False)
         await runner.add_workers(worker)
         try:
@@ -254,7 +263,10 @@ def check_pipeline(industry: str = "control-industry") -> None:
         node = harness.flows_node(bp, agent, _noop)
         assert node["name"] == agent
         assert [f.name for f in node["functions"]] == harness.tool_names(bp, agent)
-        assert node["task_messages"][0]["content"] == harness.instructions(bp, agent)
+        pack = harness.instructions(bp, agent)
+        content = node["task_messages"][0]["content"]
+        assert content.startswith(pack)
+        assert "<AVAILABLE_TOOLS>" in content
 
     if industry == "control-industry" or industry.endswith("control-industry"):
         assert harness.tool_names(bp, "receptionist") == [

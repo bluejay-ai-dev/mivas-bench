@@ -235,6 +235,10 @@ def finish_tool_span(
     parameters: Any = None,
     start_offset_ms: int | None = None,
 ) -> None:
+    if name:
+        record_tool_call(
+            name, parameters, output, start_offset_ms=start_offset_ms
+        )
     if span is None:
         return
     span.set_attribute("gen_ai.tool.call.result", _json_attr(output))

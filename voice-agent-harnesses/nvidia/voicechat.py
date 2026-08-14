@@ -31,6 +31,7 @@ from harness import (
     run_tool,
     tool_names,
 )
+from nvidia_fc import FC_PROTOCOL as _FC_PROTOCOL, parse_toolcalls
 
 RUNTIME = "nemotron-voicechat"
 MODEL = "nvidia/nemotron-voicechat"
@@ -154,23 +155,6 @@ def _is_handoff_tool(bp: dict[str, Any], agent: str, name: str) -> bool:
     return False
 
 
-# Official Nemotron VoiceChat / Nemotron Nano v2 function-calling protocol.
-# Local NIM jinja appends this when session.tools is set; hosted NVCF does not.
-_FC_PROTOCOL = (
-    "\n\nCall a tool ONLY when the user's request matches one of the tools listed "
-    "in <AVAILABLE_TOOLS> below. For every other request, do not call any tool - "
-    "just answer from your knowledge. Never invent or call a tool name that is not "
-    "literally in <AVAILABLE_TOOLS>.\n"
-    "If a tool has required parameters, emit the <TOOLCALL> with those parameters "
-    "BEFORE you speak any confirmation to the caller. Do not claim a booking or "
-    "handoff succeeded unless you have emitted the matching <TOOLCALL>.\n"
-    "<AVAILABLE_TOOLS>{tools}</AVAILABLE_TOOLS>\n\n"
-    "If you decide to call any tool(s), use the following format:\n"
-    '<TOOLCALL>[{{"name": "tool_name1", "arguments": {{"param": "value"}}}}]</TOOLCALL>\n\n'
-    "The user will execute tool-calls and return responses from tool(s) in this format:\n"
-    "<TOOL_RESPONSE>[{{tool_response1}}]</TOOL_RESPONSE>\n"
-)
-_TOOLCALL_RE = re.compile(r"<TOOLCALL>(.*?)</TOOLCALL>", re.DOTALL | re.IGNORECASE)
 _DATE_NUMERIC_RE = re.compile(r"\b(\d{1,2}/\d{1,2}/\d{4})\b")
 _MONTHS = (
     "january",
@@ -391,31 +375,6 @@ def _tool_has_date_param(tool: dict[str, Any]) -> bool:
     params = tool.get("parameters") if isinstance(tool.get("parameters"), dict) else {}
     props = params.get("properties") if isinstance(params, dict) else None
     return isinstance(props, dict) and "date" in props
-
-
-def parse_toolcalls(text: str) -> list[dict[str, Any]]:
-    """Parse native <TOOLCALL>[...]</TOOLCALL> blocks from VoiceChat text."""
-    out: list[dict[str, Any]] = []
-    if not text:
-        return out
-    for match in _TOOLCALL_RE.finditer(text):
-        raw = (match.group(1) or "").strip()
-        try:
-            payload = json.loads(raw)
-        except json.JSONDecodeError:
-            continue
-        items = payload if isinstance(payload, list) else [payload]
-        for item in items:
-            if not isinstance(item, dict) or not item.get("name"):
-                continue
-            args = item.get("arguments", {})
-            if isinstance(args, str):
-                try:
-                    args = json.loads(args) if args.strip() else {}
-                except json.JSONDecodeError:
-                    args = {"raw": args}
-            out.append({"name": str(item["name"]), "arguments": args or {}})
-    return out
 
 
 def infer_tool_calls(tools: list[dict[str, Any]], text: str) -> list[dict[str, Any]]:
