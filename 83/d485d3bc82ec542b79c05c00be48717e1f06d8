@@ -1,0 +1,108 @@
+voice-agent-harnesses/pipecat/adapters/livekit_worker.py
+  s_f2003d6aab6332::t_b0ccff9fa5af7c 12
+  s_f2003d6aab6332::t_0c8fa50f5c20dc 85,92
+  s_f2003d6aab6332::t_fb691ac9c8cdb7 89-91
+  s_f2003d6aab6332::t_b444a02194af4c 123-126
+  s_f2003d6aab6332::t_eb583de1f2a3aa 98
+tests/test_twilio_industry.py
+  s_75a043c1bec064::t_af2b3f1b066563 15-23
+  s_75a043c1bec064::t_80ffa783ab63e9 62-73
+voice-agent-harnesses/pipecat/report.py
+  s_f2003d6aab6332::t_a2eafb392bd126 299,303-306
+voice-agent-harnesses/pipecat/bot.py
+  s_f2003d6aab6332::t_7676feda8abd2a 346
+  s_f2003d6aab6332::t_2e5f251108dbef 307,312
+  s_f2003d6aab6332::t_8059a12e53900e 230-239
+  s_f2003d6aab6332::t_44e1782ff794ec 71,80-84
+tests/test_agents.py
+  s_f2003d6aab6332::t_b48bf97645ce1c 255,257
+  s_ddedc7a01e832c::t_2c1bd5b6bb6675 254,256
+voice-agent-harnesses/livekit/cascaded/agent.py
+  s_ddedc7a01e832c::t_20cf832dc0937c 6-11,41-51,55,59,72
+  s_ddedc7a01e832c::t_59aab347ae2c8d 12,39-40,52-54,56,60-62
+voice-agent-harnesses/livekit/test_audio_quality.py
+  s_ddedc7a01e832c::t_0dd312948abb0f 90-95
+  s_ddedc7a01e832c::t_d5bd7c31c9a2e0 96-104
+  s_ddedc7a01e832c::t_6b5ec52cda6d1b 1-89
+voice-agent-harnesses/pipecat/harness.py
+  s_f2003d6aab6332::t_04b8ef89db7668 37,40
+  s_f2003d6aab6332::t_ca9c2dfcbd1d8e 402,404-408
+  s_f2003d6aab6332::t_5c8d9fba4c0da1 135-169,194-199,211,213-220
+  s_f2003d6aab6332::t_c123addff55e03 126
+  s_f2003d6aab6332::t_23e6a5bb928ff5 200-210,212
+  s_f2003d6aab6332::t_d7caa77de529ab 431-437
+  s_f2003d6aab6332::t_6989c57e10e3c3 466-467,469,471-477
+  s_f2003d6aab6332::t_825bd74b9d2b5d 73-75
+  s_f2003d6aab6332::t_6cfd405f660de4 77-80,87-90
+  s_f2003d6aab6332::t_8f646d956a504f 478-492
+  s_f2003d6aab6332::t_7a6d8933e2d3e2 170-193
+voice-agent-harnesses/twilio/harness.py
+  s_75a043c1bec064::t_97916007785eb3 672-688,692,697-700,702-703
+  s_75a043c1bec064::t_1f9891f0ea21a2 199-205
+  s_75a043c1bec064::t_8e6ca2e70ed308 165-178
+voice-agent-harnesses/livekit/test_harness.py
+  s_ddedc7a01e832c::t_1a73d09878d3d0 142
+  s_ddedc7a01e832c::t_e300e003d159dc 93-113
+  s_ddedc7a01e832c::t_b8d079fc2b1472 144-156
+  s_ddedc7a01e832c::t_79647cedeb9d84 63-64
+  s_ddedc7a01e832c::t_3c5ca2a96e0eae 71-72
+voice-agent-harnesses/pipecat/check.py
+  s_f2003d6aab6332::t_dda67e05a82886 103
+  s_f2003d6aab6332::t_877e659f47afc2 63-65
+  s_f2003d6aab6332::t_fdce401b9fc2a3 83,88-97
+  s_f2003d6aab6332::t_254db25b39293b 29,34-36,38,43-44,47-52
+voice-agent-harnesses/livekit/audio_quality.py
+  s_ddedc7a01e832c::t_a2cfce03df5d66 1-85,89-126
+  s_ddedc7a01e832c::t_c1a15597fab39a 86-88
+voice-agent-harnesses/pipecat/test_harness.py
+  s_f2003d6aab6332::t_b736dda39f7ee3 1-15,17-102
+  s_f2003d6aab6332::t_4b903e5ec65697 16
+run.py
+  h_f787e3fe1ad713 321-322
+voice-agent-harnesses/livekit/harness.py
+  s_ddedc7a01e832c::t_61a59d0767151a 320
+  s_ddedc7a01e832c::t_62a0cfcf962d3e 459-465,471
+  s_ddedc7a01e832c::t_46bf49309c3e4c 27
+  s_ddedc7a01e832c::t_939d67a8936993 467,473
+  s_ddedc7a01e832c::t_61c155c375d762 64-66
+  s_ddedc7a01e832c::t_ab27d2d955ff93 498-499
+  s_ddedc7a01e832c::t_5aa769820ce405 136,140-172
+  s_ddedc7a01e832c::t_eda81eb63f1743 173-174
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "83d485d3bc82ec542b79c05c00be48717e1f06d8",
+  "prompts": {},
+  "humans": {
+    "h_f787e3fe1ad713": {
+      "author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_75a043c1bec064": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "d3e9f670-d900-4b6c-b355-770a26f2c2f7",
+        "model": "grok-4.6"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    },
+    "s_ddedc7a01e832c": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "8e9f3356-85c5-4567-b766-25439d97f35d",
+        "model": "grok-4.6"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    },
+    "s_f2003d6aab6332": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "8de53f23-7a74-4752-90bb-54de3d5e0a54",
+        "model": "grok-4.6"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}
