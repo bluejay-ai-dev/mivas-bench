@@ -32,6 +32,9 @@ export HARNESS_RUNTIME
 
 mkdir -p "$(dirname "$MIVAS_DB_PATH")"
 
+# Fail here, not silently at hangup, when the image cannot reach the snapshot bucket.
+python -c "import snapshot; snapshot.preflight()"
+
 wait_for_tools() {
   local url="$1"
   echo "waiting for tool server health at ${url}"

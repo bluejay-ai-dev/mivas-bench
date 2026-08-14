@@ -49,6 +49,32 @@ def _put_s3(key: str, body: bytes, content_type: str) -> None:
     )
 
 
+def preflight() -> None:
+    """Boot check: a configured bucket the pod cannot write to loses every call.
+
+    Hard-fails on a missing boto3 (packaging bug, deterministic). Only warns on
+    credentials, which can resolve a moment after the container starts.
+    """
+    bucket = os.environ.get("MIVAS_SNAPSHOT_BUCKET", "").strip()
+    if not bucket:
+        print("snapshot: MIVAS_SNAPSHOT_BUCKET unset — local .final.json only", flush=True)
+        return
+    import boto3  # ModuleNotFoundError here is fatal on purpose
+
+    region = (
+        os.environ.get("AWS_DEFAULT_REGION")
+        or os.environ.get("AWS_REGION")
+        or "us-west-1"
+    )
+    if boto3.Session(region_name=region).get_credentials() is None:
+        print(
+            f"snapshot: NO AWS CREDENTIALS — every PUT to s3://{bucket} will fail",
+            flush=True,
+        )
+        return
+    print(f"snapshot: preflight ok bucket={bucket} region={region}", flush=True)
+
+
 def capture_final(call_id: str) -> dict[str, Any] | None:
     """GET /state for this id, write local JSON, PUT JSON + sqlite to S3."""
     cid = str(call_id or "").strip()
@@ -90,7 +116,13 @@ def capture_final(call_id: str) -> dict[str, Any] | None:
         if db_bytes is not None:
             _put_s3(snapshot_key(cid, ".db"), db_bytes, "application/vnd.sqlite3")
     except Exception as e:
-        print(f"snapshot: S3 put failed sim={cid} err={e}", flush=True)
+        bucket = os.environ.get("MIVAS_SNAPSHOT_BUCKET", "").strip()
+        print(
+            f"snapshot: S3 PUT FAILED sim={cid} "
+            f"s3://{bucket}/{snapshot_key(cid, '.final.json')} "
+            f"err={type(e).__name__}: {e}",
+            flush=True,
+        )
         return state
     bucket = os.environ.get("MIVAS_SNAPSHOT_BUCKET", "").strip()
     if bucket:

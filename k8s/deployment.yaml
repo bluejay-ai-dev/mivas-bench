@@ -23,6 +23,11 @@ spec:
       mivas.slug: "__SLUG__"
   template:
     metadata:
+      annotations:
+        # Karpenter consolidation evicted a pod mid-run ("Evicted pod:
+        # Underutilized"), dropping six live calls and the trace POST in the
+        # harness's finally block. maxUnavailable above only guards rollouts.
+        karpenter.sh/do-not-disrupt: "true"
       labels:
         app: mivas-bench
         mivas.slug: "__SLUG__"
@@ -30,6 +35,9 @@ spec:
         mivas.harness_runtime: "__HARNESS_RUNTIME__"
         mivas.industry: "__INDUSTRY__"
     spec:
+      # EKS Pod Identity: grants s3:PutObject on the snapshot bucket. Node IMDS
+      # runs at hop limit 1, so the instance profile is unreachable from a pod.
+      serviceAccountName: mivas-bench
       containers:
         - name: mivas
           image: __IMAGE__
@@ -222,10 +230,10 @@ spec:
               name: chirp
           resources:
             requests:
-              cpu: 250m
-              memory: 384Mi
+              cpu: __CPU_REQUEST__
+              memory: __MEMORY_REQUEST__
             limits:
-              memory: 1536Mi
+              memory: __MEMORY_LIMIT__
           readinessProbe:
             # In-pod industry tool server on :8000. Do not TCP-probe :8765.
             httpGet:

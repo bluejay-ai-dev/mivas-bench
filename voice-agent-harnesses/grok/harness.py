@@ -30,7 +30,7 @@ for _root in (Path("/app"), *Path(__file__).resolve().parents):
         if str(_runtime) not in sys.path:
             sys.path.insert(0, str(_runtime))
         break
-from call_id import headers as tool_headers, set_call_id  # noqa: E402
+from call_id import call_session, headers as tool_headers, set_call_id  # noqa: E402
 
 # Verbal booking confirm without a function-call event (same failure mode as
 # hosted VoiceChat). Recover schedule_appointment for tool-server + OTel.

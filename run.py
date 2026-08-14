@@ -283,6 +283,7 @@ def _render(template_name: str, harness: str, industry: str, image: str, service
         if os.environ.get("MIVAS_IMAGE_PREFIX", "").strip()
         else "IfNotPresent"
     )
+    cpu_req, mem_req, mem_lim = pair_resources(harness)
     template = (ROOT / "k8s" / template_name).read_text()
     return (
         template.replace("__HARNESS__", harness)
@@ -301,10 +302,25 @@ def _render(template_name: str, harness: str, industry: str, image: str, service
         .replace("__MIVAS_MODE__", pair_mivas_mode(harness))
         .replace("__TWILIO_WELCOME_GREETING__", _twilio_welcome(industry))
         .replace("__REPLICAS__", str(replica_count()))
+        .replace("__CPU_REQUEST__", cpu_req)
+        .replace("__MEMORY_REQUEST__", mem_req)
+        .replace("__MEMORY_LIMIT__", mem_lim)
         .replace("__SNAPSHOT_BUCKET__", os.environ.get("MIVAS_SNAPSHOT_BUCKET", "").strip())
         .replace("__SNAPSHOT_PREFIX__", os.environ.get("MIVAS_SNAPSHOT_PREFIX", "mivas").strip() or "mivas")
         .replace("__AWS_REGION__", os.environ.get("AWS_DEFAULT_REGION") or os.environ.get("AWS_REGION") or "us-west-1")
     )
+
+
+def pair_resources(harness: str) -> tuple[str, str, str]:
+    """cpu request, memory request, memory limit.
+
+    Cascaded Nemotron runs Silero + NVCF STT/LLM/TTS per websocket. Six of those
+    on the default 250m/384Mi box never reached TTS (runs 230627 / 230659).
+    """
+    family, runtime = split_harness(harness)
+    if family == "nvidia" and runtime == "nemotron":
+        return "1000m", "1Gi", "3Gi"
+    return "250m", "384Mi", "1536Mi"
 
 
 def replica_count() -> int:
