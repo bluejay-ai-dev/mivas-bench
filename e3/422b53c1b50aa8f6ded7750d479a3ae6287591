@@ -1,0 +1,31 @@
+run.py
+  s_1adb16f94ce775::t_44c0d9af85c66d 675
+tests/test_agents.py
+  s_1adb16f94ce775::t_b80152758d8d5a 196-197
+.env.example
+  s_1adb16f94ce775::t_ab12649646c75f 147-148
+README.md
+  s_1adb16f94ce775::t_db1c492f246be5 33,35,37,42,46,50-53,55
+  s_1adb16f94ce775::t_95962d87fe9e58 73
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "e3422b53c1b50aa8f6ded7750d479a3ae6287591",
+  "prompts": {},
+  "humans": {
+    "h_f787e3fe1ad713": {
+      "author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_1adb16f94ce775": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "37a4a07a-e790-42a0-ad63-1432d57d6ed7",
+        "model": "grok-4.6"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}
