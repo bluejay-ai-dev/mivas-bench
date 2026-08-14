@@ -114,9 +114,25 @@ def _headers() -> dict[str, str]:
 PATHWAY_NOTE = """
 
 # Bland pathway
-Never announce a transfer or that you are looking something up, and never read out any
-name written in snake_case — say your line, and the pathway moves you on by itself.
+Never announce a transfer, never say you are looking something up, and never read
+out snake_case, handoff_summary, next_intent, or a tool name. A short "Sure —"
+or "Okay." is enough — the pathway moves you on by itself.
 """
+
+# Reception's job is routing, not identity. Left in the prompt, "ask for name
+# and date of birth" makes Bland interview and then speak a fake transfer.
+START_NODE_NOTE = """
+Do not ask for a name or date of birth. As soon as you know they want to cancel,
+book, check insurance, talk billing, or ask about Botox, stop talking.
+Do not list appointment times, doctors, or locations — that happens after transfer.
+Cancel and reschedule are never a new-patient booking — stop after you hear cancel.
+"""
+
+_LEAK = re.compile(
+    r"handoff_summary|next_intent|call the transfer tool|every transfer takes|"
+    r"call exactly one",
+    re.I,
+)
 
 _SENTENCE = re.compile(r"(?<=[.!?])\s+")
 
@@ -127,7 +143,11 @@ def _strip_tool_instructions(instructions: str, tool_names: Iterable[str]) -> st
     kept = []
     for line in instructions.splitlines():
         if line.strip():
-            line = " ".join(s for s in _SENTENCE.split(line) if not named.search(s))
+            line = " ".join(
+                s
+                for s in _SENTENCE.split(line)
+                if not named.search(s) and not _LEAK.search(s)
+            )
             if not line.strip():
                 continue
         kept.append(line)
@@ -210,19 +230,209 @@ def _webhook_node(
     }
 
 
+# Shared tools on every healthcare specialist. Wiring each as its own edge
+# from every Default node drowns the routing criterion; they stay callable
+# from the industry tool server if a later specialist node adds them.
+_SHARED_SKIP = frozenset(
+    {
+        "search_practice_kb",
+        "create_callback_task",
+        "send_sms",
+        "transfer_to_human",
+    }
+)
+
+# Reception must route, not interview. Wiring classify/list_locations as edges
+# makes Bland webhook-pause ("one moment while I look that up") and quote slots
+# before transfer_to_scheduling, which leaves a 25s+ agent-to-agent gap across
+# the new-patient info dump (max_punctuation_latency).
+_START_EDGE_SKIP = frozenset(
+    {
+        "classify_visit_request",
+        "list_locations",
+    }
+)
+
+# Edge `description` is the routing criterion (never the tool name — Bland TTS
+# will read snake_case if the model copies it into dialogue).
+_HANDOFF_WHEN = {
+    "handoff_to_scheduler": (
+        "the caller wants to schedule, book, or set up a repair appointment"
+    ),
+    "transfer_to_identity": (
+        "the caller says cancel, cancellation, reschedule, or move an existing "
+        "appointment, or is an existing patient who needs their chart for a "
+        "bill, results, refill, or insurance update. Take this as soon as you "
+        "hear cancel or that they have a bill — before goodbye"
+    ),
+    "transfer_to_scheduling": (
+        "a new patient wants to book a first visit and no existing chart "
+        "needs to be looked up. Do not take this path to cancel or "
+        "reschedule an appointment that already exists"
+    ),
+    "transfer_to_coverage": (
+        "the caller asks about insurance, whether a plan is accepted, "
+        "referrals, eligibility, or what their copay will be"
+    ),
+    "transfer_to_cosmetic": (
+        "the caller asks about Botox, fillers, lasers, peels, cosmetic "
+        "pricing, or booking a cosmetic consult"
+    ),
+    "transfer_to_billing": (
+        "the caller is already verified and wants a balance, a charge "
+        "explained, a payment link, financing, or a fee waiver"
+    ),
+    "transfer_to_clinical": (
+        "the caller is already verified and wants results status, a refill, "
+        "a nurse message, the patient portal, or records"
+    ),
+}
+
+
+def _take_path_when(clause: str) -> str:
+    clause = clause.strip().rstrip(".")
+    return f"Take this path when {clause}."
+
+
+def _tool_edge_description(spec: dict[str, Any]) -> str:
+    name = spec["name"]
+    if name in _HANDOFF_WHEN:
+        return _take_path_when(_HANDOFF_WHEN[name])
+    desc = (spec.get("description") or name).strip()
+    desc = re.sub(re.escape(name), "", desc, flags=re.I)
+    desc = desc.split(".")[0].strip(" -")
+    if re.match(r"invisible handoff", desc, re.I):
+        found = re.search(r"\b(?:when|for)\s+(.+)", desc, re.I)
+        desc = found.group(1) if found else desc
+    if not desc:
+        desc = f"the next step is {name.replace('_', ' ')}"
+    return _take_path_when(desc)
+
+
+def _is_control_two_agent(bp: dict[str, Any]) -> bool:
+    start = bp["agents"][bp["start"]]
+    handoffs = [t for t in start["tools"] if t.get("handoff")]
+    return (
+        len(bp["agents"]) == 2
+        and len(handoffs) == 1
+        and handoffs[0]["name"] == "handoff_to_scheduler"
+        and handoffs[0].get("handoff_to") in bp["agents"]
+    )
+
+
 def pathway_graph(bp: dict[str, Any], public_url: str) -> dict[str, Any]:
     """Blueprint → {nodes, edges}.
 
-    receptionist ──"caller wants an appointment"──▶ handoff_to_scheduler (Webhook)
-      ──▶ scheduler ──"concrete date agreed"──▶ schedule_appointment (Webhook) ──▶ End Call
-
-    The handoff is a webhook node rather than a bare edge so the transition shows
-    up as a timed `execute_tool` span like every other blueprint tool.
+    Control-industry stays the two-node repair-shop graph. Every other
+    industry compiles one Default node per agent, a Webhook node per
+    handoff and specialist tool, and an End Call node per agent.
 
     Routing lives in the edge's `description` (`label` is just the editor's display
     name), and it has to be sent **top-level on the edge** — Bland silently drops
     anything you nest under `edge.data` and stores its own `data` copy, so an edge
     written the way the docs example shows arrives with no description and never fires.
+    """
+    if _is_control_two_agent(bp):
+        return _control_pathway_graph(bp, public_url)
+    return _blueprint_pathway_graph(bp, public_url)
+
+
+def _blueprint_pathway_graph(bp: dict[str, Any], public_url: str) -> dict[str, Any]:
+    """One Default node per agent; webhooks for handoffs and specialist tools."""
+    nodes: list[dict[str, Any]] = []
+    edges: list[dict[str, Any]] = []
+    start_name = bp["start"]
+    catalog = bp["catalog"]
+
+    for name, agent in bp["agents"].items():
+        nodes.append(
+            {
+                "id": name,
+                "type": "Default",
+                "data": {
+                    "name": name,
+                    "prompt": _adapt_prompt(agent["instructions"], catalog)
+                    + (START_NODE_NOTE if name == start_name else ""),
+                    "isStart": name == start_name,
+                    "modelOptions": _model_options(),
+                },
+            }
+        )
+
+    for name, agent in bp["agents"].items():
+        end_id = f"end_{name}"
+        nodes.append(
+            {
+                "id": end_id,
+                "type": "End Call",
+                "data": {
+                    "name": f"end_call_{name}",
+                    "prompt": "Say goodbye and end the call.",
+                    "modelOptions": {"skipUserResponse": True},
+                },
+            }
+        )
+        for tool in agent["tools"]:
+            tname = tool["name"]
+            if tool.get("session") or tname in _SHARED_SKIP:
+                continue
+            if name == start_name and tname in _START_EDGE_SKIP:
+                continue
+            spec = catalog[tname]
+            webhook_id = f"{name}__{tname}"
+            if tool.get("handoff"):
+                nxt = tool["handoff_to"]
+                nodes.append(
+                    _webhook_node(
+                        webhook_id,
+                        spec,
+                        public_url,
+                        next_node=(nxt, nxt),
+                        failure_node=(name, name),
+                    )
+                )
+            else:
+                nodes.append(
+                    _webhook_node(
+                        webhook_id,
+                        spec,
+                        public_url,
+                        next_node=(name, name),
+                        failure_node=(name, name),
+                    )
+                )
+            edges.append(
+                {
+                    "id": f"e_{name}_{tname}",
+                    "source": name,
+                    "target": webhook_id,
+                    "label": f"{name} → {tname}",
+                    "description": _tool_edge_description(spec),
+                }
+            )
+        # end_call last: Bland often picks the first matching edge, and "thank you"
+        # after a fake "I'll cancel that" used to skip identity entirely.
+        edges.append(
+            {
+                "id": f"e_end_{name}",
+                "source": name,
+                "target": end_id,
+                "label": f"{name} → end_call",
+                "description": (
+                    "Take this path only when the caller says goodbye or that "
+                    "this is a wrong number, and you are not canceling, booking, "
+                    "checking insurance, or talking about a bill."
+                ),
+            }
+        )
+    return {"nodes": nodes, "edges": edges}
+
+
+def _control_pathway_graph(bp: dict[str, Any], public_url: str) -> dict[str, Any]:
+    """receptionist → handoff_to_scheduler → scheduler → schedule_appointment → End Call.
+
+    The handoff is a webhook node rather than a bare edge so the transition shows
+    up as a timed `execute_tool` span like every other blueprint tool.
     """
     start = bp["agents"][bp["start"]]
     handoff = next(t for t in start["tools"] if t.get("handoff"))
@@ -366,7 +576,7 @@ def ensure_agent(industry_dir: str | Path, public_url: str) -> dict[str, str]:
         r = httpx.post(
             f"{API_BASE}/v1/convo_pathway/create",
             headers=_headers(),
-            json={"name": f"mivas-{industry_name}", "description": "MIVAS bench control industry"},
+            json={"name": f"mivas-{industry_name}", "description": f"MIVAS bench {industry_name}"},
             timeout=30.0,
         )
         r.raise_for_status()
@@ -377,7 +587,7 @@ def ensure_agent(industry_dir: str | Path, public_url: str) -> dict[str, str]:
         f"{API_BASE}/v1/pathway/{entry['pathway_id']}",
         headers=_headers(),
         json={"name": f"mivas-{industry_name}", **graph},
-        timeout=60.0,
+        timeout=120.0,
     )
     r.raise_for_status()
 
