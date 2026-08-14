@@ -39,7 +39,7 @@ from harness import (  # noqa: E402
     end_session,
     ensure_agent,
     for_provider,
-    industry_path,
+    industry_name,
     load_blueprint,
     provider_id_from_request,
     run_tool,
@@ -114,7 +114,7 @@ async def chirp(ws: WebSocket) -> None:
 
 async def _bridge(ws: WebSocket) -> None:
     industry, model = STATE["industry"], STATE["model"]
-    workflow = f"mivas-{Path(industry_path(industry)).name}-{model}"
+    workflow = f"mivas-{industry_name(industry)}-{model}"
     sim_id = ws.headers.get("x-simulation-result-id")
     if sim_id:
         print(f"chirp sim_result_id={sim_id}", flush=True)

@@ -33,10 +33,9 @@ from line.voice_agent_app import AgentEnv, CallRequest, VoiceAgentApp
 
 BLUEPRINT = json.loads((Path(__file__).parent / "blueprint.json").read_text())
 MODEL = os.getenv("MIVAS_MODEL", "gpt-4.1")
-GREETING = os.getenv("MIVAS_GREETING", "Welcome to Bluejay's Repair Services!")
-# A handoff target is started with CallStarted, so it only speaks if it has an
-# introduction — this is the scheduler prompt's own step 1, verbatim.
-HANDOFF_INTRO = "Hey, when do you want to schedule your repair appointment?"
+_REPAIR_GREETING = "Welcome to Bluejay's Repair Services!"
+_REPAIR_HANDOFF = "Hey, when do you want to schedule your repair appointment?"
+GREETING = os.getenv("MIVAS_GREETING") or BLUEPRINT.get("greeting") or _REPAIR_GREETING
 
 
 def _call_id(call_request: CallRequest | None) -> str | None:
@@ -77,12 +76,25 @@ def _http_tool(name: str, call_id: str | None) -> object:
     )
 
 
-def _build(agent_name: str, call_id: str | None) -> LlmAgent:
+def _build(
+    agent_name: str,
+    call_id: str | None,
+    stack: frozenset[str] = frozenset(),
+    cache: dict[str, LlmAgent] | None = None,
+) -> LlmAgent:
+    """build one Line agent; skip handoff edges that would recurse (healthcare is cyclic)."""
+    cache = cache if cache is not None else {}
+    if agent_name in cache:
+        return cache[agent_name]
     entry = BLUEPRINT["agents"][agent_name]
     tools = []
+    next_stack = stack | {agent_name}
     for t in entry["tools"]:
         if t.get("handoff"):
-            target = _build(t["handoff_to"], call_id)
+            target_name = t["handoff_to"]
+            if target_name in next_stack:
+                continue
+            target = _build(target_name, call_id, next_stack, cache)
             tools.append(
                 agent_as_handoff(
                     target,
@@ -94,15 +106,36 @@ def _build(agent_name: str, call_id: str | None) -> LlmAgent:
             tools.append(end_call)
         else:
             tools.append(_http_tool(t["name"], call_id))
-    return LlmAgent(
+    intro = _introduction(agent_name)
+    config = (
+        LlmConfig(system_prompt=entry["instructions"], introduction=intro)
+        if intro
+        else LlmConfig(system_prompt=entry["instructions"])
+    )
+    agent = LlmAgent(
         model=MODEL,
         api_key=os.environ["OPENAI_API_KEY"],
         tools=tools,
-        config=LlmConfig(
-            system_prompt=entry["instructions"],
-            introduction=GREETING if agent_name == BLUEPRINT["start"] else HANDOFF_INTRO,
-        ),
+        config=config,
     )
+    cache[agent_name] = agent
+    return agent
+
+
+def _introduction(agent_name: str) -> str | None:
+    """start node speaks the pack greeting; handoff targets must not re-greet.
+
+    control-industry has no pack greeting and the scheduler only talks on
+    CallStarted if it has an introduction. Other packs continue mid-stride.
+    """
+    if agent_name == BLUEPRINT["start"]:
+        return GREETING
+    override = os.getenv("MIVAS_HANDOFF_INTRO")
+    if override is not None:
+        return override or None
+    if BLUEPRINT.get("greeting"):
+        return None
+    return _REPAIR_HANDOFF
 
 
 async def get_agent(env: AgentEnv, call_request: CallRequest) -> LlmAgent:
