@@ -66,6 +66,23 @@ def industry_path(name: str | Path) -> Path:
     return (REPO_ROOT / "industries" / name).resolve()
 
 
+def industry_name(industry_dir: str | Path | None = None) -> str:
+    """k8s mounts the pack at /app/industry, so Path.name is not the pack id."""
+    named = os.environ.get("INDUSTRY", "").strip()
+    if named and named != "industry":
+        return named
+    if industry_dir is None:
+        return named or "control-industry"
+    path = Path(industry_dir)
+    if path.is_dir():
+        name = path.resolve().name
+    else:
+        name = path.name
+    if name == "industry":
+        return named or "control-industry"
+    return name or named or "control-industry"
+
+
 def load_blueprint(industry_dir: str | Path) -> dict[str, Any]:
     industry_dir = industry_path(industry_dir)
     blueprint = json.loads((industry_dir / "agent_blueprint.json").read_text())
@@ -82,6 +99,8 @@ def load_blueprint(industry_dir: str | Path) -> dict[str, Any]:
         "start": blueprint["agents"][0]["name"],
         "agents": agents,
         "catalog": catalog,
+        # answering-node opener; without it Line defaults to the repair-shop line
+        "greeting": blueprint.get("greeting"),
     }
 
 
@@ -116,10 +135,10 @@ def _agent_id_for_name(desired: str) -> str | None:
 def export_blueprint(industry_dir: str | Path) -> str:
     """Bake the industry prompts + tool schemas into the deployable directory."""
     bp = load_blueprint(industry_dir)
-    name = Path(bp["industry_dir"]).name
-    (AGENT_DIR / "blueprint.json").write_text(
-        json.dumps({k: v for k, v in bp.items() if k != "industry_dir"}, indent=2) + "\n"
-    )
+    name = industry_name(bp["industry_dir"])
+    payload = {k: v for k, v in bp.items() if k != "industry_dir"}
+    payload["industry"] = name
+    (AGENT_DIR / "blueprint.json").write_text(json.dumps(payload, indent=2) + "\n")
     return name
 
 
@@ -160,6 +179,7 @@ def ensure_agent(industry_dir: str | Path, *, public_url: str | None = None) -> 
     agent_changed = bool(cached_agent_id and agent_id != cached_agent_id)
     created_new = False
     desired = f"mivas-{name}"
+    print(f"cartesia pack={name} desired={desired}", flush=True)
 
     if not agent_id:
         agent_id = _agent_id_for_name(desired)
@@ -173,9 +193,15 @@ def ensure_agent(industry_dir: str | Path, *, public_url: str | None = None) -> 
             created_new = True
 
     env = {"TOOL_BASE_URL": public_url or os.environ.get("PUBLIC_URL", "")}
-    for key in ("OPENAI_API_KEY", "MIVAS_MODEL", "MIVAS_GREETING"):
+    for key in ("OPENAI_API_KEY", "MIVAS_MODEL"):
         if os.environ.get(key):
             env[key] = os.environ[key]
+    greeting = os.environ.get("MIVAS_GREETING", "").strip()
+    if not greeting:
+        baked = json.loads((AGENT_DIR / "blueprint.json").read_text())
+        greeting = (baked.get("greeting") or "").strip()
+    if greeting:
+        env["MIVAS_GREETING"] = greeting
     env = {k: v for k, v in env.items() if v}
     # `env set` rolls a new deployment version (~2 min), so only push on change —
     # by digest, so the cache file never holds the API key it carries.
