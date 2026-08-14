@@ -61,6 +61,6 @@ The digital human must not speak first. With `speaks_first: true` the caller's o
 
 ## Spans
 
-Vapi streams agent audio as continuous binary frames with no gaps between turns, so the silence-gap heuristic the ElevenLabs bridge uses cannot find turn boundaries here. `agent.speech` is bracketed by `speech-update` (`role=assistant`, `started`/`stopped`) instead; `customer.speech` comes from Bluejay's inbound `speech.started`/`speech.completed`. `handoff_to_scheduler` and `endCall` never touch the webhook — they are read off `conversation-update` and emitted as zero-width `execute_tool` spans so the whole flow lands on the timeline.
+Outbound agent PCM is paced at realtime 20 ms frames so ElevenLabs Flash bursts do not record as choppy speech. Turn boundaries still cannot use a silence-gap heuristic. `agent.speech` is bracketed by `speech-update` (`role=assistant`, `started`/`stopped`) instead; `customer.speech` comes from Bluejay's inbound `speech.started`/`speech.completed`. `handoff_to_scheduler` and `endCall` never touch the webhook — they are read off `conversation-update` and emitted as zero-width `execute_tool` spans so the whole flow lands on the timeline.
 
 `report.py` waits for a *final* simulation status before its single `update-simulation-result` POST. Posting during `EVALUATING` also works, but eval then wipes `trace_ids` and the relink POST re-extracts the `execute_tool` spans on top of the first POST's, putting every tool on the conversation timeline twice. `_relink_after_final` remains as the safety net for when that wait times out.
