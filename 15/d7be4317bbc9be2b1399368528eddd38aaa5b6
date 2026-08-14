@@ -1,0 +1,23 @@
+voice-agent-harnesses/nvidia/harness.py
+  s_982cca3ee0a81d::t_47e0268d14cbde 640-642
+voice-agent-harnesses/nvidia/nemotron/Dockerfile
+  s_982cca3ee0a81d::t_c869df70b8d191 58
+voice-agent-harnesses/nvidia/bot.py
+  s_982cca3ee0a81d::t_9615b12aa9bce2 171-175
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "15d7be4317bbc9be2b1399368528eddd38aaa5b6",
+  "prompts": {},
+  "sessions": {
+    "s_982cca3ee0a81d": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "2b33ef07-6ca0-4842-8824-ae3be3dc5854",
+        "model": "grok-4.6"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}
