@@ -44,11 +44,18 @@ from harness import (  # noqa: E402
     run_tool,
     session_ws_url,
 )
+from pcm import PcmPacer  # noqa: E402
 from report import end_speech_span, start_speech_span, traced_run  # noqa: E402
 
 W, R_BLAND, R_CHIRP = 2, 44_100, 16_000
 # Bland streams silence between turns, so agent turns are bracketed by loudness.
+# Hysteresis: a high open threshold, a low hold threshold, and a long hang so
+# intra-turn pauses and pathway webhooks do not punch holes in the CHIRP stream.
 AGENT_RMS_ON = int(os.environ.get("BLAND_AGENT_RMS_ON", "400"))
+# same as ON: Bland's analog silence floor is often 60–150 RMS. A lower hold
+# threshold never ends the turn, so Bluejay counts the next user dump as
+# agent punctuation (Dana 25829 ms).
+AGENT_RMS_OFF = int(os.environ.get("BLAND_AGENT_RMS_OFF", "400"))
 AGENT_SILENCE_S = float(os.environ.get("BLAND_AGENT_SILENCE_S", "0.8"))
 
 app = FastAPI(title="mivas bland chirp bridge")
@@ -158,15 +165,25 @@ async def _bridge(ws: WebSocket, sim_id: str | None) -> None:
                             await bland.close()
 
                 async def outbound() -> None:
-                    """Bland 44.1 kHz pcm → chirp 16 kHz; RMS gate drives agent.speech."""
+                    """Bland 44.1 kHz pcm → chirp 16 kHz; RMS gate drives agent.speech.
+
+                    Bland stalls across JSON frames and webhook nodes. While a turn
+                    is open the pacer keeps a 20 ms clock (real PCM or silence).
+                    Between turns we send nothing so Bluejay does not treat hold
+                    noise as an endless agent utterance.
+                    """
                     down = None
                     utt: str | None = None
                     speech = None
                     last_loud = 0.0
+                    pacer = PcmPacer(ws.send_bytes)
+                    pace_task = asyncio.create_task(pacer.run())
 
                     async def _close_utt() -> None:
                         nonlocal utt, speech
                         if utt:
+                            pacer.hold(False)
+                            await pacer.wait_until_idle(timeout=2.0)
                             with contextlib.suppress(Exception):
                                 await ws.send_text(_event("speech.completed", {"utterance_id": utt}))
                         end_speech_span(speech)
@@ -178,30 +195,39 @@ async def _bridge(ws: WebSocket, sim_id: str | None) -> None:
                                 break
                             if isinstance(msg, str):
                                 # `payload` is a dict for update frames, a bare string for callID.
+                                # do not close the turn here: a JSON stall with no PCM is
+                                # exactly when the pacer must keep filling 20 ms frames.
                                 payload = (json.loads(msg) or {}).get("payload")
                                 if isinstance(payload, str) and payload.strip():
                                     bind_provider(payload.strip(), resolved)
                                     print(f"bland callID={payload.strip()}", flush=True)
                                 elif isinstance(payload, dict) and payload.get("text"):
                                     print(f"bland {payload.get('type')}: {payload['text']}", flush=True)
+                                await asyncio.sleep(0)
                                 continue
                             if not msg:
                                 continue
                             now = time.monotonic()
-                            if audioop.rms(msg, W) >= AGENT_RMS_ON:
+                            rms = audioop.rms(msg, W)
+                            if rms >= AGENT_RMS_ON or (utt is not None and rms >= AGENT_RMS_OFF):
                                 last_loud = now
                                 if utt is None:
                                     utt = f"u_{uuid.uuid4().hex[:12]}"
                                     speech = start_speech_span(utt, speaker="agent")
+                                    pacer.hold(True)
                                     await ws.send_text(_event("speech.started", {"utterance_id": utt}))
                             elif utt and now - last_loud > AGENT_SILENCE_S:
                                 await _close_utt()
                             out, down = audioop.ratecv(msg, W, 1, R_BLAND, R_CHIRP, down)
-                            if out:
-                                await ws.send_bytes(out)
+                            if utt is not None and out:
+                                pacer.push(out)
                                 sent["to_chirp"] += len(out)
+                            await asyncio.sleep(0)
                     finally:
                         await _close_utt()
+                        pacer.close()
+                        with contextlib.suppress(Exception):
+                            await pace_task
                         end.set()
                         with contextlib.suppress(Exception):
                             await ws.close(1000)
