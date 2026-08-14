@@ -168,7 +168,11 @@ async def run_bot(
                 target,
                 harness.tool_names(bp, target),
             )
-            return result, harness.flows_node(bp, target, on_tool)
+            # Pack greeting already played. RESET + respond_immediately made the
+            # specialist cold-open ("Hello. I am ROBIN…") on Gloria 727614.
+            return result, harness.flows_node(
+                bp, target, on_tool, respond_immediately=False
+            )
         return result, None
 
     from pipecat.flows import FlowManager
