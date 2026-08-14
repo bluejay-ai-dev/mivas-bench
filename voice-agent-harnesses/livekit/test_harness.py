@@ -60,14 +60,16 @@ def test_real_handoff() -> None:
         bp, "receptionist", hangup, llm_factory=llm_factory, scripted_opener=True
     )
     assert _tool_names(receptionist) == {"handoff_to_scheduler", "end_call"}
-    assert receptionist.instructions == bp["agents"]["receptionist"]["instructions"]
+    assert bp["agents"]["receptionist"]["instructions"] in receptionist.instructions
+    assert harness.today_clock() in receptionist.instructions
 
     handoff = lk_llm.ToolContext(receptionist.tools).get_function_tool("handoff_to_scheduler")
     scheduler = asyncio.run(handoff(raw_arguments={}))
     assert isinstance(scheduler, BlueprintAgent)
     assert scheduler.agent_name == "scheduler"
     assert _tool_names(scheduler) == {"schedule_appointment", "end_call"}
-    assert scheduler.instructions == bp["agents"]["scheduler"]["instructions"]
+    assert bp["agents"]["scheduler"]["instructions"] in scheduler.instructions
+    assert harness.today_clock() in scheduler.instructions
     # scripted_opener propagates as a capability flag, but the actual spoken line is
     # derived from the *target's own* prompt, not inherited verbatim from the caller.
     assert scheduler._opener == "Hey, when do you want to schedule your repair appointment?"
@@ -86,6 +88,27 @@ def test_generic_industries() -> None:
         start = BlueprintAgent(bp, bp["start"], hangup)
         expected = {t["name"] for t in bp["agents"][bp["start"]]["tools"]}
         assert _tool_names(start) == expected, (industry, _tool_names(start) ^ expected)
+
+
+def test_pack_greeting_and_agent_name() -> None:
+    bp = load_blueprint("healthcare")
+    assert "Straus Dermatology" in bp["greeting"]
+    assert harness.pack_greeting(bp).startswith("Thank you for calling Straus")
+    assert harness.pack_greeting(load_blueprint("control-industry")) == harness.GREETING
+
+    import os
+
+    os.environ.pop("LIVEKIT_AGENT_NAME", None)
+    os.environ.pop("MIVAS_SLUG", None)
+    assert harness.resolve_agent_name("mivas-livekit-cascaded") == "mivas-livekit-cascaded"
+    os.environ["MIVAS_SLUG"] = "livekit-cascaded-healthcare"
+    assert harness.resolve_agent_name("mivas-livekit-cascaded") == (
+        "mivas-livekit-cascaded-healthcare"
+    )
+    os.environ["LIVEKIT_AGENT_NAME"] = "explicit-name"
+    assert harness.resolve_agent_name("mivas-livekit-cascaded") == "explicit-name"
+    os.environ.pop("LIVEKIT_AGENT_NAME", None)
+    os.environ.pop("MIVAS_SLUG", None)
 
 
 def test_await_farewell() -> None:
@@ -116,5 +139,19 @@ if __name__ == "__main__":
     test_blueprint()
     test_real_handoff()
     test_generic_industries()
+    test_pack_greeting_and_agent_name()
     test_await_farewell()
+    from test_audio_quality import (
+        test_alice_chops_fail_the_gate,
+        test_cascaded_session_does_not_eager_cut,
+        test_chopped_greeting_fails,
+        test_clean_call_passes_the_gate,
+        test_greeting_waits_for_caller,
+    )
+
+    test_alice_chops_fail_the_gate()
+    test_clean_call_passes_the_gate()
+    test_chopped_greeting_fails()
+    test_cascaded_session_does_not_eager_cut()
+    test_greeting_waits_for_caller()
     print("ok")

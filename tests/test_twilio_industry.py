@@ -12,7 +12,15 @@ if str(FAMILY) not in sys.path:
     sys.path.insert(0, str(FAMILY))
 
 from adapters.conversationrelay import build_app  # noqa: E402
-from harness import demo, load_blueprint, sim_id_from_mapping, twilio_sip_uri, welcome_greeting  # noqa: E402
+from harness import (  # noqa: E402
+    conversation_hints,
+    demo,
+    load_blueprint,
+    sim_id_from_mapping,
+    twiml_connect,
+    twilio_sip_uri,
+    welcome_greeting,
+)
 
 
 def test_demo_healthcare() -> None:
@@ -49,6 +57,18 @@ def test_sim_id_from_twilio_sip_form() -> None:
         == "720488"
     )
     assert sim_id_from_mapping({"CallSid": "CA123", "To": "sip:mivas@example.sip.twilio.com"}) == ""
+
+
+def test_twiml_phone_optimized_defaults(monkeypatch) -> None:
+    monkeypatch.setenv("INDUSTRY", "healthcare")
+    monkeypatch.delenv("TWILIO_HINTS", raising=False)
+    xml = twiml_connect(ws_url="wss://example.test/ws")
+    assert 'speechModel="nova-3-general"' in xml
+    assert 'interruptSensitivity="low"' in xml
+    assert 'ignoreBackchannel="true"' in xml
+    assert 'welcomeGreetingInterruptible="none"' in xml
+    assert "Straus Dermatology" in xml
+    assert conversation_hints().startswith("Straus Dermatology")
 
 
 def test_twiml_stamps_bluejay_sim_id(monkeypatch) -> None:

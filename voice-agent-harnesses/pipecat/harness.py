@@ -34,8 +34,10 @@ Runtimes:
 
 from __future__ import annotations
 
+import datetime as _dt
 import json
 import os
+import re
 import sys
 from pathlib import Path
 from typing import Any
@@ -68,17 +70,24 @@ DEFAULT_RUNTIME = "cascaded"
 # The runtimes whose "agent" is a speech-to-speech session rather than a text LLM.
 S2S_RUNTIMES = frozenset({"openai-realtime-2.1", "gemini-flash-live-3.1"})
 
-STT_MODEL = os.environ.get("PIPECAT_STT_MODEL", "flux-general-en")
-TTS_MODEL = os.environ.get("PIPECAT_TTS_MODEL", "eleven_flash_v2_5")
-TTS_VOICE_ID = os.environ.get("PIPECAT_TTS_VOICE_ID", "21m00Tcm4TlvDq8ikWAM")
+STT_MODEL = os.environ.get("PIPECAT_STT_MODEL", "").strip() or "flux-general-en"
+TTS_MODEL = os.environ.get("PIPECAT_TTS_MODEL", "").strip() or "eleven_flash_v2_5"
+TTS_VOICE_ID = os.environ.get("PIPECAT_TTS_VOICE_ID", "").strip() or "21m00Tcm4TlvDq8ikWAM"
 
+# Fallback only for packs that omit `greeting` (control-industry). Healthcare
+# and the other industry packs put the spoken opener on agent_blueprint.json;
+# generate_reply/say/TTSSpeakFrame must use that, not this repair-shop line.
+GREETING = "Welcome to Bluejay's Repair Services!"
 # Gemini 3.1 Live will not speak until the caller does, so it opens with dead
 # air until the digital human gives up and prompts — ~64 s of a 180 s call. A TTS
 # is attached for that runtime purely so the scripted opener can be spoken; the
 # model still says everything else itself. Same workaround as the LiveKit harness
 # (`session.say(GREETING)`), for the same plugin limitation.
-GREETING = "Welcome to Bluejay's Repair Services!"
 GREETING_TTS_RUNTIMES = frozenset({"gemini-flash-live-3.1"})
+# Matches *step 1* of an agent's own flow, e.g. scheduler.md. Used so a Gemini
+# Live handoff target can speak a first line (the model rejects speaking first).
+_OPENER_RE = re.compile(r'(?:^|\n)\s*1\.\s*(?:Ask|Say):\s*"([^"]+)"', re.IGNORECASE)
+GENERIC_OPENER = "Okay, I can help you with that."
 
 
 def industry_path(name: str | Path) -> Path:
@@ -114,6 +123,7 @@ def load_blueprint(industry_dir: str | Path) -> dict[str, Any]:
         "start": blueprint["agents"][0]["name"],
         "agents": agents,
         "catalog": catalog,
+        "greeting": (blueprint.get("greeting") or "").strip(),
     }
 
 
@@ -122,8 +132,92 @@ def agent_order(bp: dict[str, Any]) -> list[str]:
     return [bp["start"]] + [n for n in bp["agents"] if n != bp["start"]]
 
 
-def instructions(bp: dict[str, Any], agent: str) -> str:
-    return bp["agents"][agent]["instructions"]
+def pack_greeting(bp: dict[str, Any] | None = None) -> str:
+    """Spoken opener for this pack. Blueprint wins; GREETING is control-industry."""
+    if bp is not None and (bp.get("greeting") or "").strip():
+        return str(bp["greeting"]).strip()
+    return GREETING
+
+
+def today_clock() -> str:
+    d = _dt.date.today()
+    return f"Today is {d.strftime('%A')}, {d.strftime('%B')} {d.day}, {d.year}."
+
+
+def with_clock(text: str) -> str:
+    """gpt-4.1 (and the S2S models) have no 'today'; relative dates invent years."""
+    clock = today_clock()
+    if clock in text:
+        return text
+    return f"{text.rstrip()}\n\n{clock}"
+
+
+def resolve_agent_name(default: str) -> str:
+    """LiveKit dispatch name. Unique per k8s slug so two industries cannot collide.
+
+    Local/dev (no MIVAS_SLUG) keeps the runtime default (`mivas-pipecat-cascaded`).
+    LIVEKIT_AGENT_NAME wins when set.
+    """
+    explicit = os.environ.get("LIVEKIT_AGENT_NAME", "").strip()
+    if explicit:
+        return explicit
+    slug = os.environ.get("MIVAS_SLUG", "").strip()
+    if slug:
+        return f"mivas-{slug}"
+    return default
+
+
+def sim_result_id_from_job_metadata(raw: Any) -> str | None:
+    """Bluejay puts X-Simulation-Result-Id on the LiveKit job metadata JSON."""
+    if not raw:
+        return None
+    meta = raw if isinstance(raw, dict) else None
+    if meta is None:
+        try:
+            meta = json.loads(str(raw))
+        except Exception:
+            return None
+    if not isinstance(meta, dict):
+        return None
+    for key in (
+        "X-Simulation-Result-Id",
+        "x-simulation-result-id",
+        "simulation_result_id",
+        "simulationResultId",
+    ):
+        val = meta.get(key)
+        if val is not None and str(val).strip():
+            return str(val).strip()
+    return None
+
+
+def agent_opener(bp: dict[str, Any], agent: str) -> str:
+    """First spoken line for a Gemini Live handoff target, from *this* agent's prompt."""
+    match = _OPENER_RE.search(bp["agents"][agent]["instructions"])
+    return match.group(1) if match else GENERIC_OPENER
+
+
+def instructions(
+    bp: dict[str, Any], agent: str, *, speak_first: bool = True
+) -> str:
+    """This agent's prompt, plus today's date, plus a start-agent opener.
+
+    Packs that already script the greeting in the prompt (control-industry) are
+    left alone. Packs that assume the harness already spoke it (healthcare)
+    get an explicit first-utterance line so cascaded / OpenAI Realtime actually
+    greet. Pass ``speak_first=False`` for Gemini Live: TTSSpeakFrame owns the
+    opener and a prompt line would make the model re-greet after the caller.
+    """
+    text = with_clock(bp["agents"][agent]["instructions"])
+    if not speak_first or agent != bp["start"]:
+        return text
+    greeting = pack_greeting(bp)
+    if greeting in text:
+        return text
+    return (
+        f"{text.rstrip()}\n\n"
+        f'When the call starts, greet the caller with exactly: "{greeting}"'
+    )
 
 
 def tool_names(bp: dict[str, Any], agent: str) -> list[str]:
@@ -305,8 +399,13 @@ def build_llm(runtime: str, instructions: str, tools):
 
 def build_agent_llms(runtime: str, bp: dict[str, Any], handler) -> dict[str, Any]:
     """One S2S service per blueprint agent, receptionist first."""
+    speak_first = runtime not in GREETING_TTS_RUNTIMES
     return {
-        agent: build_llm(runtime, instructions(bp, agent), agent_tools_schema(bp, agent, handler))
+        agent: build_llm(
+            runtime,
+            instructions(bp, agent, speak_first=speak_first),
+            agent_tools_schema(bp, agent, handler),
+        )
         for agent in agent_order(bp)
     }
 
@@ -329,7 +428,13 @@ def build_stt_tts(runtime: str):
     from pipecat.services.deepgram.flux.stt import DeepgramFluxSTTService
 
     stt = DeepgramFluxSTTService(
-        api_key=os.environ["DEEPGRAM_API_KEY"], model=STT_MODEL
+        api_key=os.environ["DEEPGRAM_API_KEY"],
+        settings=DeepgramFluxSTTService.Settings(
+            model=STT_MODEL,
+            # LiveKit cascaded uses the same 0.4: Flux starts the LLM before a
+            # high-confidence EndOfTurn. Default (off) waits for full EOT.
+            eager_eot_threshold=0.4,
+        ),
     )
     return stt, build_tts()
 
@@ -358,10 +463,33 @@ def demo() -> None:
     assert handoff_target(bp, "receptionist", "handoff_to_scheduler") == "scheduler"
     assert handoff_target(bp, "scheduler", "handoff_to_scheduler") is None
 
-    # the scripted opener must stay verbatim from the industry prompt, and only
-    # the runtimes that cannot speak first may be given a greeting TTS
+    # control-industry scripts the opener in the prompt; healthcare puts it on
+    # the blueprint and the harness must inject it (except Gemini Live TTS).
     assert f'say: "{GREETING}"' in instructions(bp, "receptionist"), GREETING
+    assert pack_greeting(bp) == GREETING
     assert GREETING_TTS_RUNTIMES <= S2S_RUNTIMES
+    assert today_clock() in instructions(bp, "receptionist")
+    hc = load_blueprint("healthcare")
+    assert "Straus Dermatology" in pack_greeting(hc)
+    assert pack_greeting(hc) in instructions(hc, hc["start"])
+    assert pack_greeting(hc) not in instructions(
+        hc, hc["start"], speak_first=False
+    )
+    prev_name, prev_slug = os.environ.pop("LIVEKIT_AGENT_NAME", None), os.environ.pop(
+        "MIVAS_SLUG", None
+    )
+    try:
+        assert resolve_agent_name("mivas-pipecat-cascaded") == "mivas-pipecat-cascaded"
+        os.environ["MIVAS_SLUG"] = "pipecat-cascaded-healthcare"
+        assert resolve_agent_name("mivas-pipecat-cascaded") == (
+            "mivas-pipecat-cascaded-healthcare"
+        )
+    finally:
+        os.environ.pop("MIVAS_SLUG", None)
+        if prev_slug is not None:
+            os.environ["MIVAS_SLUG"] = prev_slug
+        if prev_name is not None:
+            os.environ["LIVEKIT_AGENT_NAME"] = prev_name
 
     # (the tool-set split as the services actually see it needs pipecat — see check.py)
 

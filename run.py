@@ -318,7 +318,8 @@ def pair_resources(harness: str) -> tuple[str, str, str]:
     on the default 250m/384Mi box never reached TTS (runs 230627 / 230659).
     """
     family, runtime = split_harness(harness)
-    if family == "nvidia" and runtime == "nemotron":
+    if (family == "nvidia" and runtime == "nemotron") \
+            or (family in {"livekit", "pipecat"} and runtime == "cascaded"):
         return "1000m", "1Gi", "3Gi"
     return "250m", "384Mi", "1536Mi"
 

@@ -296,14 +296,14 @@ async def resolve_simulation_result_id(simulation_id: Any) -> str | None:
 
 
 async def _await_terminal_upsert(
-    client: httpx.AsyncClient, simulation_result_id: str, timeout: float = 300.0
+    client: httpx.AsyncClient, simulation_result_id: str, timeout: float = 600.0
 ) -> str | None:
     """Wait for a *final* status before the upsert.
 
-    300 s, not 150 s: eval regularly takes ~3 min to settle, and every second
-    short of that forces the early-post + relink path below, which appends the
-    execute_tool spans a second time. Still inside Pipecat Cloud's 600 s
-    maxSessionDuration even after a full 180 s call.
+    600 s, matching the LiveKit worker: eval can take longer than 300 s, and a
+    fall-through POST during EVALUATING gets wiped. The k8s LiveKit worker
+    process stays up, so the linker thread can wait the full window. Pipecat
+    Cloud's 600 s maxSessionDuration is the same ceiling.
 
     Posting during EVALUATING works, but eval then wipes trace_ids, and re-posting
     makes Bluejay re-extract the execute_tool spans on top of the ones the first

@@ -9,12 +9,11 @@ https://{host}/tools path instead.
 
 from __future__ import annotations
 
-import json
+import asyncio
 import logging
 import os
 import sys
 from pathlib import Path
-from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
@@ -34,31 +33,6 @@ AGENT_NAMES = {
     "openai-realtime-2.1": "mivas-pipecat-openai-realtime",
     "gemini-flash-live-3.1": "mivas-pipecat-gemini-live",
 }
-
-
-def sim_result_id_from_job_metadata(raw: Any) -> str | None:
-    """Bluejay puts X-Simulation-Result-Id on the LiveKit job metadata JSON."""
-    if not raw:
-        return None
-    meta = raw if isinstance(raw, dict) else None
-    if meta is None:
-        try:
-            meta = json.loads(str(raw))
-        except Exception:
-            logger.warning("job.metadata is not valid JSON: %s", raw)
-            return None
-    if not isinstance(meta, dict):
-        return None
-    for key in (
-        "X-Simulation-Result-Id",
-        "x-simulation-result-id",
-        "simulation_result_id",
-        "simulationResultId",
-    ):
-        val = meta.get(key)
-        if val is not None and str(val).strip():
-            return str(val).strip()
-    return None
 
 
 def _job_room_name(ctx: JobContext) -> str:
@@ -108,16 +82,20 @@ def main() -> None:
     runtime = os.environ.get("HARNESS_RUNTIME") or harness.DEFAULT_RUNTIME
     if runtime not in AGENT_NAMES:
         raise SystemExit(f"unknown pipecat runtime {runtime!r}")
-    agent_name = AGENT_NAMES[runtime]
+    agent_name = harness.resolve_agent_name(AGENT_NAMES[runtime])
     url = os.environ.get("LIVEKIT_URL", "").strip()
     if not url:
         raise SystemExit("LIVEKIT_URL is required")
+    for noisy in ("urllib3", "httpx", "httpcore", "asyncio"):
+        logging.getLogger(noisy).setLevel(logging.WARNING)
+    logger.setLevel(logging.INFO)
+    logger.info("registering livekit agent_name=%s runtime=%s", agent_name, runtime)
 
     async def entrypoint(ctx: JobContext) -> None:
         room_name = _job_room_name(ctx)
         if not room_name:
             raise RuntimeError("LiveKit job has no room name")
-        sim_id = sim_result_id_from_job_metadata(getattr(ctx.job, "metadata", None))
+        sim_id = harness.sim_result_id_from_job_metadata(getattr(ctx.job, "metadata", None))
         harness.set_call_id(sim_id)
         harness.begin_session(sim_id, session_key=room_name)
         job_url, job_token = _job_url_and_token(ctx, agent_name, room_name)
@@ -142,7 +120,10 @@ def main() -> None:
             simulation_result_id=sim_id,
             model=harness.RUNTIMES[runtime],
         ):
-            await bot.run_bot(transport, runtime)
+            try:
+                await bot.run_bot(transport, runtime)
+            finally:
+                await asyncio.to_thread(harness.end_session, room_name)
 
     server = AgentServer(job_executor_type=JobExecutorType.THREAD)
     server.rtc_session(agent_name=agent_name)(entrypoint)
