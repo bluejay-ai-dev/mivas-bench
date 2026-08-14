@@ -1,0 +1,27 @@
+voice-agent-harnesses/openai/report.py
+  s_c3667e3f3a0aba::t_154fe0c76978f5 220-261
+  s_c3667e3f3a0aba::t_54ba95dae2e875 363
+  s_c3667e3f3a0aba::t_0c36c134c44c97 322
+  s_c3667e3f3a0aba::t_ccca84dfa17646 51
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "81a508f6c19f97b8288bab8b3c6a00018be86f2b",
+  "prompts": {},
+  "humans": {
+    "h_bbe1a3ca680b9f": {
+      "author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_c3667e3f3a0aba": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "a182d293-da34-4767-b2b3-e646bc3aa040",
+        "model": "grok-4.6"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
