@@ -162,6 +162,20 @@ _PACK_WELCOME = {
     "travel": "Thanks for calling Juniper Airlines.",
 }
 
+# STT hints: proper nouns and pack terms Bluejay DHs actually say.
+_PACK_HINTS = {
+    "control-industry": (
+        "Bluejay, repair appointment, scheduler, next Tuesday"
+    ),
+    "healthcare": (
+        "Straus Dermatology, Park Avenue, Windermere, Aetna, Botox, copay, "
+        "Romano, Whitfield, Beaumont, Jordan Lee"
+    ),
+    "finance": "Copperline Credit Union, routing number, ACH, debit card",
+    "legal": "Halverson and Reed, retainer, consultation",
+    "travel": "Juniper Airlines, confirmation number, itinerary",
+}
+
 
 def _industry_name() -> str:
     named = os.environ.get("INDUSTRY", "").strip()
@@ -180,6 +194,13 @@ def welcome_greeting() -> str:
     if not raw or (raw == DEFAULT_WELCOME and _industry_name() != "control-industry"):
         return pack
     return raw
+
+
+def conversation_hints() -> str:
+    raw = os.environ.get("TWILIO_HINTS", "").strip()
+    if raw:
+        return raw
+    return _PACK_HINTS.get(_industry_name(), "")
 
 
 TWILIO_SIP_HOST_SUFFIX = "sip.twilio.com"
@@ -648,14 +669,38 @@ def twiml_connect(
     language = os.environ.get("TWILIO_LANGUAGE", "en-US").strip()
     tts_provider = os.environ.get("TWILIO_TTS_PROVIDER", "google").strip()
     transcription = os.environ.get("TWILIO_TRANSCRIPTION_PROVIDER", "deepgram").strip()
+    speech_model = os.environ.get("TWILIO_SPEECH_MODEL", "nova-3-general").strip()
+    interruptible = os.environ.get("TWILIO_INTERRUPTIBLE", "any").strip() or "any"
+    # Default none: industry agents greet first (DH speaks_first=false).
+    welcome_interruptible = (
+        os.environ.get("TWILIO_WELCOME_INTERRUPTIBLE", "none").strip() or "none"
+    )
+    # Healthcare DHs play cafe/office/TV beds; high sensitivity false-barges.
+    interrupt_sensitivity = (
+        os.environ.get("TWILIO_INTERRUPT_SENSITIVITY", "low").strip() or "low"
+    )
+    ignore_backchannel = (
+        os.environ.get("TWILIO_IGNORE_BACKCHANNEL", "true").strip() or "true"
+    )
+    hints = conversation_hints()
+    hints_esc = (
+        hints.replace("&", "&amp;").replace('"', "&quot;").replace("<", "&lt;")
+    )
     attrs = [
         f'url="{url_esc}"',
         f'welcomeGreeting="{greet_esc}"',
+        f'welcomeGreetingInterruptible="{welcome_interruptible}"',
         f'language="{language}"',
         f'ttsProvider="{tts_provider}"',
         f'voice="{voice}"',
         f'transcriptionProvider="{transcription}"',
+        f'speechModel="{speech_model}"',
+        f'interruptible="{interruptible}"',
+        f'interruptSensitivity="{interrupt_sensitivity}"',
+        f'ignoreBackchannel="{ignore_backchannel}"',
     ]
+    if hints_esc:
+        attrs.append(f'hints="{hints_esc}"')
     params_xml = ""
     for name, value in (parameters or {}).items():
         if not name or value is None or value == "":

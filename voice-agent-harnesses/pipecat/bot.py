@@ -68,7 +68,7 @@ async def _not_text_frame(frame: Frame) -> bool:
     return not isinstance(frame, TextFrame)
 
 
-async def _not_greeting_text(frame: Frame) -> bool:
+def _not_greeting_text_filter(greeting: str):
     """Keep the injected opener out of the LLM context.
 
     The greeting TTS emits a TTSTextFrame with `append_to_context` left true, so
@@ -76,13 +76,12 @@ async def _not_greeting_text(frame: Frame) -> bool:
     has said anything — and Gemini Live then answers nothing and closes the socket
     with 1008. Gemini's own speech frames must still reach the aggregator exactly
     as they did before the TTS existed, so match only the line we injected.
-
-    ponytail: exact-text match, fine for a fixed one-sentence opener; revisit if
-    the greeting ever becomes multi-sentence and the TTS splits it.
     """
-    return not (
-        isinstance(frame, TextFrame) and frame.text.strip() == harness.GREETING
-    )
+
+    async def _not_greeting_text(frame: Frame) -> bool:
+        return not (isinstance(frame, TextFrame) and frame.text.strip() == greeting)
+
+    return _not_greeting_text
 
 
 # `end_call` must not tear the pipeline down the instant the tool returns. A
@@ -228,9 +227,16 @@ async def run_bot(transport, runtime: str) -> None:
                     "handoff → {} ({} session, tools={})",
                     target, harness.RUNTIMES[runtime], harness.tool_names(bp, target),
                 )
-                await worker.queue_frames(
-                    [ManuallySwitchServiceFrame(service=agent_llms[target]), LLMRunFrame()]
-                )
+                frames = [
+                    ManuallySwitchServiceFrame(service=agent_llms[target]),
+                    LLMRunFrame(),
+                ]
+                # Gemini Live will not speak until the caller does, so a handoff
+                # target needs a scripted first line — derived from *that*
+                # agent's prompt, never a leftover receptionist greeting.
+                if runtime in harness.GREETING_TTS_RUNTIMES:
+                    frames.append(TTSSpeakFrame(harness.agent_opener(bp, target)))
+                await worker.queue_frames(frames)
 
             # Switch from `on_context_updated`, not inline: the handoff call and
             # its result have to be in the shared context *before* the incoming
@@ -298,11 +304,12 @@ async def run_bot(transport, runtime: str) -> None:
         # must not reach the assistant aggregator, or it lands in the context as an
         # assistant message before the caller has spoken and Gemini drops the
         # session with 1008.
+        greeting = harness.pack_greeting(bp)
         stages.append(FunctionFilter(_not_text_frame))
         stages.append(harness.build_tts())
         stages += [
             transport.output(),
-            FunctionFilter(_not_greeting_text),
+            FunctionFilter(_not_greeting_text_filter(greeting)),
             aggregators.assistant(),
         ]
     else:
@@ -336,7 +343,7 @@ async def run_bot(transport, runtime: str) -> None:
         # with 1008. The scripted opener rides behind it on the greeting TTS.
         frames = [LLMRunFrame()]
         if runtime in harness.GREETING_TTS_RUNTIMES:
-            frames.append(TTSSpeakFrame(harness.GREETING))
+            frames.append(TTSSpeakFrame(harness.pack_greeting(bp)))
         await worker.queue_frames(frames)
 
     async def _hangup(_transport, *_args):

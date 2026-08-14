@@ -24,6 +24,7 @@ the new agent's prompt and only the new agent's tools.
 from __future__ import annotations
 
 import asyncio
+import datetime as _dt
 import json
 import logging
 import os
@@ -60,6 +61,9 @@ logger = logging.getLogger("mivas.livekit")
 REPO_ROOT = Path(__file__).resolve().parents[2]
 TOOL_SERVER_URL = os.environ.get("TOOL_SERVER_URL", "http://127.0.0.1:8000").rstrip("/")
 INDUSTRY = os.environ.get("INDUSTRY", "control-industry")
+# Fallback only for packs that omit `greeting` (control-industry). Healthcare
+# and the other industry packs put the spoken opener on agent_blueprint.json;
+# generate_reply/say must use that, not this repair-shop line.
 GREETING = "Welcome to Bluejay's Repair Services!"
 # Matches *step 1* of an agent's own flow, e.g.
 # `1. Ask: "Hey, when do you want to schedule your repair appointment?"` in
@@ -129,7 +133,43 @@ def load_blueprint(industry_dir: str | Path = INDUSTRY) -> dict[str, Any]:
         "start": blueprint["agents"][0]["name"],
         "agents": agents,
         "catalog": catalog,
+        "greeting": (blueprint.get("greeting") or "").strip(),
     }
+
+
+def pack_greeting(bp: dict[str, Any] | None = None) -> str:
+    """Spoken opener for this pack. Blueprint wins; GREETING is control-industry."""
+    if bp is not None and (bp.get("greeting") or "").strip():
+        return str(bp["greeting"]).strip()
+    return GREETING
+
+
+def today_clock() -> str:
+    d = _dt.date.today()
+    return f"Today is {d.strftime('%A')}, {d.strftime('%B')} {d.day}, {d.year}."
+
+
+def with_clock(instructions: str) -> str:
+    """gpt-4.1 (and the S2S models) have no 'today'; relative dates invent years."""
+    clock = today_clock()
+    if clock in instructions:
+        return instructions
+    return f"{instructions.rstrip()}\n\n{clock}"
+
+
+def resolve_agent_name(default: str) -> str:
+    """LiveKit dispatch name. Unique per k8s slug so two industries cannot collide.
+
+    Local/dev (no MIVAS_SLUG) keeps the runtime default (`mivas-livekit-cascaded`).
+    LIVEKIT_AGENT_NAME wins when set.
+    """
+    explicit = os.environ.get("LIVEKIT_AGENT_NAME", "").strip()
+    if explicit:
+        return explicit
+    slug = os.environ.get("MIVAS_SLUG", "").strip()
+    if slug:
+        return f"mivas-{slug}"
+    return default
 
 
 # ── tools (in-process, each under an execute_tool span) ──────────────────────
@@ -277,7 +317,7 @@ class BlueprintAgent(Agent):
         scripted_opener: bool = False,
         entered_by_handoff: bool = False,
     ):
-        instructions = bp["agents"][name]["instructions"]
+        instructions = with_clock(bp["agents"][name]["instructions"])
         llm: NotGivenOr[Any] = llm_factory(name) if llm_factory else NOT_GIVEN
         super().__init__(
             instructions=instructions,
@@ -416,13 +456,21 @@ async def run_call(
         session = build_session(bp)
         wire_speech_spans(session)
         await session.start(room=ctx.room, agent=build_agent(bp, hangup))
+        # Greeting audio is dropped if we speak before the DH has subscribed
+        # (Gloria 728129 started mid-opener). Wait for the caller, then say
+        # the pack line uninterruptibly so VAD cannot chop the first sentence.
+        try:
+            await ctx.wait_for_participant()
+        except Exception as e:
+            logger.warning("wait_for_participant: %s", e)
 
+        greeting = pack_greeting(bp)
         if greet == "say":
             # realtime models with mutable_chat_context=False reject generate_reply;
             # a TTS on the session lets say() deliver the scripted opener instead.
-            session.say(GREETING)
+            session.say(greeting, allow_interruptions=False)
         elif greet == "generate_reply":
-            session.generate_reply(instructions=f"Greet the caller with: '{GREETING}'")
+            session.generate_reply(instructions=f'Greet the caller with: "{greeting}"')
 
         done = [asyncio.create_task(hangup.wait()), asyncio.create_task(disconnected.wait())]
         await asyncio.wait(done, return_when=asyncio.FIRST_COMPLETED)
@@ -447,6 +495,8 @@ def serve(
     greet: str = "generate_reply",
 ) -> None:
     """Register one runtime with LiveKit and hand control to the agents CLI."""
+    agent_name = resolve_agent_name(agent_name)
+    logger.info("registering livekit agent_name=%s", agent_name)
 
     async def entrypoint(ctx: JobContext) -> None:
         await run_call(

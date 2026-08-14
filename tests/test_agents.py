@@ -251,6 +251,10 @@ def test_render_snapshot_bucket(monkeypatch: pytest.MonkeyPatch) -> None:
 
 def test_cascaded_nemotron_gets_heavier_pod() -> None:
     assert pair_resources("nvidia/nemotron") == ("1000m", "1Gi", "3Gi")
+    assert pair_resources("livekit/cascaded") == ("1000m", "1Gi", "3Gi")
+    assert pair_resources("pipecat/cascaded") == ("1000m", "1Gi", "3Gi")
+    assert pair_resources("livekit/openai-realtime-2.1") == ("250m", "384Mi", "1536Mi")
+    assert pair_resources("pipecat/openai-realtime-2.1") == ("250m", "384Mi", "1536Mi")
     assert pair_resources("nvidia/nemotron-voicechat") == ("250m", "384Mi", "1536Mi")
     assert pair_resources("openai/realtime-2.1") == ("250m", "384Mi", "1536Mi")
     yaml_text = render_agents_yaml(
