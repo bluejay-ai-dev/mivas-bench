@@ -221,9 +221,11 @@ def build_image(harness: str, industry: str, image: str) -> None:
     prefix = os.environ.get("MIVAS_IMAGE_PREFIX", "").strip()
     platforms = os.environ.get("MIVAS_IMAGE_PLATFORMS", "").strip()
     if prefix:
-        # Auto Mode general-purpose nodes are amd64; system nodes are arm64.
-        platforms = platforms or "linux/amd64,linux/arm64"
+        # Auto Mode general-purpose nodes are amd64. Dual-arch is opt-in.
+        platforms = platforms or "linux/amd64"
         print(f"building {image} (-f {dockerfile.relative_to(ROOT)}) {platforms} → push")
+        family = split_harness(harness)[0]
+        cache = f"{prefix.rstrip('/')}:cache-{family}"
         run(
             [
                 "docker",
@@ -235,6 +237,8 @@ def build_image(harness: str, industry: str, image: str) -> None:
                 str(dockerfile),
                 "--build-arg",
                 f"INDUSTRY={industry}",
+                "--cache-from",
+                f"type=registry,ref={cache}",
                 "-t",
                 image,
                 "--push",
@@ -279,6 +283,7 @@ def _render(template_name: str, harness: str, industry: str, image: str, service
         if os.environ.get("MIVAS_IMAGE_PREFIX", "").strip()
         else "IfNotPresent"
     )
+    cpu_req, mem_req, mem_lim = pair_resources(harness)
     template = (ROOT / "k8s" / template_name).read_text()
     return (
         template.replace("__HARNESS__", harness)
@@ -297,12 +302,29 @@ def _render(template_name: str, harness: str, industry: str, image: str, service
         .replace("__MIVAS_MODE__", pair_mivas_mode(harness))
         .replace("__TWILIO_WELCOME_GREETING__", _twilio_welcome(industry))
         .replace("__REPLICAS__", str(replica_count()))
-        .replace("__TOOLS_REPLICAS__", str(tools_replica_count()))
+        .replace("__CPU_REQUEST__", cpu_req)
+        .replace("__MEMORY_REQUEST__", mem_req)
+        .replace("__MEMORY_LIMIT__", mem_lim)
+        .replace("__SNAPSHOT_BUCKET__", os.environ.get("MIVAS_SNAPSHOT_BUCKET", "").strip())
+        .replace("__SNAPSHOT_PREFIX__", os.environ.get("MIVAS_SNAPSHOT_PREFIX", "mivas").strip() or "mivas")
+        .replace("__AWS_REGION__", os.environ.get("AWS_DEFAULT_REGION") or os.environ.get("AWS_REGION") or "us-west-1")
     )
 
 
+def pair_resources(harness: str) -> tuple[str, str, str]:
+    """cpu request, memory request, memory limit.
+
+    Cascaded Nemotron runs Silero + NVCF STT/LLM/TTS per websocket. Six of those
+    on the default 250m/384Mi box never reached TTS (runs 230627 / 230659).
+    """
+    family, runtime = split_harness(harness)
+    if family == "nvidia" and runtime == "nemotron":
+        return "1000m", "1Gi", "3Gi"
+    return "250m", "384Mi", "1536Mi"
+
+
 def replica_count() -> int:
-    """Harness Deployment replicas from MIVAS_REPLICAS (default 1)."""
+    """Combined-pod Deployment replicas from MIVAS_REPLICAS (default 1)."""
     raw = os.environ.get("MIVAS_REPLICAS", "1").strip() or "1"
     try:
         n = int(raw)
@@ -310,22 +332,6 @@ def replica_count() -> int:
         raise ValueError(f"MIVAS_REPLICAS must be a positive integer, got {raw!r}") from None
     if n < 1:
         raise ValueError(f"MIVAS_REPLICAS must be >= 1, got {n}")
-    return n
-
-
-def tools_replica_count() -> int:
-    """Tools Deployment replicas. v1 is one writer: must be 1."""
-    raw = os.environ.get("MIVAS_TOOLS_REPLICAS", "1").strip() or "1"
-    try:
-        n = int(raw)
-    except ValueError:
-        raise ValueError(
-            f"MIVAS_TOOLS_REPLICAS must be a positive integer, got {raw!r}"
-        ) from None
-    if n != 1:
-        raise ValueError(
-            f"MIVAS_TOOLS_REPLICAS must be 1 in v1 (one SQLite writer per pair), got {n}"
-        )
     return n
 
 
@@ -562,8 +568,6 @@ def render_agents_yaml(pairs: list[tuple[str, str]], service_type: str) -> str:
         docs.append(_render("ingressclass.yaml", h0, i0, image_ref(h0, i0), service_type))
     for harness, industry in pairs:
         image = image_ref(harness, industry)
-        docs.append(_render("deployment-tools.yaml", harness, industry, image, service_type))
-        docs.append(_render("service-tools.yaml", harness, industry, image, service_type))
         docs.append(_render("deployment.yaml", harness, industry, image, service_type))
         docs.append(_render("service.yaml", harness, industry, image, service_type))
         if use_ingress and pair_needs_ingress(harness):
@@ -592,14 +596,14 @@ def apply_agents(pairs: list[tuple[str, str]], *, follow_logs: bool) -> None:
     if n > 1:
         families = {split_harness(h)[0] for h, _ in pairs}
         print(
-            f"MIVAS_REPLICAS={n} harness pods; tools Deployment stays at "
-            f"{tools_replica_count()} (ClusterIP mivas-{{slug}}-tools).",
+            f"MIVAS_REPLICAS={n}; tools run in-pod (127.0.0.1:8000). "
+            "vapi/retell/bland/cartesia must stay at 1.",
             file=sys.stderr,
         )
         if families & PLATFORM_FAMILIES:
             print(
-                "warning: vapi/retell/bland/cartesia webhooks still hit a random "
-                "CHIRP replica; bind is stored on the tools Service.",
+                "warning: vapi/retell/bland/cartesia webhooks hit a random "
+                "replica; combined-pod SQLite will split across pods.",
                 file=sys.stderr,
             )
 
@@ -613,15 +617,23 @@ def apply_agents(pairs: list[tuple[str, str]], *, follow_logs: bool) -> None:
             base = os.environ["MIVAS_BASE_DOMAIN"].strip().lower().strip(".")
             print(f"stable hosts under *.{base} (same URL across redeploys for each slug)")
         run(["kubectl", "apply", "-f", str(path)])
+        for harness, industry in pairs:
+            name = f"mivas-{slug(harness, industry)}"
+            subprocess.run(
+                [
+                    "kubectl",
+                    "delete",
+                    "deploy,svc",
+                    f"{name}-tools",
+                    "--ignore-not-found",
+                ],
+                check=False,
+            )
     finally:
         path.unlink(missing_ok=True)
 
     for harness, industry in pairs:
         name = f"mivas-{slug(harness, industry)}"
-        subprocess.run(
-            ["kubectl", "rollout", "status", f"deployment/{name}-tools", "--timeout=180s"],
-            check=False,
-        )
         subprocess.run(
             ["kubectl", "rollout", "status", f"deployment/{name}", "--timeout=180s"],
             check=False,
@@ -660,7 +672,7 @@ def apply_agents(pairs: list[tuple[str, str]], *, follow_logs: bool) -> None:
             "(auth: CHIRP_USER/CHIRP_PASS). Hostnames are deterministic per slug."
         )
         print("List: kubectl get ingress,svc,deploy -l app=mivas-bench")
-        print("ALB hostname (Cloudflare CNAME target, DNS-only / grey cloud):")
+        print("ALB hostname (wildcard CNAME target for MIVAS_BASE_DOMAIN):")
         print(
             "  kubectl get ingress -l app=mivas-bench "
             "-o jsonpath='{.items[0].status.loadBalancer.ingress[0].hostname}'"
@@ -783,7 +795,12 @@ def main() -> None:
         default=os.environ.get("INDUSTRY", "control-industry"),
         help="Industry pack (default: $INDUSTRY or control-industry)",
     )
-    parser.add_argument("--build", action="store_true", help="docker build image(s)")
+    parser.add_argument("--build", action="store_true", help="docker build image(s) locally")
+    parser.add_argument(
+        "--codebuild",
+        action="store_true",
+        help="Build image(s) as a CodeBuild batch (linux/amd64, one child per AGENTS pair)",
+    )
     parser.add_argument(
         "--apply",
         action="store_true",
@@ -809,7 +826,7 @@ def main() -> None:
     args = parser.parse_args()
 
     mode = "check" if args.check else args.mode
-    do_local = args.local or not (args.build or args.apply)
+    do_local = args.local or not (args.build or args.apply or args.codebuild)
 
     try:
         pairs = resolve_pairs(args.harness, args.industry)
@@ -830,6 +847,19 @@ def main() -> None:
 
     if os.environ.get("AGENTS", "").strip():
         print(f"AGENTS → {len(pairs)} pair(s): " + ", ".join(f"{h}:{i}" for h, i in pairs))
+
+    if args.codebuild:
+        if str(ROOT) not in sys.path:
+            sys.path.insert(0, str(ROOT))
+        from codebuild.fleet import start_fleet
+
+        try:
+            start_fleet(pairs, wait=True)
+        except (ValueError, SystemExit) as e:
+            print(e, file=sys.stderr)
+            if isinstance(e, SystemExit):
+                raise
+            sys.exit(1)
 
     if args.build:
         prefix = os.environ.get("MIVAS_IMAGE_PREFIX", "").strip()

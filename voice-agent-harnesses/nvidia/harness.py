@@ -13,9 +13,12 @@ Industry tools map onto the industry state API; session tools (`end_call`) hang 
 
 from __future__ import annotations
 
+import asyncio
+import concurrent.futures
 import json
 import os
 import sys
+import threading
 from pathlib import Path
 from typing import Any
 
@@ -27,7 +30,7 @@ for _root in (Path("/app"), *Path(__file__).resolve().parents):
         if str(_runtime) not in sys.path:
             sys.path.insert(0, str(_runtime))
         break
-from call_id import begin_session, headers as tool_headers, set_call_id  # noqa: E402
+from call_id import begin_session, end_session, headers as tool_headers, set_call_id  # noqa: E402
 
 HARNESS_DIR = Path(__file__).resolve().parent
 REPO_ROOT = HARNESS_DIR.parents[1] if len(HARNESS_DIR.parents) > 1 else HARNESS_DIR
@@ -52,6 +55,62 @@ SAMPLE_RATE = int(os.environ.get("NEMOTRON_SAMPLE_RATE", "16000"))
 
 # Verbatim from control-industry receptionist prompt; Flows kicks greeting via LLMRun.
 GREETING = "Welcome to Bluejay's Repair Services!"
+
+_IO_INSTALLED = False
+_MAGPIE_LOCK = threading.Lock()
+_MAGPIE_CONFIG = None
+
+
+def io_workers() -> int:
+    raw = os.environ.get("NEMOTRON_IO_WORKERS", "24").strip() or "24"
+    n = int(raw)
+    if n < 8:
+        raise ValueError(f"NEMOTRON_IO_WORKERS must be >= 8, got {n}")
+    return n
+
+
+def install_io_executor() -> None:
+    """Widen the loop default executor. 1-CPU pods get min(32, cpu+4)=5 threads,
+    which starved two of six Magpie start()s (run 230706)."""
+    global _IO_INSTALLED
+    if _IO_INSTALLED:
+        return
+    asyncio.get_running_loop().set_default_executor(
+        concurrent.futures.ThreadPoolExecutor(
+            max_workers=io_workers(),
+            thread_name_prefix="nvidia-io",
+        )
+    )
+    _IO_INSTALLED = True
+
+
+def attach_magpie(tts) -> None:
+    """Per-call gRPC channel, process-wide synthesis config.
+
+    GetRivaSynthesisConfig is the only blocking network RPC in TTS start(); six
+    at once hung behind live SynthesizeOnline streams (run 230708), so it is
+    fetched once under the lock and reused. The channel must NOT be shared:
+    Pipecat's _close_client() closes auth.channel, so with one shared client the
+    first caller to hang up killed TTS for the other five with "Cannot invoke
+    RPC: Channel closed!" (run 230716). grpc.secure_channel is lazy, so a
+    per-call client costs no I/O here.
+    """
+    global _MAGPIE_CONFIG
+    tts._initialize_client()
+    with _MAGPIE_LOCK:
+        if _MAGPIE_CONFIG is None:
+            _MAGPIE_CONFIG = tts._create_synthesis_config()
+    tts._config = _MAGPIE_CONFIG
+    tts._load_zero_shot_audio_prompt()
+
+
+def warm_magpie() -> None:
+    """Pay GetRivaSynthesisConfig at process start, while the pod is idle."""
+    tts = build_tts()
+    try:
+        attach_magpie(tts)
+    finally:
+        tts._close_client()
 
 
 def industry_path(name: str | Path) -> Path:
@@ -87,6 +146,9 @@ def load_blueprint(industry_dir: str | Path) -> dict[str, Any]:
         "start": blueprint["agents"][0]["name"],
         "agents": agents,
         "catalog": catalog,
+        # Pack opener for speak-first DHs. Healthcare reception.md assumes this
+        # already played; control-industry has none and the LLM greets itself.
+        "greeting": (blueprint.get("greeting") or "").strip(),
     }
 
 
@@ -184,7 +246,13 @@ def _spec(bp: dict[str, Any], name: str) -> tuple[str, dict, list]:
     )
 
 
-def flows_node(bp: dict[str, Any], agent: str, handler):
+def flows_node(
+    bp: dict[str, Any],
+    agent: str,
+    handler,
+    *,
+    respond_immediately: bool = True,
+):
     """One agent as a Pipecat Flows node: its own prompt, its own functions."""
     import functools
 
@@ -206,13 +274,26 @@ def flows_node(bp: dict[str, Any], agent: str, handler):
             for d, p, r in [_spec(bp, name)]
         ],
         context_strategy=ContextStrategyConfig(strategy=ContextStrategy.RESET),
+        respond_immediately=respond_immediately,
     )
 
 
 def build_stt():
     from pipecat.services.nvidia.stt import NvidiaSTTService
 
-    return NvidiaSTTService(
+    class NonblockingNvidiaSTTService(NvidiaSTTService):
+        """TLS + gRPC Auth() must not run on the uvicorn loop (6-way run 230683)."""
+
+        async def start(self, frame):
+            await asyncio.to_thread(self._initialize_client)
+            real_init = self._initialize_client
+            self._initialize_client = lambda: None  # noqa: E731
+            try:
+                await super().start(frame)
+            finally:
+                self._initialize_client = real_init
+
+    return NonblockingNvidiaSTTService(
         api_key=nvidia_api_key(),
         server=ASR_SERVER,
         use_ssl=True,
@@ -221,7 +302,6 @@ def build_stt():
             "function_id": ASR_FUNCTION_ID,
             "model_name": ASR_MODEL,
         },
-        stop_history=400,
     )
 
 
@@ -247,7 +327,29 @@ def build_llm():
 def build_tts():
     from pipecat.services.nvidia.tts import NvidiaTTSService
 
-    return NvidiaTTSService(
+    class NonblockingNvidiaTTSService(NvidiaTTSService):
+        """Off-loop Magpie client + config; Event when start() can take TTSSpeakFrame."""
+
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.ready = asyncio.Event()
+
+        def _blocking_start(self) -> None:
+            attach_magpie(self)
+
+        async def start(self, frame):
+            await super(NvidiaTTSService, self).start(frame)
+            await asyncio.to_thread(self._blocking_start)
+            self.ready.set()
+
+        # No semaphore around run_tts. It existed to stop six Magpie start()
+        # handshakes racing live streams; attach_magpie() now caches the only
+        # blocking RPC, so the handshake is free. Delaying synthesis is not:
+        # Pipecat cleans up the TTS context when the LLM turn ends, and any
+        # sentence still waiting for a slot is truncated or dropped (run 230744,
+        # "...date of birth? This").
+
+    return NonblockingNvidiaTTSService(
         api_key=nvidia_api_key(),
         server=TTS_SERVER,
         use_ssl=True,

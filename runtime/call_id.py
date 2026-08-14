@@ -7,6 +7,7 @@ provider call id (Vapi call.id, Retell call_id, …).
 
 from __future__ import annotations
 
+import asyncio
 import json
 import os
 import threading
@@ -14,8 +15,9 @@ import urllib.error
 import urllib.parse
 import urllib.request
 import uuid
+from contextlib import asynccontextmanager
 from contextvars import ContextVar
-from typing import Any
+from typing import Any, AsyncIterator
 
 HEADER = "X-Mivas-Call-Id"
 CALL_ID: ContextVar[str] = ContextVar("mivas_call_id", default="")
@@ -83,6 +85,37 @@ def end_session(session_key: str) -> None:
             capture_final(sim)
         except Exception as e:
             print(f"snapshot: capture failed sim={sim} err={e}", flush=True)
+
+
+@asynccontextmanager
+async def call_session(
+    sim_id: str | None, *, session_key: str | None = None
+) -> AsyncIterator[str]:
+    """Register an in-flight call and freeze its DB to S3 when the bridge exits.
+
+    Compose it onto the existing `traced_run` line — `async with
+    call_session(sim_id), traced_run(...)` — so no bridge body needs reindenting
+    and a raising bridge still snapshots.
+
+    Freezes whatever id is current at *exit*, not the one passed in: Twilio only
+    learns the real simulation id from the ConversationRelay setup frame, which
+    arrives after the bridge opens.
+    """
+    key = session_key or uuid.uuid4().hex
+    resolved = begin_session(sim_id, session_key=key)
+    try:
+        yield resolved
+    finally:
+        with _lock:
+            _sessions.pop(key, None)
+        final = (CALL_ID.get() or resolved or "").strip()
+        if final:
+            try:
+                from snapshot import capture_final
+
+                await asyncio.to_thread(capture_final, final)
+            except Exception as e:
+                print(f"snapshot: capture failed sim={final} err={e}", flush=True)
 
 
 def sole_session() -> str | None:

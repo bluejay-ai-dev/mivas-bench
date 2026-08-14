@@ -22,7 +22,7 @@ import websockets
 from websockets.asyncio.server import serve
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from harness import ensure_agents, get_signed_url, industry_path, load_blueprint, run_tool, set_call_id  # noqa: E402
+from harness import call_session, ensure_agents, get_signed_url, industry_path, load_blueprint, run_tool, set_call_id  # noqa: E402
 from report import (  # noqa: E402
     end_speech_span,
     finish_tool_span,
@@ -84,7 +84,11 @@ async def _bridge(ws, model: str, industry: str) -> None:
         end_speech_span(customer_otel)
         customer_otel = None
 
-    async with traced_run(workflow, simulation_result_id=sim_id, model=model):
+    # call_session freezes this call's DB to S3 on exit; composed here so a
+    # raising bridge still snapshots and the body needs no reindent.
+    async with traced_run(
+        workflow, simulation_result_id=sim_id, model=model
+    ), call_session(sim_id):
         async with websockets.connect(signed_url) as agent_ws:
             await agent_ws.send(json.dumps({"type": "conversation_initiation_client_data"}))
 

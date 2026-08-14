@@ -19,7 +19,7 @@ from google.genai import types
 from websockets.asyncio.server import serve
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from harness import industry_path, live_config, load_blueprint, run_tool, set_call_id  # noqa: E402
+from harness import call_session, industry_path, live_config, load_blueprint, run_tool, set_call_id  # noqa: E402
 from report import end_speech_span, start_speech_span, traced_run  # noqa: E402
 
 W, R_OUT, R_CHIRP = 2, 24_000, 16_000
@@ -78,7 +78,11 @@ async def _bridge(ws, model: str, industry: str) -> None:
         end_speech_span(customer_otel)
         customer_otel = None
 
-    async with traced_run(workflow, simulation_result_id=sim_id, model=model):
+    # call_session freezes this call's DB to S3 on exit; composed here so a
+    # raising bridge still snapshots and the body needs no reindent.
+    async with traced_run(
+        workflow, simulation_result_id=sim_id, model=model
+    ), call_session(sim_id):
         async with client.aio.live.connect(model=model, config=config) as session:
             # Live waits for a turn before speaking — nudge the scripted greeting.
             await session.send_realtime_input(

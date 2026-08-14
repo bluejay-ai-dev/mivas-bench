@@ -46,6 +46,7 @@ from harness import (  # noqa: E402
     openai_tools_for_agent,
     public_base_url,
     run_tool,
+    call_session,
     sim_id_from_mapping,
     sip_header_keys,
     transcript_blob,
@@ -170,7 +171,11 @@ def build_app(industry: str | None = None) -> FastAPI:
         log(f"WS open sim={sim_id} industry={bp['industry_dir'].name}")
 
         otel_sim = sim_id if str(sim_id).isdigit() else None
-        async with traced_run(workflow, simulation_result_id=otel_sim, model=MODEL) as root:
+        # call_session freezes on the id current at exit, not `sim_id` here: the
+        # real simulation id can still arrive in the CR setup frame below.
+        async with traced_run(
+            workflow, simulation_result_id=otel_sim, model=MODEL
+        ) as root, call_session(sim_id):
             state["_otel_root"] = root
             try:
                 while True:
