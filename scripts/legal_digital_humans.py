@@ -108,7 +108,9 @@ EXIT_BOOKING = (
     "confirmed back to you, so do not end the call after giving your details or after the "
     "matter is written down. Keep answering questions until you have been told the "
     "appointment is booked. Only then say exactly: \"Thank you, that's all I needed.\" and "
-    "end the call yourself."
+    "end the call yourself. The one exception: if the agent stops making progress and says "
+    "nothing new for three turns in a row, say exactly: \"I'll call back another time.\" "
+    "and end the call."
 )
 
 
