@@ -61,7 +61,7 @@ USER_LIVE_S = float(os.environ.get("VOICECHAT_USER_LIVE_S", "0.25"))
 CUSTOMER_HANG_S = float(os.environ.get("VOICECHAT_CUSTOMER_HANG_S", "2.0"))
 AGENT_HANG_S = float(os.environ.get("VOICECHAT_AGENT_HANG_S", "2.2"))
 KICK_TRAIL_SILENCE_S = float(os.environ.get("VOICECHAT_KICK_TRAIL_SILENCE_S", "3.5"))
-ECHO_SUPPRESS_S = float(os.environ.get("VOICECHAT_ECHO_SUPPRESS_S", "0.75"))
+ECHO_SUPPRESS_S = float(os.environ.get("VOICECHAT_ECHO_SUPPRESS_S", "1.5"))
 _KICK_WAV = Path(__file__).resolve().parents[1] / "assets" / "speak_first_kick.wav"
 
 _LOG_LEVEL = (os.environ.get("VOICECHAT_LOG") or "full").strip().lower()
@@ -324,9 +324,18 @@ async def _bridge(ws, industry: str) -> None:
 
             def _agent_echo_risk(now: float | None = None) -> bool:
                 now = now if now is not None else time.monotonic()
+                if turns.agent_utt is not None:
+                    return True
                 return bool(ctl["agent_heard"]) and (
                     now - float(ctl["last_agent_loud"] or 0.0) < ECHO_SUPPRESS_S
                 )
+
+            def _real_barge_in(now: float | None = None) -> bool:
+                """User is actually talking — not Bluejay VAD hearing our TTS."""
+                now = now if now is not None else time.monotonic()
+                if _agent_echo_risk(now):
+                    return False
+                return _user_live(now)
 
             async def _send_pcm24(pcm24: bytes) -> None:
                 if not pcm24 or end.is_set():
@@ -607,10 +616,15 @@ async def _bridge(ws, industry: str) -> None:
                         if isinstance(msg, bytes) and msg:
                             rms = audioop.rms(msg, W)
                             loud = rms >= USER_RMS_ON
-                            if not (ctl["customer_speaking"] or loud):
-                                continue
-                            if ctl["customer_speaking"] and loud:
+                            echo = _agent_echo_risk()
+                            if loud and not echo:
                                 ctl["last_user_loud"] = time.monotonic()
+                            elif loud and echo and rms >= USER_RMS_ON * 2:
+                                # Real barge-in over TTS: much louder than typical echo.
+                                ctl["last_user_loud"] = time.monotonic()
+                                echo = False
+                            if echo or not (ctl["customer_speaking"] or loud):
+                                continue
                             pcm, up = audioop.ratecv(msg, W, 1, R_CHIRP, R_VC, up)
                             if pcm:
                                 ctl["awaiting_agent"] = True
@@ -631,19 +645,19 @@ async def _bridge(ws, industry: str) -> None:
                         etype = event.get("type")
                         data = event.get("data") or {}
                         if etype == "speech.started":
-                            if _agent_echo_risk():
+                            if not _real_barge_in():
                                 _log(
                                     f"CHIRP speech.started IGNORED echo "
-                                    f"uid={data.get('utterance_id')}"
+                                    f"uid={data.get('utterance_id')} "
+                                    f"user_live={_user_live()} echo={_agent_echo_risk()}"
                                 )
                                 continue
                             ctl["customer_speaking"] = True
-                            ctl["last_user_loud"] = time.monotonic()
                             uid = data.get("utterance_id") or f"c_{uuid.uuid4().hex[:12]}"
                             _log(f"CHIRP speech.started uid={uid}")
                             ctl["awaiting_agent"] = True
                             if turns.agent_utt is not None:
-                                await turns.end_agent(why="barge_in:chirp")
+                                await turns.end_agent(why="barge_in:user")
                             await turns.start_customer(uid, why="chirp_speech.started")
                         elif etype == "speech.completed":
                             if not ctl["customer_speaking"] and turns.customer_utt is None:
@@ -713,12 +727,12 @@ async def _bridge(ws, industry: str) -> None:
                             if not pcm16:
                                 continue
                             rms = audioop.rms(pcm16, W)
-                            if ctl["customer_speaking"]:
+                            # Never drop agent PCM because Bluejay VAD heard our
+                            # own TTS (run 230628: barge_in:chirp chopped every turn).
+                            if _real_barge_in(now):
                                 loud_ms = 0.0
                                 if turns.agent_utt is not None:
-                                    await turns.end_agent(why="customer_speaking")
-                                continue
-                            if _user_live(now):
+                                    await turns.end_agent(why="barge_in:user")
                                 continue
                             loud = rms >= AGENT_RMS_ON
                             frame_ms = 1000.0 * (len(pcm16) / W) / R_CHIRP
@@ -823,6 +837,13 @@ async def _bridge(ws, industry: str) -> None:
                                 source="nvcf_fc",
                             )
 
+                        elif etype == "input_audio_buffer.speech_started":
+                            _log(f"event={etype}")
+                            if not _agent_echo_risk():
+                                ctl["customer_speaking"] = True
+                                ctl["last_user_loud"] = time.monotonic()
+                                if turns.agent_utt is not None:
+                                    await turns.end_agent(why="barge_in:nvcf")
                         elif etype == "error":
                             _log(f"ERROR {event}")
                         elif etype == "session.end":
@@ -832,7 +853,6 @@ async def _bridge(ws, industry: str) -> None:
                         elif etype in {
                             "response.created",
                             "conversation.item.created",
-                            "input_audio_buffer.speech_started",
                             "input_audio_buffer.speech_stopped",
                         }:
                             _log(f"event={etype}")

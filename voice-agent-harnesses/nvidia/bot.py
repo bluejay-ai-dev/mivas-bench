@@ -16,6 +16,7 @@ from pipecat.frames.frames import (
     BotStartedSpeakingFrame,
     BotStoppedSpeakingFrame,
     EndTaskFrame,
+    TTSSpeakFrame,
     UserStartedSpeakingFrame,
     UserStoppedSpeakingFrame,
 )
@@ -101,6 +102,7 @@ async def run_bot(
     *,
     simulation_result_id: str | None = None,
 ) -> None:
+    harness.install_io_executor()
     harness.set_call_id(simulation_result_id)
     harness.begin_session(simulation_result_id, session_key=str(simulation_result_id or "job"))
     bp = harness.load_blueprint(industry)
@@ -114,8 +116,9 @@ async def run_bot(
     tts = harness.build_tts()
 
     context = LLMContext()
+    vad = await asyncio.to_thread(SileroVADAnalyzer)
     aggregators = LLMContextAggregatorPair(
-        context, user_params=LLMUserAggregatorParams(vad_analyzer=SileroVADAnalyzer())
+        context, user_params=LLMUserAggregatorParams(vad_analyzer=vad)
     )
 
     worker = PipelineWorker(
@@ -171,10 +174,48 @@ async def run_bot(
         worker=worker, llm=llm, context_aggregator=aggregators, transport=transport
     )
 
+    async def _speak_pack_greeting(text: str) -> None:
+        try:
+            ready = getattr(tts, "ready", None)
+            if ready is not None:
+                await ready.wait()
+            logger.info("speaking pack greeting ({} chars)", len(text))
+            await tts.queue_frame(TTSSpeakFrame(text))
+        except Exception:
+            logger.exception("pack greeting failed")
+
+    async def _init_start_node() -> None:
+        try:
+            # Pack greeting already plays via TTSSpeakFrame. An opening LLMRun
+            # (Flows default) fired 6 NIM completions at once; #1 then timed
+            # out and never answered the caller (run 230706, 726209).
+            has_greeting = bool((bp.get("greeting") or "").strip())
+            logger.info(
+                "client connected — initializing {} node (respond_immediately={})",
+                bp["start"],
+                not has_greeting,
+            )
+            await flow_manager.initialize(
+                harness.flows_node(
+                    bp,
+                    bp["start"],
+                    on_tool,
+                    respond_immediately=not has_greeting,
+                )
+            )
+        except Exception:
+            logger.exception("flow initialize failed")
+
     @transport.event_handler("on_client_connected")
     async def _connected(_transport, _client):
-        logger.info("client connected — initializing {} node", bp["start"])
-        await flow_manager.initialize(harness.flows_node(bp, bp["start"], on_tool))
+        # Do not await initialize() here. Flows' opening LLMRun blocks until the
+        # LLM returns; six concurrent pipelines starved that call and the
+        # greeting never left (runs 230627 / 230659, all NO_ANSWER). Speak the
+        # pack opener as soon as TTS is up; initialize in the background.
+        greeting = (bp.get("greeting") or "").strip()
+        if greeting:
+            asyncio.create_task(_speak_pack_greeting(greeting))
+        asyncio.create_task(_init_start_node())
 
     @transport.event_handler("on_client_disconnected")
     async def _disconnected(_transport, _client):
@@ -195,6 +236,10 @@ async def run_bot(
         finally:
             await cancel_end_task()
             observer.close()
+            # end_session freezes the call DB to S3; it does blocking HTTP.
+            await asyncio.to_thread(
+                harness.end_session, str(simulation_result_id or "job")
+            )
 
 
 def check_pipeline(industry: str = "control-industry") -> None:

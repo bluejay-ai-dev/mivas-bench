@@ -45,7 +45,10 @@ CHIRP VAD blips (`VOICECHAT_CUSTOMER_HANG_S`). Audio-transcript deltas are prefe
 over text deltas so spans don't double words.
 
 Idle CHIRP PCM is **not** forwarded to VoiceChat (it would barge-in on noise). Agent
-audio is muted the moment the DH is live so both sides hear a real gap.
+audio is muted only on **real** barge-in: loud inbound RMS outside the echo-suppress
+window after agent TTS, or NVIDIA `input_audio_buffer.speech_started`. Bluejay
+`speech.started` alone is ignored — CHIRP VAD hearing Magpie/VoiceChat echo used to
+chop every agent turn (`barge_in:chirp`).
 
 **Tools:** the active session advertises that agent’s catalog tools. Hosted NVCF does not
 run the local NIM jinja, so the harness also appends NVIDIA’s trained
