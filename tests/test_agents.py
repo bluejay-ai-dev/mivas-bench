@@ -15,6 +15,7 @@ from run import (  # noqa: E402
     image_ref,
     pair_host,
     pair_public_url,
+    pair_resources,
     pair_websocket_url,
     parse_agents,
     render_agents_yaml,
@@ -105,6 +106,10 @@ def test_stable_ingress_urls(monkeypatch: pytest.MonkeyPatch) -> None:
     assert "https://api.getbluejay.ai/v1" in yaml_text
     assert "maxUnavailable: 0" in yaml_text
     assert "maxSurge: 1" in yaml_text
+    # maxUnavailable only guards rollouts. Karpenter consolidation evicted a pod
+    # mid-run ("Evicted pod: Underutilized"), killing six live calls and the
+    # trace POST that runs in the harness's finally block.
+    assert 'karpenter.sh/do-not-disrupt: "true"' in yaml_text
     assert (
         "alb.ingress.kubernetes.io/target-group-attributes: "
         "load_balancing.algorithm.type=least_outstanding_requests"
@@ -228,6 +233,8 @@ def test_render_respects_mivas_replicas(monkeypatch: pytest.MonkeyPatch) -> None
     assert "http://127.0.0.1:8000" in yaml_text
     assert "__REPLICAS__" not in yaml_text
     assert "MIVAS_SNAPSHOT_BUCKET" in yaml_text
+    # no serviceAccountName => no creds => every snapshot PUT silently fails
+    assert "serviceAccountName: mivas-bench" in yaml_text
 
 
 def test_render_snapshot_bucket(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -240,3 +247,20 @@ def test_render_snapshot_bucket(monkeypatch: pytest.MonkeyPatch) -> None:
     assert "mivas-call-dbs" in yaml_text
     assert "call-freeze" in yaml_text
     assert "__SNAPSHOT_BUCKET__" not in yaml_text
+
+
+def test_cascaded_nemotron_gets_heavier_pod() -> None:
+    assert pair_resources("nvidia/nemotron") == ("1000m", "1Gi", "3Gi")
+    assert pair_resources("nvidia/nemotron-voicechat") == ("250m", "384Mi", "1536Mi")
+    assert pair_resources("openai/realtime-2.1") == ("250m", "384Mi", "1536Mi")
+    yaml_text = render_agents_yaml(
+        [
+            ("openai/realtime-2.1", "healthcare"),
+            ("nvidia/nemotron", "healthcare"),
+        ],
+        "LoadBalancer",
+    )
+    assert yaml_text.count("cpu: 1000m") == 1
+    assert yaml_text.count("cpu: 250m") == 1
+    assert "__CPU_REQUEST__" not in yaml_text
+    assert "__MEMORY_LIMIT__" not in yaml_text
