@@ -4,9 +4,10 @@ Line is code-first: this file *is* the agent config, so the industry blueprint
 has to travel with it. `harness.export_blueprint()` writes `blueprint.json` into
 this directory right before every deploy; the deployed runtime has no repo.
 
-Multi-agent is native: the receptionist's `handoff_to_scheduler` is a Line
-handoff tool (`agent_as_handoff`), so the scheduler takes over inside Line with
-no bridge-side routing. `end_call` is Line's built-in.
+Multi-agent is native: the receptionist's transfer tool is a Line
+handoff that replays AgentHandedOff onto the specialist so it generates
+immediately (agent_as_handoff would send CallStarted and wait). `end_call`
+is Line's built-in.
 
 `schedule_appointment` is an `http_server_tool` pointed at the harness webhook
 (`$TOOL_BASE_URL/tool/schedule_appointment?call_id=<ac_*>`) rather than a local function: that
@@ -22,13 +23,15 @@ import os
 from pathlib import Path
 from urllib.parse import quote
 
+from line.agent import call_agent
+from line.events import AgentHandedOff
 from line.llm_agent import (
     LlmAgent,
     LlmConfig,
-    agent_as_handoff,
     end_call,
     http_server_tool,
 )
+from line.llm_agent.tools.utils import ToolType, construct_function_tool
 from line.voice_agent_app import AgentEnv, CallRequest, VoiceAgentApp
 
 BLUEPRINT = json.loads((Path(__file__).parent / "blueprint.json").read_text())
@@ -66,13 +69,40 @@ def _http_tool(name: str, call_id: str | None) -> object:
             "X-Call-Id": str(call_id),
             "X-Cartesia-Call-Id": str(call_id),
         }
+    # Foreground + a short timeout: background http_server_tool (the SDK default)
+    # returns to the LLM only after the webhook finishes, so a slow POST is
+    # dead air until the caller pokes the agent again.
     return http_server_tool(
         name=name,
         description=spec.get("description", name),
         url=_tool_url(name, call_id),
         method="POST",
         request_body_schema=schema,
+        timeout=8.0,
+        is_background=False,
         **extra,
+    )
+
+
+def _continue_as_handoff(agent: LlmAgent, *, name: str, description: str):
+    """handoff that makes the specialist generate immediately.
+
+    Line's agent_as_handoff sends CallStarted to the target. An empty
+    introduction then waits for the next user turn — healthcare sounds like a
+    hang until the DH asks "are you still there?". AgentHandedOff is not
+    CallStarted, so LlmAgent generates from the existing history instead.
+    """
+
+    async def _handoff_fn(ctx, event):
+        kick = event if isinstance(event, AgentHandedOff) else event
+        async for output in call_agent(agent, ctx.turn_env, kick):
+            yield output
+
+    return construct_function_tool(
+        _handoff_fn,
+        name=name,
+        description=description,
+        tool_type=ToolType.HANDOFF,
     )
 
 
@@ -96,7 +126,7 @@ def _build(
                 continue
             target = _build(target_name, call_id, next_stack, cache)
             tools.append(
-                agent_as_handoff(
+                _continue_as_handoff(
                     target,
                     name=t["name"],
                     description=BLUEPRINT["catalog"][t["name"]]["description"],
