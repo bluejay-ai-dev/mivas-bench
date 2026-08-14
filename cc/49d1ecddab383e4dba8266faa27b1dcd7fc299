@@ -1,0 +1,43 @@
+tests/test_cartesia_industry.py
+  s_65d5342a79eeac::t_78ad795f02f485 42
+  s_65d5342a79eeac::t_bbc0b76dce32bc 40-41,43-50
+voice-agent-harnesses/cartesia/adapters/chirp.py
+  s_65d5342a79eeac::t_d9518a4cad615b 130,132-135
+  s_65d5342a79eeac::t_f1c4a8b278a4fa 154,161-163,181,187-197,200
+  s_65d5342a79eeac::t_91184931b642b0 273-276
+voice-agent-harnesses/cartesia/line_agent/main.py
+  s_65d5342a79eeac::t_58d2261315ccab 7-10
+  s_65d5342a79eeac::t_41490f8f03ffe6 26-27,34
+  s_65d5342a79eeac::t_6f67026c0f3e30 72-74,81-82,87-105
+  s_65d5342a79eeac::t_37506682941088 129
+  s_c17d9c72f060ab::t_cef1b9b8bfe3c0 106-108
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "cc49d1ecddab383e4dba8266faa27b1dcd7fc299",
+  "prompts": {},
+  "humans": {
+    "h_bbe1a3ca680b9f": {
+      "author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_65d5342a79eeac": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "1a796477-7be8-4e20-9a74-f7394f552db0",
+        "model": "grok-4.6"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    },
+    "s_c17d9c72f060ab": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "20f9c89d-312d-42dd-886a-28af9c6a21fe",
+        "model": "grok-4.6"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
