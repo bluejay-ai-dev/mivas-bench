@@ -10,13 +10,13 @@ Audio barge-in (critical):
   Bluejay CHIRP `speech.started` often fires on *agent echo* in the mixed
   recording path. Muting/cancelling on that signal hard-chops agent PCM
   ("Hey," then silence) and starves Grok of the DH's full utterance.
-  Correct policy (matches OpenAI chirp + xAI docs):
-    - Always forward inbound DH PCM to Grok.
-    - Always forward agent PCM to Bluejay unless Grok itself reports
-      `input_audio_buffer.speech_started` (real user barge-in), or CHIRP
-      VAD fires *and* recent inbound RMS is loud *and* we are outside the
-      post-TTS echo-suppress window.
-    - Let Grok `server_vad` own turn-taking; do not fight it with CHIRP VAD.
+  Echo of our own TTS is also loud on the inbound RMS meter — `user_loud`
+  must not override echo risk (nemotron policy: echo wins).
+  Correct policy:
+    - While the agent utterance is open (or just ended), treat inbound as
+      echo unless RMS is ~2× the user threshold (true barge-over-TTS).
+    - Do not forward echo PCM to Grok — server_vad will cancel the greeting.
+    - Forward agent PCM to Bluejay unless a *real* barge-in is confirmed.
 
 Observability: GROK_CHIRP_LOG=full|audio|off (default full). Periodic
 byte/RMS summaries + every mute/chop/speech event with reason.
@@ -59,12 +59,13 @@ from harness import (  # noqa: E402
     tool_names,
     ws_url,
 )
+from pcm import PcmPacer  # noqa: E402
 from report import end_speech_span, start_speech_span, traced_run  # noqa: E402
 
 W, R_GROK, R_CHIRP = 2, SAMPLE_RATE, 16_000
 
 # Ignore CHIRP speech.started while agent TTS was just loud (speaker echo → fake DH VAD).
-ECHO_SUPPRESS_S = float(os.environ.get("GROK_ECHO_SUPPRESS_S", "0.85"))
+ECHO_SUPPRESS_S = float(os.environ.get("GROK_ECHO_SUPPRESS_S", "1.25"))
 # Inbound PCM must clear this RMS to count as a real barge-in (with CHIRP VAD).
 USER_RMS_ON = int(os.environ.get("GROK_USER_RMS_ON", "350"))
 USER_LIVE_S = float(os.environ.get("GROK_USER_LIVE_S", "0.35"))
@@ -332,11 +333,26 @@ async def _bridge(ws, industry: str, model: str) -> None:
             }
             spoken: dict[str, list[str]] = {a: [] for a in sessions}
 
+            async def _paced_send(frame: bytes) -> None:
+                # stamp loudness when PCM actually hits CHIRP so the echo
+                # window covers playback, not Grok's burst-push.
+                if frame:
+                    rms = audioop.rms(frame, W) if len(frame) >= W else 0
+                    if rms >= 200:
+                        ctl["last_agent_loud"] = time.monotonic()
+                await ws.send(frame)
+
+            pacer = PcmPacer(_paced_send)
+            pacer_task = asyncio.create_task(pacer.run())
+
             def active_ws():
                 return sessions[state["agent"]]
 
             def _agent_echo_risk(now: float | None = None) -> bool:
                 now = now if now is not None else time.monotonic()
+                # open agent speech, or mix delay after the last paced frame.
+                if turns.agent_utt is not None:
+                    return True
                 return bool(ctl["last_agent_loud"]) and (
                     now - float(ctl["last_agent_loud"]) < ECHO_SUPPRESS_S
                 )
@@ -346,6 +362,12 @@ async def _bridge(ws, industry: str, model: str) -> None:
                 return bool(ctl["last_user_loud"]) and (
                     now - float(ctl["last_user_loud"]) < USER_LIVE_S
                 )
+
+            def _real_barge_in(now: float | None = None) -> bool:
+                """user is talking — not Bluejay VAD hearing our TTS."""
+                if _agent_echo_risk(now):
+                    return False
+                return _user_loud_recent(now)
 
             def _ctl_snap() -> str:
                 return (
@@ -395,11 +417,15 @@ async def _bridge(ws, industry: str, model: str) -> None:
 
             async def _on_real_barge_in(*, why: str) -> None:
                 """Confirmed user speech overlapping agent — mute + cancel."""
+                if turns.agent_utt is None and not ctl["response_active"]:
+                    # idle: user started talking. muting here sticks FORWARD MUTE
+                    # until grok_vad_stopped and the next greeting never plays.
+                    _log(f"barge SKIP (agent idle) why={why} {_ctl_snap()}")
+                    return
                 stats.barge_ins += 1
                 await _set_forward(False, why=why)
-                if turns.agent_utt is not None or ctl["response_active"]:
-                    await turns.end_agent(why=f"barge:{why}")
-                    await _cancel_active(why=why)
+                await turns.end_agent(why=f"barge:{why}")
+                await _cancel_active(why=why)
 
             async def inbound() -> None:
                 up = None
@@ -408,12 +434,21 @@ async def _bridge(ws, industry: str, model: str) -> None:
                         if end.is_set():
                             break
                         if isinstance(msg, bytes) and msg:
-                            # ALWAYS forward DH PCM — never gate on agent speaking.
-                            # Grok server_vad decides turn boundaries from this stream.
                             rms = audioop.rms(msg, W) if len(msg) >= W else 0
                             stats.note_in(len(msg), rms)
-                            if rms >= USER_RMS_ON:
+                            echo = _agent_echo_risk()
+                            loud = rms >= USER_RMS_ON
+                            if loud and not echo:
                                 ctl["last_user_loud"] = time.monotonic()
+                            elif loud and echo and rms >= USER_RMS_ON * 2:
+                                # real barge-in over TTS: much louder than echo.
+                                ctl["last_user_loud"] = time.monotonic()
+                                echo = False
+                            if echo:
+                                # TTS looped into the mix. feeding it to Grok
+                                # makes server_vad cancel the greeting.
+                                stats.maybe_summary()
+                                continue
                             pcm, up = audioop.ratecv(msg, W, 1, R_CHIRP, R_GROK, up)
                             if pcm:
                                 await _send_pcm24_to_active(pcm)
@@ -435,8 +470,9 @@ async def _bridge(ws, industry: str, model: str) -> None:
                         if etype == "speech.started":
                             stats.chirp_speech_starts += 1
                             uid = data.get("utterance_id") or f"c_{uuid.uuid4().hex[:12]}"
-                            # Echo of our own TTS → Bluejay VAD. Trace only.
-                            if _agent_echo_risk() and not _user_loud_recent():
+                            # echo of our own TTS → Bluejay VAD. echo wins over
+                            # inbound RMS (echo is loud on the mixed path).
+                            if not _real_barge_in():
                                 stats.echo_ignores += 1
                                 _log(
                                     f"CHIRP speech.started IGNORED echo uid={uid} "
@@ -446,10 +482,7 @@ async def _bridge(ws, industry: str, model: str) -> None:
                                 continue
                             ctl["customer_speaking"] = True
                             await turns.start_customer(uid, why="chirp_speech.started")
-                            # Only barge if inbound audio is actually loud — not echo.
-                            if _user_loud_recent() and (
-                                turns.agent_utt is not None or ctl["response_active"]
-                            ):
+                            if turns.agent_utt is not None or ctl["response_active"]:
                                 await _on_real_barge_in(why="chirp_vad+user_rms")
                             else:
                                 _log(
@@ -561,6 +594,7 @@ async def _bridge(ws, industry: str, model: str) -> None:
                         await target.send(json.dumps(nudge_greeting()))
                         _log(f"handoff nudge → {role}")
                 elif stop:
+                    await pacer.wait_until_idle()
                     asyncio.create_task(_close_all(sessions, ws, end))
                 else:
                     ctl["need_continue"] = True
@@ -613,14 +647,12 @@ async def _bridge(ws, industry: str, model: str) -> None:
                             f"why={ctl['mute_why']}"
                         )
                     return down_state
-                if rms >= 200:
-                    ctl["last_agent_loud"] = time.monotonic()
                 ctl["response_active"] = True
                 ctl["audio_done"] = False
                 if turns.agent_utt is None:
                     await turns.start_agent()
                 turns.note_agent_bytes(len(pcm16))
-                await ws.send(pcm16)
+                pacer.push(pcm16)
                 if _LOG_AUDIO:
                     _log(f"agent→chirp bytes={len(pcm16)} rms={rms}")
                 stats.maybe_summary()
@@ -649,6 +681,13 @@ async def _bridge(ws, industry: str, model: str) -> None:
                         if etype == "input_audio_buffer.speech_started":
                             if is_active:
                                 stats.grok_speech_starts += 1
+                                if _agent_echo_risk():
+                                    stats.echo_ignores += 1
+                                    _log(
+                                        f"grok VAD speech_started IGNORED echo "
+                                        f"{_ctl_snap()}"
+                                    )
+                                    continue
                                 ctl["grok_user_speaking"] = True
                                 _log(f"grok VAD speech_started {_ctl_snap()}")
                                 await _on_real_barge_in(why="grok_vad")
@@ -682,6 +721,7 @@ async def _bridge(ws, industry: str, model: str) -> None:
                             "response.done",
                         }:
                             if is_active:
+                                await pacer.wait_until_idle()
                                 await turns.end_agent(why=etype)
                                 ctl["audio_done"] = True
                                 ctl["response_active"] = False
@@ -768,6 +808,26 @@ async def _bridge(ws, industry: str, model: str) -> None:
             await sessions[bp["start"]].send(json.dumps(nudge_greeting()))
             _log(f"grok nudge_greeting → {bp['start']}")
 
+            async def _greeting_watchdog() -> None:
+                # first TTS used to be inaudible ("You with."). re-nudge
+                # only if no agent PCM actually hit CHIRP.
+                await asyncio.sleep(3.0)
+                if end.is_set():
+                    return
+                if ctl.get("last_user_asr"):
+                    _log("greeting watchdog skip (user asr)")
+                    return
+                if _user_loud_recent() or turns.agent_utt is not None:
+                    _log("greeting watchdog skip (live speech)")
+                    return
+                if ctl.get("last_agent_loud"):
+                    _log("greeting watchdog skip (already greeted)")
+                    return
+                _log("greeting watchdog re-nudge")
+                with contextlib.suppress(Exception):
+                    await sessions[state["agent"]].send(json.dumps(nudge_greeting()))
+
+            watchdog = asyncio.create_task(_greeting_watchdog())
             tasks = [asyncio.create_task(inbound())] + [
                 asyncio.create_task(outbound_agent(a)) for a in sessions
             ]
@@ -775,6 +835,11 @@ async def _bridge(ws, industry: str, model: str) -> None:
                 tasks, return_when=asyncio.FIRST_COMPLETED
             )
             end.set()
+            watchdog.cancel()
+            await pacer.wait_until_idle()
+            pacer.close()
+            with contextlib.suppress(Exception):
+                await asyncio.wait_for(pacer_task, timeout=5)
             await turns.close()
             stats.maybe_summary(force=True)
             _log(

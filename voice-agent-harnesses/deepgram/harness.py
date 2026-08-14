@@ -34,7 +34,7 @@ WS_URL = "wss://agent.deepgram.com/v1/agent/converse"
 DEEPGRAM_LISTEN_MODEL = os.environ.get("DEEPGRAM_LISTEN_MODEL", "flux-general-en")
 DEEPGRAM_THINK_MODEL = os.environ.get("DEEPGRAM_THINK_MODEL", "gpt-4.1")
 DEEPGRAM_SPEAK_MODEL = os.environ.get("DEEPGRAM_SPEAK_MODEL", "flux-hannah-en")
-DEEPGRAM_GREETING = os.environ.get("DEEPGRAM_GREETING", "Thanks for calling! How can I help you today?")
+DEFAULT_GREETING = "Thanks for calling! How can I help you today?"
 
 
 def _speak_provider() -> dict[str, Any]:
@@ -72,6 +72,7 @@ def load_blueprint(industry_dir: str | Path) -> dict[str, Any]:
         "start": blueprint["agents"][0]["name"],
         "agents": agents,
         "catalog": catalog,
+        "greeting": (blueprint.get("greeting") or "").strip(),
     }
 
 
@@ -125,6 +126,11 @@ def settings_payload(bp: dict[str, Any], model: str | None = None) -> dict[str, 
     start = bp["agents"][bp["start"]]
     # note soft-handoff: other agents' tools are visible; prompt still starts as bp["start"]
     prompt = start["instructions"] + _multiagent_note(bp)
+    spoken = (
+        os.environ.get("DEEPGRAM_GREETING", "").strip()
+        or (bp.get("greeting") or "").strip()
+        or DEFAULT_GREETING
+    )
 
     return {
         "type": "Settings",
@@ -141,7 +147,7 @@ def settings_payload(bp: dict[str, Any], model: str | None = None) -> dict[str, 
                 "functions": functions,
             },
             "speak": {"provider": _speak_provider()},
-            "greeting": DEEPGRAM_GREETING,
+            "greeting": spoken,
         },
     }
 

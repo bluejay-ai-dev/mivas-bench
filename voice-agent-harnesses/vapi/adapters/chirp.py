@@ -5,8 +5,11 @@ Both are served by one FastAPI app so a single cloudflared tunnel covers them:
 squad runs `schedule_appointment`. Vapi's websocket transport is raw 16 kHz
 pcm_s16le both directions, so no resampling either way.
 
-Agent audio arrives as continuous binary frames with no gaps, so the usual
-silence-gap heuristic can't find turn boundaries here — `agent.speech` is
+ElevenLabs Flash dumps TTS in irregular bursts. Bluejay timestamps CHIRP frames
+by arrival, so those bursts record as choppy speech — outbound PCM is paced at
+realtime 20 ms frames. Inbound CHIRP is re-chunked to the same size for Flux.
+
+Turn boundaries still cannot use a silence-gap heuristic — `agent.speech` is
 bracketed by Vapi's `speech-update` (role=assistant, started/stopped) instead.
 `customer.speech` comes from Bluejay's inbound `speech.started`/`speech.completed`.
 """
@@ -43,6 +46,7 @@ from harness import (  # noqa: E402
     unbind_provider,
     webhook_tool_names,
 )
+from pcm import PcmPacer, take_frames  # noqa: E402
 from report import (  # noqa: E402
     bind_call,
     end_speech_span,
@@ -152,10 +156,13 @@ async def _bridge(ws: WebSocket) -> None:
             provider_id = call_id
             print(f"chirp vapi call={call_id}", flush=True)
             async with websockets.connect(call_url, max_size=None) as vapi_ws:
+                pacer = PcmPacer(ws.send_bytes)
+                pacer_task = asyncio.create_task(pacer.run())
 
                 async def inbound() -> None:
                     """chirp pcm + Bluejay speech.* → Vapi; customer.speech spans."""
                     nonlocal customer_otel, audio_in
+                    in_buf = bytearray()
                     try:
                         while not end.is_set():
                             msg = await ws.receive()
@@ -163,7 +170,8 @@ async def _bridge(ws: WebSocket) -> None:
                                 break
                             if msg.get("bytes"):
                                 audio_in += len(msg["bytes"])
-                                await vapi_ws.send(msg["bytes"])
+                                for frame in take_frames(in_buf, msg["bytes"]):
+                                    await vapi_ws.send(frame)
                                 continue
                             if not msg.get("text"):
                                 continue
@@ -198,7 +206,7 @@ async def _bridge(ws: WebSocket) -> None:
                                 break
                             if isinstance(raw, bytes):
                                 audio_out += len(raw)
-                                await ws.send_bytes(raw)
+                                pacer.push(raw)
                                 continue
                             try:
                                 event = json.loads(raw)
@@ -212,6 +220,8 @@ async def _bridge(ws: WebSocket) -> None:
                                     speech_otel = start_speech_span(utt, speaker="agent")
                                     await ws.send_text(_event("speech.started", {"utterance_id": utt}))
                                 elif body.get("status") == "stopped" and utt:
+                                    # drain paced audio before closing the utterance
+                                    await pacer.wait_until_idle()
                                     await ws.send_text(_event("speech.completed", {"utterance_id": utt}))
                                     end_speech_span(speech_otel)
                                     speech_otel, utt = None, None
@@ -232,6 +242,9 @@ async def _bridge(ws: WebSocket) -> None:
                                 print(f"chirp vapi error: {body}", flush=True)
                                 break
                     finally:
+                        pacer.close()
+                        with contextlib.suppress(Exception):
+                            await asyncio.wait_for(pacer_task, timeout=5)
                         if utt:
                             await ws.send_text(_event("speech.completed", {"utterance_id": utt}))
                             end_speech_span(speech_otel)
@@ -242,6 +255,9 @@ async def _bridge(ws: WebSocket) -> None:
 
                 tasks = [asyncio.create_task(inbound()), asyncio.create_task(outbound())]
                 done, pending = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
+                pacer.close()
+                with contextlib.suppress(Exception):
+                    await asyncio.wait_for(pacer_task, timeout=5)
                 for t in pending:
                     t.cancel()
                 await asyncio.gather(*pending, return_exceptions=True)
