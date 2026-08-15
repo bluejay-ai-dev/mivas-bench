@@ -50,7 +50,7 @@ def _array_props() -> list[tuple[str, str, dict]]:
     return out
 
 
-@pytest.mark.parametrize("provider", ["gemini", "vapi"])
+@pytest.mark.parametrize("provider", ["gemini", "vapi", "elevenlabs"])
 def test_array_items_survive_conversion(provider: str) -> None:
     module = _load(provider)
     for industry, where, prop in _array_props():
@@ -60,7 +60,7 @@ def test_array_items_survive_conversion(provider: str) -> None:
         assert converted["items"].get("type"), (provider, industry, where, converted)
 
 
-@pytest.mark.parametrize("provider", ["gemini", "vapi"])
+@pytest.mark.parametrize("provider", ["gemini", "vapi", "elevenlabs"])
 def test_bare_array_gets_an_item_type(provider: str) -> None:
     """A tools.json that forgets `items` still must not reach the provider bare."""
     module = _load(provider)
