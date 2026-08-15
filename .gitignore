@@ -47,10 +47,7 @@ Thumbs.db
 # k8s / docker scratch
 *.local.yaml
 
-# internal handoff docs, not shipped. The bare pattern matches at any depth, so
-# industry packs are exempted: industries/<slug>/docs/ is part of the pack contract
-# (RESEARCH / SPEC / SPEC_TRACE / ONEPAGER) and tests/test_industry_contract.py
-# allows it.
+# internal handoff docs, not shipped. Every industry keeps its research, spec,
+# call areas and one-pager under docs/<industry>/, and none of it is tracked.
 docs/
-!industries/*/docs/
 graphify-out/

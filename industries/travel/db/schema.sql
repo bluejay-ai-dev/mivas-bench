@@ -2,7 +2,7 @@
 --
 -- Juniper Airlines is a fictional replica of a real US ultra-low-cost carrier. Every
 -- number here is structurally identical to that carrier's published policy; every
--- name and code is invented. See docs/RESEARCH.md for the replica map.
+-- name and code is invented. See docs/travel/RESEARCH.md for the replica map.
 
 -- ===================================================================
 -- SEEDED REFERENCE DATA: the replica's world, identical on every run
