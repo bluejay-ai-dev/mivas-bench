@@ -2,7 +2,7 @@
 
 Juniper Airlines is a fictional replica of a real US ultra-low-cost carrier. Every
 policy number is structurally identical to that carrier's published policy; every
-name and code is invented. See docs/RESEARCH.md.
+name and code is invented. See docs/travel/RESEARCH.md.
 
 Three behaviours are load-bearing:
 
@@ -1456,7 +1456,7 @@ def _selfcheck() -> None:
     # The negative control for the gate. Note this passes on the 44-year-old's age
     # alone: `is_guardian` only adds reach for a guardian who is NOT already a 15+
     # traveller on the booking, and no fixture exercises that. Documented in
-    # docs/SPEC.md §6 rather than asserted here as though it were covered.
+    # docs/travel/SPEC.md §6 rather than asserted here as though it were covered.
     guarded = get_traveler_list("TY7MBX")
     assert guarded["has_accompanying_adult"] is True, "an adult on the booking clears"
 
