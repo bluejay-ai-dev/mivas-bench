@@ -10,9 +10,10 @@ and Fare Club, and payment. Every consequential change is a two-step write gate.
 **Frontier Airlines**: every fee, window, threshold, tier boundary and eligibility
 rule below matches Frontier's published policy or federal rule, and every name,
 brand, code and person is invented. The backing systems are deterministic SQLite
-fixtures, not a reservation system. See [docs/RESEARCH.md](docs/RESEARCH.md) for the
-replica map and sources, and [docs/SPEC.md](docs/SPEC.md) for which facts are
-sourced `[R]` and which are inferred `[I]`.
+fixtures, not a reservation system. The replica map and sources are in
+`docs/travel/RESEARCH.md`, and `docs/travel/SPEC.md` marks which facts are sourced
+`[R]` and which are inferred `[I]`. Those sit with the other industries' notes under
+the repo-level `docs/`, which is internal and deliberately not tracked in git.
 
 The agent introduces itself as **Frankie**, once, in reception's first sentence
 ("Juniper Airlines, this is Frankie, I'm an AI assistant"). No node after reception repeats
@@ -112,7 +113,7 @@ credit.
 | `agent_blueprint.json` | Wires tools: industry / `handoff` / `session` |
 | `agent_blueprint.mmd` | Mermaid graph, generated from the blueprint |
 | `system-prompts/*.md` | Full per-agent prompts. Open with `WHO YOU ARE`, then the numbered role divider and per-agent sections (`WHERE YOU ARE IN THE CALL` / `GOAL` / `DESCRIPTION` / `TOOLS AT THIS STAGE` / `HANDING OFF` / `RECEIVING CONTEXT` / `GLOBAL TOOLS`), then the remaining shared sections (`PERSONALITY`, `GUARDRAILS`, `HANDOFFS ARE INVISIBLE`, `HARD RULES`, `SECURITY`) with `AIRLINE FACTS YOU MAY STATE WITHOUT A TOOL` last. Role sits at the top so it is not lost under the shared preamble. `--selfcheck` asserts the section set and that order, that `WHO YOU ARE` and the no-tool facts list are identical everywhere, and that every non-entry node says where the call already is |
-| `docs/` | `RESEARCH.md`, `SPEC.md`, `SPEC_TRACE.md`, `ONEPAGER.md` |
+| `docs/travel/` (repo root, untracked) | `CALL_AREAS.md`, `RESEARCH.md`, `SPEC.md`, `SPEC_TRACE.md`, `ONEPAGER.md`, in the same place and shape as `docs/finance/` and `docs/customer-support/` |
 
 Example state routes: `POST /reservations/find`, `GET /reservations/{code}`,
 `GET /reservations/{code}/travelers`, `GET /reservations/{code}/entitlement`,
