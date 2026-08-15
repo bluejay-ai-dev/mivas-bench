@@ -2,7 +2,7 @@
 -- NOW = 2026-08-01T09:00:00. Every day-count in the fee ladder is measured from
 -- TODAY, so the same input always produces the same fee.
 --
--- Fourteen reservations, one per trap. See docs/SPEC.md §6 for the trap table.
+-- Fourteen reservations, one per trap. See docs/travel/SPEC.md §6 for the trap table.
 
 INSERT INTO settings (key, value) VALUES
     ('today', '2026-08-01'),
