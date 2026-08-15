@@ -1,0 +1,28 @@
+industries/travel/db/seed.sql
+  s_dec8be94946be7::t_86cfa0677f18c7 5
+industries/travel/README.md
+  s_dec8be94946be7::t_dfdc77e5ace2aa 116
+  s_dec8be94946be7::t_084bf9d72c6383 13-16
+.gitignore
+  s_dec8be94946be7::t_ef63be236c049e 50-51
+industries/travel/db/schema.sql
+  s_dec8be94946be7::t_86cfa0677f18c7 5
+industries/travel/tool_server.py
+  s_dec8be94946be7::t_86cfa0677f18c7 5,1459
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "6ec17b7a20e9059fce147c80c67d425739c6cfe7",
+  "prompts": {},
+  "sessions": {
+    "s_dec8be94946be7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8b6603b7-3e89-4369-ac83-69adb4ab10d9",
+        "model": "claude-opus-5"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
