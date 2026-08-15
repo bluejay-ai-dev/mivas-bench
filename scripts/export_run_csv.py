@@ -31,6 +31,7 @@ import pathlib
 import sys
 import urllib.error
 import urllib.request
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 API = os.environ.get("BLUEJAY_API_URL", "https://api.getbluejay.ai/v1").rstrip("/")
 TERMINAL = {"COMPLETED", "FAILED", "NO_ANSWER", "NO_CONNECTION", "CANCELLED",
@@ -151,20 +152,35 @@ def main() -> int:
     p.add_argument("--sim", default="30315")
     p.add_argument("-o", "--out", default=None)
     p.add_argument("--tools-from", choices=["trace", "api", "both"], default="both")
+    p.add_argument("--workers", type=int, default=12)
     args = p.parse_args()
 
     # The bulk endpoint under-reports tool_calls for the tail of a large run (D14), so it is
     # used only to enumerate ids; every row's data comes from the per-result endpoint.
     listing = _get(f"retrieve-simulation-results/{args.run}").get("simulation_results", [])
-    results = []
-    for stub in listing:
-        rid = stub.get("id")
-        if rid is None:
-            continue
-        full = _get(f"retrieve-simulation-result/{rid}").get("simulation_result") or stub
-        results.append(full)
+    ids = [stub.get("id") for stub in listing if stub.get("id") is not None]
+    results: list[dict] = []
+    with ThreadPoolExecutor(max_workers=args.workers) as pool:
+        futs = {pool.submit(_get, f"retrieve-simulation-result/{rid}"): rid for rid in ids}
+        by_id: dict = {}
+        for fut in as_completed(futs):
+            rid = futs[fut]
+            stub = next(s for s in listing if s.get("id") == rid)
+            by_id[rid] = fut.result().get("simulation_result") or stub
+        results = [by_id[rid] for rid in ids]
     dhs = {d["id"]: d for d in _get(f"digital-humans-by-simulation/{args.sim}").get("digital_humans", [])}
     print(f"run {args.run}: {len(results)} results, {len(dhs)} digital humans", file=sys.stderr)
+
+    # prefetch traces so tool extraction is not serial across 180 calls
+    trace_cache: dict[str, list[tuple[str, str]]] = {}
+    if args.tools_from in ("trace", "both"):
+        tids = sorted({tid for r in results for tid in (r.get("trace_ids") or [])})
+        def _one_trace(tid: str) -> tuple[str, list[tuple[str, str]]]:
+            return tid, trace_tools([tid])
+        with ThreadPoolExecutor(max_workers=args.workers) as pool:
+            for tid, pairs in pool.map(_one_trace, tids):
+                trace_cache[tid] = pairs
+        print(f"  fetched {len(tids)} traces", file=sys.stderr)
 
     rows = []
     for r in results:
@@ -176,7 +192,11 @@ def main() -> int:
 
         expected_tools = sorted({g["name"] for g in groups if g.get("expected")})
         api_tools = [g["name"] for g in groups if g.get("actual")]
-        tr_pairs = trace_tools(r.get("trace_ids") or []) if args.tools_from in ("trace", "both") else []
+        if args.tools_from in ("trace", "both"):
+            tr_pairs = [p for tid in (r.get("trace_ids") or []) for p in trace_cache.get(tid, [])]
+            tr_pairs.sort()
+        else:
+            tr_pairs = []
         tr_tools = [n for _, n in tr_pairs]
 
         chosen = tr_tools if args.tools_from in ("trace", "both") and tr_tools else api_tools
@@ -202,6 +222,7 @@ def main() -> int:
             "tools_hit": ";".join(hits),
             "tools_missing": ";".join(missing),
             "tool_call_adherence": adherence,
+            "n_traces": len(r.get("trace_ids") or []),
             "n_tools_trace": len(tr_tools),
             "n_tools_api": len(api_tools),
             "tool_extraction_gap": 1 if (tr_tools and not api_tools) else 0,
