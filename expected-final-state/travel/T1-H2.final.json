@@ -1,0 +1,38 @@
+{
+  "bag_purchases": [],
+  "commits": [
+    {
+      "amount": 0.0,
+      "confirmation_code": "RT2LKD",
+      "detail": "JA775 on 2026-08-09 at 14:10. No charge: no change fee and no difference in fare.",
+      "id": 1,
+      "kind": "involuntary_rebook",
+      "token": "JA-IRR-3160"
+    }
+  ],
+  "escalations": [],
+  "holds": [
+    {
+      "amount": 0.0,
+      "confirmation_code": "RT2LKD",
+      "consumed": 1,
+      "kind": "involuntary_rebook",
+      "miles_number": "",
+      "payload": "{\"confirmation_token\": \"JA-IRR-3160\", \"summary\": \"JA775 on 2026-08-09 at 14:10. No charge: no change fee and no difference in fare.\", \"new_flight\": \"JA775\", \"departs_on\": \"2026-08-09\", \"departs_at\": \"14:10\", \"total\": 0.0, \"basis\": \"cancellation\"}",
+      "summary": "JA775 on 2026-08-09 at 14:10. No charge: no change fee and no difference in fare.",
+      "token": "JA-IRR-3160"
+    }
+  ],
+  "itineraries": [
+    {
+      "channel": "email",
+      "confirmation_code": "RT2LKD",
+      "id": 1
+    }
+  ],
+  "pass_bookings": [],
+  "payments": [],
+  "refunds": [],
+  "reservation_notes": [],
+  "seat_assignments": []
+}

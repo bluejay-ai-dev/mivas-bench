@@ -1,0 +1,66 @@
+{
+  "bag_purchases": [
+    {
+      "amount": 35.0,
+      "bag_kind": "carry_on",
+      "confirmation_code": "ZC8MRF",
+      "id": 1,
+      "quantity": 1,
+      "touchpoint": "booking"
+    }
+  ],
+  "commits": [
+    {
+      "amount": 35.0,
+      "confirmation_code": "ZC8MRF",
+      "detail": "1 x carry on at booking: $35.00.",
+      "id": 1,
+      "kind": "bag",
+      "token": "JA-BAG-5528"
+    },
+    {
+      "amount": 0.0,
+      "confirmation_code": "ZC8MRF",
+      "detail": "$35.00 to the card ending 8853.",
+      "id": 2,
+      "kind": "payment",
+      "token": "JA-PAY-7734"
+    }
+  ],
+  "escalations": [],
+  "holds": [
+    {
+      "amount": 35.0,
+      "confirmation_code": "ZC8MRF",
+      "consumed": 1,
+      "kind": "bag",
+      "miles_number": "",
+      "payload": "{\"confirmation_token\": \"JA-BAG-5528\", \"summary\": \"1 x carry on at booking: $35.00.\", \"bag_kind\": \"carry_on\", \"touchpoint\": \"booking\", \"price\": 35.0, \"base_price\": 35.0, \"waiver\": \"\", \"label\": \"carry on\", \"quantity\": 1, \"total\": 35.0}",
+      "summary": "1 x carry on at booking: $35.00.",
+      "token": "JA-BAG-5528"
+    },
+    {
+      "amount": 0.0,
+      "confirmation_code": "ZC8MRF",
+      "consumed": 1,
+      "kind": "payment",
+      "miles_number": "",
+      "payload": "{\"confirmation_token\": \"JA-PAY-7734\", \"summary\": \"$35.00 to the card ending 8853.\", \"amount\": 35.0, \"card_last4\": \"8853\"}",
+      "summary": "$35.00 to the card ending 8853.",
+      "token": "JA-PAY-7734"
+    }
+  ],
+  "itineraries": [],
+  "pass_bookings": [],
+  "payments": [
+    {
+      "amount": 35.0,
+      "card_last4": "8853",
+      "confirmation_code": "ZC8MRF",
+      "id": 1
+    }
+  ],
+  "refunds": [],
+  "reservation_notes": [],
+  "seat_assignments": []
+}

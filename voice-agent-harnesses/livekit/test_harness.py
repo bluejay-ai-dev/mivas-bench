@@ -18,7 +18,13 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from livekit.agents import llm as lk_llm
 
 import harness
-from harness import BlueprintAgent, load_blueprint, sim_result_id_from_job_metadata
+from harness import (
+    BlueprintAgent,
+    load_blueprint,
+    sip_uri,
+    sim_result_id_from_job_metadata,
+    sim_result_id_from_participant,
+)
 
 
 def test_sim_result_id() -> None:
@@ -32,6 +38,11 @@ def test_sim_result_id() -> None:
     assert sim_result_id_from_job_metadata({"simulation_result_id": 710922}) == "710922"
     for empty in (None, "", "{}", "not json", json.dumps({"X-Agent-Id": "1"}), "[]"):
         assert sim_result_id_from_job_metadata(empty) is None, empty
+    sip = SimpleNamespace(
+        attributes={"sip.h.x-simulation-result-id": "736069"},
+        metadata="",
+    )
+    assert sim_result_id_from_participant(sip) == "736069"
 
 
 def test_blueprint() -> None:
@@ -110,6 +121,22 @@ def test_pack_greeting_and_agent_name() -> None:
     os.environ.pop("LIVEKIT_AGENT_NAME", None)
     os.environ.pop("MIVAS_SLUG", None)
 
+    prev_host, prev_num = os.environ.pop("LIVEKIT_SIP_HOST", None), os.environ.pop(
+        "LIVEKIT_SIP_NUMBER", None
+    )
+    try:
+        assert sip_uri() is None
+        os.environ["LIVEKIT_SIP_HOST"] = "65197ejfbqv.sip.livekit.cloud"
+        os.environ["LIVEKIT_SIP_NUMBER"] = "+15551230000"
+        assert sip_uri() == "sip:+15551230000@65197ejfbqv.sip.livekit.cloud"
+    finally:
+        os.environ.pop("LIVEKIT_SIP_HOST", None)
+        os.environ.pop("LIVEKIT_SIP_NUMBER", None)
+        if prev_host is not None:
+            os.environ["LIVEKIT_SIP_HOST"] = prev_host
+        if prev_num is not None:
+            os.environ["LIVEKIT_SIP_NUMBER"] = prev_num
+
 
 def test_await_farewell() -> None:
     """The hangup wait must outlast the agent's goodbye, but never run forever."""
@@ -126,7 +153,7 @@ def test_await_farewell() -> None:
 
     # nothing left to say -> exactly the quiet window, as the old flat sleep did
     assert 0.3 < asyncio.run(elapsed("listening", [])) < 0.6
-    # 713652: quiet at the old sample point, then the farewell starts -> keep waiting
+    # quiet at the old sample point, then the farewell starts -> keep waiting
     assert 1.0 < asyncio.run(elapsed("listening", [(0.2, "thinking"), (1.0, "listening")])) < 1.6
     # still speaking after the quiet window -> wait for it to stop
     assert 0.7 < asyncio.run(elapsed("speaking", [(0.6, "listening")])) < 1.2
@@ -141,17 +168,4 @@ if __name__ == "__main__":
     test_generic_industries()
     test_pack_greeting_and_agent_name()
     test_await_farewell()
-    from test_audio_quality import (
-        test_alice_chops_fail_the_gate,
-        test_cascaded_session_does_not_eager_cut,
-        test_chopped_greeting_fails,
-        test_clean_call_passes_the_gate,
-        test_greeting_waits_for_caller,
-    )
-
-    test_alice_chops_fail_the_gate()
-    test_clean_call_passes_the_gate()
-    test_chopped_greeting_fails()
-    test_cascaded_session_does_not_eager_cut()
-    test_greeting_waits_for_caller()
     print("ok")

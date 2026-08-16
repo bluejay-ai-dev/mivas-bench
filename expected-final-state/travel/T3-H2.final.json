@@ -1,0 +1,40 @@
+{
+  "bag_purchases": [],
+  "commits": [
+    {
+      "amount": 0.0,
+      "confirmation_code": "ZC8MRF",
+      "detail": "Seat 14B on JA812, standard: $0.00.",
+      "id": 1,
+      "kind": "seat",
+      "token": "JA-SEAT-1163"
+    }
+  ],
+  "escalations": [],
+  "holds": [
+    {
+      "amount": 0.0,
+      "confirmation_code": "ZC8MRF",
+      "consumed": 1,
+      "kind": "seat",
+      "miles_number": "",
+      "payload": "{\"confirmation_token\": \"JA-SEAT-1163\", \"summary\": \"Seat 14B on JA812, standard: $0.00.\", \"seat\": \"14B\", \"flight_number\": \"JA812\", \"departs_on\": \"2026-08-18\", \"seat_class\": \"standard\", \"price\": 0.0, \"base_price\": 15.0, \"waiver\": \"elite_platinum_seat\", \"total\": 0.0}",
+      "summary": "Seat 14B on JA812, standard: $0.00.",
+      "token": "JA-SEAT-1163"
+    }
+  ],
+  "itineraries": [],
+  "pass_bookings": [],
+  "payments": [],
+  "refunds": [],
+  "reservation_notes": [],
+  "seat_assignments": [
+    {
+      "amount": 0.0,
+      "confirmation_code": "ZC8MRF",
+      "flight_number": "JA812",
+      "id": 1,
+      "seat": "14B"
+    }
+  ]
+}

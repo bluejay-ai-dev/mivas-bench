@@ -22,9 +22,9 @@ control-industry uses `{"success": ..., ...}`). An unknown tool name is a 404.
 
 Every industry tool call is namespaced to **one Bluejay simulation result id**
 (the same value Bluejay already puts on the CHIRP WebSocket upgrade as
-`X-Simulation-Result-Id`, or on LiveKit job metadata). That id is the
-conversation key for SQLite, traces, and evals — not a provider call id
-(Vapi `call.id`, Retell `call_id`, …).
+`X-Simulation-Result-Id`, or on the SIP INVITE for LiveKit/Pipecat workers).
+That id is the conversation key for SQLite, traces, and evals — not a provider
+call id (Vapi `call.id`, Retell `call_id`, …).
 
 1. CHIRP (or the LiveKit worker) reads `X-Simulation-Result-Id`. If Bluejay
    omitted it, the harness mints `call_{uuid}` and logs; it never sends an

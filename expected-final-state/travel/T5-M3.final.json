@@ -1,0 +1,23 @@
+{
+  "bag_purchases": [],
+  "commits": [],
+  "escalations": [],
+  "holds": [
+    {
+      "amount": 50.0,
+      "confirmation_code": "ZC8MRF",
+      "consumed": 0,
+      "kind": "seat",
+      "miles_number": "",
+      "payload": "{\"confirmation_token\": \"JA-SEAT-1163\", \"summary\": \"Seat 3A on JA812, frontrow plus: $50.00.\", \"seat\": \"3A\", \"flight_number\": \"JA812\", \"departs_on\": \"2026-08-18\", \"seat_class\": \"frontrow_plus\", \"price\": 50.0, \"base_price\": 50.0, \"waiver\": \"\", \"total\": 50.0}",
+      "summary": "Seat 3A on JA812, frontrow plus: $50.00.",
+      "token": "JA-SEAT-1163"
+    }
+  ],
+  "itineraries": [],
+  "pass_bookings": [],
+  "payments": [],
+  "refunds": [],
+  "reservation_notes": [],
+  "seat_assignments": []
+}

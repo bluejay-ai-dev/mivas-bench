@@ -1,4 +1,7 @@
-"""Deploy this harness to Pipecat Cloud over the REST API (no Docker, no CLI).
+"""Optional Pipecat Cloud deploy. Bluejay no longer uses this path.
+
+The live harness is a Daily pinless SIP worker on k8s (`bot.serve` plus
+`dispatcher.py`). This script remains only if you still want a Cloud image.
 
 The `pipecat` CLI needs an interactive browser login or a personal access token,
 and a local Docker daemon; the REST API needs neither — it takes a tarball of the
@@ -47,6 +50,7 @@ SECRET_KEYS = (
     "BLUEJAY_API_URL",
     "BLUEJAY_OTLP_ENDPOINT",
     "BLUEJAY_SERVICE_NAME",
+    "INDUSTRY",
 )
 # Files copied into the build context (Pipecat Cloud Dockerfile COPYs *.py + industries/).
 # MIVAS CHIRP uses Dockerfile in this directory; Pipecat Cloud uses Dockerfile.pipecat-cloud
@@ -79,6 +83,8 @@ def build_context() -> bytes:
         tar.add(HARNESS_DIR / "Dockerfile.pipecat-cloud", arcname="Dockerfile")
         for name in CONTEXT_FILES:
             tar.add(HARNESS_DIR / name, arcname=name)
+        for runtime_file in ("call_id.py", "snapshot.py"):
+            tar.add(REPO_ROOT / "runtime" / runtime_file, arcname=f"runtime/{runtime_file}")
         tar.add(
             REPO_ROOT / "industries" / INDUSTRY,
             arcname=f"industries/{INDUSTRY}",
@@ -145,7 +151,10 @@ def main() -> int:
         "buildId": build_id,
         "region": REGION,
         "secretSet": SECRET_SET,
-        "autoScaling": {"minAgents": 1, "maxAgents": 3},
+        "autoScaling": {
+            "minAgents": int(os.environ.get("PIPECAT_MIN_AGENTS", "1")),
+            "maxAgents": int(os.environ.get("PIPECAT_MAX_AGENTS", "15")),
+        },
         "agentProfile": "agent-1x",
         "maxSessionDuration": 600,
     }

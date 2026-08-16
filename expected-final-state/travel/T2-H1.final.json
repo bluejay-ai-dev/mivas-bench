@@ -1,0 +1,57 @@
+{
+  "bag_purchases": [],
+  "commits": [
+    {
+      "amount": 103.8,
+      "confirmation_code": "MR4KLD",
+      "detail": "JA340 on 2026-09-13 at 07:30. Change fee $79.00, difference in fare $24.80, total $103.80.",
+      "id": 1,
+      "kind": "change",
+      "token": "JA-CHG-4417"
+    },
+    {
+      "amount": 0.0,
+      "confirmation_code": "MR4KLD",
+      "detail": "$103.80 to the card ending 6073.",
+      "id": 2,
+      "kind": "payment",
+      "token": "JA-PAY-7734"
+    }
+  ],
+  "escalations": [],
+  "holds": [
+    {
+      "amount": 103.8,
+      "confirmation_code": "MR4KLD",
+      "consumed": 1,
+      "kind": "change",
+      "miles_number": "",
+      "payload": "{\"confirmation_token\": \"JA-CHG-4417\", \"summary\": \"JA340 on 2026-09-13 at 07:30. Change fee $79.00, difference in fare $24.80, total $103.80.\", \"new_flight\": \"JA340\", \"departs_on\": \"2026-09-13\", \"departs_at\": \"07:30\", \"change_fee\": 79.0, \"fare_difference\": 24.8, \"total\": 103.8, \"fare_family\": \"basic\", \"same_day\": false, \"residual_value_forfeited\": 0.0, \"note\": \"\"}",
+      "summary": "JA340 on 2026-09-13 at 07:30. Change fee $79.00, difference in fare $24.80, total $103.80.",
+      "token": "JA-CHG-4417"
+    },
+    {
+      "amount": 0.0,
+      "confirmation_code": "MR4KLD",
+      "consumed": 1,
+      "kind": "payment",
+      "miles_number": "",
+      "payload": "{\"confirmation_token\": \"JA-PAY-7734\", \"summary\": \"$103.80 to the card ending 6073.\", \"amount\": 103.8, \"card_last4\": \"6073\"}",
+      "summary": "$103.80 to the card ending 6073.",
+      "token": "JA-PAY-7734"
+    }
+  ],
+  "itineraries": [],
+  "pass_bookings": [],
+  "payments": [
+    {
+      "amount": 103.8,
+      "card_last4": "6073",
+      "confirmation_code": "MR4KLD",
+      "id": 1
+    }
+  ],
+  "refunds": [],
+  "reservation_notes": [],
+  "seat_assignments": []
+}

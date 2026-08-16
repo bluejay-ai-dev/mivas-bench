@@ -1,0 +1,23 @@
+{
+  "bag_purchases": [],
+  "commits": [],
+  "escalations": [],
+  "holds": [
+    {
+      "amount": 30.0,
+      "confirmation_code": "MR4KLD",
+      "consumed": 0,
+      "kind": "bag",
+      "miles_number": "",
+      "payload": "{\"confirmation_token\": \"JA-BAG-5528\", \"summary\": \"1 x checked first at booking: $30.00.\", \"bag_kind\": \"checked_first\", \"touchpoint\": \"booking\", \"price\": 30.0, \"base_price\": 30.0, \"waiver\": \"\", \"label\": \"checked first\", \"quantity\": 1, \"total\": 30.0}",
+      "summary": "1 x checked first at booking: $30.00.",
+      "token": "JA-BAG-5528"
+    }
+  ],
+  "itineraries": [],
+  "pass_bookings": [],
+  "payments": [],
+  "refunds": [],
+  "reservation_notes": [],
+  "seat_assignments": []
+}

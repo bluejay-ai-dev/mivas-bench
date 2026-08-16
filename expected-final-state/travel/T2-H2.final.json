@@ -1,0 +1,32 @@
+{
+  "bag_purchases": [],
+  "commits": [
+    {
+      "amount": 129.0,
+      "confirmation_code": "QK4TZP",
+      "detail": "Cancelling QK4TZP. Fee $129.00. Back to the traveller: $14.90 as flight credit.",
+      "id": 1,
+      "kind": "cancellation",
+      "token": "JA-CAN-8290"
+    }
+  ],
+  "escalations": [],
+  "holds": [
+    {
+      "amount": 129.0,
+      "confirmation_code": "QK4TZP",
+      "consumed": 1,
+      "kind": "cancellation",
+      "miles_number": "",
+      "payload": "{\"confirmation_token\": \"JA-CAN-8290\", \"summary\": \"Cancelling QK4TZP. Fee $129.00. Back to the traveller: $14.90 as flight credit.\", \"fee\": 129.0, \"amount_returned\": 14.9, \"outcome\": \"credit\", \"credit_expires_on\": \"2027-08-01\", \"basis\": \"\", \"note\": \"Flight credit, not cash. It is worth $14.90 and it expires on 2027-08-01.\"}",
+      "summary": "Cancelling QK4TZP. Fee $129.00. Back to the traveller: $14.90 as flight credit.",
+      "token": "JA-CAN-8290"
+    }
+  ],
+  "itineraries": [],
+  "pass_bookings": [],
+  "payments": [],
+  "refunds": [],
+  "reservation_notes": [],
+  "seat_assignments": []
+}

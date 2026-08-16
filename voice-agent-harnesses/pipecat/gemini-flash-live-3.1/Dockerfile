@@ -5,7 +5,8 @@
 #     --build-arg INDUSTRY=control-industry \
 #     -t mivas-bench:pipecat-gemini-flash-live-3.1-control-industry .
 #
-# Copies the whole pipecat/ tree (shared harness.py) and runs this runtime.
+# Copies the whole pipecat/ tree (shared harness.py + bot.py). The pod
+# runs a Daily dialin worker plus the industry tool server.
 
 FROM python:3.12-slim
 
@@ -29,6 +30,7 @@ ENV HARNESS=pipecat/gemini-flash-live-3.1 \
     UV_SYSTEM_PYTHON=1 \
     UV_COMPILE_BYTECODE=1 \
     BLUEJAY_SERVICE_NAME=mivas-pipecat \
+    DAILY_API_KEY="" \
     OPENAI_API_KEY="" \
     GOOGLE_API_KEY="" \
     DEEPGRAM_API_KEY="" \
@@ -36,9 +38,6 @@ ENV HARNESS=pipecat/gemini-flash-live-3.1 \
     PIPECAT_STT_MODEL="" \
     PIPECAT_TTS_MODEL="" \
     PIPECAT_TTS_VOICE_ID="" \
-    LIVEKIT_URL="" \
-    LIVEKIT_API_KEY="" \
-    LIVEKIT_API_SECRET="" \
     BLUEJAY_API_KEY="" \
     BLUEJAY_API_URL="" \
     BLUEJAY_OTLP_ENDPOINT=""
@@ -61,8 +60,7 @@ COPY voice-agent-harnesses/pipecat/ /app/harness/
 COPY runtime/ /app/runtime/
 RUN chmod +x /app/runtime/entrypoint.sh \
     && mkdir -p /data \
-    && test -f "${HARNESS_DIR}/agent.py" \
-    && test -f /app/harness/adapters/livekit_worker.py
+    && test -f "${HARNESS_DIR}/agent.py"
 
 EXPOSE 8000 8765
 

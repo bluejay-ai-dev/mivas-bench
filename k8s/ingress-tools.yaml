@@ -1,4 +1,4 @@
-# Tools-only public hostname for worker families (Pipecat Cloud / LiveKit).
+# Tools-only public hostname for SIP workers.
 # Combined pod: the industry FastAPI still listens on :8000 in the same container.
 # One Prefix `/tools` — extra FastAPI routes must live under /tools so they
 # do not cost another ALB rule. Evals still read S3, not this host.

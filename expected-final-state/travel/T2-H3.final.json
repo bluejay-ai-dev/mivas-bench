@@ -1,0 +1,40 @@
+{
+  "bag_purchases": [],
+  "commits": [
+    {
+      "amount": 0.0,
+      "confirmation_code": "KF2DVR",
+      "detail": "Cancelling KF2DVR. Fee $0.00. Back to the traveller: $154.30 as cash.",
+      "id": 1,
+      "kind": "cancellation",
+      "token": "JA-CAN-8290"
+    }
+  ],
+  "escalations": [],
+  "holds": [
+    {
+      "amount": 0.0,
+      "confirmation_code": "KF2DVR",
+      "consumed": 1,
+      "kind": "cancellation",
+      "miles_number": "",
+      "payload": "{\"confirmation_token\": \"JA-CAN-8290\", \"summary\": \"Cancelling KF2DVR. Fee $0.00. Back to the traveller: $154.30 as cash.\", \"fee\": 0.0, \"amount_returned\": 154.3, \"outcome\": \"cash\", \"credit_expires_on\": \"\", \"basis\": \"booked_24h\", \"note\": \"Cash back to the original form of payment, no fee, because of booked_24h. 7 business days for a card, 20 calendar days otherwise\"}",
+      "summary": "Cancelling KF2DVR. Fee $0.00. Back to the traveller: $154.30 as cash.",
+      "token": "JA-CAN-8290"
+    }
+  ],
+  "itineraries": [],
+  "pass_bookings": [],
+  "payments": [],
+  "refunds": [
+    {
+      "amount": 154.3,
+      "basis": "booked_24h",
+      "confirmation_code": "KF2DVR",
+      "form_of_payment": "original form of payment",
+      "id": 1
+    }
+  ],
+  "reservation_notes": [],
+  "seat_assignments": []
+}

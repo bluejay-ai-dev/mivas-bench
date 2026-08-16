@@ -1,0 +1,66 @@
+{
+  "bag_purchases": [
+    {
+      "amount": 30.0,
+      "bag_kind": "checked_first",
+      "confirmation_code": "MR4KLD",
+      "id": 1,
+      "quantity": 1,
+      "touchpoint": "booking"
+    }
+  ],
+  "commits": [
+    {
+      "amount": 30.0,
+      "confirmation_code": "MR4KLD",
+      "detail": "1 x checked first at booking: $30.00.",
+      "id": 1,
+      "kind": "bag",
+      "token": "JA-BAG-5528"
+    },
+    {
+      "amount": 0.0,
+      "confirmation_code": "MR4KLD",
+      "detail": "$30.00 to the card ending 6073.",
+      "id": 2,
+      "kind": "payment",
+      "token": "JA-PAY-7734"
+    }
+  ],
+  "escalations": [],
+  "holds": [
+    {
+      "amount": 30.0,
+      "confirmation_code": "MR4KLD",
+      "consumed": 1,
+      "kind": "bag",
+      "miles_number": "",
+      "payload": "{\"confirmation_token\": \"JA-BAG-5528\", \"summary\": \"1 x checked first at booking: $30.00.\", \"bag_kind\": \"checked_first\", \"touchpoint\": \"booking\", \"price\": 30.0, \"base_price\": 30.0, \"waiver\": \"\", \"label\": \"checked first\", \"quantity\": 1, \"total\": 30.0}",
+      "summary": "1 x checked first at booking: $30.00.",
+      "token": "JA-BAG-5528"
+    },
+    {
+      "amount": 0.0,
+      "confirmation_code": "MR4KLD",
+      "consumed": 1,
+      "kind": "payment",
+      "miles_number": "",
+      "payload": "{\"confirmation_token\": \"JA-PAY-7734\", \"summary\": \"$30.00 to the card ending 6073.\", \"amount\": 30.0, \"card_last4\": \"6073\"}",
+      "summary": "$30.00 to the card ending 6073.",
+      "token": "JA-PAY-7734"
+    }
+  ],
+  "itineraries": [],
+  "pass_bookings": [],
+  "payments": [
+    {
+      "amount": 30.0,
+      "card_last4": "6073",
+      "confirmation_code": "MR4KLD",
+      "id": 1
+    }
+  ],
+  "refunds": [],
+  "reservation_notes": [],
+  "seat_assignments": []
+}

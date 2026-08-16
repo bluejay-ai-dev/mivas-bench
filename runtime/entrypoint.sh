@@ -22,7 +22,11 @@ export INDUSTRY_DIR
 export INDUSTRY
 export HARNESS
 
+HARNESS_FAMILY="${HARNESS_FAMILY:-${HARNESS%%/*}}"
 HARNESS_RUNTIME="${HARNESS_RUNTIME:-$(basename "${HARNESS_DIR}")}"
+if [[ "${HARNESS_FAMILY}" == "pipecat" && "${MIVAS_MODE}" != "dispatcher" ]]; then
+  export PIPECAT_DIALIN_UPSTREAM="${PIPECAT_DIALIN_UPSTREAM:-http://127.0.0.1:8080/dialin}"
+fi
 case "${HARNESS_RUNTIME}" in
   realtime-2.1) : "${OPENAI_REALTIME_MODEL:=gpt-realtime-2.1}" ;;
   realtime-2.1-mini) : "${OPENAI_REALTIME_MODEL:=gpt-realtime-2.1-mini}" ;;
@@ -85,24 +89,28 @@ start_harness() {
   fi
 
   HARNESS_FAMILY="${HARNESS_FAMILY:-${HARNESS%%/*}}"
-  HARNESS_FAMILY_DIR="${HARNESS_FAMILY_DIR:-${APP_ROOT}/harness}"
 
   if [[ "${HARNESS_FAMILY}" == "livekit" ]]; then
-    echo "starting LiveKit Cloud worker (${HARNESS})"
+    echo "starting LiveKit SIP worker (${HARNESS})"
     exec python "${HARNESS_DIR}/agent.py" start
   fi
 
   if [[ "${HARNESS_FAMILY}" == "pipecat" ]]; then
-    echo "starting Pipecat LiveKit Cloud worker (${HARNESS})"
-    exec python "${HARNESS_FAMILY_DIR}/adapters/livekit_worker.py"
+    echo "starting Pipecat Daily dialin worker (${HARNESS})"
+    exec python "${HARNESS_FAMILY_DIR:-${APP_ROOT}/harness}/bot.py"
   fi
 
   echo "starting harness agent (${HARNESS}) mode=${MIVAS_MODE}"
   exec python "${HARNESS_DIR}/agent.py" "${INDUSTRY}"
 }
 
-if [[ "${MIVAS_ROLE}" == "tools" ]]; then
-  echo "starting tool server (${INDUSTRY}) on :${TOOL_SERVER_PORT} (role=tools)"
+if [[ "${MIVAS_MODE}" == "dispatcher" ]]; then
+  echo "starting Pipecat Daily SIP dispatcher"
+  exec python "${HARNESS_FAMILY_DIR:-${APP_ROOT}/harness}/dispatcher.py"
+fi
+
+if [[ "${MIVAS_ROLE}" == "tools" || "${MIVAS_MODE}" == "tools" ]]; then
+  echo "starting tool server (${INDUSTRY}) on :${TOOL_SERVER_PORT} (mode=tools)"
   exec python "${INDUSTRY_DIR}/tool_server.py"
 fi
 

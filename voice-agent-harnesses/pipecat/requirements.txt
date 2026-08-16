@@ -1,5 +1,7 @@
-pipecat-ai[daily,deepgram,elevenlabs,google,livekit,openai,runner,silero]==1.7.0
-livekit-agents[silero]>=1.5.14,<2
+pipecat-ai[daily,deepgram,elevenlabs,google,openai,runner,silero]==1.7.0
+fastapi>=0.110
+uvicorn>=0.30
+python-dotenv>=1.0
 opentelemetry-sdk>=1.30
 opentelemetry-exporter-otlp-proto-http>=1.30
 httpx>=0.27

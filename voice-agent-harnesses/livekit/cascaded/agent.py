@@ -3,14 +3,12 @@
 Same STT/LLM/TTS as the Vapi/Cartesia cascaded harnesses, so the stack is the
 control variable and the framework is what changes.
 
-Flux owns turn boundaries (`turn_detection="stt"`). Eager EOT and preemptive
-generation are off: 0.4 eager + preemptive LLM was starting TTS while the
-caller was still talking, then VAD barge-in cut the line mid-sentence
-(Alice 728130: "Your current", "on the"). Interruptions need a few real
-words, not a backchannel. The extra session endpointing delay is a short
-buffer after Flux EndOfTurn, not the old 0.5s pad.
+Bluejay reaches this worker over SIP into LiveKit Cloud
+(`connection_type=SIP`). The worker still registers with LiveKit; an inbound
+SIP call creates the room and dispatches `agent_name`. Audio is the stock
+LiveKit SIP mix in that room.
 
-    python cascaded/agent.py dev      # local worker, picks up Bluejay dispatch
+    python cascaded/agent.py dev      # local worker, picks up Bluejay SIP dispatch
 """
 
 from __future__ import annotations
@@ -25,7 +23,7 @@ from dotenv import load_dotenv
 load_dotenv(Path(__file__).resolve().parents[3] / ".env")
 load_dotenv(Path(__file__).resolve().parents[1] / ".env", override=True)
 
-from livekit.agents import AgentSession, TurnHandlingOptions  # noqa: E402
+from livekit.agents import AgentSession  # noqa: E402
 from livekit.plugins import deepgram, elevenlabs, openai, silero  # noqa: E402
 
 import harness  # noqa: E402
@@ -36,38 +34,23 @@ MODEL = "gpt-4.1"
 
 def build_session(_bp):
     return AgentSession(
-        turn_handling=TurnHandlingOptions(
-            turn_detection="stt",
-            # In STT mode min_delay is *added* after the provider EOT. A tiny
-            # buffer absorbs Flux jitter without the old 0.5s latency pad.
-            endpointing={"mode": "fixed", "min_delay": 0.25, "max_delay": 3.0},
-            preemptive_generation={"enabled": False},
-            interruption={
-                "enabled": True,
-                "mode": "vad",
-                "min_duration": 0.8,
-                "min_words": 3,
-                "resume_false_interruption": True,
-            },
-        ),
-        stt=deepgram.STTv2(
-            model="flux-general-en",
-            eot_threshold=0.8,
-        ),
+        stt=deepgram.STTv2(model="flux-general-en"),
         llm=openai.LLM(model=MODEL),
         tts=elevenlabs.TTS(model="eleven_flash_v2_5", voice_id="21m00Tcm4TlvDq8ikWAM"),
-        vad=silero.VAD.load(min_speech_duration=0.3),
-        # healthcare reception can chain classify + locations + transfer in one
-        # turn; 8 was the old cap and sat on the default-3 LiveKit limit.
+        vad=silero.VAD.load(),
+        # LiveKit defaults to 3; one user turn can chain several tools.
         max_tool_steps=16,
     )
 
 
 if __name__ == "__main__":
-    harness.serve(
-        AGENT_NAME,
-        build_session=build_session,
-        build_agent=lambda bp, hangup: harness.BlueprintAgent(bp, bp["start"], hangup),
-        model=MODEL,
-        greet="say",
-    )
+    if "--check" in sys.argv:
+        harness.load_blueprint()
+        print("ok")
+    else:
+        harness.serve(
+            AGENT_NAME,
+            build_session=build_session,
+            build_agent=lambda bp, hangup: harness.BlueprintAgent(bp, bp["start"], hangup),
+            model=MODEL,
+        )

@@ -97,6 +97,42 @@ spec:
                   name: mivas-secrets
                   key: NGC_API_KEY
                   optional: true
+            - name: NEMOTRON_LLM_BASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: mivas-secrets
+                  key: NEMOTRON_LLM_BASE_URL
+                  optional: true
+            - name: NEMOTRON_LLM_MODEL
+              valueFrom:
+                secretKeyRef:
+                  name: mivas-secrets
+                  key: NEMOTRON_LLM_MODEL
+                  optional: true
+            - name: NEMOTRON_ASR_SERVER
+              valueFrom:
+                secretKeyRef:
+                  name: mivas-secrets
+                  key: NEMOTRON_ASR_SERVER
+                  optional: true
+            - name: NEMOTRON_TTS_SERVER
+              valueFrom:
+                secretKeyRef:
+                  name: mivas-secrets
+                  key: NEMOTRON_TTS_SERVER
+                  optional: true
+            - name: NEMOTRON_USE_SSL
+              valueFrom:
+                secretKeyRef:
+                  name: mivas-secrets
+                  key: NEMOTRON_USE_SSL
+                  optional: true
+            - name: NEMOTRON_ASR_FUNCTION_ID
+              valueFrom:
+                secretKeyRef:
+                  name: mivas-secrets
+                  key: NEMOTRON_ASR_FUNCTION_ID
+                  optional: true
             - name: VAPI_API_KEY
               valueFrom:
                 secretKeyRef:
@@ -170,19 +206,19 @@ spec:
             - name: LIVEKIT_URL
               valueFrom:
                 secretKeyRef:
-                  name: mivas-secrets
+                  name: __LIVEKIT_SECRET_NAME__
                   key: LIVEKIT_URL
                   optional: true
             - name: LIVEKIT_API_KEY
               valueFrom:
                 secretKeyRef:
-                  name: mivas-secrets
+                  name: __LIVEKIT_SECRET_NAME__
                   key: LIVEKIT_API_KEY
                   optional: true
             - name: LIVEKIT_API_SECRET
               valueFrom:
                 secretKeyRef:
-                  name: mivas-secrets
+                  name: __LIVEKIT_SECRET_NAME__
                   key: LIVEKIT_API_SECRET
                   optional: true
             - name: VOICECHAT_WS_URL
@@ -202,6 +238,12 @@ spec:
                 secretKeyRef:
                   name: mivas-secrets
                   key: BLUEJAY_API_KEY
+                  optional: true
+            - name: DAILY_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: mivas-secrets
+                  key: DAILY_API_KEY
                   optional: true
             - name: BLUEJAY_API_URL
               value: "__BLUEJAY_API_URL__"

@@ -1,19 +1,9 @@
-"""Pipecat Cloud entrypoint for the MIVAS control-industry agent.
+"""Pipecat k8s worker for the MIVAS industry agent.
 
-One deployed Pipecat Cloud service serves all three runtimes; which one runs is
-read from the start `body`, i.e. from the Bluejay agent's
-`pipecat_agent_configuration`:
-
-    {"runtime": "cascaded" | "openai-realtime-2.1" | "gemini-flash-live-3.1",
-     "tool_server_url": "https://<tunnel>",
-     "simulation_id": 30xxx}
-
-`simulation_id` is there because Bluejay's Pipecat dispatch passes no per-run
-metadata — `report.resolve_simulation_result_id` turns it into the live
-simulation_result_id.
-
-The receptionist → scheduler handoff is a real agent switch in all three
-runtimes; see `harness` for which Pipecat mechanism each one uses and why.
+Daily pinless SIP hits the cluster dispatcher, which POSTs `/tools/dialin` on
+this pod. This process creates a Daily room, joins it over DailyTransport, and
+runs the receptionist → scheduler switch. Traces stay on this process via
+`report.traced_run`. There is no LiveKit in this path.
 """
 
 from __future__ import annotations
@@ -50,17 +40,23 @@ from pipecat.pipeline.worker import PipelineParams, PipelineWorker
 from pipecat.processors.aggregators.llm_context import LLMContext
 from pipecat.processors.aggregators.llm_response_universal import (
     LLMContextAggregatorPair,
-    LLMUserAggregatorParams,
 )
 from pipecat.processors.frame_processor import FrameDirection
-from pipecat.audio.vad.silero import SileroVADAnalyzer
-from pipecat.runner.utils import create_transport
-from pipecat.transports.daily.transport import DailyParams
+from pipecat.transports.daily.transport import DailyParams, DailyTransport
 
+try:
+    from pipecat.transports.daily.transport import DailyDialinSettings
+except ImportError:  # older pipecat re-exports from the package
+    from pipecat.transports.daily import DailyDialinSettings
 import harness
 import report
 
 INDUSTRY = os.environ.get("INDUSTRY", "control-industry")
+AGENT_NAMES = {
+    "cascaded": "mivas-pipecat-cascaded",
+    "openai-realtime-2.1": "mivas-pipecat-openai-realtime",
+    "gemini-flash-live-3.1": "mivas-pipecat-gemini-live",
+}
 
 
 async def _not_text_frame(frame: Frame) -> bool:
@@ -88,9 +84,8 @@ def _not_greeting_text_filter(greeting: str):
 # cascaded LLM has already generated its farewell by then, so the EndFrame drain
 # plays it out; a realtime model only generates that audio *after* it sees the
 # tool result, so an immediate EndTaskFrame cuts it off mid-thought and the caller
-# hears silence (pipecat 711945 vs livekit 710923, same gpt-realtime-2.1). LiveKit
-# solves this with a flat `HANGUP_GRACE_S = 4.0`; here we can do better and wait
-# for the farewell to actually finish, with the flat delay as the lead-in.
+# hears silence. Wait for the farewell to actually finish, with a flat delay as
+# the lead-in.
 END_CALL_LEAD_IN_S = float(os.environ.get("MIVAS_END_CALL_CLOSE_DELAY_S", "4.0"))
 END_CALL_MAX_WAIT_S = float(os.environ.get("MIVAS_END_CALL_MAX_WAIT_S", "20.0"))
 
@@ -235,7 +230,11 @@ async def run_bot(transport, runtime: str) -> None:
                 # target needs a scripted first line — derived from *that*
                 # agent's prompt, never a leftover receptionist greeting.
                 if runtime in harness.GREETING_TTS_RUNTIMES:
-                    frames.append(TTSSpeakFrame(harness.agent_opener(bp, target)))
+                    frames.append(
+                        TTSSpeakFrame(
+                            harness.agent_opener(bp, target), append_to_context=False
+                        )
+                    )
                 await worker.queue_frames(frames)
 
             # Switch from `on_context_updated`, not inline: the handoff call and
@@ -285,7 +284,7 @@ async def run_bot(transport, runtime: str) -> None:
     # the scheduler's tools.
     context = LLMContext()
     aggregators = LLMContextAggregatorPair(
-        context, user_params=LLMUserAggregatorParams(vad_analyzer=SileroVADAnalyzer())
+        context, user_params=harness.user_aggregator_params(runtime)
     )
 
     stages = [transport.input()]
@@ -343,7 +342,9 @@ async def run_bot(transport, runtime: str) -> None:
         # with 1008. The scripted opener rides behind it on the greeting TTS.
         frames = [LLMRunFrame()]
         if runtime in harness.GREETING_TTS_RUNTIMES:
-            frames.append(TTSSpeakFrame(harness.pack_greeting(bp)))
+            frames.append(
+                TTSSpeakFrame(harness.pack_greeting(bp), append_to_context=False)
+            )
         await worker.queue_frames(frames)
 
     async def _hangup(_transport, *_args):
@@ -351,14 +352,9 @@ async def run_bot(transport, runtime: str) -> None:
         await cancel_end_task()
         await worker.cancel()
 
-    # Daily Cloud uses on_client_*; LiveKitTransport uses participant/room events.
-    if transport.__class__.__name__.startswith("Daily"):
-        transport.event_handler("on_client_connected")(_kickoff)
-        transport.event_handler("on_client_disconnected")(_hangup)
-    else:
-        transport.event_handler("on_first_participant_joined")(_kickoff)
-        transport.event_handler("on_participant_disconnected")(_hangup)
-        transport.event_handler("on_disconnected")(_hangup)
+    transport.event_handler("on_first_participant_joined")(_kickoff)
+    transport.event_handler("on_participant_disconnected")(_hangup)
+    transport.event_handler("on_disconnected")(_hangup)
 
     runner = WorkerRunner(handle_sigint=False)
     await runner.add_workers(worker)
@@ -369,50 +365,135 @@ async def run_bot(transport, runtime: str) -> None:
         observer.close()
 
 
-async def bot(args) -> None:
-    """Pipecat Cloud entrypoint."""
-    body = dict(getattr(args, "body", None) or {})
-    runtime = body.get("runtime") or harness.DEFAULT_RUNTIME
+def _sim_result_id(body: dict) -> str | None:
+    headers = body.get("sipHeaders") or body.get("sip_headers") or {}
+    if isinstance(headers, dict):
+        sid = harness.sim_result_id_from_job_metadata(headers)
+        if sid:
+            return sid
+    return harness.sim_result_id_from_job_metadata(body)
+
+
+async def _daily_room(from_display: str) -> tuple[str, str]:
+    """Create a SIP dial-in Daily room and an owner token. Returns (url, token)."""
+    import httpx
+
+    api_key = os.environ.get("DAILY_API_KEY", "").strip()
+    if not api_key:
+        raise RuntimeError("DAILY_API_KEY is required")
+    api = os.environ.get("DAILY_API_URL", "https://api.daily.co/v1").rstrip("/")
+    headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        room = await client.post(
+            f"{api}/rooms",
+            headers=headers,
+            json={
+                "properties": {
+                    "exp": int(time.time()) + 600,
+                    "eject_at_room_exp": True,
+                    "sip": {
+                        "display_name": from_display or "caller",
+                        "sip_mode": "dial-in",
+                        "num_endpoints": 1,
+                    },
+                }
+            },
+        )
+        room.raise_for_status()
+        data = room.json()
+        tok = await client.post(
+            f"{api}/meeting-tokens",
+            headers=headers,
+            json={"properties": {"room_name": data["name"], "is_owner": True}},
+        )
+        tok.raise_for_status()
+        return data["url"], tok.json()["token"]
+
+
+def serve(runtime: str, *, agent_name: str | None = None) -> None:
+    """HTTP worker: POST /dialin starts one Daily SIP session; 409 if busy."""
+    import uvicorn
+    from fastapi import FastAPI, HTTPException, Request
+    from fastapi.responses import JSONResponse
+
     if runtime not in harness.RUNTIMES:
-        logger.warning("unknown runtime %r — falling back to %s", runtime, harness.DEFAULT_RUNTIME)
-        runtime = harness.DEFAULT_RUNTIME
-    if body.get("tool_server_url"):
-        os.environ["TOOL_SERVER_URL"] = str(body["tool_server_url"])
+        raise SystemExit(f"unknown runtime {runtime!r}")
+    name = harness.resolve_agent_name(agent_name or AGENT_NAMES.get(runtime, runtime))
+    port = int(os.environ.get("PIPECAT_DIALIN_PORT", "8080"))
+    inflight = 0
+    slot = asyncio.Lock()
 
-    sim_result_id = await report.resolve_simulation_result_id(body.get("simulation_id"))
-    harness.set_call_id(sim_result_id)
-    harness.begin_session(sim_result_id, session_key=str(sim_result_id or "job"))
-    logger.info(
-        "pipecat bot runtime={} model={} sim_result_id={} tool_server={}",
-        runtime, harness.RUNTIMES[runtime], sim_result_id, harness.tool_server_url(),
-    )
-
-    transport = await create_transport(
-        args,
-        {
-            "daily": lambda: DailyParams(
-                audio_in_enabled=True,
-                audio_out_enabled=True,
-                vad_analyzer=SileroVADAnalyzer(),
-            ),
-        },
-    )
-
-    async with report.traced_run(
-        f"mivas-{INDUSTRY}-{runtime}",
-        simulation_result_id=sim_result_id,
-        model=harness.RUNTIMES[runtime],
-    ):
+    async def run_session(body: dict) -> None:
+        nonlocal inflight
+        sim_result_id = _sim_result_id(body)
+        harness.set_call_id(sim_result_id)
+        session_key = str(body.get("callId") or sim_result_id or "job")
+        harness.begin_session(sim_result_id, session_key=session_key)
+        caller = str(body.get("From") or body.get("from") or "")
+        call_id = str(body.get("callId") or body.get("call_id") or "")
+        call_domain = str(body.get("callDomain") or body.get("call_domain") or "")
+        logger.info(
+            "dialin start runtime={} model={} sim={} callId={}",
+            runtime,
+            harness.RUNTIMES[runtime],
+            sim_result_id,
+            call_id,
+        )
         try:
-            await run_bot(transport, runtime)
-        finally:
-            # end_session freezes the call DB to S3; it does blocking HTTP.
-            await asyncio.to_thread(
-                harness.end_session, str(sim_result_id or "job")
+            room_url, token = await _daily_room(caller)
+            transport = DailyTransport(
+                room_url,
+                token,
+                name,
+                DailyParams(
+                    api_key=os.environ.get("DAILY_API_KEY", ""),
+                    api_url=os.environ.get("DAILY_API_URL", "https://api.daily.co/v1"),
+                    dialin_settings=DailyDialinSettings(
+                        call_id=call_id, call_domain=call_domain
+                    ),
+                    audio_in_enabled=True,
+                    audio_out_enabled=True,
+                ),
             )
+            async with report.traced_run(
+                f"mivas-{INDUSTRY}-{runtime}",
+                simulation_result_id=sim_result_id,
+                model=harness.RUNTIMES[runtime],
+            ):
+                await run_bot(transport, runtime)
+        finally:
+            await asyncio.to_thread(harness.end_session, session_key)
+            async with slot:
+                inflight = max(0, inflight - 1)
+
+    app = FastAPI(title="mivas pipecat worker")
+
+    @app.get("/health")
+    def health() -> dict[str, object]:
+        return {"status": "ok", "inflight": inflight}
+
+    @app.post("/dialin")
+    async def dialin(request: Request) -> JSONResponse:
+        nonlocal inflight
+        try:
+            body = await request.json()
+        except Exception:
+            body = {}
+        if not isinstance(body, dict):
+            body = {}
+        if body.get("test") == "test" or not body.get("callId"):
+            return JSONResponse({"ok": True, "probe": True})
+        async with slot:
+            if inflight >= 1:
+                raise HTTPException(status_code=409, detail="busy")
+            inflight += 1
+        asyncio.create_task(run_session(body))
+        return JSONResponse({"ok": True}, status_code=202)
+
+    logger.info("pipecat dialin worker runtime=%s name=%s port=%s", runtime, name, port)
+    uvicorn.run(app, host="127.0.0.1", port=port, log_level="info")
 
 
 if __name__ == "__main__":
-    from pipecat.runner.run import main
+    serve(os.environ.get("PIPECAT_RUNTIME") or os.environ.get("HARNESS_RUNTIME") or harness.DEFAULT_RUNTIME)
 
-    main()

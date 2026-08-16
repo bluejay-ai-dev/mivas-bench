@@ -32,9 +32,13 @@ def build_session(_bp):
 
 
 if __name__ == "__main__":
-    harness.serve(
-        AGENT_NAME,
-        build_session=build_session,
-        build_agent=lambda bp, hangup: harness.BlueprintAgent(bp, bp["start"], hangup),
-        model=MODEL,
-    )
+    if "--check" in sys.argv:
+        harness.load_blueprint()
+        print("ok")
+    else:
+        harness.serve(
+            AGENT_NAME,
+            build_session=build_session,
+            build_agent=lambda bp, hangup: harness.BlueprintAgent(bp, bp["start"], hangup),
+            model=MODEL,
+        )

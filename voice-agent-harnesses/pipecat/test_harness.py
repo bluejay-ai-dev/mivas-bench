@@ -1,7 +1,7 @@
 """Self-check: `python test_harness.py` (no Pipecat runtime import required).
 
-Covers the k8s-healthcare misses: pack greeting, today clock, LiveKit dispatch
-name per slug, and Gemini handoff openers derived from the *target* prompt.
+Covers pack greeting, today clock, Daily pinless SIP URI, and
+Gemini handoff openers derived from the *target* prompt.
 """
 
 from __future__ import annotations
@@ -13,11 +13,12 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import harness
-from harness import sim_result_id_from_job_metadata
+from harness import sip_uri, sim_result_id_from_job_metadata, sim_result_id_from_participant
 
 
 def test_sim_result_id() -> None:
     import json
+    from types import SimpleNamespace
 
     assert (
         sim_result_id_from_job_metadata(
@@ -28,6 +29,11 @@ def test_sim_result_id() -> None:
     assert sim_result_id_from_job_metadata({"simulation_result_id": 710922}) == "710922"
     for empty in (None, "", "{}", "not json", json.dumps({"X-Agent-Id": "1"}), "[]"):
         assert sim_result_id_from_job_metadata(empty) is None, empty
+    sip = SimpleNamespace(
+        attributes={"sip.h.x-simulation-result-id": "736069"},
+        metadata="",
+    )
+    assert sim_result_id_from_participant(sip) == "736069"
 
 
 def test_control_industry_split() -> None:
@@ -91,6 +97,26 @@ def test_resolve_agent_name() -> None:
     os.environ.pop("LIVEKIT_AGENT_NAME", None)
     os.environ.pop("MIVAS_SLUG", None)
 
+    prev_sip = os.environ.pop("DAILY_SIP_URI", None)
+    try:
+        assert sip_uri() is None
+        os.environ["DAILY_SIP_URI"] = "sip:abc@daily-pinless.example"
+        assert sip_uri() == "sip:abc@daily-pinless.example"
+    finally:
+        os.environ.pop("DAILY_SIP_URI", None)
+        if prev_sip is not None:
+            os.environ["DAILY_SIP_URI"] = prev_sip
+
+
+def test_daily_dialin_not_livekit() -> None:
+    bot = (Path(__file__).parent / "bot.py").read_text()
+    assert "def serve(" in bot
+    assert "DailyTransport" in bot
+    assert "LiveKitTransport" not in bot
+    disp = (Path(__file__).parent / "dispatcher.py").read_text()
+    assert "PIPECAT_WORKER_URL_TEMPLATE" in disp
+    assert "_RETRY_CODES" in disp
+
 
 if __name__ == "__main__":
     test_sim_result_id()
@@ -99,4 +125,5 @@ if __name__ == "__main__":
     test_agent_opener()
     test_generic_industries()
     test_resolve_agent_name()
+    test_daily_dialin_not_livekit()
     print("ok")

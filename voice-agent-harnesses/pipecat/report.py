@@ -11,9 +11,9 @@ After the call we POST to update-simulation-result with `trace_ids` only —
 conversation tool markers come from the execute_tool spans, and posting
 `tool_calls` as well double-counts them.
 
-Unlike the CHIRP harnesses there is no `X-Simulation-Result-Id` header: Bluejay
-starts a Pipecat Cloud agent through `POST /v1/public/<agent>/start` and that
-call carries no per-run metadata (see `resolve_simulation_result_id`).
+Bluejay supplies simulation_result_id via X-Simulation-Result-Id on the SIP
+INVITE (GetRemoteHeaders / participant attributes). There is no CHIRP bridge
+and no Pipecat Cloud start body.
 """
 
 from __future__ import annotations
@@ -247,11 +247,8 @@ IN_FLIGHT_STATUSES = ("DISPATCHED", "RUNNING", "READY", "QUEUED", "INITIALIZING"
 async def resolve_simulation_result_id(simulation_id: Any) -> str | None:
     """Find the in-flight simulation result for `simulation_id`.
 
-    Bluejay's PIPECAT dispatch hands the bot only the static
-    `pipecat_agent_configuration` as the start `body`; the run's
-    simulation_result_id is never passed through (LiveKit gets it on the job
-    metadata, Pipecat has no equivalent). So the bot bakes its simulation_id
-    into that config and looks the live result up over the API instead.
+    Fallback when SIP `sipHeaders` did not carry X-Simulation-Result-Id.
+    Looks up the in-flight result for a baked-in simulation_id.
 
     ponytail: newest-run + first in-flight result. Correct at max_concurrent=1,
     which is what the MIVAS control sims run at; a concurrent sim would need
@@ -281,13 +278,47 @@ async def resolve_simulation_result_id(simulation_id: Any) -> str | None:
         logger.error("resolve_simulation_result_id failed: %s: %s", type(e).__name__, e)
         return None
 
-    for res in results:
-        if str(res.get("status")) in IN_FLIGHT_STATUSES:
-            logger.info(
-                "resolved simulation_result_id=%s (run=%s status=%s)",
-                res.get("id"), run_id, res.get("status"),
-            )
-            return str(res.get("id"))
+    inflight = [
+        res for res in results if str(res.get("status")) in IN_FLIGHT_STATUSES
+    ]
+    inflight.sort(key=lambda r: int(r.get("id") or 0))
+    owner = os.environ.get("HOSTNAME") or f"pid-{os.getpid()}"
+    tool_base = (os.environ.get("TOOL_SERVER_URL") or "").rstrip("/")
+    claimed = None
+    if tool_base and inflight:
+        try:
+            async with httpx.AsyncClient(timeout=8) as claim_client:
+                for res in inflight:
+                    rid = str(res.get("id") or "")
+                    if not rid:
+                        continue
+                    cr = await claim_client.post(
+                        f"{tool_base}/tools/_claim",
+                        json={"sim_id": rid, "owner": owner},
+                    )
+                    if cr.status_code == 200:
+                        claimed = rid
+                        break
+                    if cr.status_code not in (404, 409):
+                        logger.warning(
+                            "claim sim=%s status=%s body=%s",
+                            rid, cr.status_code, cr.text[:200],
+                        )
+        except Exception as e:
+            logger.warning("claim failed: %s: %s", type(e).__name__, e)
+    if claimed:
+        logger.info(
+            "resolved simulation_result_id=%s (run=%s claimed owner=%s)",
+            claimed, run_id, owner,
+        )
+        return claimed
+    if inflight:
+        rid = str(inflight[0].get("id"))
+        logger.info(
+            "resolved simulation_result_id=%s (run=%s status=%s unclaimed fallback)",
+            rid, run_id, inflight[0].get("status"),
+        )
+        return rid
     logger.warning(
         "no in-flight result on run=%s (statuses=%s)",
         run_id, [r.get("status") for r in results],
@@ -300,10 +331,9 @@ async def _await_terminal_upsert(
 ) -> str | None:
     """Wait for a *final* status before the upsert.
 
-    600 s, matching the LiveKit worker: eval can take longer than 300 s, and a
-    fall-through POST during EVALUATING gets wiped. The k8s LiveKit worker
-    process stays up, so the linker thread can wait the full window. Pipecat
-    Cloud's 600 s maxSessionDuration is the same ceiling.
+    600 s: eval can take longer than 300 s, and a fall-through POST during
+    EVALUATING gets wiped. The k8s worker process stays up, so the linker
+    thread can wait the full window.
 
     Posting during EVALUATING works, but eval then wipes trace_ids, and re-posting
     makes Bluejay re-extract the execute_tool spans on top of the ones the first
@@ -485,11 +515,17 @@ async def traced_run(
         if root_token is not None:
             _root_span.reset(root_token)
         _call_t0.reset(t0_token)
-        flush()
+        try:
+            flush()
+        except Exception:
+            logger.exception("otel flush failed sim=%s", simulation_result_id)
         if simulation_result_id and otel_tid:
-            # LiveKit cancels the entrypoint ~15 s after the room closes
-            # ("entrypoint did not exit in time"), which kills any coroutine still
-            # waiting here. A non-daemon thread outlives the job until the link lands.
+            # A non-daemon thread outlives the Daily session until the link lands.
+            logger.info(
+                "starting linker thread sim=%s trace=%s",
+                simulation_result_id,
+                otel_tid,
+            )
             threading.Thread(
                 target=asyncio.run,
                 args=(
