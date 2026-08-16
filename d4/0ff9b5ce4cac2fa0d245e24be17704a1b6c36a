@@ -1,0 +1,19 @@
+voice-agent-harnesses/openai/test_post_trace_ids.py
+  s_9d2f77bfd49fda::t_f8a09168786439 9,13,52-59,73-77
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "d40ff9b5ce4cac2fa0d245e24be17704a1b6c36a",
+  "prompts": {},
+  "sessions": {
+    "s_9d2f77bfd49fda": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "0f9d6c71-ac43-4776-aa21-177f6bcae14d",
+        "model": "grok-4.6"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
