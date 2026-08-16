@@ -20,7 +20,6 @@ import asyncio
 import json
 import logging
 import os
-import time
 from contextlib import asynccontextmanager
 from typing import Any, AsyncIterator, Optional
 
@@ -39,15 +38,6 @@ logger = logging.getLogger("mivas.otel")
 
 DEFAULT_OTLP_ENDPOINT = "https://otlp.getbluejay.ai/v1/traces"
 DEFAULT_API_URL = "https://api.getbluejay.ai/v1"
-FINAL_STATUSES = {
-    "COMPLETED",
-    "FAILED",
-    "SYSTEM_ERROR",
-    "NO_ANSWER",
-    "CANCELLED",
-    "NO_CONNECTION",
-}
-EARLY_UPSERT_STATUSES = {"EVALUATING", "EVALUATED", "CONVERSATION_ENDED"}
 _RETRYABLE_UPSERT_STATUS = {429, 500, 502, 503, 504}
 _MAX_ATTR = 4000
 
@@ -172,51 +162,6 @@ def flush() -> None:
             logger.error("otel flush failed: %s", e)
 
 
-def _upsert_stop_statuses() -> set[str]:
-    """Statuses that release the pre-POST wait.
-
-    Default waits for a final status so the link is not wiped mid-eval. With
-    MIVAS_UPSERT_BEFORE_EVAL set, the POST goes out as soon as the conversation ends, so
-    the goal evaluator can see the call's tool calls — at the cost of a possible
-    double-count of execute_tool spans if eval then wipes the link and the relink fires.
-    """
-    if os.environ.get("MIVAS_UPSERT_BEFORE_EVAL", "").strip().lower() in ("1", "true", "yes"):
-        return FINAL_STATUSES | {"CONVERSATION_ENDED"}
-    return FINAL_STATUSES
-
-
-async def _await_terminal_upsert(
-    client: httpx.AsyncClient, simulation_result_id: str, timeout: float = 300.0
-) -> str | None:
-    """Wait for a *final* status, then POST once.
-
-    Not TERMINAL_STATUSES (it counts EVALUATING) and not 18 s: posting mid-eval gets
-    trace_ids wiped, and the relink then re-extracts every execute_tool span on top of
-    the first POST's, so each tool lands twice. Eval needs ~175 s; CHIRP has no session
-    cap, so the wait is free.
-    """
-    deadline = time.monotonic() + timeout
-    key = _api_key()
-    if not key:
-        return None
-    while time.monotonic() < deadline:
-        try:
-            r = await client.get(
-                f"{_api_url()}/retrieve-simulation-result/{simulation_result_id}",
-                headers={"X-API-Key": key},
-            )
-            if r.status_code == 200:
-                st = str(
-                    ((r.json() or {}).get("simulation_result") or {}).get("status")
-                )
-                if st in _upsert_stop_statuses():
-                    return st
-        except Exception:
-            pass
-        await asyncio.sleep(1.0)
-    return None
-
-
 async def _post_update_simulation_result(
     client: httpx.AsyncClient,
     body: dict[str, Any],
@@ -259,86 +204,14 @@ async def _post_update_simulation_result(
     return last
 
 
-async def _relink_after_final(
-    client: httpx.AsyncClient,
-    simulation_result_id: str,
-    body: dict[str, Any],
-    key: str,
-    trace_id: str,
-    early_status: str | None,
-) -> None:
-    """Re-POST trace_ids once the sim leaves EVALUATING (eval can wipe the link).
-
-    Only if it actually got wiped: each POST re-extracts the execute_tool spans and
-    appends them, so a redundant relink double-counts every tool on the timeline.
-    """
-    final: str | None = None
-    linked = False
-    deadline = time.monotonic() + 120.0
-    while time.monotonic() < deadline:
-        try:
-            r = await client.get(
-                f"{_api_url()}/retrieve-simulation-result/{simulation_result_id}",
-                headers={"X-API-Key": key},
-            )
-            if r.status_code == 200:
-                result = (r.json() or {}).get("simulation_result") or {}
-                st = str(result.get("status"))
-                if st in FINAL_STATUSES:
-                    final = st
-                    linked = trace_id in (result.get("trace_ids") or [])
-                    break
-        except Exception:
-            pass
-        await asyncio.sleep(2.0)
-    if final is not None and linked:
-        await asyncio.sleep(float(os.environ.get("MIVAS_RELINK_SETTLE_SECONDS", "15")))
-        try:
-            r = await client.get(
-                f"{_api_url()}/retrieve-simulation-result/{simulation_result_id}",
-                headers={"X-API-Key": key},
-            )
-            if r.status_code == 200:
-                result = (r.json() or {}).get("simulation_result") or {}
-                linked = trace_id in (result.get("trace_ids") or [])
-        except Exception:
-            pass
-        if linked:
-            logger.info(
-                "relink not needed after %s — trace=%s still linked sim=%s final=%s",
-                early_status,
-                trace_id,
-                simulation_result_id,
-                final,
-            )
-            return
-    if final is None:
-        logger.warning(
-            "relink skipped — still not final after early upsert terminal=%s sim=%s",
-            early_status,
-            simulation_result_id,
-        )
-        return
-    r = await _post_update_simulation_result(client, body, key)
-    if r.status_code >= 400:
-        logger.error(
-            "relink after %s FAILED sim=%s %s %s",
-            early_status,
-            simulation_result_id,
-            r.status_code,
-            r.text[:300],
-        )
-    else:
-        logger.info(
-            "relink after %s ok trace=%s sim=%s final=%s",
-            early_status,
-            trace_id,
-            simulation_result_id,
-            final,
-        )
-
-
 async def post_trace_ids(simulation_result_id: str, trace_id: str) -> None:
+    """Link this call's OTel trace after hangup. One POST, no wait for COMPLETED.
+
+    traced_run already force_flush()'d; that only proves the collector accepted the
+    spans. Middleware extracts execute_tool spans with a single ClickHouse read at
+    POST time, so settle first. A second POST re-extracts every span and doubles
+    the tool timeline — do not relink.
+    """
     key = _api_key()
     if not key or not simulation_result_id or not trace_id:
         logger.warning(
@@ -352,33 +225,21 @@ async def post_trace_ids(simulation_result_id: str, trace_id: str) -> None:
         "simulation_result_id": str(simulation_result_id),
         "trace_ids": [trace_id],
     }
+    await asyncio.sleep(float(os.environ.get("MIVAS_UPSERT_SETTLE_SECONDS", "10")))
     async with httpx.AsyncClient(timeout=20) as client:
-        st = await _await_terminal_upsert(client, simulation_result_id)
-        if st in EARLY_UPSERT_STATUSES:
-            # Bluejay extracts execute_tool spans at POST time, so posting the instant the
-            # call ends can beat the OTLP spans into the store and link a trace with no
-            # tools. force_flush() only proves the exporter accepted them. Settle first —
-            # still well inside the window before evaluation reads the tool list.
-            await asyncio.sleep(float(os.environ.get("MIVAS_UPSERT_SETTLE_SECONDS", "10")))
         r = await _post_update_simulation_result(client, body, key)
         if r.status_code >= 400:
             logger.error(
-                "update-simulation-result FAILED %s %s (status=%s)",
+                "update-simulation-result FAILED %s %s",
                 r.status_code,
                 r.text[:300],
-                st,
             )
         else:
             logger.info(
-                "update-simulation-result ok trace=%s sim=%s terminal=%s",
+                "update-simulation-result ok trace=%s sim=%s",
                 trace_id,
                 simulation_result_id,
-                st,
             )
-            if st is None or st in EARLY_UPSERT_STATUSES:
-                await _relink_after_final(
-                    client, simulation_result_id, body, key, trace_id, st
-                )
 
 
 class RealtimeEventTracer:
