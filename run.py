@@ -627,6 +627,8 @@ def render_agents_yaml(pairs: list[tuple[str, str]], service_type: str) -> str:
         image = image_ref(harness, industry)
         docs.append(_render("deployment.yaml", harness, industry, image, service_type))
         docs.append(_render("service.yaml", harness, industry, image, service_type))
+        if split_harness(harness)[0] in PIPECAT_WORKER_FAMILIES:
+            docs.append(_render("service-pods.yaml", harness, industry, image, service_type))
         if use_ingress and pair_needs_ingress(harness):
             docs.append(_render("ingress.yaml", harness, industry, image, service_type))
         elif use_ingress:
@@ -652,7 +654,11 @@ def render_dispatcher_yaml(image: str, industry: str) -> str:
     # In-cluster Service for the same pods as https://{slug}.{base}/tools.
     worker_template = os.environ.get(
         "PIPECAT_WORKER_URL_TEMPLATE",
-        "http://mivas-{slug}:8000/tools/dialin",
+        "http://mivas-{slug}:8080/dialin",
+    )
+    pods_template = os.environ.get(
+        "PIPECAT_WORKER_PODS_TEMPLATE",
+        "mivas-{slug}-pods",
     )
     return (
         (ROOT / "k8s" / "dispatcher.yaml")
@@ -662,6 +668,7 @@ def render_dispatcher_yaml(image: str, industry: str) -> str:
         .replace("__INDUSTRY__", industry)
         .replace("__BASE_DOMAIN__", base)
         .replace("__WORKER_URL_TEMPLATE__", worker_template)
+        .replace("__WORKER_PODS_TEMPLATE__", pods_template)
         .replace("__HOST__", host)
     )
 
@@ -766,7 +773,7 @@ def apply_agents(pairs: list[tuple[str, str]], *, follow_logs: bool) -> None:
         if family in PIPECAT_WORKER_FAMILIES:
             print(
                 f"Pipecat Daily worker ({name}): bot on this pod; "
-                f"Daily pinless SIP → dispatcher → {public}/tools/dialin"
+                f"Daily pinless SIP → dispatcher → worker :8080/dialin"
             )
             if public:
                 print(f"PUBLIC_URL / tools ({name}): {public}/tools")
@@ -897,7 +904,7 @@ def run_local(harness: str, industry: str, agent_check: bool, mode: str) -> None
             return
 
         if family in PIPECAT_WORKER_FAMILIES:
-            env.setdefault("PIPECAT_DIALIN_UPSTREAM", "http://127.0.0.1:8080/dialin")
+            env.setdefault("PIPECAT_DIALIN_HOST", "127.0.0.1")
             print(f"starting Pipecat Daily dialin worker ({harness}) — Ctrl+C to stop")
             run([sys.executable, str(family_dir / "bot.py")], env=env, cwd=str(ROOT))
             return

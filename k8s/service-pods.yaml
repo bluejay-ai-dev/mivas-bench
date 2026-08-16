@@ -1,26 +1,22 @@
+# Headless: one A record per ready pod. The dispatcher reads /health on each
+# address and POSTs /dialin to the lowest inflight. The ClusterIP Service
+# stays for tools/ingress; kube-proxy cannot see in-pod call count.
 apiVersion: v1
 kind: Service
 metadata:
-  name: mivas-__SLUG__
+  name: mivas-__SLUG__-pods
   labels:
     app: mivas-bench
+    mivas.component: pipecat-worker-pods
     mivas.harness_family: "__HARNESS_FAMILY__"
     mivas.harness_runtime: "__HARNESS_RUNTIME__"
     mivas.industry: "__INDUSTRY__"
 spec:
-  type: __SERVICE_TYPE__
+  clusterIP: None
   selector:
     app: mivas-bench
     mivas.slug: "__SLUG__"
   ports:
-    - name: chirp
-      port: 8765
-      targetPort: chirp
-      protocol: TCP
-    - name: tools
-      port: 8000
-      targetPort: tools
-      protocol: TCP
     - name: dialin
       port: 8080
       targetPort: 8080

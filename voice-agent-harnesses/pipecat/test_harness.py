@@ -113,8 +113,12 @@ def test_daily_dialin_not_livekit() -> None:
     assert "def serve(" in bot
     assert "DailyTransport" in bot
     assert "LiveKitTransport" not in bot
+    # Request must be a module global: `from __future__ import annotations`
+    # otherwise FastAPI treats `request` as a required query param (422).
+    assert "from fastapi import HTTPException, Request" in bot
     disp = (Path(__file__).parent / "dispatcher.py").read_text()
     assert "PIPECAT_WORKER_URL_TEMPLATE" in disp
+    assert "PIPECAT_WORKER_PODS_TEMPLATE" in disp
     assert "_RETRY_CODES" in disp
 
 

@@ -12,7 +12,6 @@ before yielding.
 
 from __future__ import annotations
 
-import json
 import os
 import re
 import sqlite3
@@ -74,7 +73,7 @@ class DBService:
 
 
     def ensure(self, call_id: str) -> Path:
-        safe = _normalise_call_id(call_id)
+        safe = normalise_call_id(call_id)
         path = self.calls_dir / f"{safe}.db"
         if path.exists():
             return path
@@ -104,7 +103,7 @@ class DBService:
     @contextmanager
     def scope(self, call_id: str, *, fresh: bool = False) -> Iterator[str]:
         """Bind call_id for this context. fresh=True rebuilds its fixture DB first."""
-        safe = _normalise_call_id(call_id)
+        safe = normalise_call_id(call_id)
         if fresh:
             self._recreate(self.calls_dir / f"{safe}.db")
         token = _call_id.set(safe)
@@ -152,10 +151,6 @@ class DBService:
         path = request.url.path.rstrip("/") or "/"
         if path == "/bind" or path.startswith("/bind/"):
             return await call_next(request)
-        if path == "/tools/_claim":
-            return await call_next(request)
-        if path == "/tools/dialin":
-            return await call_next(request)
         if path == "/snapshot" or path.startswith("/snapshot/"):
             return await call_next(request)
         raw = request.headers.get("x-mivas-call-id") or request.query_params.get("call_id")
@@ -176,131 +171,8 @@ class DBService:
     def current_call_id(self) -> str:
         return _call_id.get()
 
-    def mount_cluster_routes(self, app) -> None:
-        """Provider-call-id → Bluejay sim id (in-process; same pod as CHIRP)."""
-        from starlette.requests import Request
-        from starlette.responses import JSONResponse
-        from starlette.routing import Route
 
-        store: dict[str, str] = {}
-        lock = threading.Lock()
-
-        async def bind(request: Request) -> JSONResponse:
-            data = await request.json()
-            pid = str((data or {}).get("provider_call_id") or "").strip()
-            sid = str((data or {}).get("sim_id") or "").strip()
-            if not pid or not sid:
-                return JSONResponse(
-                    {"detail": "provider_call_id and sim_id required"}, status_code=400
-                )
-            with lock:
-                store[pid] = sid
-            return JSONResponse(
-                {"ok": "true", "provider_call_id": pid, "sim_id": sid}
-            )
-
-        async def lookup(request: Request) -> JSONResponse:
-            pid = str(request.path_params.get("provider_call_id") or "").strip()
-            with lock:
-                found = store.get(pid)
-            if not found:
-                return JSONResponse({"detail": "unknown provider call id"}, status_code=404)
-            return JSONResponse({"provider_call_id": pid, "sim_id": found})
-
-        claims: dict[str, str] = {}
-
-        async def claim(request: Request) -> JSONResponse:
-            """One owner per sim_id. Pipecat Cloud has no per-run result id."""
-            data = await request.json()
-            sid = str((data or {}).get("sim_id") or "").strip()
-            owner = str((data or {}).get("owner") or "").strip()
-            if not sid or not owner:
-                return JSONResponse(
-                    {"detail": "sim_id and owner required"}, status_code=400
-                )
-            with lock:
-                held = claims.get(sid)
-                if held and held != owner:
-                    return JSONResponse(
-                        {"ok": False, "sim_id": sid, "owner": held}, status_code=409
-                    )
-                claims[sid] = owner
-            return JSONResponse({"ok": True, "sim_id": sid, "owner": owner})
-
-        async def dialin_proxy(request: Request) -> JSONResponse:
-            """Forward Daily SIP payload to the in-pod Pipecat dialin server."""
-            import httpx
-
-            upstream = os.environ.get("PIPECAT_DIALIN_UPSTREAM", "").strip()
-            if not upstream:
-                return JSONResponse({"detail": "dialin disabled"}, status_code=404)
-            try:
-                payload = await request.json()
-            except Exception:
-                payload = {}
-            try:
-                async with httpx.AsyncClient(timeout=30.0) as client:
-                    resp = await client.post(upstream, json=payload)
-            except httpx.HTTPError as e:
-                return JSONResponse({"detail": str(e)}, status_code=502)
-            try:
-                data = resp.json()
-            except Exception:
-                data = {"ok": False, "body": resp.text[:500]}
-            return JSONResponse(data, status_code=resp.status_code)
-
-        def _final_path(call_id: str) -> Path:
-            safe = _normalise_call_id(call_id)
-            self.calls_dir.mkdir(parents=True, exist_ok=True)
-            return self.calls_dir / f"{safe}.final.json"
-
-        async def save_snapshot(request: Request) -> JSONResponse:
-            try:
-                data = await request.json()
-            except Exception:
-                data = None
-            cid = str((data or {}).get("call_id") or "").strip()
-            state = (data or {}).get("state")
-            if not cid or not isinstance(state, dict):
-                return JSONResponse(
-                    {"detail": "call_id and state object required"}, status_code=400
-                )
-            try:
-                path = _final_path(cid)
-            except CallIdError as e:
-                return JSONResponse({"detail": str(e)}, status_code=400)
-            path.write_text(json.dumps(state), encoding="utf-8")
-            return JSONResponse({"ok": True, "call_id": cid})
-
-        async def get_snapshot(request: Request) -> JSONResponse:
-            cid = str(request.path_params.get("call_id") or "").strip()
-            try:
-                path = _final_path(cid)
-            except CallIdError as e:
-                return JSONResponse({"detail": str(e)}, status_code=400)
-            if not path.is_file():
-                return JSONResponse({"detail": "no snapshot"}, status_code=404)
-            try:
-                payload = json.loads(path.read_text(encoding="utf-8"))
-            except json.JSONDecodeError:
-                return JSONResponse({"detail": "corrupt snapshot"}, status_code=500)
-            return JSONResponse(payload)
-
-        app.router.routes.extend(
-            [
-                Route("/bind", bind, methods=["POST"]),
-                Route("/bind/{provider_call_id}", lookup, methods=["GET"]),
-                Route("/tools/_claim", claim, methods=["POST"]),
-                Route("/tools/dialin", dialin_proxy, methods=["POST"]),
-                Route("/snapshot", save_snapshot, methods=["POST"]),
-                Route("/snapshot/{call_id}", get_snapshot, methods=["GET"]),
-            ]
-        )
-
-
-
-
-def _normalise_call_id(raw: str | None) -> str:
+def normalise_call_id(raw: str | None) -> str:
     value = str(raw or "").strip()
     if not _CALL_ID_OK.fullmatch(value):
         raise CallIdError(f"invalid call id {raw!r}")
