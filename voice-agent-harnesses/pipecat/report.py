@@ -283,9 +283,12 @@ async def resolve_simulation_result_id(simulation_id: Any) -> str | None:
     ]
     inflight.sort(key=lambda r: int(r.get("id") or 0))
     owner = os.environ.get("HOSTNAME") or f"pid-{os.getpid()}"
-    tool_base = (os.environ.get("TOOL_SERVER_URL") or "").rstrip("/")
+    claim_port = os.environ.get("PIPECAT_DIALIN_PORT", "8080")
+    claim_base = (
+        os.environ.get("PIPECAT_CLAIM_URL") or f"http://127.0.0.1:{claim_port}"
+    ).rstrip("/")
     claimed = None
-    if tool_base and inflight:
+    if inflight:
         try:
             async with httpx.AsyncClient(timeout=8) as claim_client:
                 for res in inflight:
@@ -293,7 +296,7 @@ async def resolve_simulation_result_id(simulation_id: Any) -> str | None:
                     if not rid:
                         continue
                     cr = await claim_client.post(
-                        f"{tool_base}/tools/_claim",
+                        f"{claim_base}/claim",
                         json={"sim_id": rid, "owner": owner},
                     )
                     if cr.status_code == 200:

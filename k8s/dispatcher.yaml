@@ -46,6 +46,8 @@ spec:
               value: "__BASE_DOMAIN__"
             - name: PIPECAT_WORKER_URL_TEMPLATE
               value: "__WORKER_URL_TEMPLATE__"
+            - name: PIPECAT_WORKER_PODS_TEMPLATE
+              value: "__WORKER_PODS_TEMPLATE__"
             - name: PIPECAT_DISPATCHER_PORT
               value: "8000"
           ports:

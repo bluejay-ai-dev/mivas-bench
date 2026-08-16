@@ -145,6 +145,9 @@ def test_worker_families_skip_ingress(monkeypatch: pytest.MonkeyPatch) -> None:
     assert "host: livekit-cascaded-control-industry.benchmarks.example.com" in yaml_text
     assert "host: pipecat-openai-realtime-2-1-control-industry.benchmarks.example.com" in yaml_text
     assert yaml_text.count("path: /tools") == 2
+    assert "name: mivas-pipecat-openai-realtime-2-1-control-industry-pods" in yaml_text
+    assert "clusterIP: None" in yaml_text
+    assert "name: mivas-livekit-cascaded-control-industry-pods" not in yaml_text
     assert 'name: MIVAS_MODE\n              value: "chirp"' in yaml_text
     assert 'name: MIVAS_MODE\n              value: "agent"' in yaml_text
     from run import pair_host, pair_mivas_mode, pair_needs_ingress
@@ -179,9 +182,11 @@ def test_render_dispatcher_yaml(monkeypatch: pytest.MonkeyPatch) -> None:
     assert 'value: "dispatcher"' in yaml_text
     assert "host: pipecat-dialin.benchmarks.example.com" in yaml_text
     assert "path: /dialin" in yaml_text
-    assert "http://mivas-{slug}:8000/tools/dialin" in yaml_text
+    assert "http://mivas-{slug}:8080/dialin" in yaml_text
+    assert "mivas-{slug}-pods" in yaml_text
     assert "__HOST__" not in yaml_text
     assert "__WORKER_URL_TEMPLATE__" not in yaml_text
+    assert "__WORKER_PODS_TEMPLATE__" not in yaml_text
     assert "karpenter.sh/do-not-disrupt" in yaml_text
 
 

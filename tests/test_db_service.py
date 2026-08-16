@@ -186,10 +186,11 @@ def test_middleware_scopes_header_and_rejects_miss(
     from fastapi import FastAPI
     from fastapi.testclient import TestClient
 
-    monkeypatch.delenv("PIPECAT_DIALIN_UPSTREAM", raising=False)
+    from tools_http import mount as mount_tools_http
+
     app = FastAPI()
     app.middleware("http")(db.http_middleware)
-    db.mount_cluster_routes(app)
+    mount_tools_http(app, db.calls_dir)
 
     @app.get("/health")
     def health() -> dict[str, str]:
@@ -219,17 +220,6 @@ def test_middleware_scopes_header_and_rejects_miss(
     assert bind.status_code == 200, bind.text
     assert client.get("/bind/vapi-1").json()["sim_id"] == "675"
     assert client.get("/bind/missing").status_code == 404
-    first = client.post("/tools/_claim", json={"sim_id": "736161", "owner": "bot-a"})
-    assert first.status_code == 200, first.text
-    clash = client.post("/tools/_claim", json={"sim_id": "736161", "owner": "bot-b"})
-    assert clash.status_code == 409
-    same = client.post("/tools/_claim", json={"sim_id": "736161", "owner": "bot-a"})
-    assert same.status_code == 200
-    other = client.post("/tools/_claim", json={"sim_id": "736162", "owner": "bot-b"})
-    assert other.status_code == 200
-    missing_upstream = client.post("/tools/dialin", json={"callId": "abc"})
-    assert missing_upstream.status_code == 404
-    assert "missing X-Mivas-Call-Id" not in missing_upstream.text
     a = {"appointments": [{"date": "08/18/2026"}]}
     b = {"appointments": [{"date": "09/01/2026"}]}
     assert client.post("/snapshot", json={"call_id": "675", "state": a}).status_code == 200
@@ -239,47 +229,6 @@ def test_middleware_scopes_header_and_rejects_miss(
     assert client.get("/snapshot/677").status_code == 404
     assert client.post("/snapshot", json={"call_id": "675"}).status_code == 400
     assert client.get("/snapshot/bad.id").status_code == 400
-
-
-def test_dialin_proxies_without_call_id(
-    db: DBService, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    from fastapi import FastAPI
-    from fastapi.testclient import TestClient
-
-    class _Resp:
-        status_code = 202
-        text = '{"ok":true}'
-
-        def json(self) -> dict[str, bool]:
-            return {"ok": True}
-
-    class _Client:
-        def __init__(self, *args, **kwargs) -> None:
-            pass
-
-        async def __aenter__(self):
-            return self
-
-        async def __aexit__(self, *args):
-            return None
-
-        async def post(self, url, json=None):
-            assert url == "http://127.0.0.1:8080/dialin"
-            assert json["callId"] == "abc"
-            return _Resp()
-
-    import httpx
-
-    monkeypatch.setenv("PIPECAT_DIALIN_UPSTREAM", "http://127.0.0.1:8080/dialin")
-    monkeypatch.setattr(httpx, "AsyncClient", _Client)
-    app = FastAPI()
-    app.middleware("http")(db.http_middleware)
-    db.mount_cluster_routes(app)
-    client = TestClient(app)
-    r = client.post("/tools/dialin", json={"callId": "abc", "callDomain": "dom"})
-    assert r.status_code == 202
-    assert r.json() == {"ok": True}
 
 
 def test_for_industry_uses_env_data_dir(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:

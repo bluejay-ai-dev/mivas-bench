@@ -130,3 +130,58 @@ def capture_final(call_id: str) -> dict[str, Any] | None:
     else:
         print(f"snapshot: final sim={cid}", flush=True)
     return state
+
+
+def mount(app, calls_dir: Path) -> None:
+    """GET/POST /snapshot on the tool server. Files sit next to {id}.db."""
+    from starlette.requests import Request
+    from starlette.responses import JSONResponse
+    from starlette.routing import Route
+
+    from db_service import CallIdError, normalise_call_id
+
+    root = Path(calls_dir)
+
+    def _final_path(call_id: str) -> Path:
+        safe = normalise_call_id(call_id)
+        root.mkdir(parents=True, exist_ok=True)
+        return root / f"{safe}.final.json"
+
+    async def save_snapshot(request: Request) -> JSONResponse:
+        try:
+            data = await request.json()
+        except Exception:
+            data = None
+        cid = str((data or {}).get("call_id") or "").strip()
+        state = (data or {}).get("state")
+        if not cid or not isinstance(state, dict):
+            return JSONResponse(
+                {"detail": "call_id and state object required"}, status_code=400
+            )
+        try:
+            path = _final_path(cid)
+        except CallIdError as e:
+            return JSONResponse({"detail": str(e)}, status_code=400)
+        path.write_text(json.dumps(state), encoding="utf-8")
+        return JSONResponse({"ok": True, "call_id": cid})
+
+    async def get_snapshot(request: Request) -> JSONResponse:
+        cid = str(request.path_params.get("call_id") or "").strip()
+        try:
+            path = _final_path(cid)
+        except CallIdError as e:
+            return JSONResponse({"detail": str(e)}, status_code=400)
+        if not path.is_file():
+            return JSONResponse({"detail": "no snapshot"}, status_code=404)
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            return JSONResponse({"detail": "corrupt snapshot"}, status_code=500)
+        return JSONResponse(payload)
+
+    app.router.routes.extend(
+        [
+            Route("/snapshot", save_snapshot, methods=["POST"]),
+            Route("/snapshot/{call_id}", get_snapshot, methods=["GET"]),
+        ]
+    )
