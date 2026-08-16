@@ -25,7 +25,7 @@ export HARNESS
 HARNESS_FAMILY="${HARNESS_FAMILY:-${HARNESS%%/*}}"
 HARNESS_RUNTIME="${HARNESS_RUNTIME:-$(basename "${HARNESS_DIR}")}"
 if [[ "${HARNESS_FAMILY}" == "pipecat" && "${MIVAS_MODE}" != "dispatcher" ]]; then
-  export PIPECAT_DIALIN_UPSTREAM="${PIPECAT_DIALIN_UPSTREAM:-http://127.0.0.1:8080/dialin}"
+  export PIPECAT_DIALIN_HOST="${PIPECAT_DIALIN_HOST:-0.0.0.0}"
 fi
 case "${HARNESS_RUNTIME}" in
   realtime-2.1) : "${OPENAI_REALTIME_MODEL:=gpt-realtime-2.1}" ;;

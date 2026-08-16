@@ -24,6 +24,7 @@ for _runtime in (Path("/app/runtime"), Path(__file__).resolve().parents[2] / "ru
             sys.path.insert(0, str(_runtime))
         break
 from db_service import DBService  # noqa: E402
+from tools_http import mount as mount_tools_http  # noqa: E402
 
 db = DBService.for_industry(INDUSTRY_DIR)
 
@@ -36,7 +37,7 @@ def _db() -> Any:
 
 app = FastAPI(title="control-industry state API")
 app.middleware("http")(db.http_middleware)
-db.mount_cluster_routes(app)
+mount_tools_http(app, db.calls_dir)
 
 
 class AppointmentCreate(BaseModel):

@@ -19,6 +19,7 @@ if str(RUNTIME) not in sys.path:
 
 from db_service import DBService  # noqa: E402
 from snapshot import capture_final, snapshot_key  # noqa: E402
+from tools_http import mount as mount_tools_http  # noqa: E402
 
 SCHEMA = """
 CREATE TABLE items (
@@ -44,7 +45,7 @@ def db(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> DBService:
 def _app(db: DBService) -> FastAPI:
     app = FastAPI()
     app.middleware("http")(db.http_middleware)
-    db.mount_cluster_routes(app)
+    mount_tools_http(app, db.calls_dir)
 
     @app.get("/health")
     def health() -> dict[str, str]:

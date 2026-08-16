@@ -14,14 +14,16 @@ There is no LiveKit in this path, and Pipecat Cloud is not the worker pool.
 Bluejay SIP INVITE
   → Daily pinless URI
   → POST https://pipecat-dialin.<MIVAS_BASE_DOMAIN>/dialin/<slug>
-  → dispatcher retries POST http://mivas-<slug>:8000/tools/dialin
-  → in-pod bot on 127.0.0.1:8080 (409 if already on a call)
+  → dispatcher resolves mivas-<slug>-pods, GET /health on each :8080
+  → POST http://<least-inflight-pod>:8080/dialin
+  → bot on that pod (409 if that process is at cap)
   → Daily room + DailyDialinSettings(call_id, call_domain)
 ```
 
-`slug` is the k8s pair name, e.g. `pipecat-cascaded-healthcare`. One in-flight
-call per worker process; extra INVITEs get 409 until a replica is free. Scale
-with `MIVAS_REPLICAS`.
+`slug` is the k8s pair name, e.g. `pipecat-cascaded-healthcare`. Each worker
+process takes up to `PIPECAT_MAX_INFLIGHT` calls (default 8). The dispatcher
+always prefers the replica with the lowest `inflight`; a 409 tries the next
+replica. Scale with `MIVAS_REPLICAS`.
 
 ## Runtimes
 
@@ -97,6 +99,7 @@ shared URI).
 | `BLUEJAY_API_KEY` | OTLP export + `update-simulation-result` |
 | `BLUEJAY_API_URL`, `BLUEJAY_OTLP_ENDPOINT`, `BLUEJAY_SERVICE_NAME` | defaults are the prod Bluejay endpoints / `mivas-pipecat` |
 | `TOOL_SERVER_URL` | industry tool server (local `127.0.0.1:8000` is fine) |
+| `PIPECAT_MAX_INFLIGHT` | max concurrent Daily rooms per worker process (default 8) |
 
 ## Commands
 
@@ -110,7 +113,7 @@ uv run python voice-agent-harnesses/pipecat/cascaded/agent.py --check
 uv run python voice-agent-harnesses/pipecat/openai-realtime-2.1/agent.py --check
 uv run python voice-agent-harnesses/pipecat/gemini-flash-live-3.1/agent.py --check
 
-# local dialin worker (POST http://127.0.0.1:8080/dialin, or /tools/dialin on :8000)
+# local dialin worker (POST http://127.0.0.1:8080/dialin)
 cd voice-agent-harnesses/pipecat
 uv venv --python 3.12 .venv && uv pip install --python .venv/bin/python -r requirements.txt
 .venv/bin/python cascaded/agent.py dev

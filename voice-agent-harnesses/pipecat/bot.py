@@ -1,8 +1,9 @@
 """Pipecat k8s worker for the MIVAS industry agent.
 
-Daily pinless SIP hits the cluster dispatcher, which POSTs `/tools/dialin` on
-this pod. This process creates a Daily room, joins it over DailyTransport, and
-runs the receptionist → scheduler switch. Traces stay on this process via
+Daily pinless SIP hits the cluster dispatcher, which picks this pod when it
+has the fewest active calls and POSTs `/dialin` on this process. This process
+creates a Daily room, joins it over DailyTransport, and runs the
+receptionist → scheduler switch. Traces stay on this process via
 `report.traced_run`. There is no LiveKit in this path.
 """
 
@@ -16,6 +17,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+from fastapi import HTTPException, Request
+from fastapi.responses import JSONResponse
 from loguru import logger
 
 from pipecat.frames.frames import (
@@ -411,17 +414,21 @@ async def _daily_room(from_display: str) -> tuple[str, str]:
 
 
 def serve(runtime: str, *, agent_name: str | None = None) -> None:
-    """HTTP worker: POST /dialin starts one Daily SIP session; 409 if busy."""
+    """HTTP worker: POST /dialin starts a Daily SIP session; 409 if at cap."""
     import uvicorn
-    from fastapi import FastAPI, HTTPException, Request
-    from fastapi.responses import JSONResponse
+    from fastapi import FastAPI
 
     if runtime not in harness.RUNTIMES:
         raise SystemExit(f"unknown runtime {runtime!r}")
     name = harness.resolve_agent_name(agent_name or AGENT_NAMES.get(runtime, runtime))
     port = int(os.environ.get("PIPECAT_DIALIN_PORT", "8080"))
+    host = os.environ.get("PIPECAT_DIALIN_HOST", "0.0.0.0")
+    # One process can run several Daily rooms. 8 covers 20 calls on 3 replicas.
+    max_inflight = max(1, int(os.environ.get("PIPECAT_MAX_INFLIGHT", "8")))
     inflight = 0
     slot = asyncio.Lock()
+    claims: dict[str, str] = {}
+    claims_lock = asyncio.Lock()
 
     async def run_session(body: dict) -> None:
         nonlocal inflight
@@ -470,7 +477,7 @@ def serve(runtime: str, *, agent_name: str | None = None) -> None:
 
     @app.get("/health")
     def health() -> dict[str, object]:
-        return {"status": "ok", "inflight": inflight}
+        return {"status": "ok", "inflight": inflight, "max_inflight": max_inflight}
 
     @app.post("/dialin")
     async def dialin(request: Request) -> JSONResponse:
@@ -484,14 +491,41 @@ def serve(runtime: str, *, agent_name: str | None = None) -> None:
         if body.get("test") == "test" or not body.get("callId"):
             return JSONResponse({"ok": True, "probe": True})
         async with slot:
-            if inflight >= 1:
+            if inflight >= max_inflight:
                 raise HTTPException(status_code=409, detail="busy")
             inflight += 1
         asyncio.create_task(run_session(body))
         return JSONResponse({"ok": True}, status_code=202)
 
-    logger.info("pipecat dialin worker runtime=%s name=%s port=%s", runtime, name, port)
-    uvicorn.run(app, host="127.0.0.1", port=port, log_level="info")
+    @app.post("/claim")
+    async def claim(request: Request) -> JSONResponse:
+        """One owner per sim id when the SIP header did not carry one."""
+        try:
+            data = await request.json()
+        except Exception:
+            data = {}
+        sid = str((data or {}).get("sim_id") or "").strip()
+        owner = str((data or {}).get("owner") or "").strip()
+        if not sid or not owner:
+            raise HTTPException(status_code=400, detail="sim_id and owner required")
+        async with claims_lock:
+            held = claims.get(sid)
+            if held and held != owner:
+                return JSONResponse(
+                    {"ok": False, "sim_id": sid, "owner": held}, status_code=409
+                )
+            claims[sid] = owner
+        return JSONResponse({"ok": True, "sim_id": sid, "owner": owner})
+
+    logger.info(
+        "pipecat dialin worker runtime=%s name=%s host=%s port=%s max_inflight=%s",
+        runtime,
+        name,
+        host,
+        port,
+        max_inflight,
+    )
+    uvicorn.run(app, host=host, port=port, log_level="info")
 
 
 if __name__ == "__main__":

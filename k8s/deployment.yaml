@@ -270,6 +270,8 @@ spec:
               name: tools
             - containerPort: 8765
               name: chirp
+            - containerPort: 8080
+              name: dialin
           resources:
             requests:
               cpu: __CPU_REQUEST__
