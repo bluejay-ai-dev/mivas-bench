@@ -1,10 +1,10 @@
 # LiveKit Agents harness
 
 Three LiveKit Agents runtimes over the shared `control-industry` blueprint, reached
-by **native Bluejay `LIVEKIT` dispatch** — Bluejay creates the room and dispatches
-our `agent_name` into it. There is **no CHIRP bridge, no tool webhook and no
-cloudflared tunnel**: LiveKit runs our code, so every tool body executes in this
-process and is wrapped directly in an `execute_tool` span.
+by **Bluejay `connection_type=SIP`**. Bluejay dials this project's LiveKit SIP
+host; an inbound trunk plus dispatch rule create the room and dispatch our
+`agent_name`. Audio is the stock LiveKit SIP mix — no CHIRP bridge, no RoomIO
+patching, no tool webhook.
 
 | runtime | stack | LiveKit `agent_name` |
 | --- | --- | --- |
@@ -23,16 +23,36 @@ report.py      OTel → Bluejay OTLP + the single post-final update-simulation-r
 <runtime>/agent.py   plugin wiring for one stack; everything else comes from harness.py
 ```
 
+## SIP setup (once per LiveKit project)
+
+On the **same** LiveKit Cloud project the worker registers with:
+
+1. Inbound trunk whose `numbers` is a routing key (any E.164, e.g. `+15551230000`).
+2. Dispatch rule on that trunk: `roomPrefix: sip-`, `roomConfig.agents[0].agentName`
+   matching the worker (`mivas-livekit-cascaded` locally, `mivas-{slug}` on k8s).
+3. Forward `X-Simulation-Result-Id` on the trunk (`headers_to_attributes` or
+   `include_headers: SIP_X_HEADERS`). The worker also reads it via
+   `lk.sip.GetRemoteHeaders`.
+
+Bluejay agent: `connection_type=SIP`, `mode=VOICE`,
+
+```
+sip:+15551230000@<project-sip-id>.sip.livekit.cloud
+```
+
+The number must match the trunk. The SIP host id is not the wss project name —
+set `LIVEKIT_SIP_HOST` / `LIVEKIT_SIP_NUMBER` in `.env`.
+
 ## Run
 
-The worker registers with LiveKit Cloud and waits for Bluejay to dispatch it, so it
+The worker registers with LiveKit Cloud and waits for a SIP-dispatched room, so it
 can run locally — which is also how it reaches the industry tool server on
 `127.0.0.1:8000`.
 
 ```bash
 cd voice-agent-harnesses/livekit
 uv venv --python 3.12 .venv && uv pip install --python .venv/bin/python -r requirements.txt
-cp .env.example .env      # fill in; LIVEKIT_* must be the project on the Bluejay org's LiveKit integration
+cp .env.example .env      # LIVEKIT_* + LIVEKIT_SIP_HOST / LIVEKIT_SIP_NUMBER
 
 # terminal A — shared industry tool server (do not restart if another harness is using it)
 uv run python industries/control-industry/tool_server.py
@@ -43,11 +63,7 @@ uv run python industries/control-industry/tool_server.py
 .venv/bin/python gemini-flash-live-3.1/agent.py dev
 ```
 
-Then queue a Bluejay run against an agent whose `connection_type=LIVEKIT` and
-`livekit_agent_name` matches (or pass `livekit_agent_name` to
-`queue-simulation-run`). **Do not** pass `livekit_metadata` at queue time: a
-simulation-run-level metadata dict *replaces* the test-case one, and the test-case
-one is where Bluejay injects `X-Simulation-Result-Id`.
+Then queue a Bluejay run against the SIP agent. Do not set `connection_type=LIVEKIT`.
 
 ## Telemetry
 
@@ -58,47 +74,23 @@ voice.call                      root, attr bluejay.simulation_result_id
   └── execute_tool <name>       handoff_to_scheduler / schedule_appointment / end_call
 ```
 
-All three tools are ours, so all three produce real spans — there is no
-provider-internal step to leave untimed. Only `trace_ids` is POSTed
-(`tool_calls` would double-count against the OTel-extracted tools), and only once,
-after the simulation reaches a final status.
+All three tools are ours, so all three produce real spans. Only `trace_ids` is
+POSTed (`tool_calls` would double-count against the OTel-extracted tools), and
+only once, after the simulation reaches a final status.
 
 The exporter is attached to a **private** `TracerProvider` rather than the global
 one. livekit-agents resolves its own tracer off the global provider, and setting it
 would ship the framework's entire internal span tree to Bluejay as unrelated traces.
 
-`_await_terminal_upsert` waits **600 s** here, not the 150 s the CHIRP harnesses
-use. Result 710911 proved why: its evaluation took longer than 150 s, the wait
-fell through to `_relink_after_final`, the link had by then been wiped, and the
-relink POST appended a second copy of every tool (`handoff_to_scheduler` actual=2,
-`end_call` actual=2). Since we never re-post, a fall-through is now simply a lost
-link: result 712617 hit the old 300 s ceiling, POSTed during `EVALUATING`, and
-evaluation wiped its `trace_ids`. The clock to beat is our hangup → `COMPLETED`,
-which includes the ~2 min the simulation can linger after we hang up.
-
-## Proof runs (control-industry)
-
-All three `COMPLETED` with `goal_success: true`, a linked `trace_ids`, and exactly one
-actual per expected tool (`handoff_to_scheduler`, `schedule_appointment`).
-
-| runtime | agent | sim | run | result | duration | `end_call` | link |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| cascaded | 30519 | 30223 | 225463 | 713666 | 82 s | 81.6 s | https://app.getbluejay.ai/simulations/30223/runs/225463 |
-| openai-realtime-2.1 | 30520 | 30224 | 225462 | 713665 | 58 s | 39.5 s | https://app.getbluejay.ai/simulations/30224/runs/225462 |
-| gemini-flash-live-3.1 | 30521 | 30225 | 225464 | 713667 | 52 s | 39.8 s | https://app.getbluejay.ai/simulations/30225/runs/225464 |
+`_await_terminal_upsert` waits **600 s**. The clock to beat is hangup →
+`COMPLETED`, which includes the time the simulation can linger after we hang up.
 
 ## Runtime notes
 
 * **Hanging up waits for silence, not a fixed delay.** `end_call` only marks the
   *intent* to hang up; the goodbye is still playing. `await_farewell` polls
   `AgentSession.agent_state` and deletes the room after `HANGUP_QUIET_S` (4 s) of
-  neither `speaking` nor `thinking`, capped at `HANGUP_MAX_WAIT_S` (20 s). The old flat
-  4 s sleep clipped all three runtimes and broke `gpt-realtime-2.1` outright: it calls
-  `end_call` in the same response turn as `schedule_appointment`, so the room went away
-  mid-sentence (713478/713612/713652), the caller never heard a goodbye, never hung up,
-  and the run burned the full 180 s cap. `thinking` counts as busy too: the gap before
-  the farewell audio is where a `speaking`-only check fires early (713652). The three
-  proof runs above waited 6.3 s, 14.3 s and 7.5 s.
+  neither `speaking` nor `thinking`, capped at `HANGUP_MAX_WAIT_S` (20 s).
 * **Job executor is THREAD, not PROCESS.** `spawn` pickles the entrypoint by
   reference and ours is a closure over the runtime's session/agent factories.
 * **The trace-linking POST lives in the entrypoint**, not a shutdown callback:
@@ -120,17 +112,14 @@ actual per expected tool (`handoff_to_scheduler`, `schedule_appointment`).
     a handoff only when `self.llm is new_activity.llm`. This runtime gives the
     `Receptionist` and the `Scheduler` their own `RealtimeModel`, so the handoff
     falls through to `llm.session()` and a second Gemini Live socket is opened with
-    the scheduler's `system_instruction` and only the scheduler's `tools`
-    (`_build_connect_config`). The debug log shows *two* "created new realtime
-    session for activity" lines and no "reusing realtime session";
+    the scheduler's `system_instruction` and only the scheduler's `tools`;
   * `generate_reply()` is still rejected, so the model cannot open a turn on its
     own. An ElevenLabs TTS is attached so `session.say()` can deliver the two
     scripted lines: the call greeting, and (on handoff) a first line derived from
-    the target agent's own prompt via `harness._derive_opener` (step 1 of that
-    agent's own flow, e.g. `scheduler.md`, when it has one, else a generic,
-    blueprint-neutral line); every other turn is native Gemini audio.
+    the target agent's own prompt via `harness._derive_opener`; every other turn is
+    native Gemini audio.
 * **OpenAI Realtime reuses the socket, by design.** Its capabilities are all
   mutable, so LiveKit keeps the WebSocket and re-pushes the scheduler's
-  instructions and tool list with a `session.update` (`_start_session`, `rt_reused`
-  branch). Still a real agent switch — the model is handed a different prompt and a
-  different tool set — just without a reconnect.
+  instructions and tool list with a `session.update`. Still a real agent switch —
+  the model is handed a different prompt and a different tool set — just without a
+  reconnect.

@@ -7,10 +7,12 @@ tool server's POST /tools/{name} route. Multi-agent handoff is in-framework — 
 handoff tool returns the target `BlueprintAgent` instance — so the handoff is a
 real, timed tool call rather than a provider-internal jump.
 
-Transport is native Bluejay `LIVEKIT` dispatch: Bluejay creates the room, mints a
-token with a `RoomAgentDispatch` for our `agent_name`, and puts
-`X-Simulation-Result-Id` on the job metadata (see livekit_agent
-`src/agent_bootstrap/hydration.py`). There is no CHIRP bridge.
+Transport is Bluejay `connection_type=SIP` into this LiveKit Cloud project.
+Bluejay dials `sip:<number>@<project>.sip.livekit.cloud`; an inbound trunk plus
+dispatch rule create the room and dispatch our `agent_name`. Audio is the stock
+LiveKit SIP mix — no CHIRP bridge and no custom RoomIO patching.
+`X-Simulation-Result-Id` arrives on the SIP INVITE (GetRemoteHeaders / participant
+attributes), not on LiveKit job metadata.
 
 All three runtimes use the same handoff, including the speech-to-speech ones. The
 `mutable_*` capability flags only gate *mutating an existing* realtime session, so
@@ -340,8 +342,26 @@ class BlueprintAgent(Agent):
 # ── job plumbing ─────────────────────────────────────────────────────────────
 
 
+def sip_host() -> str:
+    """LiveKit Cloud SIP hostname (`<id>.sip.livekit.cloud`). Not the wss project name."""
+    return os.environ.get("LIVEKIT_SIP_HOST", "").strip().removeprefix("sip:")
+
+
+def sip_number(default: str = "+15551230000") -> str:
+    """Routing key on the inbound trunk. Must match the Bluejay `sip_uri` user part."""
+    return os.environ.get("LIVEKIT_SIP_NUMBER", "").strip() or default
+
+
+def sip_uri(*, number: str | None = None) -> str | None:
+    """Bluejay agent `sip_uri`: `sip:<number>@<LIVEKIT_SIP_HOST>`."""
+    host = sip_host()
+    if not host:
+        return None
+    return f"sip:{number or sip_number()}@{host}"
+
+
 def sim_result_id_from_job_metadata(raw: Any) -> str | None:
-    """Bluejay puts X-Simulation-Result-Id on the LiveKit job metadata JSON."""
+    """Bluejay puts X-Simulation-Result-Id on LiveKit job metadata JSON."""
     if not raw:
         return None
     meta = raw if isinstance(raw, dict) else None
@@ -365,6 +385,43 @@ def sim_result_id_from_job_metadata(raw: Any) -> str | None:
     return None
 
 
+def sim_result_id_from_participant(participant: Any) -> str | None:
+    """SIP inbound stamps the sim id on participant attributes, not job metadata."""
+    if participant is None:
+        return None
+    attrs = dict(getattr(participant, "attributes", None) or {})
+    for key, val in attrs.items():
+        kl = str(key).lower().replace("_", "-")
+        if "simulation-result-id" in kl or kl.endswith("simulation-result-id"):
+            if val is not None and str(val).strip():
+                return str(val).strip()
+    return sim_result_id_from_job_metadata(attrs) or sim_result_id_from_job_metadata(
+        getattr(participant, "metadata", None)
+    )
+
+
+async def sim_result_id_from_sip(ctx: JobContext, participant: Any) -> str | None:
+    """Read X-Simulation-Result-Id from the SIP INVITE (RPC, then attributes)."""
+    if participant is None:
+        return None
+    try:
+        from livekit import rtc
+
+        if getattr(participant, "kind", None) == rtc.ParticipantKind.PARTICIPANT_KIND_SIP:
+            response = await ctx.room.local_participant.perform_rpc(
+                destination_identity=participant.identity,
+                method="lk.sip.GetRemoteHeaders",
+                payload="{}",
+            )
+            headers = (json.loads(response) or {}).get("headers") or {}
+            sid = sim_result_id_from_job_metadata(headers)
+            if sid:
+                return sid
+    except Exception as e:
+        logger.warning("GetRemoteHeaders: %s", e)
+    return sim_result_id_from_participant(participant)
+
+
 async def await_farewell(session: AgentSession, disconnected: asyncio.Event) -> None:
     """Hold the room until the agent has gone quiet for HANGUP_QUIET_S.
 
@@ -376,7 +433,7 @@ async def await_farewell(session: AgentSession, disconnected: asyncio.Event) -> 
     t0 = quiet_since = loop.time()
     while not disconnected.is_set() and loop.time() - t0 < HANGUP_MAX_WAIT_S:
         # "thinking" counts: it is the gap between the end_call tool result and the
-        # farewell audio, exactly where a speaking-only check fires early (713652).
+        # farewell audio, exactly where a speaking-only check fires early.
         if session.agent_state in ("thinking", "speaking"):
             quiet_since = loop.time()
         elif loop.time() - quiet_since >= HANGUP_QUIET_S:
@@ -429,6 +486,13 @@ async def run_call(
     only get `shutdown_process_timeout` (10 s).
     """
     sim_result_id = sim_result_id_from_job_metadata(ctx.job.metadata)
+    participant = None
+    try:
+        participant = await ctx.wait_for_participant()
+    except Exception as e:
+        logger.warning("wait_for_participant: %s", e)
+    if not sim_result_id:
+        sim_result_id = await sim_result_id_from_sip(ctx, participant)
     logger.info("job start room=%s sim_result_id=%s model=%s", ctx.room.name, sim_result_id, model)
     set_call_id(sim_result_id)
     session_key = getattr(ctx.room, "name", None) or "job"
@@ -456,19 +520,12 @@ async def run_call(
         session = build_session(bp)
         wire_speech_spans(session)
         await session.start(room=ctx.room, agent=build_agent(bp, hangup))
-        # Greeting audio is dropped if we speak before the DH has subscribed
-        # (Gloria 728129 started mid-opener). Wait for the caller, then say
-        # the pack line uninterruptibly so VAD cannot chop the first sentence.
-        try:
-            await ctx.wait_for_participant()
-        except Exception as e:
-            logger.warning("wait_for_participant: %s", e)
 
         greeting = pack_greeting(bp)
         if greet == "say":
             # realtime models with mutable_chat_context=False reject generate_reply;
             # a TTS on the session lets say() deliver the scripted opener instead.
-            session.say(greeting, allow_interruptions=False)
+            await session.say(greeting)
         elif greet == "generate_reply":
             session.generate_reply(instructions=f'Greet the caller with: "{greeting}"')
 

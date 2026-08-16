@@ -1,0 +1,23 @@
+{
+  "bag_purchases": [],
+  "commits": [],
+  "escalations": [],
+  "holds": [
+    {
+      "amount": 70.6,
+      "confirmation_code": "NB4RQC",
+      "consumed": 0,
+      "kind": "change",
+      "miles_number": "",
+      "payload": "{\"confirmation_token\": \"JA-CHG-4417\", \"summary\": \"JA216 on 2026-10-02 at 08:00. Change fee $0.00, difference in fare $70.60, total $70.60.\", \"new_flight\": \"JA216\", \"departs_on\": \"2026-10-02\", \"departs_at\": \"08:00\", \"change_fee\": 0.0, \"fare_difference\": 70.6, \"total\": 70.6, \"fare_family\": \"basic\", \"same_day\": false, \"residual_value_forfeited\": 0.0, \"note\": \"\"}",
+      "summary": "JA216 on 2026-10-02 at 08:00. Change fee $0.00, difference in fare $70.60, total $70.60.",
+      "token": "JA-CHG-4417"
+    }
+  ],
+  "itineraries": [],
+  "pass_bookings": [],
+  "payments": [],
+  "refunds": [],
+  "reservation_notes": [],
+  "seat_assignments": []
+}

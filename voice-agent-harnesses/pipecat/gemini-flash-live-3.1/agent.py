@@ -1,14 +1,34 @@
-"""Local smoke for the `gemini-flash-live-3.1` runtime — builds the real services and pipeline
-without a transport, so a bad service kwarg fails here instead of mid-call.
+"""MIVAS Pipecat runtime — Gemini `gemini-3.1-flash-live-preview` (speech-to-speech).
 
-    uv run python voice-agent-harnesses/pipecat/gemini-flash-live-3.1/agent.py control-industry
+    python gemini-flash-live-3.1/agent.py --check control-industry
+    python gemini-flash-live-3.1/agent.py dev
 """
+
+from __future__ import annotations
 
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from check import check_runtime
+
+from dotenv import load_dotenv
+
+load_dotenv(Path(__file__).resolve().parents[3] / ".env")
+load_dotenv(Path(__file__).resolve().parents[1] / ".env", override=True)
+
+from check import check_runtime  # noqa: E402
+
+RUNTIME = "gemini-flash-live-3.1"
+_CLI = frozenset({"dev", "start", "download-files", "console"})
+
 
 if __name__ == "__main__":
-    check_runtime("gemini-flash-live-3.1", sys.argv[1] if len(sys.argv) > 1 else "control-industry")
+    argv = sys.argv[1:]
+    positional = [a for a in argv if not a.startswith("-")]
+    if "--check" in argv or (positional and positional[0] not in _CLI):
+        industry = next((a for a in positional if a not in _CLI), "control-industry")
+        check_runtime(RUNTIME, industry)
+    else:
+        from bot import serve
+
+        serve(RUNTIME)

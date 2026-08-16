@@ -152,6 +152,10 @@ class DBService:
         path = request.url.path.rstrip("/") or "/"
         if path == "/bind" or path.startswith("/bind/"):
             return await call_next(request)
+        if path == "/tools/_claim":
+            return await call_next(request)
+        if path == "/tools/dialin":
+            return await call_next(request)
         if path == "/snapshot" or path.startswith("/snapshot/"):
             return await call_next(request)
         raw = request.headers.get("x-mivas-call-id") or request.query_params.get("call_id")
@@ -203,6 +207,48 @@ class DBService:
                 return JSONResponse({"detail": "unknown provider call id"}, status_code=404)
             return JSONResponse({"provider_call_id": pid, "sim_id": found})
 
+        claims: dict[str, str] = {}
+
+        async def claim(request: Request) -> JSONResponse:
+            """One owner per sim_id. Pipecat Cloud has no per-run result id."""
+            data = await request.json()
+            sid = str((data or {}).get("sim_id") or "").strip()
+            owner = str((data or {}).get("owner") or "").strip()
+            if not sid or not owner:
+                return JSONResponse(
+                    {"detail": "sim_id and owner required"}, status_code=400
+                )
+            with lock:
+                held = claims.get(sid)
+                if held and held != owner:
+                    return JSONResponse(
+                        {"ok": False, "sim_id": sid, "owner": held}, status_code=409
+                    )
+                claims[sid] = owner
+            return JSONResponse({"ok": True, "sim_id": sid, "owner": owner})
+
+        async def dialin_proxy(request: Request) -> JSONResponse:
+            """Forward Daily SIP payload to the in-pod Pipecat dialin server."""
+            import httpx
+
+            upstream = os.environ.get("PIPECAT_DIALIN_UPSTREAM", "").strip()
+            if not upstream:
+                return JSONResponse({"detail": "dialin disabled"}, status_code=404)
+            try:
+                payload = await request.json()
+            except Exception:
+                payload = {}
+            try:
+                async with httpx.AsyncClient(timeout=30.0) as client:
+                    resp = await client.post(upstream, json=payload)
+            except httpx.HTTPError as e:
+                return JSONResponse({"detail": str(e)}, status_code=502)
+            try:
+                data = resp.json()
+            except Exception:
+                data = {"ok": False, "body": resp.text[:500]}
+            return JSONResponse(data, status_code=resp.status_code)
+
         def _final_path(call_id: str) -> Path:
             safe = _normalise_call_id(call_id)
             self.calls_dir.mkdir(parents=True, exist_ok=True)
@@ -244,6 +290,8 @@ class DBService:
             [
                 Route("/bind", bind, methods=["POST"]),
                 Route("/bind/{provider_call_id}", lookup, methods=["GET"]),
+                Route("/tools/_claim", claim, methods=["POST"]),
+                Route("/tools/dialin", dialin_proxy, methods=["POST"]),
                 Route("/snapshot", save_snapshot, methods=["POST"]),
                 Route("/snapshot/{call_id}", get_snapshot, methods=["GET"]),
             ]

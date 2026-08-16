@@ -1,0 +1,40 @@
+{
+  "bag_purchases": [],
+  "commits": [
+    {
+      "amount": 0.0,
+      "confirmation_code": "WD7NCE",
+      "detail": "$208.75 back to the card ending 1188, no fee. 7 business days for a card, 20 calendar days otherwise",
+      "id": 1,
+      "kind": "refund",
+      "token": "JA-RFD-6042"
+    }
+  ],
+  "escalations": [],
+  "holds": [
+    {
+      "amount": 0.0,
+      "confirmation_code": "WD7NCE",
+      "consumed": 1,
+      "kind": "refund",
+      "miles_number": "",
+      "payload": "{\"confirmation_token\": \"JA-RFD-6042\", \"summary\": \"$208.75 back to the card ending 1188, no fee. 7 business days for a card, 20 calendar days otherwise\", \"amount\": 208.75, \"form_of_payment\": \"card ending 1188\", \"basis\": \"delay\", \"processing_window\": \"7 business days for a card, 20 calendar days otherwise\"}",
+      "summary": "$208.75 back to the card ending 1188, no fee. 7 business days for a card, 20 calendar days otherwise",
+      "token": "JA-RFD-6042"
+    }
+  ],
+  "itineraries": [],
+  "pass_bookings": [],
+  "payments": [],
+  "refunds": [
+    {
+      "amount": 208.75,
+      "basis": "delay",
+      "confirmation_code": "WD7NCE",
+      "form_of_payment": "card ending 1188",
+      "id": 1
+    }
+  ],
+  "reservation_notes": [],
+  "seat_assignments": []
+}

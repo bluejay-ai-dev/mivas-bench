@@ -81,8 +81,7 @@ GREETING = "Welcome to Bluejay's Repair Services!"
 # Gemini 3.1 Live will not speak until the caller does, so it opens with dead
 # air until the digital human gives up and prompts — ~64 s of a 180 s call. A TTS
 # is attached for that runtime purely so the scripted opener can be spoken; the
-# model still says everything else itself. Same workaround as the LiveKit harness
-# (`session.say(GREETING)`), for the same plugin limitation.
+# model still says everything else itself.
 GREETING_TTS_RUNTIMES = frozenset({"gemini-flash-live-3.1"})
 # Matches *step 1* of an agent's own flow, e.g. scheduler.md. Used so a Gemini
 # Live handoff target can speak a first line (the model rejects speaking first).
@@ -153,12 +152,10 @@ def with_clock(text: str) -> str:
 
 
 def resolve_agent_name(default: str) -> str:
-    """LiveKit dispatch name. Unique per k8s slug so two industries cannot collide.
-
-    Local/dev (no MIVAS_SLUG) keeps the runtime default (`mivas-pipecat-cascaded`).
-    LIVEKIT_AGENT_NAME wins when set.
-    """
-    explicit = os.environ.get("LIVEKIT_AGENT_NAME", "").strip()
+    """Worker identity. Unique per k8s slug so two industries cannot collide."""
+    explicit = os.environ.get("PIPECAT_AGENT_NAME", "").strip() or os.environ.get(
+        "LIVEKIT_AGENT_NAME", ""
+    ).strip()
     if explicit:
         return explicit
     slug = os.environ.get("MIVAS_SLUG", "").strip()
@@ -167,8 +164,16 @@ def resolve_agent_name(default: str) -> str:
     return default
 
 
+def sip_uri() -> str | None:
+    """Bluejay agent `sip_uri`: Daily pinless interconnect address."""
+    explicit = os.environ.get("DAILY_SIP_URI", "").strip() or os.environ.get(
+        "PIPECAT_SIP_URI", ""
+    ).strip()
+    return explicit or None
+
+
 def sim_result_id_from_job_metadata(raw: Any) -> str | None:
-    """Bluejay puts X-Simulation-Result-Id on the LiveKit job metadata JSON."""
+    """Bluejay puts X-Simulation-Result-Id on SIP headers / start body JSON."""
     if not raw:
         return None
     meta = raw if isinstance(raw, dict) else None
@@ -189,6 +194,21 @@ def sim_result_id_from_job_metadata(raw: Any) -> str | None:
         if val is not None and str(val).strip():
             return str(val).strip()
     return None
+
+
+def sim_result_id_from_participant(participant: Any) -> str | None:
+    """SIP inbound stamps the sim id on participant attributes."""
+    if participant is None:
+        return None
+    attrs = dict(getattr(participant, "attributes", None) or {})
+    for key, val in attrs.items():
+        kl = str(key).lower().replace("_", "-")
+        if "simulation-result-id" in kl or kl.endswith("simulation-result-id"):
+            if val is not None and str(val).strip():
+                return str(val).strip()
+    return sim_result_id_from_job_metadata(attrs) or sim_result_id_from_job_metadata(
+        getattr(participant, "metadata", None)
+    )
 
 
 def agent_opener(bp: dict[str, Any], agent: str) -> str:
@@ -382,8 +402,7 @@ def build_llm(runtime: str, instructions: str, tools):
     if runtime == "gemini-flash-live-3.1":
         from pipecat.services.google.gemini_live.llm import GeminiLiveLLMService
 
-        # the plugin quirk carried over from the LiveKit prior art: the system
-        # prompt must go in on the constructor, not as a context message.
+        # the system prompt must go in on the constructor, not as a context message.
         return GeminiLiveLLMService(
             api_key=os.environ["GOOGLE_API_KEY"],
             model=model,
@@ -420,6 +439,16 @@ def build_tts():
     )
 
 
+def user_aggregator_params(runtime: str):
+    """S2S services already emit turn frames; Flux owns cascaded turn boundaries."""
+    from pipecat.processors.aggregators.llm_response_universal import LLMUserAggregatorParams
+    from pipecat.turns.user_turn_strategies import ExternalUserTurnStrategies
+
+    if runtime in S2S_RUNTIMES:
+        return LLMUserAggregatorParams(user_turn_strategies=ExternalUserTurnStrategies())
+    return LLMUserAggregatorParams()
+
+
 def build_stt_tts(runtime: str):
     """(stt, tts) for the cascaded runtime; (None, None) for the S2S ones."""
     if runtime != "cascaded":
@@ -429,12 +458,7 @@ def build_stt_tts(runtime: str):
 
     stt = DeepgramFluxSTTService(
         api_key=os.environ["DEEPGRAM_API_KEY"],
-        settings=DeepgramFluxSTTService.Settings(
-            model=STT_MODEL,
-            # LiveKit cascaded uses the same 0.4: Flux starts the LLM before a
-            # high-confidence EndOfTurn. Default (off) waits for full EOT.
-            eager_eot_threshold=0.4,
-        ),
+        settings=DeepgramFluxSTTService.Settings(model=STT_MODEL),
     )
     return stt, build_tts()
 
@@ -478,18 +502,25 @@ def demo() -> None:
     prev_name, prev_slug = os.environ.pop("LIVEKIT_AGENT_NAME", None), os.environ.pop(
         "MIVAS_SLUG", None
     )
+    prev_sip = os.environ.pop("DAILY_SIP_URI", None)
     try:
         assert resolve_agent_name("mivas-pipecat-cascaded") == "mivas-pipecat-cascaded"
         os.environ["MIVAS_SLUG"] = "pipecat-cascaded-healthcare"
         assert resolve_agent_name("mivas-pipecat-cascaded") == (
             "mivas-pipecat-cascaded-healthcare"
         )
+        os.environ.pop("MIVAS_SLUG", None)
+        os.environ["DAILY_SIP_URI"] = "sip:abc@daily-pinless.example"
+        assert sip_uri() == "sip:abc@daily-pinless.example"
     finally:
         os.environ.pop("MIVAS_SLUG", None)
+        os.environ.pop("DAILY_SIP_URI", None)
         if prev_slug is not None:
             os.environ["MIVAS_SLUG"] = prev_slug
         if prev_name is not None:
             os.environ["LIVEKIT_AGENT_NAME"] = prev_name
+        if prev_sip is not None:
+            os.environ["DAILY_SIP_URI"] = prev_sip
 
     # (the tool-set split as the services actually see it needs pipecat — see check.py)
 

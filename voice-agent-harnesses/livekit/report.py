@@ -20,8 +20,8 @@ After the call we POST to update-simulation-result with:
   - trace_ids  → waterfall flamegraph
   Conversation tool markers come from execute_tool OTel spans (not a tool_calls POST).
 
-Bluejay supplies simulation_result_id via X-Simulation-Result-Id on the LiveKit
-job metadata (native LIVEKIT dispatch — there is no CHIRP bridge here).
+Bluejay supplies simulation_result_id via X-Simulation-Result-Id on the SIP
+INVITE (GetRemoteHeaders / participant attributes). There is no CHIRP bridge.
 """
 
 from __future__ import annotations

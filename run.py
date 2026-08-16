@@ -102,9 +102,13 @@ def harness_paths(harness: str) -> tuple[Path, Path]:
     return family_dir, agent_dir
 
 
-# LiveKit / Pipecat workers register with LiveKit Cloud. They do not serve a
-# public ingress adapter and do not need a public Ingress hostname.
-WORKER_FAMILIES = frozenset({"livekit", "pipecat"})
+# LiveKit pods register with LiveKit Cloud and take Bluejay SIP inbound.
+# Pipecat pods run the bot locally; Daily pinless SIP hits the dispatcher,
+# which forwards to an idle replica.
+LIVEKIT_WORKER_FAMILIES = frozenset({"livekit"})
+PIPECAT_WORKER_FAMILIES = frozenset({"pipecat"})
+WORKER_FAMILIES = LIVEKIT_WORKER_FAMILIES | PIPECAT_WORKER_FAMILIES
+SIP_WORKER_FAMILIES = LIVEKIT_WORKER_FAMILIES
 PLATFORM_FAMILIES = frozenset({"vapi", "retell", "bland", "cartesia"})
 
 
@@ -123,7 +127,9 @@ def ingress_adapter(harness: str) -> Path:
 
 def pair_mivas_mode(harness: str) -> str:
     family = split_harness(harness)[0]
-    if family in WORKER_FAMILIES:
+    if family in LIVEKIT_WORKER_FAMILIES:
+        return "agent"
+    if family in PIPECAT_WORKER_FAMILIES:
         return "agent"
     if ingress_adapter(harness).name == "conversationrelay.py":
         return "conversationrelay"
@@ -164,7 +170,7 @@ def pair_host(harness: str, industry: str) -> str | None:
 
 
 def pair_public_url(harness: str, industry: str) -> str:
-    """HTTPS base for tool webhooks and Pipecat Cloud TOOL_SERVER_URL."""
+    """HTTPS base for tool webhooks and the worker's public /tools host."""
     host = pair_dns_host(harness, industry) or pair_host(harness, industry)
     if host:
         return f"https://{host}"
@@ -305,10 +311,18 @@ def _render(template_name: str, harness: str, industry: str, image: str, service
         .replace("__CPU_REQUEST__", cpu_req)
         .replace("__MEMORY_REQUEST__", mem_req)
         .replace("__MEMORY_LIMIT__", mem_lim)
+        .replace("__LIVEKIT_SECRET_NAME__", livekit_secret_name(harness, industry))
         .replace("__SNAPSHOT_BUCKET__", os.environ.get("MIVAS_SNAPSHOT_BUCKET", "").strip())
         .replace("__SNAPSHOT_PREFIX__", os.environ.get("MIVAS_SNAPSHOT_PREFIX", "mivas").strip() or "mivas")
         .replace("__AWS_REGION__", os.environ.get("AWS_DEFAULT_REGION") or os.environ.get("AWS_REGION") or "us-west-1")
     )
+
+
+def livekit_secret_name(harness: str, industry: str) -> str:
+    """SIP healthcare worker uses a dedicated LiveKit Cloud project secret."""
+    if slug(harness, industry) == "livekit-cascaded-healthcare":
+        return os.environ.get("LIVEKIT_SIP_SECRET_NAME", "mivas-livekit-sip").strip() or "mivas-livekit-sip"
+    return "mivas-secrets"
 
 
 def pair_resources(harness: str) -> tuple[str, str, str]:
@@ -319,7 +333,7 @@ def pair_resources(harness: str) -> tuple[str, str, str]:
     """
     family, runtime = split_harness(harness)
     if (family == "nvidia" and runtime == "nemotron") \
-            or (family in {"livekit", "pipecat"} and runtime == "cascaded"):
+            or (family in LIVEKIT_WORKER_FAMILIES | PIPECAT_WORKER_FAMILIES and runtime == "cascaded"):
         return "1000m", "1Gi", "3Gi"
     return "250m", "384Mi", "1536Mi"
 
@@ -371,11 +385,18 @@ _SECRET_ENV_KEYS = (
     "GOOGLE_API_KEY",
     "GROK_API_KEY",
     "XAI_API_KEY",
+    "DAILY_API_KEY",
     "LIVEKIT_URL",
     "LIVEKIT_API_KEY",
     "LIVEKIT_API_SECRET",
     "VOICECHAT_WS_URL",
     "VOICECHAT_FUNCTION_ID",
+    "NEMOTRON_LLM_BASE_URL",
+    "NEMOTRON_LLM_MODEL",
+    "NEMOTRON_ASR_SERVER",
+    "NEMOTRON_TTS_SERVER",
+    "NEMOTRON_USE_SSL",
+    "NEMOTRON_ASR_FUNCTION_ID",
     "BLUEJAY_API_KEY",
     "PUBLIC_URL",
     "CHIRP_USER",
@@ -455,6 +476,41 @@ def ensure_secret() -> None:
         print(apply.stderr or apply.stdout, file=sys.stderr)
         sys.exit(apply.returncode)
     print(f"+ kubectl apply secret/mivas-secrets → {(apply.stdout or '').strip()}")
+
+
+def ensure_livekit_sip_secret() -> None:
+    """Dedicated LiveKit Cloud project for SIP inbound (not the org LIVEKIT_* pair)."""
+    url = os.environ.get("LIVEKIT_SIP_URL", "").strip()
+    key = os.environ.get("LIVEKIT_SIP_API_KEY", "").strip()
+    secret = os.environ.get("LIVEKIT_SIP_API_SECRET", "").strip()
+    name = os.environ.get("LIVEKIT_SIP_SECRET_NAME", "mivas-livekit-sip").strip() or "mivas-livekit-sip"
+    if not (url and key and secret):
+        return
+    cmd = [
+        "kubectl",
+        "create",
+        "secret",
+        "generic",
+        name,
+        "--dry-run=client",
+        "-o",
+        "yaml",
+        f"--from-literal=LIVEKIT_URL={url}",
+        f"--from-literal=LIVEKIT_API_KEY={key}",
+        f"--from-literal=LIVEKIT_API_SECRET={secret}",
+    ]
+    rendered = subprocess.run(cmd, check=True, capture_output=True, text=True)
+    apply = subprocess.run(
+        ["kubectl", "apply", "-f", "-"],
+        input=rendered.stdout,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if apply.returncode != 0:
+        print(apply.stderr or apply.stdout, file=sys.stderr)
+        sys.exit(apply.returncode)
+    print(f"+ kubectl apply secret/{name} → {(apply.stdout or '').strip()}")
 
 
 def _kubectl_json(cmd: list[str]) -> dict:
@@ -578,9 +634,42 @@ def render_agents_yaml(pairs: list[tuple[str, str]], service_type: str) -> str:
     return "\n---\n".join(docs) + "\n"
 
 
+def dispatcher_host() -> str | None:
+    base = os.environ.get("MIVAS_BASE_DOMAIN", "").strip().lower().strip(".")
+    if not base:
+        return None
+    return f"pipecat-dialin.{base}"
+
+
+def render_dispatcher_yaml(image: str, industry: str) -> str:
+    host = dispatcher_host() or ""
+    base = os.environ.get("MIVAS_BASE_DOMAIN", "").strip().lower().strip(".")
+    pull_policy = (
+        "Always"
+        if os.environ.get("MIVAS_IMAGE_PREFIX", "").strip()
+        else "IfNotPresent"
+    )
+    # In-cluster Service for the same pods as https://{slug}.{base}/tools.
+    worker_template = os.environ.get(
+        "PIPECAT_WORKER_URL_TEMPLATE",
+        "http://mivas-{slug}:8000/tools/dialin",
+    )
+    return (
+        (ROOT / "k8s" / "dispatcher.yaml")
+        .read_text()
+        .replace("__IMAGE__", image)
+        .replace("__IMAGE_PULL_POLICY__", pull_policy)
+        .replace("__INDUSTRY__", industry)
+        .replace("__BASE_DOMAIN__", base)
+        .replace("__WORKER_URL_TEMPLATE__", worker_template)
+        .replace("__HOST__", host)
+    )
+
+
 def apply_agents(pairs: list[tuple[str, str]], *, follow_logs: bool) -> None:
     """kubectl apply one Deployment+Service(+Ingress) per harness×industry pair."""
     ensure_secret()
+    ensure_livekit_sip_secret()
     use_ingress = ingress_enabled()
     if use_ingress:
         service_type = os.environ.get("MIVAS_SERVICE_TYPE", "ClusterIP")
@@ -589,6 +678,16 @@ def apply_agents(pairs: list[tuple[str, str]], *, follow_logs: bool) -> None:
 
     try:
         yaml_text = render_agents_yaml(pairs, service_type)
+        pipecat_pairs = [(h, i) for h, i in pairs if split_harness(h)[0] in PIPECAT_WORKER_FAMILIES]
+        if pipecat_pairs and use_ingress:
+            h0, i0 = pipecat_pairs[0]
+            yaml_text += "---\n" + render_dispatcher_yaml(image_ref(h0, i0), i0)
+        elif pipecat_pairs:
+            print(
+                "Pipecat Daily dispatcher skipped (set MIVAS_BASE_DOMAIN "
+                "so Daily can webhook pipecat-dialin.<domain>)",
+                file=sys.stderr,
+            )
     except ValueError as e:
         print(e, file=sys.stderr)
         sys.exit(1)
@@ -639,12 +738,35 @@ def apply_agents(pairs: list[tuple[str, str]], *, follow_logs: bool) -> None:
             ["kubectl", "rollout", "status", f"deployment/{name}", "--timeout=180s"],
             check=False,
         )
+    if any(split_harness(h)[0] in PIPECAT_WORKER_FAMILIES for h, _ in pairs):
+        subprocess.run(
+            [
+                "kubectl",
+                "rollout",
+                "status",
+                "deployment/mivas-pipecat-dispatcher",
+                "--timeout=180s",
+            ],
+            check=False,
+        )
+
+    for harness, industry in pairs:
+        name = f"mivas-{slug(harness, industry)}"
         stable = pair_websocket_url(harness, industry)
         public = pair_public_url(harness, industry)
-        if split_harness(harness)[0] in WORKER_FAMILIES:
+        family = split_harness(harness)[0]
+        if family in LIVEKIT_WORKER_FAMILIES:
             print(
-                f"LiveKit Cloud worker ({name}): connection_type=LIVEKIT "
-                f"(pod registers with LIVEKIT_URL)"
+                f"LiveKit SIP worker ({name}): connection_type=SIP "
+                f"(pod registers with LIVEKIT_URL; Bluejay dials LIVEKIT_SIP_HOST)"
+            )
+            if public:
+                print(f"PUBLIC_URL / tools ({name}): {public}/tools")
+            continue
+        if family in PIPECAT_WORKER_FAMILIES:
+            print(
+                f"Pipecat Daily worker ({name}): bot on this pod; "
+                f"Daily pinless SIP → dispatcher → {public}/tools/dialin"
             )
             if public:
                 print(f"PUBLIC_URL / tools ({name}): {public}/tools")
@@ -683,6 +805,12 @@ def apply_agents(pairs: list[tuple[str, str]], *, follow_logs: bool) -> None:
         print("List: kubectl get deploy,svc -l app=mivas-bench")
     else:
         print("List: kubectl get deploy,svc -l app=mivas-bench")
+
+    if any(split_harness(h)[0] in PIPECAT_WORKER_FAMILIES for h, _ in pairs):
+        dhost = dispatcher_host()
+        if dhost:
+            print(f"Daily pinless room_creation_api: https://{dhost}/dialin/<slug>")
+            print("  slug example: pipecat-cascaded-healthcare")
 
     if follow_logs and len(pairs) == 1:
         name = f"mivas-{slug(pairs[0][0], pairs[0][1])}"
@@ -758,6 +886,22 @@ def run_local(harness: str, industry: str, agent_check: bool, mode: str) -> None
             run(agent_cmd, env=env, cwd=str(ROOT))
             return
 
+        if mode == "tools":
+            print(f"tool server only ({harness}); Ctrl+C to stop.")
+            tool_proc.wait()
+            return
+
+        if family in LIVEKIT_WORKER_FAMILIES:
+            print(f"starting LiveKit SIP worker ({harness}) — Ctrl+C to stop")
+            run([sys.executable, str(agent_dir / "agent.py"), "dev"], env=env, cwd=str(ROOT))
+            return
+
+        if family in PIPECAT_WORKER_FAMILIES:
+            env.setdefault("PIPECAT_DIALIN_UPSTREAM", "http://127.0.0.1:8080/dialin")
+            print(f"starting Pipecat Daily dialin worker ({harness}) — Ctrl+C to stop")
+            run([sys.executable, str(family_dir / "bot.py")], env=env, cwd=str(ROOT))
+            return
+
         if mode in ("chirp", "conversationrelay"):
             adapter = ingress_adapter(harness)
             if not adapter.is_file():
@@ -814,9 +958,9 @@ def main() -> None:
     )
     parser.add_argument(
         "--mode",
-        choices=("chirp", "conversationrelay", "agent", "check"),
+        choices=("chirp", "conversationrelay", "agent", "tools", "check"),
         default=os.environ.get("MIVAS_MODE", "chirp"),
-        help="Runtime mode (default: chirp for Bluejay CHIRP; Twilio uses conversationrelay)",
+        help="Runtime mode (default: chirp; LiveKit/Pipecat SIP workers use agent)",
     )
     parser.add_argument("--check", action="store_true", help="Shortcut for --mode check")
     parser.add_argument(

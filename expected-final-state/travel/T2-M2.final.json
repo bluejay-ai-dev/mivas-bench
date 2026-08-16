@@ -1,0 +1,23 @@
+{
+  "bag_purchases": [],
+  "commits": [],
+  "escalations": [],
+  "holds": [
+    {
+      "amount": 41.5,
+      "confirmation_code": "HB9WQM",
+      "consumed": 0,
+      "kind": "change",
+      "miles_number": "",
+      "payload": "{\"confirmation_token\": \"JA-CHG-4417\", \"summary\": \"JA509 on 2026-08-13 at 18:40. Change fee $0.00, difference in fare $41.50, total $41.50.\", \"new_flight\": \"JA509\", \"departs_on\": \"2026-08-13\", \"departs_at\": \"18:40\", \"change_fee\": 0.0, \"fare_difference\": 41.5, \"total\": 41.5, \"fare_family\": \"value\", \"same_day\": true, \"residual_value_forfeited\": 0.0, \"note\": \"\"}",
+      "summary": "JA509 on 2026-08-13 at 18:40. Change fee $0.00, difference in fare $41.50, total $41.50.",
+      "token": "JA-CHG-4417"
+    }
+  ],
+  "itineraries": [],
+  "pass_bookings": [],
+  "payments": [],
+  "refunds": [],
+  "reservation_notes": [],
+  "seat_assignments": []
+}
