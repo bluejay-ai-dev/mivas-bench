@@ -531,10 +531,28 @@ def get_policy(a: dict[str, Any]) -> dict[str, Any]:
         "describing a policy the system didn't give you.")
 
 
+def _fee_canonical(said: str) -> str:
+    """Resolve a caller-word fee string to a fee code.
+
+    Exact alias first, then longest alias contained in the query. If both Plus
+    and Total aliases hit, prefer the tier named in the query.
+    """
+    exact = (FEE_ALIASES.get(said) or FEE_ALIASES.get(said + " fee")
+             or FEE_ALIASES.get(said + "s"))
+    if exact:
+        return exact
+    hits = [(alias, code) for alias, code in FEE_ALIASES.items() if alias in said]
+    if not hits:
+        return said
+    codes = {code for _, code in hits}
+    if codes >= {"membership_plus", "membership_total"}:
+        return "membership_total" if "total" in said else "membership_plus"
+    return max(hits, key=lambda item: len(item[0]))[1]
+
+
 def get_fee(a: dict[str, Any]) -> dict[str, Any]:
     said = str(a.get("fee") or "").strip().lower().rstrip("s")
-    canonical = (FEE_ALIASES.get(said) or FEE_ALIASES.get(said + " fee")
-                 or FEE_ALIASES.get(said + "s") or said)
+    canonical = _fee_canonical(said)
     with _db() as conn:
         rows = conn.execute("SELECT * FROM fees ORDER BY code").fetchall()
     exact = [r for r in rows if r["code"] == canonical.replace(" ", "_")]
@@ -1739,6 +1757,11 @@ def _selfcheck() -> None:
     assert get_fee({"fee": "restocking"})["fees"][0]["code"] == "restocking_activatable"
     assert get_fee({"fee": "kestrel total"})["fees"][0]["amount_text"] == "$199.99 per year"
     assert err(get_fee, {"fee": "teleportation"}).code == "NO_SUCH_FEE"
+    # caller-word paraphrases the schema invites (D2)
+    assert get_fee({"fee": "haul away old appliance with delivery"})["fees"][0]["code"] == "haul_away_with_delivery"
+    assert get_fee({"fee": "restocking fee for a phone"})["fees"][0]["code"] == "restocking_activatable"
+    assert get_fee({"fee": "Kestrel Plus annual price"})["fees"][0]["code"] == "membership_plus"
+    assert get_fee({"fee": "TechCrew bench diagnostic if nothing covers the repair"})["fees"][0]["code"] == "techcrew_bench_diagnostic"
     assert get_policy({"topic": "how long do I have to return"})["count"] >= 1
     assert err(get_policy, {"topic": "teleportation"}).code == "NO_SUCH_POLICY"
     assert get_store_info({"store": "corvallis"})["count"] == 1
