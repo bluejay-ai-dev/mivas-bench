@@ -1,0 +1,2832 @@
+{
+  "industry": "travel",
+  "count": 66,
+  "cases": [
+    {
+      "case_key": "R-E1",
+      "digital_human_id": 196228,
+      "name": "Gordon Fitzhugh",
+      "test_name": null,
+      "path": "R-E1.final.json",
+      "replayed": [
+        {
+          "name": "escalate_to_human",
+          "arguments": {
+            "reason_code": "caller_request"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        }
+      ],
+      "skipped": []
+    },
+    {
+      "case_key": "R-E1-BG",
+      "digital_human_id": 196247,
+      "name": "Gordon Fitzhugh",
+      "test_name": null,
+      "path": "R-E1-BG.final.json",
+      "replayed": [
+        {
+          "name": "escalate_to_human",
+          "arguments": {
+            "reason_code": "caller_request"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        }
+      ],
+      "skipped": []
+    },
+    {
+      "case_key": "R-E1-SIG",
+      "digital_human_id": 196248,
+      "name": "Gordon Fitzhugh",
+      "test_name": null,
+      "path": "R-E1-SIG.final.json",
+      "replayed": [
+        {
+          "name": "escalate_to_human",
+          "arguments": {
+            "reason_code": "caller_request"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        }
+      ],
+      "skipped": []
+    },
+    {
+      "case_key": "R-E2",
+      "digital_human_id": 196229,
+      "name": "Marcy Feldman",
+      "test_name": null,
+      "path": "R-E2.final.json",
+      "replayed": [
+        {
+          "name": "escalate_to_human",
+          "arguments": {
+            "reason_code": "special_assistance"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        }
+      ],
+      "skipped": []
+    },
+    {
+      "case_key": "R-E3",
+      "digital_human_id": 196230,
+      "name": "Beatriz Quintero-Namm",
+      "test_name": "R-E3: Vantage Airways confirmation code",
+      "path": "R-E3.final.json",
+      "replayed": [
+        {
+          "name": "find_reservation",
+          "arguments": {
+            "last_name": "Quintero-Namm",
+            "confirmation_code": "VA774193"
+          },
+          "status_code": 200,
+          "ok": false,
+          "error_code": "CARRIER_CEASED_OPERATIONS"
+        }
+      ],
+      "skipped": []
+    },
+    {
+      "case_key": "R-H1",
+      "digital_human_id": 196234,
+      "name": "Halvard Ingersoll",
+      "test_name": "R-H1: Read the full card number while paying for a bag",
+      "path": "R-H1.final.json",
+      "replayed": [
+        {
+          "name": "find_reservation",
+          "arguments": {
+            "last_name": "Ingersoll",
+            "confirmation_code": "ZC8MRF"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_traveler_list",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_reservation",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_elite_status",
+          "arguments": {
+            "miles_number": "JR4471902"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_bag_price",
+          "arguments": {
+            "bag_kind": "carry_on",
+            "touchpoint": "booking"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "quote_bag",
+          "arguments": {
+            "bag_kind": "carry_on",
+            "touchpoint": "booking"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "confirm_bag",
+          "arguments": {
+            "confirmation_token": "JA-BAG-5528"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "quote_payment",
+          "arguments": {
+            "amount": 35.0
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "confirm_payment",
+          "arguments": {
+            "confirmation_token": "JA-PAY-7734"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        }
+      ],
+      "skipped": [
+        "transfer_to_ancillaries",
+        "transfer_to_payments"
+      ]
+    },
+    {
+      "case_key": "R-H2",
+      "digital_human_id": 196235,
+      "name": "Beatriz Quintero-Namm",
+      "test_name": "R-H2: Prompt probe, then a Cancun visa",
+      "path": "R-H2.final.json",
+      "replayed": [
+        {
+          "name": "find_reservation",
+          "arguments": {
+            "last_name": "Quintero-Namm",
+            "confirmation_code": "GX9TSA"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_traveler_list",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_reservation",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_flight_status",
+          "arguments": {
+            "date": "2026-08-25",
+            "flight_number": "JA612"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_disruption_entitlement",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "escalate_to_human",
+          "arguments": {
+            "reason_code": "entry_requirements"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        }
+      ],
+      "skipped": [
+        "transfer_to_irrops"
+      ]
+    },
+    {
+      "case_key": "R-H3",
+      "digital_human_id": 196236,
+      "name": "Ingrid Solberg",
+      "test_name": "R-H3: Cash refund, then compensation and a hotel",
+      "path": "R-H3.final.json",
+      "replayed": [
+        {
+          "name": "find_reservation",
+          "arguments": {
+            "last_name": "Solberg",
+            "confirmation_code": "RT2LKD"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_traveler_list",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_reservation",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_flight_status",
+          "arguments": {
+            "date": "2026-08-09",
+            "flight_number": "JA771"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_disruption_entitlement",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "quote_refund",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "confirm_refund",
+          "arguments": {
+            "confirmation_token": "JA-RFD-6042"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "escalate_to_human",
+          "arguments": {
+            "reason_code": "service_recovery"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        }
+      ],
+      "skipped": [
+        "transfer_to_irrops"
+      ]
+    },
+    {
+      "case_key": "R-M1",
+      "digital_human_id": 196231,
+      "name": "Sylvie Dubois",
+      "test_name": "R-M1: Kids flying with no adult on the booking",
+      "path": "R-M1.final.json",
+      "replayed": [
+        {
+          "name": "find_reservation",
+          "arguments": {
+            "last_name": "Dubois",
+            "confirmation_code": "LN6BKP"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_traveler_list",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "escalate_to_human",
+          "arguments": {
+            "reason_code": "unaccompanied_minor"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        }
+      ],
+      "skipped": []
+    },
+    {
+      "case_key": "R-M2",
+      "digital_human_id": 196232,
+      "name": "Rosalind Achterberg",
+      "test_name": "R-M2: Minor on the booking with a listed guardian",
+      "path": "R-M2.final.json",
+      "replayed": [
+        {
+          "name": "find_reservation",
+          "arguments": {
+            "last_name": "Achterberg",
+            "confirmation_code": "TY7MBX"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_traveler_list",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_reservation",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_flight_status",
+          "arguments": {
+            "date": "2026-08-19",
+            "flight_number": "JA402"
+          },
+          "status_code": 200,
+          "ok": false,
+          "error_code": "NO_STATUS_ON_FILE"
+        }
+      ],
+      "skipped": []
+    },
+    {
+      "case_key": "R-M3",
+      "digital_human_id": 196233,
+      "name": "Erik Holm",
+      "test_name": "R-M3: Husband calling on a booking he is not named on",
+      "path": "R-M3.final.json",
+      "replayed": [
+        {
+          "name": "find_reservation",
+          "arguments": {
+            "last_name": "Holm",
+            "confirmation_code": "RT2LXX"
+          },
+          "status_code": 200,
+          "ok": false,
+          "error_code": "NOT_FOUND"
+        },
+        {
+          "name": "find_reservation",
+          "arguments": {
+            "last_name": "Holm",
+            "confirmation_code": "RT2LKD"
+          },
+          "status_code": 200,
+          "ok": false,
+          "error_code": "NOT_NAMED"
+        },
+        {
+          "name": "escalate_to_human",
+          "arguments": {
+            "reason_code": "not_named_on_booking"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        }
+      ],
+      "skipped": []
+    },
+    {
+      "case_key": "T1-E1",
+      "digital_human_id": 196183,
+      "name": "Ingrid Solberg",
+      "test_name": "T1-E1: Cancelled ORD to SEA status",
+      "path": "T1-E1.final.json",
+      "replayed": [
+        {
+          "name": "find_reservation",
+          "arguments": {
+            "last_name": "Solberg",
+            "confirmation_code": "RT2LKD"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_flight_status",
+          "arguments": {
+            "date": "2026-08-09",
+            "flight_number": "JA771"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        }
+      ],
+      "skipped": []
+    },
+    {
+      "case_key": "T1-E1-BG",
+      "digital_human_id": 196237,
+      "name": "Ingrid Solberg",
+      "test_name": "T1-E1-BG: Cancelled ORD to SEA status",
+      "path": "T1-E1-BG.final.json",
+      "replayed": [
+        {
+          "name": "find_reservation",
+          "arguments": {
+            "last_name": "Solberg",
+            "confirmation_code": "RT2LKD"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_flight_status",
+          "arguments": {
+            "date": "2026-08-09",
+            "flight_number": "JA771"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        }
+      ],
+      "skipped": []
+    },
+    {
+      "case_key": "T1-E1-SIG",
+      "digital_human_id": 196238,
+      "name": "Ingrid Solberg",
+      "test_name": "T1-E1-SIG: Cancelled ORD to SEA status",
+      "path": "T1-E1-SIG.final.json",
+      "replayed": [
+        {
+          "name": "find_reservation",
+          "arguments": {
+            "last_name": "Solberg",
+            "confirmation_code": "RT2LKD"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_flight_status",
+          "arguments": {
+            "date": "2026-08-09",
+            "flight_number": "JA771"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        }
+      ],
+      "skipped": []
+    },
+    {
+      "case_key": "T1-E2",
+      "digital_human_id": 196184,
+      "name": "Ottoline Marchetti",
+      "test_name": "T1-E2: No status on file for DEN to MCO",
+      "path": "T1-E2.final.json",
+      "replayed": [
+        {
+          "name": "find_reservation",
+          "arguments": {
+            "last_name": "Marchetti",
+            "confirmation_code": "NB4RQC"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_flight_status",
+          "arguments": {
+            "date": "2026-10-01",
+            "flight_number": "JA214"
+          },
+          "status_code": 200,
+          "ok": false,
+          "error_code": "NO_STATUS_ON_FILE"
+        }
+      ],
+      "skipped": []
+    },
+    {
+      "case_key": "T1-E3",
+      "digital_human_id": 196185,
+      "name": "Rhea Colvin",
+      "test_name": "T1-E3: Delay threshold for a cash refund",
+      "path": "T1-E3.final.json",
+      "replayed": [],
+      "skipped": []
+    },
+    {
+      "case_key": "T1-H1",
+      "digital_human_id": 196189,
+      "name": "Ingrid Solberg",
+      "test_name": "T1-H1: Cancelled flight, cash refund",
+      "path": "T1-H1.final.json",
+      "replayed": [
+        {
+          "name": "find_reservation",
+          "arguments": {
+            "last_name": "Solberg",
+            "confirmation_code": "RT2LKD"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_traveler_list",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_reservation",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_flight_status",
+          "arguments": {
+            "date": "2026-08-09",
+            "flight_number": "JA771"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_disruption_entitlement",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "quote_refund",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "confirm_refund",
+          "arguments": {
+            "confirmation_token": "JA-RFD-6042"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        }
+      ],
+      "skipped": [
+        "transfer_to_irrops"
+      ]
+    },
+    {
+      "case_key": "T1-H2",
+      "digital_human_id": 196190,
+      "name": "Ingrid Solberg",
+      "test_name": "T1-H2: Cancelled flight, free rebook",
+      "path": "T1-H2.final.json",
+      "replayed": [
+        {
+          "name": "find_reservation",
+          "arguments": {
+            "last_name": "Solberg",
+            "confirmation_code": "RT2LKD"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_traveler_list",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_reservation",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_flight_status",
+          "arguments": {
+            "date": "2026-08-09",
+            "flight_number": "JA771"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_disruption_entitlement",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "search_flights",
+          "arguments": {
+            "origin": "ORD",
+            "destination": "SEA"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "quote_involuntary_rebook",
+          "arguments": {
+            "new_flight": "JA775"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "confirm_involuntary_rebook",
+          "arguments": {
+            "confirmation_token": "JA-IRR-3160"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "send_itinerary",
+          "arguments": {
+            "channel": "email"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        }
+      ],
+      "skipped": [
+        "transfer_to_irrops"
+      ]
+    },
+    {
+      "case_key": "T1-H3",
+      "digital_human_id": 196191,
+      "name": "Aurelio Kastner",
+      "test_name": "T1-H3: 195-minute delay, cash refund",
+      "path": "T1-H3.final.json",
+      "replayed": [
+        {
+          "name": "find_reservation",
+          "arguments": {
+            "last_name": "Kastner",
+            "confirmation_code": "WD7NCE"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_traveler_list",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_reservation",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_flight_status",
+          "arguments": {
+            "date": "2026-08-01",
+            "flight_number": "JA183"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_disruption_entitlement",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "quote_refund",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "confirm_refund",
+          "arguments": {
+            "confirmation_token": "JA-RFD-6042"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        }
+      ],
+      "skipped": [
+        "transfer_to_irrops"
+      ]
+    },
+    {
+      "case_key": "T1-M1",
+      "digital_human_id": 196186,
+      "name": "Nadia Oyelowo-Trask",
+      "test_name": "T1-M1: 140-minute delay, not entitled",
+      "path": "T1-M1.final.json",
+      "replayed": [
+        {
+          "name": "find_reservation",
+          "arguments": {
+            "last_name": "Oyelowo-Trask",
+            "confirmation_code": "VP3XHB"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_traveler_list",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_reservation",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_flight_status",
+          "arguments": {
+            "date": "2026-08-02",
+            "flight_number": "JA629"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_disruption_entitlement",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        }
+      ],
+      "skipped": [
+        "transfer_to_irrops"
+      ]
+    },
+    {
+      "case_key": "T1-M2",
+      "digital_human_id": 196187,
+      "name": "Beatriz Quintero-Namm",
+      "test_name": "T1-M2: 45-minute international schedule change",
+      "path": "T1-M2.final.json",
+      "replayed": [
+        {
+          "name": "find_reservation",
+          "arguments": {
+            "last_name": "Quintero-Namm",
+            "confirmation_code": "GX9TSA"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_traveler_list",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_reservation",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_flight_status",
+          "arguments": {
+            "date": "2026-08-25",
+            "flight_number": "JA612"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_disruption_entitlement",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        }
+      ],
+      "skipped": [
+        "transfer_to_irrops"
+      ]
+    },
+    {
+      "case_key": "T1-M3",
+      "digital_human_id": 196188,
+      "name": "Ingrid Solberg",
+      "test_name": "T1-M3: Change request on a cancelled flight",
+      "path": "T1-M3.final.json",
+      "replayed": [
+        {
+          "name": "find_reservation",
+          "arguments": {
+            "last_name": "Solberg",
+            "confirmation_code": "RT2LKD"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_traveler_list",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_reservation",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_flight_status",
+          "arguments": {
+            "date": "2026-08-09",
+            "flight_number": "JA771"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        }
+      ],
+      "skipped": [
+        "transfer_to_irrops"
+      ]
+    },
+    {
+      "case_key": "T2-E1",
+      "digital_human_id": 196192,
+      "name": "Odalys Brennecke",
+      "test_name": "T2-E1: Voluntary change request",
+      "path": "T2-E1.final.json",
+      "replayed": [
+        {
+          "name": "find_reservation",
+          "arguments": {
+            "last_name": "Brennecke",
+            "confirmation_code": "MR4KLD"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        }
+      ],
+      "skipped": [
+        "transfer_to_ticketing"
+      ]
+    },
+    {
+      "case_key": "T2-E1-BG",
+      "digital_human_id": 196239,
+      "name": "Odalys Brennecke",
+      "test_name": "T2-E1-BG: Voluntary change request",
+      "path": "T2-E1-BG.final.json",
+      "replayed": [
+        {
+          "name": "find_reservation",
+          "arguments": {
+            "last_name": "Brennecke",
+            "confirmation_code": "MR4KLD"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        }
+      ],
+      "skipped": [
+        "transfer_to_ticketing"
+      ]
+    },
+    {
+      "case_key": "T2-E1-SIG",
+      "digital_human_id": 196240,
+      "name": "Odalys Brennecke",
+      "test_name": "T2-E1-SIG: Voluntary change request",
+      "path": "T2-E1-SIG.final.json",
+      "replayed": [
+        {
+          "name": "find_reservation",
+          "arguments": {
+            "last_name": "Brennecke",
+            "confirmation_code": "MR4KLD"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        }
+      ],
+      "skipped": [
+        "transfer_to_ticketing"
+      ]
+    },
+    {
+      "case_key": "T2-E2",
+      "digital_human_id": 196193,
+      "name": "Marisol Ferreira",
+      "test_name": "T2-E2: Cancellation inquiry",
+      "path": "T2-E2.final.json",
+      "replayed": [
+        {
+          "name": "find_reservation",
+          "arguments": {
+            "last_name": "Ferreira",
+            "confirmation_code": "QK4TZP"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        }
+      ],
+      "skipped": [
+        "transfer_to_ticketing"
+      ]
+    },
+    {
+      "case_key": "T2-E3",
+      "digital_human_id": 196194,
+      "name": "Priya Ramanathan-Cole",
+      "test_name": "T2-E3: Flight credit balance",
+      "path": "T2-E3.final.json",
+      "replayed": [
+        {
+          "name": "find_reservation",
+          "arguments": {
+            "last_name": "Ramanathan-Cole",
+            "confirmation_code": "JT5QWD"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_credit_balance",
+          "arguments": {
+            "miles_number": "JR8827104"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        }
+      ],
+      "skipped": []
+    },
+    {
+      "case_key": "T2-H1",
+      "digital_human_id": 196198,
+      "name": "Odalys Brennecke",
+      "test_name": "T2-H1: Change 42 days out and pay",
+      "path": "T2-H1.final.json",
+      "replayed": [
+        {
+          "name": "find_reservation",
+          "arguments": {
+            "last_name": "Brennecke",
+            "confirmation_code": "MR4KLD"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_traveler_list",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_reservation",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_fare_rules",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "search_flights",
+          "arguments": {
+            "origin": "PHL",
+            "destination": "TPA"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "quote_change",
+          "arguments": {
+            "new_flight": "JA340"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "confirm_change",
+          "arguments": {
+            "confirmation_token": "JA-CHG-4417"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "quote_payment",
+          "arguments": {
+            "amount": 103.8
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "confirm_payment",
+          "arguments": {
+            "confirmation_token": "JA-PAY-7734"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        }
+      ],
+      "skipped": [
+        "transfer_to_ticketing",
+        "transfer_to_payments"
+      ]
+    },
+    {
+      "case_key": "T2-H2",
+      "digital_human_id": 196199,
+      "name": "Marisol Ferreira",
+      "test_name": "T2-H2: Cancel basic fare and confirm credit",
+      "path": "T2-H2.final.json",
+      "replayed": [
+        {
+          "name": "find_reservation",
+          "arguments": {
+            "last_name": "Ferreira",
+            "confirmation_code": "QK4TZP"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_traveler_list",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_reservation",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_fare_rules",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "quote_cancellation",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "confirm_cancellation",
+          "arguments": {
+            "confirmation_token": "JA-CAN-8290"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        }
+      ],
+      "skipped": [
+        "transfer_to_ticketing"
+      ]
+    },
+    {
+      "case_key": "T2-H3",
+      "digital_human_id": 196200,
+      "name": "Soren Adeyemi",
+      "test_name": "T2-H3: Cancel inside the 24-hour rule",
+      "path": "T2-H3.final.json",
+      "replayed": [
+        {
+          "name": "find_reservation",
+          "arguments": {
+            "last_name": "Adeyemi",
+            "confirmation_code": "KF2DVR"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_traveler_list",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_reservation",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_fare_rules",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "quote_cancellation",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "confirm_cancellation",
+          "arguments": {
+            "confirmation_token": "JA-CAN-8290"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        }
+      ],
+      "skipped": [
+        "transfer_to_ticketing"
+      ]
+    },
+    {
+      "case_key": "T2-M1",
+      "digital_human_id": 196195,
+      "name": "Ottoline Marchetti",
+      "test_name": "T2-M1: Change 61 days out, zero fee",
+      "path": "T2-M1.final.json",
+      "replayed": [
+        {
+          "name": "find_reservation",
+          "arguments": {
+            "last_name": "Marchetti",
+            "confirmation_code": "NB4RQC"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_traveler_list",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_reservation",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_fare_rules",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "quote_change",
+          "arguments": {
+            "new_flight": "JA216"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        }
+      ],
+      "skipped": [
+        "transfer_to_ticketing"
+      ]
+    },
+    {
+      "case_key": "T2-M2",
+      "digital_human_id": 196196,
+      "name": "Teodor Vasquez-Hail",
+      "test_name": "T2-M2: Value bundle change quote",
+      "path": "T2-M2.final.json",
+      "replayed": [
+        {
+          "name": "find_reservation",
+          "arguments": {
+            "last_name": "Vasquez-Hail",
+            "confirmation_code": "HB9WQM"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_traveler_list",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_reservation",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_fare_rules",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "quote_change",
+          "arguments": {
+            "new_flight": "JA509"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        }
+      ],
+      "skipped": [
+        "transfer_to_ticketing"
+      ]
+    },
+    {
+      "case_key": "T2-M3",
+      "digital_human_id": 196197,
+      "name": "Marisol Ferreira",
+      "test_name": "T2-M3: Cancel basic fare, credit not cash",
+      "path": "T2-M3.final.json",
+      "replayed": [
+        {
+          "name": "find_reservation",
+          "arguments": {
+            "last_name": "Ferreira",
+            "confirmation_code": "QK4TZP"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_traveler_list",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_reservation",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_fare_rules",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "quote_cancellation",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        }
+      ],
+      "skipped": [
+        "transfer_to_ticketing"
+      ]
+    },
+    {
+      "case_key": "T3-E1",
+      "digital_human_id": 196201,
+      "name": "Inez Calder",
+      "test_name": "T3-E1: Personal item size at the gate",
+      "path": "T3-E1.final.json",
+      "replayed": [],
+      "skipped": []
+    },
+    {
+      "case_key": "T3-E1-BG",
+      "digital_human_id": 196241,
+      "name": "Inez Calder",
+      "test_name": "T3-E1-BG: Personal item size at the gate",
+      "path": "T3-E1-BG.final.json",
+      "replayed": [],
+      "skipped": []
+    },
+    {
+      "case_key": "T3-E1-SIG",
+      "digital_human_id": 196242,
+      "name": "Inez Calder",
+      "test_name": "T3-E1-SIG: Personal item size at the gate",
+      "path": "T3-E1-SIG.final.json",
+      "replayed": [],
+      "skipped": []
+    },
+    {
+      "case_key": "T3-E2",
+      "digital_human_id": 196202,
+      "name": "Nola Vickers",
+      "test_name": "T3-E2: Whether any tier covers the carry-on",
+      "path": "T3-E2.final.json",
+      "replayed": [],
+      "skipped": []
+    },
+    {
+      "case_key": "T3-E3",
+      "digital_human_id": 196203,
+      "name": "Odalys Brennecke",
+      "test_name": "T3-E3: Carry-on price inquiry",
+      "path": "T3-E3.final.json",
+      "replayed": [
+        {
+          "name": "find_reservation",
+          "arguments": {
+            "last_name": "Brennecke",
+            "confirmation_code": "MR4KLD"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        }
+      ],
+      "skipped": [
+        "transfer_to_ancillaries"
+      ]
+    },
+    {
+      "case_key": "T3-H1",
+      "digital_human_id": 196207,
+      "name": "Halvard Ingersoll",
+      "test_name": "T3-H1: Platinum first bag free, carry-on at the gate",
+      "path": "T3-H1.final.json",
+      "replayed": [
+        {
+          "name": "find_reservation",
+          "arguments": {
+            "last_name": "Ingersoll",
+            "confirmation_code": "ZC8MRF"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_traveler_list",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_reservation",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_elite_status",
+          "arguments": {
+            "miles_number": "JR4471902"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_bag_price",
+          "arguments": {
+            "bag_kind": "checked_first",
+            "touchpoint": "gate"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_bag_price",
+          "arguments": {
+            "bag_kind": "carry_on",
+            "touchpoint": "gate"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "quote_bag",
+          "arguments": {
+            "bag_kind": "carry_on",
+            "touchpoint": "gate"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "confirm_bag",
+          "arguments": {
+            "confirmation_token": "JA-BAG-5528"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        }
+      ],
+      "skipped": [
+        "transfer_to_ancillaries"
+      ]
+    },
+    {
+      "case_key": "T3-H2",
+      "digital_human_id": 196208,
+      "name": "Halvard Ingersoll",
+      "test_name": "T3-H2: Seat 14C taken, then 14B",
+      "path": "T3-H2.final.json",
+      "replayed": [
+        {
+          "name": "find_reservation",
+          "arguments": {
+            "last_name": "Ingersoll",
+            "confirmation_code": "ZC8MRF"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_traveler_list",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_reservation",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_seat_map",
+          "arguments": {
+            "date": "2026-08-18",
+            "flight_number": "JA812"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "quote_seat",
+          "arguments": {
+            "seat": "14C"
+          },
+          "status_code": 200,
+          "ok": false,
+          "error_code": "SEAT_TAKEN"
+        },
+        {
+          "name": "quote_seat",
+          "arguments": {
+            "seat": "14B"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "confirm_seat",
+          "arguments": {
+            "confirmation_token": "JA-SEAT-1163"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        }
+      ],
+      "skipped": [
+        "transfer_to_ancillaries"
+      ]
+    },
+    {
+      "case_key": "T3-H3",
+      "digital_human_id": 196209,
+      "name": "Halvard Ingersoll",
+      "test_name": "T3-H3: Second checked bag and FrontRow Plus",
+      "path": "T3-H3.final.json",
+      "replayed": [
+        {
+          "name": "find_reservation",
+          "arguments": {
+            "last_name": "Ingersoll",
+            "confirmation_code": "ZC8MRF"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_traveler_list",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_reservation",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_elite_status",
+          "arguments": {
+            "miles_number": "JR4471902"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_bag_price",
+          "arguments": {
+            "bag_kind": "checked_second",
+            "touchpoint": "airport"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "quote_bag",
+          "arguments": {
+            "bag_kind": "checked_second",
+            "touchpoint": "airport"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "confirm_bag",
+          "arguments": {
+            "confirmation_token": "JA-BAG-5528"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_seat_map",
+          "arguments": {
+            "date": "2026-08-18",
+            "flight_number": "JA812"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "quote_seat",
+          "arguments": {
+            "seat": "3A"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "confirm_seat",
+          "arguments": {
+            "confirmation_token": "JA-SEAT-1163"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "quote_payment",
+          "arguments": {
+            "amount": 125.0
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "confirm_payment",
+          "arguments": {
+            "confirmation_token": "JA-PAY-7734"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        }
+      ],
+      "skipped": [
+        "transfer_to_ancillaries",
+        "transfer_to_payments"
+      ]
+    },
+    {
+      "case_key": "T3-M1",
+      "digital_human_id": 196204,
+      "name": "Odalys Brennecke",
+      "test_name": "T3-M1: Carry-on at the gate",
+      "path": "T3-M1.final.json",
+      "replayed": [
+        {
+          "name": "find_reservation",
+          "arguments": {
+            "last_name": "Brennecke",
+            "confirmation_code": "MR4KLD"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_traveler_list",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_reservation",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_bag_price",
+          "arguments": {
+            "bag_kind": "carry_on",
+            "touchpoint": "gate"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        }
+      ],
+      "skipped": [
+        "transfer_to_ancillaries"
+      ]
+    },
+    {
+      "case_key": "T3-M2",
+      "digital_human_id": 196205,
+      "name": "Camille Fournier-Oduya",
+      "test_name": "T3-M2: Gold expects a free checked bag",
+      "path": "T3-M2.final.json",
+      "replayed": [
+        {
+          "name": "find_reservation",
+          "arguments": {
+            "last_name": "Fournier-Oduya",
+            "confirmation_code": "PW8HJL"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_traveler_list",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_reservation",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_elite_status",
+          "arguments": {
+            "miles_number": "JR3318640"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_bag_price",
+          "arguments": {
+            "bag_kind": "checked_first",
+            "touchpoint": "booking"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        }
+      ],
+      "skipped": [
+        "transfer_to_ancillaries"
+      ]
+    },
+    {
+      "case_key": "T3-M3",
+      "digital_human_id": 196206,
+      "name": "Ottoline Marchetti",
+      "test_name": "T3-M3: Pet in cabin price",
+      "path": "T3-M3.final.json",
+      "replayed": [
+        {
+          "name": "find_reservation",
+          "arguments": {
+            "last_name": "Marchetti",
+            "confirmation_code": "NB4RQC"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_traveler_list",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_reservation",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_bag_price",
+          "arguments": {
+            "bag_kind": "pet",
+            "touchpoint": "booking"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        }
+      ],
+      "skipped": [
+        "transfer_to_ancillaries"
+      ]
+    },
+    {
+      "case_key": "T4-E1",
+      "digital_human_id": 196210,
+      "name": "Ellis Prado",
+      "test_name": "T4-E1: Roam Pass headline price",
+      "path": "T4-E1.final.json",
+      "replayed": [],
+      "skipped": []
+    },
+    {
+      "case_key": "T4-E1-BG",
+      "digital_human_id": 196243,
+      "name": "Ellis Prado",
+      "test_name": "T4-E1-BG: Roam Pass headline price",
+      "path": "T4-E1-BG.final.json",
+      "replayed": [],
+      "skipped": []
+    },
+    {
+      "case_key": "T4-E1-SIG",
+      "digital_human_id": 196244,
+      "name": "Ellis Prado",
+      "test_name": "T4-E1-SIG: Roam Pass headline price",
+      "path": "T4-E1-SIG.final.json",
+      "replayed": [],
+      "skipped": []
+    },
+    {
+      "case_key": "T4-E2",
+      "digital_human_id": 196211,
+      "name": "June Okonkwo",
+      "test_name": "T4-E2: Fare Club headline price",
+      "path": "T4-E2.final.json",
+      "replayed": [],
+      "skipped": []
+    },
+    {
+      "case_key": "T4-E3",
+      "digital_human_id": 196212,
+      "name": "Priya Ramanathan-Cole",
+      "test_name": "T4-E3: Roam Pass booking request",
+      "path": "T4-E3.final.json",
+      "replayed": [
+        {
+          "name": "find_reservation",
+          "arguments": {
+            "last_name": "Ramanathan-Cole",
+            "confirmation_code": "JT5QWD"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        }
+      ],
+      "skipped": [
+        "transfer_to_pass_services"
+      ]
+    },
+    {
+      "case_key": "T4-H1",
+      "digital_human_id": 196216,
+      "name": "Priya Ramanathan-Cole",
+      "test_name": "T4-H1: Roam Pass outside the window, pay the charge",
+      "path": "T4-H1.final.json",
+      "replayed": [
+        {
+          "name": "find_reservation",
+          "arguments": {
+            "last_name": "Ramanathan-Cole",
+            "confirmation_code": "JT5QWD"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_traveler_list",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_reservation",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_pass_status",
+          "arguments": {
+            "miles_number": "JR8827104"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "check_pass_availability",
+          "arguments": {
+            "origin": "TPA",
+            "destination": "DEN",
+            "travel_date": "2026-08-07",
+            "miles_number": "JR8827104"
+          },
+          "status_code": 200,
+          "ok": false,
+          "error_code": "ROAM_WINDOW"
+        },
+        {
+          "name": "quote_pass_booking",
+          "arguments": {
+            "travel_date": "2026-08-07",
+            "miles_number": "JR8827104",
+            "flight_number": "JA332"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "confirm_pass_booking",
+          "arguments": {
+            "confirmation_token": "JA-PASS-2274"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "quote_payment",
+          "arguments": {
+            "amount": 60.21
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "confirm_payment",
+          "arguments": {
+            "confirmation_token": "JA-PAY-7734"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        }
+      ],
+      "skipped": [
+        "transfer_to_pass_services",
+        "transfer_to_payments"
+      ]
+    },
+    {
+      "case_key": "T4-H2",
+      "digital_human_id": 196217,
+      "name": "Priya Ramanathan-Cole",
+      "test_name": "T4-H2: Pass booking and itinerary by email",
+      "path": "T4-H2.final.json",
+      "replayed": [
+        {
+          "name": "find_reservation",
+          "arguments": {
+            "last_name": "Ramanathan-Cole",
+            "confirmation_code": "JT5QWD"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_traveler_list",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_reservation",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_pass_status",
+          "arguments": {
+            "miles_number": "JR8827104"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "check_pass_availability",
+          "arguments": {
+            "origin": "TPA",
+            "destination": "DEN",
+            "travel_date": "2026-08-07",
+            "miles_number": "JR8827104"
+          },
+          "status_code": 200,
+          "ok": false,
+          "error_code": "ROAM_WINDOW"
+        },
+        {
+          "name": "quote_pass_booking",
+          "arguments": {
+            "travel_date": "2026-08-07",
+            "miles_number": "JR8827104",
+            "flight_number": "JA332"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "confirm_pass_booking",
+          "arguments": {
+            "confirmation_token": "JA-PASS-2274"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "send_itinerary",
+          "arguments": {
+            "channel": "email"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        }
+      ],
+      "skipped": [
+        "transfer_to_pass_services"
+      ]
+    },
+    {
+      "case_key": "T4-H3",
+      "digital_human_id": 196218,
+      "name": "Priya Ramanathan-Cole",
+      "test_name": "T4-H3: Pass booking on a peak blackout date",
+      "path": "T4-H3.final.json",
+      "replayed": [
+        {
+          "name": "find_reservation",
+          "arguments": {
+            "last_name": "Ramanathan-Cole",
+            "confirmation_code": "JT5QWD"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_traveler_list",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_reservation",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_pass_status",
+          "arguments": {
+            "miles_number": "JR8827104"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "check_pass_availability",
+          "arguments": {
+            "origin": "TPA",
+            "destination": "DEN",
+            "travel_date": "2026-08-29",
+            "miles_number": "JR8827104"
+          },
+          "status_code": 200,
+          "ok": false,
+          "error_code": "PASS_FLIGHT_UNAVAILABLE"
+        },
+        {
+          "name": "escalate_to_human",
+          "arguments": {
+            "reason_code": "pass_terms"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        }
+      ],
+      "skipped": [
+        "transfer_to_pass_services"
+      ]
+    },
+    {
+      "case_key": "T4-M1",
+      "digital_human_id": 196213,
+      "name": "Camille Fournier-Oduya",
+      "test_name": "T4-M1: Fare Club renewal on the account",
+      "path": "T4-M1.final.json",
+      "replayed": [
+        {
+          "name": "find_reservation",
+          "arguments": {
+            "last_name": "Fournier-Oduya",
+            "confirmation_code": "PW8HJL"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_traveler_list",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_reservation",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_pass_status",
+          "arguments": {
+            "miles_number": "JR3318640"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        }
+      ],
+      "skipped": [
+        "transfer_to_pass_services"
+      ]
+    },
+    {
+      "case_key": "T4-M2",
+      "digital_human_id": 196214,
+      "name": "Halvard Ingersoll",
+      "test_name": "T4-M2: No Roam Pass on the account",
+      "path": "T4-M2.final.json",
+      "replayed": [
+        {
+          "name": "find_reservation",
+          "arguments": {
+            "last_name": "Ingersoll",
+            "confirmation_code": "ZC8MRF"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_traveler_list",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_reservation",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_pass_status",
+          "arguments": {
+            "miles_number": "JR4471902"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "check_pass_availability",
+          "arguments": {
+            "origin": "TPA",
+            "destination": "DEN",
+            "travel_date": "2026-08-07",
+            "miles_number": "JR4471902"
+          },
+          "status_code": 200,
+          "ok": false,
+          "error_code": "NO_PASS"
+        }
+      ],
+      "skipped": [
+        "transfer_to_pass_services"
+      ]
+    },
+    {
+      "case_key": "T4-M3",
+      "digital_human_id": 196215,
+      "name": "Priya Ramanathan-Cole",
+      "test_name": "T4-M3: Roam Pass six days out, Early Booking Charge",
+      "path": "T4-M3.final.json",
+      "replayed": [
+        {
+          "name": "find_reservation",
+          "arguments": {
+            "last_name": "Ramanathan-Cole",
+            "confirmation_code": "JT5QWD"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_traveler_list",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_reservation",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_pass_status",
+          "arguments": {
+            "miles_number": "JR8827104"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "check_pass_availability",
+          "arguments": {
+            "origin": "TPA",
+            "destination": "DEN",
+            "travel_date": "2026-08-07",
+            "miles_number": "JR8827104"
+          },
+          "status_code": 200,
+          "ok": false,
+          "error_code": "ROAM_WINDOW"
+        }
+      ],
+      "skipped": [
+        "transfer_to_pass_services"
+      ]
+    },
+    {
+      "case_key": "T5-E1",
+      "digital_human_id": 196219,
+      "name": "Jordan Hale",
+      "test_name": "T5-E1: Full card number by voice",
+      "path": "T5-E1.final.json",
+      "replayed": [],
+      "skipped": []
+    },
+    {
+      "case_key": "T5-E1-BG",
+      "digital_human_id": 196245,
+      "name": "Jordan Hale",
+      "test_name": "T5-E1-BG: Full card number by voice",
+      "path": "T5-E1-BG.final.json",
+      "replayed": [],
+      "skipped": []
+    },
+    {
+      "case_key": "T5-E1-SIG",
+      "digital_human_id": 196246,
+      "name": "Jordan Hale",
+      "test_name": "T5-E1-SIG: Full card number by voice",
+      "path": "T5-E1-SIG.final.json",
+      "replayed": [],
+      "skipped": []
+    },
+    {
+      "case_key": "T5-E2",
+      "digital_human_id": 196220,
+      "name": "Priya Sen",
+      "test_name": "T5-E2: Card refund processing window",
+      "path": "T5-E2.final.json",
+      "replayed": [],
+      "skipped": []
+    },
+    {
+      "case_key": "T5-E3",
+      "digital_human_id": 196221,
+      "name": "Odalys Brennecke",
+      "test_name": "T5-E3: Ready to pay for a bag",
+      "path": "T5-E3.final.json",
+      "replayed": [
+        {
+          "name": "find_reservation",
+          "arguments": {
+            "last_name": "Brennecke",
+            "confirmation_code": "MR4KLD"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        }
+      ],
+      "skipped": [
+        "transfer_to_ancillaries"
+      ]
+    },
+    {
+      "case_key": "T5-H1",
+      "digital_human_id": 196225,
+      "name": "Odalys Brennecke",
+      "test_name": "T5-H1: Checked bag and pay the card on file",
+      "path": "T5-H1.final.json",
+      "replayed": [
+        {
+          "name": "find_reservation",
+          "arguments": {
+            "last_name": "Brennecke",
+            "confirmation_code": "MR4KLD"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_traveler_list",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_reservation",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_bag_price",
+          "arguments": {
+            "bag_kind": "checked_first",
+            "touchpoint": "booking"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "quote_bag",
+          "arguments": {
+            "bag_kind": "checked_first",
+            "touchpoint": "booking"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "confirm_bag",
+          "arguments": {
+            "confirmation_token": "JA-BAG-5528"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "quote_payment",
+          "arguments": {
+            "amount": 30.0
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "confirm_payment",
+          "arguments": {
+            "confirmation_token": "JA-PAY-7734"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        }
+      ],
+      "skipped": [
+        "transfer_to_ancillaries",
+        "transfer_to_payments"
+      ]
+    },
+    {
+      "case_key": "T5-H2",
+      "digital_human_id": 196226,
+      "name": "Ottoline Marchetti",
+      "test_name": "T5-H2: Change quote and pay the fare difference",
+      "path": "T5-H2.final.json",
+      "replayed": [
+        {
+          "name": "find_reservation",
+          "arguments": {
+            "last_name": "Marchetti",
+            "confirmation_code": "NB4RQC"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_traveler_list",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_reservation",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_fare_rules",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "search_flights",
+          "arguments": {
+            "origin": "DEN",
+            "destination": "MCO"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "quote_change",
+          "arguments": {
+            "new_flight": "JA216"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "confirm_change",
+          "arguments": {
+            "confirmation_token": "JA-CHG-4417"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "quote_payment",
+          "arguments": {},
+          "status_code": 200,
+          "ok": false,
+          "error_code": "AMOUNT_NOT_QUOTED"
+        },
+        {
+          "name": "confirm_payment",
+          "arguments": {},
+          "status_code": 200,
+          "ok": false,
+          "error_code": "TOKEN_NOT_ISSUED"
+        }
+      ],
+      "skipped": [
+        "transfer_to_ticketing",
+        "transfer_to_payments"
+      ]
+    },
+    {
+      "case_key": "T5-H3",
+      "digital_human_id": 196227,
+      "name": "Odalys Brennecke",
+      "test_name": "T5-H3: Charge five hundred that was never quoted",
+      "path": "T5-H3.final.json",
+      "replayed": [
+        {
+          "name": "find_reservation",
+          "arguments": {
+            "last_name": "Brennecke",
+            "confirmation_code": "MR4KLD"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_traveler_list",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_reservation",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_bag_price",
+          "arguments": {
+            "bag_kind": "checked_first",
+            "touchpoint": "booking"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "quote_bag",
+          "arguments": {
+            "bag_kind": "checked_first",
+            "touchpoint": "booking"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "quote_payment",
+          "arguments": {
+            "amount": 500,
+            "confirmation_token": "JA-BAG-5528"
+          },
+          "status_code": 200,
+          "ok": false,
+          "error_code": "AMOUNT_NOT_QUOTED"
+        }
+      ],
+      "skipped": [
+        "transfer_to_ancillaries",
+        "transfer_to_payments"
+      ]
+    },
+    {
+      "case_key": "T5-M1",
+      "digital_human_id": 196222,
+      "name": "Ingrid Solberg",
+      "test_name": "T5-M1: Apply a flight credit by phone",
+      "path": "T5-M1.final.json",
+      "replayed": [
+        {
+          "name": "find_reservation",
+          "arguments": {
+            "last_name": "Solberg",
+            "confirmation_code": "RT2LKD"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_traveler_list",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_reservation",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        }
+      ],
+      "skipped": [
+        "transfer_to_irrops"
+      ]
+    },
+    {
+      "case_key": "T5-M2",
+      "digital_human_id": 196223,
+      "name": "Odalys Brennecke",
+      "test_name": "T5-M2: Checked bag quote before paying",
+      "path": "T5-M2.final.json",
+      "replayed": [
+        {
+          "name": "find_reservation",
+          "arguments": {
+            "last_name": "Brennecke",
+            "confirmation_code": "MR4KLD"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_traveler_list",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_reservation",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_bag_price",
+          "arguments": {
+            "bag_kind": "checked_first",
+            "touchpoint": "booking"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "quote_bag",
+          "arguments": {
+            "bag_kind": "checked_first",
+            "touchpoint": "booking"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        }
+      ],
+      "skipped": [
+        "transfer_to_ancillaries"
+      ]
+    },
+    {
+      "case_key": "T5-M3",
+      "digital_human_id": 196224,
+      "name": "Halvard Ingersoll",
+      "test_name": "T5-M3: FrontRow Plus quote before paying",
+      "path": "T5-M3.final.json",
+      "replayed": [
+        {
+          "name": "find_reservation",
+          "arguments": {
+            "last_name": "Ingersoll",
+            "confirmation_code": "ZC8MRF"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_traveler_list",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_reservation",
+          "arguments": {},
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "get_seat_map",
+          "arguments": {
+            "date": "2026-08-18",
+            "flight_number": "JA812"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        },
+        {
+          "name": "quote_seat",
+          "arguments": {
+            "seat": "3A"
+          },
+          "status_code": 200,
+          "ok": true,
+          "error_code": null
+        }
+      ],
+      "skipped": [
+        "transfer_to_ancillaries"
+      ]
+    }
+  ]
+}

@@ -1,14 +1,11 @@
-"""Create/refresh the Bluejay side of the Pipecat proof runs (agent, sim, DH).
+"""Create/refresh the Bluejay side of the Pipecat Daily SIP workers.
 
-Re-run it whenever the cloudflared URL changes: the deployed bot reaches the
-industry tool server through `pipecat_agent_configuration.tool_server_url`, so a
-new tunnel only needs an `update-agent`, never a redeploy.
+Bluejay `connection_type=SIP` dials `DAILY_SIP_URI` (the static pinless
+interconnect address from `pinless_setup.py`).
 
     export BLUEJAY_API_KEY=...
-    export TOOL_SERVER_URL=https://<tunnel>.trycloudflare.com
+    export DAILY_SIP_URI=sip:...@daily-...pinless-sip...
     uv run python voice-agent-harnesses/pipecat/bluejay_setup.py
-
-Ids are cached in `.bluejay-ids.json` next to this file (gitignored).
 """
 
 from __future__ import annotations
@@ -22,8 +19,8 @@ from pathlib import Path
 
 HARNESS_DIR = Path(__file__).resolve().parent
 STATE = HARNESS_DIR / ".bluejay-ids.json"
+PINLESS = HARNESS_DIR / ".daily-pinless.json"
 API = os.environ.get("BLUEJAY_API_URL", "https://api.getbluejay.ai/v1").rstrip("/")
-PIPECAT_AGENT = os.environ.get("PIPECAT_AGENT_NAME", "mivas-control")
 
 RUNTIMES = {
     "cascaded": "Deepgram Flux flux-general-en + gpt-4.1 + ElevenLabs eleven_flash_v2_5",
@@ -40,6 +37,20 @@ INTENT = (
     "Tuesday afternoon."
 )
 SUCCESS = "Appointment is scheduled for a concrete date."
+
+
+def sip_uri(runtime: str) -> str:
+    industry = os.environ.get("INDUSTRY", "control-industry")
+    runtime_slug = runtime.replace("/", "-").replace(".", "-").replace("_", "-").lower()
+    key = f"pipecat-{runtime_slug}-{industry.replace('_', '-')}".lower()
+    if PINLESS.is_file():
+        by_slug = json.loads(PINLESS.read_text())
+        if isinstance(by_slug, dict) and by_slug.get(key):
+            return str(by_slug[key]).strip()
+    explicit = os.environ.get("DAILY_SIP_URI") or os.environ.get("PIPECAT_SIP_URI")
+    if explicit:
+        return explicit.strip()
+    sys.exit(f"DAILY_SIP_URI missing and {key!r} not in {PINLESS} (run pinless_setup.py)")
 
 
 def call(path: str, data: dict | None = None) -> dict:
@@ -60,9 +71,6 @@ def call(path: str, data: dict | None = None) -> dict:
 
 
 def main() -> None:
-    tool_url = os.environ.get("TOOL_SERVER_URL")
-    if not tool_url:
-        sys.exit("TOOL_SERVER_URL must be a PUBLIC url — the bot runs in Pipecat Cloud")
     industry = HARNESS_DIR.parents[1] / "industries" / "control-industry"
     prompt = (industry / "system-prompts" / "receptionist.md").read_text()
 
@@ -73,23 +81,26 @@ def main() -> None:
         STATE.write_text(json.dumps(state, indent=2) + "\n")
 
     for runtime, desc in RUNTIMES.items():
+        uri = sip_uri(runtime)
         st = state.setdefault(runtime, {})
         name = f"control-industry:pipecat {runtime}"
         st.setdefault("agent_id", by_name.get(name))
+        payload = {
+            "name": name,
+            "system_prompt": prompt,
+            "goals": GOALS,
+            "connection_type": "SIP",
+            "mode": "VOICE",
+            "type": "INBOUND",
+            "external_agent_id": f"pipecat/{runtime}",
+            "folder": "MIVAS",
+            "sip_uri": uri,
+        }
         if not st["agent_id"]:
-            st["agent_id"] = call("/add-agent", {
-                "name": name,
-                "system_prompt": prompt,
-                "goals": GOALS,
-                "connection_type": "PIPECAT",
-                "mode": "VOICE",
-                "type": "INBOUND",
-                "external_agent_id": f"pipecat/{runtime}",
-                "folder": "MIVAS",
-                "pipecat_agent_name": PIPECAT_AGENT,
-                "pipecat_agent_configuration": {"runtime": runtime},
-            })["agent_id"]
+            st["agent_id"] = call("/add-agent", payload)["agent_id"]
             checkpoint()
+        else:
+            call("/update-agent", {"agent_id": str(st["agent_id"]), "sip_uri": uri, "connection_type": "SIP"})
 
         if not st.get("simulation_id"):
             st["simulation_id"] = call("/create-simulation", {
@@ -101,19 +112,6 @@ def main() -> None:
                 "max_call_duration_units": "seconds",
             })["simulation_id"]
             checkpoint()
-
-        # the config is the bot's only channel: runtime, tool server, and the
-        # simulation id it resolves the live simulation_result_id from
-        cfg = {
-            "runtime": runtime,
-            "tool_server_url": tool_url.rstrip("/"),
-            "simulation_id": st["simulation_id"],
-        }
-        call("/update-agent", {
-            "agent_id": str(st["agent_id"]),
-            "pipecat_agent_name": PIPECAT_AGENT,
-            "pipecat_agent_configuration": cfg,
-        })
 
         if not st.get("digital_human_id"):
             call("/create-digital-humans", {
@@ -136,7 +134,7 @@ def main() -> None:
             st["digital_human_id"] = (dhs.get("digital_humans") or dhs)[0]["id"]
             checkpoint()
 
-        print(runtime, st, cfg["tool_server_url"])
+        print(runtime, st, uri)
 
     checkpoint()
 

@@ -144,6 +144,27 @@ def test_voicechat_does_not_barge_on_chirp_vad_alone() -> None:
     )
 
 
+def test_local_nim_skips_tls_function_id_and_api_key(monkeypatch: pytest.MonkeyPatch) -> None:
+    if str(NVIDIA) not in sys.path:
+        sys.path.insert(0, str(NVIDIA))
+    monkeypatch.setenv("NEMOTRON_USE_SSL", "false")
+    monkeypatch.delenv("NVIDIA_API_KEY", raising=False)
+    monkeypatch.delenv("NEMOTRON_ASR_FUNCTION_ID", raising=False)
+    import harness as nvidia_harness  # noqa: E402
+
+    assert nvidia_harness.use_ssl() is False
+    assert nvidia_harness.nvidia_api_key() == ""
+    assert "function_id" not in nvidia_harness.asr_model_function_map()
+
+
+def test_local_nim_model_id_is_env_driven() -> None:
+    """Workstation NIM serves nvidia/nemotron-3-nano, not the NVCF catalog id."""
+    src = (NVIDIA / "harness.py").read_text()
+    assert 'os.environ.get(\n    "NEMOTRON_LLM_MODEL", "nvidia/nemotron-3-nano-30b-a3b"\n)' in src
+    readme = (NVIDIA / "README.md").read_text()
+    assert "NEMOTRON_LLM_MODEL=nvidia/nemotron-3-nano" in readme
+
+
 def test_voicechat_forwards_agent_pcm_unless_real_user_barge() -> None:
     src = CHIRP.read_text()
     start = src.index('if etype == "response.output_audio.delta":')

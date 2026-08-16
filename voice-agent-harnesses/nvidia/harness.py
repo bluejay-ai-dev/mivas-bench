@@ -193,11 +193,35 @@ def tool_server_url() -> str:
     return os.environ.get("TOOL_SERVER_URL", "http://127.0.0.1:8000").rstrip("/")
 
 
+def use_ssl() -> bool:
+    """TLS for ASR/TTS gRPC. Cloud NVCF is TLS; a local/LAN NIM is plaintext."""
+    raw = os.environ.get("NEMOTRON_USE_SSL", "").strip().lower()
+    if raw:
+        return raw in ("1", "true", "yes", "on")
+    return "nvcf.nvidia.com" in ASR_SERVER or ASR_SERVER.endswith(":443")
+
+
 def nvidia_api_key() -> str:
     key = os.environ.get("NVIDIA_API_KEY", "").strip()
-    if not key:
+    if key:
+        return key
+    if use_ssl():
         raise SystemExit("need NVIDIA_API_KEY")
-    return key
+    return ""
+
+
+def asr_model_function_map() -> dict[str, str]:
+    """NVCF needs function_id. A local NIM only wants the model name."""
+    out: dict[str, str] = {"model_name": ASR_MODEL}
+    explicit = os.environ.get("NEMOTRON_ASR_FUNCTION_ID")
+    if explicit is not None and not explicit.strip():
+        return out
+    if not use_ssl():
+        if explicit and explicit.strip():
+            out["function_id"] = explicit.strip()
+        return out
+    out["function_id"] = ASR_FUNCTION_ID
+    return out
 
 
 async def _execute_tool(
@@ -324,12 +348,9 @@ def build_stt():
     return NonblockingNvidiaSTTService(
         api_key=nvidia_api_key(),
         server=ASR_SERVER,
-        use_ssl=True,
+        use_ssl=use_ssl(),
         sample_rate=SAMPLE_RATE,
-        model_function_map={
-            "function_id": ASR_FUNCTION_ID,
-            "model_name": ASR_MODEL,
-        },
+        model_function_map=asr_model_function_map(),
     )
 
 
@@ -807,7 +828,7 @@ def build_tts():
     return NonblockingNvidiaTTSService(
         api_key=nvidia_api_key(),
         server=TTS_SERVER,
-        use_ssl=True,
+        use_ssl=use_ssl(),
         voice_id=TTS_VOICE,
         sample_rate=SAMPLE_RATE,
     )

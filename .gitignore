@@ -26,6 +26,9 @@ uv.toml
 # per-call SQLite copies (X-Mivas-Call-Id isolation)
 **/db/calls/
 
+# downloaded hangup dumps (slug/run/dh/result)
+actual-final-state/
+
 # cached provider-side agent IDs (e.g. ElevenLabs ensure_agents)
 **/.agents.json
 
@@ -34,6 +37,8 @@ uv.toml
 
 # cached Bluejay agent/sim/DH ids (pipecat harness bootstrap)
 **/.bluejay-ids.json
+# Daily pinless SIP URIs written by pinless_setup.py
+**/.daily-pinless.json
 
 # OS / editor
 .DS_Store

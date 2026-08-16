@@ -76,10 +76,14 @@ def build_agent(bp: dict[str, Any], hangup: asyncio.Event) -> harness.BlueprintA
 
 
 if __name__ == "__main__":
-    harness.serve(
-        AGENT_NAME,
-        build_session=build_session,
-        build_agent=build_agent,
-        model=MODEL,
-        greet="say",
-    )
+    if "--check" in sys.argv:
+        harness.load_blueprint()
+        print("ok")
+    else:
+        harness.serve(
+            AGENT_NAME,
+            build_session=build_session,
+            build_agent=build_agent,
+            model=MODEL,
+            greet="say",
+        )

@@ -12,7 +12,7 @@ Shared: `harness.py` (blueprint + industry tools), `report.py` (OTel → Bluejay
 
 ## nemotron (cascaded)
 
-Pipecat + cloud NIM. See `bot.py` / `adapters/chirp.py`.
+Pipecat + NIM. Cloud NVCF is the default. See `bot.py` / `adapters/chirp.py`.
 
 ```bash
 uv pip install -r voice-agent-harnesses/nvidia/requirements.txt
@@ -21,7 +21,32 @@ uv run python run.py --harness nvidia/nemotron --mode check
 uv run python run.py --harness nvidia/nemotron --mode chirp
 ```
 
-## nemotron-voicechat (full duplex)
+Self-hosted NIM (one GPU ≥72 GB, NVIDIA workstation compose) — point the same harness at the box:
+
+```bash
+export NEMOTRON_LLM_BASE_URL=http://<gpu-host>:18000/v1
+export NEMOTRON_LLM_MODEL=nvidia/nemotron-3-nano
+export NEMOTRON_ASR_SERVER=<gpu-host>:50152
+export NEMOTRON_TTS_SERVER=<gpu-host>:50151
+export NEMOTRON_USE_SSL=false
+export NEMOTRON_ASR_FUNCTION_ID=
+# NVIDIA_API_KEY is optional when USE_SSL=false
+# Workstation NIM serves nvidia/nemotron-3-nano, not the cloud catalog id.
+```
+
+On the GPU host, only the three sidecars are required (not the blueprint's python app):
+
+```bash
+git clone https://github.com/NVIDIA-AI-Blueprints/nemotron-voice-agent
+cd nemotron-voice-agent
+# NGC key in .env as NVIDIA_API_KEY
+docker compose --profile generic-assistant/workstation up -d \
+  nvidia-llm tts-service nemotron-asr-streaming-english
+```
+
+Host ports are 18000 (LLM HTTP), 50152 (ASR gRPC), 50151 (TTS gRPC). First pull + TRT compile is 30–60 minutes.
+
+## nemotron-voicechat (full duplex) (WIP)
 
 OpenAI Realtime–compatible WebSocket. Default is the hosted NVCF endpoint
 (`wss://grpc.nvcf.nvidia.com/v1/realtime`, function `ai-nemotron-voicechat`) —
@@ -87,7 +112,13 @@ Wire format is 24 kHz PCM both ways (server resamples internally); CHIRP stays 1
 
 | var | use |
 |---|---|
-| `NVIDIA_API_KEY` | cascaded NIM cloud + hosted VoiceChat NVCF |
+| `NVIDIA_API_KEY` | cascaded NIM cloud + hosted VoiceChat NVCF. Optional when `NEMOTRON_USE_SSL=false` |
+| `NEMOTRON_LLM_BASE_URL` | LLM HTTP base (default `https://integrate.api.nvidia.com/v1`; local NIM `:18000/v1`) |
+| `NEMOTRON_LLM_MODEL` | LLM id (default `nvidia/nemotron-3-nano-30b-a3b` on NVCF; local NIM is `nvidia/nemotron-3-nano`) |
+| `NEMOTRON_ASR_SERVER` | ASR gRPC host:port (default `grpc.nvcf.nvidia.com:443`; local NIM `:50152`) |
+| `NEMOTRON_TTS_SERVER` | TTS gRPC host:port (default `grpc.nvcf.nvidia.com:443`; local NIM `:50151`) |
+| `NEMOTRON_USE_SSL` | `true`/`false`. Unset: TLS if the ASR host is NVCF or `:443` |
+| `NEMOTRON_ASR_FUNCTION_ID` | NVCF function id. Empty / omitted on a local NIM |
 | `VOICECHAT_WS_URL` | VoiceChat Realtime WS (default `wss://grpc.nvcf.nvidia.com/v1/realtime`) |
 | `VOICECHAT_FUNCTION_ID` | NVCF function id (default `42c86b5f-545a-4b2f-a83b-90fd71da9912`) |
 | `VOICECHAT_SPEAKS_FIRST` | `true`/`false` (default `true`) — speech-kick at call open only |
