@@ -6,9 +6,11 @@
 from __future__ import annotations
 
 import asyncio
+import os
 import sys
 from pathlib import Path
 from typing import Any
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import report  # noqa: E402
@@ -47,12 +49,14 @@ async def _case_posts_once_after_settle() -> None:
     async def _sleep(seconds: float) -> None:
         sleeps.append(seconds)
 
-    report._api_key = lambda: "test-key"  # type: ignore[method-assign]
-    report._api_url = lambda: "https://api.example.test/v1"  # type: ignore[method-assign]
-    report.httpx.AsyncClient = lambda timeout=20: client  # type: ignore[method-assign]
-    report.asyncio.sleep = _sleep  # type: ignore[method-assign]
-
-    await report.post_trace_ids("737917", "abc123")
+    with (
+        patch.object(report, "_api_key", return_value="test-key"),
+        patch.object(report, "_api_url", return_value="https://api.example.test/v1"),
+        patch.object(report.httpx, "AsyncClient", return_value=client),
+        patch.object(report.asyncio, "sleep", _sleep),
+        patch.dict(os.environ, {"MIVAS_UPSERT_SETTLE_SECONDS": "10"}),
+    ):
+        await report.post_trace_ids("737917", "abc123")
 
     assert sleeps == [10.0], sleeps
     assert client.gets == [], f"must not poll status before POST: {client.gets}"
@@ -66,9 +70,11 @@ async def _case_posts_once_after_settle() -> None:
 
 async def _case_skips_without_key() -> None:
     client = _FakeClient()
-    report._api_key = lambda: None  # type: ignore[method-assign]
-    report.httpx.AsyncClient = lambda timeout=20: client  # type: ignore[method-assign]
-    await report.post_trace_ids("737917", "abc123")
+    with (
+        patch.object(report, "_api_key", return_value=None),
+        patch.object(report.httpx, "AsyncClient", return_value=client),
+    ):
+        await report.post_trace_ids("737917", "abc123")
     assert client.posts == []
 
 
