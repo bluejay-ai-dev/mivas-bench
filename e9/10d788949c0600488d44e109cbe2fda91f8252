@@ -1,0 +1,969 @@
+expected-final-state/legal/T3-E1-SIG.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-36
+expected-final-state/travel/T1-E1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-12
+expected-final-state/customer-support/T4-M2.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-656
+expected-final-state/customer-support/T1-M2.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-663
+expected-final-state/healthcare/T4-M3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-180
+expected-final-state/travel/T1-H2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-38
+expected-final-state/customer-support/T3-H3.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-668
+expected-final-state/travel/T4-E3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-12
+k8s/deployment.yaml
+  s_f2003d6aab6332::t_9acc847b0f1c2f 242-247
+  s_45ff4528f38a78::t_a30fcb23ddb21c 106-111
+  s_45ff4528f38a78::t_e8554f758a03e7 100-105,112-135
+  s_ddedc7a01e832c::t_30fb44b9adb9f1 209,215,221
+expected-final-state/customer-support/T5-H1.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-677
+expected-final-state/legal/T1-E1-SIG.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-36
+expected-final-state/legal/T1-E2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-36
+voice-agent-harnesses/pipecat/openai-realtime-2.1/agent.py
+  s_2997e68a1d5402::t_ce596b8d02ee52 1,3-4,7-8,13-23,26-34
+expected-final-state/travel/R-H2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-19
+expected-final-state/customer-support/T2-H1.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-684
+expected-final-state/finance/T3-E3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-370
+expected-final-state/healthcare/T3-H1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-180
+expected-final-state/healthcare/T5-E1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-172
+tests/test_expected_final_state.py
+  s_afdea5f75e1590::t_2f58dfbf15cde4 5,7,12-14,16-29
+  s_afdea5f75e1590::t_e355bbd8a9ff82 1-4,6,8-11,15,30-143
+expected-final-state/legal/T2-M2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-42
+expected-final-state/travel/T5-H2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-32
+voice-agent-harnesses/README.md
+  s_2997e68a1d5402::t_a1053ad106bcf2 25-27
+expected-final-state/finance/T1-H1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-370
+tests/test_pull_actual_final_state.py
+  s_afdea5f75e1590::t_bb4818dad9a3f3 1-35,38-48,50,55-58,60-66,72,74-84,86-88,92-94,103-113,117,139-145
+  s_afdea5f75e1590::t_db487e961773ca 36-37,49,51-54,59,67-71,73,85,89-91,95-102,114-116,118-138
+expected-final-state/legal/T5-M1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-36
+expected-final-state/customer-support/T4-H2.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-675
+expected-final-state/finance/R-M3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-376
+expected-final-state/customer-support/T2-E1.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-656
+expected-final-state/finance/T4-H3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-387
+voice-agent-harnesses/livekit/.env.example
+  s_2997e68a1d5402::t_e7ef8ed5a2f1ab 1,6-9
+  s_ddedc7a01e832c::t_b83340b6625fa9 11-15
+  s_afdea5f75e1590::t_6b5d65d5030b1b 10
+expected-final-state/customer-support/T3-M3.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-656
+voice-agent-harnesses/pipecat/test_harness.py
+  s_f2003d6aab6332::t_ea35ef98a81e78 3
+  s_2997e68a1d5402::t_3f7398dd2bfe2f 4,16,21,32-36,101-102,105,109-110,113
+  s_f2003d6aab6332::t_82f60b353032f3 100,103-104,106-108,111,114-117
+  s_f2003d6aab6332::t_3e2556a27f5840 112,119
+  s_f2003d6aab6332::t_2911e07454eb0f 118
+  s_f2003d6aab6332::t_dfa0df7aea1c0f 128
+expected-final-state/finance/T4-E1-SIG.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-370
+expected-final-state/healthcare/T1-M2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-172
+expected-final-state/customer-support/T4-H3.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-656
+expected-final-state/healthcare/T5-M1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-178
+expected-final-state/customer-support/T3-E3.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-656
+expected-final-state/customer-support/T4-E1-SIG.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-656
+expected-final-state/travel/T1-E1-BG.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-12
+voice-agent-harnesses/pipecat/README.md
+  s_2997e68a1d5402::t_a75bdf8ad32882 12,29,46-47,51,56-59,62-63,97,99,104,108-112,114-118
+  s_f2003d6aab6332::t_3902b6a904dcee 8-11,13-25,28,30-32,34-35,65,67-70,72-79,81-87,93-95,113
+expected-final-state/finance/T3-M1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-379
+expected-final-state/travel/index.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-2832
+expected-final-state/finance/T3-M2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-370
+expected-final-state/healthcare/T2-E1-BG.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-172
+expected-final-state/legal/T2-E1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-42
+voice-agent-harnesses/pipecat/gemini-flash-live-3.1/agent.py
+  s_2997e68a1d5402::t_7cabdc5ddea278 1,3-4,7-8,13-23,26-34
+expected-final-state/finance/T1-M2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-370
+expected-final-state/customer-support/R-M3.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-656
+expected-final-state/finance/T1-H2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-370
+expected-final-state/legal/T2-E1-SIG.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-42
+expected-final-state/customer-support/T5-M3.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-656
+expected-final-state/travel/T1-E3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-12
+expected-final-state/finance/index.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-2513
+expected-final-state/customer-support/T1-E1-BG.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-656
+expected-final-state/healthcare/T2-M1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-172
+expected-final-state/legal/T2-H1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-42
+expected-final-state/finance/T1-H3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-370
+expected-final-state/travel/T1-E2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-12
+expected-final-state/finance/T2-E3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-370
+expected-final-state/customer-support/T2-E1-SIG.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-656
+expected-final-state/customer-support/T2-M3.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-656
+expected-final-state/customer-support/T2-H2.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-677
+k8s/secret.example.yaml
+  s_f2003d6aab6332::t_0d19066b36fd68 29
+expected-final-state/travel/R-M3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-19
+expected-final-state/customer-support/T1-H2.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-674
+expected-final-state/finance/T4-H2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-387
+expected-final-state/travel/R-E2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-19
+expected-final-state/legal/T4-H1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-36
+expected-final-state/customer-support/T3-M2.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-656
+expected-final-state/healthcare/T2-H1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-172
+expected-final-state/travel/T2-E1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-12
+expected-final-state/legal/T3-H2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-42
+expected-final-state/customer-support/T1-E3.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-656
+expected-final-state/finance/T2-H1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-377
+expected-final-state/healthcare/T3-E1-SIG.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-172
+expected-final-state/finance/T3-H3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-388
+expected-final-state/legal/T3-M2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-42
+voice-agent-harnesses/livekit/README.md
+  s_2997e68a1d5402::t_729f917016bf97 4-7,26-45,48,55,66,77-79,85-86,93,115,119-120,123-125
+expected-final-state/finance/T4-M3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-376
+expected-final-state/travel/T3-M2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-12
+expected-final-state/customer-support/T5-E3.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-656
+expected-final-state/customer-support/T5-H3.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-677
+expected-final-state/customer-support/T5-E1-BG.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-656
+expected-final-state/customer-support/index.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-2552
+expected-final-state/travel/T5-E1-BG.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-12
+voice-agent-harnesses/pipecat/requirements.txt
+  s_f2003d6aab6332::t_0d9be2f1170708 1-3
+  s_2997e68a1d5402::t_7f328ac4c09015 4
+expected-final-state/travel/T5-H1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-66
+expected-final-state/healthcare/T2-H3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-180
+expected-final-state/travel/R-H3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-47
+voice-agent-harnesses/livekit/gemini-flash-live-3.1/agent.py
+  s_2997e68a1d5402::t_3d431e5a010ca9 79-89
+expected-final-state/healthcare/T1-H1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-180
+expected-final-state/customer-support/R-H2.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-674
+expected-final-state/healthcare/T4-H3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-180
+expected-final-state/customer-support/T1-E2.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-656
+voice-agent-harnesses/pipecat/harness.py
+  s_2997e68a1d5402::t_4ba49d37ee1f06 443,448-449,461
+  s_2997e68a1d5402::t_3997ef01b26157 512
+  s_f2003d6aab6332::t_b4475ade249b44 84
+  s_f2003d6aab6332::t_c64c5f0f502192 505,513-514,517,522-523
+  s_f2003d6aab6332::t_8f99cea6a1e95d 405
+  s_f2003d6aab6332::t_6eef002d00eb58 176
+  s_f2003d6aab6332::t_e0714f1d61fcb6 155-158,167-172
+  s_f2003d6aab6332::t_cc4f4c1f5810ee 173-174
+  s_2997e68a1d5402::t_8efe2ea94283a6 199-213
+  s_f2003d6aab6332::t_61092434a1a710 442,444-447,450-451
+expected-final-state/healthcare/T1-M1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-172
+expected-final-state/finance/T3-E1-SIG.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-370
+expected-final-state/healthcare/R-H3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-195
+expected-final-state/legal/T1-E1-BG.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-36
+.gitignore
+  s_afdea5f75e1590::t_618abce487e9f8 29-31
+  s_f2003d6aab6332::t_46dad26d00a357 40-41
+expected-final-state/legal/index.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-2778
+voice-agent-harnesses/pipecat/report.py
+  s_f2003d6aab6332::t_36924e4c080b31 281-321
+  s_f2003d6aab6332::t_ea5cfb36740ed0 523
+  s_f2003d6aab6332::t_7a1e84e3316e5c 250-251
+  s_f2003d6aab6332::t_c0e666f2c51fa7 518-521,524-528
+  s_2997e68a1d5402::t_91a6c8aa05b54f 14-16
+  s_f2003d6aab6332::t_c5cd3062fe52a6 334-336
+expected-final-state/legal/T5-E3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-36
+expected-final-state/customer-support/T1-E1.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-656
+expected-final-state/legal/T3-M3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-42
+expected-final-state/travel/T5-M2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-23
+expected-final-state/finance/R-E1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-376
+expected-final-state/finance/R-H3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-376
+expected-final-state/finance/T1-E1-BG.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-370
+expected-final-state/finance/R-H1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-395
+expected-final-state/travel/R-M2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-12
+expected-final-state/customer-support/T5-E1-SIG.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-656
+expected-final-state/legal/T1-H2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-36
+expected-final-state/travel/R-H1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-66
+expected-final-state/legal/T1-E1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-36
+expected-final-state/finance/T2-E1-BG.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-370
+expected-final-state/legal/T3-M1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-42
+expected-final-state/healthcare/T3-E3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-172
+expected-final-state/finance/T5-E1-BG.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-370
+expected-final-state/legal/T2-E3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-42
+expected-final-state/travel/T2-E1-SIG.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-12
+expected-final-state/healthcare/T1-E1-BG.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-172
+expected-final-state/healthcare/T3-H2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-187
+expected-final-state/legal/T2-H3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-42
+expected-final-state/customer-support/T5-H2.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-662
+expected-final-state/legal/T2-E2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-42
+expected-final-state/travel/T1-H1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-40
+expected-final-state/finance/T4-E1-BG.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-370
+expected-final-state/finance/T4-E1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-370
+expected-final-state/healthcare/index.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-2210
+expected-final-state/customer-support/T4-E3.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-656
+expected-final-state/finance/T1-E2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-370
+expected-final-state/finance/T5-M1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-370
+expected-final-state/legal/T4-H2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-36
+expected-final-state/legal/T5-E1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-36
+expected-final-state/healthcare/T2-H2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-180
+expected-final-state/legal/T3-H3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-42
+expected-final-state/healthcare/R-M3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-172
+expected-final-state/healthcare/T2-E1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-172
+expected-final-state/healthcare/R-E3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-172
+expected-final-state/healthcare/T1-E1-SIG.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-172
+expected-final-state/customer-support/T5-E2.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-656
+expected-final-state/finance/T5-M2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-370
+expected-final-state/finance/T1-M1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-370
+expected-final-state/travel/T5-M3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-23
+expected-final-state/legal/T4-M3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-36
+expected-final-state/travel/T2-E3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-12
+expected-final-state/legal/T4-E1-SIG.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-36
+expected-final-state/healthcare/T2-E1-SIG.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-172
+voice-agent-harnesses/livekit/openai-realtime-2.1/agent.py
+  s_2997e68a1d5402::t_310273e540a8d6 35-44
+expected-final-state/customer-support/T4-H1.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-675
+expected-final-state/healthcare/T5-H1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-178
+expected-final-state/finance/T4-E2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-370
+expected-final-state/travel/T4-E2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-12
+run.py
+  s_f2003d6aab6332::t_349ca5e6836ba3 388
+  s_f2003d6aab6332::t_2de5ef3ec78b4b 685-690
+  s_f2003d6aab6332::t_5236dbf46360e4 809-814
+  s_45ff4528f38a78::t_851e8c76b8f9c4 394,396-399
+  s_2997e68a1d5402::t_707146ccc56205 889-890
+  s_2997e68a1d5402::t_ea4e1fc4c63973 895-896,903-904
+  s_f2003d6aab6332::t_ace7e05cfa4a2f 758,762-769
+  s_f2003d6aab6332::t_90f8b3bd106ece 894,897-899,901-902
+  s_2997e68a1d5402::t_6d83e3ad11d1e7 760-761
+  s_ddedc7a01e832c::t_b260e96a105a03 481-515
+  s_f2003d6aab6332::t_1d171afd17f072 891-893
+  s_f2003d6aab6332::t_fc525bbe4782af 900
+  s_2997e68a1d5402::t_b6273c1994c665 963
+  s_45ff4528f38a78::t_2358f8a9768943 395
+  s_f2003d6aab6332::t_83e3852ce463cb 961
+  s_f2003d6aab6332::t_7459328e313143 667-668
+  s_f2003d6aab6332::t_61bdebe74d5d15 105-111
+  s_ddedc7a01e832c::t_ad15bc13191995 314
+  s_f2003d6aab6332::t_762b5e5bcfeda5 336
+  s_f2003d6aab6332::t_72207dbffa817d 637-666
+  s_f2003d6aab6332::t_9a37864b81cfe0 681-684
+  s_f2003d6aab6332::t_94f12dd6a36f04 741-754
+  s_f2003d6aab6332::t_81a814930cb781 757
+  s_f2003d6aab6332::t_8ea7d1429d15e7 130-132
+  s_2997e68a1d5402::t_30de7667f8cb77 173
+  s_ddedc7a01e832c::t_783683edeb0fa6 321-327
+  s_ddedc7a01e832c::t_90424493ad9121 672
+expected-final-state/travel/T4-H2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-49
+expected-final-state/legal/R-H3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-42
+expected-final-state/travel/T2-E2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-12
+expected-final-state/finance/T2-M2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-370
+expected-final-state/customer-support/T3-E1-BG.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-656
+expected-final-state/legal/T3-E1-BG.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-36
+expected-final-state/customer-support/T4-M1.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-656
+expected-final-state/healthcare/T1-E3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-172
+expected-final-state/legal/T2-E1-BG.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-42
+expected-final-state/travel/T3-H2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-40
+expected-final-state/travel/R-E1-SIG.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-19
+expected-final-state/finance/T4-E3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-370
+expected-final-state/travel/T3-H3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-92
+tests/test_agents.py
+  s_f2003d6aab6332::t_a0ffbb1f84f513 154-155
+  s_f2003d6aab6332::t_c4b6d3d919f8e1 170-187
+  s_f2003d6aab6332::t_b0120912fdcc17 15,23
+expected-final-state/travel/T3-M1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-12
+expected-final-state/legal/R-E3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-36
+expected-final-state/customer-support/T2-E1-BG.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-656
+expected-final-state/travel/T5-M1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-12
+expected-final-state/customer-support/T4-E1-BG.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-656
+expected-final-state/healthcare/T3-M1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-172
+voice-agent-harnesses/pipecat/bluejay_setup.py
+  s_f2003d6aab6332::t_6b254b035b21d0 1,3-4,7,22,50,84
+  s_f2003d6aab6332::t_dd81901b81938c 42-49,53
+  s_2997e68a1d5402::t_9a88883e2f444c 51-52,54-55,88-98,100,102-103,137
+expected-final-state/healthcare/T4-E3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-172
+expected-final-state/customer-support/T2-M2.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-656
+expected-final-state/finance/R-E2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-376
+voice-agent-harnesses/livekit/report.py
+  s_2997e68a1d5402::t_5fe0aaf5d8283d 23-24
+expected-final-state/customer-support/R-E2.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-656
+expected-final-state/customer-support/R-E1-BG.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-662
+expected-final-state/healthcare/R-M1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-172
+expected-final-state/legal/R-H2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-42
+expected-final-state/travel/T1-E1-SIG.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-12
+voice-agent-harnesses/pipecat/gemini-flash-live-3.1/Dockerfile
+  s_2997e68a1d5402::t_7540447fdaba6a 8
+  s_f2003d6aab6332::t_18c78aa89bd8b0 63
+  s_f2003d6aab6332::t_20073ef5b484eb 33
+  s_f2003d6aab6332::t_664066029b8b4f 9
+expected-final-state/legal/T5-H2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-36
+expected-final-state/healthcare/T5-H2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-172
+expected-final-state/healthcare/R-H2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-180
+expected-final-state/healthcare/T4-E2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-172
+expected-final-state/customer-support/T5-M2.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-656
+tests/test_nvidia_speak_first.py
+  s_45ff4528f38a78::t_cc08746a1c4748 160,162-165
+  s_45ff4528f38a78::t_85ea96c646355a 161,166-167
+  s_45ff4528f38a78::t_358514e24b1735 147-159
+k8s/dispatcher.yaml
+  s_f2003d6aab6332::t_0d39889a608812 1-19,22-97,99-106
+  s_f2003d6aab6332::t_f35e7659c487c7 98
+  s_f2003d6aab6332::t_53e7a043c8a233 107-111
+  s_f2003d6aab6332::t_e39a31ed7b0909 20-21
+expected-final-state/finance/R-E1-SIG.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-376
+expected-final-state/travel/T5-E3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-12
+expected-final-state/healthcare/R-H1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-195
+expected-final-state/finance/T2-E1-SIG.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-370
+expected-final-state/finance/T5-E1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-370
+expected-final-state/customer-support/T2-M1.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-656
+expected-final-state/travel/T4-H3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-19
+expected-final-state/customer-support/T3-E2.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-656
+expected-final-state/healthcare/T3-E1-BG.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-172
+expected-final-state/customer-support/T4-E2.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-656
+expected-final-state/customer-support/T1-E1-SIG.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-656
+expected-final-state/finance/T4-M1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-378
+expected-final-state/legal/T5-M2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-36
+expected-final-state/customer-support/T2-E2.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-656
+voice-agent-harnesses/nvidia/harness.py
+  s_45ff4528f38a78::t_8ae54447edb43f 351,353
+  s_45ff4528f38a78::t_c1b27d8bc8a3ae 196-203,206-208,210-224
+  s_45ff4528f38a78::t_50396ec7727881 831
+expected-final-state/healthcare/R-E1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-172
+expected-final-state/healthcare/T5-E1-BG.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-172
+expected-final-state/travel/T5-E1-SIG.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-12
+expected-final-state/customer-support/R-M1.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-662
+expected-final-state/legal/T1-M3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-36
+expected-final-state/travel/T3-E1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-12
+expected-final-state/customer-support/T3-E1.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-656
+voice-agent-harnesses/pipecat/test_dispatcher.py
+  s_f2003d6aab6332::t_45218dd5249679 1-22,28-90
+  s_f2003d6aab6332::t_579077701f5d9f 23-27
+  s_f2003d6aab6332::t_1777a8cc275eed 91-147
+expected-final-state/travel/R-E1-BG.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-19
+expected-final-state/legal/T1-M2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-36
+expected-final-state/finance/T3-H1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-389
+expected-final-state/legal/T4-E1-BG.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-36
+expected-final-state/legal/T4-E3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-36
+expected-final-state/legal/T3-E3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-36
+expected-final-state/finance/T1-E1-SIG.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-370
+expected-final-state/legal/T4-M1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-36
+expected-final-state/travel/T3-H1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-41
+expected-final-state/travel/T4-M2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-12
+expected-final-state/finance/T5-H2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-381
+expected-final-state/healthcare/T5-M3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-172
+expected-final-state/finance/T2-E2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-370
+expected-final-state/customer-support/T4-E1.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-656
+expected-final-state/customer-support/T1-M3.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-656
+expected-final-state/finance/T2-H3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-388
+expected-final-state/legal/T5-E1-BG.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-36
+expected-final-state/healthcare/T4-M2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-172
+expected-final-state/travel/T4-E1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-12
+expected-final-state/healthcare/T4-M1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-178
+expected-final-state/travel/T4-M3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-12
+expected-final-state/finance/T5-H1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-381
+expected-final-state/healthcare/T3-E2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-172
+expected-final-state/travel/R-E1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-19
+expected-final-state/healthcare/T1-M3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-172
+expected-final-state/legal/T4-H3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-36
+expected-final-state/finance/T3-E1-BG.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-370
+expected-final-state/healthcare/T2-M2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-172
+expected-final-state/legal/T4-E1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-36
+expected-final-state/customer-support/T1-H1.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-674
+expected-final-state/travel/T2-M3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-23
+voice-agent-harnesses/livekit/test_harness.py
+  s_ddedc7a01e832c::t_4907912f83c90b 41-45
+  s_2997e68a1d5402::t_e5da423077ea57 124-139
+  s_2997e68a1d5402::t_fd5b781c08cc86 21-27
+  s_ab8be5417efb5b::t_922140722658a5 156
+expected-final-state/legal/T5-H1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-42
+expected-final-state/legal/R-M3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-36
+expected-final-state/finance/R-H2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-381
+expected-final-state/healthcare/T5-E1-SIG.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-172
+expected-final-state/travel/T3-E3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-12
+voice-agent-harnesses/pipecat/cascaded/agent.py
+  s_f2003d6aab6332::t_e160ff381f7f8e 3
+  s_2997e68a1d5402::t_f5a93b14732ad5 1,4-7,10-11,16-26,29-37
+expected-final-state/travel/T1-M2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-12
+expected-final-state/travel/T5-H3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-23
+expected-final-state/finance/T1-E3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-370
+expected-final-state/legal/T2-M3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-42
+expected-final-state/legal/T3-E2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-36
+expected-final-state/customer-support/T3-M1.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-656
+expected-final-state/healthcare/T4-H2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-180
+expected-final-state/finance/T3-E2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-370
+expected-final-state/legal/R-E1-SIG.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-42
+expected-final-state/legal/R-E1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-42
+expected-final-state/finance/T3-E1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-370
+expected-final-state/legal/R-E2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-36
+expected-final-state/healthcare/T5-H3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-185
+expected-final-state/legal/T1-E3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-42
+expected-final-state/finance/T3-H2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-388
+expected-final-state/legal/T3-E1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-36
+expected-final-state/travel/R-E3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-12
+expected-final-state/healthcare/R-M2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-178
+runtime/db_service.py
+  s_f2003d6aab6332::t_3474a0482be5bb 155-156
+  s_f2003d6aab6332::t_92caa7cc267c47 210-229
+  s_f2003d6aab6332::t_f076e886a93b9a 294
+  s_f2003d6aab6332::t_cdc757dc694ee8 230-251
+  s_f2003d6aab6332::t_7fe70256a1ff08 293
+  s_f2003d6aab6332::t_1a90d74dad8e5f 157-158
+voice-agent-harnesses/pipecat/pinless_setup.py
+  s_f2003d6aab6332::t_d3437e8382257f 1,7-10,12-13,15,17-22,24-25,28-52,77-82,84,86-96,100
+  s_f2003d6aab6332::t_6ae7efb461146c 3-5,53-76,83,85
+expected-final-state/finance/T2-E1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-370
+expected-final-state/travel/T1-M3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-12
+expected-final-state/travel/T1-H3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-40
+expected-final-state/legal/T5-M3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-36
+expected-final-state/travel/T3-E1-BG.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-12
+expected-final-state/customer-support/R-M2.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-662
+expected-final-state/healthcare/R-E1-BG.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-172
+expected-final-state/customer-support/R-E3.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-662
+expected-final-state/travel/T2-H2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-32
+expected-final-state/travel/T3-E2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-12
+expected-final-state/customer-support/T5-E1.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-656
+expected-final-state/healthcare/T3-E1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-172
+voice-agent-harnesses/pipecat/openai-realtime-2.1/Dockerfile
+  s_2997e68a1d5402::t_578dd1429eef6e 8
+  s_f2003d6aab6332::t_c4e87e917477af 9
+  s_f2003d6aab6332::t_4b60d2ee542928 33
+  s_f2003d6aab6332::t_5aeec5947613b0 63
+expected-final-state/finance/T5-E2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-370
+expected-final-state/legal/T1-H3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-36
+expected-final-state/healthcare/T3-M2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-182
+expected-final-state/finance/T4-M2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-379
+expected-final-state/healthcare/T5-M2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-178
+expected-final-state/customer-support/R-E1.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-662
+expected-final-state/travel/T2-M2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-23
+expected-final-state/legal/T4-E2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-36
+expected-final-state/legal/R-H1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-42
+expected-final-state/legal/T3-H1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-42
+expected-final-state/finance/R-E1-BG.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-376
+expected-final-state/healthcare/R-E2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-172
+expected-final-state/customer-support/T1-M1.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-656
+expected-final-state/healthcare/T5-E2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-172
+expected-final-state/customer-support/T3-E1-SIG.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-656
+expected-final-state/healthcare/T4-E1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-172
+scripts/expected_final_state.py
+  s_afdea5f75e1590::t_25c0d5a2f3da5d 13
+  s_afdea5f75e1590::t_20cbdb5b5d917f 356-449,454-482
+  s_afdea5f75e1590::t_e6fed0d5b21505 450-453
+  s_afdea5f75e1590::t_2b7d78f4f23472 527-531,538-551,553-554
+  s_afdea5f75e1590::t_015f739d8143fe 552
+  s_afdea5f75e1590::t_c0cd8d7ab4ec79 1-12,14-355,483-526,532-537,555-573
+expected-final-state/healthcare/T4-E1-BG.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-172
+expected-final-state/travel/T4-E1-SIG.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-12
+expected-final-state/customer-support/T4-M3.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-656
+expected-final-state/finance/T5-E3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-370
+expected-final-state/finance/T3-M3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-388
+expected-final-state/travel/T5-E1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-12
+expected-final-state/legal/T1-M1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-36
+expected-final-state/customer-support/R-H1.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-668
+expected-final-state/travel/T4-E1-BG.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-12
+expected-final-state/legal/T5-H3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-42
+expected-final-state/healthcare/T2-E2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-172
+voice-agent-harnesses/pipecat/Dockerfile.pipecat-cloud
+  s_f2003d6aab6332::t_10f5c8dfb1d722 13
+expected-final-state/finance/T5-H3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-381
+expected-final-state/healthcare/T5-E3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-172
+tests/test_db_service.py
+  s_f2003d6aab6332::t_fe5e6fa6b0c4d3 244-284
+  s_f2003d6aab6332::t_dd58ab882ada1c 230-232
+  s_f2003d6aab6332::t_21127f8b2dbbf1 183-185
+  s_f2003d6aab6332::t_246b518e59370e 222-229
+  s_f2003d6aab6332::t_a2358107e161d5 189
+expected-final-state/travel/T2-M1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-23
+voice-agent-harnesses/livekit/harness.py
+  s_ddedc7a01e832c::t_c75a4a1ad75150 361-362
+  s_ddedc7a01e832c::t_71f195e7807fb1 364,388-402
+  s_ddedc7a01e832c::t_ab5ef15ac12ac5 348-349,353
+  s_2997e68a1d5402::t_8f977b48c80e97 489-493,495
+  s_ddedc7a01e832c::t_9764f349539642 354
+  s_ab8be5417efb5b::t_4309b847de79e1 436
+  s_ddedc7a01e832c::t_1bcbd86209bc5b 494
+  s_2997e68a1d5402::t_8e4daa91ff467a 10-15
+  s_2997e68a1d5402::t_dca4b9b5ad12f5 528
+  s_2997e68a1d5402::t_65a01209270a8e 403-424
+  s_2997e68a1d5402::t_195b9c9e771fb2 345-347,350-352,355-360
+expected-final-state/customer-support/T1-H3.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-656
+expected-final-state/customer-support/T5-M1.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-656
+expected-final-state/travel/R-M1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-19
+expected-final-state/legal/T1-H1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-36
+expected-final-state/finance/T1-M3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-370
+voice-agent-harnesses/pipecat/bot.py
+  s_2997e68a1d5402::t_d647b38ac41d1c 55-59
+  s_f2003d6aab6332::t_1ac3ab7b047645 233-237
+  s_f2003d6aab6332::t_0a80bfe254e509 345-347
+  s_f2003d6aab6332::t_cdba01ede8f540 1,3-6
+  s_f2003d6aab6332::t_2e83141722fe21 287
+  s_f2003d6aab6332::t_39443313e737e4 45,47-50
+  s_f2003d6aab6332::t_302fe20d42795a 87-88
+  s_2997e68a1d5402::t_46230377dd7506 355-357
+  s_f2003d6aab6332::t_18095b767f4c67 368-400,402-410,414-417,421-428,430,432-434,436,439-440,443-456,458-462,464-494,498
+  s_2997e68a1d5402::t_7fc974e28bbabd 401,413,418-420,429,431,435,437-438,441,463
+expected-final-state/legal/T5-E1-SIG.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-36
+expected-final-state/healthcare/R-E1-SIG.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-172
+voice-agent-harnesses/livekit/cascaded/agent.py
+  s_2997e68a1d5402::t_b66d2fb01abf73 8-9,11,26,37,40
+  s_ab8be5417efb5b::t_24192455093ba2 41
+  s_2997e68a1d5402::t_ddb268710be59b 47-56
+  s_ddedc7a01e832c::t_46158679f76508 6-7
+expected-final-state/healthcare/T1-E2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-172
+expected-final-state/healthcare/T2-M3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-172
+expected-final-state/legal/T2-M1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-42
+expected-final-state/customer-support/R-E1-SIG.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-662
+expected-final-state/healthcare/T1-E1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-172
+expected-final-state/healthcare/T2-E3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-172
+expected-final-state/legal/R-M2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-42
+scripts/pull_actual_final_state.py
+  s_afdea5f75e1590::t_1de74a7956e2c1 1,3-5,10,12-13,15,17-37,39-42,48-130,132-133,135-152,154-233
+  s_afdea5f75e1590::t_a71cb56ac04a29 153
+  s_afdea5f75e1590::t_812ce3500f1c99 7-8
+  s_afdea5f75e1590::t_c5b48fd8cbe895 43-47
+expected-final-state/healthcare/T3-H3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-182
+expected-final-state/customer-support/T3-H1.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-668
+expected-final-state/legal/R-M1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-42
+expected-final-state/travel/T1-M1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-12
+expected-final-state/finance/T4-H1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-387
+expected-final-state/finance/T2-M1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-370
+expected-final-state/travel/T2-H1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-57
+expected-final-state/healthcare/T4-E1-SIG.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-172
+runtime/entrypoint.sh
+  s_f2003d6aab6332::t_8d726b925ac34d 107-111
+  s_2997e68a1d5402::t_72e6a15a94b994 94
+  s_f2003d6aab6332::t_fa51bcdf6e0c37 99-100
+  s_f2003d6aab6332::t_2e54017c6535e2 25,27-29
+  s_f2003d6aab6332::t_6c9386543066cd 112-113
+voice-agent-harnesses/pipecat/deploy.py
+  s_f2003d6aab6332::t_4d750e9345e080 53
+  s_f2003d6aab6332::t_904c98fea2400d 3-4
+  s_f2003d6aab6332::t_e27b11682a1d21 154-157
+  s_f2003d6aab6332::t_8ea5bb06ed1d46 86-87
+  s_2997e68a1d5402::t_e93fcb0134c477 1-2
+.env.example
+  s_45ff4528f38a78::t_ed6a6516ca38e9 80
+  s_2997e68a1d5402::t_0c80a5c0075222 62-64
+  s_ddedc7a01e832c::t_b6bbd5c512e242 65-68
+  s_f2003d6aab6332::t_9e3fe8a76c4e94 58
+  s_f2003d6aab6332::t_06412ac50b6516 117-118,120
+  s_f2003d6aab6332::t_6d21c0d86f8557 119
+  s_45ff4528f38a78::t_bff227a7402682 74,78-79,81-84
+expected-final-state/healthcare/T1-H2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-180
+k8s/ingress-tools.yaml
+  s_f2003d6aab6332::t_4aaa01e457bde4 1
+expected-final-state/healthcare/T3-M3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-172
+expected-final-state/legal/T2-H2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-42
+expected-final-state/customer-support/R-H3.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-683
+expected-final-state/finance/T1-E1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-370
+expected-final-state/healthcare/T1-H3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-180
+expected-final-state/travel/T2-E1-BG.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-12
+expected-final-state/legal/T5-E2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-42
+expected-final-state/customer-support/T2-H3.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-662
+expected-final-state/customer-support/T2-E3.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-656
+expected-final-state/finance/T5-M3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-370
+expected-final-state/travel/T3-E1-SIG.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-12
+expected-final-state/travel/T4-M1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-12
+expected-final-state/finance/R-M1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-376
+expected-final-state/travel/T3-M3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-12
+expected-final-state/finance/R-M2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-376
+expected-final-state/finance/R-E3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-376
+expected-final-state/finance/T2-M3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-370
+voice-agent-harnesses/pipecat/dispatcher.py
+  s_f2003d6aab6332::t_839dfaa9f81d45 71
+  s_f2003d6aab6332::t_e59f3ac5e8723a 35
+  s_f2003d6aab6332::t_841f861bad92aa 69,83
+  s_f2003d6aab6332::t_9637372539a371 1,8-10,18-28,30-34,37-68,70,72-76,84-89,93-100
+  s_f2003d6aab6332::t_5b99f53bce2bb6 5-6
+  s_f2003d6aab6332::t_1cf1dfa66eafc7 3-4,7
+  s_f2003d6aab6332::t_eaf8762bc26686 77-82
+  s_f2003d6aab6332::t_e87ab37ef06bad 29
+expected-final-state/healthcare/T4-H1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-185
+expected-final-state/travel/T4-H1.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-68
+expected-final-state/legal/T4-M2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-36
+voice-agent-harnesses/pipecat/cascaded/Dockerfile
+  s_f2003d6aab6332::t_106a4add7be101 33
+  s_2997e68a1d5402::t_0b745118c85c0d 8
+  s_f2003d6aab6332::t_39840710b29674 9
+  s_f2003d6aab6332::t_d5e9a624aa3588 63
+expected-final-state/customer-support/T3-H2.final.json
+  s_afdea5f75e1590::t_86151d6c373b66 1-662
+voice-agent-harnesses/nvidia/README.md
+  s_45ff4528f38a78::t_4b31188872f3af 15,24-27,29-33,35-47
+  s_afdea5f75e1590::t_3d1339ed7110f9 48
+  h_f787e3fe1ad713 49
+  s_45ff4528f38a78::t_40528125f11992 115-116,118-121
+  s_45ff4528f38a78::t_33afbe6ce1b358 117
+  s_45ff4528f38a78::t_2c7f911e5034f8 28,34
+expected-final-state/travel/T2-H3.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-40
+expected-final-state/finance/T5-E1-SIG.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-370
+expected-final-state/finance/T2-H2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-376
+expected-final-state/legal/R-E1-BG.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-42
+expected-final-state/travel/T5-E2.final.json
+  s_afdea5f75e1590::t_104febf634d5bf 1-12
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "e910d788949c0600488d44e109cbe2fda91f8252",
+  "prompts": {},
+  "humans": {
+    "h_f787e3fe1ad713": {
+      "author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_2997e68a1d5402": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "583147cd-324e-4ff6-a891-421c31064ab9",
+        "model": "grok-4.6"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    },
+    "s_45ff4528f38a78": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "1f10f9a7-87a5-4982-9246-10e271e79bfd",
+        "model": "grok-4.6"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    },
+    "s_ab8be5417efb5b": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "90020be9-ece0-4ae3-ae80-31bd242483eb",
+        "model": "grok-4.6"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    },
+    "s_afdea5f75e1590": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "5c43a902-ae31-4b35-8ba6-bc260c2d7115",
+        "model": "grok-4.6"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    },
+    "s_ddedc7a01e832c": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "8e9f3356-85c5-4567-b766-25439d97f35d",
+        "model": "grok-4.6"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    },
+    "s_f2003d6aab6332": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "8de53f23-7a74-4752-90bb-54de3d5e0a54",
+        "model": "grok-4.6"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}
