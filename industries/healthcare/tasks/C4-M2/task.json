@@ -27,13 +27,6 @@
       "value": "Park Avenue"
     }
   ],
-  "prompt_adherence_substrs": [
-    "4th floor",
-    "A $125 deposit holds the consult.",
-    "up to 72 hours before",
-    "deposit is forfeited",
-    "remaining balance"
-  ],
   "exp_handoff_path": [
     "transfer_to_cosmetic"
   ],
