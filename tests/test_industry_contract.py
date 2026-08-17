@@ -25,12 +25,9 @@ ROOT = Path(__file__).resolve().parents[1]
 INDUSTRY_ROOT = ROOT / "industries"
 
 # Documented debt, not contract exceptions. Remove an entry when the gap is fixed.
-# - healthcare "handoff_tools_in_catalog": agent_blueprint.json wires transfer_to_*
-#   handoff tools that tools.json never declares (harnesses fall back to a default
-#   description today).
 KNOWN_GAPS: dict[str, set[str]] = {
     "control-industry": {"mmd", "selfcheck", "seeded_reference"},
-    "healthcare": {"selfcheck", "handoff_tools_in_catalog"},
+    "healthcare": {"selfcheck"},
 }
 
 REQUIRED_FILES = {"README.md", "agent_blueprint.json", "tools.json",

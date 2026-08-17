@@ -888,6 +888,8 @@ def complete_call(
             )
             call = {**call, "output": {**output, "ok": True, "data": data}}
 
+    if params.get("appointment_id") is not None:
+        params["appointment_id"] = str(params["appointment_id"])
     filled = {
         key: value
         for key, value in params.items()
