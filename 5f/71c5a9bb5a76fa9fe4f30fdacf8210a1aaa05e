@@ -1,0 +1,151 @@
+industries/healthcare/tasks/C4-E1-BG/task.json
+  s_ac61f807d2de62::t_00798485fe4954 44
+industries/healthcare/tasks/C4-E2/task.json
+  s_ac61f807d2de62::t_00798485fe4954 44
+industries/healthcare/tasks/C2-H3/task.json
+  s_ac61f807d2de62::t_00798485fe4954 111,117,126
+industries/healthcare/tasks/C3-H2/task.json
+  s_ac61f807d2de62::t_00798485fe4954 113
+industries/healthcare/tasks/C5-M2/task.json
+  s_ac61f807d2de62::t_00798485fe4954 90,96,105
+industries/healthcare/tasks/C5-H1/task.json
+  s_ac61f807d2de62::t_00798485fe4954 101,107,116
+industries/healthcare/tasks/C2-M1/task.json
+  s_ac61f807d2de62::t_00798485fe4954 83,89,98
+industries/healthcare/tasks/R-H2/task.json
+  s_ac61f807d2de62::t_00798485fe4954 124,130,139
+industries/healthcare/tasks/C3-E1-SIG/task.json
+  s_ac61f807d2de62::t_00798485fe4954 48
+industries/healthcare/tasks/C2-M2/task.json
+  s_ac61f807d2de62::t_00798485fe4954 80,86,95
+industries/healthcare/tasks/C2-M3/task.json
+  s_ac61f807d2de62::t_00798485fe4954 83,89,98
+industries/healthcare/tasks/C4-E3/task.json
+  s_ac61f807d2de62::t_00798485fe4954 36
+industries/healthcare/tasks/C2-E1-BG/task.json
+  s_ac61f807d2de62::t_00798485fe4954 34
+industries/healthcare/tasks/C4-H2/task.json
+  s_ac61f807d2de62::t_00798485fe4954 100,106,115
+industries/healthcare/tasks/C1-M1/task.json
+  s_ac61f807d2de62::t_00798485fe4954 95
+industries/healthcare/tasks/C3-E2/task.json
+  s_ac61f807d2de62::t_00798485fe4954 50
+industries/healthcare/tasks/C3-M3/task.json
+  s_ac61f807d2de62::t_00798485fe4954 85
+industries/healthcare/tasks/C2-E2/task.json
+  s_ac61f807d2de62::t_00798485fe4954 34
+industries/healthcare/tasks/C1-E1-SIG/task.json
+  s_ac61f807d2de62::t_00798485fe4954 57
+industries/healthcare/tasks/C4-M3/task.json
+  s_ac61f807d2de62::t_00798485fe4954 52
+industries/healthcare/tasks/C3-E1/task.json
+  s_ac61f807d2de62::t_00798485fe4954 48
+industries/healthcare/tasks/C5-H3/task.json
+  s_ac61f807d2de62::t_00798485fe4954 105,111,120
+industries/healthcare/tasks/C2-H2/task.json
+  s_ac61f807d2de62::t_00798485fe4954 103,109,118
+industries/healthcare/tasks/C5-E1-BG/task.json
+  s_ac61f807d2de62::t_00798485fe4954 21
+industries/healthcare/tasks/R-H3/task.json
+  s_ac61f807d2de62::t_00798485fe4954 115,121,130
+industries/healthcare/tasks/C4-H1/task.json
+  s_ac61f807d2de62::t_00798485fe4954 101
+industries/healthcare/tasks/C1-E2/task.json
+  s_ac61f807d2de62::t_00798485fe4954 40
+industries/healthcare/tasks/C5-H2/task.json
+  s_ac61f807d2de62::t_00798485fe4954 111,117,126
+industries/healthcare/tasks/C5-M1/task.json
+  s_ac61f807d2de62::t_00798485fe4954 92,98,107
+industries/healthcare/tasks/R-E2/task.json
+  s_ac61f807d2de62::t_00798485fe4954 36
+industries/healthcare/tasks/C3-H3/task.json
+  s_ac61f807d2de62::t_00798485fe4954 111,117,123,132
+industries/healthcare/tasks/C4-M1/task.json
+  s_ac61f807d2de62::t_00798485fe4954 74
+industries/healthcare/tasks/C5-E3/task.json
+  s_ac61f807d2de62::t_00798485fe4954 21
+industries/healthcare/tasks/C2-H1/task.json
+  s_ac61f807d2de62::t_00798485fe4954 111,117,126
+scripts/encode_healthcare_tasks.py
+  s_ac61f807d2de62::t_3f20000e2c64a1 363-365,371-375
+industries/healthcare/tasks/C1-H2/task.json
+  s_ac61f807d2de62::t_00798485fe4954 112
+industries/healthcare/tasks/C2-E3/task.json
+  s_ac61f807d2de62::t_00798485fe4954 21
+industries/healthcare/tasks/R-E3/task.json
+  s_ac61f807d2de62::t_00798485fe4954 39
+industries/healthcare/tasks/C3-E3/task.json
+  s_ac61f807d2de62::t_00798485fe4954 48
+industries/healthcare/tasks/C3-E1-BG/task.json
+  s_ac61f807d2de62::t_00798485fe4954 48
+industries/healthcare/tasks/R-H1/task.json
+  s_ac61f807d2de62::t_00798485fe4954 116,122,131
+industries/healthcare/tasks/C1-H1/task.json
+  s_ac61f807d2de62::t_00798485fe4954 121
+industries/healthcare/tasks/C1-M2/task.json
+  s_ac61f807d2de62::t_00798485fe4954 85
+industries/healthcare/tasks/R-M3/task.json
+  s_ac61f807d2de62::t_00798485fe4954 83,89,98
+industries/healthcare/tasks/C5-E1-SIG/task.json
+  s_ac61f807d2de62::t_00798485fe4954 21
+industries/healthcare/tasks/R-E1-SIG/task.json
+  s_ac61f807d2de62::t_00798485fe4954 31,40
+industries/healthcare/tasks/R-E1/task.json
+  s_ac61f807d2de62::t_00798485fe4954 31,40
+industries/healthcare/tasks/C2-E1/task.json
+  s_ac61f807d2de62::t_00798485fe4954 34
+industries/healthcare/tasks/C4-E1-SIG/task.json
+  s_ac61f807d2de62::t_00798485fe4954 44
+industries/healthcare/tasks/C4-M2/task.json
+  s_ac61f807d2de62::t_00798485fe4954 71
+industries/healthcare/tasks/C3-H1/task.json
+  s_ac61f807d2de62::t_00798485fe4954 118
+industries/healthcare/tasks/R-M2/task.json
+  s_ac61f807d2de62::t_00798485fe4954 83,89,98
+industries/healthcare/tasks/C1-H3/task.json
+  s_ac61f807d2de62::t_00798485fe4954 113
+industries/healthcare/tasks/C1-E1-BG/task.json
+  s_ac61f807d2de62::t_00798485fe4954 57
+industries/healthcare/tasks/R-E1-BG/task.json
+  s_ac61f807d2de62::t_00798485fe4954 31,40
+industries/healthcare/tasks/C1-E1/task.json
+  s_ac61f807d2de62::t_00798485fe4954 57
+industries/healthcare/tasks/C2-E1-SIG/task.json
+  s_ac61f807d2de62::t_00798485fe4954 34
+industries/healthcare/tasks/C5-E1/task.json
+  s_ac61f807d2de62::t_00798485fe4954 21
+industries/healthcare/tasks/C1-E3/task.json
+  s_ac61f807d2de62::t_00798485fe4954 54
+industries/healthcare/tasks/C3-M2/task.json
+  s_ac61f807d2de62::t_00798485fe4954 85,91,97,106
+industries/healthcare/tasks/C3-M1/task.json
+  s_ac61f807d2de62::t_00798485fe4954 87,93,102
+industries/healthcare/tasks/C4-E1/task.json
+  s_ac61f807d2de62::t_00798485fe4954 44
+industries/healthcare/tasks/R-M1/task.json
+  s_ac61f807d2de62::t_00798485fe4954 84,90,99
+industries/healthcare/tasks/C5-E2/task.json
+  s_ac61f807d2de62::t_00798485fe4954 34
+industries/healthcare/tasks/C4-H3/task.json
+  s_ac61f807d2de62::t_00798485fe4954 111
+industries/healthcare/tasks/C5-M3/task.json
+  s_ac61f807d2de62::t_00798485fe4954 79,85,94
+industries/healthcare/tasks/C1-M3/task.json
+  s_ac61f807d2de62::t_00798485fe4954 64
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "5f71c5a9bb5a76fa9fe4f30fdacf8210a1aaa05e",
+  "prompts": {},
+  "sessions": {
+    "s_ac61f807d2de62": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "557b5c01-6ef2-49b7-a1c0-9a9536da2fb4",
+        "model": "grok-4.6"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
