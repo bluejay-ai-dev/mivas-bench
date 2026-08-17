@@ -323,14 +323,41 @@ def test_tool_call_adherence_aliases_office_names() -> None:
         "name": "check_plan_accepted",
         "parameters": {
             "carrier": "Aetna",
-            "location_id": "Park Avenue office in Manhattan",
+            "location_id": "Park Avenue",
         },
         "ok": True,
     }]
     assert vtr.tool_call_adherence(expected, actual, schemas=schemas)["passed"] is True
+    loose = [{
+        "name": "check_plan_accepted",
+        "parameters": {
+            "carrier": "Aetna",
+            "location_id": "Park Avenue office in Manhattan",
+        },
+        "ok": True,
+    }]
+    assert vtr.tool_call_adherence(expected, loose, schemas=schemas)["passed"] is False
     wrong = [{
         "name": "check_plan_accepted",
         "parameters": {"carrier": "Aetna", "location_id": "Windermere"},
         "ok": True,
     }]
     assert vtr.tool_call_adherence(expected, wrong, schemas=schemas)["passed"] is False
+
+
+def test_location_ids_require_exact_set() -> None:
+    schemas = vtr.load_tool_schemas("healthcare")
+    expected = [{
+        "name": "find_slots",
+        "parameters": {"location_ids": ["loc_park_ave"]},
+    }]
+    extra = [{
+        "name": "find_slots",
+        "parameters": {"location_ids": ["loc_park_ave", "loc_windermere"]},
+    }]
+    assert vtr.tool_call_adherence(expected, extra, schemas=schemas)["passed"] is False
+    ok = [{
+        "name": "find_slots",
+        "parameters": {"location_ids": ["Park Avenue"]},
+    }]
+    assert vtr.tool_call_adherence(expected, ok, schemas=schemas)["passed"] is True

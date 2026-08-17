@@ -362,7 +362,7 @@ def _canon_location(value: Any) -> str:
     if not said:
         return ""
     for loc_id, name in _LOCATION_IDS.items():
-        if said == loc_id or said == name or name in said or said in name:
+        if said == loc_id or said == name:
             return loc_id
     return said
 
@@ -423,8 +423,9 @@ def _values_equal(key: str, expected: Any, actual: Any) -> bool:
         return bool(left) and left == right
     if isinstance(expected, list) and isinstance(actual, list):
         if key == "location_ids":
+            exp_ids = {_canon_location(item) for item in expected}
             act_ids = {_canon_location(item) for item in actual}
-            return all(_canon_location(item) in act_ids for item in expected)
+            return bool(exp_ids) and exp_ids == act_ids
         if len(expected) != len(actual):
             return False
         return all(

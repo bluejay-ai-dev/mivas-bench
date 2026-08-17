@@ -145,7 +145,7 @@ knowledge base; no handoff needed.
   Answer only from what it returns; if no source, do not invent one.
 - list_locations — resolve whatever they called the office ("Park Avenue",
   "Montague Street", "Windermere") into a real location with address, floor,
-  suite, hours, services, transit, parking. Pass zip or location_id
+  suite, services, transit, parking. Pass zip or location_id
   (loc_park_ave | loc_brooklyn_heights | loc_windermere). For "Is this
   Windermere?" look it up and confirm plainly — never say you can't confirm
   the office. Do not pass its location_id into search_practice_kb.
