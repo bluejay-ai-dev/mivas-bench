@@ -82,9 +82,27 @@
   "scripted_responses": [
     {
       "match_type": "context",
+      "match_phrase": "greets you and asks what you need, what they can help with, or why you are calling, before you have explained the reason for the call.",
+      "response_type": "phrase",
+      "response_value": "What would a visit cost out of pocket at Park Avenue?"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "says they cannot give a reliable out-of-pocket number or ballpark, or says coverage must be checked before they can estimate the visit cost. NOT when they are already choosing an appointment time.",
+      "response_type": "phrase",
+      "response_value": "Is there any rough ballpark at all? If not, I still want to book a routine rash visit at Park Avenue as a new patient."
+    },
+    {
+      "match_type": "context",
       "match_phrase": "asks for your full name and date of birth, or asks you to confirm who you are, or asks for the patient's name and date of birth. NOT when asking only for a member ID or insurance card, NOT when asking which office or location, NOT when asking for a phone or mobile number, NOT when asking about an appointment day or time, NOT when reading your name and date of birth back to you for confirmation.",
       "response_type": "phrase",
       "response_value": "Aggie Trumbull. My date of birth is May ninth, nineteen seventy-eight."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "reads your name back as Addie, Abby, Aggy, or anything other than Aggie Trumbull and asks whether it is correct.",
+      "response_type": "phrase",
+      "response_value": "No. It is Aggie Trumbull \u2014 Aggie, A-G-G-I-E. I am a new patient."
     },
     {
       "match_type": "context",
