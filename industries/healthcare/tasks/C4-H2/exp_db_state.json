@@ -167,14 +167,6 @@
       "name": "Dr. Luis Ruiz"
     }
   ],
-  "tool_events": [
-    {
-      "id": 1,
-      "kind": "sms",
-      "payload": {
-        "template_id": "cosmetic_deposit"
-      }
-    }
-  ],
+  "tool_events": [],
   "waitlist": []
 }

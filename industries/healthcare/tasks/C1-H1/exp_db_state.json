@@ -32,6 +32,17 @@
       "provider_id": "prov_patel",
       "start": "2026-09-15T09:00:00",
       "status": "booked"
+    },
+    {
+      "appointment_type_code": "MOHS_CONSULT",
+      "description": "possible skin cancer on shoulder",
+      "end": "2026-08-24T09:30:00",
+      "id": 4,
+      "location_id": "loc_brooklyn_heights",
+      "patient_id": null,
+      "provider_id": "prov_ruiz",
+      "start": "2026-08-24T09:00:00",
+      "status": "booked"
     }
   ],
   "locations": [
@@ -172,6 +183,7 @@
       "id": 1,
       "kind": "sms",
       "payload": {
+        "mobile_e164": "+17185550191",
         "template_id": "appointment_confirmation"
       }
     }

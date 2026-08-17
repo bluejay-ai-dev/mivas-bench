@@ -167,6 +167,24 @@
       "name": "Dr. Luis Ruiz"
     }
   ],
-  "tool_events": [],
+  "tool_events": [
+    {
+      "id": 1,
+      "kind": "clinical_message",
+      "payload": {
+        "category": "results_followup",
+        "patient_id": "pat_jordan_lee",
+        "priority": "routine",
+        "summary": "Jordan Lee asking whether biopsy results are back"
+      }
+    },
+    {
+      "id": 2,
+      "kind": "portal_activation",
+      "payload": {
+        "channel": "sms"
+      }
+    }
+  ],
   "waitlist": []
 }

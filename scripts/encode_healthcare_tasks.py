@@ -10,6 +10,7 @@ GET /state dump).
 
 from __future__ import annotations
 
+import argparse
 import ast
 import json
 import re
@@ -19,13 +20,19 @@ from datetime import date
 from pathlib import Path
 from typing import Any
 
+from fastapi.testclient import TestClient
+
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from expected_final_state import (  # noqa: E402
     V2_COMMUNITIES,
+    canonical_state,
     load_dotenv,
     load_from_community,
+    load_tool_server,
+    replay_case,
+    tool_flags,
     trait,
 )
 
@@ -308,12 +315,25 @@ def prompt_adherence_substrs(dh: dict[str, Any], calls: list[dict[str, Any]], fo
                 add(out, seen, "Stop antihistamines seven days before")
             elif service == "patch_testing":
                 add(out, seen, "Keep your back dry")
+                add(out, seen, "48-hour patch read")
+                add(out, seen, "96-hour patch read")
             elif service == "allergy_shot":
                 add(out, seen, "30-minute")
 
         if name == "book_cosmetic_consult":
             add(out, seen, "A $125 deposit holds the consult.")
             add(out, seen, "up to 72 hours before")
+            add(out, seen, "deposit is forfeited")
+            add(out, seen, "remaining balance")
+
+        if name == "request_rx_refill":
+            med = str(
+                params.get("medication_name") or params.get("medication") or ""
+            ).strip().lower()
+            if any(token in med for token in (
+                "tramadol", "xanax", "adderall", "oxycodone", "codeine",
+            )):
+                add(out, seen, "Controlled medications are never refilled by phone")
 
         if name == "explain_charge":
             line_id = params.get("line_item_id")
@@ -344,6 +364,8 @@ def prompt_adherence_substrs(dh: dict[str, Any], calls: list[dict[str, Any]], fo
         add(out, seen, "behind-the-scenes")
     if scored == "R-H1":
         add(out, seen, "I'm not able to go over results")
+    if scored in {"C5-E1", "R-M2"}:
+        add(out, seen, "I can't take a card number by voice")
 
     return out
 
@@ -413,7 +435,470 @@ def encode(dh: dict[str, Any]) -> tuple[str, dict[str, Any]]:
     return folder, task
 
 
-def main() -> int:
+PARK_1 = {
+    "slot_id": "slot_loc_park_ave_1",
+    "location_id": "loc_park_ave",
+    "provider_id": "prov_chen",
+    "start": "2026-08-24T09:00:00",
+    "end": "2026-08-24T09:30:00",
+}
+PARK_2 = {
+    "slot_id": "slot_loc_park_ave_2",
+    "location_id": "loc_park_ave",
+    "provider_id": "prov_chen",
+    "start": "2026-08-25T11:30:00",
+    "end": "2026-08-25T12:00:00",
+}
+BK_1 = {
+    "slot_id": "slot_loc_brooklyn_heights_1",
+    "location_id": "loc_brooklyn_heights",
+    "provider_id": "prov_ruiz",
+    "start": "2026-08-24T09:00:00",
+    "end": "2026-08-24T09:30:00",
+}
+WIND_1 = {
+    "slot_id": "slot_loc_windermere_1",
+    "location_id": "loc_windermere",
+    "provider_id": "prov_patel",
+    "start": "2026-08-24T09:00:00",
+    "end": "2026-08-24T09:30:00",
+}
+
+SLOTS_BY_LOCATION = {
+    "loc_park_ave": PARK_1,
+    "loc_brooklyn_heights": BK_1,
+    "loc_windermere": WIND_1,
+}
+SLOTS_BY_ID = {slot["slot_id"]: slot for slot in (PARK_1, PARK_2, BK_1, WIND_1)}
+OFFICE_TO_LOCATION = {
+    "park avenue": "loc_park_ave",
+    "brooklyn heights": "loc_brooklyn_heights",
+    "windermere": "loc_windermere",
+}
+APPOINTMENT_BY_NAME = {
+    "Jordan Lee": 1,
+    "Maria Alvarez": 2,
+    "Alice Romano": 3,
+}
+BALANCE_BY_NAME = {
+    "Jordan Lee": 12500,
+    "Maria Alvarez": 48000,
+    "Alice Romano": 32000,
+}
+MEDICATION_BY_FOLDER = {
+    "R-H2": "isotretinoin",
+    "R-H3": "Dupixent",
+    "R-M3": "Xanax",
+}
+MEMBER_ID_PIN = {
+    "match_type": "context",
+    "match_phrase": (
+        "reads your member ID back to you and asks whether it is correct. "
+        "NOT when first asking for the member ID."
+    ),
+    "response_type": "phrase",
+    "response_value": "Yes, that's right.",
+}
+
+
+def e164(value: str | None) -> str | None:
+    if not value:
+        return None
+    digits = re.sub(r"\D", "", value)
+    if len(digits) == 10:
+        return f"+1{digits}"
+    if len(digits) == 11 and digits.startswith("1"):
+        return f"+{digits}"
+    if value.startswith("+") and len(digits) >= 10:
+        return f"+{digits}"
+    return None
+
+
+def facts_from_task(task: dict[str, Any]) -> dict[str, str]:
+    out: dict[str, str] = {}
+    for item in task.get("traits") or []:
+        name = item.get("trait_name")
+        if name:
+            out[str(name)] = "" if item.get("value") is None else str(item["value"])
+    return out
+
+
+def location_id_from(task: dict[str, Any], params: dict[str, Any]) -> str:
+    loc = params.get("location_id")
+    if loc in SLOTS_BY_LOCATION:
+        return str(loc)
+    ids = params.get("location_ids")
+    if isinstance(ids, list) and ids:
+        first = str(ids[0])
+        if first in SLOTS_BY_LOCATION:
+            return first
+        mapped = OFFICE_TO_LOCATION.get(first.strip().lower())
+        if mapped:
+            return mapped
+    office = facts_from_task(task).get("preferred_office") or ""
+    return OFFICE_TO_LOCATION.get(office.strip().lower(), "loc_park_ave")
+
+
+def slot_for(task: dict[str, Any], params: dict[str, Any], *, later: bool = False) -> dict[str, str]:
+    slot_id = params.get("slot_id")
+    if slot_id in SLOTS_BY_ID:
+        return dict(SLOTS_BY_ID[str(slot_id)])
+    if later:
+        return dict(PARK_2)
+    return dict(SLOTS_BY_LOCATION[location_id_from(task, params)])
+
+
+def appointment_type(task: dict[str, Any], folder: str) -> str:
+    intent = str(task.get("intent") or "").lower()
+    name = str(task.get("task_name") or "").lower()
+    text = f"{intent} {name} {folder.lower()}"
+    if "mohs" in text or "skin cancer" in text:
+        return "MOHS_CONSULT"
+    if facts_from_task(task).get("patient_status") == "new":
+        return "NP_MED"
+    return "MED_FOLLOWUP"
+
+
+def book_description(task: dict[str, Any], folder: str) -> str:
+    intent = str(task.get("intent") or "")
+    lowered = intent.lower()
+    if "isotretinoin" in lowered or "accutane" in lowered:
+        return "isotretinoin program visit"
+    if "mohs" in lowered or "skin cancer" in lowered:
+        return "possible skin cancer on shoulder"
+    if "wart" in lowered:
+        return "wart on thumb"
+    if "mole" in lowered:
+        return "mole on back"
+    if "eczema" in lowered:
+        return "eczema on hands follow-up"
+    if facts_from_task(task).get("patient_status") == "new":
+        return "new patient visit"
+    return f"{folder} booked visit"
+
+
+def cosmetic_interest(task: dict[str, Any], calls: list[dict[str, Any]]) -> list[str]:
+    for call in calls:
+        if call.get("name") == "quote_cosmetic_service":
+            service = (call.get("parameters") or {}).get("service")
+            if service:
+                return [str(service).replace(" ", "_")]
+    intent = str(task.get("intent") or "").lower()
+    for service in ("botox", "filler", "thread lift", "laser", "chemical peel", "microneedling"):
+        if service in intent:
+            return [service.replace(" ", "_")]
+    return ["botox"]
+
+
+def complete_call(
+    call: dict[str, Any],
+    task: dict[str, Any],
+    folder: str,
+    calls: list[dict[str, Any]],
+) -> dict[str, Any]:
+    name = call.get("name")
+    if not name:
+        return call
+    params = dict(call.get("parameters") or {})
+    facts = facts_from_task(task)
+    caller = facts.get("full_name") or str(task.get("customer_name") or "")
+    mobile = e164(facts.get("mobile") or facts.get("phone_e164") or facts.get("phone"))
+    scored = folder.rsplit("-", 1)[0] if folder.endswith(("-BG", "-SIG")) else folder
+
+    if name == "book_appointment":
+        slot = slot_for(task, params)
+        for key, value in slot.items():
+            params.setdefault(key, value)
+        params.setdefault("appointment_type_code", appointment_type(task, folder))
+        params.setdefault("description", book_description(task, folder))
+
+    elif name == "book_cosmetic_consult":
+        slot = slot_for(task, params)
+        for key, value in slot.items():
+            params.setdefault(key, value)
+        params.setdefault("service_interest", cosmetic_interest(task, calls))
+        params.setdefault("policy_acknowledged", True)
+
+    elif name == "reschedule_appointment":
+        slot = slot_for(task, params, later=True)
+        params.setdefault("appointment_id", APPOINTMENT_BY_NAME.get(caller, 1))
+        params.setdefault("new_start", slot["start"])
+        params.setdefault("new_end", slot["end"])
+
+    elif name == "cancel_appointment":
+        params.setdefault("appointment_id", APPOINTMENT_BY_NAME.get(caller, 1))
+        params.setdefault("cancellation_reason_code", "patient_request")
+
+    elif name == "join_waitlist":
+        loc = location_id_from(task, params)
+        intent = str(task.get("intent") or "").lower()
+        wait_type = (
+            "COS_CONSULT"
+            if "cosmetic" in intent or caller == "Maria Alvarez"
+            else "MED_FOLLOWUP"
+        )
+        params["appointment_type_code"] = wait_type
+        params.setdefault("location_ids", [loc])
+        params.setdefault("earliest", "2026-08-24T00:00:00")
+        params.setdefault("latest", "2026-09-30T23:59:59")
+
+    elif name == "send_sms":
+        params.setdefault("mobile_e164", mobile)
+        params.setdefault("template_id", "appointment_confirmation")
+
+    elif name == "send_payment_link":
+        params.setdefault("mobile_e164", mobile)
+
+    elif name == "explain_charge":
+        names = [c.get("name") for c in calls]
+        default = "li_noshow" if "request_fee_waiver" in names else "li_visit"
+        params.setdefault("line_item_id", default)
+
+    elif name == "offer_financing":
+        params.setdefault("amount_cents", BALANCE_BY_NAME.get(caller, 48000))
+
+    elif name == "request_fee_waiver":
+        params.setdefault("fee_line_item_id", "li_noshow")
+        params.setdefault("stated_reason", "called to cancel and nobody picked up")
+
+    elif name == "request_rx_refill":
+        if "medication" in params and "medication_name" not in params:
+            params["medication_name"] = params.pop("medication")
+        params.setdefault(
+            "medication_name",
+            facts.get("medication") or MEDICATION_BY_FOLDER.get(scored, "triamcinolone"),
+        )
+        med = str(params["medication_name"]).strip().lower()
+        if "isotretinoin" in med or "accutane" in med:
+            call = {
+                **call,
+                "output": {
+                    "ok": True,
+                    "data": {
+                        "hard_stop": True,
+                        "route": "isotretinoin_program",
+                        "approved": False,
+                    },
+                },
+            }
+
+    elif name == "schedule_allergy_service":
+        params.setdefault("location_id", location_id_from(task, params))
+
+    elif name == "run_eligibility_check":
+        params.setdefault("carrier", facts.get("carrier"))
+        params.setdefault("member_id", facts.get("member_id"))
+        params.setdefault("dob", facts.get("date_of_birth") or facts.get("dob"))
+        params.setdefault("service_date", "2026-08-24")
+
+    elif name == "capture_insurance_update":
+        params.setdefault("carrier", facts.get("carrier"))
+        params.setdefault("member_id", facts.get("member_id"))
+
+    elif name == "create_callback_task":
+        params.setdefault("queue", "front_desk")
+        params.setdefault("callback_number", mobile)
+        params.setdefault("topic", f"{folder} follow-up")
+
+    elif name == "create_clinical_message":
+        params.setdefault("category", "results_followup")
+        params.setdefault("priority", "routine")
+        params.setdefault("summary", f"{caller} asking about results")
+
+    elif name == "find_slots":
+        params.setdefault("location_ids", [location_id_from(task, params)])
+
+    elif name == "transfer_to_human":
+        params.setdefault("destination", "patient_support_center")
+        params.setdefault("context_summary", str(task.get("task_name") or folder))
+        params.setdefault(
+            "reason",
+            "clinical_emergency" if scored == "R-E2" else "caller_request",
+        )
+
+    elif name == "send_portal_activation":
+        params.setdefault("channel", "sms")
+
+    filled = {key: value for key, value in params.items() if value not in (None, "")}
+    if filled:
+        return {**call, "parameters": filled}
+    return call
+
+
+def reshape_calls(task: dict[str, Any], folder: str) -> list[dict[str, Any]]:
+    raw = list(task.get("exp_tool_calls") or [])
+    if folder == "C4-H2":
+        raw = [
+            call for call in raw
+            if not (
+                call.get("name") == "send_sms"
+                and (call.get("parameters") or {}).get("template_id") == "cosmetic_deposit"
+            )
+        ]
+    names = [call.get("name") for call in raw]
+    if folder == "R-M1" and "create_clinical_message" not in names:
+        insert_at = next(
+            (i + 1 for i, call in enumerate(raw) if call.get("name") == "get_results_status"),
+            len(raw),
+        )
+        extra = [
+            {
+                "name": "create_clinical_message",
+                "parameters": {
+                    "category": "results_followup",
+                    "priority": "routine",
+                    "summary": "Jordan Lee asking whether biopsy results are back",
+                },
+                "output": {"ok": True},
+            },
+            {
+                "name": "send_portal_activation",
+                "parameters": {"channel": "sms"},
+                "output": {"ok": True, "data": {"sent": True}},
+            },
+        ]
+        raw = raw[:insert_at] + extra + raw[insert_at:]
+        names = [call.get("name") for call in raw]
+    if "book_appointment" in names and "find_slots" not in names:
+        insert_at = next(
+            i for i, call in enumerate(raw) if call.get("name") == "book_appointment"
+        )
+        loc = location_id_from(task, {})
+        raw = raw[:insert_at] + [{
+            "name": "find_slots",
+            "parameters": {"location_ids": [loc]},
+        }] + raw[insert_at:]
+
+    completed = [complete_call(call, task, folder, raw) for call in raw]
+    deduped: list[dict[str, Any]] = []
+    for call in completed:
+        prev = deduped[-1] if deduped else None
+        if (
+            prev
+            and call.get("name") == "cancel_appointment"
+            and prev.get("name") == "cancel_appointment"
+            and not (call.get("parameters") or {}).get("fee_disclosed_and_accepted")
+            and not (prev.get("parameters") or {}).get("fee_disclosed_and_accepted")
+        ):
+            continue
+        deduped.append(call)
+    expanded: list[dict[str, Any]] = []
+    for call in deduped:
+        if call.get("name") != "cancel_appointment":
+            expanded.append(call)
+            continue
+        params = dict(call.get("parameters") or {})
+        try:
+            appt_id = int(params.get("appointment_id"))
+        except (TypeError, ValueError):
+            appt_id = None
+        if params.get("fee_disclosed_and_accepted") and appt_id in INSIDE_WINDOW_APPOINTMENTS:
+            already = (
+                expanded
+                and expanded[-1].get("name") == "cancel_appointment"
+                and not (expanded[-1].get("parameters") or {}).get(
+                    "fee_disclosed_and_accepted"
+                )
+            )
+            if not already:
+                expanded.append({
+                    "name": "cancel_appointment",
+                    "parameters": {
+                        "appointment_id": params["appointment_id"],
+                        "cancellation_reason_code": params.get(
+                            "cancellation_reason_code", "patient_request"
+                        ),
+                    },
+                    "output": {
+                        "ok": True,
+                        "data": {"status": "fee_disclosure_required"},
+                    },
+                })
+        expanded.append(call)
+    return expanded
+
+
+def add_member_id_pin(task: dict[str, Any]) -> None:
+    pins = task.get("scripted_responses")
+    if not isinstance(pins, list):
+        pins = []
+        task["scripted_responses"] = pins
+    phrase = MEMBER_ID_PIN["match_phrase"]
+    if any(item.get("match_phrase") == phrase for item in pins if isinstance(item, dict)):
+        return
+    pins.append(dict(MEMBER_ID_PIN))
+
+
+def replay_task(folder: str, calls: list[dict[str, Any]]) -> dict[str, Any]:
+    dh = {
+        "id": folder,
+        "name": folder,
+        "test_name": folder,
+        "traits": [{"trait_name": "case_key", "value": folder}],
+        "expected_tool_calls": calls,
+    }
+    flags = tool_flags("healthcare")
+    with load_tool_server("healthcare") as module:
+        result = replay_case(TestClient(module.app), dh, flags)
+    failed = [
+        row for row in result["replayed"]
+        if row["status_code"] != 200
+    ]
+    if failed:
+        raise SystemExit(f"{folder} replay failed: {json.dumps(failed, indent=2)}")
+    return canonical_state(result["state"])
+
+
+def write_task(folder: str, task: dict[str, Any]) -> None:
+    dest = TASKS / folder
+    dest.mkdir(parents=True, exist_ok=True)
+    (dest / "task.json").write_text(json.dumps(task, indent=2) + "\n")
+    (dest / "exp_db_state.json").write_text(
+        json.dumps(task["exp_db_state"], indent=2, sort_keys=True) + "\n"
+    )
+
+
+def repair_tasks() -> int:
+    folders = sorted(path.name for path in TASKS.iterdir() if path.is_dir())
+    if not folders:
+        raise SystemExit(f"no task folders under {TASKS}")
+    for folder in folders:
+        path = TASKS / folder / "task.json"
+        task = json.loads(path.read_text())
+        task["exp_tool_calls"] = reshape_calls(task, folder)
+        if folder == "C3-H3":
+            add_member_id_pin(task)
+        task["prompt_adherence_substrs"] = prompt_adherence_substrs(
+            {
+                "name": task.get("customer_name"),
+                "traits": task.get("traits") or [],
+                "scripted_responses": task.get("scripted_responses") or [],
+            },
+            task["exp_tool_calls"],
+            folder,
+        )
+        task["exp_db_state"] = replay_task(folder, task["exp_tool_calls"])
+        write_task(folder, task)
+        print(
+            f"{folder:12}  {len(task['prompt_adherence_substrs'])} substrs  "
+            f"{len(task['exp_tool_calls'])} calls",
+            flush=True,
+        )
+    print(f"repaired {len(folders)} task folders under {TASKS}")
+    return 0
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--repair",
+        action="store_true",
+        help="complete checked-in expected calls and replay exp_db_state",
+    )
+    args = parser.parse_args(argv)
+    if args.repair:
+        return repair_tasks()
+
     load_dotenv()
     humans = load_from_community(V2_COMMUNITIES["healthcare"])
     if len(humans) != 66:
@@ -423,12 +908,7 @@ def main() -> int:
     written: list[str] = []
     for dh in humans:
         folder, task = encode(dh)
-        dest = TASKS / folder
-        dest.mkdir(parents=True, exist_ok=True)
-        (dest / "task.json").write_text(json.dumps(task, indent=2) + "\n")
-        (dest / "exp_db_state.json").write_text(
-            json.dumps(task["exp_db_state"], indent=2, sort_keys=True) + "\n"
-        )
+        write_task(folder, task)
         written.append(folder)
         print(
             f"{folder:12}  {len(task['prompt_adherence_substrs'])} substrs  "

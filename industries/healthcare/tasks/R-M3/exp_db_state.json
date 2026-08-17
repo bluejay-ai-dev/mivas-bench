@@ -167,6 +167,16 @@
       "name": "Dr. Luis Ruiz"
     }
   ],
-  "tool_events": [],
+  "tool_events": [
+    {
+      "id": 1,
+      "kind": "rx_refill_request",
+      "payload": {
+        "medication_name": "Xanax",
+        "patient_id": "pat_alice_romano",
+        "route": "controlled_substance"
+      }
+    }
+  ],
   "waitlist": []
 }

@@ -32,6 +32,17 @@
       "provider_id": "prov_patel",
       "start": "2026-09-15T09:00:00",
       "status": "booked"
+    },
+    {
+      "appointment_type_code": "ALLERGY_ALLERGY_SHOT",
+      "description": "Allergy service: allergy_shot",
+      "end": "2026-08-24T10:00:00",
+      "id": 4,
+      "location_id": "loc_brooklyn_heights",
+      "patient_id": "pat_leo_park",
+      "provider_id": "prov_ruiz",
+      "start": "2026-08-24T09:00:00",
+      "status": "booked"
     }
   ],
   "locations": [
@@ -167,14 +178,6 @@
       "name": "Dr. Luis Ruiz"
     }
   ],
-  "tool_events": [
-    {
-      "id": 1,
-      "kind": "sms",
-      "payload": {
-        "template_id": "appointment_confirmation"
-      }
-    }
-  ],
+  "tool_events": [],
   "waitlist": []
 }

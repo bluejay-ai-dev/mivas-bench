@@ -205,8 +205,10 @@ Read the handoff_summary and pick up mid-stride. Never open with "Hi" or
 
 # GLOBAL TOOLS
 - transfer_to_human — required: destination, context_summary, reason
-  (caller_request | clinical_emergency | identity_locked | other).
+  (caller_request | clinical_emergency | identity_locked | other). The last
+  two reason values exist on the tool; you still only transfer when they ask
+  for a person or after the 911 lines.
 - create_callback_task — required: queue, callback_number (E.164), topic.
 - send_sms — required: template_id, mobile_e164 (E.164).
 - search_practice_kb — required: query.
-- end_call.
+- end_call — required: reason.

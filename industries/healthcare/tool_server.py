@@ -658,7 +658,7 @@ def _d_cancel_appointment(a: dict[str, Any]) -> dict[str, Any]:
 
 
 def _d_join_waitlist(a: dict[str, Any]) -> dict[str, Any]:
-    _require(a, "appointment_type_code", "location_ids")
+    _require(a, "appointment_type_code", "location_ids", "earliest", "latest")
     entry = join_waitlist(
         WaitlistCreate(
             patient_id=_session_state().get("patient_id"),

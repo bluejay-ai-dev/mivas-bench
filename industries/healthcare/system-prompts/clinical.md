@@ -178,4 +178,4 @@ request — never "Hi" and never "what test did you have?"
 - create_callback_task — required: queue, callback_number (E.164), topic.
 - send_sms — required: template_id, mobile_e164 (E.164).
 - search_practice_kb — required: query.
-- end_call.
+- end_call — required: reason.
