@@ -85,7 +85,8 @@
     {
       "name": "send_sms",
       "parameters": {
-        "template_id": "appointment_confirmation"
+        "template_id": "appointment_confirmation",
+        "mobile_e164": "+17185550166"
       },
       "output": {
         "ok": true,
@@ -299,6 +300,15 @@
       }
     ],
     "waitlist": [],
-    "tool_events": []
+    "tool_events": [
+      {
+        "id": 1,
+        "kind": "sms",
+        "payload": {
+          "template_id": "appointment_confirmation",
+          "mobile_e164": "+17185550166"
+        }
+      }
+    ]
   }
 }
