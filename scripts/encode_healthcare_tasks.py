@@ -490,6 +490,13 @@ BALANCE_BY_NAME = {
     "Maria Alvarez": 48000,
     "Alice Romano": 32000,
 }
+PHONE_BY_NAME = {
+    "Jordan Lee": "+12125550100",
+    "Maria Alvarez": "+12125550133",
+    "Alice Romano": "+14075550155",
+    "Sam Nguyen": "+17185550122",
+    "Leo Park": "+17185550166",
+}
 MEDICATION_BY_FOLDER = {
     "R-H2": "isotretinoin",
     "R-H3": "Dupixent",
@@ -608,6 +615,8 @@ def complete_call(
     facts = facts_from_task(task)
     caller = facts.get("full_name") or str(task.get("customer_name") or "")
     mobile = e164(facts.get("mobile") or facts.get("phone_e164") or facts.get("phone"))
+    if not mobile:
+        mobile = PHONE_BY_NAME.get(caller)
     scored = folder.rsplit("-", 1)[0] if folder.endswith(("-BG", "-SIG")) else folder
 
     if name == "book_appointment":
@@ -865,7 +874,7 @@ def replay_task(folder: str, calls: list[dict[str, Any]]) -> dict[str, Any]:
         result = replay_case(TestClient(module.app), dh, flags)
     failed = [
         row for row in result["replayed"]
-        if row["status_code"] != 200
+        if row["status_code"] != 200 or row.get("ok") is False
     ]
     if failed:
         raise SystemExit(f"{folder} replay failed: {json.dumps(failed, indent=2)}")
