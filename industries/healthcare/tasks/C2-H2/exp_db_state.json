@@ -178,6 +178,15 @@
       "name": "Dr. Luis Ruiz"
     }
   ],
-  "tool_events": [],
+  "tool_events": [
+    {
+      "id": 1,
+      "kind": "sms",
+      "payload": {
+        "mobile_e164": "+17185550166",
+        "template_id": "appointment_confirmation"
+      }
+    }
+  ],
   "waitlist": []
 }
