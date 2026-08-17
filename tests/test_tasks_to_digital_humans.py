@@ -152,6 +152,11 @@ def test_claim_updates_include_expected_tool_calls() -> None:
     assert patch["success_criteria"] == want["success_criteria"]
     assert patch["test_name"] == want["test_name"]
     assert patch["traits"] == want["traits"]
+    assert "scripted_responses" in patch
+    pinless = {**want}
+    pinless.pop("scripted_responses", None)
+    cleared = conv.claim_updates([pinless], live)
+    assert cleared[0]["update"]["scripted_responses"] == []
 
 
 def test_api_url_reads_env_after_import(monkeypatch) -> None:
@@ -184,3 +189,10 @@ def test_encoder_slugs_stay_inside_enums() -> None:
     assert enc.slug_cosmetic("thread lift") is None
     assert enc.slug_cosmetic("botox") == "botox"
     assert enc.slug_location("Park Avenue") == "loc_park_ave"
+    quoted = enc.complete_call(
+        {"name": "quote_cosmetic_service", "parameters": {"service": "laser"}},
+        {"intent": "quote laser", "customer_name": "Maria Alvarez", "traits": []},
+        "C4-E1",
+        [],
+    )
+    assert (quoted.get("parameters") or {}).get("service") != "laser"

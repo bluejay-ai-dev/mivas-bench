@@ -581,6 +581,7 @@ def claim_updates(
         if not want or dh.get("id") is None:
             continue
         patch = {field: want[field] for field in CLAIM_FIELDS if field in want}
+        patch["scripted_responses"] = want.get("scripted_responses") or []
         updates.append({"digital_human_id": int(dh["id"]), "update": patch})
     return updates
 
