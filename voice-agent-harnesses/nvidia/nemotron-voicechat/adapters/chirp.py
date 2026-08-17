@@ -38,7 +38,6 @@ from voicechat import (  # noqa: E402
     handle_function_call,
     handoff_nudge_event,
     handoff_role,
-    infer_tool_calls,
     parse_toolcalls,
     session_update_for_agent,
     speaks_first,
@@ -309,9 +308,6 @@ async def _bridge(ws, industry: str) -> None:
             rate: dict[str, dict] = {}
             deferred_tools: list[dict[str, Any]] = []
             pending_user_pcm: list[bytes] = []
-            agent_tools = {
-                a: session_update_for_agent(bp, a)["session"]["tools"] for a in bp["agents"]
-            }
             handled_tools: set[str] = set()
 
             def _user_live(now: float | None = None) -> bool:
@@ -581,20 +577,6 @@ async def _bridge(ws, industry: str) -> None:
                 for item in pending:
                     await _dispatch_tool(**item)
 
-            async def _maybe_tools(blob: str, *, prefix: str) -> None:
-                agent = state["agent"]
-                calls = infer_tool_calls(agent_tools[agent], blob)
-                if not calls:
-                    return
-                _log(f"infer HIT prefix={prefix} calls={calls} blob={_clip(blob)!r}")
-                for call in calls:
-                    await _dispatch_tool(
-                        name=call["name"],
-                        arguments=call["arguments"],
-                        call_id=f"{prefix}_{agent}_{call['name']}",
-                        source=f"infer:{prefix}",
-                    )
-
             async def _maybe_hard_tools(blob: str, *, prefix: str) -> None:
                 calls = parse_toolcalls(blob)
                 if not calls:
@@ -775,7 +757,7 @@ async def _bridge(ws, industry: str) -> None:
                                 ctl["awaiting_agent"] = False
                             blob = turn_spoken.strip()
                             if blob:
-                                await _maybe_tools(blob, prefix="done")
+                                await _maybe_hard_tools(blob, prefix="done")
                             await _flush_deferred()
                             if etype == "response.done":
                                 text_buf = ""
@@ -824,7 +806,7 @@ async def _bridge(ws, industry: str) -> None:
                                 turn_spoken = (turn_spoken + pad).strip()
                                 turns.note_agent_text(pad)
                                 ctl["last_spoken"] = spoken
-                            await _maybe_tools(
+                            await _maybe_hard_tools(
                                 text_buf or turn_spoken or tr, prefix="tr"
                             )
                             text_buf = ""
