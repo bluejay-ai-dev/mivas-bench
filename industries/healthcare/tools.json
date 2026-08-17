@@ -136,7 +136,7 @@
     },
     {
       "name": "list_locations",
-      "description": "Offices by zip OR location_id: address, floor, suite, hours, services, transit, parking, and whether the office does cosmetic work. The only source of an office address, floor or location_id. Map caller names to loc_park_ave, loc_brooklyn_heights, or loc_windermere.",
+      "description": "Offices by zip OR location_id: address, floor, suite, services, transit, parking, and whether the office does cosmetic work. The only source of an office address, floor or location_id. Practice hours come from search_practice_kb. Map caller names to loc_park_ave, loc_brooklyn_heights, or loc_windermere.",
       "inputSchema": {
         "type": "object",
         "properties": {
