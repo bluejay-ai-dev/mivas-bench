@@ -1,0 +1,57 @@
+voice-agent-harnesses/nvidia/harness.py
+  s_ac61f807d2de62::t_e0b18d4decd72c 1014-1034
+  s_ac61f807d2de62::t_6b783a5c22724e 541,543
+  s_ac61f807d2de62::t_39227d4f068bdc 517
+scripts/tasks_to_digital_humans.py
+  s_ac61f807d2de62::t_dc6a958a400d8d 93-96
+  s_ac61f807d2de62::t_4faa10bbfd4c98 552-587,597
+  s_ac61f807d2de62::t_c5c69a1814198b 649
+  s_ac61f807d2de62::t_7514d7eba108cb 668
+  s_ac61f807d2de62::t_7d24e38f599c8e 114
+  s_ac61f807d2de62::t_23c7a8dd36d63e 429-434
+  s_ac61f807d2de62::t_6cc8992807edfc 30
+  s_ac61f807d2de62::t_0606435b653e21 439
+scripts/encode_healthcare_tasks.py
+  s_ac61f807d2de62::t_4aeaf26f2483aa 679-681
+  s_ac61f807d2de62::t_05170c7d9e974f 746-747
+  s_ac61f807d2de62::t_4f62138fc8c309 683,685-687
+  s_ac61f807d2de62::t_a620644088b3cb 855-859
+  s_ac61f807d2de62::t_4970af8cb03789 629,641,644,646
+  s_ac61f807d2de62::t_6c240fe76b85d1 720-722
+  s_ac61f807d2de62::t_fa4cdbf30ee25a 821,823-824
+voice-agent-harnesses/nvidia/nvidia_fc.py
+  s_ac61f807d2de62::t_497543c965b3eb 283,286
+  s_ac61f807d2de62::t_04cfda701e62a3 178-219
+  s_ac61f807d2de62::t_7a40c762a40303 277-282,284-285,287-307,309-311,317,326-328,331-336,344-346,349-354,368-372
+tests/test_verify_task_run.py
+  s_ac61f807d2de62::t_09c5218ab75293 326,331-339
+  s_ac61f807d2de62::t_85276f6ca550a8 346-363
+tests/test_tasks_to_digital_humans.py
+  s_ac61f807d2de62::t_3f2ceb2df1e0d6 137-186
+industries/healthcare/tools.json
+  s_ac61f807d2de62::t_8ff3236e8731fb 13,20,67
+  s_ac61f807d2de62::t_56b213e42fac6f 1154
+scripts/verify_task_run.py
+  s_ac61f807d2de62::t_d3c6811e4324f7 426,428
+  s_ac61f807d2de62::t_72b4a3f3949428 365
+industries/healthcare/system-prompts/reception.md
+  s_ac61f807d2de62::t_b41ed54593ba4a 148
+industries/healthcare/system-prompts/scheduling.md
+  s_ac61f807d2de62::t_34bd969d082d5c 171
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "d9a00c44ffafef6929e300feed907c160ac9bcc0",
+  "prompts": {},
+  "sessions": {
+    "s_ac61f807d2de62": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "557b5c01-6ef2-49b7-a1c0-9a9536da2fb4",
+        "model": "grok-4.6"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
