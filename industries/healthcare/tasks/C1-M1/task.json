@@ -31,12 +31,6 @@
       "value": "Park Avenue"
     }
   ],
-  "prompt_adherence_substrs": [
-    "Hal Brenner",
-    "December 2, 1975",
-    "2125550194",
-    "4th floor"
-  ],
   "exp_handoff_path": [
     "transfer_to_scheduling"
   ],

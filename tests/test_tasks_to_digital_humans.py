@@ -43,7 +43,6 @@ def test_names_are_person_only_and_test_name_from_task() -> None:
 def test_case_key_trait_and_no_verifier_fields() -> None:
     for dh in _humans():
         assert conv.trait_value(dh, "case_key") == conv.case_key_of(dh)
-        assert "prompt_adherence_substrs" not in dh
         assert "exp_db_state" not in dh
         assert conv.trait_value(dh, "call_area")
         assert conv.trait_value(dh, "difficulty")
@@ -196,3 +195,92 @@ def test_encoder_slugs_stay_inside_enums() -> None:
         [],
     )
     assert (quoted.get("parameters") or {}).get("service") != "laser"
+
+
+def _encoder():
+    spec = importlib.util.spec_from_file_location(
+        "encode_healthcare_tasks", ROOT / "scripts" / "encode_healthcare_tasks.py"
+    )
+    assert spec is not None and spec.loader is not None
+    enc = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(enc)
+    return enc
+
+
+def test_encoder_drops_courtesy_send_sms() -> None:
+    enc = _encoder()
+    courtesy = {
+        "intent": "Take the first time they offer, confirm it, then thank them and end the call.",
+        "scripted_responses": [],
+        "exp_tool_calls": [
+            {"name": "book_appointment"},
+            {
+                "name": "send_sms",
+                "parameters": {"template_id": "appointment_confirmation"},
+            },
+        ],
+        "exp_db_state": {
+            "tool_events": [
+                {"kind": "sms", "payload": {"template_id": "appointment_confirmation"}},
+            ],
+        },
+    }
+    dropped = enc.drop_unneeded_send_sms(courtesy)
+    assert [call["name"] for call in dropped] == ["book_appointment"]
+    state = enc.drop_courtesy_sms_events({**courtesy, "exp_tool_calls": dropped})
+    assert state["tool_events"] == []
+
+    wants_address = {
+        "intent": "Ask them to text you the address so you have it.",
+        "scripted_responses": [
+            {"response_value": "Yes, please text me the address."},
+        ],
+        "exp_tool_calls": [
+            {"name": "send_sms", "parameters": {"template_id": "directions"}},
+            {"name": "book_appointment"},
+        ],
+    }
+    kept = [call["name"] for call in enc.drop_unneeded_send_sms(wants_address)]
+    assert kept == ["send_sms", "book_appointment"]
+
+    deposit = {
+        "intent": "Ask them to text you the deposit link so you can pay it.",
+        "scripted_responses": [],
+        "exp_tool_calls": [
+            {"name": "send_payment_link"},
+            {"name": "send_sms", "parameters": {"template_id": "cosmetic_deposit"}},
+        ],
+    }
+    assert [call["name"] for call in enc.drop_unneeded_send_sms(deposit)] == [
+        "send_payment_link",
+    ]
+
+    faq = {
+        "intent": (
+            "Ask when they send appointment confirmation texts — how many days "
+            "before the visit they start."
+        ),
+        "scripted_responses": [],
+        "exp_tool_calls": [
+            {"name": "send_sms", "parameters": {"template_id": "appointment_confirmation"}},
+        ],
+    }
+    assert enc.drop_unneeded_send_sms(faq) == []
+
+
+def test_healthcare_send_sms_only_when_caller_wants_text() -> None:
+    import json
+
+    enc = _encoder()
+    keep: list[str] = []
+    for path in sorted((ROOT / "industries" / "healthcare" / "tasks").glob("*/task.json")):
+        task = json.loads(path.read_text())
+        names = [call.get("name") for call in task.get("exp_tool_calls") or []]
+        if "send_sms" not in names:
+            continue
+        keep.append(path.parent.name)
+        assert enc.caller_requests_sms(task), path.parent.name
+        for call in task["exp_tool_calls"]:
+            assert enc.keep_send_sms_call(task, call, names)
+    assert keep == ["C1-H2", "C3-H2"]
+

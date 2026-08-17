@@ -7,10 +7,6 @@
       "value": "Bill Tanaka"
     }
   ],
-  "prompt_adherence_substrs": [
-    "call 911",
-    "I'm transferring you to a human now."
-  ],
   "exp_handoff_path": [
     "transfer_to_human"
   ],

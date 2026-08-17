@@ -183,14 +183,6 @@
       "payload": {
         "channel": "sms"
       }
-    },
-    {
-      "id": 3,
-      "kind": "sms",
-      "payload": {
-        "mobile_e164": "+12125550100",
-        "template_id": "portal_activation"
-      }
     }
   ],
   "waitlist": []

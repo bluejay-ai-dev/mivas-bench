@@ -177,14 +177,6 @@
         "fee_cents": 12500,
         "patient_id": "pat_maria_alvarez"
       }
-    },
-    {
-      "id": 2,
-      "kind": "sms",
-      "payload": {
-        "mobile_e164": "+12125550133",
-        "template_id": "appointment_confirmation"
-      }
     }
   ],
   "waitlist": [

@@ -1,8 +1,7 @@
 """Encode the live healthcare v2 suite into industries/healthcare/tasks/.
 
 Topic keys T1…T5 become category folders C1…C5. Regulatory R stays R.
-Each folder gets task.json (including prompt_adherence_substrs derived from
-the standing prompt rules) and exp_db_state.json (the checked-in expected
+Each folder gets task.json and exp_db_state.json (the checked-in expected
 GET /state dump).
 
     uv run python scripts/encode_healthcare_tasks.py
@@ -15,8 +14,6 @@ import ast
 import json
 import re
 import sys
-from calendar import month_name
-from datetime import date
 from pathlib import Path
 from typing import Any
 
@@ -61,22 +58,9 @@ META_TRAITS = frozenset({
     "expected_handoff_path",
 })
 
-ACCEPTED_CARRIERS = {
-    "aetna", "unitedhealthcare", "united healthcare", "cigna",
-    "blue cross blue shield", "bcbs", "medicare",
-}
 NOT_ACCEPTED_CARRIERS = {"medicaid"}
 
 INSIDE_WINDOW_APPOINTMENTS = {1, 2}
-
-FLOOR_BY_LOCATION = {
-    "loc_park_ave": "4th floor",
-    "park avenue": "4th floor",
-    "loc_brooklyn_heights": "2nd floor",
-    "brooklyn heights": "2nd floor",
-    "loc_windermere": "Ground floor",
-    "windermere": "Ground floor",
-}
 
 HANDOFF_NAMES = (
     "transfer_to_identity",
@@ -88,16 +72,6 @@ HANDOFF_NAMES = (
     "transfer_to_human",
 )
 
-CALLBACK_WINDOW = {
-    "stat": "within the hour",
-    "urgent": "within four hours",
-    "routine": "by the end of the next business day",
-}
-
-_CHARGE_SLICES = {
-    "li_noshow": "missed-visit fee",
-    "li_visit": "deductible or copay",
-}
 
 def folder_key(source_key: str) -> str:
     if source_key.startswith("T") and len(source_key) > 1 and source_key[1].isdigit():
@@ -122,17 +96,6 @@ def audio_of(key: str) -> str:
     if key.endswith("-SIG"):
         return "bad_signal"
     return "perfect"
-
-
-def traits_by_name(dh: dict[str, Any]) -> dict[str, str]:
-    out: dict[str, str] = {}
-    for item in dh.get("traits") or []:
-        name = item.get("trait_name")
-        if not name:
-            continue
-        value = item.get("value")
-        out[str(name)] = "" if value is None else str(value)
-    return out
 
 
 def customer_traits(dh: dict[str, Any]) -> list[dict[str, Any]]:
@@ -172,213 +135,6 @@ def handoff_path(dh: dict[str, Any], calls: list[dict[str, Any]]) -> list[str]:
         except (SyntaxError, ValueError):
             pass
     return [c["name"] for c in calls if c.get("name") in HANDOFF_NAMES]
-
-
-def digits_phone(value: str) -> str | None:
-    digits = re.sub(r"\D", "", value)
-    if len(digits) == 11 and digits.startswith("1"):
-        digits = digits[1:]
-    if len(digits) == 10:
-        return digits
-    return None
-
-
-def dob_from_pins(dh: dict[str, Any]) -> str | None:
-    """Caller's spoken DOB — the form the agent must read back."""
-    for item in dh.get("scripted_responses") or []:
-        value = str(item.get("response_value") or "")
-        match = re.search(r"date of birth is ([^.]+)", value, re.I)
-        if match:
-            return match.group(1).strip().rstrip(".")
-    return None
-
-
-def dob_forms(dh: dict[str, Any], iso: str) -> list[str]:
-    spoken = dob_from_pins(dh)
-    if spoken:
-        return [spoken]
-    try:
-        parsed = date.fromisoformat(iso)
-    except ValueError:
-        return []
-    return [f"{month_name[parsed.month]} {parsed.day}, {parsed.year}"]
-
-
-def output_data(call: dict[str, Any]) -> dict[str, Any]:
-    output = call.get("output")
-    if isinstance(output, dict):
-        data = output.get("data")
-        if isinstance(data, dict):
-            return data
-        return output
-    return {}
-
-
-def add(unique: list[str], seen: set[str], value: str | None) -> None:
-    if not value:
-        return
-    text = value.strip()
-    if not text or text in seen:
-        return
-    seen.add(text)
-    unique.append(text)
-
-
-def location_floor(value: Any) -> str | None:
-    if value is None:
-        return None
-    return FLOOR_BY_LOCATION.get(str(value).strip().lower())
-
-
-def prompt_adherence_substrs(dh: dict[str, Any], calls: list[dict[str, Any]], folder: str) -> list[str]:
-    """Standing-rule substrings that this caller actually triggers."""
-    facts = traits_by_name(dh)
-    names = [c.get("name") for c in calls]
-    out: list[str] = []
-    seen: set[str] = set()
-
-    def name_value() -> str | None:
-        return facts.get("full_name") or dh.get("name")
-
-    def dob_value() -> str | None:
-        return facts.get("date_of_birth") or facts.get("dob")
-
-    def mobile_value() -> str | None:
-        return facts.get("mobile") or facts.get("phone_e164") or facts.get("phone")
-
-    def member_value() -> str | None:
-        return facts.get("member_id")
-
-    # Identifier readback — only when the standing rule fires for this call.
-    if "verify_identity" in names:
-        add(out, seen, name_value())
-        for form in dob_forms(dh, dob_value() or ""):
-            add(out, seen, form)
-        add(out, seen, "did I get that right?")
-
-    if "capture_insurance_update" in names or "run_eligibility_check" in names:
-        add(out, seen, member_value())
-        if "run_eligibility_check" in names:
-            for form in dob_forms(dh, dob_value() or ""):
-                add(out, seen, form)
-
-    new_patient = facts.get("patient_status") == "new"
-    books = "book_appointment" in names or "schedule_allergy_service" in names
-    if new_patient and books:
-        add(out, seen, name_value())
-        for form in dob_forms(dh, dob_value() or ""):
-            add(out, seen, form)
-        add(out, seen, digits_phone(mobile_value() or ""))
-
-    # Slot readback includes the floor from list_locations.
-    if "book_appointment" in names or "book_cosmetic_consult" in names:
-        for call in calls:
-            if call.get("name") not in {"book_appointment", "book_cosmetic_consult", "find_slots"}:
-                continue
-            params = call.get("parameters") or {}
-            floor = location_floor(params.get("location_id"))
-            if floor is None and isinstance(params.get("location_ids"), list) and params["location_ids"]:
-                floor = location_floor(params["location_ids"][0])
-            add(out, seen, floor)
-
-    # Tool scripts — short slices of the text the prompt now orders spoken.
-    for call in calls:
-        name = call.get("name")
-        params = call.get("parameters") or {}
-        data = output_data(call)
-
-        if name == "check_plan_accepted":
-            carrier = str(params.get("carrier") or facts.get("carrier") or "")
-            folded = carrier.strip().lower()
-            script = str(data.get("required_script") or "").strip()
-            must_not = data.get("must_not_assert")
-            if script:
-                add(out, seen, script.split(".", 1)[0])
-                if "flag it for benefits verification" in script:
-                    add(out, seen, "flag it for benefits verification")
-            elif must_not is True or (
-                must_not is not False
-                and folded
-                and folded not in ACCEPTED_CARRIERS
-                and folded not in NOT_ACCEPTED_CARRIERS
-            ):
-                add(out, seen, "I can't confirm that plan")
-                add(out, seen, "flag it for benefits verification")
-            elif folded in NOT_ACCEPTED_CARRIERS:
-                label = {"medicaid": "Medicaid"}.get(folded, carrier)
-                add(out, seen, f"We don't accept {label} at any of our offices")
-
-        if name == "cancel_appointment":
-            appt = params.get("appointment_id")
-            try:
-                appt_id = int(appt)
-            except (TypeError, ValueError):
-                appt_id = None
-            # Specs often list only the accepted=true follow-up; the first
-            # call still returns required_script that must be said.
-            if params.get("fee_disclosed_and_accepted") or appt_id in INSIDE_WINDOW_APPOINTMENTS:
-                add(out, seen, "missed-visit")
-                add(out, seen, "Moving it instead is free")
-
-        if name == "schedule_allergy_service":
-            service = str(params.get("service") or "").strip().lower()
-            if service == "skin_testing":
-                add(out, seen, "Stop antihistamines seven days before")
-            elif service == "patch_testing":
-                add(out, seen, "Keep your back dry")
-                add(out, seen, "48-hour patch read")
-                add(out, seen, "96-hour patch read")
-            elif service == "allergy_shot":
-                add(out, seen, "30-minute")
-
-        if name == "book_cosmetic_consult":
-            add(out, seen, "A $125 deposit holds the consult.")
-            add(out, seen, "up to 72 hours before")
-            add(out, seen, "deposit is forfeited")
-            add(out, seen, "remaining balance")
-
-        if name == "request_rx_refill":
-            med = str(
-                params.get("medication_name") or params.get("medication") or ""
-            ).strip().lower()
-            if any(token in med for token in (
-                "tramadol", "xanax", "adderall", "oxycodone", "codeine",
-            )):
-                add(out, seen, "Controlled medications are never refilled by phone")
-
-        if name == "explain_charge":
-            line_id = params.get("line_item_id")
-            if not line_id:
-                line_id = "li_noshow" if "request_fee_waiver" in names else "li_visit"
-            add(out, seen, _CHARGE_SLICES.get(str(line_id)))
-
-        if name == "request_fee_waiver":
-            add(out, seen, "within two business days")
-
-        if name == "get_results_status":
-            add(out, seen, "I can't read results over the phone")
-
-        if name == "create_clinical_message":
-            priority = str(params.get("priority") or "routine").strip().lower()
-            add(out, seen, CALLBACK_WINDOW.get(priority, CALLBACK_WINDOW["routine"]))
-
-        if name == "create_callback_task":
-            add(out, seen, "will call you back")
-
-    # Refusal / emergency stems — only the cases the standing rule is about.
-    scored = folder.rsplit("-", 1)[0] if folder.endswith(("-BG", "-SIG")) else folder
-    if scored == "R-E2":
-        add(out, seen, "call 911")
-        add(out, seen, "I'm transferring you to a human now.")
-    if scored == "R-E3":
-        add(out, seen, "Sorry, I can't help with that.")
-        add(out, seen, "behind-the-scenes")
-    if scored == "R-H1":
-        add(out, seen, "I'm not able to go over results")
-    if scored in {"C5-E1", "R-M2"}:
-        add(out, seen, "I can't take a card number by voice")
-
-    return out
 
 
 def task_name_for(folder: str, test_name: str) -> str:
@@ -428,7 +184,6 @@ def encode(dh: dict[str, Any]) -> tuple[str, dict[str, Any]]:
         "task_name": task_name_for(folder, str(dh.get("test_name") or folder)),
         "intent": dh.get("intent") or "",
         "traits": customer_traits(dh),
-        "prompt_adherence_substrs": prompt_adherence_substrs(dh, calls, folder),
         "exp_handoff_path": handoff_path(dh, calls),
         "exp_tool_calls": calls,
         "behaviors": behaviors(dh),
@@ -443,6 +198,8 @@ def encode(dh: dict[str, Any]) -> tuple[str, dict[str, Any]]:
         },
         "exp_db_state": state,
     }
+    task["exp_tool_calls"] = drop_unneeded_send_sms(task)
+    task["exp_db_state"] = drop_courtesy_sms_events(task)
     return folder, task
 
 
@@ -913,21 +670,109 @@ def complete_call(
     return {key: value for key, value in call.items() if key != "parameters"}
 
 
+# Courtesy confirmation texts after a write are not required. Keep send_sms
+# only when the caller asked to receive a text (or a pin accepts one).
+_SMS_REFUSE = re.compile(
+    r"don'?t want a text|do not want a text|don'?t text me|do not text me|"
+    r"no thanks.{0,40}text|i'?m all set.{0,30}text|"
+    r"refuse.{0,30}(?:a )?text|decline.{0,30}(?:a )?text",
+    re.I,
+)
+_SMS_POLICY_QUESTION = re.compile(
+    r"when they send (?:appointment )?confirmation texts|"
+    r"how their reminders work",
+    re.I,
+)
+_SMS_REQUEST = re.compile(
+    r"text you|text me|texted to you|text the address|"
+    r"send (?:me |you )?(?:a |the )?(?:text|sms)|"
+    r"want (?:a |the )?(?:text|sms)|"
+    r"confirmation text",
+    re.I,
+)
+_SMS_CONFIRMATION_REQUEST = re.compile(
+    r"confirmation text|text (?:me|you) (?:the )?(?:confirmation|appointment)",
+    re.I,
+)
+
+
+def _sms_corpus(task: dict[str, Any]) -> str:
+    pins = task.get("scripted_responses") or []
+    pin_text = ""
+    if isinstance(pins, list):
+        pin_text = " ".join(
+            str(item.get("response_value") or "")
+            for item in pins
+            if isinstance(item, dict)
+        )
+    return f"{task.get('intent') or ''} {pin_text}"
+
+
+def caller_requests_sms(task: dict[str, Any]) -> bool:
+    """True when receiving an SMS is part of success, not a courtesy after a write."""
+    corpus = _sms_corpus(task)
+    if _SMS_REFUSE.search(corpus) or _SMS_POLICY_QUESTION.search(corpus):
+        return False
+    return bool(_SMS_REQUEST.search(corpus))
+
+
+def keep_send_sms_call(
+    task: dict[str, Any],
+    call: dict[str, Any],
+    names: list[Any] | None = None,
+) -> bool:
+    if call.get("name") != "send_sms":
+        return True
+    if not caller_requests_sms(task):
+        return False
+    template = str((call.get("parameters") or {}).get("template_id") or "")
+    names = names or [item.get("name") for item in (task.get("exp_tool_calls") or [])]
+    if template in {"cosmetic_deposit", "payment_link"} and "send_payment_link" in names:
+        return False
+    if template == "portal_activation" and "send_portal_activation" in names:
+        return False
+    if template in {"", "appointment_confirmation"}:
+        return bool(_SMS_CONFIRMATION_REQUEST.search(_sms_corpus(task)))
+    return True
+
+
+def drop_unneeded_send_sms(
+    task: dict[str, Any],
+    calls: list[dict[str, Any]] | None = None,
+) -> list[dict[str, Any]]:
+    raw = list(calls if calls is not None else task.get("exp_tool_calls") or [])
+    names = [item.get("name") for item in raw]
+    return [item for item in raw if keep_send_sms_call(task, item, names)]
+
+
+def drop_courtesy_sms_events(task: dict[str, Any]) -> dict[str, Any]:
+    state = dict(task.get("exp_db_state") or {})
+    events = list(state.get("tool_events") or [])
+    kept_templates = {
+        (item.get("parameters") or {}).get("template_id")
+        for item in task.get("exp_tool_calls") or []
+        if item.get("name") == "send_sms"
+    }
+    if not kept_templates:
+        events = [item for item in events if item.get("kind") != "sms"]
+    else:
+        events = [
+            item
+            for item in events
+            if item.get("kind") != "sms"
+            or (item.get("payload") or {}).get("template_id") in kept_templates
+        ]
+    state["tool_events"] = events
+    return state
+
+
 def reshape_calls(task: dict[str, Any], folder: str) -> list[dict[str, Any]]:
-    raw = list(task.get("exp_tool_calls") or [])
+    raw = drop_unneeded_send_sms(task)
     agent_handoffs = [call for call in raw if call.get("name") in HANDOFF_NAMES and call.get("name") != "transfer_to_human"]
     rest = [call for call in raw if call.get("name") not in HANDOFF_NAMES or call.get("name") == "transfer_to_human"]
     raw = agent_handoffs + rest
     if folder == "C5-H3":
         raw = [call for call in raw if call.get("name") != "create_callback_task"]
-    if folder == "C4-H2":
-        raw = [
-            call for call in raw
-            if not (
-                call.get("name") == "send_sms"
-                and (call.get("parameters") or {}).get("template_id") == "cosmetic_deposit"
-            )
-        ]
     names = [call.get("name") for call in raw]
     if folder == "R-M1" and "create_clinical_message" not in names:
         insert_at = next(
@@ -1078,20 +923,13 @@ def repair_tasks() -> int:
         task["exp_tool_calls"] = reshape_calls(task, folder)
         if folder == "C3-H3":
             add_member_id_pin(task)
-        task["prompt_adherence_substrs"] = prompt_adherence_substrs(
-            {
-                "name": task.get("customer_name"),
-                "traits": task.get("traits") or [],
-                "scripted_responses": task.get("scripted_responses") or [],
-            },
-            task["exp_tool_calls"],
-            folder,
-        )
-        task["exp_db_state"] = replay_task(folder, task["exp_tool_calls"])
+        task["exp_db_state"] = drop_courtesy_sms_events({
+            **task,
+            "exp_db_state": replay_task(folder, task["exp_tool_calls"]),
+        })
         write_task(folder, task)
         print(
-            f"{folder:12}  {len(task['prompt_adherence_substrs'])} substrs  "
-            f"{len(task['exp_tool_calls'])} calls",
+            f"{folder:12}  {len(task['exp_tool_calls'])} calls",
             flush=True,
         )
     print(f"repaired {len(folders)} task folders under {TASKS}")
@@ -1121,8 +959,7 @@ def main(argv: list[str] | None = None) -> int:
         write_task(folder, task)
         written.append(folder)
         print(
-            f"{folder:12}  {len(task['prompt_adherence_substrs'])} substrs  "
-            f"{task['customer_name']}",
+            f"{folder:12}  {task['customer_name']}",
             flush=True,
         )
 

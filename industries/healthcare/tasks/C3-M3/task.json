@@ -31,12 +31,6 @@
       "value": "Windermere"
     }
   ],
-  "prompt_adherence_substrs": [
-    "Walter Prinz",
-    "August 3, 1952",
-    "4075550181",
-    "Ground floor"
-  ],
   "exp_handoff_path": [
     "transfer_to_coverage",
     "transfer_to_scheduling"

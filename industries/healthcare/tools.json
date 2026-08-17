@@ -2,7 +2,7 @@
   "tools": [
     {
       "name": "identify_patient",
-      "description": "Find the patient record. The number they're calling from is tried automatically — try that before asking for anything. dob is YYYY-MM-DD. Returns masked candidates only.",
+      "description": "The caller may already be a patient and you need to find their record before verifying. The number they are calling from is tried first — use that before asking for name or date of birth. Returns masked candidates only; this does not verify identity.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -56,7 +56,7 @@
     },
     {
       "name": "verify_identity",
-      "description": "Verify the caller. Needs full name and date of birth (YYYY-MM-DD); add a second factor — their zip or the last four of the phone on file — if the tool asks for one. Never ask for a Social Security number. After the third failure this locks; when it does, stop and offer the front desk or a callback.",
+      "description": "You have the caller's name and date of birth and need to confirm they are the patient before any protected chart work. Add zip or last four of the phone on file only if a prior lookup asked for a second factor. Never ask for a Social Security number; after three failures this locks — stop and offer the front desk or a callback.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -107,7 +107,7 @@
     },
     {
       "name": "get_patient_summary",
-      "description": "Load everything the chart already knows — name, language, home office, last visit, upcoming appointments, insurance, balance, card on file, portal status, open orders and clinical flags. Call this the moment verification passes, before handing off.",
+      "description": "Identity verification just succeeded — load the chart before handing off or starting specialist work. Returns what the rest of the call should already know. Identity-gated; do not call unverified.",
       "inputSchema": {
         "type": "object",
         "properties": {},
@@ -136,7 +136,7 @@
     },
     {
       "name": "list_locations",
-      "description": "Offices by zip OR location_id: address, floor, suite, services, transit, parking, and whether the office does cosmetic work. The only source of an office address, floor or location_id. Practice hours come from search_practice_kb. Map caller names to loc_park_ave, loc_brooklyn_heights, or loc_windermere.",
+      "description": "The caller asks for an office address, floor, or suite, names an office, or you need an office id before booking or a coverage check. The only source of address, floor, suite, and location ids — never guess. Hours, directions, fees, portal, and services come from search_practice_kb, not this tool.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -180,7 +180,7 @@
     },
     {
       "name": "classify_visit_request",
-      "description": "Map the visit to an appointment type. Pass visit_class (cosmetic | mohs | allergy | medical), is_new_patient when you know, and urgency when spreading/painful/bleeding. Always call this before find_slots — it is what stops a Mohs consult being booked with a PA.",
+      "description": "The caller described a reason for a visit and you need the appointment type before you route or search slots. Maps the complaint to type and credential so a Mohs consult is never booked with a PA. Always call this before find_slots.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -235,7 +235,7 @@
     },
     {
       "name": "find_slots",
-      "description": "Open appointment slots at the given offices. Offer two or three, never a list.",
+      "description": "You are ready to offer appointment times at specific offices. Call after classify_visit_request, with office ids from list_locations. Offer two or three slots, never a list; do not promise a time this did not return.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -298,7 +298,7 @@
     },
     {
       "name": "book_appointment",
-      "description": "Create the appointment. Only after you have read back the day, the time, the office WITH THE FLOOR and the provider with credentials, and the caller said yes. Description is derived from appointment_type_code — do not pass one.",
+      "description": "The caller said yes after you read back the day, time, office with floor, and provider with credentials. Creates the appointment; description is derived from the appointment type — do not pass one. Slot fields must match the find_slots offer.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -380,7 +380,7 @@
     },
     {
       "name": "reschedule_appointment",
-      "description": "Move an existing appointment. This is an update, never a cancel-then-rebook, and it never costs anything — say so. Always offer this before cancelling.",
+      "description": "The caller wants to move an existing appointment — offer this before cancelling. This is an update, never a cancel-then-rebook, and it never costs anything; say so. Identity-gated to their own bookings.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -435,7 +435,7 @@
     },
     {
       "name": "cancel_appointment",
-      "description": "Cancel. Leave fee_disclosed_and_accepted false the first time: if a fee applies the tool will hand you the exact wording to say. Say it, offer a different time instead, and only call again with true if they still want to cancel. Always offer to rebook after.",
+      "description": "They still want to cancel after you offered to move the visit instead. First call without fee acceptance: if a fee applies, say the exact wording returned, offer a different time, and only call again after they accept. Always offer to rebook. Identity-gated.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -489,7 +489,7 @@
     },
     {
       "name": "join_waitlist",
-      "description": "Put them on the earlier-appointment list. Required: appointment_type_code, location_ids, earliest, latest.",
+      "description": "They want an earlier opening than the slots you can offer, or they decline to rebook after a cancel. Puts them on the earlier-appointment list for the given type and offices.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -560,7 +560,7 @@
     },
     {
       "name": "schedule_allergy_service",
-      "description": "Allergy visits: skin_testing, patch_testing, food_challenge, allergy_shot, drops_pickup, asthma_eval, immunotherapy_buildup. Say the prep instructions, the observation time after a shot, and the linked return visits out loud.",
+      "description": "They need an allergy service — testing, shots, drops pickup, food challenge, asthma eval, or immunotherapy — not a generic medical visit. Say the prep, the observation time after a shot, and the linked return visits out loud.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -626,7 +626,7 @@
     },
     {
       "name": "check_plan_accepted",
-      "description": "Carrier by OFFICE by provider. Pass carrier as a slug (aetna, unitedhealthcare, cigna, bcbs, medicare, medicaid, oscar_health, other) and location_id as loc_park_ave | loc_brooklyn_heights | loc_windermere. If must_not_assert is true you may not say they're covered or not covered: say required_script and create a callback. If accepted is no, say so plainly.",
+      "description": "The caller asks whether you take a plan at this office — you must call this; do not answer from the prompt. Acceptance is office-specific, and sometimes provider-specific. If must_not_assert is true, say required_script and do not claim covered or not; if accepted is no, say so plainly.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -692,7 +692,7 @@
     },
     {
       "name": "run_eligibility_check",
-      "description": "Live copay, deductible and coinsurance. Only if they gave you a member ID. If the payer doesn't answer, say you couldn't get the number — never guess at a copay.",
+      "description": "They want a live copay, deductible, or coinsurance and have given a member ID. If the payer does not answer, say you could not get the number — never guess a copay.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -757,7 +757,7 @@
     },
     {
       "name": "capture_insurance_update",
-      "description": "Take new or changed insurance by voice, then send a secure link for card photos. Never ask for a Social Security number.",
+      "description": "They have new or changed insurance to put on file. Carrier plus member ID is enough — still call if they have no group number. Texts a secure link for card photos; never ask for a Social Security number. Identity-gated.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -825,7 +825,7 @@
     },
     {
       "name": "get_account_balance",
-      "description": "The balance and the line items behind it.",
+      "description": "They ask about a bill, balance, or charge — call this first, before explaining or collecting. Returns the current balance and line items. Identity-gated; do not invent a sample amount.",
       "inputSchema": {
         "type": "object",
         "properties": {},
@@ -854,7 +854,7 @@
     },
     {
       "name": "explain_charge",
-      "description": "The approved explanation for a charge. Say approved_script as written — do not improvise a billing explanation.",
+      "description": "They ask why a specific charge is on the account. Say approved_script as written — do not improvise a billing explanation. Identity-gated.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -895,7 +895,7 @@
     },
     {
       "name": "send_payment_link",
-      "description": "Text a secure payment link. The only payment path — never take a card by voice.",
+      "description": "They are ready to pay a balance or a cosmetic deposit. Texts a secure payment link — the only payment path; never take a card by voice.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -938,7 +938,7 @@
     },
     {
       "name": "offer_financing",
-      "description": "CareCredit for a balance they can't pay at once. Over two hundred fifty dollars. Required: amount_cents.",
+      "description": "They cannot pay the full amount at once and the balance is over two hundred fifty dollars. Offers CareCredit; do not offer it for smaller amounts.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -976,7 +976,7 @@
     },
     {
       "name": "request_fee_waiver",
-      "description": "Open a review of a missed-visit fee. You do NOT waive it yourself. Required: fee_line_item_id. Say the SLA the tool gives you out loud.",
+      "description": "They dispute a missed-visit fee and want it reviewed. You do not waive it yourself — say the SLA the tool returns out loud.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -1017,7 +1017,7 @@
     },
     {
       "name": "quote_cosmetic_service",
-      "description": "The only source of a cosmetic price. service is botox | filler | chemical_peel | microneedling. If it returns a range you may say that range and must add that the consult settles the number. If it returns no range, never invent a number.",
+      "description": "They ask what a cosmetic treatment costs. The only source of a spoken cosmetic price — if it returns a range, say that range and that the consult settles the number; if no range, never invent one.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -1060,7 +1060,7 @@
     },
     {
       "name": "book_cosmetic_consult",
-      "description": "Book the consult. Leave policy_acknowledged false the first time — the tool hands you the exact four policy lines to say (deposit, 72 hours, forfeited, balance due). Say them, get a real yes, then call again with true.",
+      "description": "They are ready to book a cosmetic consult. First call without policy acknowledgment returns four policy lines — say them verbatim, get a real yes, then call again with acknowledgment. Do not book before that yes.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -1143,7 +1143,7 @@
     },
     {
       "name": "request_rx_refill",
-      "description": "Open a refill request. This NEVER approves a refill. Required: medication_name. Optional: pharmacy_phone (E.164), last_fill_date (YYYY-MM-DD). Follow the route it returns; on a no_recent_visit hard stop, offer to book the visit on this call.",
+      "description": "They want a medication refill. This never approves a refill — follow the route it returns; on a no-recent-visit hard stop, offer to book the visit on this call. Identity-gated.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -1193,7 +1193,7 @@
     },
     {
       "name": "get_results_status",
-      "description": "STATUS of pathology, lab or allergy testing — never the content. Required: order_type (pathology | lab | allergy). Say approved_script. If they push for what the results say, hold the line warmly every time and create a clinical message instead.",
+      "description": "They ask about pathology, lab, or allergy testing results. Returns STATUS only, never the content. Say approved_script; if they push for what the results say, hold the line and create a clinical message instead.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -1235,7 +1235,7 @@
     },
     {
       "name": "create_clinical_message",
-      "description": "Task the clinical team. priority stat for anything emergent, urgent otherwise. Say the callback_window it returns out loud.",
+      "description": "A nurse, results, or refill question needs the clinical team — including when they push for result content you cannot read. Say the callback_window it returns out loud. Identity-gated.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -1293,7 +1293,7 @@
     },
     {
       "name": "search_practice_kb",
-      "description": "Look up a grounded Straus answer. topic is hours | directions | portal | fees | services. Only say what this returns — if it finds no source, do not make one up.",
+      "description": "They ask about hours, directions, parking, fees, cancellation policy, the portal, or what the practice treats. Not for address, floor, suite, or location ids — those come from list_locations. Only say what this returns; if it finds no source, do not make one up.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -1337,7 +1337,7 @@
     },
     {
       "name": "send_sms",
-      "description": "Text the caller. template_id is one of appointment_confirmation, portal_activation, payment_link, insurance_card_upload, directions, cosmetic_deposit.",
+      "description": "You need to text a confirmation, directions, a portal link, a payment link, an insurance-card upload, or a cosmetic deposit. Uses an approved template only — never free-form text.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -1388,7 +1388,7 @@
     },
     {
       "name": "send_portal_activation",
-      "description": "Send the portal activation link when the portal isn't active. Optional: channel (sms | email).",
+      "description": "The portal is not active and they need access — on every results call where it is inactive, before the call ends. Sends the activation link.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -1426,7 +1426,7 @@
     },
     {
       "name": "create_callback_task",
-      "description": "Promise a callback with a real, tracked SLA. queue is billing, clinical, front_desk, cosmetic or records. Say the spoken_commitment out loud, verbatim.",
+      "description": "You need to promise a callback with a real tracked SLA — after a tool cannot finish the work, or they need a team to call back. Say spoken_commitment out loud, verbatim. Do not use this instead of a tool that already has the answer.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -1485,7 +1485,7 @@
     },
     {
       "name": "transfer_to_identity",
-      "description": "Invisible handoff to Identity & Verification when chart access is required before the real work. Pass next_intent (scheduling | billing | clinical | coverage | cosmetic) so identity knows where to continue. Call history is already visible — do not pass a summary.",
+      "description": "Chart access is required before the real work — existing-patient scheduling, billing, clinical, or updating insurance on file. Invisible hop; do not announce it. Pass next_intent so identity knows where to continue after verification.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -1529,7 +1529,7 @@
     },
     {
       "name": "transfer_to_scheduling",
-      "description": "Invisible handoff to Scheduling & Access for booking, rescheduling, cancelling, waitlist, or allergy visits. Call history is already visible — no arguments.",
+      "description": "The remaining work is booking, moving, cancelling, waitlist, or an allergy visit. Invisible hop; no arguments; do not announce it.",
       "inputSchema": {
         "type": "object",
         "properties": {},
@@ -1558,7 +1558,7 @@
     },
     {
       "name": "transfer_to_coverage",
-      "description": "Invisible handoff to Coverage & Benefits for plan acceptance, referrals, eligibility, or capturing a new insurance card. Call history is already visible — no arguments.",
+      "description": "The question is plan acceptance, a referral, eligibility, or capturing a new insurance card. Invisible hop; no arguments; do not announce it.",
       "inputSchema": {
         "type": "object",
         "properties": {},
@@ -1587,7 +1587,7 @@
     },
     {
       "name": "transfer_to_cosmetic",
-      "description": "Invisible handoff to Cosmetic Concierge for Botox, fillers, lasers, peels, cosmetic pricing, or cosmetic consult booking. Call history is already visible — no arguments.",
+      "description": "They want Botox, fillers, lasers, peels, cosmetic pricing, or a cosmetic consult. Invisible hop; no arguments; do not announce it.",
       "inputSchema": {
         "type": "object",
         "properties": {},
@@ -1616,7 +1616,7 @@
     },
     {
       "name": "transfer_to_billing",
-      "description": "Invisible handoff to Billing & Payments for balances, charge explanations, payment links, financing, or fee waivers. Caller must already be identity-verified. Call history is already visible — no arguments.",
+      "description": "The remaining work is a balance, charge explanation, payment, financing, or a fee waiver. Caller must already be identity-verified. Invisible hop; no arguments; do not announce it.",
       "inputSchema": {
         "type": "object",
         "properties": {},
@@ -1645,7 +1645,7 @@
     },
     {
       "name": "transfer_to_clinical",
-      "description": "Invisible handoff to Clinical Liaison for results status, refills, nurse messages, prior auth, portal, or records. Caller must already be identity-verified. Call history is already visible — no arguments.",
+      "description": "The remaining work is results status, a refill, a nurse message, prior auth, portal, or records. Caller must already be identity-verified. Invisible hop; no arguments; do not announce it.",
       "inputSchema": {
         "type": "object",
         "properties": {},
@@ -1674,7 +1674,7 @@
     },
     {
       "name": "transfer_to_human",
-      "description": "Transfer the caller to a human. Use only when (1) the caller asks for a human, or (2) after telling them to call 911 and saying you are transferring them for a clinical emergency. Required: destination and reason enums. Call history is already visible — do not pass a summary.",
+      "description": "The caller asks for a person, or you have told them to call 911 and said you are transferring them for a clinical emergency. This is the only transfer you announce out loud. Not for hard questions, policy limits, or a slow call.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -1731,7 +1731,7 @@
     },
     {
       "name": "end_call",
-      "description": "End the call once the caller is done, or immediately if it's spam or a wrong number. Say goodbye first. reason is caller_done | spam | wrong_number. There is no silent-hangup reason — a finished call after goodbye is caller_done.",
+      "description": "The caller is done — say goodbye first — or this is spam or a wrong number. A finished call after goodbye is caller_done; there is no silent-hangup reason.",
       "inputSchema": {
         "type": "object",
         "properties": {

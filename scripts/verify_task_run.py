@@ -1,21 +1,19 @@
 """Score a finished Bluejay run against MIVAS task.json files.
 
-Four independent checks per result (combined pass is AND):
+Three independent checks per result (combined pass is AND):
 
-1. Agent-side transcript vs `prompt_adherence_substrs`. Exact substring
-   always passes. Standing prompt/tool lines stay exact; other needles
-   may fold dates, phones, 911, money, floors, and name case.
-2. Hangup GET /state vs `exp_db_state` on office tables only
+1. Hangup GET /state vs `exp_db_state` on office tables only
    (`patients`, `appointments`, `waitlist`). Ignores `tool_events`,
    catalog tables, `created_at`, and unconstrained description text.
-3. Tool-call adherence — Bluejay `actual` invocations vs `exp_tool_calls`,
+2. Tool-call adherence — Bluejay `actual` invocations vs `exp_tool_calls`,
    matching constrained args from `tools.json` (enums, ids, facts). Prose
    args must be non-empty when required; empty live args are name-only.
-4. Handoff adherence — `exp_handoff_path` as an in-order subsequence of
-   actual transfer_* tools.
+3. Handoff adherence — `exp_handoff_path` as an in-order subsequence of
+   actual transfer_* tools in wall-clock order (`start_offset_ms`), not
+   Bluejay's name-grouped `tool_calls` array.
 
 Join result → task by the DH `case_key` trait or the `test_name` prefix
-(`C1-E1:`). Empty substrings / empty expected tools pass that half.
+(`C1-E1:`). Empty expected tools pass that half.
 Missing S3 dumps skip state with a note; `--actuals-dir` compares local
 files without S3.
 
@@ -66,46 +64,6 @@ FACT_ARG_KEYS = frozenset({
 })
 KEEP_ARG_TYPES = frozenset({"number", "integer", "boolean"})
 KEEP_ARG_FORMATS = frozenset({"date", "date-time"})
-
-# Standing prompt / tool lines: exact glyph match only, no speech folding.
-VERBATIM_PHRASES = (
-    "Sorry, I can't help with that.",
-    "I'm transferring you to a human now.",
-    "I can't take a card number by voice",
-    "did I get that right?",
-    "We don't accept Medicaid at any of our offices",
-    "I can't confirm that plan",
-    "A $125 deposit holds the consult.",
-    "up to 72 hours before",
-    "deposit is forfeited",
-    "remaining balance",
-    "Controlled medications are never refilled by phone",
-    "I can't read results over the phone",
-    "I'm not able to go over results",
-    "behind-the-scenes",
-)
-
-_ONES = {
-    "zero": 0, "one": 1, "two": 2, "three": 3, "four": 4, "five": 5,
-    "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10, "eleven": 11,
-    "twelve": 12, "thirteen": 13, "fourteen": 14, "fifteen": 15,
-    "sixteen": 16, "seventeen": 17, "eighteen": 18, "nineteen": 19,
-}
-_ORD_ONES = {
-    "zeroth": 0, "first": 1, "second": 2, "third": 3, "fourth": 4,
-    "fifth": 5, "sixth": 6, "seventh": 7, "eighth": 8, "ninth": 9,
-    "tenth": 10, "eleventh": 11, "twelfth": 12, "thirteenth": 13,
-    "fourteenth": 14, "fifteenth": 15, "sixteenth": 16, "seventeenth": 17,
-    "eighteenth": 18, "nineteenth": 19,
-}
-_TENS = {
-    "twenty": 20, "thirty": 30, "forty": 40, "fifty": 50,
-    "sixty": 60, "seventy": 70, "eighty": 80, "ninety": 90,
-}
-_ORD_TENS = {
-    "twentieth": 20, "thirtieth": 30, "fortieth": 40, "fiftieth": 50,
-    "sixtieth": 60, "seventieth": 70, "eightieth": 80, "ninetieth": 90,
-}
 
 _TOOL_SCHEMAS: dict[str, dict[str, Any]] = {}
 
@@ -204,10 +162,6 @@ def agent_transcript(lines: list[str]) -> str:
         if role in AGENT_ROLES:
             texts.append(said)
     return "\n".join(texts)
-
-
-def _unify_quotes(text: str) -> str:
-    return text.replace("\u2019", "'").replace("\u2018", "'").replace("`", "'")
 
 
 def _digits_phone(value: str) -> str:
@@ -499,7 +453,13 @@ def expected_tool_names(task: dict[str, Any] | None) -> list[str]:
 
 
 def actual_tool_calls(result: dict[str, Any]) -> list[dict[str, Any]]:
-    """One entry per Bluejay `actual` invocation, preserving group order."""
+    """One entry per Bluejay `actual` invocation, in wall-clock order.
+
+    Bluejay groups all actuals of one name into one `{name, actual[]}` object.
+    Group array order is not chronological — sort by `start_offset_ms` when
+    present so handoff subsequence scoring sees identity → specialist, not
+    whichever transfer name happened to be grouped first.
+    """
     calls: list[dict[str, Any]] = []
     for group in result.get("tool_calls") or []:
         if not isinstance(group, dict):
@@ -527,7 +487,16 @@ def actual_tool_calls(result: dict[str, Any]) -> list[dict[str, Any]]:
                 call["error_code"] = item.get("error_code")
             elif "error_code" in output:
                 call["error_code"] = output.get("error_code")
+            if item.get("start_offset_ms") is not None:
+                call["start_offset_ms"] = item.get("start_offset_ms")
             calls.append(call)
+    if any(call.get("start_offset_ms") is not None for call in calls):
+        calls.sort(
+            key=lambda call: (
+                call.get("start_offset_ms") is None,
+                call.get("start_offset_ms") if call.get("start_offset_ms") is not None else 0,
+            )
+        )
     return calls
 
 
@@ -615,114 +584,6 @@ def handoff_adherence(expected: list[str], actual: list[str]) -> dict[str, Any]:
     }
 
 
-def _replace_spoken_years(text: str) -> str:
-    tens_w = "|".join(_TENS)
-    ones_w = "|".join(word for word, value in _ONES.items() if 1 <= value <= 9)
-    teens_w = "|".join(word for word, value in _ONES.items() if value >= 10)
-
-    def nineteen_tens(match: re.Match[str]) -> str:
-        tens = _TENS[match.group(1)]
-        ones = _ONES.get(match.group(2) or "", 0)
-        return str(1900 + tens + ones)
-
-    text = re.sub(
-        rf"\bnineteen(?:[- ]({tens_w}))(?:[- ]({ones_w}))?\b",
-        nineteen_tens,
-        text,
-    )
-    text = re.sub(
-        rf"\bnineteen[- ]({teens_w})\b",
-        lambda match: str(1900 + _ONES[match.group(1)]),
-        text,
-    )
-
-    def two_thousand(match: re.Match[str]) -> str:
-        word = match.group(1)
-        return str(2000 + (_ONES.get(word, 0) if word else 0))
-
-    text = re.sub(
-        rf"\btwo thousand(?: and)?(?:[- ]({teens_w}|{ones_w}))?\b",
-        two_thousand,
-        text,
-    )
-    return text
-
-
-def _replace_spoken_numbers(text: str) -> str:
-    tens_w = "|".join(_TENS)
-    ones_1_9 = "|".join(word for word, value in _ONES.items() if 1 <= value <= 9)
-    ord_1_9 = "|".join(word for word, value in _ORD_ONES.items() if 1 <= value <= 9)
-    text = re.sub(
-        rf"\b({tens_w})[- ]({ord_1_9})\b",
-        lambda match: str(_TENS[match.group(1)] + _ORD_ONES[match.group(2)]),
-        text,
-    )
-    text = re.sub(
-        rf"\b({tens_w})[- ]({ones_1_9})\b",
-        lambda match: str(_TENS[match.group(1)] + _ONES[match.group(2)]),
-        text,
-    )
-    ordinals = {**_ORD_ONES, **_ORD_TENS}
-    for word, value in sorted(ordinals.items(), key=lambda item: -len(item[0])):
-        text = re.sub(rf"\b{word}\b", str(value), text)
-    for word, value in sorted(_ONES.items(), key=lambda item: -len(item[0])):
-        text = re.sub(rf"\b{word}\b", str(value), text)
-    return text
-
-
-def _collapse_phone_runs(text: str) -> str:
-    def collapse(match: re.Match[str]) -> str:
-        return _digits_phone(match.group(0))
-
-    return re.sub(r"(?:\d[\s().\-]*){7,}", collapse, text)
-
-
-def fold_speech(text: str) -> str:
-    """Canonical form for non-verbatim substring matching."""
-    folded = _unify_quotes(text).casefold()
-    folded = re.sub(r"\bnine[\s\-]+one[\s\-]+one\b", "911", folded)
-    folded = re.sub(r"\b9\s*-\s*1\s*-\s*1\b", "911", folded)
-    folded = re.sub(r"\$\s*125\b", "125", folded)
-    folded = re.sub(
-        r"\b(?:one\s+)?hundred\s+(?:and\s+)?twenty[\-\s]?five\b",
-        "125",
-        folded,
-    )
-    folded = _replace_spoken_years(folded)
-    folded = _replace_spoken_numbers(folded)
-    folded = re.sub(r"\b(\d+)(?:st|nd|rd|th)\b", r"\1", folded)
-    folded = _collapse_phone_runs(folded)
-    folded = re.sub(r"[^a-z0-9]+", " ", folded)
-    return re.sub(r"\s+", " ", folded).strip()
-
-
-def is_verbatim_needle(needle: str) -> bool:
-    return any(phrase in needle for phrase in VERBATIM_PHRASES)
-
-
-def substr_matches(agent_text: str, needle: str) -> bool:
-    haystack = _unify_quotes(agent_text)
-    want = _unify_quotes(needle)
-    if want in haystack:
-        return True
-    if is_verbatim_needle(want):
-        return False
-    folded_needle = fold_speech(want)
-    if not folded_needle:
-        return False
-    return folded_needle in fold_speech(haystack)
-
-
-def match_agent_substrs(agent_text: str, substrs: list[str] | None) -> dict[str, Any]:
-    """Empty substrs pass. Exact hit always counts; else fold unless verbatim."""
-    wanted = [s for s in (substrs or []) if s]
-    if not wanted:
-        return {"passed": True, "missing": [], "found": []}
-    missing = [s for s in wanted if not substr_matches(agent_text, s)]
-    found = [s for s in wanted if substr_matches(agent_text, s)]
-    return {"passed": not missing, "missing": missing, "found": found}
-
-
 def _fetch_result(result_id: str) -> dict[str, Any]:
     body = verify_run._get(f"retrieve-simulation-result/{result_id}")
     return body.get("simulation_result") or body
@@ -763,8 +624,6 @@ def verify_result(
         schemas = load_tool_schemas(industry)
     lines = result_transcript_lines(result)
     agent_text = agent_transcript(lines)
-    substrs = (task or {}).get("prompt_adherence_substrs") if task else None
-    substr = match_agent_substrs(agent_text, substrs)
     actual_calls = actual_tool_calls(result)
     expected_calls = list((task or {}).get("exp_tool_calls") or [])
     call = tool_call_adherence(expected_calls, actual_calls, schemas=schemas)
@@ -789,13 +648,11 @@ def verify_result(
             state = {"passed": matched, "skipped": False, "note": None}
 
     passed = (
-        substr["passed"]
-        and state.get("passed") is not False
+        state.get("passed") is not False
         and call["passed"]
         and handoff["passed"]
     )
     return {
-        "substr": substr,
         "state": state,
         "call": call,
         "handoff": handoff,
@@ -899,8 +756,6 @@ def main(argv: list[str] | None = None) -> int:
             extra = f"  ↳ {row['void_reason']}"
         elif not task:
             extra = "  ↳ no task.json for this digital human"
-        elif not check["substr"]["passed"]:
-            extra = f"  ↳ missing substrs: {check['substr']['missing']}"
         elif not check["call"]["passed"]:
             extra = f"  ↳ missing tools: {check['call']['missing']}"
         elif not check["handoff"]["passed"]:

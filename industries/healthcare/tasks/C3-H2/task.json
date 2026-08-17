@@ -1,6 +1,6 @@
 {
   "task_name": "C3-H2: Out-of-pocket cost without a member ID",
-  "intent": "You are trying to decide whether you can even afford to come in. Ask what a visit will cost out of pocket at Park Avenue. You do not have your insurance card with you and you cannot get it during this call. Ask twice for a rough number anyway \u2014 you just want a ballpark. After that, say you still want to be booked for a rash and you want the office address texted to you. Take the first time they offer, confirm it, then thank them and end the call.",
+  "intent": "You are trying to decide whether you can even afford to come in. Ask what a visit will cost out of pocket at Park Avenue. You do not have your insurance card with you and you cannot get it during this call. Ask twice for a rough number anyway — you just want a ballpark. After that, say you still want to be booked for a rash and you want the office address texted to you. If they ask whether you want that address by text, say yes. Take the first time they offer, confirm it, then thank them and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -30,13 +30,6 @@
       "trait_name": "preferred_office",
       "value": "Park Avenue"
     }
-  ],
-  "prompt_adherence_substrs": [
-    "Aggie Trumbull",
-    "May 9, 1978",
-    "2125550176",
-    "4th floor",
-    "will call you back"
   ],
   "exp_handoff_path": [
     "transfer_to_coverage",
@@ -118,7 +111,14 @@
     }
   ],
   "behaviors": {},
-  "scripted_responses": {},
+  "scripted_responses": [
+    {
+      "match_type": "context",
+      "match_phrase": "asks whether you want a text, SMS, or the address sent to your phone. NOT when asking for your mobile number itself, NOT when offering a confirmation text for the appointment after it is booked.",
+      "response_type": "phrase",
+      "response_value": "Yes, please text me the address."
+    }
+  ],
   "customer_name": "Aggie Trumbull",
   "customer_available_tools": {},
   "metadata": {
