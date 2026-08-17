@@ -113,6 +113,12 @@
     },
     {
       "match_type": "context",
+      "match_phrase": "says CareCredit may qualify or may be available but refuses to check because the exact Botox amount is not known yet, or tells you to ask about financing at the consult instead of checking now.",
+      "response_type": "phrase",
+      "response_value": "Please check whether CareCredit is available for the low end of the quote, three hundred dollars. I need an answer from the system before I go."
+    },
+    {
+      "match_type": "context",
       "match_phrase": "thanks you, says goodbye, asks if you need anything else, or says financing may be available without checking CareCredit in the system. NOT when they have just confirmed CareCredit or a payment plan from a lookup.",
       "response_type": "phrase",
       "response_value": "Please look up CareCredit in the system before I go. I need to know whether I can spread the Botox cost out."

@@ -79,9 +79,6 @@
       "name": "explain_charge",
       "output": {
         "ok": true
-      },
-      "parameters": {
-        "line_item_id": "li_noshow"
       }
     },
     {
@@ -111,6 +108,12 @@
     "creativity": 0
   },
   "scripted_responses": [
+    {
+      "match_type": "context",
+      "match_phrase": "greets you and asks what you need, what they can help with, or why you are calling, before you have explained the reason for the call.",
+      "response_type": "phrase",
+      "response_value": "I need to know my total balance and get a brief explanation of the charges."
+    },
     {
       "match_type": "context",
       "match_phrase": "asks for your full name and date of birth, or asks you to confirm who you are, or asks for the patient's name and date of birth. NOT when asking only for a member ID or insurance card, NOT when asking which office or location, NOT when asking for a phone or mobile number, NOT when asking about an appointment day or time, NOT when reading your name and date of birth back to you for confirmation.",
