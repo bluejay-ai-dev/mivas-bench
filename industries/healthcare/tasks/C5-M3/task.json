@@ -1,0 +1,268 @@
+{
+  "task_name": "C5-M3: A bill the caller is sure they received",
+  "intent": "You are an existing Straus patient and you are sure you were sent a bill \u2014 you remember opening something. Answer their identity questions. If they say there is no balance, insist once that you definitely received something and ask them to look again. If they offer a callback, accept it. Then thank them and end the call.",
+  "traits": [
+    {
+      "trait_name": "full_name",
+      "value": "Sam Nguyen"
+    },
+    {
+      "trait_name": "zip",
+      "value": "11201"
+    },
+    {
+      "trait_name": "patient_status",
+      "value": "existing"
+    },
+    {
+      "trait_name": "mobile",
+      "value": "718-555-0122"
+    },
+    {
+      "trait_name": "date_of_birth",
+      "value": "1985-11-03"
+    },
+    {
+      "trait_name": "carrier",
+      "value": "UnitedHealthcare"
+    },
+    {
+      "trait_name": "preferred_office",
+      "value": "Brooklyn Heights"
+    }
+  ],
+  "prompt_adherence_substrs": [
+    "Sam Nguyen",
+    "November third, nineteen eighty-five",
+    "did I get that right?"
+  ],
+  "exp_handoff_path": [
+    "transfer_to_identity",
+    "transfer_to_billing"
+  ],
+  "exp_tool_calls": [
+    {
+      "name": "transfer_to_identity"
+    },
+    {
+      "name": "transfer_to_billing"
+    },
+    {
+      "name": "verify_identity",
+      "parameters": {
+        "dob": "1985-11-03",
+        "full_name": "Sam Nguyen"
+      },
+      "output": {
+        "ok": true,
+        "data": {
+          "verified": true
+        }
+      }
+    },
+    {
+      "name": "get_account_balance",
+      "output": {
+        "ok": true,
+        "data": {
+          "balance_cents": 0
+        }
+      }
+    }
+  ],
+  "behaviors": {},
+  "scripted_responses": [
+    {
+      "match_type": "context",
+      "match_phrase": "asks for your full name and date of birth, or asks you to confirm who you are, or asks for the patient's name and date of birth. NOT when asking only for a member ID or insurance card, NOT when asking which office or location, NOT when asking for a phone or mobile number, NOT when asking about an appointment day or time, NOT when reading your name and date of birth back to you for confirmation.",
+      "response_type": "phrase",
+      "response_value": "Sam Nguyen. My date of birth is November third, nineteen eighty-five."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "reads your name and date of birth back to you and asks whether it is correct, or asks 'did I get that right'. NOT when first asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "Yes, that's right."
+    }
+  ],
+  "customer_name": "Sam Nguyen",
+  "customer_available_tools": {},
+  "metadata": {
+    "category": "C5",
+    "category_slug": "billing-and-payments",
+    "difficulty": "medium",
+    "audio_condition": "perfect"
+  },
+  "exp_db_state": {
+    "patients": [
+      {
+        "id": "pat_alice_romano",
+        "first_name": "Alice",
+        "last_name": "Romano",
+        "dob": "1995-09-08",
+        "zip": "34786",
+        "phone_e164": "+14075550155",
+        "home_office_id": "loc_windermere",
+        "language": "en",
+        "balance_cents": 32000,
+        "carrier": "Oscar Health",
+        "member_id": "O778899001",
+        "plan_name": "Circle EPO"
+      },
+      {
+        "id": "pat_jordan_lee",
+        "first_name": "Jordan",
+        "last_name": "Lee",
+        "dob": "1990-04-12",
+        "zip": "10016",
+        "phone_e164": "+12125550100",
+        "home_office_id": "loc_park_ave",
+        "language": "en",
+        "balance_cents": 12500,
+        "carrier": "Aetna",
+        "member_id": "W123456789",
+        "plan_name": "Open Access Elect Choice"
+      },
+      {
+        "id": "pat_leo_park",
+        "first_name": "Leo",
+        "last_name": "Park",
+        "dob": "2016-03-22",
+        "zip": "11201",
+        "phone_e164": "+17185550166",
+        "home_office_id": "loc_brooklyn_heights",
+        "language": "en",
+        "balance_cents": 0,
+        "carrier": "Aetna",
+        "member_id": "W998877665",
+        "plan_name": "Open Access Elect Choice"
+      },
+      {
+        "id": "pat_maria_alvarez",
+        "first_name": "Maria",
+        "last_name": "Alvarez",
+        "dob": "1972-06-30",
+        "zip": "10016",
+        "phone_e164": "+12125550133",
+        "home_office_id": "loc_park_ave",
+        "language": "en",
+        "balance_cents": 48000,
+        "carrier": "Cigna",
+        "member_id": "C445566778",
+        "plan_name": "Open Access Plus"
+      },
+      {
+        "id": "pat_sam_nguyen",
+        "first_name": "Sam",
+        "last_name": "Nguyen",
+        "dob": "1985-11-03",
+        "zip": "11201",
+        "phone_e164": "+17185550122",
+        "home_office_id": "loc_brooklyn_heights",
+        "language": "en",
+        "balance_cents": 0,
+        "carrier": "UnitedHealthcare",
+        "member_id": "U987654321",
+        "plan_name": "Choice Plus"
+      }
+    ],
+    "locations": [
+      {
+        "id": "loc_brooklyn_heights",
+        "name": "Brooklyn Heights",
+        "zip": "11201",
+        "offers_cosmetic": 1,
+        "address": "142 Montague Street, Brooklyn, NY 11201",
+        "floor": "2nd floor",
+        "suite": "Suite 2B",
+        "hours": "Mon-Fri 8am-5pm",
+        "services": "medical, surgical, cosmetic, allergy",
+        "transit": "Two blocks from Borough Hall",
+        "parking": "Street parking; garage on Clinton Street"
+      },
+      {
+        "id": "loc_park_ave",
+        "name": "Park Avenue",
+        "zip": "10016",
+        "offers_cosmetic": 1,
+        "address": "386 Park Avenue South, New York, NY 10016",
+        "floor": "4th floor",
+        "suite": "Suite 410",
+        "hours": "Mon-Fri 8am-5pm, Sat 9am-1pm",
+        "services": "medical, surgical, cosmetic, allergy",
+        "transit": "One block from the 6 train at 33rd Street",
+        "parking": "Garage next door on East 27th"
+      },
+      {
+        "id": "loc_windermere",
+        "name": "Windermere",
+        "zip": "34786",
+        "offers_cosmetic": 0,
+        "address": "7600 Conroy Windermere Road, Windermere, FL 34786",
+        "floor": "Ground floor",
+        "suite": "Suite 100",
+        "hours": "Mon-Fri 8am-5pm",
+        "services": "medical, surgical, allergy",
+        "transit": "No transit nearby",
+        "parking": "Free surface lot"
+      }
+    ],
+    "providers": [
+      {
+        "id": "prov_chen",
+        "name": "Dr. Amy Chen",
+        "credentials": "MD, FAAD",
+        "location_id": "loc_park_ave"
+      },
+      {
+        "id": "prov_patel",
+        "name": "Dr. Neha Patel",
+        "credentials": "DO",
+        "location_id": "loc_windermere"
+      },
+      {
+        "id": "prov_ruiz",
+        "name": "Dr. Luis Ruiz",
+        "credentials": "MD",
+        "location_id": "loc_brooklyn_heights"
+      }
+    ],
+    "appointments": [
+      {
+        "id": 1,
+        "patient_id": "pat_jordan_lee",
+        "location_id": "loc_park_ave",
+        "provider_id": "prov_chen",
+        "appointment_type_code": "MED_FOLLOWUP",
+        "start": "2026-08-20T10:00:00",
+        "end": "2026-08-20T10:20:00",
+        "description": "Follow-up acne check",
+        "status": "booked"
+      },
+      {
+        "id": 2,
+        "patient_id": "pat_maria_alvarez",
+        "location_id": "loc_park_ave",
+        "provider_id": "prov_chen",
+        "appointment_type_code": "COS_CONSULT",
+        "start": "2026-08-21T15:00:00",
+        "end": "2026-08-21T15:30:00",
+        "description": "Botox consult",
+        "status": "booked"
+      },
+      {
+        "id": 3,
+        "patient_id": "pat_alice_romano",
+        "location_id": "loc_windermere",
+        "provider_id": "prov_patel",
+        "appointment_type_code": "MED_FOLLOWUP",
+        "start": "2026-09-15T09:00:00",
+        "end": "2026-09-15T09:20:00",
+        "description": "Eczema follow-up",
+        "status": "booked"
+      }
+    ],
+    "waitlist": [],
+    "tool_events": []
+  }
+}

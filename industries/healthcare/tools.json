@@ -1,76 +1,6 @@
 {
   "tools": [
     {
-      "name": "resolve_inbound_context",
-      "description": "Resolve dialed DID / caller ANI into office, legacy brand greeting, and known_caller before the first spoken turn.",
-      "inputSchema": {
-        "type": "object",
-        "properties": {
-          "dialed_did": {
-            "type": "string"
-          },
-          "caller_ani": {
-            "type": "string"
-          }
-        }
-      },
-      "outputSchema": {
-        "type": "object",
-        "properties": {
-          "ok": {
-            "type": "boolean"
-          },
-          "data": {
-            "type": "object"
-          },
-          "error_code": {
-            "type": "string"
-          },
-          "patient_safe_message": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "ok"
-        ]
-      }
-    },
-    {
-      "name": "detect_language",
-      "description": "Detect the caller's language. Not wired into the healthcare blueprint (English-only eval); kept for future multilingual industries.",
-      "inputSchema": {
-        "type": "object",
-        "properties": {
-          "utterance": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "utterance"
-        ]
-      },
-      "outputSchema": {
-        "type": "object",
-        "properties": {
-          "ok": {
-            "type": "boolean"
-          },
-          "data": {
-            "type": "object"
-          },
-          "error_code": {
-            "type": "string"
-          },
-          "patient_safe_message": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "ok"
-        ]
-      }
-    },
-    {
       "name": "identify_patient",
       "description": "Find the patient record. The number they're calling from is tried automatically \u2014 try that before asking for anything. dob is YYYY-MM-DD. Returns masked candidates only.",
       "inputSchema": {
@@ -83,7 +13,9 @@
             "type": "string"
           },
           "dob": {
-            "type": "string"
+            "type": "string",
+            "format": "date",
+            "description": "YYYY-MM-DD"
           },
           "zip": {
             "type": "string"
@@ -121,7 +53,9 @@
             "type": "string"
           },
           "dob": {
-            "type": "string"
+            "type": "string",
+            "format": "date",
+            "description": "YYYY-MM-DD"
           },
           "second_factor": {
             "type": "string"
@@ -314,22 +248,36 @@
         "type": "object",
         "properties": {
           "slot_id": {
-            "type": "string"
+            "type": "string",
+            "description": "Id returned by find_slots, e.g. slot_loc_park_ave_1. Must match location_id, provider_id, start, and end."
           },
           "appointment_type_code": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "NP_MED",
+              "MED_FOLLOWUP",
+              "MOHS_CONSULT",
+              "COS_CONSULT",
+              "ALLERGY_EVAL"
+            ]
           },
           "location_id": {
-            "type": "string"
+            "type": "string",
+            "description": "Must equal the slot's location_id (loc_park_ave, loc_brooklyn_heights, loc_windermere)."
           },
           "provider_id": {
-            "type": "string"
+            "type": "string",
+            "description": "Must equal the slot's provider_id (prov_chen, prov_ruiz, prov_patel)."
           },
           "start": {
-            "type": "string"
+            "type": "string",
+            "format": "date-time",
+            "description": "Must equal the slot start, e.g. 2026-08-24T09:00:00"
           },
           "end": {
-            "type": "string"
+            "type": "string",
+            "format": "date-time",
+            "description": "Must equal the slot end, e.g. 2026-08-24T09:30:00"
           },
           "description": {
             "type": "string"
@@ -376,16 +324,21 @@
         "type": "object",
         "properties": {
           "appointment_id": {
-            "type": "string"
+            "type": "string",
+            "description": "Seeded appointment id as a string, e.g. \"1\"."
           },
           "new_slot_id": {
             "type": "string"
           },
           "new_start": {
-            "type": "string"
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO-8601 local datetime, e.g. 2026-08-25T11:30:00"
           },
           "new_end": {
-            "type": "string"
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO-8601 local datetime, e.g. 2026-08-25T12:00:00"
           },
           "reason": {
             "type": "string"
@@ -393,10 +346,8 @@
         },
         "required": [
           "appointment_id",
-          "new_slot_id",
           "new_start",
-          "new_end",
-          "reason"
+          "new_end"
         ]
       },
       "outputSchema": {
@@ -430,7 +381,14 @@
             "type": "string"
           },
           "cancellation_reason_code": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "patient_request",
+              "provider_request",
+              "weather",
+              "illness",
+              "other"
+            ]
           },
           "fee_disclosed_and_accepted": {
             "type": "boolean"
@@ -522,16 +480,28 @@
         "type": "object",
         "properties": {
           "service": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "skin_testing",
+              "patch_testing",
+              "food_challenge",
+              "allergy_shot",
+              "drops_pickup",
+              "asthma_eval",
+              "immunotherapy_buildup"
+            ]
           },
           "location_id": {
-            "type": "string"
+            "type": "string",
+            "description": "Location id (loc_park_ave) or the office name the caller used."
           },
           "window_start": {
-            "type": "string"
+            "type": "string",
+            "format": "date-time"
           },
           "window_end": {
-            "type": "string"
+            "type": "string",
+            "format": "date-time"
           }
         },
         "required": [
@@ -621,10 +591,14 @@
             "type": "string"
           },
           "dob": {
-            "type": "string"
+            "type": "string",
+            "format": "date",
+            "description": "YYYY-MM-DD"
           },
           "service_date": {
-            "type": "string"
+            "type": "string",
+            "format": "date",
+            "description": "YYYY-MM-DD of the visit being checked."
           }
         },
         "required": [
@@ -736,7 +710,11 @@
         "type": "object",
         "properties": {
           "line_item_id": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "li_noshow",
+              "li_visit"
+            ]
           }
         },
         "required": [
@@ -771,7 +749,8 @@
         "type": "object",
         "properties": {
           "mobile_e164": {
-            "type": "string"
+            "type": "string",
+            "description": "E.164, e.g. +12125550100"
           },
           "amount_cents": {
             "type": "integer"
@@ -847,7 +826,11 @@
         "type": "object",
         "properties": {
           "fee_line_item_id": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "li_noshow",
+              "li_visit"
+            ]
           },
           "stated_reason": {
             "type": "string"
@@ -886,7 +869,8 @@
         "type": "object",
         "properties": {
           "service": {
-            "type": "string"
+            "type": "string",
+            "description": "Cosmetic service slug. Known priced: botox, filler, chemical_peel, microneedling. Unknown names return no range."
           }
         },
         "required": [
@@ -943,7 +927,6 @@
           }
         },
         "required": [
-          "slot_id",
           "service_interest",
           "location_id",
           "provider_id",
@@ -1054,10 +1037,21 @@
         "type": "object",
         "properties": {
           "category": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "nurse_question",
+              "results_followup",
+              "rx_question",
+              "other"
+            ]
           },
           "priority": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "stat",
+              "urgent",
+              "routine"
+            ]
           },
           "summary": {
             "type": "string"
@@ -1135,10 +1129,19 @@
         "type": "object",
         "properties": {
           "mobile_e164": {
-            "type": "string"
+            "type": "string",
+            "description": "E.164, e.g. +12125550100"
           },
           "template_id": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "appointment_confirmation",
+              "portal_activation",
+              "payment_link",
+              "insurance_card_upload",
+              "directions",
+              "cosmetic_deposit"
+            ]
           },
           "variables": {
             "type": "object"
@@ -1209,13 +1212,21 @@
         "type": "object",
         "properties": {
           "callback_number": {
-            "type": "string"
+            "type": "string",
+            "description": "E.164, e.g. +12125550100"
           },
           "topic": {
             "type": "string"
           },
           "queue": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "billing",
+              "clinical",
+              "front_desk",
+              "cosmetic",
+              "records"
+            ]
           },
           "priority": {
             "type": "string"
@@ -1229,126 +1240,6 @@
           "topic",
           "queue"
         ]
-      },
-      "outputSchema": {
-        "type": "object",
-        "properties": {
-          "ok": {
-            "type": "boolean"
-          },
-          "data": {
-            "type": "object"
-          },
-          "error_code": {
-            "type": "string"
-          },
-          "patient_safe_message": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "ok"
-        ]
-      }
-    },
-    {
-      "name": "authenticate_for_transfer",
-      "description": "Authenticate and package context before transferring to a human queue.",
-      "inputSchema": {
-        "type": "object",
-        "properties": {
-          "patient_id": {
-            "type": "string"
-          },
-          "context_summary": {
-            "type": "string"
-          },
-          "intents_attempted": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "tools_called": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "unresolved_reason": {
-            "type": "string"
-          }
-        }
-      },
-      "outputSchema": {
-        "type": "object",
-        "properties": {
-          "ok": {
-            "type": "boolean"
-          },
-          "data": {
-            "type": "object"
-          },
-          "error_code": {
-            "type": "string"
-          },
-          "patient_safe_message": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "ok"
-        ]
-      }
-    },
-    {
-      "name": "transfer_call",
-      "description": "Transfer the call to a human destination queue.",
-      "inputSchema": {
-        "type": "object",
-        "properties": {
-          "destination": {
-            "type": "string"
-          }
-        }
-      },
-      "outputSchema": {
-        "type": "object",
-        "properties": {
-          "ok": {
-            "type": "boolean"
-          },
-          "data": {
-            "type": "object"
-          },
-          "error_code": {
-            "type": "string"
-          },
-          "patient_safe_message": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "ok"
-        ]
-      }
-    },
-    {
-      "name": "log_call_disposition",
-      "description": "Log call disposition (normally fired on session shutdown).",
-      "inputSchema": {
-        "type": "object",
-        "properties": {
-          "intents": {
-            "type": "string"
-          },
-          "containment": {
-            "type": "string"
-          },
-          "revenue_events": {
-            "type": "string"
-          }
-        }
       },
       "outputSchema": {
         "type": "object",
@@ -1599,13 +1490,28 @@
         "type": "object",
         "properties": {
           "destination": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "patient_support_center",
+              "billing_team",
+              "location_front_desk",
+              "cosmetic_coordinator",
+              "clinical_triage",
+              "records",
+              "on_call"
+            ]
           },
           "context_summary": {
             "type": "string"
           },
           "reason": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "caller_request",
+              "clinical_emergency",
+              "identity_locked",
+              "other"
+            ]
           }
         },
         "required": [

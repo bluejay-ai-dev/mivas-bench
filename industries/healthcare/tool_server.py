@@ -15,7 +15,6 @@ from __future__ import annotations
 import json
 import logging
 import os
-import re
 import sqlite3
 import sys
 from contextlib import contextmanager
@@ -288,6 +287,16 @@ class ToolError(Exception):
         self.code, self.message = code, message
 
 
+def _require(a: dict[str, Any], *keys: str) -> None:
+    """Fail with INVALID_ARGUMENTS instead of KeyError when a required field is missing."""
+    missing = [k for k in keys if a.get(k) in (None, "")]
+    if missing:
+        raise ToolError(
+            "INVALID_ARGUMENTS",
+            f"Missing required argument(s): {', '.join(missing)}.",
+        )
+
+
 def _event(kind: str, payload: dict[str, Any]) -> int:
     with _db() as conn:
         cur = conn.execute(
@@ -328,38 +337,6 @@ def _iso_plus_minutes(start: str, minutes: int) -> str:
 # --- identity ----------------------------------------------------------------
 
 
-def _d_resolve_inbound_context(a: dict[str, Any]) -> dict[str, Any]:
-    ani = str(a.get("caller_ani") or "").strip()
-    with _db() as conn:
-        patient = conn.execute(
-            "SELECT * FROM patients WHERE phone_e164 = ?", (ani,)
-        ).fetchone() if ani else None
-        office = None
-        if patient and patient["home_office_id"]:
-            office = conn.execute(
-                "SELECT * FROM locations WHERE id = ?", (patient["home_office_id"],)
-            ).fetchone()
-        if office is None:
-            office = conn.execute("SELECT * FROM locations ORDER BY id LIMIT 1").fetchone()
-    return {
-        "office_id": office["id"],
-        "office_name": office["name"],
-        "brand_greeting": "Thank you for calling Straus Dermatology",
-        "known_caller": patient is not None,
-    }
-
-
-_SPANISH = {"hola", "gracias", "buenos", "buenas", "cita", "necesito", "español",
-            "espanol", "habla", "quiero", "por favor"}
-
-
-def _d_detect_language(a: dict[str, Any]) -> dict[str, Any]:
-    words = set(str(a["utterance"]).lower().split())
-    lang = "es" if words & _SPANISH else "en"
-    _session_state()["language"] = lang
-    return {"language": lang, "note": "Switch to this language and stay switched."}
-
-
 def _d_identify_patient(a: dict[str, Any]) -> dict[str, Any]:
     first = str(a.get("first_name") or "").strip().lower()
     last = str(a.get("last_name") or "").strip().lower()
@@ -395,6 +372,7 @@ def _d_verify_identity(a: dict[str, Any]) -> dict[str, Any]:
             "IDENTITY_LOCKED",
             "Verification is locked after three failures. Offer the front desk or a callback.",
         )
+    _require(a, "full_name", "dob")
     name = str(a["full_name"]).strip().lower().split()
     dob = str(a["dob"]).strip()
     second = str(a.get("second_factor") or "").strip()
@@ -466,6 +444,7 @@ _VISIT_TYPES = [
 
 
 def _d_classify_visit_request(a: dict[str, Any]) -> dict[str, Any]:
+    _require(a, "reason_text")
     text = str(a["reason_text"]).lower()
     for keywords, spec in _VISIT_TYPES:
         if any(k in text for k in keywords):
@@ -510,6 +489,7 @@ _SLOT_TIMES = ("2026-08-24T09:00:00", "2026-08-25T11:30:00", "2026-08-26T14:00:0
 def _d_find_slots(a: dict[str, Any]) -> dict[str, Any]:
     """Deterministic open slots per requested office (no slot inventory table —
     book_appointment carries the full location/provider/start anyway)."""
+    _require(a, "location_ids")
     location_ids = [str(x) for x in (a.get("location_ids") or [])]
     window_start = str(a.get("window_start") or "")
     window_end = str(a.get("window_end") or "")
@@ -575,6 +555,8 @@ def _resolve_slot(slot_id: str) -> dict[str, Any]:
 
 
 def _d_book_appointment(a: dict[str, Any]) -> dict[str, Any]:
+    _require(a, "slot_id", "appointment_type_code", "location_id", "provider_id",
+             "start", "end", "description")
     slot = _resolve_slot(str(a["slot_id"]))
     if (
         str(a["location_id"]) != slot["location_id"]
@@ -616,6 +598,7 @@ def _owned_appointment(appointment_id: int) -> sqlite3.Row:
 
 
 def _d_reschedule_appointment(a: dict[str, Any]) -> dict[str, Any]:
+    _require(a, "appointment_id", "new_start", "new_end")
     appt_id = int(a["appointment_id"])
     _owned_appointment(appt_id)
     updated = update_appointment(
@@ -629,6 +612,7 @@ def _d_reschedule_appointment(a: dict[str, Any]) -> dict[str, Any]:
 def _d_cancel_appointment(a: dict[str, Any]) -> dict[str, Any]:
     from datetime import datetime
 
+    _require(a, "appointment_id", "cancellation_reason_code")
     appt_id = int(a["appointment_id"])
     patient = _patient_row()
     row = _owned_appointment(appt_id)
@@ -674,6 +658,7 @@ def _d_cancel_appointment(a: dict[str, Any]) -> dict[str, Any]:
 
 
 def _d_join_waitlist(a: dict[str, Any]) -> dict[str, Any]:
+    _require(a, "appointment_type_code", "location_ids", "earliest", "latest")
     entry = join_waitlist(
         WaitlistCreate(
             patient_id=_session_state().get("patient_id"),
@@ -704,6 +689,7 @@ _ALLERGY_SERVICES = {
 
 
 def _d_schedule_allergy_service(a: dict[str, Any]) -> dict[str, Any]:
+    _require(a, "service", "location_id")
     service = str(a["service"]).strip().lower()
     spec = _ALLERGY_SERVICES.get(service)
     if spec is None:
@@ -743,12 +729,13 @@ _NOT_ACCEPTED_CARRIERS = {"medicaid"}
 
 _UNCONFIRMED_SCRIPT = (
     "I can't confirm that plan over the phone. The insurance team will "
-    "verify it before your visit — I can set up a callback or you can "
-    "text our insurance line."
+    "verify it before your visit. I can still get you on the books now "
+    "and flag it for benefits verification — or I can set up a callback."
 )
 
 
 def _d_check_plan_accepted(a: dict[str, Any]) -> dict[str, Any]:
+    _require(a, "carrier", "location_id")
     carrier = str(a["carrier"]).strip().lower()
     loc = _resolve_location(a["location_id"])
     provider_id = a.get("provider_id")
@@ -806,6 +793,7 @@ def _d_check_plan_accepted(a: dict[str, Any]) -> dict[str, Any]:
 
 
 def _d_run_eligibility_check(a: dict[str, Any]) -> dict[str, Any]:
+    _require(a, "carrier", "member_id", "dob", "service_date")
     with _db() as conn:
         row = conn.execute(
             "SELECT * FROM patients WHERE member_id = ? AND dob = ?",
@@ -830,6 +818,7 @@ def _d_run_eligibility_check(a: dict[str, Any]) -> dict[str, Any]:
 
 
 def _d_capture_insurance_update(a: dict[str, Any]) -> dict[str, Any]:
+    _require(a, "carrier", "member_id")
     row = _patient_row()
     with _db() as conn:
         conn.execute(
@@ -871,6 +860,7 @@ _CHARGE_SCRIPTS = {
 
 
 def _d_explain_charge(a: dict[str, Any]) -> dict[str, Any]:
+    _require(a, "line_item_id")
     script = _CHARGE_SCRIPTS.get(str(a["line_item_id"]))
     if script is None:
         raise ToolError("UNKNOWN_LINE_ITEM", "No approved explanation for that line item — "
@@ -879,12 +869,14 @@ def _d_explain_charge(a: dict[str, Any]) -> dict[str, Any]:
 
 
 def _d_send_payment_link(a: dict[str, Any]) -> dict[str, Any]:
+    _require(a, "mobile_e164")
     _event("payment_link", dict(a))
     return {"sent": True, "channel": "sms", "mobile_e164": a["mobile_e164"],
             "amount_cents": a.get("amount_cents")}
 
 
 def _d_offer_financing(a: dict[str, Any]) -> dict[str, Any]:
+    _require(a, "amount_cents")
     amount = int(a["amount_cents"])
     eligible = amount >= 25000
     return {"eligible": eligible, "provider": "CareCredit",
@@ -892,6 +884,7 @@ def _d_offer_financing(a: dict[str, Any]) -> dict[str, Any]:
 
 
 def _d_request_fee_waiver(a: dict[str, Any]) -> dict[str, Any]:
+    _require(a, "fee_line_item_id", "stated_reason")
     _event("fee_waiver_request", dict(a))
     return {"review_opened": True, "sla": "two business days",
             "spoken_commitment": ("The billing team will review that fee and get back "
@@ -916,6 +909,7 @@ _COSMETIC_POLICY_LINES = [
 
 
 def _d_quote_cosmetic_service(a: dict[str, Any]) -> dict[str, Any]:
+    _require(a, "service")
     service = str(a["service"]).strip().lower().replace(" ", "_")
     rng = _COSMETIC_QUOTES.get(service)
     if rng:
@@ -930,6 +924,7 @@ def _d_book_cosmetic_consult(a: dict[str, Any]) -> dict[str, Any]:
         return {"status": "policy_disclosure_required",
                 "policy_lines": _COSMETIC_POLICY_LINES,
                 "note": "Say all four lines, get a real yes, then call again with true."}
+    _require(a, "location_id", "provider_id", "start", "service_interest")
     loc = _resolve_location(a["location_id"])
     if not loc["offers_cosmetic"]:
         raise ToolError("COSMETIC_NOT_OFFERED", f"{loc['name']} does not do cosmetic work.")
@@ -961,12 +956,16 @@ _RX_HARD_STOPS = (
 
 
 def _d_request_rx_refill(a: dict[str, Any]) -> dict[str, Any]:
+    _require(a, "medication_name")
     patient = _patient_row()
     med = str(a["medication_name"]).strip().lower()
     for keywords, route, note in _RX_HARD_STOPS:
         if any(k in med for k in keywords):
             _event("rx_refill_request", {"patient_id": patient["id"], **a, "route": route})
-            return {"route": route, "hard_stop": True, "approved": False, "note": note}
+            payload = {"route": route, "hard_stop": True, "approved": False, "note": note}
+            if route == "controlled_substance":
+                payload["spoken_commitment"] = note
+            return payload
     _event("rx_refill_request", {"patient_id": patient["id"], **a, "route": "routed_to_provider"})
     return {"route": "routed_to_provider", "hard_stop": False, "approved": False,
             "pharmacy_needed": not a.get("pharmacy_name"),
@@ -996,6 +995,7 @@ _CLINICAL_CALLBACK_WINDOW = {
 
 
 def _d_create_clinical_message(a: dict[str, Any]) -> dict[str, Any]:
+    _require(a, "category", "priority", "summary")
     patient = _patient_row()
     event_id = _event("clinical_message", {"patient_id": patient["id"], **a})
     priority = str(a["priority"]).strip().lower()
@@ -1036,6 +1036,7 @@ def _d_search_practice_kb(a: dict[str, Any]) -> dict[str, Any]:
     "close" and does not stem). Buckets are now tried in _KB order — narrower topics
     ahead of directions — and matched on substrings so "hours"/"closing" both land.
     """
+    _require(a, "query")
     query = str(a["query"]).lower().replace("?", " ")
     for keywords, source, answer in _KB:
         if any(k in query for k in keywords):
@@ -1049,6 +1050,7 @@ _SMS_TEMPLATES = {"appointment_confirmation", "portal_activation", "payment_link
 
 
 def _d_send_sms(a: dict[str, Any]) -> dict[str, Any]:
+    _require(a, "template_id", "mobile_e164")
     if a["template_id"] not in _SMS_TEMPLATES:
         raise ToolError("UNKNOWN_TEMPLATE",
                         f"template_id must be one of {sorted(_SMS_TEMPLATES)}.")
@@ -1066,6 +1068,7 @@ _CALLBACK_QUEUES = {"billing", "clinical", "front_desk", "cosmetic", "records"}
 
 
 def _d_create_callback_task(a: dict[str, Any]) -> dict[str, Any]:
+    _require(a, "queue", "callback_number", "topic")
     if a["queue"] not in _CALLBACK_QUEUES:
         raise ToolError("UNKNOWN_QUEUE", f"queue must be one of {sorted(_CALLBACK_QUEUES)}.")
     sla_hours = {"stat": 1, "urgent": 4}.get(str(a.get("priority") or ""), 24)
@@ -1086,22 +1089,8 @@ _TRANSFER_DESTINATIONS = {"patient_support_center", "billing_team", "location_fr
                           "cosmetic_coordinator", "clinical_triage", "records", "on_call"}
 
 
-def _d_authenticate_for_transfer(a: dict[str, Any]) -> dict[str, Any]:
-    return {"authenticated": bool(_session_state().get("verified")),
-            "patient_id": _session_state().get("patient_id"),
-            "transfer_packet": dict(a)}
-
-
-def _d_transfer_call(a: dict[str, Any]) -> dict[str, Any]:
-    dest = str(a.get("destination") or "patient_support_center")
-    if dest not in _TRANSFER_DESTINATIONS:
-        raise ToolError("UNKNOWN_DESTINATION",
-                        f"destination must be one of {sorted(_TRANSFER_DESTINATIONS)}.")
-    _event("transfer", {"destination": dest})
-    return {"transferred": True, "destination": dest}
-
-
 def _d_transfer_to_human(a: dict[str, Any]) -> dict[str, Any]:
+    _require(a, "destination", "context_summary", "reason")
     dest = str(a["destination"])
     if dest not in _TRANSFER_DESTINATIONS:
         raise ToolError("UNKNOWN_DESTINATION",
@@ -1110,14 +1099,7 @@ def _d_transfer_to_human(a: dict[str, Any]) -> dict[str, Any]:
     return {"transferred": True, "destination": dest}
 
 
-def _d_log_call_disposition(a: dict[str, Any]) -> dict[str, Any]:
-    _event("call_disposition", dict(a))
-    return {"logged": True}
-
-
 DISPATCH = {
-    "resolve_inbound_context": _d_resolve_inbound_context,
-    "detect_language": _d_detect_language,
     "identify_patient": _d_identify_patient,
     "verify_identity": _d_verify_identity,
     "get_patient_summary": _d_get_patient_summary,
@@ -1146,9 +1128,6 @@ DISPATCH = {
     "send_sms": _d_send_sms,
     "send_portal_activation": _d_send_portal_activation,
     "create_callback_task": _d_create_callback_task,
-    "authenticate_for_transfer": _d_authenticate_for_transfer,
-    "transfer_call": _d_transfer_call,
-    "log_call_disposition": _d_log_call_disposition,
     "transfer_to_human": _d_transfer_to_human,
 }
 

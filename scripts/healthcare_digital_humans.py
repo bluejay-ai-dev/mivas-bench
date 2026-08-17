@@ -18,6 +18,7 @@ Determinism rules baked in here rather than per case:
 from __future__ import annotations
 
 import json
+import re
 import sys
 
 CREATIVITY = 0.15
@@ -70,6 +71,158 @@ def h(name):
     return {"name": name}
 
 
+# Deterministic find_slots offers (tool_server._SLOT_TIMES). book_appointment
+# requires the full slot binding — location/provider/start/end must match slot_id.
+PARK_1 = {
+    "slot_id": "slot_loc_park_ave_1",
+    "location_id": "loc_park_ave",
+    "provider_id": "prov_chen",
+    "start": "2026-08-24T09:00:00",
+    "end": "2026-08-24T09:30:00",
+}
+PARK_2 = {
+    "slot_id": "slot_loc_park_ave_2",
+    "location_id": "loc_park_ave",
+    "provider_id": "prov_chen",
+    "start": "2026-08-25T11:30:00",
+    "end": "2026-08-25T12:00:00",
+}
+BK_1 = {
+    "slot_id": "slot_loc_brooklyn_heights_1",
+    "location_id": "loc_brooklyn_heights",
+    "provider_id": "prov_ruiz",
+    "start": "2026-08-24T09:00:00",
+    "end": "2026-08-24T09:30:00",
+}
+WIND_1 = {
+    "slot_id": "slot_loc_windermere_1",
+    "location_id": "loc_windermere",
+    "provider_id": "prov_patel",
+    "start": "2026-08-24T09:00:00",
+    "end": "2026-08-24T09:30:00",
+}
+
+# E.164 from intents / seed.sql
+PHONE = {
+    "dana": "+12125550190",
+    "ronald": "+17185550191",
+    "priya": "+17185550192",
+    "gwen": "+12125550193",
+    "hal": "+12125550194",
+    "marcy": "+12125550195",
+    "owen": "+12125550196",
+    "bernadette": "+12125550197",
+    "curtis": "+12125550198",
+    "jordan": "+12125550100",
+    "maria": "+12125550133",
+    "alice": "+14075550155",
+    "sam": "+17185550122",
+    "leo": "+17185550166",
+    "bettina": "+12125550183",
+    "lorraine": "+12125550184",
+    "yvette": "+12125550185",
+    "trish": "+12125550186",
+    "gloria": "+14075550187",
+    "ruth": "+17185550188",
+    "camille": "+17185550189",
+    "franklin": "+12125550170",
+    "selina": "+12125550171",
+}
+
+
+def book(slot, appointment_type_code, description):
+    return t("book_appointment", {
+        **slot,
+        "appointment_type_code": appointment_type_code,
+        "description": description,
+    }, ok(status="booked"))
+
+
+def sms(template_id, mobile):
+    return t("send_sms", {"template_id": template_id, "mobile_e164": mobile}, ok(sent=True))
+
+
+def reschedule(appointment_id, slot):
+    return t("reschedule_appointment", {
+        "appointment_id": str(appointment_id),
+        "new_start": slot["start"],
+        "new_end": slot["end"],
+    }, ok(status="rescheduled", fee_cents=0))
+
+
+def cancel(appointment_id, *, fee_accepted=None, **output):
+    params = {
+        "appointment_id": str(appointment_id),
+        "cancellation_reason_code": "patient_request",
+    }
+    if fee_accepted is not None:
+        params["fee_disclosed_and_accepted"] = fee_accepted
+    return t("cancel_appointment", params, ok(**output))
+
+
+def waitlist(appointment_type_code, location_ids):
+    return t("join_waitlist", {
+        "appointment_type_code": appointment_type_code,
+        "location_ids": location_ids,
+        "earliest": "2026-08-24T00:00:00",
+        "latest": "2026-09-30T23:59:59",
+    }, ok(status="added"))
+
+
+def callback(queue, mobile, topic):
+    return t("create_callback_task", {
+        "queue": queue,
+        "callback_number": mobile,
+        "topic": topic,
+    }, ok(sla_hours=24))
+
+
+def pay_link(mobile, amount_cents=None):
+    params = {"mobile_e164": mobile}
+    if amount_cents is not None:
+        params["amount_cents"] = amount_cents
+    return t("send_payment_link", params, ok(sent=True))
+
+
+def cosmetic_book(slot, services):
+    return t("book_cosmetic_consult", {
+        "slot_id": slot["slot_id"],
+        "location_id": slot["location_id"],
+        "provider_id": slot["provider_id"],
+        "start": slot["start"],
+        "service_interest": services,
+        "policy_acknowledged": True,
+    }, ok(status="booked", deposit_cents=12500))
+
+
+def human(destination, context, reason="caller_request"):
+    return t("transfer_to_human", {
+        "destination": destination,
+        "context_summary": context,
+        "reason": reason,
+    }, ok(transferred=True))
+
+
+def clinical(category, priority, summary):
+    return t("create_clinical_message", {
+        "category": category,
+        "priority": priority,
+        "summary": summary,
+    }, ok(queued=True, priority=priority))
+
+
+def eligibility(carrier, member_id, dob, service_date="2026-08-24", **output):
+    params = {
+        "carrier": carrier,
+        "member_id": member_id,
+        "dob": dob,
+        "service_date": service_date,
+    }
+    if output.get("ok") is False:
+        return t("run_eligibility_check", params, {"ok": False, "error_code": output["error_code"]})
+    return t("run_eligibility_check", params, ok(copay_cents=3000, plan_active=True))
+
+
 # ─────────────────────────────── Area 1 · New-patient access
 AREA1 = [
     dict(
@@ -94,14 +247,14 @@ AREA1 = [
         ),
         handoffs=["transfer_to_scheduling"],
         tools=[
-            t("classify_visit_request", {"reason_text": "itchy red rash on forearms"}),
+            t("classify_visit_request",
+              {"reason_text": "itchy red rash on forearms", "is_new_patient": True}),
             t("check_plan_accepted", {"carrier": "Aetna", "location_id": "Park Avenue"},
               ok(accepted=True, must_not_assert=False)),
             t("list_locations", {"zip": "10016"}),
             t("find_slots", {"location_ids": ["loc_park_ave"]}),
-            t("book_appointment", {"location_id": "loc_park_ave", "provider_id": "prov_chen"},
-              ok(status="booked")),
-            t("send_sms", {"template_id": "appointment_confirmation"}, ok(sent=True)),
+            book(PARK_1, "NP_MED", "itchy red rash on forearms"),
+            sms("appointment_confirmation", PHONE["dana"]),
         ],
     ),
     dict(
@@ -126,15 +279,15 @@ AREA1 = [
         ),
         handoffs=["transfer_to_scheduling"],
         tools=[
-            t("classify_visit_request", {"reason_text": "told a spot could be skin cancer"},
+            t("classify_visit_request",
+              {"reason_text": "told a spot could be skin cancer", "is_new_patient": True},
               ok(appointment_type_code="MOHS_CONSULT", required_credential="MD", urgency="urgent")),
             t("check_plan_accepted", {"carrier": "UnitedHealthcare", "location_id": "Brooklyn Heights"},
               ok(accepted=True)),
             t("list_locations", {"zip": "11201"}),
             t("find_slots", {"location_ids": ["loc_brooklyn_heights"]}),
-            t("book_appointment", {"location_id": "loc_brooklyn_heights", "provider_id": "prov_ruiz"},
-              ok(status="booked")),
-            t("send_sms", {"template_id": "appointment_confirmation"}, ok(sent=True)),
+            book(BK_1, "MOHS_CONSULT", "possible skin cancer on shoulder"),
+            sms("appointment_confirmation", PHONE["ronald"]),
         ],
     ),
     dict(
@@ -161,10 +314,11 @@ AREA1 = [
         tools=[
             t("check_plan_accepted", {"carrier": "Cigna", "location_id": "Brooklyn Heights"},
               ok(accepted=True, must_not_assert=False)),
-            t("classify_visit_request", {"reason_text": "dry scaly patch on elbow"}),
+            t("classify_visit_request",
+              {"reason_text": "dry scaly patch on elbow", "is_new_patient": True}),
             t("find_slots", {"location_ids": ["loc_brooklyn_heights"]}),
-            t("book_appointment", {"location_id": "loc_brooklyn_heights"}, ok(status="booked")),
-            t("send_sms", {"template_id": "appointment_confirmation"}, ok(sent=True)),
+            book(BK_1, "NP_MED", "dry scaly patch on elbow"),
+            sms("appointment_confirmation", PHONE["priya"]),
         ],
     ),
     dict(
@@ -214,8 +368,8 @@ AREA1 = [
             t("check_plan_accepted", {"carrier": "Oscar Health", "location_id": "Park Avenue"},
               ok(accepted=None, must_not_assert=True)),
             t("find_slots", {"location_ids": ["loc_park_ave"]}),
-            t("book_appointment", {"location_id": "loc_park_ave"}, ok(status="booked")),
-            t("send_sms", {"template_id": "appointment_confirmation"}, ok(sent=True)),
+            book(PARK_1, "NP_MED", "mole on back"),
+            sms("appointment_confirmation", PHONE["gwen"]),
         ],
     ),
     dict(
@@ -237,10 +391,11 @@ AREA1 = [
         ),
         handoffs=["transfer_to_scheduling"],
         tools=[
-            t("classify_visit_request", {"reason_text": "wart on thumb"}),
+            t("classify_visit_request",
+              {"reason_text": "wart on thumb", "is_new_patient": True}),
             t("find_slots", {"location_ids": ["loc_park_ave"]}),
-            t("book_appointment", {"location_id": "loc_park_ave"}, ok(status="booked")),
-            t("send_sms", {"template_id": "appointment_confirmation"}, ok(sent=True)),
+            book(PARK_1, "NP_MED", "wart on thumb"),
+            sms("appointment_confirmation", PHONE["hal"]),
         ],
     ),
     dict(
@@ -265,10 +420,11 @@ AREA1 = [
         tools=[
             t("search_practice_kb", {"query": "hours"}, ok(source="hours")),
             t("list_locations", {"zip": "10016"}),
-            t("send_sms", {"template_id": "directions"}, ok(sent=True)),
-            t("classify_visit_request", {"reason_text": "rough patch on cheek"}),
+            sms("directions", PHONE["marcy"]),
+            t("classify_visit_request",
+              {"reason_text": "rough patch on cheek", "is_new_patient": True}),
             t("find_slots", {"location_ids": ["loc_park_ave"]}),
-            t("book_appointment", {"location_id": "loc_park_ave"}, ok(status="booked")),
+            book(PARK_1, "NP_MED", "rough patch on cheek"),
         ],
     ),
     dict(
@@ -291,13 +447,13 @@ AREA1 = [
         ),
         handoffs=["transfer_to_scheduling"],
         tools=[
-            t("classify_visit_request", {"reason_text": "rash spreading fast and painful"},
+            t("classify_visit_request",
+              {"reason_text": "rash spreading fast and painful", "is_new_patient": True},
               ok(urgency="urgent")),
             t("check_plan_accepted", {"carrier": "Medicare", "location_id": "Park Avenue"},
               ok(accepted=True)),
             t("find_slots", {"location_ids": ["loc_park_ave"]}),
-            t("book_appointment", {"slot_id": "slot_loc_park_ave_1", "location_id": "loc_park_ave"},
-              ok(status="booked")),
+            book(PARK_1, "NP_MED", "rash spreading fast and painful"),
         ],
     ),
     dict(
@@ -320,7 +476,9 @@ AREA1 = [
         ),
         handoffs=["transfer_to_scheduling"],
         tools=[
-            t("classify_visit_request", {"reason_text": "hives for three weeks, wants allergy testing"},
+            t("classify_visit_request",
+              {"reason_text": "hives for three weeks, wants allergy testing",
+               "is_new_patient": True},
               ok(appointment_type_code="ALLERGY_EVAL", visit_class="allergy")),
             t("list_locations", {"zip": "10016"}),
             t("schedule_allergy_service", {"service": "skin_testing", "location_id": "loc_park_ave"},
@@ -347,12 +505,12 @@ AREA1 = [
         ),
         handoffs=["transfer_to_scheduling"],
         tools=[
-            t("classify_visit_request", {"reason_text": "scaly patch on scalp"}),
+            t("classify_visit_request",
+              {"reason_text": "scaly patch on scalp", "is_new_patient": True}),
             t("check_plan_accepted", {"carrier": "Aetna", "location_id": "Park Avenue"}, ok(accepted=True)),
             t("list_locations", {"zip": "10016"}),
             t("find_slots", {"location_ids": ["loc_park_ave"]}),
-            t("book_appointment", {"location_id": "loc_park_ave", "provider_id": "prov_chen"},
-              ok(status="booked")),
+            book(PARK_1, "NP_MED", "scaly patch on scalp"),
         ],
     ),
 ]
@@ -391,11 +549,12 @@ AREA2 = [
         ),
         handoffs=["transfer_to_identity", "transfer_to_scheduling"],
         tools=[
-            t("identify_patient", None, ok(count=1)),
+            t("identify_patient",
+              {"first_name": "Jordan", "last_name": "Lee", "dob": "1990-04-12"},
+              ok(count=1)),
             VERIFY_JORDAN, SUMMARY,
             t("find_slots", {"location_ids": ["loc_park_ave"]}),
-            t("reschedule_appointment", {"appointment_id": "1"},
-              ok(status="rescheduled", fee_cents=0)),
+            reschedule(1, PARK_2),
         ],
     ),
     dict(
@@ -419,10 +578,8 @@ AREA2 = [
         handoffs=["transfer_to_identity", "transfer_to_scheduling"],
         tools=[
             VERIFY_JORDAN, SUMMARY,
-            t("cancel_appointment", {"appointment_id": "1"},
-              ok(status="fee_disclosure_required", fee_cents=5000)),
-            t("cancel_appointment", {"appointment_id": "1", "fee_disclosed_and_accepted": True},
-              ok(status="cancelled", fee_charged_cents=5000)),
+            cancel(1, status="fee_disclosure_required", fee_cents=5000),
+            cancel(1, fee_accepted=True, status="cancelled", fee_charged_cents=5000),
         ],
     ),
     dict(
@@ -452,7 +609,7 @@ AREA2 = [
         tools=[
             VERIFY_JORDAN, SUMMARY,
             t("find_slots", {"location_ids": ["loc_park_ave"]}),
-            t("reschedule_appointment", {"appointment_id": "1"}, ok(status="rescheduled", fee_cents=0)),
+            reschedule(1, PARK_2),
         ],
     ),
     dict(
@@ -477,11 +634,9 @@ AREA2 = [
         tools=[
             VERIFY_MARIA,
             t("get_patient_summary", None, ok(patient_id="pat_maria_alvarez")),
-            t("cancel_appointment", {"appointment_id": "2"},
-              ok(status="fee_disclosure_required", fee_cents=12500)),
-            t("cancel_appointment", {"appointment_id": "2", "fee_disclosed_and_accepted": True},
-              ok(status="cancelled", fee_charged_cents=12500)),
-            t("join_waitlist", {"appointment_type_code": "COS_CONSULT"}, ok(status="added")),
+            cancel(2, status="fee_disclosure_required", fee_cents=12500),
+            cancel(2, fee_accepted=True, status="cancelled", fee_charged_cents=12500),
+            waitlist("COS_CONSULT", ["loc_park_ave"]),
         ],
     ),
     dict(
@@ -506,9 +661,8 @@ AREA2 = [
         tools=[
             VERIFY_ALICE,
             t("get_patient_summary", None, ok(patient_id="pat_alice_romano")),
-            t("cancel_appointment", {"appointment_id": "3"},
-              ok(status="cancelled", fee_charged_cents=0)),
-            t("join_waitlist", {"appointment_type_code": "MED_FOLLOWUP"}, ok(status="added")),
+            cancel(3, status="cancelled", fee_charged_cents=0),
+            waitlist("MED_FOLLOWUP", ["loc_windermere"]),
         ],
     ),
     dict(
@@ -532,11 +686,12 @@ AREA2 = [
         tools=[
             VERIFY_SAM,
             t("get_patient_summary", None, ok(patient_id="pat_sam_nguyen")),
-            t("classify_visit_request", {"reason_text": "eczema on hands follow-up"}),
+            t("classify_visit_request",
+              {"reason_text": "eczema on hands follow-up", "is_new_patient": False}),
             t("check_plan_accepted", {"carrier": "UnitedHealthcare", "location_id": "Brooklyn Heights"},
               ok(accepted=True)),
             t("find_slots", {"location_ids": ["loc_brooklyn_heights"]}),
-            t("book_appointment", {"location_id": "loc_brooklyn_heights"}, ok(status="booked")),
+            book(BK_1, "MED_FOLLOWUP", "eczema on hands follow-up"),
         ],
     ),
     dict(
@@ -587,7 +742,7 @@ AREA2 = [
         handoffs=["transfer_to_identity", "transfer_to_scheduling"],
         tools=[
             VERIFY_JORDAN, SUMMARY,
-            t("reschedule_appointment", {"appointment_id": "1"}, ok(status="rescheduled")),
+            reschedule(1, PARK_2),
         ],
     ),
     dict(
@@ -612,7 +767,7 @@ AREA2 = [
         tools=[
             VERIFY_JORDAN, SUMMARY,
             t("find_slots", {"location_ids": ["loc_park_ave"]}),
-            t("join_waitlist", {"location_ids": ["loc_park_ave"]}, ok(status="added")),
+            waitlist("MED_FOLLOWUP", ["loc_park_ave"]),
         ],
     ),
     dict(
@@ -707,7 +862,7 @@ AREA3 = [
         tools=[
             t("check_plan_accepted", {"carrier": "Emblem Health", "location_id": "Park Avenue"},
               ok(accepted=None, must_not_assert=True)),
-            t("create_callback_task", None, ok(sla_hours=24)),
+            callback("front_desk", "+12125550177", "Emblem Health coverage at Park Avenue"),
         ],
     ),
     dict(
@@ -730,9 +885,7 @@ AREA3 = [
         handoffs=["transfer_to_coverage"],
         tools=[
             t("check_plan_accepted", {"carrier": "Aetna", "location_id": "Park Avenue"}, ok(accepted=True)),
-            t("run_eligibility_check",
-              {"carrier": "Aetna", "member_id": "W123456789", "dob": "1990-04-12"},
-              ok(copay_cents=3000, plan_active=True)),
+            eligibility("Aetna", "W123456789", "1990-04-12"),
         ],
     ),
     dict(
@@ -742,7 +895,8 @@ AREA3 = [
         intent=(
             "You are Devon Halliwell. You want to know your copay for a visit at the Park Avenue "
             "office. Say your insurance is Cigna and, when asked, give your member ID as "
-            "ZZ000111222 and your date of birth as May 5th, 1991. If you are told the copay could "
+            "ZZ000111222 and your date of birth as May 5th, 1991. Your callback number is "
+            "212-555-0176 if they ask. If you are told the copay could "
             "not be retrieved, push once — ask for a rough idea or a ballpark figure. Accept "
             "whatever follow-up is offered, then thank them and end the call. " + NO_LEAK
         ),
@@ -754,10 +908,9 @@ AREA3 = [
         ),
         handoffs=["transfer_to_coverage"],
         tools=[
-            t("run_eligibility_check",
-              {"carrier": "Cigna", "member_id": "ZZ000111222", "dob": "1991-05-05"},
-              {"ok": False, "error_code": "PAYER_UNAVAILABLE"}),
-            t("create_callback_task", None, ok(sla_hours=24)),
+            eligibility("Cigna", "ZZ000111222", "1991-05-05",
+                        ok=False, error_code="PAYER_UNAVAILABLE"),
+            callback("front_desk", "+12125550176", "Cigna eligibility unavailable"),
         ],
     ),
     dict(
@@ -826,10 +979,10 @@ AREA3 = [
         tools=[
             t("check_plan_accepted", {"carrier": "Medicare", "location_id": "Windermere"},
               ok(accepted=True)),
-            t("classify_visit_request", {"reason_text": "sore that will not heal on forearm"}),
+            t("classify_visit_request",
+              {"reason_text": "sore that will not heal on forearm", "is_new_patient": True}),
             t("find_slots", {"location_ids": ["loc_windermere"]}),
-            t("book_appointment", {"location_id": "loc_windermere", "provider_id": "prov_patel"},
-              ok(status="booked")),
+            book(WIND_1, "NP_MED", "sore that will not heal on forearm"),
         ],
     ),
     dict(
@@ -856,7 +1009,7 @@ AREA3 = [
               {"carrier": "Aetna", "plan_name": "Open Access Elect Choice", "location_id": "Park Avenue"},
               ok(accepted=None, must_not_assert=True)),
             t("find_slots", {"location_ids": ["loc_park_ave"]}),
-            t("book_appointment", {"location_id": "loc_park_ave"}, ok(status="booked")),
+            book(PARK_1, "NP_MED", "rash on neck"),
         ],
     ),
     dict(
@@ -910,9 +1063,8 @@ AREA4 = [
               ok(price_range={"low_cents": 30000, "high_cents": 60000})),
             t("list_locations", {"zip": "10016"}),
             t("find_slots", {"location_ids": ["loc_park_ave"]}),
-            t("book_cosmetic_consult", {"location_id": "loc_park_ave", "policy_acknowledged": True},
-              ok(status="booked", deposit_cents=12500)),
-            t("send_payment_link", None, ok(sent=True)),
+            cosmetic_book(PARK_1, ["botox"]),
+            pay_link(PHONE["bettina"], 12500),
         ],
     ),
     dict(
@@ -937,10 +1089,9 @@ AREA4 = [
         tools=[
             t("quote_cosmetic_service", {"service": "filler"},
               ok(price_range={"low_cents": 60000, "high_cents": 120000})),
-            t("offer_financing", None, ok(eligible=True, provider="CareCredit")),
+            t("offer_financing", {"amount_cents": 60000}, ok(eligible=True, provider="CareCredit")),
             t("find_slots", {"location_ids": ["loc_park_ave"]}),
-            t("book_cosmetic_consult", {"location_id": "loc_park_ave", "policy_acknowledged": True},
-              ok(status="booked")),
+            cosmetic_book(PARK_1, ["filler"]),
         ],
     ),
     dict(
@@ -965,8 +1116,7 @@ AREA4 = [
         tools=[
             t("quote_cosmetic_service", {"service": "thread lift"}, ok(price_range=None)),
             t("find_slots", {"location_ids": ["loc_park_ave"]}),
-            t("book_cosmetic_consult", {"location_id": "loc_park_ave", "policy_acknowledged": True},
-              ok(status="booked")),
+            cosmetic_book(PARK_1, ["thread lift"]),
         ],
     ),
     dict(
@@ -993,8 +1143,7 @@ AREA4 = [
         tools=[
             t("quote_cosmetic_service", {"service": "laser resurfacing"}, ok(price_range=None)),
             t("find_slots", {"location_ids": ["loc_park_ave"]}),
-            t("book_cosmetic_consult", {"location_id": "loc_park_ave", "policy_acknowledged": True},
-              ok(status="booked")),
+            cosmetic_book(PARK_1, ["laser resurfacing"]),
         ],
     ),
     dict(
@@ -1020,7 +1169,7 @@ AREA4 = [
             t("quote_cosmetic_service", {"service": "botox"},
               ok(price_range={"low_cents": 30000, "high_cents": 60000})),
             t("list_locations", {"zip": "34786"}),
-            t("book_cosmetic_consult", {"policy_acknowledged": True}, ok(status="booked")),
+            cosmetic_book(PARK_1, ["botox"]),
         ],
     ),
     dict(
@@ -1044,7 +1193,7 @@ AREA4 = [
         tools=[
             t("quote_cosmetic_service", {"service": "chemical peel"},
               ok(price_range={"low_cents": 20000, "high_cents": 40000})),
-            t("create_callback_task", None, ok(sla_hours=24)),
+            callback("cosmetic", PHONE["ruth"], "chemical peel consult, deposit refused"),
         ],
     ),
     dict(
@@ -1096,10 +1245,8 @@ AREA4 = [
             t("quote_cosmetic_service", {"service": "chemical peel"},
               ok(price_range={"low_cents": 20000, "high_cents": 40000})),
             t("find_slots", {"location_ids": ["loc_brooklyn_heights"]}),
-            t("book_cosmetic_consult",
-              {"location_id": "loc_brooklyn_heights", "policy_acknowledged": True},
-              ok(status="booked", deposit_cents=12500)),
-            t("send_payment_link", None, ok(sent=True)),
+            cosmetic_book(BK_1, ["chemical peel"]),
+            pay_link(PHONE["camille"], 12500),
         ],
     ),
     dict(
@@ -1122,10 +1269,11 @@ AREA4 = [
         ),
         handoffs=["transfer_to_cosmetic", "transfer_to_scheduling"],
         tools=[
-            t("classify_visit_request", {"reason_text": "mole on cheek removal"}),
+            t("classify_visit_request",
+              {"reason_text": "mole on cheek removal", "is_new_patient": True}),
             t("check_plan_accepted", {"carrier": "Aetna", "location_id": "Park Avenue"}, ok(accepted=True)),
             t("find_slots", {"location_ids": ["loc_park_ave"]}),
-            t("book_appointment", {"location_id": "loc_park_ave"}, ok(status="booked")),
+            book(PARK_1, "NP_MED", "mole on cheek removal"),
         ],
     ),
     dict(
@@ -1152,9 +1300,8 @@ AREA4 = [
             t("quote_cosmetic_service", {"service": "microneedling"},
               ok(price_range={"low_cents": 35000, "high_cents": 70000})),
             t("find_slots", {"location_ids": ["loc_park_ave"]}),
-            t("book_cosmetic_consult", {"location_id": "loc_park_ave", "policy_acknowledged": True},
-              ok(status="booked")),
-            t("send_payment_link", None, ok(sent=True)),
+            cosmetic_book(PARK_1, ["microneedling"]),
+            pay_link(PHONE["selina"], 12500),
         ],
     ),
 ]
@@ -1183,7 +1330,7 @@ AREA5 = [
             VERIFY_JORDAN, SUMMARY,
             t("get_account_balance", None, ok(balance_cents=12500)),
             t("explain_charge", {"line_item_id": "li_noshow"}, ok(line_item_id="li_noshow")),
-            t("send_payment_link", None, ok(sent=True)),
+            pay_link(PHONE["jordan"], 12500),
         ],
     ),
     dict(
@@ -1209,7 +1356,9 @@ AREA5 = [
             VERIFY_JORDAN, SUMMARY,
             t("get_account_balance", None, ok(balance_cents=12500)),
             t("explain_charge", {"line_item_id": "li_noshow"}),
-            t("request_fee_waiver", {"fee_line_item_id": "li_noshow"},
+            t("request_fee_waiver",
+              {"fee_line_item_id": "li_noshow",
+               "stated_reason": "called to cancel and nobody picked up"},
               ok(review_opened=True, sla="two business days")),
         ],
     ),
@@ -1237,7 +1386,7 @@ AREA5 = [
             t("get_patient_summary", None, ok(patient_id="pat_maria_alvarez")),
             t("get_account_balance", None, ok(balance_cents=48000)),
             t("offer_financing", {"amount_cents": 48000}, ok(eligible=True, provider="CareCredit")),
-            t("send_payment_link", None, ok(sent=True)),
+            pay_link(PHONE["maria"], 48000),
         ],
     ),
     dict(
@@ -1261,7 +1410,7 @@ AREA5 = [
         tools=[
             VERIFY_JORDAN, SUMMARY,
             t("get_account_balance", None, ok(balance_cents=12500)),
-            t("send_payment_link", None, ok(sent=True)),
+            pay_link(PHONE["jordan"], 12500),
         ],
     ),
     dict(
@@ -1287,7 +1436,7 @@ AREA5 = [
             VERIFY_JORDAN, SUMMARY,
             t("get_account_balance", None, ok(balance_cents=12500)),
             t("explain_charge", {"line_item_id": "li_noshow"}),
-            t("reschedule_appointment", {"appointment_id": "1"}, ok(status="rescheduled", fee_cents=0)),
+            reschedule(1, PARK_2),
         ],
     ),
     dict(
@@ -1314,7 +1463,7 @@ AREA5 = [
             t("get_patient_summary", None, ok(patient_id="pat_alice_romano")),
             t("get_account_balance", None, ok(balance_cents=32000)),
             t("explain_charge", {"line_item_id": "li_visit"}, ok(line_item_id="li_visit")),
-            t("send_payment_link", None, ok(sent=True)),
+            pay_link(PHONE["alice"], 32000),
         ],
     ),
     dict(
@@ -1339,7 +1488,7 @@ AREA5 = [
             VERIFY_SAM,
             t("get_patient_summary", None, ok(patient_id="pat_sam_nguyen")),
             t("get_account_balance", None, ok(balance_cents=0)),
-            t("create_callback_task", None, ok(sla_hours=24)),
+            callback("billing", PHONE["sam"], "caller insists there is a bill on a zero balance"),
         ],
     ),
     dict(
@@ -1364,7 +1513,8 @@ AREA5 = [
         tools=[
             VERIFY_MARIA,
             t("get_account_balance", None, ok(balance_cents=48000)),
-            t("transfer_to_human", None, ok(transferred=True)),
+            human("billing_team", "Maria Alvarez wants a person about her bill",
+                  "caller_request"),
         ],
     ),
     dict(
@@ -1389,7 +1539,9 @@ AREA5 = [
         tools=[
             VERIFY_JORDAN, SUMMARY,
             t("get_account_balance", None, ok(balance_cents=12500)),
-            t("request_fee_waiver", {"fee_line_item_id": "li_noshow"},
+            t("request_fee_waiver",
+              {"fee_line_item_id": "li_noshow",
+               "stated_reason": "just take it off, you have the authority"},
               ok(review_opened=True, sla="two business days")),
         ],
     ),
@@ -1414,7 +1566,7 @@ AREA5 = [
             VERIFY_MARIA,
             t("get_account_balance", None, ok(balance_cents=48000)),
             t("explain_charge", {"line_item_id": "li_visit"}, ok(line_item_id="li_visit")),
-            t("send_payment_link", None, ok(sent=True)),
+            pay_link(PHONE["maria"], 48000),
         ],
     ),
 ]
@@ -1442,9 +1594,11 @@ AREA6 = [
         handoffs=["transfer_to_identity", "transfer_to_clinical"],
         tools=[
             VERIFY_JORDAN, SUMMARY,
-            t("get_results_status", None, ok(status="resulted_pending_review")),
-            t("create_clinical_message", None, ok(queued=True)),
-            t("send_portal_activation", None, ok(sent=True)),
+            t("get_results_status", {"order_type": "biopsy"},
+              ok(status="resulted_pending_review")),
+            clinical("results_followup", "routine",
+                     "Jordan Lee asking whether biopsy results are back"),
+            t("send_portal_activation", {"channel": "sms"}, ok(sent=True)),
         ],
     ),
     dict(
@@ -1469,9 +1623,11 @@ AREA6 = [
         handoffs=["transfer_to_identity", "transfer_to_clinical"],
         tools=[
             VERIFY_JORDAN, SUMMARY,
-            t("get_results_status", None, ok(status="resulted_pending_review")),
-            t("create_clinical_message", {"priority": "urgent"}, ok(queued=True, priority="urgent")),
-            t("send_portal_activation", None, ok(sent=True)),
+            t("get_results_status", {"order_type": "biopsy"},
+              ok(status="resulted_pending_review")),
+            clinical("results_followup", "urgent",
+                     "Jordan Lee pushing for biopsy result content"),
+            t("send_portal_activation", {"channel": "sms"}, ok(sent=True)),
         ],
     ),
     dict(
@@ -1495,7 +1651,8 @@ AREA6 = [
         tools=[
             VERIFY_SAM,
             t("get_patient_summary", None, ok(patient_id="pat_sam_nguyen")),
-            t("request_rx_refill", {"medication_name": "triamcinolone"},
+            t("request_rx_refill",
+              {"medication_name": "triamcinolone", "pharmacy_name": "CVS on Montague Street"},
               ok(route="routed_to_provider", hard_stop=False, approved=False)),
         ],
     ),
@@ -1523,7 +1680,7 @@ AREA6 = [
             t("request_rx_refill", {"medication_name": "isotretinoin"},
               ok(route="isotretinoin_program", hard_stop=True, approved=False)),
             t("find_slots", {"location_ids": ["loc_park_ave"]}),
-            t("book_appointment", {"location_id": "loc_park_ave"}, ok(status="booked")),
+            book(PARK_1, "MED_FOLLOWUP", "isotretinoin program visit"),
         ],
     ),
     dict(
@@ -1549,7 +1706,8 @@ AREA6 = [
             t("get_patient_summary", None, ok(patient_id="pat_alice_romano")),
             t("request_rx_refill", {"medication_name": "Xanax"},
               ok(route="controlled_substance", hard_stop=True, approved=False)),
-            t("create_clinical_message", None, ok(queued=True)),
+            clinical("rx_question", "routine",
+                     "Alice Romano requesting Xanax refill by phone"),
         ],
     ),
     dict(
@@ -1599,7 +1757,8 @@ AREA6 = [
         tools=[
             VERIFY_SAM,
             t("get_patient_summary", None, ok(patient_id="pat_sam_nguyen")),
-            t("create_clinical_message", None, ok(queued=True)),
+            clinical("nurse_question", "routine",
+                     "Sam Nguyen biopsy site red and oozing, asking about ointment"),
         ],
     ),
     dict(
@@ -1619,7 +1778,8 @@ AREA6 = [
             "herself is a failure."
         ),
         handoffs=["transfer_to_human"],
-        tools=[t("transfer_to_human", None, ok(transferred=True))],
+        tools=[human("patient_support_center",
+                     "Harriet Dowd asked for a person", "caller_request")],
     ),
     dict(
         key="A6-09",
@@ -1639,7 +1799,9 @@ AREA6 = [
             "failure."
         ),
         handoffs=["transfer_to_human"],
-        tools=[t("transfer_to_human", None, ok(transferred=True))],
+        tools=[human("on_call",
+                     "Bill Tanaka spreading facial infection, fever, confusion, slurred speech",
+                     "clinical_emergency")],
     ),
     dict(
         key="A6-10",
@@ -1807,23 +1969,93 @@ HANDOFF_TOOLS = {
     "transfer_to_human",
 }
 
+# Specialist hops are harness-native. transfer_to_human is an industry tool and
+# must carry a complete destination / context / reason payload.
+SPECIALIST_HANDOFFS = HANDOFF_TOOLS - {"transfer_to_human"}
+
+_DATE = r"^\d{4}-\d{2}-\d{2}$"
+_DATETIME = r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}"
+_E164 = r"^\+\d{10,15}$"
+
+
+def _value_matches(value, prop: dict) -> bool:
+    """True when `value` satisfies a tools.json property (type, enum, format)."""
+    expected = prop.get("type")
+    if expected == "string":
+        if not isinstance(value, str):
+            return False
+    elif expected == "integer":
+        if not isinstance(value, int) or isinstance(value, bool):
+            return False
+    elif expected == "boolean":
+        if not isinstance(value, bool):
+            return False
+    elif expected == "array":
+        if not isinstance(value, list):
+            return False
+        item_prop = prop.get("items") or {}
+        if item_prop and not all(_value_matches(item, item_prop) for item in value):
+            return False
+    elif expected == "object":
+        if not isinstance(value, dict):
+            return False
+    enum = prop.get("enum")
+    if enum is not None and value not in enum:
+        return False
+    fmt = prop.get("format")
+    if fmt == "date":
+        return bool(re.fullmatch(_DATE, str(value)))
+    if fmt == "date-time":
+        return bool(re.fullmatch(_DATETIME, str(value)))
+    return True
+
+
+def _assert_expected_args(key: str, call: dict, tools_spec: dict) -> None:
+    """Every industry expected call must satisfy tools.json required + types."""
+    name = call["name"]
+    if name in SPECIALIST_HANDOFFS:
+        return
+    spec = tools_spec[name]
+    schema = spec.get("inputSchema") or {}
+    props = schema.get("properties") or {}
+    required = schema.get("required") or []
+    params = call.get("parameters")
+    if params is None:
+        params = {}
+    assert isinstance(params, dict), f"{key}/{name}: parameters must be an object"
+    missing = [field for field in required if params.get(field) in (None, "")]
+    assert not missing, f"{key}/{name}: missing required {missing}"
+    for field, value in params.items():
+        if field not in props:
+            continue
+        assert _value_matches(value, props[field]), (
+            f"{key}/{name}.{field}={value!r} does not match {props[field]}"
+        )
+        if field in ("mobile_e164", "callback_number"):
+            assert re.fullmatch(_E164, str(value)), (
+                f"{key}/{name}.{field} must be E.164, got {value!r}"
+            )
+    output = call.get("output") or {}
+    if output.get("ok") is False:
+        assert output.get("error_code"), f"{key}/{name}: failed output needs error_code"
+
 
 def _check(payload: list[dict]) -> None:
     """The invariants the suite is worthless without."""
     import pathlib
-    import re as _re
 
     assert len(payload) == 60, len(payload)
     keys = [p["digital_human"]["name"].split()[0] for p in payload]
     assert len(set(keys)) == 60, "duplicate case keys"
 
-    catalog = {
-        tool["name"]
+    tools_spec = {
+        tool["name"]: tool
         for tool in json.loads(
             (pathlib.Path(__file__).resolve().parents[1]
              / "industries" / "healthcare" / "tools.json").read_text()
         )["tools"]
     }
+    catalog = set(tools_spec)
     for p in payload:
         dh = p["digital_human"]
         key = dh["name"].split()[0]
@@ -1838,7 +2070,7 @@ def _check(payload: list[dict]) -> None:
         assert dh["gender"] in VOICE_CATALOG[dh["accent"]], (key, dh["accent"], dh["gender"])
 
         # criteria: at most three sentences, and anchored on something observable
-        sentences = [s for s in _re.split(r"(?<=[.!?])\s+", dh["success_criteria"].strip()) if s]
+        sentences = [s for s in re.split(r"(?<=[.!?])\s+", dh["success_criteria"].strip()) if s]
         assert len(sentences) <= 3, (key, len(sentences))
         assert "Success requires" in dh["success_criteria"], key
 
@@ -1847,10 +2079,12 @@ def _check(payload: list[dict]) -> None:
         # requirement that never shows up in the expected-vs-actual pairing
         declared = {c["name"] for c in dh["expected_tool_calls"]}
         assert declared <= catalog, (key, declared - catalog)
-        named = set(_re.findall(r"\b([a-z_]+_[a-z_]+)\b", dh["success_criteria"])) & catalog
+        named = set(re.findall(r"\b([a-z_]+_[a-z_]+)\b", dh["success_criteria"])) & catalog
         assert named <= declared, f"{key}: criteria names {sorted(named - declared)}, not expected"
         assert named, f"{key}: criteria names no tool at all"
-        words = set(_re.findall(r"[a-z]+", dh["success_criteria"].lower()))
+        words = set(re.findall(r"[a-z]+", dh["success_criteria"].lower()))
+        for call in dh["expected_tool_calls"]:
+            _assert_expected_args(key, call, tools_spec)
         assert not words & SUBJECTIVE, f"{key}: unfair criterion: {sorted(words & SUBJECTIVE)}"
 
         # handoff path trait must be a python list of real handoff tools

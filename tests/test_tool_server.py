@@ -112,7 +112,7 @@ _KNOWN_GOOD_ARGS: dict[str, dict[str, dict[str, Any]]] = {
         "get_attorney": {"attorney_id": "a_10"},
     },
     "healthcare": {
-        "resolve_inbound_context": {"caller_ani": "+12125550100"},
+        "list_locations": {"zip": "10016"},
         "verify_identity": {"full_name": "Jordan Lee", "dob": "1990-04-12"},
         "get_patient_summary": {},
         "find_slots": {"location_ids": ["loc_park_ave"]},
@@ -623,7 +623,11 @@ def test_industry_writes_do_not_leak_across_call_ids() -> None:
     """Each industry: a write on call A is invisible to call B; call C matches seed."""
     writers: dict[str, list[tuple[str, dict[str, Any]]]] = {
         "control-industry": [("schedule_appointment", {"date": "08/15/2026"})],
-        "healthcare": [("log_call_disposition", {"intents": "booking"})],
+        "healthcare": [("create_callback_task", {
+            "queue": "front_desk",
+            "callback_number": "+12125550100",
+            "topic": "isolation write",
+        })],
         "finance": [("escalate_to_human", {"reason_code": "caller_request"})],
         "legal": [
             ("lookup_caller", {"full_name": "Dana Whitfield", "phone": "5105550142"}),
