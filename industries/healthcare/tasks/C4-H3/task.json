@@ -43,6 +43,12 @@
   ],
   "exp_tool_calls": [
     {
+      "name": "transfer_to_cosmetic"
+    },
+    {
+      "name": "transfer_to_scheduling"
+    },
+    {
       "name": "classify_visit_request",
       "parameters": {
         "reason_text": "mole on cheek"
@@ -99,12 +105,6 @@
           "sent": true
         }
       }
-    },
-    {
-      "name": "transfer_to_cosmetic"
-    },
-    {
-      "name": "transfer_to_scheduling"
     }
   ],
   "behaviors": {},

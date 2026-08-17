@@ -23,6 +23,9 @@
   ],
   "exp_tool_calls": [
     {
+      "name": "transfer_to_cosmetic"
+    },
+    {
       "name": "quote_cosmetic_service",
       "parameters": {
         "service": "chemical peel"
@@ -38,9 +41,6 @@
       "output": {
         "ok": true
       }
-    },
-    {
-      "name": "transfer_to_cosmetic"
     }
   ],
   "behaviors": {},

@@ -42,6 +42,9 @@
   ],
   "exp_tool_calls": [
     {
+      "name": "transfer_to_scheduling"
+    },
+    {
       "name": "search_practice_kb",
       "parameters": {
         "query": "hours subway"
@@ -103,9 +106,6 @@
           "status": "booked"
         }
       }
-    },
-    {
-      "name": "transfer_to_scheduling"
     }
   ],
   "behaviors": {},
