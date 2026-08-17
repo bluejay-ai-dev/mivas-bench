@@ -345,10 +345,6 @@
             "type": "string",
             "format": "date-time",
             "description": "ISO-8601 local datetime, e.g. 2026-08-24T09:00:00."
-          },
-          "new_patient": {
-            "type": "boolean",
-            "description": "True for a first visit at Straus."
           }
         },
         "required": [
@@ -1507,7 +1503,8 @@
         },
         "required": [
           "next_intent"
-        ]
+        ],
+        "additionalProperties": false
       },
       "outputSchema": {
         "type": "object",
@@ -1535,7 +1532,8 @@
       "description": "Invisible handoff to Scheduling & Access for booking, rescheduling, cancelling, waitlist, or allergy visits. Call history is already visible — no arguments.",
       "inputSchema": {
         "type": "object",
-        "properties": {}
+        "properties": {},
+        "additionalProperties": false
       },
       "outputSchema": {
         "type": "object",
@@ -1563,7 +1561,8 @@
       "description": "Invisible handoff to Coverage & Benefits for plan acceptance, referrals, eligibility, or capturing a new insurance card. Call history is already visible — no arguments.",
       "inputSchema": {
         "type": "object",
-        "properties": {}
+        "properties": {},
+        "additionalProperties": false
       },
       "outputSchema": {
         "type": "object",
@@ -1591,7 +1590,8 @@
       "description": "Invisible handoff to Cosmetic Concierge for Botox, fillers, lasers, peels, cosmetic pricing, or cosmetic consult booking. Call history is already visible — no arguments.",
       "inputSchema": {
         "type": "object",
-        "properties": {}
+        "properties": {},
+        "additionalProperties": false
       },
       "outputSchema": {
         "type": "object",
@@ -1619,7 +1619,8 @@
       "description": "Invisible handoff to Billing & Payments for balances, charge explanations, payment links, financing, or fee waivers. Caller must already be identity-verified. Call history is already visible — no arguments.",
       "inputSchema": {
         "type": "object",
-        "properties": {}
+        "properties": {},
+        "additionalProperties": false
       },
       "outputSchema": {
         "type": "object",
@@ -1647,7 +1648,8 @@
       "description": "Invisible handoff to Clinical Liaison for results status, refills, nurse messages, prior auth, portal, or records. Caller must already be identity-verified. Call history is already visible — no arguments.",
       "inputSchema": {
         "type": "object",
-        "properties": {}
+        "properties": {},
+        "additionalProperties": false
       },
       "outputSchema": {
         "type": "object",
