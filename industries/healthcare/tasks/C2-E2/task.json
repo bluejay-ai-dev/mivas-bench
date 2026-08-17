@@ -13,7 +13,7 @@
     {
       "name": "search_practice_kb",
       "parameters": {
-        "query": "allergy testing service"
+        "topic": "services"
       },
       "output": {
         "ok": true,

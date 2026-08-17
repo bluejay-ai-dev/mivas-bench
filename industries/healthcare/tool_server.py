@@ -427,56 +427,79 @@ def _d_get_patient_summary(a: dict[str, Any]) -> dict[str, Any]:
 
 # --- scheduling ---------------------------------------------------------------
 
-_VISIT_TYPES = [
-    ({"botox", "filler", "juvederm", "laser", "cosmetic", "microneedling", "peel"},
-     {"appointment_type_code": "COS_CONSULT", "visit_class": "cosmetic",
-      "required_credential": "MD", "duration_min": 30, "urgency": "routine",
-      "constraints": ["cosmetic offices only", "deposit policy applies"]}),
-    ({"mohs", "skin cancer", "melanoma", "biopsy"},
-     {"appointment_type_code": "MOHS_CONSULT", "visit_class": "medical",
-      "required_credential": "MD", "duration_min": 45, "urgency": "urgent",
-      "constraints": ["must be booked with an MD, never a PA"]}),
-    ({"allergy", "allergies", "asthma", "hives", "shot", "immunotherapy"},
-     {"appointment_type_code": "ALLERGY_EVAL", "visit_class": "allergy",
-      "required_credential": "MD", "duration_min": 40, "urgency": "routine",
-      "constraints": ["allergy services carry prep instructions"]}),
-]
+_VISIT_BY_CLASS = {
+    "cosmetic": {
+        "appointment_type_code": "COS_CONSULT",
+        "visit_class": "cosmetic",
+        "required_credential": "MD",
+        "duration_min": 30,
+        "urgency": "routine",
+        "constraints": ["cosmetic offices only", "deposit policy applies"],
+    },
+    "mohs": {
+        "appointment_type_code": "MOHS_CONSULT",
+        "visit_class": "mohs",
+        "required_credential": "MD",
+        "duration_min": 45,
+        "urgency": "urgent",
+        "constraints": ["must be booked with an MD, never a PA"],
+    },
+    "allergy": {
+        "appointment_type_code": "ALLERGY_EVAL",
+        "visit_class": "allergy",
+        "required_credential": "MD",
+        "duration_min": 40,
+        "urgency": "routine",
+        "constraints": ["allergy services carry prep instructions"],
+    },
+    "medical": {
+        "appointment_type_code": "MED_FOLLOWUP",
+        "visit_class": "medical",
+        "required_credential": "MD_OR_PA",
+        "duration_min": 20,
+        "urgency": "routine",
+        "constraints": [],
+    },
+}
 
 
 def _d_classify_visit_request(a: dict[str, Any]) -> dict[str, Any]:
-    _require(a, "reason_text")
-    text = str(a["reason_text"]).lower()
-    for keywords, spec in _VISIT_TYPES:
-        if any(k in text for k in keywords):
-            return dict(spec)
-    urgent = any(k in text for k in ("bleeding", "spreading", "infected", "severe", "painful"))
-    new = bool(a.get("is_new_patient"))
-    return {
-        "appointment_type_code": "NP_MED" if new else "MED_FOLLOWUP",
-        "visit_class": "medical",
-        "required_credential": "MD_OR_PA",
-        "duration_min": 30 if new else 20,
-        "urgency": "urgent" if urgent else "routine",
-        "constraints": [],
-    }
+    _require(a, "visit_class")
+    visit_class = str(a["visit_class"]).strip().lower()
+    spec = _VISIT_BY_CLASS.get(visit_class)
+    if spec is None:
+        raise ToolError(
+            "UNKNOWN_VISIT_CLASS",
+            f"visit_class must be one of {sorted(_VISIT_BY_CLASS)}.",
+        )
+    out = dict(spec)
+    if visit_class == "medical":
+        new = bool(a.get("is_new_patient"))
+        out["appointment_type_code"] = "NP_MED" if new else "MED_FOLLOWUP"
+        out["duration_min"] = 30 if new else 20
+    urgency = str(a.get("urgency") or out["urgency"]).strip().lower()
+    if urgency in ("routine", "urgent"):
+        out["urgency"] = urgency
+    out["is_new_patient"] = bool(a.get("is_new_patient"))
+    return out
 
 
 def _d_list_locations(a: dict[str, Any]) -> dict[str, Any]:
-    """Offices, best match first. Either `zip` or `name` will do.
-
-    reception.md promises this tool turns "whatever they called the office" into a real
-    location, but `zip` used to be the only way in — so an existing patient who names
-    their office ("Brooklyn Heights") gave the agent nothing to call it with, and the
-    agent stalled asking for a ZIP it did not need.
-    """
+    """Offices, best match first. Either `zip` or `location_id` will do."""
     zip_ = str(a.get("zip") or "").strip()
-    name = str(a.get("name") or a.get("location") or "").strip().lower()
+    loc_id = ""
+    raw_id = a.get("location_id") or a.get("name") or a.get("location")
+    if raw_id:
+        try:
+            loc_id = _resolve_location(str(raw_id))["id"]
+        except ToolError:
+            loc_id = str(raw_id).strip().lower()
     with _db() as conn:
         rows = [dict(r) for r in conn.execute("SELECT * FROM locations ORDER BY id")]
     def rank(r: dict[str, Any]) -> tuple[int, int]:
-        by_name = 0 if name and (name in r["name"].lower() or r["name"].lower() in name) else 1
+        by_id = 0 if loc_id and r["id"] == loc_id else 1
         by_zip = 0 if zip_ and r["zip"] == zip_ else 1
-        return (by_name, by_zip)
+        return (by_id, by_zip)
     rows.sort(key=rank)
     for r in rows:
         r["offers_cosmetic"] = bool(r["offers_cosmetic"])
@@ -554,9 +577,18 @@ def _resolve_slot(slot_id: str) -> dict[str, Any]:
     )
 
 
+_BOOK_DESC = {
+    "NP_MED": "new patient visit",
+    "MED_FOLLOWUP": "follow-up visit",
+    "MOHS_CONSULT": "Mohs consult",
+    "COS_CONSULT": "cosmetic consult",
+    "ALLERGY_EVAL": "allergy evaluation",
+}
+
+
 def _d_book_appointment(a: dict[str, Any]) -> dict[str, Any]:
     _require(a, "slot_id", "appointment_type_code", "location_id", "provider_id",
-             "start", "end", "description")
+             "start", "end")
     slot = _resolve_slot(str(a["slot_id"]))
     if (
         str(a["location_id"]) != slot["location_id"]
@@ -577,7 +609,7 @@ def _d_book_appointment(a: dict[str, Any]) -> dict[str, Any]:
             appointment_type_code=a["appointment_type_code"],
             start=slot["start"],
             end=slot["end"],
-            description=a.get("description", ""),
+            description=_BOOK_DESC.get(str(a["appointment_type_code"]), "visit"),
         )
     )
     return {"appointment": created, "status": "booked"}
@@ -659,11 +691,17 @@ def _d_cancel_appointment(a: dict[str, Any]) -> dict[str, Any]:
 
 def _d_join_waitlist(a: dict[str, Any]) -> dict[str, Any]:
     _require(a, "appointment_type_code", "location_ids", "earliest", "latest")
+    location_ids = []
+    for raw in a["location_ids"]:
+        try:
+            location_ids.append(_resolve_location(str(raw))["id"])
+        except ToolError:
+            location_ids.append(str(raw))
     entry = join_waitlist(
         WaitlistCreate(
             patient_id=_session_state().get("patient_id"),
             appointment_type_code=a["appointment_type_code"],
-            location_ids=[str(x) for x in a["location_ids"]],
+            location_ids=location_ids,
             earliest=a.get("earliest"),
             latest=a.get("latest"),
         )
@@ -722,9 +760,41 @@ def _d_schedule_allergy_service(a: dict[str, Any]) -> dict[str, Any]:
 
 # --- coverage / billing --------------------------------------------------------
 
-_ACCEPTED_CARRIERS = {"aetna", "unitedhealthcare", "united healthcare", "cigna",
-                      "blue cross blue shield", "bcbs", "medicare"}
+_ACCEPTED_CARRIERS = {"aetna", "unitedhealthcare", "cigna", "bcbs", "medicare"}
 _NOT_ACCEPTED_CARRIERS = {"medicaid"}
+_CARRIER_SLUGS = {
+    "aetna": "aetna",
+    "unitedhealthcare": "unitedhealthcare",
+    "cigna": "cigna",
+    "bcbs": "bcbs",
+    "bluecross": "bcbs",
+    "bluecrossblueshield": "bcbs",
+    "medicare": "medicare",
+    "medicaid": "medicaid",
+    "oscarhealth": "oscar_health",
+    "oscar": "oscar_health",
+    "other": "other",
+}
+_CARRIER_LABEL = {
+    "aetna": "Aetna",
+    "unitedhealthcare": "UnitedHealthcare",
+    "cigna": "Cigna",
+    "bcbs": "Blue Cross Blue Shield",
+    "medicare": "Medicare",
+    "medicaid": "Medicaid",
+    "oscar_health": "Oscar Health",
+    "other": "that plan",
+}
+
+
+def _carrier_slug(value: str) -> str:
+    compact = "".join(ch for ch in str(value or "").lower() if ch.isalnum())
+    return _CARRIER_SLUGS.get(compact, compact or "other")
+
+
+def _carrier_label(value: str) -> str:
+    slug = _carrier_slug(value)
+    return _CARRIER_LABEL.get(slug, str(value or "that plan"))
 
 
 _UNCONFIRMED_SCRIPT = (
@@ -736,7 +806,8 @@ _UNCONFIRMED_SCRIPT = (
 
 def _d_check_plan_accepted(a: dict[str, Any]) -> dict[str, Any]:
     _require(a, "carrier", "location_id")
-    carrier = str(a["carrier"]).strip().lower()
+    slug = _carrier_slug(a["carrier"])
+    label = _carrier_label(slug)
     loc = _resolve_location(a["location_id"])
     provider_id = a.get("provider_id")
     if provider_id:
@@ -750,43 +821,29 @@ def _d_check_plan_accepted(a: dict[str, Any]) -> dict[str, Any]:
             return {
                 "accepted": None,
                 "must_not_assert": True,
-                "carrier": a["carrier"],
+                "carrier": slug,
                 "location": loc["name"],
                 "required_script": _UNCONFIRMED_SCRIPT,
             }
-    with _db() as conn:
-        others = [r["name"] for r in conn.execute(
-            "SELECT name FROM locations WHERE id != ? ORDER BY id", (loc["id"],))]
-    if carrier in _NOT_ACCEPTED_CARRIERS:
+    if slug in _NOT_ACCEPTED_CARRIERS:
         # acceptance is carrier-level in this fixture, so no office takes it. Handing back
         # sibling offices as "alternatives" invited a false "try Brooklyn Heights instead".
         return {"accepted": False, "must_not_assert": False,
-                "carrier": a["carrier"], "location": loc["name"],
+                "carrier": slug, "location": loc["name"],
                 "alternative_locations": [],
-                "notes": (f"{a['carrier']} is not accepted at any Straus office. Say so "
+                "notes": (f"{label} is not accepted at any Straus office. Say so "
                           "plainly and offer self-pay pricing or a callback — do not send "
                           "them to another office."),
-                "required_script": (f"We don't accept {a['carrier']} at any of our offices. "
+                "required_script": (f"We don't accept {label} at any of our offices. "
                                     "I can go over self-pay pricing or have someone call "
                                     "you about options.")}
-    if carrier in _ACCEPTED_CARRIERS:
-        # We only have a carrier-level acceptance list, no real plan/provider
-        # coverage matrix — a specific plan_name/plan_type can't be validated,
-        # so don't assert accepted for those dimensions.
-        if a.get("plan_name") or a.get("plan_type"):
-            return {
-                "accepted": None,
-                "must_not_assert": True,
-                "carrier": a["carrier"],
-                "location": loc["name"],
-                "required_script": _UNCONFIRMED_SCRIPT,
-            }
+    if slug in _ACCEPTED_CARRIERS:
         return {"accepted": True, "must_not_assert": False,
-                "carrier": a["carrier"], "location": loc["name"]}
+                "carrier": slug, "location": loc["name"]}
     return {
         "accepted": None,
         "must_not_assert": True,
-        "carrier": a["carrier"],
+        "carrier": slug,
         "location": loc["name"],
         "required_script": _UNCONFIRMED_SCRIPT,
     }
@@ -805,8 +862,8 @@ def _d_run_eligibility_check(a: dict[str, Any]) -> dict[str, Any]:
             "The payer didn't return eligibility. Say you couldn't get the number — "
             "never guess at a copay.",
         )
-    submitted_carrier = "".join(str(a["carrier"]).strip().lower().split())
-    on_file_carrier = "".join(str(row["carrier"] or "").strip().lower().split())
+    submitted_carrier = _carrier_slug(a["carrier"])
+    on_file_carrier = _carrier_slug(row["carrier"] or "")
     if not on_file_carrier or submitted_carrier != on_file_carrier:
         raise ToolError(
             "PAYER_UNAVAILABLE",
@@ -884,7 +941,7 @@ def _d_offer_financing(a: dict[str, Any]) -> dict[str, Any]:
 
 
 def _d_request_fee_waiver(a: dict[str, Any]) -> dict[str, Any]:
-    _require(a, "fee_line_item_id", "stated_reason")
+    _require(a, "fee_line_item_id")
     _event("fee_waiver_request", dict(a))
     return {"review_opened": True, "sla": "two business days",
             "spoken_commitment": ("The billing team will review that fee and get back "
@@ -968,12 +1025,12 @@ def _d_request_rx_refill(a: dict[str, Any]) -> dict[str, Any]:
             return payload
     _event("rx_refill_request", {"patient_id": patient["id"], **a, "route": "routed_to_provider"})
     return {"route": "routed_to_provider", "hard_stop": False, "approved": False,
-            "pharmacy_needed": not a.get("pharmacy_name"),
+            "pharmacy_needed": not a.get("pharmacy_phone"),
             "note": "The request is with the clinical team; this never approves a refill."}
 
 
 def _d_get_results_status(a: dict[str, Any]) -> dict[str, Any]:
-    order = str(a.get("order_type") or "test")
+    order = str(a.get("order_type") or "lab")
     return {
         "status": "resulted_pending_review",
         "approved_script": (
@@ -995,7 +1052,7 @@ _CLINICAL_CALLBACK_WINDOW = {
 
 
 def _d_create_clinical_message(a: dict[str, Any]) -> dict[str, Any]:
-    _require(a, "category", "priority", "summary")
+    _require(a, "category", "priority")
     patient = _patient_row()
     event_id = _event("clinical_message", {"patient_id": patient["id"], **a})
     priority = str(a["priority"]).strip().lower()
@@ -1008,41 +1065,38 @@ def _d_create_clinical_message(a: dict[str, Any]) -> dict[str, Any]:
 
 # --- practice / plumbing ----------------------------------------------------------
 
-_KB = [
-    ({"hour", "open", "close"}, "hours",
-     "Offices are open 8am to 5pm Monday through Friday, and Park Avenue is open "
-     "9am to 1pm on Saturdays."),
-    ({"park", "parking", "direction", "subway", "train"}, "directions",
-     "Park Avenue is at 36th and Park, a block from the 6 train; there is a garage "
-     "next door. Brooklyn Heights is two blocks from Borough Hall."),
-    ({"portal", "login", "password"}, "portal",
-     "The patient portal is portal.strausderm.example; activation links arrive by "
-     "text and expire after 72 hours."),
-    ({"fee", "cancel", "cancellation", "no-show", "missed"}, "fees",
-     "Cancellations need 24 hours notice for medical visits and 72 for cosmetic; the "
-     "missed-visit fee is $50 medical and $125 cosmetic."),
-    ({"treat", "service", "condition"}, "services",
-     "Straus treats medical, surgical, and cosmetic dermatology plus allergy testing "
-     "and immunotherapy."),
-]
+_KB = {
+    "hours": (
+        "Offices are open 8am to 5pm Monday through Friday, and Park Avenue is open "
+        "9am to 1pm on Saturdays."
+    ),
+    "directions": (
+        "Park Avenue is at 36th and Park, a block from the 6 train; there is a garage "
+        "next door. Brooklyn Heights is two blocks from Borough Hall."
+    ),
+    "portal": (
+        "The patient portal is portal.strausderm.example; activation links arrive by "
+        "text and expire after 72 hours."
+    ),
+    "fees": (
+        "Cancellations need 24 hours notice for medical visits and 72 for cosmetic; the "
+        "missed-visit fee is $50 medical and $125 cosmetic."
+    ),
+    "services": (
+        "Straus treats medical, surgical, and cosmetic dermatology plus allergy testing "
+        "and immunotherapy."
+    ),
+}
 
 
 def _d_search_practice_kb(a: dict[str, Any]) -> dict[str, Any]:
-    """Substring match, most-specific bucket first.
-
-    Exact-token intersection made the KB unable to answer its own hours question: the
-    office is named "Park Avenue", so "Park Avenue office hours closing time" hit the
-    `directions` bucket on "park" and never reached `hours` (which keys on "hour"/"open"/
-    "close" and does not stem). Buckets are now tried in _KB order — narrower topics
-    ahead of directions — and matched on substrings so "hours"/"closing" both land.
-    """
-    _require(a, "query")
-    query = str(a["query"]).lower().replace("?", " ")
-    for keywords, source, answer in _KB:
-        if any(k in query for k in keywords):
-            return {"source": source, "answer": answer}
-    return {"source": None, "answer": None,
-            "note": "No grounded source — do not make one up."}
+    _require(a, "topic")
+    topic = str(a["topic"]).strip().lower()
+    answer = _KB.get(topic)
+    if not answer:
+        return {"source": None, "answer": None,
+                "note": "No grounded source — do not make one up."}
+    return {"source": topic, "answer": answer}
 
 
 _SMS_TEMPLATES = {"appointment_confirmation", "portal_activation", "payment_link",
@@ -1068,7 +1122,7 @@ _CALLBACK_QUEUES = {"billing", "clinical", "front_desk", "cosmetic", "records"}
 
 
 def _d_create_callback_task(a: dict[str, Any]) -> dict[str, Any]:
-    _require(a, "queue", "callback_number", "topic")
+    _require(a, "queue", "callback_number")
     if a["queue"] not in _CALLBACK_QUEUES:
         raise ToolError("UNKNOWN_QUEUE", f"queue must be one of {sorted(_CALLBACK_QUEUES)}.")
     sla_hours = {"stat": 1, "urgent": 4}.get(str(a.get("priority") or ""), 24)
@@ -1090,7 +1144,7 @@ _TRANSFER_DESTINATIONS = {"patient_support_center", "billing_team", "location_fr
 
 
 def _d_transfer_to_human(a: dict[str, Any]) -> dict[str, Any]:
-    _require(a, "destination", "context_summary", "reason")
+    _require(a, "destination", "reason")
     dest = str(a["destination"])
     if dest not in _TRANSFER_DESTINATIONS:
         raise ToolError("UNKNOWN_DESTINATION",
