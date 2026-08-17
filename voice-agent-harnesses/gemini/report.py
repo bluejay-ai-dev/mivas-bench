@@ -1,16 +1,25 @@
 """OpenTelemetry → Bluejay OTLP for Gemini Live harnesses.
 
-Gemini Live has no Agents-SDK span tree, so we emit GenAI-native spans:
+LangSmith-shaped tree (same as the OpenAI realtime harness), emitted from the
+Gemini Live server event stream:
 
-  voice.call (root) — gen_ai.provider.name=gcp.gemini
-    ├── agent.speech          (TTS / agent audio turns)
-    └── execute_tool <name>   (gen_ai.tool.*)
+  realtime_session (root) — gen_ai.system=gcp.gemini
+    └── turn                    (one caller utterance → all ensuing agent activity)
+          ├── user_message      (caller transcript)
+          ├── model             (one generation per response: gen_ai.usage.* token
+          │                      breakdown + time-to-first-token + output transcript)
+          ├── execute_tool <n>  (gen_ai.tool.*; Bluejay reads these)
+          └── audio_interrupted (barge-in)
 
-After the call we POST to update-simulation-result with:
-  - trace_ids  → waterfall flamegraph
-  Conversation tool markers come from execute_tool OTel spans (not a tool_calls POST).
+Token counts come from Gemini `usage_metadata` (prompt/response/total, cached,
+thoughts=reasoning, and per-modality audio/text) into standard gen_ai.usage.*
+attributes and are rolled up onto the root. TTFT = caller-stop → first agent
+audio. State lives on a per-call `GeminiTrace` (one CHIRP process serves many
+concurrent calls, so module globals would race).
 
-Chirp supplies simulation_result_id via X-Simulation-Result-Id on upgrade.
+After the call we POST update-simulation-result with trace_ids; tool markers come
+from execute_tool spans. Chirp supplies simulation_result_id via
+X-Simulation-Result-Id on upgrade.
 """
 
 from __future__ import annotations
@@ -66,6 +75,10 @@ _reported_tools: ContextVar[list[dict[str, Any]] | None] = ContextVar(
 _active_root: Span | None = None
 _active_t0: float | None = None
 _active_tools: list[dict[str, Any]] | None = None
+# The per-call GeminiTrace (turn/model state). Set before the inbound/outbound
+# tasks are created so both inherit the same object and share its turn spans.
+_trace: ContextVar["GeminiTrace | None"] = ContextVar("mivas_gemini_trace", default=None)
+_active_trace: "GeminiTrace | None" = None
 
 
 def _api_url() -> str:
@@ -143,6 +156,10 @@ def flush() -> None:
 
 
 def _parent_span() -> Span | None:
+    # Tools nest under the active turn, so execute_tool lands inside realtime_session → turn.
+    tr = _trace.get() or _active_trace
+    if tr is not None:
+        return tr.current_turn()
     parent = _root_span.get()
     if parent is not None and parent.get_span_context().is_valid:
         return parent
@@ -235,40 +252,199 @@ def finish_tool_span(
             span.set_status(Status(StatusCode.ERROR, _json_attr(output)[:400]))
 
 
-def start_speech_span(
-    utterance_id: str, *, speaker: str = "agent"
-) -> Span | None:
-    """Begin agent.speech or customer.speech under voice.call."""
-    parent = _parent_span()
-    if parent is None:
-        return None
-    tracer = otel_trace.get_tracer(TRACER_NAME)
-    parent_ctx = otel_trace.set_span_in_context(parent)
-    is_customer = speaker in ("customer", "user", "digital_human")
-    span_name = "customer.speech" if is_customer else "agent.speech"
-    attrs: dict[str, Any] = {
-        "gen_ai.operation.name": (
-            "speech_to_text" if is_customer else "text_to_speech"
-        ),
-        "gen_ai.provider.name": PROVIDER,
-        "mivas.utterance_id": str(utterance_id),
-        "mivas.speech.speaker": "customer" if is_customer else "agent",
-        "bluejay.speech.start_offset_ms": call_offset_ms(),
-    }
-    span = tracer.start_span(
-        span_name,
-        context=parent_ctx,
-        kind=SpanKind.INTERNAL,
-        attributes=attrs,
-    )
-    return span
+def _usage_attrs(um: Any) -> dict[str, int]:
+    """Gemini Live UsageMetadata → gen_ai.usage.* ints (audio/text/cached/reasoning)."""
+    out: dict[str, int] = {}
+    if um is None:
+        return out
 
-def end_speech_span(span: Span | None) -> None:
-    if span is None:
-        return
-    span.set_attribute("bluejay.speech.end_offset_ms", call_offset_ms())
-    span.set_status(Status(StatusCode.OK))
-    span.end()
+    def put(key: str, val: Any) -> None:
+        if isinstance(val, int):
+            out[key] = val
+
+    put("gen_ai.usage.input_tokens", getattr(um, "prompt_token_count", None))
+    put("gen_ai.usage.output_tokens", getattr(um, "response_token_count", None))
+    put("gen_ai.usage.total_tokens", getattr(um, "total_token_count", None))
+    put("gen_ai.usage.cached_tokens", getattr(um, "cached_content_token_count", None))
+    put("gen_ai.usage.output_reasoning_tokens", getattr(um, "thoughts_token_count", None))
+    for det in getattr(um, "prompt_tokens_details", None) or []:
+        mod = str(getattr(getattr(det, "modality", None), "name", getattr(det, "modality", ""))).upper()
+        if mod == "AUDIO":
+            put("gen_ai.usage.input_audio_tokens", getattr(det, "token_count", None))
+        elif mod == "TEXT":
+            put("gen_ai.usage.input_text_tokens", getattr(det, "token_count", None))
+    for det in getattr(um, "response_tokens_details", None) or []:
+        mod = str(getattr(getattr(det, "modality", None), "name", getattr(det, "modality", ""))).upper()
+        if mod == "AUDIO":
+            put("gen_ai.usage.output_audio_tokens", getattr(det, "token_count", None))
+        elif mod == "TEXT":
+            put("gen_ai.usage.output_text_tokens", getattr(det, "token_count", None))
+    return out
+
+
+class GeminiTrace:
+    """Per-call LangSmith-shaped tree: realtime_session → turn → {user_message, model, execute_tool}.
+
+    One CHIRP process serves concurrent calls; each ``_bridge`` gets its own
+    instance, so turn/model state can never bleed between calls.
+    """
+
+    def __init__(self, tracer: Any, root: Span, model: str | None = None) -> None:
+        self._tracer = tracer
+        self.root = root
+        self._model = model
+        self._turn: Span | None = None
+        self._turn_index = 0
+        self._model_span: Span | None = None
+        self._ref_mono: float | None = None  # caller-stop (or turn-open) → TTFT baseline
+        self._ttft_ms: float | None = None
+        self._pending_usage: Any = None
+        self._out_parts: list[str] = []
+        self._seen_user: set[str] = set()
+        self._usage_in = 0
+        self._usage_out = 0
+        self._responses = 0
+        self._events = 0
+
+    # -- turn --
+    def current_turn(self) -> Span:
+        if self._turn is None:
+            self._turn_index += 1
+            self._turn = self._tracer.start_span(
+                "turn",
+                context=otel_trace.set_span_in_context(self.root),
+                kind=SpanKind.INTERNAL,
+                attributes={"mivas.turn.index": self._turn_index},
+            )
+            if self._ref_mono is None:
+                self._ref_mono = time.monotonic()
+        return self._turn
+
+    def _turn_ctx(self):
+        return otel_trace.set_span_in_context(self.current_turn())
+
+    def start_turn(self) -> None:
+        """New caller utterance → previous turn done, open a fresh one."""
+        self.close_turn()
+        self._ref_mono = time.monotonic()
+        self.current_turn()
+
+    def mark_ref(self) -> None:
+        """Caller stopped speaking → TTFT baseline for the model's reply."""
+        self._ref_mono = time.monotonic()
+
+    def close_turn(self) -> None:
+        if self._model_span is not None:
+            self.finish_model()
+        if self._turn is not None:
+            self._turn.set_status(Status(StatusCode.OK))
+            self._turn.end()
+            self._turn = None
+
+    # -- caller --
+    def user_message(self, text: str | None) -> None:
+        key = (text or "").strip()
+        if not key or key in self._seen_user:
+            return
+        self._seen_user.add(key)
+        span = self._tracer.start_span(
+            "user_message",
+            context=self._turn_ctx(),
+            kind=SpanKind.INTERNAL,
+            attributes={
+                "mivas.role": "user",
+                "mivas.transcript": _json_attr(key),
+                "gen_ai.input.messages": _json_attr([{"role": "user", "content": key}]),
+            },
+        )
+        span.set_status(Status(StatusCode.OK))
+        span.end()
+
+    # -- model --
+    def on_model_audio(self) -> None:
+        """First agent audio chunk of a response → open the generation span + TTFT."""
+        if self._model_span is not None:
+            return
+        attrs: dict[str, Any] = {
+            "gen_ai.operation.name": "chat",
+            "gen_ai.system": PROVIDER,
+            "gen_ai.provider.name": PROVIDER,
+            "mivas.modality": "audio",
+            "mivas.event": "model",
+        }
+        if self._model:
+            attrs["gen_ai.request.model"] = str(self._model)
+        self._model_span = self._tracer.start_span(
+            "model", context=self._turn_ctx(), kind=SpanKind.CLIENT, attributes=attrs
+        )
+        if self._ref_mono is not None:
+            self._ttft_ms = max(0.0, (time.monotonic() - self._ref_mono) * 1000.0)
+
+    def record_usage(self, um: Any) -> None:
+        if um is not None:
+            self._pending_usage = um
+
+    def add_output(self, text: str | None) -> None:
+        if text:
+            self._out_parts.append(str(text))
+
+    def finish_model(self) -> None:
+        """turn_complete → stamp usage + TTFT + transcript, end the span, roll totals up."""
+        span = self._model_span
+        self._model_span = None
+        ttft = self._ttft_ms
+        self._ttft_ms = None
+        usage = self._pending_usage
+        self._pending_usage = None
+        parts = self._out_parts
+        self._out_parts = []
+        if span is None:
+            return
+        attrs = _usage_attrs(usage)
+        for key, value in attrs.items():
+            span.set_attribute(key, value)
+        if self._model:
+            span.set_attribute("gen_ai.response.model", str(self._model))
+        if ttft is not None:
+            span.set_attribute("gen_ai.server.time_to_first_token", ttft / 1000.0)
+            span.set_attribute("mivas.ttft_ms", round(ttft, 2))
+        if parts:
+            text = "".join(parts)
+            span.set_attribute("mivas.transcript", _json_attr(text))
+            span.set_attribute(
+                "gen_ai.output.messages", _json_attr([{"role": "assistant", "content": text}])
+            )
+        span.set_status(Status(StatusCode.OK))
+        span.end()
+        # ponytail: sum per-response like the OpenAI harness; if Gemini reports
+        # cumulative usage_metadata this over-counts the root total — the per-span
+        # gen_ai.usage.* are the authoritative numbers either way.
+        self._usage_in += attrs.get("gen_ai.usage.input_tokens", 0)
+        self._usage_out += attrs.get("gen_ai.usage.output_tokens", 0)
+        self._responses += 1
+        self.root.set_attribute("gen_ai.usage.input_tokens", self._usage_in)
+        self.root.set_attribute("gen_ai.usage.output_tokens", self._usage_out)
+        self.root.set_attribute("gen_ai.usage.total_tokens", self._usage_in + self._usage_out)
+        self.root.set_attribute("mivas.response.count", self._responses)
+
+    def interrupted(self) -> None:
+        if self._model_span is not None:
+            self._model_span.set_attribute("mivas.interrupted", True)
+        span = self._tracer.start_span(
+            "audio_interrupted",
+            context=self._turn_ctx(),
+            kind=SpanKind.INTERNAL,
+            attributes={"mivas.event": "audio_interrupted"},
+        )
+        span.set_status(Status(StatusCode.OK))
+        span.end()
+
+    def bump_event(self) -> None:
+        self._events += 1
+
+    def close(self) -> None:
+        self.close_turn()
+        self.root.set_attribute("mivas.event_count", self._events)
 
 
 def _upsert_stop_statuses() -> set[str]:
@@ -493,13 +669,13 @@ async def traced_run(
     *,
     simulation_result_id: str | None = None,
     model: str | None = None,
-) -> AsyncIterator[None]:
-    """OTel voice.call root; flush + link trace_ids/tool_calls on exit."""
-    global _active_root, _active_t0, _active_tools
+) -> AsyncIterator["GeminiTrace | None"]:
+    """OTel realtime_session root; yields a GeminiTrace; links trace_ids on exit."""
+    global _active_root, _active_t0, _active_tools, _active_trace
 
     provider = setup_otel()
     if provider is None:
-        yield
+        yield None
         return
 
     tracer = otel_trace.get_tracer(TRACER_NAME)
@@ -507,7 +683,7 @@ async def traced_run(
         # Gemini / GenAI semantic conventions (not openai.realtime)
         "gen_ai.system": PROVIDER,
         "gen_ai.provider.name": PROVIDER,
-        "gen_ai.operation.name": "invoke_agent",
+        "gen_ai.operation.name": "realtime_session",
         "mivas.workflow.name": workflow_name,
     }
     if model:
@@ -524,17 +700,23 @@ async def traced_run(
     prev_active = _active_root
     prev_t0 = _active_t0
     prev_tools = _active_tools
+    prev_trace = _active_trace
+    trace_token = None
+    trace: GeminiTrace | None = None
     try:
         with tracer.start_as_current_span(
-            "voice.call",
+            "realtime_session",
             kind=SpanKind.SERVER,
             attributes=attrs,
         ) as root:
             root_token = _root_span.set(root)
             tools_token = _reported_tools.set(tool_buf)
+            trace = GeminiTrace(tracer, root, model=model)
+            trace_token = _trace.set(trace)
             _active_root = root
             _active_t0 = t0
             _active_tools = tool_buf
+            _active_trace = trace
             ctx = root.get_span_context()
             if ctx.is_valid:
                 otel_tid = format(ctx.trace_id, "032x")
@@ -546,20 +728,25 @@ async def traced_run(
                     model,
                 )
             try:
-                yield
+                yield trace
             except Exception as e:
                 if type(e).__name__.startswith("ConnectionClosed"):
                     root.set_status(Status(StatusCode.OK))
                 else:
                     raise
+            finally:
+                trace.close()
     finally:
         _active_root = prev_active
         _active_t0 = prev_t0
         _active_tools = prev_tools
+        _active_trace = prev_trace
         if root_token is not None:
             _root_span.reset(root_token)
         if tools_token is not None:
             _reported_tools.reset(tools_token)
+        if trace_token is not None:
+            _trace.reset(trace_token)
         _call_t0.reset(t0_token)
         flush()
         if simulation_result_id and (otel_tid or tool_buf):

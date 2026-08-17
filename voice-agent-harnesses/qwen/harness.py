@@ -435,7 +435,7 @@ async def run_session(industry_dir: str | Path, *, model: str = MODEL) -> None:
     bp = load_blueprint(industry_dir)
     name = Path(industry_path(industry_dir)).name
 
-    async with traced_run(f"mivas-{name}-{model}"):
+    async with traced_run(f"mivas-{name}-{model}", model=model):
         async with connect_qwen(model) as qwen:
             created = json.loads(await asyncio.wait_for(qwen.recv(), timeout=30))
             print(f"session {created.get('type')}", flush=True)

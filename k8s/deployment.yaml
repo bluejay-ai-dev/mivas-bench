@@ -233,6 +233,24 @@ spec:
                   name: mivas-secrets
                   key: QWEN_REGION
                   optional: true
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: mivas-secrets
+                  key: AWS_ACCESS_KEY_ID
+                  optional: true
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: mivas-secrets
+                  key: AWS_SECRET_ACCESS_KEY
+                  optional: true
+            - name: AWS_SESSION_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: mivas-secrets
+                  key: AWS_SESSION_TOKEN
+                  optional: true
             - name: LIVEKIT_URL
               valueFrom:
                 secretKeyRef:

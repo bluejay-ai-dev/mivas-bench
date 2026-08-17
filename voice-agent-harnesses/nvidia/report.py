@@ -83,6 +83,9 @@ def _api_key() -> str | None:
     return os.environ.get("BLUEJAY_API_KEY") or None
 
 
+_MAX_ATTR = 4000
+
+
 def _json_attr(value: Any) -> str:
     if isinstance(value, str):
         return value
@@ -90,6 +93,43 @@ def _json_attr(value: Any) -> str:
         return json.dumps(value, default=str)
     except Exception:
         return str(value)
+
+
+def _clip_attr(value: Any, n: int = _MAX_ATTR) -> str:
+    s = _json_attr(value)
+    return s if len(s) <= n else s[: n - 3] + "..."
+
+
+def _deep_get(obj: Any, *path: str) -> Any:
+    """Read a dotted path off a dict or object."""
+    for key in path:
+        if obj is None:
+            return None
+        obj = obj.get(key) if isinstance(obj, dict) else getattr(obj, key, None)
+    return obj
+
+
+def _usage_attrs(usage: Any) -> dict[str, int]:
+    """Realtime response usage → gen_ai.usage.* ints. Empty when the provider
+    reports no usage (VoiceChat/NVCF does not — the model span still carries TTFT)."""
+    out: dict[str, int] = {}
+    if usage is None:
+        return out
+
+    def put(key: str, *path: str) -> None:
+        v = _deep_get(usage, *path)
+        if isinstance(v, int):
+            out[key] = v
+
+    put("gen_ai.usage.input_tokens", "input_tokens")
+    put("gen_ai.usage.output_tokens", "output_tokens")
+    put("gen_ai.usage.total_tokens", "total_tokens")
+    put("gen_ai.usage.input_audio_tokens", "input_token_details", "audio_tokens")
+    put("gen_ai.usage.input_text_tokens", "input_token_details", "text_tokens")
+    put("gen_ai.usage.cached_tokens", "input_token_details", "cached_tokens")
+    put("gen_ai.usage.output_audio_tokens", "output_token_details", "audio_tokens")
+    put("gen_ai.usage.output_text_tokens", "output_token_details", "text_tokens")
+    return out
 
 
 def call_offset_ms() -> int:
@@ -284,6 +324,147 @@ def end_speech_span(span: Span | None) -> None:
     span.set_attribute("bluejay.speech.end_offset_ms", call_offset_ms())
     span.set_status(Status(StatusCode.OK))
     span.end()
+
+
+class RealtimeSpanTracer:
+    """LangSmith-shaped tree for the S2S VoiceChat path, driven imperatively from
+    the CHIRP bridge's already-hand-dispatched event loop (no wrappable iterator):
+
+        realtime_session (root)
+          turn                 (one caller utterance → all ensuing agent activity)
+            model              (per response: TTFT + output transcript; gen_ai.usage.*
+                                only if the provider reports it — VoiceChat does not)
+
+    Tools land as ``execute_tool`` via ``tool_span`` (parented at the root), which
+    Bluejay extracts regardless of nesting. No per-chunk / agent.speech / customer.speech
+    spans. VoiceChat exposes no user ASR transcript, so a turn has no ``user_message``.
+    """
+
+    def __init__(self, root: Span | None, model: str | None = None, *, system: str = PROVIDER, tracer=None) -> None:
+        self._tracer = tracer or otel_trace.get_tracer(TRACER_NAME)
+        self.root = root
+        self._model = model
+        self._system = system
+        self._turn: Span | None = None
+        self._turn_index = 0
+        self._model_span: Span | None = None
+        self._resp_start_mono: float | None = None
+        self._resp_ttft_ms: float | None = None
+        self._usage_input = 0
+        self._usage_output = 0
+        self._response_count = 0
+
+    def _ok(self) -> bool:
+        return self.root is not None and self.root.get_span_context().is_valid
+
+    def _current_turn(self) -> Span | None:
+        if not self._ok():
+            return None
+        if self._turn is None:
+            self._turn_index += 1
+            self._turn = self._tracer.start_span(
+                "turn",
+                context=otel_trace.set_span_in_context(self.root),
+                kind=SpanKind.INTERNAL,
+                attributes={"mivas.turn.index": self._turn_index},
+            )
+        return self._turn
+
+    def _turn_ctx(self):
+        turn = self._current_turn()
+        return otel_trace.set_span_in_context(turn) if turn is not None else None
+
+    def _close_turn(self) -> None:
+        self.end_model(None)
+        if self._turn is not None:
+            self._turn.set_status(Status(StatusCode.OK))
+            self._turn.end()
+            self._turn = None
+
+    def on_user_speech(self) -> None:
+        """New caller utterance → previous turn is done; open a fresh one."""
+        if not self._ok():
+            return
+        self._close_turn()
+        self._current_turn()
+
+    def start_model(self, event: Any = None) -> None:
+        """response.created → open a generation span; duration = model latency."""
+        ctx = self._turn_ctx()
+        if ctx is None:
+            return
+        if self._model_span is not None:
+            self.end_model(None)
+        self._resp_start_mono = time.monotonic()
+        self._resp_ttft_ms = None
+        model = self._model or _deep_get(event, "response", "model")
+        attrs: dict[str, Any] = {
+            "gen_ai.operation.name": "chat",
+            "gen_ai.system": self._system,
+            "gen_ai.provider.name": self._system,
+            "mivas.modality": "audio",
+        }
+        if model:
+            attrs["gen_ai.request.model"] = str(model)
+        rid = _deep_get(event, "response", "id")
+        if rid:
+            attrs["gen_ai.response.id"] = str(rid)
+        self._model_span = self._tracer.start_span(
+            "model", context=ctx, kind=SpanKind.CLIENT, attributes=attrs
+        )
+
+    def mark_first_output(self) -> None:
+        """First agent audio/transcript chunk → time to first token."""
+        if (
+            self._model_span is None
+            or self._resp_ttft_ms is not None
+            or self._resp_start_mono is None
+        ):
+            return
+        self._resp_ttft_ms = (time.monotonic() - self._resp_start_mono) * 1000.0
+
+    def set_output(self, text: str | None) -> None:
+        if self._model_span is not None and text:
+            self._model_span.set_attribute("mivas.transcript", _clip_attr(text))
+            self._model_span.set_attribute(
+                "gen_ai.output.messages",
+                _clip_attr([{"role": "assistant", "content": str(text)}]),
+            )
+
+    def end_model(self, event: Any) -> None:
+        """response.done → stamp usage (if any) + TTFT, end the span, roll onto root."""
+        span = self._model_span
+        self._model_span = None
+        ttft = self._resp_ttft_ms
+        self._resp_start_mono = None
+        self._resp_ttft_ms = None
+        if span is None:
+            return
+        attrs = _usage_attrs(_deep_get(event, "response", "usage") if event else None)
+        for key, value in attrs.items():
+            span.set_attribute(key, value)
+        rmodel = (_deep_get(event, "response", "model") if event else None) or self._model
+        if rmodel:
+            span.set_attribute("gen_ai.response.model", str(rmodel))
+        if ttft is not None:
+            span.set_attribute("gen_ai.server.time_to_first_token", ttft / 1000.0)
+            span.set_attribute("mivas.ttft_ms", round(ttft, 2))
+        span.set_status(Status(StatusCode.OK))
+        span.end()
+        self._usage_input += attrs.get("gen_ai.usage.input_tokens", 0)
+        self._usage_output += attrs.get("gen_ai.usage.output_tokens", 0)
+        self._response_count += 1
+        if attrs and self._ok():
+            self.root.set_attribute("gen_ai.usage.input_tokens", self._usage_input)
+            self.root.set_attribute("gen_ai.usage.output_tokens", self._usage_output)
+            self.root.set_attribute(
+                "gen_ai.usage.total_tokens", self._usage_input + self._usage_output
+            )
+        if self._ok():
+            self.root.set_attribute("mivas.response.count", self._response_count)
+
+    def close(self) -> None:
+        self._close_turn()
 
 
 async def _await_upsert_ready(
@@ -486,8 +667,14 @@ async def traced_run(
     *,
     simulation_result_id: str | None = None,
     model: str | None = None,
+    root_name: str = "voice.call",
+    operation: str = "invoke_agent",
 ) -> AsyncIterator[Span | None]:
-    """OTel voice.call root; flush + link trace_ids/tool_calls on exit."""
+    """OTel root span; flush + link trace_ids/tool_calls on exit.
+
+    ``root_name``/``operation`` default to the cascaded pipeline's ``voice.call``;
+    the S2S VoiceChat path passes ``realtime_session`` for the LangSmith-shaped tree.
+    """
     global _active_root, _active_t0, _active_tools
 
     provider = setup_otel()
@@ -499,7 +686,7 @@ async def traced_run(
     attrs: dict[str, Any] = {
         "gen_ai.system": PROVIDER,
         "gen_ai.provider.name": PROVIDER,
-        "gen_ai.operation.name": "invoke_agent",
+        "gen_ai.operation.name": operation,
         "mivas.workflow.name": workflow_name,
     }
     if model:
@@ -518,7 +705,7 @@ async def traced_run(
     prev_tools = _active_tools
     try:
         with tracer.start_as_current_span(
-            "voice.call",
+            root_name,
             kind=SpanKind.SERVER,
             attributes=attrs,
         ) as root:

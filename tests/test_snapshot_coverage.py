@@ -23,6 +23,7 @@ import call_id as call_id_mod  # noqa: E402
 # family -> the file that owns its call teardown
 HOOK_SITES = {
     "assemblyai": ["adapters/chirp.py"],
+    "aws": ["report.py"],
     "bland": ["adapters/chirp.py"],
     "cartesia": ["adapters/chirp.py"],
     "deepgram": ["adapters/chirp.py"],
@@ -33,6 +34,7 @@ HOOK_SITES = {
     "nvidia": ["bot.py"],
     "openai": ["report.py"],
     "pipecat": ["bot.py"],
+    "qwen": ["report.py"],
     "retell": ["adapters/chirp.py"],
     "twilio": ["adapters/conversationrelay.py"],
     "vapi": ["adapters/chirp.py"],

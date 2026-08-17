@@ -1,19 +1,18 @@
-"""Qwen-Audio Realtime events → Bluejay OTel traces.
+"""Nova 2 Sonic events → Bluejay OTel traces.
 
-Same LangSmith-shaped tree as the OpenAI chirp tracer, driven from DashScope WS
-events (OpenAI-realtime-compatible) instead of the Agents SDK:
+LangSmith-shaped tree, driven from the Bedrock bidirectional stream:
 
   realtime_session
-    └── turn                   (one caller utterance → ensuing agent activity)
-          ├── user_message     (caller transcript)
-          ├── model            (one generation per response: gen_ai.usage.* token
-          │                     breakdown + time-to-first-token + output)
-          ├── execute_tool <n> (tool calls + handoffs; Bluejay reads these)
-          └── audio_interrupted
+    └── turn                   (one caller utterance → all ensuing agent activity)
+          ├── user_message     (caller ASR transcript)
+          ├── model            (one generation per response: gen_ai.usage.* tokens
+          │                     from Nova's usageEvent + time-to-first-token + output)
+          ├── execute_tool <n> (tool calls; Bluejay reads these)
+          └── audio_interrupted (barge-in)
 
-Token counts + TTFT come off Qwen response.created/response.done into standard
-OTel GenAI (`gen_ai.*`) attributes; turn boundaries from server_vad
-``input_audio_buffer.speech_started``.
+Nova's ``usageEvent`` carries per-turn ``details.delta`` and cumulative
+``details.total`` token counts (speech/text modality) — delta lands on the
+``model`` span, total is rolled onto the root.
 """
 
 from __future__ import annotations
@@ -56,7 +55,7 @@ def _otlp_endpoint() -> str:
 
 
 def _service_name() -> str:
-    return os.environ.get("BLUEJAY_SERVICE_NAME", "mivas-qwen")
+    return os.environ.get("BLUEJAY_SERVICE_NAME", "mivas-aws")
 
 
 def _api_key() -> str | None:
@@ -76,27 +75,62 @@ def _deep_get(obj: Any, *path: str) -> Any:
     return obj
 
 
-def _usage_attrs(usage: Any) -> dict[str, int]:
-    """Realtime response usage → gen_ai.usage.* ints (audio/text/cached broken out)."""
-    out: dict[str, int] = {}
-    if usage is None:
-        return out
-
-    def put(key: str, *path: str) -> None:
-        v = _deep_get(usage, *path)
+def _sum_int_leaves(node: Any) -> int | None:
+    if not isinstance(node, dict):
+        return None
+    total, seen = 0, False
+    for v in node.values():
         if isinstance(v, int):
-            out[key] = v
+            total += v
+            seen = True
+    return total if seen else None
 
-    put(GenAIAttributes.GEN_AI_USAGE_INPUT_TOKENS, "input_tokens")
-    put(GenAIAttributes.GEN_AI_USAGE_OUTPUT_TOKENS, "output_tokens")
-    put("gen_ai.usage.total_tokens", "total_tokens")
-    put("gen_ai.usage.input_audio_tokens", "input_token_details", "audio_tokens")
-    put("gen_ai.usage.input_text_tokens", "input_token_details", "text_tokens")
-    put("gen_ai.usage.cached_tokens", "input_token_details", "cached_tokens")
-    put("gen_ai.usage.output_audio_tokens", "output_token_details", "audio_tokens")
-    put("gen_ai.usage.output_text_tokens", "output_token_details", "text_tokens")
-    put("gen_ai.usage.output_reasoning_tokens", "output_token_details", "reasoning_tokens")
+
+def _nova_side_attrs(node: Any) -> dict[str, int]:
+    """One side of Nova usage details (delta or total) → gen_ai.usage.* ints."""
+    out: dict[str, int] = {}
+    if not isinstance(node, dict):
+        return out
+    i = node.get("input") if isinstance(node.get("input"), dict) else {}
+    o = node.get("output") if isinstance(node.get("output"), dict) else {}
+    it, ot = _sum_int_leaves(i), _sum_int_leaves(o)
+    if it is not None:
+        out[GenAIAttributes.GEN_AI_USAGE_INPUT_TOKENS] = it
+    if ot is not None:
+        out[GenAIAttributes.GEN_AI_USAGE_OUTPUT_TOKENS] = ot
+    if it is not None and ot is not None:
+        out["gen_ai.usage.total_tokens"] = it + ot
+    for k, attr in (("speechTokens", "input_audio_tokens"), ("audioTokens", "input_audio_tokens"), ("textTokens", "input_text_tokens")):
+        if isinstance(i.get(k), int):
+            out[f"gen_ai.usage.{attr}"] = i[k]
+    for k, attr in (("speechTokens", "output_audio_tokens"), ("audioTokens", "output_audio_tokens"), ("textTokens", "output_text_tokens")):
+        if isinstance(o.get(k), int):
+            out[f"gen_ai.usage.{attr}"] = o[k]
     return out
+
+
+def _nova_usage(usage: Any) -> tuple[dict[str, int], dict[str, int]]:
+    """Nova usageEvent → (per-turn delta attrs, cumulative total attrs).
+
+    Field names aren't published, so extraction is defensive: top-level
+    total{Input,Output}Tokens fall back for the cumulative side, and if no
+    per-turn delta is present the total is reused so the model span still
+    carries token counts.
+    """
+    details = usage.get("details") if isinstance(usage, dict) else None
+    delta = _nova_side_attrs(_deep_get(details, "delta"))
+    total = _nova_side_attrs(_deep_get(details, "total"))
+    if not total and isinstance(usage, dict):
+        ti, to, tt = usage.get("totalInputTokens"), usage.get("totalOutputTokens"), usage.get("totalTokens")
+        if isinstance(ti, int):
+            total[GenAIAttributes.GEN_AI_USAGE_INPUT_TOKENS] = ti
+        if isinstance(to, int):
+            total[GenAIAttributes.GEN_AI_USAGE_OUTPUT_TOKENS] = to
+        if isinstance(tt, int):
+            total["gen_ai.usage.total_tokens"] = tt
+    if not delta:
+        delta = dict(total)
+    return delta, total
 
 
 def setup_otel() -> TracerProvider | None:
@@ -204,17 +238,15 @@ async def post_trace_ids(simulation_result_id: str, trace_id: str) -> None:
             )
 
 
-class QwenEventTracer:
-    """Qwen-Audio Realtime events → a LangSmith-shaped tree under realtime_session.
+class NovaEventTracer:
+    """Nova Sonic events → LangSmith-shaped tree under ``realtime_session``.
 
         realtime_session
           turn
-            user_message          (caller transcript)
-            model                 (generation: gen_ai.usage.* tokens + TTFT + output)
-            execute_tool <name>   (tools/handoffs — parented via state["_otel_root"])
-
-    The chirp adapter forwards every Qwen WS event to ``handle_raw``; tool spans
-    the harness creates parent under ``current_turn()``.
+            user_message      caller ASR transcript
+            model             gen_ai.usage.* (per-turn delta) + TTFT + output
+            execute_tool <n>  (parented via harness tool_span → the active turn)
+            audio_interrupted barge-in
     """
 
     def __init__(self, tracer: Tracer, root: Span, model: str | None = None) -> None:
@@ -223,17 +255,16 @@ class QwenEventTracer:
         self._model = model
         self._turn: Span | None = None
         self._turn_index = 0
-        self._seen_user_text: set[str] = set()
-        self._llm_span: Span | None = None
-        self._resp_start_mono: float | None = None
-        self._resp_ttft_ms: float | None = None
-        self._usage_input = 0
-        self._usage_output = 0
-        self._response_count = 0
+        self._model_span: Span | None = None
+        self._user_stop_mono: float | None = None  # caller-stop ref for TTFB
+        self._ttft_ms: float | None = None
+        self._seen_user: set[str] = set()
+        self._resp_count = 0
         self._event_count = 0
 
-    # -- turn management --
-    def _current_turn(self) -> Span:
+    # -- turn / model lifecycle -------------------------------------------
+
+    def current_turn(self) -> Span:
         if self._turn is None:
             self._turn_index += 1
             self._turn = self._tracer.start_span(
@@ -244,92 +275,66 @@ class QwenEventTracer:
             )
         return self._turn
 
-    def current_turn(self) -> Span:
-        """Public: parent for tool spans the harness creates during this turn."""
-        return self._current_turn()
-
     def _turn_ctx(self):
-        return otel_trace.set_span_in_context(self._current_turn())
+        return otel_trace.set_span_in_context(self.current_turn())
+
+    def _ensure_model(self) -> Span:
+        if self._model_span is None:
+            attrs: dict[str, Any] = {
+                GenAIAttributes.GEN_AI_OPERATION_NAME: "chat",
+                GenAIAttributes.GEN_AI_SYSTEM: "aws.bedrock",
+                "gen_ai.provider.name": "aws.bedrock",
+                "mivas.modality": "audio",
+                "mivas.event": "response",
+            }
+            if self._model:
+                attrs[GenAIAttributes.GEN_AI_REQUEST_MODEL] = str(self._model)
+            self._model_span = self._tracer.start_span(
+                "model", context=self._turn_ctx(), kind=SpanKind.CLIENT, attributes=attrs
+            )
+        return self._model_span
+
+    def _finish_model(self) -> None:
+        span = self._model_span
+        self._model_span = None
+        ttft = self._ttft_ms
+        self._ttft_ms = None
+        self._user_stop_mono = None
+        if span is None:
+            return
+        if ttft is not None:
+            span.set_attribute("gen_ai.server.time_to_first_token", ttft / 1000.0)
+            span.set_attribute("mivas.ttft_ms", round(ttft, 2))
+        span.set_status(Status(StatusCode.OK))
+        span.end()
+        self._resp_count += 1
+        self.root.set_attribute("mivas.response.count", self._resp_count)
 
     def _close_turn(self) -> None:
-        if self._llm_span is not None:
-            self._finish_llm(None)
+        self._finish_model()
         if self._turn is not None:
             self._turn.set_status(Status(StatusCode.OK))
             self._turn.end()
             self._turn = None
 
-    # -- generation span (response.created → response.done) --
-    def _start_llm(self, response: Any) -> None:
-        if self._llm_span is not None:
-            self._finish_llm(None)
-        self._resp_start_mono = time.monotonic()
-        self._resp_ttft_ms = None
-        model = self._model or _deep_get(response, "model")
-        attrs: dict[str, Any] = {
-            GenAIAttributes.GEN_AI_OPERATION_NAME: "chat",
-            GenAIAttributes.GEN_AI_SYSTEM: "qwen",
-            "gen_ai.provider.name": "dashscope",
-            "mivas.modality": "audio",
-            "mivas.event": "response.created",
-        }
-        if model:
-            attrs[GenAIAttributes.GEN_AI_REQUEST_MODEL] = str(model)
-        rid = _deep_get(response, "id")
-        if rid:
-            attrs[GenAIAttributes.GEN_AI_RESPONSE_ID] = str(rid)
-        self._llm_span = self._tracer.start_span(
-            "model", context=self._turn_ctx(), kind=SpanKind.CLIENT, attributes=attrs
-        )
+    # -- event signals (called by the chirp bridge) -----------------------
 
-    def _mark_first_output(self) -> None:
-        if (
-            self._llm_span is None
-            or self._resp_ttft_ms is not None
-            or self._resp_start_mono is None
-        ):
-            return
-        self._resp_ttft_ms = (time.monotonic() - self._resp_start_mono) * 1000.0
+    def on_caller_start(self) -> None:
+        """CHIRP speech.started → previous turn is over; open a fresh one."""
+        self._event_count += 1
+        self._close_turn()
+        self.current_turn()
 
-    def _finish_llm(self, response: Any) -> None:
-        span = self._llm_span
-        self._llm_span = None
-        ttft = self._resp_ttft_ms
-        self._resp_start_mono = None
-        self._resp_ttft_ms = None
-        if span is None:
-            return
-        attrs = _usage_attrs(_deep_get(response, "usage"))
-        for key, value in attrs.items():
-            span.set_attribute(key, value)
-        rid = _deep_get(response, "id")
-        if rid:
-            span.set_attribute(GenAIAttributes.GEN_AI_RESPONSE_ID, str(rid))
-        rmodel = _deep_get(response, "model") or self._model
-        if rmodel:
-            span.set_attribute(GenAIAttributes.GEN_AI_RESPONSE_MODEL, str(rmodel))
-        if ttft is not None:
-            span.set_attribute("gen_ai.server.time_to_first_token", ttft / 1000.0)
-            span.set_attribute("mivas.ttft_ms", round(ttft, 2))
-        if _deep_get(response, "status") == "failed":
-            msg = _deep_get(response, "status_details", "error", "message") or "response failed"
-            span.set_status(Status(StatusCode.ERROR, str(msg)))
-        else:
-            span.set_status(Status(StatusCode.OK))
-        span.end()
-        self._usage_input += attrs.get(GenAIAttributes.GEN_AI_USAGE_INPUT_TOKENS, 0)
-        self._usage_output += attrs.get(GenAIAttributes.GEN_AI_USAGE_OUTPUT_TOKENS, 0)
-        self._response_count += 1
-        self.root.set_attribute(GenAIAttributes.GEN_AI_USAGE_INPUT_TOKENS, self._usage_input)
-        self.root.set_attribute(GenAIAttributes.GEN_AI_USAGE_OUTPUT_TOKENS, self._usage_output)
-        self.root.set_attribute("gen_ai.usage.total_tokens", self._usage_input + self._usage_output)
-        self.root.set_attribute("mivas.response.count", self._response_count)
+    def on_caller_stop(self) -> None:
+        self._event_count += 1
+        self._user_stop_mono = time.monotonic()
 
-    def _user_message(self, text: str) -> None:
-        key = text.strip()
-        if not key or key in self._seen_user_text:
+    def user_message(self, text: str) -> None:
+        self._event_count += 1
+        key = (text or "").strip()
+        if not key or key in self._seen_user:
             return
-        self._seen_user_text.add(key)
+        self._seen_user.add(key)
         span = self._tracer.start_span(
             "user_message",
             context=self._turn_ctx(),
@@ -343,40 +348,51 @@ class QwenEventTracer:
         span.set_status(Status(StatusCode.OK))
         span.end()
 
-    # -- event entry point (called by the chirp adapter for every Qwen event) --
-    def handle_raw(self, et: str | None, ev: dict[str, Any]) -> None:
-        if not et:
-            return
+    def on_agent_audio(self) -> None:
+        """First agent audio of a response → open model span + stamp TTFT."""
         self._event_count += 1
-        try:
-            self._dispatch(et, ev)
-        except Exception:
-            logger.debug("qwen tracer failed on %s", et, exc_info=True)
+        self._ensure_model()
+        if self._ttft_ms is None and self._user_stop_mono is not None:
+            self._ttft_ms = (time.monotonic() - self._user_stop_mono) * 1000.0
 
-    def _dispatch(self, et: str, ev: dict[str, Any]) -> None:
-        if et == "input_audio_buffer.speech_started":
-            # New caller utterance → previous turn is done; open a fresh one.
-            self._close_turn()
-            self._current_turn()
-        elif et == "conversation.item.input_audio_transcription.completed":
-            tr = (ev.get("transcript") or "").strip()
-            if tr:
-                self._user_message(tr)
-        elif et == "response.created":
-            self._start_llm(ev.get("response"))
-        elif et in ("response.audio.delta", "response.audio_transcript.delta"):
-            if ev.get("delta"):
-                self._mark_first_output()
-        elif et == "response.audio_transcript.done":
-            tr = (ev.get("transcript") or "").strip()
-            if tr and self._llm_span is not None:
-                self._llm_span.set_attribute("mivas.transcript", _clip(tr))
-                self._llm_span.set_attribute(
-                    GenAIAttributes.GEN_AI_OUTPUT_MESSAGES,
-                    _clip([{"role": "assistant", "content": tr}]),
-                )
-        elif et == "response.done":
-            self._finish_llm(ev.get("response"))
+    def set_output(self, transcript: str | None) -> None:
+        if not transcript:
+            return
+        span = self._ensure_model()
+        span.set_attribute("mivas.transcript", _clip(transcript))
+        span.set_attribute(
+            GenAIAttributes.GEN_AI_OUTPUT_MESSAGES,
+            _clip([{"role": "assistant", "content": transcript}]),
+        )
+
+    def record_usage(self, usage: Any) -> None:
+        """Nova usageEvent → delta on the model span, total on the root; ends the span."""
+        self._event_count += 1
+        delta, total = _nova_usage(usage)
+        if delta:
+            span = self._ensure_model()
+            if self._model:
+                span.set_attribute(GenAIAttributes.GEN_AI_RESPONSE_MODEL, str(self._model))
+            for k, v in delta.items():
+                span.set_attribute(k, v)
+        for k, v in total.items():
+            self.root.set_attribute(k, v)
+        # usageEvent fires at completionEnd → this response is done.
+        self._finish_model()
+
+    def interrupted(self) -> None:
+        self._event_count += 1
+        if self._model_span is not None:
+            self._model_span.set_attribute("mivas.interrupted", True)
+        span = self._tracer.start_span(
+            "audio_interrupted",
+            context=self._turn_ctx(),
+            kind=SpanKind.INTERNAL,
+            attributes={"mivas.event": "audio_interrupted"},
+        )
+        span.set_status(Status(StatusCode.OK))
+        span.end()
+        self._finish_model()
 
     def close(self) -> None:
         self._close_turn()
@@ -395,10 +411,10 @@ def tool_span(
     if root is None:
         yield None
         return
-    tracer = otel_trace.get_tracer("mivas.qwen.audio")
+    tracer = otel_trace.get_tracer("mivas.aws.nova")
     attrs: dict[str, Any] = {
         GenAIAttributes.GEN_AI_OPERATION_NAME: "execute_tool",
-        "gen_ai.provider.name": "dashscope",
+        "gen_ai.provider.name": "aws.bedrock",
         GenAIAttributes.GEN_AI_TOOL_NAME: name,
         GenAIAttributes.GEN_AI_TOOL_CALL_ARGUMENTS: _clip(
             parameters if parameters is not None else {}
@@ -445,26 +461,26 @@ async def traced_run(
     *,
     simulation_result_id: str | None = None,
     model: str | None = None,
-) -> AsyncIterator[Optional[QwenEventTracer]]:
+) -> AsyncIterator[Optional[NovaEventTracer]]:
     provider = setup_otel()
     if provider is None:
         yield None
         return
 
-    tracer = otel_trace.get_tracer("mivas.qwen.audio")
+    tracer = otel_trace.get_tracer("mivas.aws.nova")
     attrs: dict[str, Any] = {
         "mivas.workflow.name": workflow_name,
         GenAIAttributes.GEN_AI_OPERATION_NAME: "realtime_session",
-        GenAIAttributes.GEN_AI_SYSTEM: "qwen",
-        "gen_ai.provider.name": "dashscope",
+        GenAIAttributes.GEN_AI_SYSTEM: "aws.bedrock",
+        "gen_ai.provider.name": "aws.bedrock",
     }
-    if model:
-        attrs[GenAIAttributes.GEN_AI_REQUEST_MODEL] = str(model)
     if simulation_result_id:
         attrs["bluejay.simulation_result_id"] = str(simulation_result_id)
+    if model:
+        attrs[GenAIAttributes.GEN_AI_REQUEST_MODEL] = str(model)
 
     otel_tid: str | None = None
-    event_tracer: QwenEventTracer | None = None
+    event_tracer: NovaEventTracer | None = None
     try:
         with tracer.start_as_current_span(
             "realtime_session",
@@ -480,7 +496,7 @@ async def traced_run(
                     simulation_result_id,
                     workflow_name,
                 )
-            event_tracer = QwenEventTracer(tracer, root, model=model)
+            event_tracer = NovaEventTracer(tracer, root, model=model)
             yield event_tracer
             event_tracer.close()
     finally:

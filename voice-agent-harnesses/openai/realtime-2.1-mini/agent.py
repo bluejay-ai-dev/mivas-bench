@@ -29,7 +29,7 @@ async def run(industry: str = "control-industry") -> None:
     industry_dir = os.environ.get("INDUSTRY_DIR") or str(industry_path(industry))
     runner = build_from_blueprint(industry_dir)
     name = Path(industry_dir).name
-    async with traced_run(f"mivas-{name}-{MODEL}") as tracer:
+    async with traced_run(f"mivas-{name}-{MODEL}", model=MODEL) as tracer:
         ctx: dict = {}
         async with await runner.run(context=ctx) as session:
             ctx["session"] = session
