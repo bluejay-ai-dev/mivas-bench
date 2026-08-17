@@ -179,9 +179,7 @@ list_locations. Do not guess which state or office they called.
 - create_callback_task — required: queue (billing | clinical | front_desk |
   cosmetic | records), callback_number (E.164). Optional: priority (stat |
   urgent | routine). Say the SLA it returns out loud.
-- send_sms — required: template_id (appointment_confirmation | portal_activation
-  | payment_link | insurance_card_upload | directions | cosmetic_deposit),
-  mobile_e164 (E.164).
+- send_sms — required: template_id, mobile_e164 (E.164).
 - search_practice_kb — required: topic (hours | directions | portal | fees |
   services). Answer only from what it returns; if no source, do not invent one.
 - end_call — required: reason (caller_done | spam | wrong_number). Call

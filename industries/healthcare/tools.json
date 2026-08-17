@@ -1731,7 +1731,7 @@
     },
     {
       "name": "end_call",
-      "description": "End the call once the caller is done, or immediately if it's spam or a wrong number. Say goodbye first. reason is caller_done | spam | wrong_number.",
+      "description": "End the call once the caller is done, or immediately if it's spam or a wrong number. Say goodbye first. reason is caller_done | spam | wrong_number. There is no silent-hangup reason — a finished call after goodbye is caller_done.",
       "inputSchema": {
         "type": "object",
         "properties": {
