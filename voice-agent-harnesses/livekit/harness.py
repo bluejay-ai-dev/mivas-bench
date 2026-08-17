@@ -194,9 +194,9 @@ async def _execute(name: str, args: dict[str, Any], *, local: bool) -> dict[str,
 async def run_tool(name: str, args: dict[str, Any], *, local: bool = False) -> dict[str, Any]:
     """Run one blueprint tool under an `execute_tool` span. Never raises.
 
-    `local=True` marks harness-native tools (handoffs, session tools); everything
+    `local=True` marks harness-native tools (handoffs, `end_call`); everything
     else dispatches to POST {TOOL_SERVER_URL}/tools/{name} and returns the
-    server's envelope verbatim.
+    server's envelope verbatim. Human-transfer session tools POST, then hang up.
     """
     offset = report.call_offset_ms()
     with report.tool_span(name, args) as span:
@@ -274,7 +274,10 @@ def _blueprint_tools(
         elif t.get("session"):
             def _make_session(tool_name: str):
                 async def _session_tool(raw_arguments: dict[str, Any]) -> dict[str, Any]:
-                    result = await run_tool(tool_name, dict(raw_arguments), local=True)
+                    # end_call is local; human-transfer session tools still POST.
+                    result = await run_tool(
+                        tool_name, dict(raw_arguments), local=tool_name == "end_call"
+                    )
                     hangup.set()
                     return result
                 return _session_tool

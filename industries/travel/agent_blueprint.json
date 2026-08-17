@@ -8,7 +8,7 @@
         {"name": "get_traveler_list", "handoff": false},
         {"name": "get_reservation", "handoff": false},
         {"name": "get_flight_status", "handoff": false},
-        {"name": "escalate_to_human", "handoff": false},
+        {"name": "escalate_to_human", "handoff": false, "session": true},
         {"name": "end_call", "session": true},
         {"name": "transfer_to_irrops", "handoff": true, "handoff_to": "irrops"},
         {"name": "transfer_to_ticketing", "handoff": true, "handoff_to": "ticketing"},
@@ -30,7 +30,7 @@
         {"name": "get_reservation", "handoff": false},
         {"name": "send_itinerary", "handoff": false},
         {"name": "add_reservation_note", "handoff": false},
-        {"name": "escalate_to_human", "handoff": false},
+        {"name": "escalate_to_human", "handoff": false, "session": true},
         {"name": "end_call", "session": true},
         {"name": "transfer_to_ancillaries", "handoff": true, "handoff_to": "ancillaries"}
       ]
@@ -49,7 +49,7 @@
         {"name": "get_reservation", "handoff": false},
         {"name": "send_itinerary", "handoff": false},
         {"name": "add_reservation_note", "handoff": false},
-        {"name": "escalate_to_human", "handoff": false},
+        {"name": "escalate_to_human", "handoff": false, "session": true},
         {"name": "end_call", "session": true},
         {"name": "transfer_to_ancillaries", "handoff": true, "handoff_to": "ancillaries"},
         {"name": "transfer_to_payments", "handoff": true, "handoff_to": "payments"}
@@ -66,7 +66,7 @@
         {"name": "get_reservation", "handoff": false},
         {"name": "send_itinerary", "handoff": false},
         {"name": "add_reservation_note", "handoff": false},
-        {"name": "escalate_to_human", "handoff": false},
+        {"name": "escalate_to_human", "handoff": false, "session": true},
         {"name": "end_call", "session": true},
         {"name": "transfer_to_ancillaries", "handoff": true, "handoff_to": "ancillaries"},
         {"name": "transfer_to_payments", "handoff": true, "handoff_to": "payments"}
@@ -86,7 +86,7 @@
         {"name": "get_reservation", "handoff": false},
         {"name": "send_itinerary", "handoff": false},
         {"name": "add_reservation_note", "handoff": false},
-        {"name": "escalate_to_human", "handoff": false},
+        {"name": "escalate_to_human", "handoff": false, "session": true},
         {"name": "end_call", "session": true},
         {"name": "transfer_to_payments", "handoff": true, "handoff_to": "payments"}
       ]
@@ -100,7 +100,7 @@
         {"name": "get_reservation", "handoff": false},
         {"name": "send_itinerary", "handoff": false},
         {"name": "add_reservation_note", "handoff": false},
-        {"name": "escalate_to_human", "handoff": false},
+        {"name": "escalate_to_human", "handoff": false, "session": true},
         {"name": "end_call", "session": true}
       ]
     }

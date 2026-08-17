@@ -28,6 +28,7 @@ for _root in (Path("/app"), *Path(__file__).resolve().parents):
             sys.path.insert(0, str(_runtime))
         break
 from call_id import call_session, headers as tool_headers, set_call_id  # noqa: E402
+from session_tools import hangup_tool_names as _hangup_names  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 HARNESS_DIR = Path(__file__).resolve().parent
@@ -93,6 +94,11 @@ def load_blueprint(industry_dir: str | Path) -> dict[str, Any]:
         "catalog": catalog,
         "greeting": (blueprint.get("greeting") or "").strip(),
     }
+
+
+def hangup_tool_names(bp: dict[str, Any]) -> set[str]:
+    """Human-transfer session tools: POST, then the chirp bridge hangs up."""
+    return _hangup_names(bp["agents"].values())
 
 
 def _prop(prop: dict[str, Any], *, name: str = "parameter") -> dict[str, Any]:
@@ -248,7 +254,7 @@ def _build_tools(
                     }
                 )
             continue
-        if t.get("session") or name == "end_call":
+        if name == "end_call":
             tools.append(_system_tool_end_call())
             continue
         spec = bp["catalog"].get(name)

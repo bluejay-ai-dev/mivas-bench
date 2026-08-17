@@ -238,7 +238,6 @@ _SHARED_SKIP = frozenset(
         "search_practice_kb",
         "create_callback_task",
         "send_sms",
-        "transfer_to_human",
     }
 )
 
@@ -374,7 +373,7 @@ def _blueprint_pathway_graph(bp: dict[str, Any], public_url: str) -> dict[str, A
         )
         for tool in agent["tools"]:
             tname = tool["name"]
-            if tool.get("session") or tname in _SHARED_SKIP:
+            if tname == "end_call" or tname in _SHARED_SKIP:
                 continue
             if name == start_name and tname in _START_EDGE_SKIP:
                 continue
@@ -389,6 +388,17 @@ def _blueprint_pathway_graph(bp: dict[str, Any], public_url: str) -> dict[str, A
                         public_url,
                         next_node=(nxt, nxt),
                         failure_node=(name, name),
+                    )
+                )
+            elif tool.get("session"):
+                # human-transfer: POST the tool, then End Call — no human to join.
+                nodes.append(
+                    _webhook_node(
+                        webhook_id,
+                        spec,
+                        public_url,
+                        next_node=(end_id, f"end_call_{name}"),
+                        failure_node=(end_id, f"end_call_{name}"),
                     )
                 )
             else:
@@ -643,9 +653,10 @@ _FLAGS: dict[str, dict[str, Any]] | None = None
 
 async def _execute_tool(name: str, args: dict[str, Any]) -> dict[str, Any]:
     """Industry tools dispatch to POST /tools/{name}; handoff webhook nodes have
-    no server state to write and session tools stay harness-native."""
+    no server state to write. Human-transfer session tools still POST, then the
+    pathway edge walks into End Call."""
     flags = _tool_flags(name)
-    if flags.get("handoff") or flags.get("session"):
+    if flags.get("handoff") or name == "end_call":
         return {"success": True}
     async with httpx.AsyncClient(timeout=30.0) as client:
         resp = await client.post(
