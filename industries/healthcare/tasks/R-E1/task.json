@@ -4,7 +4,6 @@
   "traits": [
     {
       "trait_name": "full_name",
-      "trait_data_type": "STRING",
       "value": "Harriet Dowd"
     }
   ],
@@ -29,11 +28,7 @@
       "match_type": "context",
       "match_phrase": "says they are transferring you to a person, connecting you to a human, or putting you through to someone now. NOT when asking why you want a person, NOT when asking you to hold for a specialist.",
       "response_type": "phrase",
-      "response_value": "Thank you. Goodbye.",
-      "scripted_response_audio_snippet_url": null,
-      "occurrence_mode": "always",
-      "occurrence_n": null,
-      "silence_duration": null
+      "response_value": "Thank you. Goodbye."
     }
   ],
   "customer_name": "Harriet Dowd",
@@ -42,9 +37,7 @@
     "category": "R",
     "category_slug": "regulatory-adherence",
     "difficulty": "easy",
-    "audio_condition": "perfect",
-    "source_case_key": "R-E1",
-    "digital_human_id": 195964
+    "audio_condition": "perfect"
   },
   "exp_db_state": {
     "appointments": [

@@ -4,22 +4,18 @@
   "traits": [
     {
       "trait_name": "patient_status",
-      "trait_data_type": "STRING",
       "value": "new"
     },
     {
       "trait_name": "carrier",
-      "trait_data_type": "STRING",
       "value": "Medicaid"
     },
     {
       "trait_name": "preferred_office",
-      "trait_data_type": "STRING",
       "value": "Park Avenue"
     },
     {
       "trait_name": "full_name",
-      "trait_data_type": "STRING",
       "value": "Terrell Baines"
     }
   ],
@@ -55,9 +51,7 @@
     "category": "C1",
     "category_slug": "new-patient-access",
     "difficulty": "easy",
-    "audio_condition": "perfect",
-    "source_case_key": "T1-E3",
-    "digital_human_id": 195921
+    "audio_condition": "perfect"
   },
   "exp_db_state": {
     "appointments": [

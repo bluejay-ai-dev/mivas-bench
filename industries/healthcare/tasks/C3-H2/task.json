@@ -4,37 +4,30 @@
   "traits": [
     {
       "trait_name": "full_name",
-      "trait_data_type": "STRING",
       "value": "Aggie Trumbull"
     },
     {
       "trait_name": "zip",
-      "trait_data_type": "STRING",
       "value": "10016"
     },
     {
       "trait_name": "mobile",
-      "trait_data_type": "STRING",
       "value": "212-555-0176"
     },
     {
       "trait_name": "patient_status",
-      "trait_data_type": "STRING",
       "value": "new"
     },
     {
       "trait_name": "date_of_birth",
-      "trait_data_type": "DATE",
       "value": "1978-05-09"
     },
     {
       "trait_name": "carrier",
-      "trait_data_type": "STRING",
       "value": "Cigna"
     },
     {
       "trait_name": "preferred_office",
-      "trait_data_type": "STRING",
       "value": "Park Avenue"
     }
   ],
@@ -117,9 +110,7 @@
     "category": "C3",
     "category_slug": "coverage-and-benefits",
     "difficulty": "hard",
-    "audio_condition": "perfect",
-    "source_case_key": "T3-H2",
-    "digital_human_id": 195944
+    "audio_condition": "perfect"
   },
   "exp_db_state": {
     "appointments": [

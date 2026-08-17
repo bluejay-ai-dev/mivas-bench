@@ -4,32 +4,26 @@
   "traits": [
     {
       "trait_name": "mobile",
-      "trait_data_type": "STRING",
       "value": "212-555-0197"
     },
     {
       "trait_name": "patient_status",
-      "trait_data_type": "STRING",
       "value": "new"
     },
     {
       "trait_name": "date_of_birth",
-      "trait_data_type": "DATE",
       "value": "1993-04-22"
     },
     {
       "trait_name": "preferred_office",
-      "trait_data_type": "STRING",
       "value": "Park Avenue"
     },
     {
       "trait_name": "full_name",
-      "trait_data_type": "STRING",
       "value": "Bernadette Kohl"
     },
     {
       "trait_name": "zip",
-      "trait_data_type": "STRING",
       "value": "10016"
     }
   ],
@@ -67,9 +61,7 @@
     "category": "C1",
     "category_slug": "new-patient-access",
     "difficulty": "medium",
-    "audio_condition": "perfect",
-    "source_case_key": "T1-M3",
-    "digital_human_id": 195924
+    "audio_condition": "perfect"
   },
   "exp_db_state": {
     "appointments": [

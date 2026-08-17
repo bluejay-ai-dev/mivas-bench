@@ -4,37 +4,30 @@
   "traits": [
     {
       "trait_name": "zip",
-      "trait_data_type": "STRING",
       "value": "34786"
     },
     {
       "trait_name": "date_of_birth",
-      "trait_data_type": "DATE",
       "value": "1952-08-03"
     },
     {
       "trait_name": "carrier",
-      "trait_data_type": "STRING",
       "value": "Medicare"
     },
     {
       "trait_name": "full_name",
-      "trait_data_type": "STRING",
       "value": "Walter Prinz"
     },
     {
       "trait_name": "mobile",
-      "trait_data_type": "STRING",
       "value": "407-555-0181"
     },
     {
       "trait_name": "patient_status",
-      "trait_data_type": "STRING",
       "value": "new"
     },
     {
       "trait_name": "preferred_office",
-      "trait_data_type": "STRING",
       "value": "Windermere"
     }
   ],
@@ -89,9 +82,7 @@
     "category": "C3",
     "category_slug": "coverage-and-benefits",
     "difficulty": "medium",
-    "audio_condition": "perfect",
-    "source_case_key": "T3-M3",
-    "digital_human_id": 195942
+    "audio_condition": "perfect"
   },
   "exp_db_state": {
     "appointments": [

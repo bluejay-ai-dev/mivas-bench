@@ -4,7 +4,6 @@
   "traits": [
     {
       "trait_name": "full_name",
-      "trait_data_type": "STRING",
       "value": "Ida Bromley"
     }
   ],
@@ -32,9 +31,7 @@
     "category": "C5",
     "category_slug": "billing-and-payments",
     "difficulty": "easy",
-    "audio_condition": "perfect",
-    "source_case_key": "T5-E2",
-    "digital_human_id": 195956
+    "audio_condition": "perfect"
   },
   "exp_db_state": {
     "appointments": [

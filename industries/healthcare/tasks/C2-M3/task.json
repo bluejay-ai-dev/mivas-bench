@@ -4,37 +4,30 @@
   "traits": [
     {
       "trait_name": "preferred_office",
-      "trait_data_type": "STRING",
       "value": "Brooklyn Heights"
     },
     {
       "trait_name": "date_of_birth",
-      "trait_data_type": "DATE",
       "value": "1985-11-03"
     },
     {
       "trait_name": "mobile",
-      "trait_data_type": "STRING",
       "value": "718-555-0122"
     },
     {
       "trait_name": "carrier",
-      "trait_data_type": "STRING",
       "value": "UnitedHealthcare"
     },
     {
       "trait_name": "zip",
-      "trait_data_type": "STRING",
       "value": "11201"
     },
     {
       "trait_name": "patient_status",
-      "trait_data_type": "STRING",
       "value": "existing"
     },
     {
       "trait_name": "full_name",
-      "trait_data_type": "STRING",
       "value": "Sam Nguyen"
     }
   ],
@@ -87,21 +80,13 @@
       "match_type": "context",
       "match_phrase": "asks for your full name and date of birth, or asks you to confirm who you are, or asks for the patient's name and date of birth. NOT when asking only for a member ID or insurance card, NOT when asking which office or location, NOT when asking for a phone or mobile number, NOT when asking about an appointment day or time, NOT when reading your name and date of birth back to you for confirmation.",
       "response_type": "phrase",
-      "response_value": "Sam Nguyen. My date of birth is November third, nineteen eighty-five.",
-      "scripted_response_audio_snippet_url": null,
-      "occurrence_mode": "always",
-      "occurrence_n": null,
-      "silence_duration": null
+      "response_value": "Sam Nguyen. My date of birth is November third, nineteen eighty-five."
     },
     {
       "match_type": "context",
       "match_phrase": "reads your name and date of birth back to you and asks whether it is correct, or asks 'did I get that right'. NOT when first asking for your name or date of birth.",
       "response_type": "phrase",
-      "response_value": "Yes, that's right.",
-      "scripted_response_audio_snippet_url": null,
-      "occurrence_mode": "always",
-      "occurrence_n": null,
-      "silence_duration": null
+      "response_value": "Yes, that's right."
     }
   ],
   "customer_name": "Sam Nguyen",
@@ -110,9 +95,7 @@
     "category": "C2",
     "category_slug": "appointment-management",
     "difficulty": "medium",
-    "audio_condition": "perfect",
-    "source_case_key": "T2-M3",
-    "digital_human_id": 195933
+    "audio_condition": "perfect"
   },
   "exp_db_state": {
     "appointments": [

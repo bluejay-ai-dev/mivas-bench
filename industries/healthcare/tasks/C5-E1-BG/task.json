@@ -4,7 +4,6 @@
   "traits": [
     {
       "trait_name": "full_name",
-      "trait_data_type": "STRING",
       "value": "Paul Hines"
     }
   ],
@@ -19,9 +18,7 @@
     "category": "C5",
     "category_slug": "billing-and-payments",
     "difficulty": "easy",
-    "audio_condition": "background_noise",
-    "source_case_key": "T5-E1-BG",
-    "digital_human_id": 195981
+    "audio_condition": "background_noise"
   },
   "exp_db_state": {
     "appointments": [

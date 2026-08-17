@@ -4,37 +4,30 @@
   "traits": [
     {
       "trait_name": "full_name",
-      "trait_data_type": "STRING",
       "value": "Ronald Mercer"
     },
     {
       "trait_name": "date_of_birth",
-      "trait_data_type": "DATE",
       "value": "1961-07-19"
     },
     {
       "trait_name": "patient_status",
-      "trait_data_type": "STRING",
       "value": "new"
     },
     {
       "trait_name": "preferred_office",
-      "trait_data_type": "STRING",
       "value": "Brooklyn Heights"
     },
     {
       "trait_name": "carrier",
-      "trait_data_type": "STRING",
       "value": "UnitedHealthcare"
     },
     {
       "trait_name": "zip",
-      "trait_data_type": "STRING",
       "value": "11201"
     },
     {
       "trait_name": "mobile",
-      "trait_data_type": "STRING",
       "value": "718-555-0191"
     }
   ],
@@ -125,9 +118,7 @@
     "category": "C1",
     "category_slug": "new-patient-access",
     "difficulty": "hard",
-    "audio_condition": "perfect",
-    "source_case_key": "T1-H1",
-    "digital_human_id": 195925
+    "audio_condition": "perfect"
   },
   "exp_db_state": {
     "appointments": [
