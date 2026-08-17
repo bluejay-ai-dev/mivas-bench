@@ -4,9 +4,8 @@ Industry tools map onto the industry state API (`TOOL_SERVER_URL`).
 Handoff tools (`handoff: true`) switch the active blueprint agent.
 Session tools (`session: true`, e.g. end_call) hang up.
 
-Multi-agent is hard isolation: one Grok Realtime WebSocket per blueprint agent,
-each with that agent's pack instructions + tools only. The CHIRP bridge keeps
-all sockets open and rewires audio to the active agent on handoff.
+Multi-agent is soft: one Grok Realtime WebSocket for the call. Handoff is
+`session.update` on that socket (target instructions + tools); history stays.
 
 Industry-agnostic: pack owns prompts/tool policy. No harness greeting strings.
 """
@@ -257,39 +256,50 @@ def infer_schedule_appointment(text: str) -> dict[str, Any] | None:
     return {"date": date}
 
 
-def session_update_for_agent(bp: dict[str, Any], agent: str) -> dict[str, Any]:
-    """Pack instructions + that agent's tools only. No harness prompt stuffing."""
+def session_update_for_agent(
+    bp: dict[str, Any], agent: str, *, mid_call: bool = False
+) -> dict[str, Any]:
+    """Pack instructions + that agent's tools only. No harness prompt stuffing.
+
+    Mid-call updates swap instructions/tools only — voice, VAD, and PCM format
+    stay from the first update so the live socket is not reset.
+    """
     if agent not in bp["agents"]:
         raise KeyError(f"unknown agent {agent!r}")
     tools = [_tool_decl(bp["catalog"][name]) for name in tool_names(bp, agent)]
-    # Telephony-friendly VAD: more prefix padding so the first syllable isn't
-    # clipped, longer silence so mid-sentence pauses don't end the turn early.
-    silence_ms = int(os.environ.get("GROK_VAD_SILENCE_MS", "700"))
-    prefix_ms = int(os.environ.get("GROK_VAD_PREFIX_MS", "400"))
-    threshold = float(os.environ.get("GROK_VAD_THRESHOLD", "0.7"))
+    session: dict[str, Any] = {
+        "instructions": with_today_context(bp["agents"][agent]["instructions"]),
+        "tools": tools,
+    }
+    if not mid_call:
+        silence_ms = int(os.environ.get("GROK_VAD_SILENCE_MS", "700"))
+        prefix_ms = int(os.environ.get("GROK_VAD_PREFIX_MS", "400"))
+        threshold = float(os.environ.get("GROK_VAD_THRESHOLD", "0.7"))
+        session.update(
+            {
+                "voice": VOICE,
+                "turn_detection": {
+                    "type": "server_vad",
+                    "threshold": threshold,
+                    "silence_duration_ms": silence_ms,
+                    "prefix_padding_ms": prefix_ms,
+                },
+                "audio": {
+                    "input": {
+                        "format": {"type": "audio/pcm", "rate": SAMPLE_RATE},
+                        "transcription": {
+                            "model": "grok-transcribe",
+                            "language_hint": "en",
+                        },
+                    },
+                    "output": {"format": {"type": "audio/pcm", "rate": SAMPLE_RATE}},
+                },
+            }
+        )
     return {
         "type": "session.update",
         "event_id": _event_id(),
-        "session": {
-            "voice": VOICE,
-            "instructions": with_today_context(bp["agents"][agent]["instructions"]),
-            "turn_detection": {
-                "type": "server_vad",
-                "threshold": threshold,
-                "silence_duration_ms": silence_ms,
-                "prefix_padding_ms": prefix_ms,
-            },
-            "audio": {
-                "input": {
-                    "format": {"type": "audio/pcm", "rate": SAMPLE_RATE},
-                    # Emit conversation.item.input_audio_transcription.* so the
-                    # bridge can log what Grok actually heard from the DH.
-                    "transcription": {"model": "grok-transcribe", "language_hint": "en"},
-                },
-                "output": {"format": {"type": "audio/pcm", "rate": SAMPLE_RATE}},
-            },
-            "tools": tools,
-        },
+        "session": session,
     }
 
 
@@ -372,53 +382,9 @@ def nudge_greeting() -> dict[str, Any]:
     return {"type": "response.create", "event_id": _event_id()}
 
 
-def _text_item(role: str, text: str) -> dict[str, Any]:
-    """conversation.item.create for a text turn (OpenAI/xAI Realtime shape)."""
-    content_type = "input_text" if role == "user" else "text"
-    return {
-        "type": "conversation.item.create",
-        "event_id": _event_id(),
-        "item": {
-            "type": "message",
-            "role": role,
-            "content": [{"type": content_type, "text": text}],
-        },
-    }
-
-
-def handoff_seed_events(
-    *,
-    user_said: str = "",
-    prior_agent_said: str = "",
-) -> list[dict[str, Any]]:
-    """Seed a cold dual-session target with prior call context (then nudge).
-
-    OpenAI soft-handoff keeps one conversation; Grok hard-isolation opens a
-    blank WS. Replaying the last user/assistant turns into the target is the
-    closest equivalent — industry-agnostic (no pack strings).
-    """
-    user = " ".join((user_said or "").split()).strip()[:500]
-    prior = " ".join((prior_agent_said or "").split()).strip()[:280]
-    events: list[dict[str, Any]] = [
-        _text_item(
-            "user",
-            "SYSTEM: Mid-call handoff. You are taking over an active call. "
-            "Continue from the conversation below — do not greet, welcome, "
-            "or ask how you can help; pick up where it left off.",
-        )
-    ]
-    if prior:
-        events.append(_text_item("assistant", prior))
-    if user:
-        events.append(_text_item("user", user))
-    else:
-        events.append(
-            _text_item(
-                "user",
-                "Please continue helping me with what I just asked. Do not greet me.",
-            )
-        )
-    return events
+def handoff_nudge_event() -> dict[str, Any]:
+    """Continue on the same socket after session.update — not a fresh greeting."""
+    return nudge_greeting()
 
 
 async def handle_function_call(
@@ -441,11 +407,13 @@ async def handle_function_call(
     return result, stop, function_call_output(call_id, result)
 
 
-async def configure_session(ws, agent: str, bp: dict[str, Any], *, timeout: float = 60.0) -> dict:
+async def configure_session(
+    ws, agent: str, bp: dict[str, Any], *, timeout: float = 60.0, mid_call: bool = False
+) -> dict:
     """Send session.update and wait for session.updated. Returns the event."""
     import asyncio
 
-    await ws.send(json.dumps(session_update_for_agent(bp, agent)))
+    await ws.send(json.dumps(session_update_for_agent(bp, agent, mid_call=mid_call)))
     while True:
         raw = await asyncio.wait_for(ws.recv(), timeout=timeout)
         if isinstance(raw, bytes):
@@ -459,7 +427,7 @@ async def configure_session(ws, agent: str, bp: dict[str, Any], *, timeout: floa
 
 
 async def run_session(industry_dir: str | Path, *, model: str = MODEL) -> None:
-    """Smoke: open one session per agent, session.update each, then close."""
+    """Smoke: one socket, session.update each agent on it, then close."""
     import asyncio
     import contextlib
 
@@ -469,18 +437,15 @@ async def run_session(industry_dir: str | Path, *, model: str = MODEL) -> None:
     name = Path(industry_path(industry_dir)).name
 
     async with traced_run(f"mivas-{name}-{model}", model=model):
-        for agent in bp["agents"]:
-            async with connect_grok(model) as grok:
-                created = json.loads(await asyncio.wait_for(grok.recv(), timeout=30))
-                print(f"{agent} {created.get('type')}", flush=True)
-                updated = await configure_session(grok, agent, bp)
+        async with connect_grok(model) as grok:
+            created = json.loads(await asyncio.wait_for(grok.recv(), timeout=30))
+            print(f"session {created.get('type')}", flush=True)
+            for i, agent in enumerate(bp["agents"]):
+                updated = await configure_session(grok, agent, bp, mid_call=i > 0)
                 n = len((updated.get("session") or {}).get("tools") or [])
-                print(
-                    f"{agent} {updated.get('type')} tools={n} ok",
-                    flush=True,
-                )
-                with contextlib.suppress(Exception):
-                    await grok.close()
+                print(f"{agent} {updated.get('type')} tools={n} ok", flush=True)
+            with contextlib.suppress(Exception):
+                await grok.close()
 
 
 def demo() -> None:
@@ -512,13 +477,10 @@ def demo() -> None:
     assert infer_schedule_appointment("Booking confirmed for March 18.") == {
         "date": f"03/18/{_dt.date.today().year}"
     }
-    seed = handoff_seed_events(
-        user_said="I'd like next Tuesday afternoon.",
-        prior_agent_said="One moment while I transfer you.",
-    )
-    assert [e["item"]["role"] for e in seed] == ["user", "assistant", "user"]
-    assert "next Tuesday" in seed[-1]["item"]["content"][0]["text"]
-    assert "Mid-call handoff" in seed[0]["item"]["content"][0]["text"]
+    assert handoff_nudge_event()["type"] == "response.create"
+    mid = session_update_for_agent(bp, start, mid_call=True)["session"]
+    assert "turn_detection" not in mid and "voice" not in mid
+    assert "instructions" in mid and "tools" in mid
     if len(bp["agents"]) > 1 and all_names - set(start_tools):
         assert set(start_tools) != all_names
     state = {"agent": start}
