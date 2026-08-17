@@ -175,6 +175,48 @@ def advertised_tool_names(functions: Any) -> set[str]:
     return names
 
 
+def advertised_tool_schemas(functions: Any) -> dict[str, dict[str, Any]]:
+    """name → input properties for each advertised Pipecat function."""
+    out: dict[str, dict[str, Any]] = {}
+    if isinstance(functions, dict):
+        for key, item in functions.items():
+            name = str(key) if key else ""
+            if isinstance(item, dict) and item.get("name"):
+                name = str(item["name"])
+            elif not isinstance(item, dict):
+                n = getattr(item, "name", None)
+                if isinstance(n, str) and n:
+                    name = n
+            if name:
+                out[name] = _function_props(item)
+        return out
+    for item in functions or []:
+        if isinstance(item, str):
+            continue
+        if isinstance(item, dict) and item.get("name"):
+            out[str(item["name"])] = _function_props(item)
+            continue
+        n = getattr(item, "name", None)
+        if isinstance(n, str) and n:
+            out[n] = _function_props(item)
+    return out
+
+
+def _function_props(item: Any) -> dict[str, Any]:
+    if isinstance(item, dict):
+        params = item.get("parameters") or item.get("inputSchema") or {}
+        if isinstance(params, dict) and "properties" in params:
+            return params.get("properties") or {}
+        return item.get("properties") or {}
+    props = getattr(item, "properties", None)
+    if isinstance(props, dict):
+        return props
+    params = getattr(item, "parameters", None)
+    if isinstance(params, dict):
+        return params.get("properties") or {}
+    return {}
+
+
 def last_user_text(messages: list[Any]) -> str:
     """Plain text of the latest user turn in an LLMContext message list."""
     for msg in reversed(messages or []):
@@ -232,31 +274,65 @@ _TRANSFER_HINTS: list[tuple[str, tuple[str, ...]]] = [
 ]
 
 
+def _schema_props(schemas: dict[str, Any] | None, name: str) -> dict[str, Any]:
+    spec = (schemas or {}).get(name) or {}
+    if not isinstance(spec, dict):
+        return {}
+    if "properties" in spec:
+        return spec.get("properties") or {}
+    params = spec.get("parameters") or spec.get("inputSchema")
+    if isinstance(params, dict):
+        return params.get("properties") or {}
+    return spec
+
+
+def _transfer_args(
+    name: str,
+    user_text: str,
+    next_intent: str | None,
+    schemas: dict[str, Any] | None,
+) -> dict[str, Any]:
+    if schemas is None:
+        if name == "transfer_to_identity" and next_intent:
+            return {"next_intent": next_intent}
+        return {}
+    props = _schema_props(schemas, name)
+    args: dict[str, Any] = {}
+    if "next_intent" in props and next_intent:
+        args["next_intent"] = next_intent
+    if "handoff_summary" in props:
+        args["handoff_summary"] = (user_text or "").strip()[:280]
+    return args
+
+
 def infer_transfer_tool(
-    user_text: str, advertised: set[str]
+    user_text: str,
+    advertised: set[str],
+    schemas: dict[str, Any] | None = None,
 ) -> dict[str, Any] | None:
     """If the caller clearly asked for a handoff the node owns, return that call.
 
     Existing-patient cancel/reschedule prefers transfer_to_identity when that
     tool is advertised (pack: identity first, next_intent=scheduling).
+    Pass `schemas` (name → properties) so legal/finance args match the catalog.
     """
     blob = (user_text or "").lower()
     if not blob or not advertised:
         return None
-    summary = user_text.strip()[:280]
     if any(w in blob for w in ("cancel", "reschedule")):
         if "transfer_to_identity" in advertised:
             return {
                 "name": "transfer_to_identity",
-                "arguments": {
-                    "handoff_summary": summary,
-                    "next_intent": "scheduling",
-                },
+                "arguments": _transfer_args(
+                    "transfer_to_identity", user_text, "scheduling", schemas
+                ),
             }
         if "transfer_to_scheduling" in advertised:
             return {
                 "name": "transfer_to_scheduling",
-                "arguments": {"handoff_summary": summary},
+                "arguments": _transfer_args(
+                    "transfer_to_scheduling", user_text, None, schemas
+                ),
             }
     if any(
         w in blob
@@ -265,15 +341,16 @@ def infer_transfer_tool(
         if "transfer_to_identity" in advertised:
             return {
                 "name": "transfer_to_identity",
-                "arguments": {
-                    "handoff_summary": summary,
-                    "next_intent": "billing",
-                },
+                "arguments": _transfer_args(
+                    "transfer_to_identity", user_text, "billing", schemas
+                ),
             }
         if "transfer_to_billing" in advertised:
             return {
                 "name": "transfer_to_billing",
-                "arguments": {"handoff_summary": summary},
+                "arguments": _transfer_args(
+                    "transfer_to_billing", user_text, None, schemas
+                ),
             }
     scored: list[tuple[int, str]] = []
     for name, needles in _TRANSFER_HINTS:
@@ -288,5 +365,8 @@ def infer_transfer_tool(
     if len(scored) > 1 and scored[0][0] == scored[1][0]:
         return None
     name = scored[0][1]
-    args: dict[str, Any] = {"handoff_summary": summary}
-    return {"name": name, "arguments": args}
+    intent = "scheduling" if name == "transfer_to_identity" else None
+    return {
+        "name": name,
+        "arguments": _transfer_args(name, user_text, intent, schemas),
+    }

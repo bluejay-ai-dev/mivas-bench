@@ -51,8 +51,8 @@
     {
       "name": "check_plan_accepted",
       "parameters": {
-        "carrier": "Medicare",
-        "location_id": "Windermere"
+        "carrier": "medicare",
+        "location_id": "loc_windermere"
       },
       "output": {
         "ok": true,
@@ -77,8 +77,7 @@
         "provider_id": "prov_patel",
         "start": "2026-08-24T09:00:00",
         "end": "2026-08-24T09:30:00",
-        "appointment_type_code": "NP_MED",
-        "description": "new patient visit"
+        "appointment_type_code": "NP_MED"
       },
       "output": {
         "ok": true,

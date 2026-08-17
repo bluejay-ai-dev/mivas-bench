@@ -22,7 +22,7 @@
     {
       "name": "quote_cosmetic_service",
       "parameters": {
-        "service": "chemical peel"
+        "service": "chemical_peel"
       },
       "output": {
         "ok": true,

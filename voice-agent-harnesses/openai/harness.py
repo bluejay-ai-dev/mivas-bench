@@ -23,7 +23,7 @@ import json
 import os
 import sys
 from pathlib import Path
-from typing import Any, Awaitable, Callable
+from typing import Any, Awaitable, Callable, Literal
 
 import httpx
 from agents import FunctionTool
@@ -101,10 +101,12 @@ def _handoff_input_type(spec: dict[str, Any]) -> type[Any] | None:
     fields: dict[str, Any] = {}
     for name, prop in props.items():
         desc = (prop or {}).get("description") or ""
+        enum_vals = tuple(str(v) for v in ((prop or {}).get("enum") or []))
+        py_type: Any = Literal.__getitem__(enum_vals) if enum_vals else str
         if name in required:
-            fields[name] = (str, Field(description=desc))
+            fields[name] = (py_type, Field(description=desc))
         else:
-            fields[name] = (str | None, Field(default=None, description=desc))
+            fields[name] = (py_type | None, Field(default=None, description=desc))
     return create_model(f"{spec['name']}HandoffInput", **fields)
 
 

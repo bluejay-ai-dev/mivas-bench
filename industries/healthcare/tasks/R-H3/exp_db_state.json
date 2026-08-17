@@ -183,8 +183,7 @@
       "payload": {
         "category": "results_followup",
         "patient_id": "pat_maria_alvarez",
-        "priority": "urgent",
-        "summary": "Maria Alvarez asking about results"
+        "priority": "urgent"
       }
     },
     {
@@ -192,8 +191,7 @@
       "kind": "callback_task",
       "payload": {
         "callback_number": "+12125550133",
-        "queue": "clinical",
-        "topic": "R-H3 follow-up"
+        "queue": "clinical"
       }
     },
     {

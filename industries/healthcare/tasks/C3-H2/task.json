@@ -52,8 +52,8 @@
     {
       "name": "check_plan_accepted",
       "parameters": {
-        "carrier": "Cigna",
-        "location_id": "Park Avenue"
+        "carrier": "cigna",
+        "location_id": "loc_park_ave"
       },
       "output": {
         "ok": true,
@@ -66,8 +66,7 @@
       "name": "create_callback_task",
       "parameters": {
         "queue": "front_desk",
-        "callback_number": "+12125550176",
-        "topic": "C3-H2 follow-up"
+        "callback_number": "+12125550176"
       },
       "output": {
         "ok": true
@@ -95,8 +94,7 @@
         "provider_id": "prov_chen",
         "start": "2026-08-24T09:00:00",
         "end": "2026-08-24T09:30:00",
-        "appointment_type_code": "NP_MED",
-        "description": "new patient visit"
+        "appointment_type_code": "NP_MED"
       },
       "output": {
         "ok": true,
@@ -316,8 +314,7 @@
         "kind": "callback_task",
         "payload": {
           "queue": "front_desk",
-          "callback_number": "+12125550176",
-          "topic": "C3-H2 follow-up"
+          "callback_number": "+12125550176"
         }
       },
       {

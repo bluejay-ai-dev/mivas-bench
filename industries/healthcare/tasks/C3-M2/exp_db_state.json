@@ -92,7 +92,7 @@
     },
     {
       "balance_cents": 12500,
-      "carrier": "Cigna",
+      "carrier": "cigna",
       "dob": "1990-04-12",
       "first_name": "Jordan",
       "home_office_id": "loc_park_ave",
@@ -172,7 +172,7 @@
       "id": 1,
       "kind": "insurance_update",
       "payload": {
-        "carrier": "Cigna",
+        "carrier": "cigna",
         "member_id": "C445566778",
         "patient_id": "pat_jordan_lee"
       }

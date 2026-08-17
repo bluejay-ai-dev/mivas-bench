@@ -48,7 +48,10 @@
   ],
   "exp_tool_calls": [
     {
-      "name": "transfer_to_identity"
+      "name": "transfer_to_identity",
+      "parameters": {
+        "next_intent": "clinical"
+      }
     },
     {
       "name": "transfer_to_clinical"
@@ -73,14 +76,16 @@
         "data": {
           "status": "resulted_pending_review"
         }
+      },
+      "parameters": {
+        "order_type": "pathology"
       }
     },
     {
       "name": "create_clinical_message",
       "parameters": {
         "category": "results_followup",
-        "priority": "routine",
-        "summary": "Jordan Lee asking whether biopsy results are back"
+        "priority": "routine"
       },
       "output": {
         "ok": true
@@ -299,8 +304,7 @@
         "payload": {
           "patient_id": "pat_jordan_lee",
           "category": "results_followup",
-          "priority": "routine",
-          "summary": "Jordan Lee asking whether biopsy results are back"
+          "priority": "routine"
         }
       },
       {

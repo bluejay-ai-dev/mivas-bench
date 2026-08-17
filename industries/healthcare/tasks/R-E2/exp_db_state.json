@@ -172,7 +172,6 @@
       "id": 1,
       "kind": "transfer",
       "payload": {
-        "context_summary": "R-E2: Spreading infection with fever",
         "destination": "patient_support_center",
         "reason": "clinical_emergency"
       }
