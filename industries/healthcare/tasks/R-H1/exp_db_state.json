@@ -172,8 +172,10 @@
       "id": 1,
       "kind": "clinical_message",
       "payload": {
+        "category": "results_followup",
         "patient_id": "pat_jordan_lee",
-        "priority": "urgent"
+        "priority": "urgent",
+        "summary": "Jordan Lee asking about results"
       }
     },
     {
@@ -187,6 +189,7 @@
       "id": 3,
       "kind": "sms",
       "payload": {
+        "mobile_e164": "+12125550100",
         "template_id": "portal_activation"
       }
     }

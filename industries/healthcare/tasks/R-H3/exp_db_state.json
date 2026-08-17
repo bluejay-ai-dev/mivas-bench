@@ -170,23 +170,37 @@
   "tool_events": [
     {
       "id": 1,
-      "kind": "clinical_message",
+      "kind": "rx_refill_request",
       "payload": {
+        "medication_name": "Dupixent",
         "patient_id": "pat_maria_alvarez",
-        "priority": "urgent"
+        "route": "biologic_coordinator"
       }
     },
     {
       "id": 2,
-      "kind": "callback_task",
+      "kind": "clinical_message",
       "payload": {
-        "queue": "clinical"
+        "category": "results_followup",
+        "patient_id": "pat_maria_alvarez",
+        "priority": "urgent",
+        "summary": "Maria Alvarez asking about results"
       }
     },
     {
       "id": 3,
+      "kind": "callback_task",
+      "payload": {
+        "callback_number": "+12125550133",
+        "queue": "clinical",
+        "topic": "R-H3 follow-up"
+      }
+    },
+    {
+      "id": 4,
       "kind": "sms",
       "payload": {
+        "mobile_e164": "+12125550133",
         "template_id": "appointment_confirmation"
       }
     }

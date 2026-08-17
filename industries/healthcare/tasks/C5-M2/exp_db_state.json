@@ -171,7 +171,10 @@
     {
       "id": 1,
       "kind": "fee_waiver_request",
-      "payload": {}
+      "payload": {
+        "fee_line_item_id": "li_noshow",
+        "stated_reason": "called to cancel and nobody picked up"
+      }
     }
   ],
   "waitlist": []

@@ -32,6 +32,17 @@
       "provider_id": "prov_patel",
       "start": "2026-09-15T09:00:00",
       "status": "booked"
+    },
+    {
+      "appointment_type_code": "NP_MED",
+      "description": "new patient visit",
+      "end": "2026-08-24T09:30:00",
+      "id": 4,
+      "location_id": "loc_park_ave",
+      "patient_id": null,
+      "provider_id": "prov_chen",
+      "start": "2026-08-24T09:00:00",
+      "status": "booked"
     }
   ],
   "locations": [
@@ -172,13 +183,16 @@
       "id": 1,
       "kind": "callback_task",
       "payload": {
-        "queue": "front_desk"
+        "callback_number": "+12125550176",
+        "queue": "front_desk",
+        "topic": "C3-H2 follow-up"
       }
     },
     {
       "id": 2,
       "kind": "sms",
       "payload": {
+        "mobile_e164": "+12125550176",
         "template_id": "directions"
       }
     }

@@ -171,7 +171,9 @@
     {
       "id": 1,
       "kind": "payment_link",
-      "payload": {}
+      "payload": {
+        "mobile_e164": "+12125550133"
+      }
     }
   ],
   "waitlist": []
