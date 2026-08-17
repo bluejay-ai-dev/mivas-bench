@@ -21,6 +21,9 @@
   ],
   "exp_tool_calls": [
     {
+      "name": "transfer_to_coverage"
+    },
+    {
       "name": "check_plan_accepted",
       "parameters": {
         "carrier": "UnitedHealthcare",
@@ -32,9 +35,6 @@
           "accepted": true
         }
       }
-    },
-    {
-      "name": "transfer_to_coverage"
     }
   ],
   "behaviors": {},

@@ -16,12 +16,15 @@
     }
   ],
   "prompt_adherence_substrs": [
-    "We don't accept Medicaid"
+    "We don't accept Medicaid at any of our offices"
   ],
   "exp_handoff_path": [
     "transfer_to_coverage"
   ],
   "exp_tool_calls": [
+    {
+      "name": "transfer_to_coverage"
+    },
     {
       "name": "check_plan_accepted",
       "parameters": {
@@ -31,12 +34,10 @@
       "output": {
         "ok": true,
         "data": {
-          "accepted": false
+          "accepted": false,
+          "required_script": "We don't accept Medicaid at any of our offices. I can go over self-pay pricing or have someone call you about options."
         }
       }
-    },
-    {
-      "name": "transfer_to_coverage"
     }
   ],
   "behaviors": {},

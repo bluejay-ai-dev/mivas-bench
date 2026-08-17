@@ -43,6 +43,12 @@
   ],
   "exp_tool_calls": [
     {
+      "name": "transfer_to_identity"
+    },
+    {
+      "name": "transfer_to_scheduling"
+    },
+    {
       "name": "verify_identity",
       "parameters": {
         "dob": "2016-03-22",
@@ -87,12 +93,6 @@
           "sent": true
         }
       }
-    },
-    {
-      "name": "transfer_to_identity"
-    },
-    {
-      "name": "transfer_to_scheduling"
     }
   ],
   "behaviors": {},

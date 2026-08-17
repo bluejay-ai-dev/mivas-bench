@@ -17,6 +17,9 @@
   ],
   "exp_tool_calls": [
     {
+      "name": "transfer_to_cosmetic"
+    },
+    {
       "name": "quote_cosmetic_service",
       "parameters": {
         "service": "chemical peel"
@@ -28,9 +31,6 @@
           "range_high": 400
         }
       }
-    },
-    {
-      "name": "transfer_to_cosmetic"
     }
   ],
   "behaviors": {},

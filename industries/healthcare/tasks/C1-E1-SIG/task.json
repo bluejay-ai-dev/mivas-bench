@@ -29,6 +29,9 @@
   ],
   "exp_tool_calls": [
     {
+      "name": "transfer_to_coverage"
+    },
+    {
       "name": "check_plan_accepted",
       "parameters": {
         "carrier": "Aetna",
@@ -41,9 +44,6 @@
           "must_not_assert": false
         }
       }
-    },
-    {
-      "name": "transfer_to_coverage"
     }
   ],
   "behaviors": {},

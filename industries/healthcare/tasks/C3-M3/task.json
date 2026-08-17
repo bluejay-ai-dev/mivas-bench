@@ -43,6 +43,12 @@
   ],
   "exp_tool_calls": [
     {
+      "name": "transfer_to_coverage"
+    },
+    {
+      "name": "transfer_to_scheduling"
+    },
+    {
       "name": "check_plan_accepted",
       "parameters": {
         "carrier": "Medicare",
@@ -80,12 +86,6 @@
           "status": "booked"
         }
       }
-    },
-    {
-      "name": "transfer_to_coverage"
-    },
-    {
-      "name": "transfer_to_scheduling"
     }
   ],
   "behaviors": {},

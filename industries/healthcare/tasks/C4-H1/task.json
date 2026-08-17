@@ -39,6 +39,9 @@
   ],
   "exp_tool_calls": [
     {
+      "name": "transfer_to_cosmetic"
+    },
+    {
       "name": "quote_cosmetic_service",
       "parameters": {
         "service": "botox"
@@ -102,9 +105,6 @@
           "sent": true
         }
       }
-    },
-    {
-      "name": "transfer_to_cosmetic"
     }
   ],
   "behaviors": {},
