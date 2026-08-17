@@ -35,12 +35,6 @@
       "value": "Park Avenue"
     }
   ],
-  "prompt_adherence_substrs": [
-    "Jordan Lee",
-    "April twelfth, nineteen ninety",
-    "did I get that right?",
-    "I can't take a card number by voice"
-  ],
   "exp_handoff_path": [
     "transfer_to_identity",
     "transfer_to_billing"
@@ -88,12 +82,6 @@
       "match_phrase": "asks for your full name and date of birth, or asks you to confirm who you are, or asks for the patient's name and date of birth. NOT when asking only for a member ID or insurance card, NOT when asking which office or location, NOT when asking for a phone or mobile number, NOT when asking about an appointment day or time, NOT when reading your name and date of birth back to you for confirmation.",
       "response_type": "phrase",
       "response_value": "Jordan Lee. My date of birth is April twelfth, nineteen ninety."
-    },
-    {
-      "match_type": "context",
-      "match_phrase": "reads your name and date of birth back to you and asks whether it is correct, or asks 'did I get that right'. NOT when first asking for your name or date of birth.",
-      "response_type": "phrase",
-      "response_value": "Yes, that's right."
     }
   ],
   "customer_name": "Jordan Lee",

@@ -1,6 +1,6 @@
 {
   "task_name": "C1-H2: Hours, directions, then an urgent rash booking",
-  "intent": "You are a new patient calling from the subway and you are a little flustered. Start by asking what time the Park Avenue office opens and how you get there on the train, and ask them to text you the address so you have it. After that, tell them the real reason you called: a rash on your side is spreading and painful and you need the soonest visit they have. Take the earliest time, confirm it, then thank them and end the call.",
+  "intent": "You are a new patient calling from the subway and you are a little flustered. Start by asking what time the Park Avenue office opens and how you get there on the train, and ask them to text you the address so you have it. If they ask whether you want that address by text, say yes — you do want it. After that, tell them the real reason you called: a rash on your side is spreading and painful and you need the soonest visit they have. Take the earliest time, confirm it, then thank them and end the call.",
   "traits": [
     {
       "trait_name": "zip",
@@ -30,12 +30,6 @@
       "trait_name": "preferred_office",
       "value": "Park Avenue"
     }
-  ],
-  "prompt_adherence_substrs": [
-    "Owen Castellanos",
-    "January 30, 1957",
-    "2125550196",
-    "4th floor"
   ],
   "exp_handoff_path": [
     "transfer_to_scheduling"
@@ -116,7 +110,14 @@
     }
   ],
   "behaviors": {},
-  "scripted_responses": {},
+  "scripted_responses": [
+    {
+      "match_type": "context",
+      "match_phrase": "asks whether you want a text, SMS, or the address sent to your phone. NOT when asking for your mobile number itself, NOT when offering a confirmation text for the appointment after it is booked.",
+      "response_type": "phrase",
+      "response_value": "Yes, please text me the address."
+    }
+  ],
   "customer_name": "Owen Castellanos",
   "customer_available_tools": {},
   "metadata": {

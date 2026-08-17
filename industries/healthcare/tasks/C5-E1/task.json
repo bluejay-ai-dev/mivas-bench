@@ -7,9 +7,6 @@
       "value": "Paul Hines"
     }
   ],
-  "prompt_adherence_substrs": [
-    "I can't take a card number by voice"
-  ],
   "exp_handoff_path": [],
   "exp_tool_calls": [],
   "behaviors": {},

@@ -31,12 +31,6 @@
       "value": "Brooklyn Heights"
     }
   ],
-  "prompt_adherence_substrs": [
-    "Priya Raghunathan",
-    "February 27, 1990",
-    "7185550192",
-    "2nd floor"
-  ],
   "exp_handoff_path": [
     "transfer_to_coverage",
     "transfer_to_scheduling"

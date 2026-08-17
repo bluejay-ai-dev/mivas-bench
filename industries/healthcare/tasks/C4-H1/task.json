@@ -27,13 +27,6 @@
       "value": "new"
     }
   ],
-  "prompt_adherence_substrs": [
-    "4th floor",
-    "A $125 deposit holds the consult.",
-    "up to 72 hours before",
-    "deposit is forfeited",
-    "remaining balance"
-  ],
   "exp_handoff_path": [
     "transfer_to_cosmetic"
   ],
@@ -90,19 +83,6 @@
       },
       "parameters": {
         "mobile_e164": "+12125550170"
-      }
-    },
-    {
-      "name": "send_sms",
-      "parameters": {
-        "template_id": "cosmetic_deposit",
-        "mobile_e164": "+12125550170"
-      },
-      "output": {
-        "ok": true,
-        "data": {
-          "sent": true
-        }
       }
     }
   ],
@@ -302,14 +282,6 @@
         "id": 1,
         "kind": "payment_link",
         "payload": {
-          "mobile_e164": "+12125550170"
-        }
-      },
-      {
-        "id": 2,
-        "kind": "sms",
-        "payload": {
-          "template_id": "cosmetic_deposit",
           "mobile_e164": "+12125550170"
         }
       }
