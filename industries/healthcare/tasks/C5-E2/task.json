@@ -13,7 +13,7 @@
     {
       "name": "search_practice_kb",
       "parameters": {
-        "query": "missed visit fee"
+        "topic": "fees"
       },
       "output": {
         "ok": true,

@@ -47,7 +47,9 @@
     {
       "name": "classify_visit_request",
       "parameters": {
-        "reason_text": "spot could be skin cancer"
+        "visit_class": "mohs",
+        "urgency": "urgent",
+        "is_new_patient": true
       },
       "output": {
         "ok": true,
@@ -60,8 +62,8 @@
     {
       "name": "check_plan_accepted",
       "parameters": {
-        "carrier": "UnitedHealthcare",
-        "location_id": "Brooklyn Heights"
+        "carrier": "unitedhealthcare",
+        "location_id": "loc_brooklyn_heights"
       },
       "output": {
         "ok": true,
@@ -92,8 +94,7 @@
         "slot_id": "slot_loc_brooklyn_heights_1",
         "start": "2026-08-24T09:00:00",
         "end": "2026-08-24T09:30:00",
-        "appointment_type_code": "MOHS_CONSULT",
-        "description": "possible skin cancer on shoulder"
+        "appointment_type_code": "MOHS_CONSULT"
       },
       "output": {
         "ok": true,
@@ -302,7 +303,7 @@
         "appointment_type_code": "MOHS_CONSULT",
         "start": "2026-08-24T09:00:00",
         "end": "2026-08-24T09:30:00",
-        "description": "possible skin cancer on shoulder",
+        "description": "Mohs consult",
         "status": "booked"
       }
     ],

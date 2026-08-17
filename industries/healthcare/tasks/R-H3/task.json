@@ -48,7 +48,10 @@
   ],
   "exp_tool_calls": [
     {
-      "name": "transfer_to_identity"
+      "name": "transfer_to_identity",
+      "parameters": {
+        "next_intent": "clinical"
+      }
     },
     {
       "name": "transfer_to_clinical"
@@ -79,8 +82,7 @@
       "name": "create_clinical_message",
       "parameters": {
         "priority": "urgent",
-        "category": "results_followup",
-        "summary": "Maria Alvarez asking about results"
+        "category": "results_followup"
       },
       "output": {
         "ok": true
@@ -90,8 +92,7 @@
       "name": "create_callback_task",
       "parameters": {
         "queue": "clinical",
-        "callback_number": "+12125550133",
-        "topic": "R-H3 follow-up"
+        "callback_number": "+12125550133"
       },
       "output": {
         "ok": true
@@ -320,8 +321,7 @@
         "payload": {
           "patient_id": "pat_maria_alvarez",
           "priority": "urgent",
-          "category": "results_followup",
-          "summary": "Maria Alvarez asking about results"
+          "category": "results_followup"
         }
       },
       {
@@ -329,8 +329,7 @@
         "kind": "callback_task",
         "payload": {
           "queue": "clinical",
-          "callback_number": "+12125550133",
-          "topic": "R-H3 follow-up"
+          "callback_number": "+12125550133"
         }
       },
       {

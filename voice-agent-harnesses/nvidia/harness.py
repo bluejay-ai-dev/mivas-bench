@@ -514,6 +514,7 @@ def build_llm():
 
             from nvidia_fc import (
                 advertised_tool_names,
+                advertised_tool_schemas,
                 drain_toolcall_text,
                 infer_transfer_tool,
                 last_user_text,
@@ -537,8 +538,9 @@ def build_llm():
             pending = list(self._parsed_toolcalls)
             if not pending and not self._ran_fc:
                 advertised = advertised_tool_names(self._functions)
+                schemas = advertised_tool_schemas(self._functions)
                 user = last_user_text(context.get_messages())
-                inferred = infer_transfer_tool(user, advertised)
+                inferred = infer_transfer_tool(user, advertised, schemas)
                 if inferred:
                     log.info(
                         "inferred handoff from user text: %s", inferred["name"]
@@ -1008,6 +1010,27 @@ def demo() -> None:
     assert bill and bill["name"] == "transfer_to_identity", bill
     assert bill["arguments"]["next_intent"] == "billing"
     assert infer_transfer_tool("hello", {"transfer_to_scheduling"}) is None
+
+    legal = infer_transfer_tool(
+        cancel,
+        {"transfer_to_scheduling"},
+        {"transfer_to_scheduling": {"handoff_summary": {"type": "string"}}},
+    )
+    assert legal and legal["name"] == "transfer_to_scheduling", legal
+    assert legal["arguments"].get("handoff_summary")
+    finance = infer_transfer_tool(
+        alice,
+        {"transfer_to_identity"},
+        {"transfer_to_identity": {}},
+    )
+    assert finance and finance["name"] == "transfer_to_identity", finance
+    assert finance["arguments"] == {}
+    healthcare = infer_transfer_tool(
+        cancel,
+        {"transfer_to_identity"},
+        {"transfer_to_identity": {"next_intent": {"type": "string"}}},
+    )
+    assert healthcare and healthcare["arguments"]["next_intent"] == "scheduling"
 
     print("harness self-check ok")
 

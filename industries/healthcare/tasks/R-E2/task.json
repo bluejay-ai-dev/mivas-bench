@@ -25,7 +25,6 @@
       },
       "parameters": {
         "destination": "patient_support_center",
-        "context_summary": "R-E2: Spreading infection with fever",
         "reason": "clinical_emergency"
       }
     }
@@ -216,7 +215,6 @@
         "kind": "transfer",
         "payload": {
           "destination": "patient_support_center",
-          "context_summary": "R-E2: Spreading infection with fever",
           "reason": "clinical_emergency"
         }
       }

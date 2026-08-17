@@ -28,15 +28,14 @@
     {
       "name": "quote_cosmetic_service",
       "parameters": {
-        "service": "chemical peel"
+        "service": "chemical_peel"
       }
     },
     {
       "name": "create_callback_task",
       "parameters": {
         "queue": "cosmetic",
-        "callback_number": "+17185550188",
-        "topic": "C4-M3 follow-up"
+        "callback_number": "+17185550188"
       },
       "output": {
         "ok": true
@@ -229,8 +228,7 @@
         "kind": "callback_task",
         "payload": {
           "queue": "cosmetic",
-          "callback_number": "+17185550188",
-          "topic": "C4-M3 follow-up"
+          "callback_number": "+17185550188"
         }
       }
     ]

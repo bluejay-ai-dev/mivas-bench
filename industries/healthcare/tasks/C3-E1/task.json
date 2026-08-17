@@ -26,8 +26,8 @@
     {
       "name": "check_plan_accepted",
       "parameters": {
-        "carrier": "UnitedHealthcare",
-        "location_id": "Brooklyn Heights"
+        "carrier": "unitedhealthcare",
+        "location_id": "loc_brooklyn_heights"
       },
       "output": {
         "ok": true,
