@@ -135,6 +135,11 @@ def test_success_criteria_from_tools() -> None:
     assert three.startswith("Success requires")
 
 
+def test_healthcare_creativity_is_zero() -> None:
+    for dh in _humans():
+        assert dh["creativity"] == 0, conv.case_key_of(dh)
+
+
 def test_claim_updates_include_expected_tool_calls() -> None:
     want = _humans()[0]
     live = [{
@@ -152,6 +157,7 @@ def test_claim_updates_include_expected_tool_calls() -> None:
     assert patch["test_name"] == want["test_name"]
     assert patch["traits"] == want["traits"]
     assert "scripted_responses" in patch
+    assert patch["creativity"] == 0
     pinless = {**want}
     pinless.pop("scripted_responses", None)
     cleared = conv.claim_updates([pinless], live)
@@ -268,6 +274,13 @@ def test_encoder_drops_courtesy_send_sms() -> None:
     assert enc.drop_unneeded_send_sms(faq) == []
 
 
+def test_encoder_stamps_creativity_zero() -> None:
+    enc = _encoder()
+    assert enc.behaviors({}) == {"creativity": 0}
+    assert enc.behaviors({"behaviors": {"creativity": 0.15}}) == {"creativity": 0}
+    assert enc.behaviors({"creativity": 0.15, "behaviors": {}}) == {"creativity": 0}
+
+
 def test_healthcare_send_sms_only_when_caller_wants_text() -> None:
     import json
 
@@ -282,5 +295,93 @@ def test_healthcare_send_sms_only_when_caller_wants_text() -> None:
         assert enc.caller_requests_sms(task), path.parent.name
         for call in task["exp_tool_calls"]:
             assert enc.keep_send_sms_call(task, call, names)
-    assert keep == ["C1-H2", "C3-H2"]
+def test_encoder_omits_waitlist_latest_and_location_zip() -> None:
+    enc = _encoder()
+    waitlisted = enc.complete_call(
+        {"name": "join_waitlist", "parameters": {}},
+        {
+            "intent": "cancel then waitlist from August twenty-fourth through September thirtieth",
+            "customer_name": "Jordan Lee",
+            "traits": [
+                {"trait_name": "full_name", "value": "Jordan Lee"},
+                {"trait_name": "preferred_office", "value": "Park Avenue"},
+            ],
+        },
+        "C2-H1",
+        [],
+    )
+    params = waitlisted.get("parameters") or {}
+    assert "latest" not in params
+    assert params.get("earliest") == "2026-08-24T00:00:00"
+    replayed = enc.replay_arguments(waitlisted)
+    assert replayed["parameters"]["latest"] == enc.JOIN_WAITLIST_REPLAY_LATEST
+
+    listed = enc.complete_call(
+        {"name": "list_locations", "parameters": {"zip": "10016"}},
+        {
+            "intent": "Ask for the Park Avenue street, floor, and suite. Do not volunteer a ZIP.",
+            "customer_name": "Owen Castellanos",
+            "traits": [{"trait_name": "zip", "value": "10016"}],
+        },
+        "C1-H2",
+        [],
+    )
+    assert (listed.get("parameters") or {}).get("zip") is None
+
+    financed = enc.complete_call(
+        {"name": "offer_financing", "parameters": {"amount_cents": 60000}},
+        {"intent": "spread the cost out", "customer_name": "Lorraine Hobbs", "traits": []},
+        "C4-M2",
+        [],
+    )
+    assert "amount_cents" not in (financed.get("parameters") or {})
+
+
+def test_healthcare_leftover_holes_are_closed() -> None:
+    import json
+
+    tasks = ROOT / "industries" / "healthcare" / "tasks"
+
+    c2h1 = json.loads((tasks / "C2-H1" / "task.json").read_text())
+    wait = next(c for c in c2h1["exp_tool_calls"] if c["name"] == "join_waitlist")
+    assert "latest" not in (wait.get("parameters") or {})
+    assert "23:59:59" not in json.dumps(wait)
+
+    c1h2 = json.loads((tasks / "C1-H2" / "task.json").read_text())
+    loc = next(c for c in c1h2["exp_tool_calls"] if c["name"] == "list_locations")
+    assert "zip" not in (loc.get("parameters") or {})
+
+    for key in ("C4-M1", "C4-M2"):
+        task = json.loads((tasks / key / "task.json").read_text())
+        pins = task.get("scripted_responses") or []
+        assert isinstance(pins, list) and pins, key
+        loc = next(c for c in task["exp_tool_calls"] if c["name"] == "list_locations")
+        assert (loc.get("parameters") or {}) in ({}, None) or "zip" not in loc.get("parameters", {})
+
+    c4m2 = json.loads((tasks / "C4-M2" / "task.json").read_text())
+    names = [c["name"] for c in c4m2["exp_tool_calls"]]
+    assert "offer_financing" not in names
+    assert "find_slots" in names
+    pin_text = " ".join(p.get("response_value") or "" for p in c4m2["scripted_responses"])
+    assert "calendar" in pin_text.lower() or "booked" in pin_text.lower()
+
+    c5h3 = json.loads((tasks / "C5-H3" / "task.json").read_text())
+    explains = [c for c in c5h3["exp_tool_calls"] if c["name"] == "explain_charge"]
+    assert len(explains) == 2
+    premature = [
+        p for p in c5h3["scripted_responses"]
+        if "I'll pay the full balance now" in (p.get("response_value") or "")
+        and "any line" in (p.get("match_phrase") or "")
+    ]
+    assert not premature
+
+    c2h3 = json.loads((tasks / "C2-H3" / "task.json").read_text())
+    assert "join_waitlist" not in [c["name"] for c in c2h3["exp_tool_calls"]]
+    assert (c2h3.get("exp_db_state") or {}).get("waitlist") == []
+    sibling = json.loads((tasks / "C2-H3" / "exp_db_state.json").read_text())
+    assert sibling.get("waitlist") == []
+
+    c3m2 = json.loads((tasks / "C3-M2" / "task.json").read_text())
+    captured = next(c for c in c3m2["exp_tool_calls"] if c["name"] == "capture_insurance_update")
+    assert "group_number" not in (captured.get("parameters") or {})
 

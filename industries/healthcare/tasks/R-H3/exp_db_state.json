@@ -181,17 +181,9 @@
       "id": 2,
       "kind": "clinical_message",
       "payload": {
-        "category": "results_followup",
+        "category": "rx_question",
         "patient_id": "pat_maria_alvarez",
         "priority": "urgent"
-      }
-    },
-    {
-      "id": 3,
-      "kind": "callback_task",
-      "payload": {
-        "callback_number": "+12125550133",
-        "queue": "clinical"
       }
     }
   ],
