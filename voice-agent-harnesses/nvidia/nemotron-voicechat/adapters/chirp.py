@@ -30,7 +30,7 @@ from websockets.asyncio.server import serve
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from harness import industry_path, load_blueprint, set_call_id  # noqa: E402
-from report import end_speech_span, start_speech_span, traced_run  # noqa: E402
+from report import RealtimeSpanTracer, traced_run  # noqa: E402
 from voicechat import (  # noqa: E402
     MODEL,
     SAMPLE_RATE,
@@ -108,16 +108,18 @@ def _eid() -> str:
 
 
 class _Turns:
-    """Exclusive agent.speech / customer.speech under voice.call."""
+    """CHIRP speech.* framing to Bluejay + agent-text buffering + hang timers.
+
+    Trace spans live on the RealtimeSpanTracer (realtime_session → turn → model);
+    this only owns the audio turn-taking sent to Bluejay over the CHIRP socket.
+    """
 
     def __init__(self, ws, root) -> None:
         self.ws = ws
         self.root = root
         self.agent_utt: str | None = None
-        self.agent_span = None
         self.agent_text: list[str] = []
         self.customer_utt: str | None = None
-        self.customer_span = None
         self._customer_hang: asyncio.Task | None = None
         self._agent_hang: asyncio.Task | None = None
 
@@ -141,9 +143,6 @@ class _Turns:
         await self.end_customer(why=f"agent_start:{why}")
         self.agent_utt = f"u_{uuid.uuid4().hex[:12]}"
         prior = "".join(self.agent_text).strip()
-        self.agent_span = start_speech_span(
-            self.agent_utt, speaker="agent", parent=self.root
-        )
         await self.ws.send(_event("speech.started", {"utterance_id": self.agent_utt}))
         _log(f"agent.speech START utt={self.agent_utt} why={why} prior={_clip(prior, 60)!r}")
 
@@ -169,14 +168,9 @@ class _Turns:
             return
         text = "".join(self.agent_text).strip()
         utt = self.agent_utt
-        if text and self.agent_span is not None:
-            with contextlib.suppress(Exception):
-                self.agent_span.set_attribute("mivas.transcript", text[:500])
         with contextlib.suppress(Exception):
             await self.ws.send(_event("speech.completed", {"utterance_id": utt}))
-        end_speech_span(self.agent_span)
         self.agent_utt = None
-        self.agent_span = None
         self.agent_text = []
         _log(f"agent.speech END utt={utt} why={why} text={_clip(text)!r}")
 
@@ -192,7 +186,6 @@ class _Turns:
             _log(f"customer.speech COALESCE keep={self.customer_utt} new={uid}")
             return
         self.customer_utt = uid
-        self.customer_span = start_speech_span(uid, speaker="customer", parent=self.root)
         _log(f"customer.speech START utt={uid} why={why}")
 
     async def note_customer_completed(self, *, why: str = "") -> None:
@@ -214,9 +207,7 @@ class _Turns:
         if self.customer_utt is None:
             return
         utt = self.customer_utt
-        end_speech_span(self.customer_span)
         self.customer_utt = None
-        self.customer_span = None
         _log(f"customer.speech END utt={utt} why={why}")
 
     async def close(self) -> None:
@@ -287,12 +278,17 @@ async def _bridge(ws, industry: str) -> None:
     vc = None
     try:
         async with traced_run(
-            workflow, simulation_result_id=sim_id, model=MODEL
+            workflow,
+            simulation_result_id=sim_id,
+            model=MODEL,
+            root_name="realtime_session",
+            operation="realtime_session",
         ) as otel_root:
             state["_otel_root"] = otel_root
             vc = await cm.__aenter__()
             await _configure_session(vc, bp["start"], bp)
             turns = _Turns(ws, otel_root)
+            tracer = RealtimeSpanTracer(otel_root, model=MODEL)
 
             ctl = {
                 "last_user_loud": 0.0,
@@ -637,6 +633,7 @@ async def _bridge(ws, industry: str) -> None:
                             ctl["customer_speaking"] = True
                             uid = data.get("utterance_id") or f"c_{uuid.uuid4().hex[:12]}"
                             _log(f"CHIRP speech.started uid={uid}")
+                            tracer.on_user_speech()
                             ctl["awaiting_agent"] = True
                             if turns.agent_utt is not None:
                                 await turns.end_agent(why="barge_in:user")
@@ -702,6 +699,7 @@ async def _bridge(ws, industry: str) -> None:
                             b64 = event.get("delta") or ""
                             if not b64:
                                 continue
+                            tracer.mark_first_output()  # first agent audio → TTFT
                             pcm24 = base64.b64decode(b64)
                             pcm16, down = audioop.ratecv(
                                 pcm24, W, 1, R_VC, R_CHIRP, down
@@ -753,6 +751,7 @@ async def _bridge(ws, industry: str) -> None:
                             )
                             loud_ms = 0.0
                             if etype == "response.done":
+                                tracer.end_model(event)
                                 await turns.note_agent_quiet(why="response.done")
                                 ctl["awaiting_agent"] = False
                             blob = turn_spoken.strip()
@@ -768,6 +767,7 @@ async def _bridge(ws, industry: str) -> None:
                             delta = event.get("delta") or ""
                             if not delta:
                                 continue
+                            tracer.mark_first_output()
                             saw_audio_transcript = True
                             text_buf += delta
                             _note(delta)
@@ -800,6 +800,7 @@ async def _bridge(ws, industry: str) -> None:
                         elif etype == "response.output_audio_transcript.done":
                             tr = (event.get("transcript") or "").strip()
                             _log(f"transcript.done={_clip(tr)!r}")
+                            tracer.set_output(tr)
                             if tr and tr not in spoken:
                                 pad = " " + tr
                                 spoken = (spoken + pad).strip()
@@ -824,8 +825,12 @@ async def _bridge(ws, industry: str) -> None:
                             if not _agent_echo_risk():
                                 ctl["customer_speaking"] = True
                                 ctl["last_user_loud"] = time.monotonic()
+                                tracer.on_user_speech()
                                 if turns.agent_utt is not None:
                                     await turns.end_agent(why="barge_in:nvcf")
+                        elif etype == "response.created":
+                            tracer.start_model(event)
+                            _log(f"event={etype}")
                         elif etype == "error":
                             _log(f"ERROR {event}")
                         elif etype == "session.end":
@@ -833,7 +838,6 @@ async def _bridge(ws, industry: str) -> None:
                             end.set()
                             break
                         elif etype in {
-                            "response.created",
                             "conversation.item.created",
                             "input_audio_buffer.speech_stopped",
                         }:
@@ -852,6 +856,7 @@ async def _bridge(ws, industry: str) -> None:
             )
             end.set()
             await turns.close()
+            tracer.close()
             pump.cancel()
             for t in pending:
                 t.cancel()

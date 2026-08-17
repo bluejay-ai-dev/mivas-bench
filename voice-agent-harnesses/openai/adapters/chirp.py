@@ -1,8 +1,9 @@
 """CHIRP (16 kHz pcm_s16le) ↔ OpenAI Realtime (24 kHz).
 
 Tracing: Realtime session events are proxied through ``report.RealtimeEventTracer``
-into a Bluejay OTel ``voice.call`` tree (turns, transcripts, tools, handoffs).
-CHIRP inbound ``speech.*`` frames open ``customer.speech`` spans.
+into a LangSmith-shaped Bluejay OTel ``realtime_session`` → ``turn`` tree
+(user_message / model / tools). Turn boundaries come from OpenAI's own events, so
+CHIRP ``speech.*`` frames are not traced here.
 """
 
 from __future__ import annotations
@@ -88,7 +89,7 @@ async def _bridge(ws, model: str, industry: str) -> None:
     sim_id = _simulation_result_id(ws)
     resolved = set_call_id(sim_id)
     log_ws_accept(resolved)
-    async with traced_run(workflow, simulation_result_id=sim_id) as tracer:
+    async with traced_run(workflow, simulation_result_id=sim_id, model=model) as tracer:
         ctx: dict = {}
         up = down = None
         utt: str | None = None
@@ -132,24 +133,9 @@ async def _bridge(ws, model: str, industry: str) -> None:
                                     break
                                 raise
                             continue
-                        if not isinstance(msg, str):
-                            continue
-                        try:
-                            event = json.loads(msg)
-                        except json.JSONDecodeError:
-                            continue
-                        etype = event.get("type")
-                        data = event.get("data") or {}
-                        if tracer is None:
-                            continue
-                        if etype == "speech.started":
-                            uid = data.get("utterance_id") or f"c_{uuid.uuid4().hex[:12]}"
-                            tracer.start_customer_speech(uid)
-                        elif etype == "speech.completed":
-                            tracer.end_customer_speech()
+                        # CHIRP speech.* frames no longer drive tracing; turn spans
+                        # come from OpenAI's input_audio_buffer.speech_started.
                 finally:
-                    if tracer is not None:
-                        tracer.end_customer_speech()
                     if not getattr(session, "_closed", False):
                         asyncio.create_task(session.close())
 

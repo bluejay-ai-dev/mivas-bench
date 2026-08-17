@@ -12,7 +12,7 @@ Shared builder: `harness.py`. Tracing/reporting: `report.py`.
 - Industry tools → industry state API (`TOOL_SERVER_URL`)
 - Session tools (`session: true`, e.g. `end_call`) → harness-local + close realtime session
 - Handoffs → Realtime handoffs
-- Tracing → Realtime event proxy (`report.py`) parses session events into a Bluejay OTel `voice.call` tree (user/agent turns, transcripts, tools, handoffs); Chirp stamps `X-Simulation-Result-Id` and POSTs `{trace_ids}`. Optional Realtime API server-side traces still go to the OpenAI dashboard.
+- Tracing → Realtime event proxy (`report.py`) parses session events into a Bluejay OTel `voice.call` tree (user/agent turns, transcripts, tools, handoffs) **plus a `chat <model>` generation span per response** carrying the full `gen_ai.usage.*` token breakdown (input/output, audio, text, cached, reasoning) and time-to-first-token (`mivas.ttft_ms` / `gen_ai.server.time_to_first_token`) — the same telemetry LangSmith/Langfuse pull, exported to Bluejay's own OTLP (no external backend). Chirp stamps `X-Simulation-Result-Id` and POSTs `{trace_ids}`. Optional Realtime API server-side traces still go to the OpenAI dashboard.
 
 Callers must `context["session"] = session` after `runner.run(context=ctx)`. Optional pcm websocket bridge under `adapters/` if an external evaluator needs one.
 

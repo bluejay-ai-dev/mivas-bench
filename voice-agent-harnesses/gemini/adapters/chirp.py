@@ -21,7 +21,7 @@ from websockets.asyncio.server import serve
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from harness import call_session, industry_path, live_config, load_blueprint, run_tool, set_call_id  # noqa: E402
-from report import end_speech_span, start_speech_span, traced_run  # noqa: E402
+from report import traced_run  # noqa: E402
 
 W, R_OUT, R_CHIRP = 2, 24_000, 16_000
 
@@ -52,7 +52,6 @@ async def _bridge(ws, model: str, industry: str) -> None:
     state = {"agent": bp["start"]}
     down = None
     utt: str | None = None
-    speech_otel = None
     end = asyncio.Event()
     industry_dir = industry_path(industry)
     workflow = f"mivas-{Path(industry_dir).name}-{model}"
@@ -68,24 +67,11 @@ async def _bridge(ws, model: str, industry: str) -> None:
     reconnects = 0
     MAX_RECONNECTS = 3
 
-    customer_otel = None
-
-    def _close_utt() -> None:
-        nonlocal utt, speech_otel
-        end_speech_span(speech_otel)
-        speech_otel = None
-        utt = None
-
-    def _close_customer() -> None:
-        nonlocal customer_otel
-        end_speech_span(customer_otel)
-        customer_otel = None
-
     # call_session freezes this call's DB to S3 on exit; composed here so a
     # raising bridge still snapshots and the body needs no reindent.
     async with traced_run(
         workflow, simulation_result_id=sim_id, model=model
-    ), call_session(sim_id):
+    ) as tr, call_session(sim_id):
       # Live can drop a session mid-call (the native-audio preview closes with
       # 1007 CONTENT_TYPE_AUDIO). The caller's websocket is still open, so
       # reconnect on the resumption handle and keep the call going rather than
@@ -116,7 +102,6 @@ async def _bridge(ws, model: str, industry: str) -> None:
                 )
 
             async def inbound() -> None:
-                nonlocal customer_otel
                 try:
                     async for msg in ws:
                         if end.is_set():
@@ -135,15 +120,12 @@ async def _bridge(ws, model: str, industry: str) -> None:
                         except json.JSONDecodeError:
                             continue
                         etype = event.get("type")
-                        data = event.get("data") or {}
-                        if etype == "speech.started":
-                            _close_customer()
-                            uid = data.get("utterance_id") or f"c_{uuid.uuid4().hex[:12]}"
-                            customer_otel = start_speech_span(uid, speaker="customer")
-                        elif etype == "speech.completed":
-                            _close_customer()
+                        # CHIRP speech.* mark caller-turn boundaries → realtime_session turn spans.
+                        if tr is not None and etype == "speech.started":
+                            tr.start_turn()
+                        elif tr is not None and etype == "speech.completed":
+                            tr.mark_ref()
                 finally:
-                    _close_customer()
                     end.set()
                     print(
                         f"chirp inbound end sim={sim_id} "
@@ -153,16 +135,21 @@ async def _bridge(ws, model: str, industry: str) -> None:
                     )
 
             async def outbound() -> None:
-                nonlocal down, utt, speech_otel, resume_handle
+                nonlocal down, utt, resume_handle
                 try:
                     while not end.is_set():
                         async for response in session.receive():
                             if end.is_set():
                                 break
+                            if tr is not None:
+                                tr.bump_event()
+                                if getattr(response, "usage_metadata", None):
+                                    tr.record_usage(response.usage_metadata)
                             if response.data:
                                 if utt is None:
                                     utt = f"u_{uuid.uuid4().hex[:12]}"
-                                    speech_otel = start_speech_span(utt, speaker="agent")
+                                    if tr is not None:
+                                        tr.on_model_audio()
                                     await ws.send(
                                         _event("speech.started", {"utterance_id": utt})
                                     )
@@ -175,11 +162,23 @@ async def _bridge(ws, model: str, industry: str) -> None:
                             if upd is not None and getattr(upd, "new_handle", None):
                                 resume_handle = upd.new_handle
                             sc = response.server_content
-                            if sc is not None and getattr(sc, "turn_complete", False) and utt:
-                                await ws.send(
-                                    _event("speech.completed", {"utterance_id": utt})
-                                )
-                                _close_utt()
+                            if sc is not None and tr is not None:
+                                it = getattr(sc, "input_transcription", None)
+                                if it is not None and getattr(it, "text", None):
+                                    tr.user_message(it.text)
+                                ot = getattr(sc, "output_transcription", None)
+                                if ot is not None and getattr(ot, "text", None):
+                                    tr.add_output(ot.text)
+                                if getattr(sc, "interrupted", False):
+                                    tr.interrupted()
+                            if sc is not None and getattr(sc, "turn_complete", False):
+                                if utt:
+                                    await ws.send(
+                                        _event("speech.completed", {"utterance_id": utt})
+                                    )
+                                    utt = None
+                                if tr is not None:
+                                    tr.finish_model()
                             if response.tool_call:
                                 replies = []
                                 should_end = False
@@ -209,8 +208,7 @@ async def _bridge(ws, model: str, industry: str) -> None:
                             continue
                         break
                 finally:
-                    if utt:
-                        _close_utt()
+                    utt = None
                     end.set()
 
             tasks = [

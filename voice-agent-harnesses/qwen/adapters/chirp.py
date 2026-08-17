@@ -121,7 +121,7 @@ async def _bridge(ws, model: str, industry: str) -> None:
 
     qwen_cm = None
     try:
-        async with traced_run(workflow, simulation_result_id=sim_id) as tracer:
+        async with traced_run(workflow, simulation_result_id=sim_id, model=model) as tracer:
             if tracer is not None:
                 state["_otel_root"] = tracer.root
             qwen, qwen_cm = await _open_session(bp["start"], bp, model)
@@ -136,8 +136,6 @@ async def _bridge(ws, model: str, industry: str) -> None:
                 if turn["agent"] is not None:
                     return
                 turn["agent"] = f"u_{uuid.uuid4().hex[:12]}"
-                if tracer is not None:
-                    tracer.start_agent_speech(turn["agent"])
                 await ws.send(_event("speech.started", {"utterance_id": turn["agent"]}))
 
             async def end_agent(*, transcript: str | None = None) -> None:
@@ -145,8 +143,6 @@ async def _bridge(ws, model: str, industry: str) -> None:
                     return
                 with contextlib.suppress(Exception):
                     await ws.send(_event("speech.completed", {"utterance_id": turn["agent"]}))
-                if tracer is not None:
-                    tracer.end_agent_speech(transcript=transcript)
                 turn["agent"] = None
 
             async def close_after_delay() -> None:
@@ -166,6 +162,8 @@ async def _bridge(ws, model: str, industry: str) -> None:
                 if not args:
                     return
                 inferred_booking["v"] = True
+                if tracer is not None:
+                    state["_otel_root"] = tracer.current_turn()  # tool nests under the turn
                 await run_tool("schedule_appointment", args, bp, state, call_id=f"infer_{_eid()}")
                 print(f"inferred schedule_appointment {args}", flush=True)
 
@@ -173,6 +171,8 @@ async def _bridge(ws, model: str, industry: str) -> None:
                 if not name or call_id in handled:
                     return
                 handled.add(call_id)
+                if tracer is not None:
+                    state["_otel_root"] = tracer.current_turn()  # tools nest under the turn
                 await end_agent()
                 result, stop, reply = await handle_function_call(
                     name, arguments, call_id, bp, state
@@ -207,25 +207,9 @@ async def _bridge(ws, model: str, industry: str) -> None:
                                     "audio": base64.b64encode(msg).decode("ascii"),
                                 }))
                             continue
-                        if not isinstance(msg, str):
-                            continue
-                        try:
-                            ev = json.loads(msg)
-                        except json.JSONDecodeError:
-                            continue
-                        et = ev.get("type")
-                        data = ev.get("data") or {}
-                        if tracer is None:
-                            continue
-                        if et == "speech.started":
-                            tracer.start_customer_speech(
-                                data.get("utterance_id") or f"c_{uuid.uuid4().hex[:12]}"
-                            )
-                        elif et == "speech.completed":
-                            tracer.end_customer_speech()
+                        # CHIRP speech.* frames no longer traced; turn spans come
+                        # from Qwen's own input_audio_buffer.speech_started.
                 finally:
-                    if tracer is not None:
-                        tracer.end_customer_speech()
                     end.set()
 
             async def outbound() -> None:
@@ -239,6 +223,8 @@ async def _bridge(ws, model: str, industry: str) -> None:
                         except json.JSONDecodeError:
                             continue
                         et = ev.get("type")
+                        if tracer is not None:
+                            tracer.handle_raw(et, ev)
                         if et == "response.audio.delta":
                             b = ev.get("delta") or ""
                             if not b:

@@ -139,6 +139,10 @@ def live_config(
         ),
         system_instruction=types.Content(parts=[types.Part(text=instruction)]),
         tools=[types.Tool(function_declarations=decls)] if decls else None,
+        # Transcripts drive the trace's user_message / model output text (no
+        # bearing on what the agent says).
+        input_audio_transcription=types.AudioTranscriptionConfig(),
+        output_audio_transcription=types.AudioTranscriptionConfig(),
         # Always on, so the server hands out resumption handles: Live drops a
         # session mid-call (the native-audio preview closes with 1007
         # CONTENT_TYPE_AUDIO), and a handle is what lets the bridge reconnect
