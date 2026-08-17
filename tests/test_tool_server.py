@@ -11,6 +11,7 @@ from __future__ import annotations
 import importlib.util
 import json
 import os
+import re
 import sys
 import tempfile
 from contextlib import contextmanager
@@ -735,6 +736,44 @@ def test_healthcare_expected_calls_match_schema() -> None:
     assert extras == []
 
 
+_PIPE_ENUM = re.compile(
+    r"\b([a-z_][a-z0-9_]*)\s*\(\s*([a-z][a-z0-9_]*(?:\s*\|\s*[a-z][a-z0-9_]*)+)\s*\)",
+    re.IGNORECASE,
+)
+
+
+def test_healthcare_prompt_enums_match_schema() -> None:
+    """Every enum token a prompt lists must exist on that field in tools.json."""
+    tools = json.loads(
+        (ROOT / "industries" / "healthcare" / "tools.json").read_text()
+    )["tools"]
+    by_key: dict[str, set[str]] = {}
+    for spec in tools:
+        props = (spec.get("inputSchema") or {}).get("properties") or {}
+        for key, prop in props.items():
+            if not isinstance(prop, dict):
+                continue
+            if prop.get("enum"):
+                by_key.setdefault(key, set()).update(str(v) for v in prop["enum"])
+            items = prop.get("items") if isinstance(prop.get("items"), dict) else {}
+            if items.get("enum"):
+                by_key.setdefault(key, set()).update(str(v) for v in items["enum"])
+
+    drift: list[str] = []
+    prompt_dir = ROOT / "industries" / "healthcare" / "system-prompts"
+    for path in sorted(prompt_dir.glob("*.md")):
+        for match in _PIPE_ENUM.finditer(path.read_text()):
+            field = match.group(1).lower()
+            allowed = {value.lower() for value in by_key.get(field, ())}
+            if not allowed:
+                continue
+            listed = {part.strip().lower() for part in match.group(2).split("|")}
+            extra = sorted(listed - allowed)
+            if extra:
+                drift.append(f"{path.name} {field}: {extra}")
+    assert drift == []
+
+
 if __name__ == "__main__":
     test_dispatch_every_industry_tool()
     test_control_industry_rest_and_dispatch()
@@ -744,6 +783,7 @@ if __name__ == "__main__":
     test_healthcare_calls_are_isolated()
     test_healthcare_tool_inputs_are_closed()
     test_healthcare_expected_calls_match_schema()
+    test_healthcare_prompt_enums_match_schema()
     test_healthcare_prompt_demands_are_satisfiable()
     test_healthcare_list_locations_has_what_the_prompts_require()
     test_travel_guards_survive_dispatch()
