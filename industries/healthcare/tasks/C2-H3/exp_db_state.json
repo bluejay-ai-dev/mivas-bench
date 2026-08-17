@@ -20,7 +20,7 @@
       "patient_id": "pat_maria_alvarez",
       "provider_id": "prov_chen",
       "start": "2026-08-21T15:00:00",
-      "status": "booked"
+      "status": "cancelled"
     },
     {
       "appointment_type_code": "MED_FOLLOWUP",
@@ -119,7 +119,7 @@
       "zip": "11201"
     },
     {
-      "balance_cents": 48000,
+      "balance_cents": 60500,
       "carrier": "Cigna",
       "dob": "1972-06-30",
       "first_name": "Maria",
@@ -170,11 +170,33 @@
   "tool_events": [
     {
       "id": 1,
+      "kind": "cancellation_fee",
+      "payload": {
+        "appointment_id": 2,
+        "cancellation_reason_code": "patient_request",
+        "fee_cents": 12500,
+        "patient_id": "pat_maria_alvarez"
+      }
+    },
+    {
+      "id": 2,
       "kind": "sms",
       "payload": {
+        "mobile_e164": "+12125550133",
         "template_id": "appointment_confirmation"
       }
     }
   ],
-  "waitlist": []
+  "waitlist": [
+    {
+      "appointment_type_code": "COS_CONSULT",
+      "earliest": "2026-08-24T00:00:00",
+      "id": 1,
+      "latest": "2026-09-30T23:59:59",
+      "location_ids": [
+        "loc_park_ave"
+      ],
+      "patient_id": "pat_maria_alvarez"
+    }
+  ]
 }

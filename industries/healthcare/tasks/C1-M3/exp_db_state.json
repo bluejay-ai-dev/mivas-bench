@@ -32,6 +32,17 @@
       "provider_id": "prov_patel",
       "start": "2026-09-15T09:00:00",
       "status": "booked"
+    },
+    {
+      "appointment_type_code": "ALLERGY_SKIN_TESTING",
+      "description": "Allergy service: skin_testing",
+      "end": "2026-08-24T09:30:00",
+      "id": 4,
+      "location_id": "loc_park_ave",
+      "patient_id": null,
+      "provider_id": "prov_chen",
+      "start": "2026-08-24T09:00:00",
+      "status": "booked"
     }
   ],
   "locations": [

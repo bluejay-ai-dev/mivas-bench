@@ -32,6 +32,17 @@
       "provider_id": "prov_patel",
       "start": "2026-09-15T09:00:00",
       "status": "booked"
+    },
+    {
+      "appointment_type_code": "COS_CONSULT",
+      "description": "Cosmetic consult: microneedling",
+      "end": "2026-08-24T09:30:00",
+      "id": 4,
+      "location_id": "loc_park_ave",
+      "patient_id": null,
+      "provider_id": "prov_chen",
+      "start": "2026-08-24T09:00:00",
+      "status": "booked"
     }
   ],
   "locations": [
@@ -171,7 +182,9 @@
     {
       "id": 1,
       "kind": "payment_link",
-      "payload": {}
+      "payload": {
+        "mobile_e164": "+12125550171"
+      }
     }
   ],
   "waitlist": []
