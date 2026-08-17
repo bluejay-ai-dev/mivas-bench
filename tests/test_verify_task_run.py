@@ -58,6 +58,29 @@ def test_office_states_ignore_tool_events_and_description() -> None:
     assert vtr.office_states_match(expected, actual) is False
 
 
+def test_office_waitlist_allows_extra_rows_when_expected_is_nonempty() -> None:
+    expected_row = {
+        "patient_id": "pat_jordan_lee",
+        "location_id": "loc_park_ave",
+        "earliest": "2026-08-24T00:00:00",
+        "latest": "2026-09-30T23:59:59",
+    }
+    extra_row = {
+        "patient_id": "pat_jordan_lee",
+        "location_id": "loc_park_ave",
+        "earliest": "2026-08-18T00:00:00",
+        "latest": "2026-09-30T23:59:59",
+    }
+    expected = {"patients": [], "appointments": [], "waitlist": [expected_row]}
+    actual = {"patients": [], "appointments": [], "waitlist": [expected_row, extra_row]}
+    assert vtr.office_states_match(expected, actual) is True
+    missing = {"patients": [], "appointments": [], "waitlist": [extra_row]}
+    assert vtr.office_states_match(expected, missing) is False
+    empty_expected = {"patients": [], "appointments": [], "waitlist": []}
+    assert vtr.office_states_match(empty_expected, actual) is False
+    assert vtr.office_states_match(empty_expected, {"patients": [], "appointments": [], "waitlist": []}) is True
+
+
 def test_verify_result_ignores_tool_events_in_state() -> None:
     task = {
         "exp_db_state": {
@@ -146,9 +169,10 @@ def test_handoff_adherence_is_in_order_subsequence() -> None:
 
     none = vtr.handoff_adherence([], [])
     assert none["passed"] is True
-    unexpected = vtr.handoff_adherence([], ["transfer_to_human"])
-    assert unexpected["passed"] is False
-    assert unexpected["verdict"] == "unexpected_handoffs"
+    assert none["verdict"] == "exact"
+    extras_ok = vtr.handoff_adherence([], ["transfer_to_human"])
+    assert extras_ok["passed"] is True
+    assert extras_ok["verdict"] == "none_required"
 
 
 def test_actual_tool_calls_sort_by_start_offset_not_group_order() -> None:

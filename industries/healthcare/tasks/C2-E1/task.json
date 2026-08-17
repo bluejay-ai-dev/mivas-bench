@@ -1,6 +1,6 @@
 {
   "task_name": "C2-E1: Medical cancellation policy",
-  "intent": "You are calling with a simple policy question, not to change an appointment. Ask how far in advance you have to cancel a regular medical visit, and whether there is a fee if you miss it or cancel late. You just want the rule so you can plan. Once you have the window and the fee, thank them and end the call.",
+  "intent": "You are calling with a general medical cancellation-policy question, not to look up or change an appointment. Ask how far in advance you have to cancel a regular medical visit, and what the missed-visit fee is if you cancel late. You only need those two facts: the cancel window and the dollar amount. If they ask for date of birth, member ID, or to look you up, say you are not on file and you only want the published policy, then ask the same two questions again. Once you have the window and the dollar amount, thank them and end the call. Do not ask to book, reschedule, or cancel an appointment. Do not ask about cosmetic visits. Do not ask to add insurance, for a callback, to speak to a person, a bill, a payment, the patient portal, a waitlist, a text, financing, or the street, floor, or suite.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -8,22 +8,30 @@
     }
   ],
   "exp_handoff_path": [],
-  "exp_tool_calls": [
+  "exp_tool_calls": [],
+  "behaviors": {
+    "creativity": 0
+  },
+  "scripted_responses": [
     {
-      "name": "search_practice_kb",
-      "parameters": {
-        "topic": "fees"
-      },
-      "output": {
-        "ok": true,
-        "data": {
-          "source": "fees"
-        }
-      }
+      "match_type": "context",
+      "match_phrase": "offers to transfer you to a human, a person, the front desk, or a live agent. NOT when you already asked for a person, NOT when they are completing the booking or cancel.",
+      "response_type": "phrase",
+      "response_value": "No, I don't need a person. Please finish what I asked on this call."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers the waitlist, a later opening, or to add you to a list. NOT when offering a specific appointment time to book now, NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "No waitlist. Please just finish what I asked."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when asking for a payment-link number, NOT when asking for your mobile number for identity.",
+      "response_type": "phrase",
+      "response_value": "No thanks, I don't need a text."
     }
   ],
-  "behaviors": {},
-  "scripted_responses": {},
   "customer_name": "Nora Ellison",
   "customer_available_tools": {},
   "metadata": {

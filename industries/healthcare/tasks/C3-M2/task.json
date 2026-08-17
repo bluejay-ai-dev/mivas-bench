@@ -1,6 +1,6 @@
 {
   "task_name": "C3-M2: New insurance card on file",
-  "intent": "You are an existing Straus patient. You changed jobs and you have a new insurance card you need them to put on file so the next visit bills correctly. Answer their identity questions. Give them the new carrier and member ID when they ask. If they read the member ID back, confirm it. Once they say the new insurance is saved, thank them and end the call.",
+  "intent": "You are an existing Straus patient. You changed jobs and you need your new insurance card put on file. That is the only reason you called. Answer their identity questions once, then stay on the insurance update. When they ask for the new plan, give the carrier and the member ID as one string. You do not have a group number \u2014 not now, not later. Carrier and member ID are enough to save. If they read the member ID back, confirm it. Once they say the new insurance is saved, thank them and end the call. Do not book, reschedule, or cancel. Do not agree to a callback, a front-desk follow-up, or a hold because a group number is missing. Do not ask to speak to a person, about a bill, a payment, the patient portal, a waitlist, a text, financing, or the street, floor, or suite. Stay until they confirm the new card is saved on the chart. A spoken 'we'll update it' or a callback is not enough \u2014 ask them to save it now. After any 'we will update it,' ask whether it is on your chart now.",
   "traits": [
     {
       "trait_name": "zip",
@@ -73,7 +73,9 @@
       }
     }
   ],
-  "behaviors": {},
+  "behaviors": {
+    "creativity": 0
+  },
   "scripted_responses": [
     {
       "match_type": "context",
@@ -83,9 +85,57 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "asks for a group number, group ID, or the number next to Group on the card. NOT when asking for the member ID or subscriber ID, NOT when reading the member ID back, NOT when asking for the carrier or plan name.",
+      "match_phrase": "asks for the insurance carrier, plan name, member ID, subscriber ID, or the numbers on your new card. NOT when asking for a group number, NOT when reading the member ID back, NOT when asking for your name or date of birth.",
       "response_type": "phrase",
-      "response_value": "I don't have a group number. I just have the carrier and the member ID."
+      "response_value": "The carrier is Cigna. The member ID is C445566778."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks for a group number, group ID, or the number next to Group on the card, even if they also just read back the member ID, or says they cannot save the insurance without a group number. NOT when they are only confirming the member ID and are not asking for a group number, NOT when asking only for the carrier.",
+      "response_type": "phrase",
+      "response_value": "I don't have a group number. I just have the carrier and the member ID. Please save those."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers a callback, asks for a number to call you back, says the front desk will follow up, or asks you to find the group number later. NOT when verifying your identity, NOT when asking for your ZIP, NOT when asking for the carrier or member ID.",
+      "response_type": "phrase",
+      "response_value": "I don't need a callback. Please put Cigna and the member ID on file without a group number."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "reads your member ID back to you and asks whether it is correct. NOT when first asking for the member ID, NOT when also asking for a group number.",
+      "response_type": "phrase",
+      "response_value": "Yes, that's right."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "reads your name and date of birth back to you and asks whether that is right, or asks you to confirm the name and date of birth they just repeated. NOT when first asking for your name and date of birth, NOT when asking for a phone or mobile number.",
+      "response_type": "phrase",
+      "response_value": "Yes, that's right."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to transfer you to a human, a person, the front desk, or a live agent. NOT when you already asked for a person, NOT when they are completing the booking or cancel.",
+      "response_type": "phrase",
+      "response_value": "No, I don't need a person. Please finish what I asked on this call."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers the waitlist, a later opening, or to add you to a list. NOT when offering a specific appointment time to book now, NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "No waitlist. Please just finish what I asked."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when asking for a payment-link number, NOT when asking for your mobile number for identity.",
+      "response_type": "phrase",
+      "response_value": "No thanks, I don't need a text."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "says they will update the insurance, put it on file later, or that the front desk will handle the card. NOT when they have just confirmed the new card is saved on the chart.",
+      "response_type": "phrase",
+      "response_value": "Is it on my chart now? Please save Cigna and the member ID before I go."
     }
   ],
   "customer_name": "Jordan Lee",

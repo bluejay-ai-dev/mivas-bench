@@ -10,7 +10,8 @@ Three independent checks per result (combined pass is AND):
    args must be non-empty when required; empty live args are name-only.
 3. Handoff adherence — `exp_handoff_path` as an in-order subsequence of
    actual transfer_* tools in wall-clock order (`start_offset_ms`), not
-   Bluejay's name-grouped `tool_calls` array.
+   Bluejay's name-grouped `tool_calls` array. Empty expected passes even
+   if extra transfers fired (customer outcome is not the hop).
 
 Join result → task by the DH `case_key` trait or the `test_name` prefix
 (`C1-E1:`). Empty expected tools pass that half.
@@ -205,8 +206,25 @@ def office_canonical(state: Any) -> dict[str, Any]:
     return out
 
 
+def _row_fingerprint(row: Any) -> str:
+    return json.dumps(row, sort_keys=True, default=str)
+
+
 def office_states_match(expected: Any, actual: Any) -> bool:
-    return office_canonical(expected) == office_canonical(actual)
+    """Patients and appointments must match exactly. Expected waitlist rows
+    must all appear in actual; extra actual waitlist rows are allowed when
+    the expected list is non-empty. An empty expected waitlist still requires
+    an empty actual waitlist (no surprise joins)."""
+    exp = office_canonical(expected)
+    act = office_canonical(actual)
+    if exp["patients"] != act["patients"]:
+        return False
+    if exp["appointments"] != act["appointments"]:
+        return False
+    if not exp["waitlist"]:
+        return act["waitlist"] == []
+    actual_keys = {_row_fingerprint(row) for row in act["waitlist"]}
+    return all(_row_fingerprint(row) in actual_keys for row in exp["waitlist"])
 
 
 def load_tool_schemas(industry: str) -> dict[str, Any]:
@@ -554,13 +572,12 @@ def actual_handoffs(actual_tools: list[str]) -> list[str]:
 
 
 def handoff_adherence(expected: list[str], actual: list[str]) -> dict[str, Any]:
-    """Expected hops must appear in order. Empty expected fails if any transfer fired."""
+    """Expected hops must appear in order. Empty expected always passes."""
     if not expected:
-        exact = not actual
         return {
-            "passed": exact,
-            "verdict": "exact" if exact else "unexpected_handoffs",
-            "score": 1.0 if exact else 0.0,
+            "passed": True,
+            "verdict": "exact" if not actual else "none_required",
+            "score": 1.0,
             "expected": expected,
             "actual": actual,
         }

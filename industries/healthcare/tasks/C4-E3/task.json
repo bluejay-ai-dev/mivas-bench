@@ -1,6 +1,6 @@
 {
   "task_name": "C4-E3: Botox at the Windermere office",
-  "intent": "You are calling from Windermere, Florida, and you would rather not drive into the city if you can help it. Ask whether the Windermere office does Botox. If they say that office does not do cosmetic work, ask which of their offices does. Once you know where to go, thank them and end the call.",
+  "intent": "You are calling about Botox at the Windermere office because you would rather not drive into the city. Ask whether that office does Botox. When they tell you Windermere does not do cosmetic work, ask which of their offices does. Then ask for one of those offices' street address, floor, and suite. Do not thank them or end the call until you have heard the street, the floor, and the suite \u2014 office names alone are not enough. If they offer to route you to the cosmetic team, decline and keep asking for the address, floor, and suite. Do not book a consult. Do not ask to book, reschedule, or cancel. Do not ask to add insurance, for a callback, to speak to a person, a bill, a payment, the patient portal, a waitlist, a text, or financing.",
   "traits": [
     {
       "trait_name": "zip",
@@ -18,14 +18,44 @@
   "exp_handoff_path": [],
   "exp_tool_calls": [
     {
-      "name": "list_locations",
-      "parameters": {
-        "zip": "34786"
-      }
+      "name": "list_locations"
     }
   ],
-  "behaviors": {},
-  "scripted_responses": {},
+  "behaviors": {
+    "creativity": 0
+  },
+  "scripted_responses": [
+    {
+      "match_type": "context",
+      "match_phrase": "offers to transfer you to a human, a person, the front desk, or a live agent. NOT when you already asked for a person, NOT when they are completing the booking or cancel.",
+      "response_type": "phrase",
+      "response_value": "No, I don't need a person. Please finish what I asked on this call."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers the waitlist, a later opening, or to add you to a list. NOT when offering a specific appointment time to book now, NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "No waitlist. Please just finish what I asked."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when asking for a payment-link number, NOT when asking for your mobile number for identity.",
+      "response_type": "phrase",
+      "response_value": "No thanks, I don't need a text."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers an appointment time, asks you to confirm a slot, or quotes an office name without the street address, floor, and suite. NOT when they have already said the street, the floor, and the suite.",
+      "response_type": "phrase",
+      "response_value": "Before I take a time, I need the street address, the floor, and the suite."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to transfer you to the cosmetic team, a cosmetic specialist, or another office instead of giving the street, floor, and suite. NOT when they have already said the street, the floor, and the suite.",
+      "response_type": "phrase",
+      "response_value": "No transfer. I just need the street address, the floor, and the suite."
+    }
+  ],
   "customer_name": "Gloria Beaumont",
   "customer_available_tools": {},
   "metadata": {

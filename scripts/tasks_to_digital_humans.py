@@ -33,7 +33,7 @@ DEFAULT_AGENTS = {
     "healthcare": 32161,  # mivas healthcare · openai realtime-2.1 (not the k8s twin)
 }
 
-CREATIVITY = 0.15
+CREATIVITY = 0
 BATCH_SIZE = 10
 PACE_S = 0.25
 
@@ -266,6 +266,14 @@ def assign_voices(rows: list[dict[str, Any]]) -> dict[str, tuple[str, str]]:
     return assigned
 
 
+def creativity_of(task: dict[str, Any]) -> float:
+    """Bluejay DH temperature. task.json `behaviors.creativity` wins; else 0."""
+    behaviors = task.get("behaviors")
+    if isinstance(behaviors, dict) and behaviors.get("creativity") is not None:
+        return float(behaviors["creativity"])
+    return float(CREATIVITY)
+
+
 def task_to_digital_human(
     task: dict[str, Any],
     case_key: str,
@@ -301,7 +309,7 @@ def task_to_digital_human(
         "traits": traits,
         "tags": [industry_tag, category_slug, audio_condition],
         "speaks_first_config": {"speaks_first": False},
-        "creativity": CREATIVITY,
+        "creativity": creativity_of(task),
         "language": "en",
         "accent": accent,
         "gender": gender,
@@ -556,6 +564,7 @@ CLAIM_FIELDS = (
     "expected_tool_calls",
     "traits",
     "scripted_responses",
+    "creativity",
 )
 
 

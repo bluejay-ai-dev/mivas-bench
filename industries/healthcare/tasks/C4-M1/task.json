@@ -1,6 +1,6 @@
 {
   "task_name": "C4-M1: Microneedling consult",
-  "intent": "You want to try microneedling and you are ready to put a consult on the calendar. Ask what it costs at Park Avenue, then ask to book a consult there. When they explain the deposit and the cancellation rules, agree to them. Take the first time they offer, confirm it, then thank them and end the call.",
+  "intent": "Ask what microneedling costs at Park Avenue, then ask to book a microneedling consult there. You must get the Park Avenue street address, floor, and suite before you accept a time \u2014 if they quote a time or an address without all three, ask for the street, the floor, and the suite. When they explain the deposit and the cancellation rules, agree to them. Take the first appointment time they offer after you have the address. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first time out loud. If they ask who you are, give your name once and continue. Ask them to text the deposit payment link to your phone; that is the only text you want. Do not thank them or end the call until a time is confirmed on the calendar and you have heard the street, floor, and suite. Do not ask for a callback, to speak to a person, about a medical bill, insurance, a medical appointment, the patient portal, a waitlist, or financing. Do not ask for a confirmation text. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar. If they only list openings, say book the first one. Do not thank them or hang up until they confirm a time is on the calendar and that a deposit payment link was sent to your phone. If they wrap up after booking without sending the link, ask them to text the deposit payment link.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -41,6 +41,17 @@
       }
     },
     {
+      "name": "list_locations"
+    },
+    {
+      "name": "find_slots",
+      "parameters": {
+        "location_ids": [
+          "loc_park_ave"
+        ]
+      }
+    },
+    {
       "name": "book_cosmetic_consult",
       "output": {
         "ok": true,
@@ -72,8 +83,65 @@
       }
     }
   ],
-  "behaviors": {},
-  "scripted_responses": {},
+  "behaviors": {
+    "creativity": 0
+  },
+  "scripted_responses": [
+    {
+      "match_type": "context",
+      "match_phrase": "offers an appointment time, a slot, or asks which day or time you want AFTER already saying the street address, the floor, and the suite. NOT when they have not yet given all three, NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "I'll take the first time you offered."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to transfer you to a human, a person, the front desk, or a live agent. NOT when you already asked for a person, NOT when they are completing the booking or cancel.",
+      "response_type": "phrase",
+      "response_value": "No, I don't need a person. Please finish what I asked on this call."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers the waitlist, a later opening, or to add you to a list. NOT when offering a specific appointment time to book now, NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "No waitlist. Please just finish what I asked."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when offering a payment link or deposit link, NOT when asking for a payment-link number, NOT when asking for your mobile number for identity.",
+      "response_type": "phrase",
+      "response_value": "No thanks, I don't need a text."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers an appointment time, asks you to confirm a slot, or quotes an office name without the street address, floor, and suite. NOT when they have already said the street, the floor, and the suite.",
+      "response_type": "phrase",
+      "response_value": "Before I take a time, I need the street address, the floor, and the suite."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before a consult time has been confirmed on the calendar. NOT when they have just confirmed a booked time.",
+      "response_type": "phrase",
+      "response_value": "I still need the consult booked. Please confirm a time on the calendar before I go."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "thanks you, says goodbye, confirms a consult time, or asks if you need anything else before saying a deposit payment link was sent. NOT when they have just said the payment link or deposit link was sent.",
+      "response_type": "phrase",
+      "response_value": "Please text me the deposit payment link before I go."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before a time has been confirmed on the calendar. NOT when they have just confirmed a booked time.",
+      "response_type": "phrase",
+      "response_value": "I still need that time booked. Please confirm it is on the calendar before I go."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "reads the cosmetic deposit and cancellation policy, asks whether you agree to it, or says they need a clear yes before booking. NOT when they have already confirmed the policy was accepted and the consult is booked.",
+      "response_type": "phrase",
+      "response_value": "Yes. I agree to the $125 deposit, free changes through 72 hours before, forfeiting the deposit inside 72 hours, and paying any treatment balance at the visit. Please book the first time."
+    }
+  ],
   "customer_name": "Selina Marsh",
   "customer_available_tools": {},
   "metadata": {

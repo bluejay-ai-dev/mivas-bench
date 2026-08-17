@@ -172,7 +172,7 @@
       "id": 1,
       "kind": "transfer",
       "payload": {
-        "destination": "patient_support_center",
+        "destination": "clinical_triage",
         "reason": "clinical_emergency"
       }
     }
