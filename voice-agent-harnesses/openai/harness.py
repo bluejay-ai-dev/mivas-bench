@@ -5,9 +5,11 @@ Tool kinds (from agent_blueprint.json):
     POSTed to {TOOL_SERVER_URL}/tools/{name} with {"arguments": {...}} and the
     server's JSON envelope goes back to the model verbatim
   - handoff: provider handoff API
-  - session: harness-local tool (e.g. end_call); then close the realtime session
+  - session: the tool ends the call. `end_call` is harness-local; human-transfer
+    session tools (`escalate_to_human`, `transfer_to_human`) still POST so the
+    industry records the escalation, then the realtime session closes.
 
-Session and handoff tools never hit the tool server.
+Handoff tools and `end_call` never hit the tool server.
 
 Callers must pass a mutable context into RealtimeRunner.run and stash the
 session on it (`context["session"] = session`) so session tools can hang up.
@@ -43,7 +45,8 @@ TOOL_SERVER_URL = os.environ.get("TOOL_SERVER_URL", "http://127.0.0.1:8000").rst
 # Let farewell audio finish before tearing down Realtime after end_call.
 END_CALL_CLOSE_DELAY_S = float(os.environ.get("MIVAS_END_CALL_CLOSE_DELAY_S", "2.5"))
 
-# Session tools: name → harness-local side effect (no state API).
+# Session tools: name → handler. `end_call` is local; every other session tool
+# POSTs (so Bluejay records the call) and then the session closes.
 SessionMapper = Callable[[dict[str, Any]], Awaitable[dict[str, Any]]]
 
 
@@ -63,9 +66,14 @@ async def _end_call_local(args: dict[str, Any]) -> dict[str, Any]:
     return {"success": True}
 
 
-SESSION_TOOL_HANDLERS: dict[str, SessionMapper] = {
-    "end_call": _end_call_local,
-}
+def _session_handler(name: str) -> SessionMapper:
+    if name == "end_call":
+        return _end_call_local
+
+    async def _post_then_hangup(args: dict[str, Any]) -> dict[str, Any]:
+        return await dispatch_industry_tool(name, args)
+
+    return _post_then_hangup
 
 
 def industry_path(name: str | Path) -> Path:
@@ -124,12 +132,7 @@ def _fn_tool(spec: dict, *, session_tool: bool = False) -> FunctionTool:
     schema.setdefault("properties", {})
 
     if session_tool:
-        handler = SESSION_TOOL_HANDLERS.get(name)
-        if handler is None:
-            raise KeyError(
-                f"no harness session handler for tool {name!r} "
-                "(session tools are harness-native, not state API routes)"
-            )
+        handler = _session_handler(name)
     else:
         async def handler(args: dict[str, Any]) -> dict[str, Any]:
             return await dispatch_industry_tool(name, args)

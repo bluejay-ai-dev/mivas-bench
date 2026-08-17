@@ -313,7 +313,7 @@ async def _execute_tool(
         state["agent"] = target
         return {"success": True, "role": target}, False
 
-    if name == "end_call" or is_session_tool(bp, state["agent"], name):
+    if name == "end_call":
         return {"success": True}, True
 
     async with httpx.AsyncClient(timeout=30.0) as client:
@@ -323,10 +323,9 @@ async def _execute_tool(
             headers=tool_headers(),
         )
         result = resp.json()
-        # transfer_to_human is an industry POST (so Bluejay records actual),
-        # then the model stops talking. CHIRP smoke has no human to join, so
-        # leave the socket open and the DH nudges after 25s+ of dead air.
-        if name == "transfer_to_human":
+        # Human-transfer session tools POST (so Bluejay records actual) then
+        # hang up — there is no human to join.
+        if is_session_tool(bp, state["agent"], name):
             return result, True
         return result, False
 

@@ -274,8 +274,9 @@ async def _execute_tool(
 ) -> tuple[dict[str, Any], bool]:
     """Run a blueprint tool. Returns (result, should_end_call).
 
-    Handoff and session tools are harness-native; every other tool is POSTed to
-    {TOOL_SERVER_URL}/tools/{name} and the server's envelope is the result. A
+    Handoff tools and `end_call` are harness-native; every other tool is POSTed
+    to {TOOL_SERVER_URL}/tools/{name} and the server's envelope is the result.
+    Human-transfer session tools POST then hang up. A
     handoff only resolves and records the target here; moving the call is the
     caller's job, because *how* you move it is a runtime property (a Flows node
     transition, or an `LLMSwitcher` swap to the target agent's own S2S session).
@@ -289,7 +290,15 @@ async def _execute_tool(
         return {"success": True, "role": target}, False
 
     if entry is not None and entry.get("session"):
-        return {"success": True}, True
+        if name == "end_call":
+            return {"success": True}, True
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            resp = await client.post(
+                f"{tool_server_url()}/tools/{name}",
+                json={"arguments": args},
+                headers=tool_headers(),
+            )
+            return resp.json(), True
 
     async with httpx.AsyncClient(timeout=30.0) as client:
         resp = await client.post(

@@ -39,6 +39,7 @@ from harness import (  # noqa: E402
     end_session,
     ensure_squad,
     for_provider,
+    hangup_tool_names,
     industry_path,
     load_blueprint,
     run_tool,
@@ -58,6 +59,8 @@ from report import (  # noqa: E402
 
 app = FastAPI(title="mivas vapi chirp bridge")
 _cfg: dict[str, Any] = {}
+# vapi call id → bridge end event, so a human-transfer webhook can hang up.
+_hangups: dict[str, asyncio.Event] = {}
 
 
 def _auth() -> str | None:
@@ -109,6 +112,12 @@ async def tool_webhook(name: str, request: Request) -> dict[str, Any]:
         )
         print(f"chirp tool {tool_name} args={args} -> {result}", flush=True)
         results.append({"toolCallId": call.get("id"), "result": json.dumps(result)})
+        hangup = _cfg.get("hangup_names") or set()
+        if tool_name in hangup and vapi_call_id:
+            ev = _hangups.get(vapi_call_id)
+            if ev is not None:
+                ev.set()
+            print(f"chirp hangup after {tool_name}", flush=True)
     return {"results": results}
 
 
@@ -154,6 +163,7 @@ async def _bridge(ws: WebSocket) -> None:
             bind_call(call_id)
             bind_provider(call_id, resolved)
             provider_id = call_id
+            _hangups[call_id] = end
             print(f"chirp vapi call={call_id}", flush=True)
             async with websockets.connect(call_url, max_size=None) as vapi_ws:
                 pacer = PcmPacer(ws.send_bytes)
@@ -253,7 +263,11 @@ async def _bridge(ws: WebSocket) -> None:
                         with contextlib.suppress(Exception):
                             await ws.close(1000)
 
-                tasks = [asyncio.create_task(inbound()), asyncio.create_task(outbound())]
+                tasks = [
+                    asyncio.create_task(inbound()),
+                    asyncio.create_task(outbound()),
+                    asyncio.create_task(end.wait()),
+                ]
                 done, pending = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
                 pacer.close()
                 with contextlib.suppress(Exception):
@@ -267,6 +281,7 @@ async def _bridge(ws: WebSocket) -> None:
                     if exc is not None and not type(exc).__name__.startswith("ConnectionClosed"):
                         raise exc
     finally:
+        _hangups.pop(provider_id, None)
         unbind_provider(provider_id)
         end_session(session_key)
 
@@ -307,11 +322,13 @@ def main(model: str | None = None) -> None:
         raise SystemExit("need PUBLIC_URL (cloudflared https url) — Vapi tool webhooks point at it")
 
     ids = ensure_squad(a.industry, public_url)
+    bp = load_blueprint(a.industry)
     _cfg.update(
         model=a.model,
         industry=a.industry,
         squad_id=ids["squad_id"],
-        webhook_tools=webhook_tool_names(load_blueprint(a.industry)),
+        webhook_tools=webhook_tool_names(bp),
+        hangup_names=hangup_tool_names(bp),
     )
     print(
         f"ws↔Vapi {a.model} × {a.industry} :{a.port} auth={bool(_auth())} "
