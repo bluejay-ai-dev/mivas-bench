@@ -178,7 +178,9 @@ async def _execute_tool(
         }, False
 
     if entry is not None and entry.get("session"):
-        return {"success": True}, True
+        if name == "end_call":
+            return {"success": True}, True
+        return await _dispatch(name, args), True
 
     return await _dispatch(name, args), False
 

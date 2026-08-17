@@ -52,6 +52,8 @@ def test_healthcare_reception_collapses_handoffs_into_one_transfer() -> None:
     assert all(row.get("transfer_message") == "One moment." for row in rows)
     assert "transfer_to_human" not in dest
     assert any(t.get("name") == "classify_visit_request" for t in tools)
+    # human-transfer stays a named client tool (not collapsed into system end_call)
+    assert any(t.get("name") == "transfer_to_human" and t.get("type") != "system" for t in tools)
 
 
 def test_healthcare_handoffs_are_downstream_only() -> None:

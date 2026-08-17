@@ -132,7 +132,7 @@ def _build(
                     description=BLUEPRINT["catalog"][t["name"]]["description"],
                 )
             )
-        elif t.get("session") or t["name"] == "end_call":
+        elif t["name"] == "end_call":
             tools.append(end_call)
         else:
             tools.append(_http_tool(t["name"], call_id))

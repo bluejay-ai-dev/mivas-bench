@@ -154,8 +154,8 @@ def test_server_boots_and_serves_fixtures(industry: str) -> None:
 def test_dispatch_parity_both_directions(industry: str) -> None:
     flags = _tool_flags(industry)
     declared = {t["name"] for t in _tools(industry)
-                if not (flags.get(t["name"], {}).get("session")
-                        or flags.get(t["name"], {}).get("handoff"))}
+                if t["name"] != "end_call"
+                and not flags.get(t["name"], {}).get("handoff")}
     module = _load_tool_server(industry)
     assert hasattr(module, "DISPATCH"), "tool_server must define DISPATCH"
     dispatch = set(module.DISPATCH)

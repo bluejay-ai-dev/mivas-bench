@@ -563,7 +563,7 @@ async def _execute_tool(
         state["mid_call"] = True
         return {"success": True, "role": target}, False
 
-    if is_session_tool(bp, state["agent"], name) or name == "end_call":
+    if name == "end_call":
         # Scheduler must book before hanging up when a date was discussed.
         if state.get("agent") == "scheduler" and not state.get("scheduled"):
             return {
@@ -580,6 +580,8 @@ async def _execute_tool(
                 state["scheduled_date"] = str(args["date"])
             elif isinstance(result, dict) and result.get("date"):
                 state["scheduled_date"] = str(result["date"])
+        if is_session_tool(bp, state["agent"], name):
+            return result, True
         return result, False
 
     return {"success": False, "error": f"unknown tool {name}"}, False
