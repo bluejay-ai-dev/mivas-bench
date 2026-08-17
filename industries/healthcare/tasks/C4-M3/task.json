@@ -1,6 +1,6 @@
 {
   "task_name": "C4-M3: Chemical peel consult, no deposit",
-  "intent": "You want to know what a chemical peel costs at Brooklyn Heights. Listen to the price. When they explain that a deposit is required to hold the consult, say you are not paying a deposit and you will not agree to that. Ask them to have someone call you back instead of booking anything today. Then thank them and end the call.",
+  "intent": "Ask what a chemical peel costs at Brooklyn Heights. When they explain that a deposit is required to hold the consult, say you are not paying a deposit and you will not agree to that. Ask the cosmetic desk to phone you back later \u2014 you do not want to book today and you do not want to be transferred on this call. If they try to connect you to a person now, decline and repeat that you want a callback later, not a live transfer. If they ask for a number to reach you, give 718-555-0188. Stay on the line until they confirm a callback is scheduled, then thank them and end the call. Do not say someone, a person, or transfer me. Do not ask to book, reschedule, or cancel. Do not ask about a medical bill, the patient portal, a text, a waitlist, financing, or the street address, floor, or suite. Do not take a consult time. If they offer a slot, refuse it \u2014 you will not put down a deposit and you only want a callback.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -39,8 +39,29 @@
       }
     }
   ],
-  "behaviors": {},
-  "scripted_responses": {},
+  "behaviors": {
+    "creativity": 0
+  },
+  "scripted_responses": [
+    {
+      "match_type": "context",
+      "match_phrase": "offers to transfer you to a human, a person, the front desk, or a live agent. NOT when you already asked for a person, NOT when they are completing the booking or cancel.",
+      "response_type": "phrase",
+      "response_value": "No, I don't need a person. Please finish what I asked on this call."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers the waitlist, a later opening, or to add you to a list. NOT when offering a specific appointment time to book now, NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "No waitlist. Please just finish what I asked."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when asking for a payment-link number, NOT when asking for your mobile number for identity.",
+      "response_type": "phrase",
+      "response_value": "No thanks, I don't need a text."
+    }
+  ],
   "customer_name": "Ruth Ellinger",
   "customer_available_tools": {},
   "metadata": {

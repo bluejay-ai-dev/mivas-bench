@@ -1,6 +1,6 @@
 {
   "task_name": "C5-M3: A bill the caller is sure they received",
-  "intent": "You are an existing Straus patient and you are sure you were sent a bill \u2014 you remember opening something. Answer their identity questions. If they say there is no balance, insist once that you definitely received something and ask them to look again. If they offer a callback, accept it. Then thank them and end the call.",
+  "intent": "You are an existing Straus patient and you are sure you were sent a bill \u2014 you remember opening a statement. Answer their identity questions once with your name and date of birth, confirm the readback if they repeat it, then go straight to the bill. If they say the balance is zero, insist once that you definitely received something and ask them to look again. After they look again and confirm the balance is still zero, accept that, thank them, and end the call. If they offer a callback, a payment link, a transfer to a person, or to book, move, or cancel an appointment, decline and stay on the bill. Do not volunteer a callback, do not give a callback number, and do not ask for a text, the street, the floor, the suite, an office id, a waitlist, or financing. Stay on the bill. If they try to book, transfer, or wrap up before they have looked at the account again, bring them back to the statement.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -68,13 +68,45 @@
       }
     }
   ],
-  "behaviors": {},
+  "behaviors": {
+    "creativity": 0
+  },
   "scripted_responses": [
     {
       "match_type": "context",
       "match_phrase": "asks for your full name and date of birth, or asks you to confirm who you are, or asks for the patient's name and date of birth. NOT when asking only for a member ID or insurance card, NOT when asking which office or location, NOT when asking for a phone or mobile number, NOT when asking about an appointment day or time, NOT when reading your name and date of birth back to you for confirmation.",
       "response_type": "phrase",
       "response_value": "Sam Nguyen. My date of birth is November third, nineteen eighty-five."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "reads your name and date of birth back to you and asks whether that is right, or asks you to confirm the name and date of birth they just repeated. NOT when first asking for your name and date of birth, NOT when asking for a phone or mobile number.",
+      "response_type": "phrase",
+      "response_value": "Yes, that's right."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to transfer you to a human, a person, the front desk, or a live agent. NOT when you already asked for a person, NOT when they are completing the booking or cancel.",
+      "response_type": "phrase",
+      "response_value": "No, I don't need a person. Please finish what I asked on this call."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers the waitlist, a later opening, or to add you to a list. NOT when offering a specific appointment time to book now, NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "No waitlist. Please just finish what I asked."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when asking for a payment-link number, NOT when asking for your mobile number for identity.",
+      "response_type": "phrase",
+      "response_value": "No thanks, I don't need a text."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "thanks you, says goodbye, offers to book, or transfers you before they have looked at the account a second time. NOT when they have just confirmed the balance is still zero after looking again.",
+      "response_type": "phrase",
+      "response_value": "Please look at the statement again. I definitely received a bill."
     }
   ],
   "customer_name": "Sam Nguyen",

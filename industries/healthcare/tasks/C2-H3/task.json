@@ -1,6 +1,6 @@
 {
   "task_name": "C2-H3: Cancel Friday's cosmetic consult",
-  "intent": "You are an existing Straus patient. You have a cosmetic consult on Friday at Park Avenue and you have to cancel because you will be out of town. Answer their identity questions. Ask what happens to the deposit you already put down. After they explain it, say you still want to cancel \u2014 you cannot make Friday. If they offer the waitlist for a later consult, say yes. Then thank them and end the call.",
+  "intent": "You are an existing Straus patient. You have a cosmetic consult this Friday at Park Avenue and you have to cancel it because you will be out of town. Answer their identity questions once \u2014 full name and date of birth \u2014 then continue with the cancel. If they also ask for ZIP, give it once. Ask what happens to the deposit you already put down. After they explain a missed-visit fee or that the deposit is forfeited, that answers the deposit question \u2014 say you still want Friday cancelled. If they offer another consult time, refuse it. If they offer the waitlist, a later opening, or to add you to a list, decline \u2014 you only want Friday cancelled. Then thank them and end the call. Do not ask to book or reschedule a new visit. Do not ask to add insurance, for a callback, to speak to a person, a bill, a payment, the patient portal, or a text. If they offer a billing or coverage callback about the deposit, refuse it. Do not ask for the street, floor, suite, or financing.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -90,32 +90,59 @@
           "status": "cancelled"
         }
       }
-    },
-    {
-      "name": "join_waitlist",
-      "output": {
-        "ok": true,
-        "data": {
-          "status": "added"
-        }
-      },
-      "parameters": {
-        "appointment_type_code": "COS_CONSULT",
-        "location_ids": [
-          "loc_park_ave"
-        ],
-        "earliest": "2026-08-24T00:00:00",
-        "latest": "2026-09-30T23:59:59"
-      }
     }
   ],
-  "behaviors": {},
+  "behaviors": {
+    "creativity": 0
+  },
   "scripted_responses": [
     {
       "match_type": "context",
       "match_phrase": "asks for your full name and date of birth, or asks you to confirm who you are, or asks for the patient's name and date of birth. NOT when asking only for a member ID or insurance card, NOT when asking which office or location, NOT when asking for a phone or mobile number, NOT when asking about an appointment day or time, NOT when reading your name and date of birth back to you for confirmation.",
       "response_type": "phrase",
       "response_value": "Maria Alvarez. My date of birth is June thirtieth, nineteen seventy-two."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers another consult time, a different appointment, or to reschedule or move Friday instead of cancelling. NOT when offering the waitlist, NOT when asking whether you still want to cancel.",
+      "response_type": "phrase",
+      "response_value": "No, I cannot take another time. I still want Friday cancelled."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers the waitlist, a later opening, or to add you to a list for a later consult. NOT when offering a specific appointment time to book now, NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "No waitlist. Please just finish cancelling Friday."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers a callback, a billing call-back, or to have billing or coverage call you about the deposit or the fee. NOT when confirming the cancellation or waitlist.",
+      "response_type": "phrase",
+      "response_value": "No thanks, I do not need a callback. Please just finish the cancel."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "reads your name and date of birth back to you and asks whether that is right, or asks you to confirm the name and date of birth they just repeated. NOT when first asking for your name and date of birth, NOT when asking for a phone or mobile number.",
+      "response_type": "phrase",
+      "response_value": "Yes, that's right."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to transfer you to a human, a person, the front desk, or a live agent. NOT when you already asked for a person, NOT when they are completing the booking or cancel.",
+      "response_type": "phrase",
+      "response_value": "No, I don't need a person. Please finish what I asked on this call."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers the waitlist, a later opening, or to add you to a list. NOT when offering a specific appointment time to book now, NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "No waitlist. Please just finish what I asked."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when asking for a payment-link number, NOT when asking for your mobile number for identity.",
+      "response_type": "phrase",
+      "response_value": "No thanks, I don't need a text."
     }
   ],
   "customer_name": "Maria Alvarez",
@@ -295,18 +322,7 @@
         "status": "booked"
       }
     ],
-    "waitlist": [
-      {
-        "id": 1,
-        "patient_id": "pat_maria_alvarez",
-        "appointment_type_code": "COS_CONSULT",
-        "location_ids": [
-          "loc_park_ave"
-        ],
-        "earliest": "2026-08-24T00:00:00",
-        "latest": "2026-09-30T23:59:59"
-      }
-    ],
+    "waitlist": [],
     "tool_events": [
       {
         "id": 1,

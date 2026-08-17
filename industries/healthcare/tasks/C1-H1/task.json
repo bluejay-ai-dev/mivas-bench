@@ -1,6 +1,6 @@
 {
   "task_name": "C1-H1: Possible skin cancer visit at Brooklyn Heights",
-  "intent": "You are a new patient and you are worried. In your first real answer, say that a doctor in Ohio told you a spot on your shoulder could be skin cancer and you want it looked at soon. You want the Brooklyn Heights office because that is where you can actually get to. Ask for the earliest time with a doctor, not a nurse visit if they give you a choice. Answer their questions, take that earliest doctor slot, confirm it, then thank them and end the call.",
+  "intent": "You are a new patient and you are worried. In your first real answer, say that a doctor in Ohio told you a spot on your shoulder could be skin cancer, and you want a skin-cancer visit soon \u2014 not a regular checkup \u2014 at the Brooklyn Heights office. Before you take a time, ask for the Brooklyn Heights street address, floor, and suite so you know exactly where to go. Then ask for the earliest opening with a doctor, not a nurse or a PA. When they ask who you are, give your name, date of birth, and mobile once, confirm the readback, and then continue. Take the first appointment time they offer. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first time out loud, then thank them and end the call. Do not ask to add or change insurance. Do not ask for a callback, to speak to a person, a bill, a payment, the patient portal, a waitlist, a text, or financing. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar. If they only list openings, say book the first one. In that first answer, say this is urgent \u2014 you need a skin-cancer or Mohs visit with a doctor soon, not a routine checkup. If they offer to transfer you to a person, refuse and stay until a time is booked.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -42,7 +42,6 @@
       "name": "classify_visit_request",
       "parameters": {
         "visit_class": "mohs",
-        "urgency": "urgent",
         "is_new_patient": true
       },
       "output": {
@@ -54,22 +53,9 @@
       }
     },
     {
-      "name": "check_plan_accepted",
-      "parameters": {
-        "carrier": "unitedhealthcare",
-        "location_id": "loc_brooklyn_heights"
-      },
-      "output": {
-        "ok": true,
-        "data": {
-          "accepted": true
-        }
-      }
-    },
-    {
       "name": "list_locations",
       "parameters": {
-        "zip": "11201"
+        "location_id": "loc_brooklyn_heights"
       }
     },
     {
@@ -98,8 +84,41 @@
       }
     }
   ],
-  "behaviors": {},
-  "scripted_responses": {},
+  "behaviors": {
+    "creativity": 0
+  },
+  "scripted_responses": [
+    {
+      "match_type": "context",
+      "match_phrase": "offers an appointment time, a slot, or asks which day or time you want AFTER already saying the street address, the floor, and the suite. NOT when they have not yet given all three, NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "I'll take the first time you offered."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to transfer you to a human, a person, the front desk, or a live agent. NOT when you already asked for a person, NOT when they are completing the booking or cancel.",
+      "response_type": "phrase",
+      "response_value": "No, I don't need a person. Please finish what I asked on this call."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers the waitlist, a later opening, or to add you to a list. NOT when offering a specific appointment time to book now, NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "No waitlist. Please just finish what I asked."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when asking for a payment-link number, NOT when asking for your mobile number for identity.",
+      "response_type": "phrase",
+      "response_value": "No thanks, I don't need a text."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers an appointment time, asks you to confirm a slot, or quotes an office name without the street address, floor, and suite. NOT when they have already said the street, the floor, and the suite.",
+      "response_type": "phrase",
+      "response_value": "Before I take a time, I need the street address, the floor, and the suite."
+    }
+  ],
   "customer_name": "Ronald Mercer",
   "customer_available_tools": {},
   "metadata": {

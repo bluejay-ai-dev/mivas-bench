@@ -1,6 +1,6 @@
 {
   "task_name": "C2-H1: Cancel tomorrow's follow-up",
-  "intent": "You are an existing Straus patient. You have a follow-up tomorrow at Park Avenue and you need it cancelled outright \u2014 you are travelling and you will not be back in time to rebook. Answer their identity questions. If they offer another time, say no, just cancel it. If they offer to put you on the waitlist for a later opening, say yes. Once it is cancelled, thank them and end the call.",
+  "intent": "You are an existing Straus patient. You have a follow-up tomorrow at Park Avenue and you need it cancelled outright because you are travelling. Answer their identity questions once with your name and date of birth, confirm if they read it back, then go straight to the cancellation. You will not rebook. If they offer another time, refuse it and say you only want this visit cancelled. After it is cancelled, if they offer the waitlist for a later opening, say yes and ask to be listed from August twenty-fourth through September thirtieth at Park Avenue \u2014 those calendar dates only. Do not name a clock time, and if they ask for a latest time of day say end of September thirtieth is fine. Then thank them and end the call. Do not ask to book or reschedule a new visit. Do not ask to add insurance, for a callback, to speak to a person, a bill, a payment, the patient portal, or a text. Do not ask for the street, floor, suite, or office id. Do not volunteer a ZIP. Give the waitlist window once. If they ask again, say you already gave August twenty-fourth through September thirtieth \u2014 do not agree to a second listing.",
   "traits": [
     {
       "trait_name": "zip",
@@ -69,14 +69,6 @@
       }
     },
     {
-      "name": "find_slots",
-      "parameters": {
-        "location_ids": [
-          "loc_park_ave"
-        ]
-      }
-    },
-    {
       "name": "cancel_appointment",
       "parameters": {
         "appointment_id": "1",
@@ -116,18 +108,61 @@
         "location_ids": [
           "loc_park_ave"
         ],
-        "earliest": "2026-08-24T00:00:00",
-        "latest": "2026-09-30T23:59:59"
+        "earliest": "2026-08-24T00:00:00"
       }
     }
   ],
-  "behaviors": {},
+  "behaviors": {
+    "creativity": 0
+  },
   "scripted_responses": [
     {
       "match_type": "context",
       "match_phrase": "asks for your full name and date of birth, or asks you to confirm who you are, or asks for the patient's name and date of birth. NOT when asking only for a member ID or insurance card, NOT when asking which office or location, NOT when asking for a phone or mobile number, NOT when asking about an appointment day or time, NOT when reading your name and date of birth back to you for confirmation.",
       "response_type": "phrase",
       "response_value": "Jordan Lee. My date of birth is April twelfth, nineteen ninety."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks for a waitlist window, start date, end date, earliest date, latest date, or when you would take an opening. NOT when asking for your name or date of birth, NOT when offering a specific appointment time to book now, NOT when asking whether you want the waitlist at all, NOT when you already gave August twenty-fourth through September thirtieth.",
+      "response_type": "phrase",
+      "response_value": "From August twenty-fourth through September thirtieth, at Park Avenue. Dates only \u2014 I don't have a clock time."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers another appointment time, to reschedule, or to rebook instead of cancelling. NOT when offering the waitlist, NOT when asking for a waitlist window, NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "No, I will not rebook. I only want tomorrow cancelled, then the waitlist."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "reads your name and date of birth back to you and asks whether that is right, or asks you to confirm the name and date of birth they just repeated. NOT when first asking for your name and date of birth, NOT when asking for a phone or mobile number.",
+      "response_type": "phrase",
+      "response_value": "Yes, that's right."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to transfer you to a human, a person, the front desk, or a live agent. NOT when you already asked for a person, NOT when they are completing the booking or cancel.",
+      "response_type": "phrase",
+      "response_value": "No, I don't need a person. Please finish what I asked on this call."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when asking for a payment-link number, NOT when asking for your mobile number for identity.",
+      "response_type": "phrase",
+      "response_value": "No thanks, I don't need a text."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks again for a waitlist window, start date, end date, or to add you a second time after you already gave August twenty-fourth through September thirtieth. NOT the first time they ask for the waitlist window.",
+      "response_type": "phrase",
+      "response_value": "I already gave that \u2014 August twenty-fourth through September thirtieth at Park Avenue. Please don't add me twice."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks to join the waitlist again, offers a second listing, or asks for the window again after you already gave August twenty-fourth through September thirtieth. NOT when first offering the waitlist.",
+      "response_type": "phrase",
+      "response_value": "I already gave August twenty-fourth through September thirtieth. Do not add a second listing."
     }
   ],
   "customer_name": "Jordan Lee",
