@@ -96,9 +96,21 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "reads your name and date of birth back to you and asks whether that is right, or asks you to confirm the name and date of birth they just repeated. NOT when first asking for your name and date of birth, NOT when asking for a phone or mobile number.",
+      "match_phrase": "reads your name and date of birth back to you and asks whether that is right before saying your identity was verified or your chart was opened. NOT when first asking for your name and date of birth, NOT when asking for a phone or mobile number, NOT after identity has already been verified.",
       "response_type": "phrase",
-      "response_value": "Yes, that's right."
+      "response_value": "Yes, that's right. Please verify me and pull my chart before checking the copay; my Aetna information is already on file."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks for your insurance carrier, member ID, provider, or other coverage details after only reading your name and date of birth back, without saying your identity was verified or your chart was opened. NOT when they have already verified you or pulled your chart.",
+      "response_type": "phrase",
+      "response_value": "Please verify me and pull my chart first. I am an existing patient, and my Aetna information is already on file."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "after verifying you or opening your chart, offers to continue with a coverage team, benefits check, eligibility check, or copay check to get the live copay. NOT when offering a human callback or front desk.",
+      "response_type": "phrase",
+      "response_value": "Yes, please continue with the coverage check and tell me the copay from the system."
     },
     {
       "match_type": "context",
