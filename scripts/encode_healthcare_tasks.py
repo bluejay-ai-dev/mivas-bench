@@ -910,7 +910,7 @@ def complete_call(
         filled = {key: value for key, value in filled.items() if key in allowed}
     if filled:
         return {**call, "parameters": filled}
-    return call
+    return {key: value for key, value in call.items() if key != "parameters"}
 
 
 def reshape_calls(task: dict[str, Any], folder: str) -> list[dict[str, Any]]:
