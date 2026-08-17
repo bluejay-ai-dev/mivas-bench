@@ -43,7 +43,10 @@
   ],
   "exp_tool_calls": [
     {
-      "name": "transfer_to_identity"
+      "name": "transfer_to_identity",
+      "parameters": {
+        "next_intent": "scheduling"
+      }
     },
     {
       "name": "transfer_to_scheduling"
@@ -77,8 +80,7 @@
         "provider_id": "prov_ruiz",
         "start": "2026-08-24T09:00:00",
         "end": "2026-08-24T09:30:00",
-        "appointment_type_code": "MED_FOLLOWUP",
-        "description": "eczema on hands follow-up"
+        "appointment_type_code": "MED_FOLLOWUP"
       },
       "output": {
         "ok": true,
@@ -287,7 +289,7 @@
         "appointment_type_code": "MED_FOLLOWUP",
         "start": "2026-08-24T09:00:00",
         "end": "2026-08-24T09:30:00",
-        "description": "eczema on hands follow-up",
+        "description": "follow-up visit",
         "status": "booked"
       }
     ],

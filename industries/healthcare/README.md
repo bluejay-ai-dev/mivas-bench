@@ -16,8 +16,9 @@ Prompts are written as real customer production prompts — not shortened for a 
 
 English only for this industry. There is **no safety agent**. Escalation is a
 single global tool, `transfer_to_human`. Handoffs between specialists are
-invisible: every `transfer_to_*` takes a `handoff_summary`, and the receiving
-agent continues mid-call (never re-greets).
+invisible: agent-to-agent `transfer_to_*` tools take no prose summary (call
+history is already visible), `transfer_to_identity` takes a `next_intent` enum,
+and the receiving agent continues mid-call (never re-greets).
 
 ## Escalation and refusal
 
@@ -51,5 +52,5 @@ uv run python tool_server.py
 # curl http://127.0.0.1:8000/state?call_id=675
 # curl -X POST http://127.0.0.1:8000/appointments -H 'content-type: application/json' \
 #   -H 'X-Mivas-Call-Id: 675' \
-#   -d '{"location_id":"loc_park_ave","provider_id":"prov_chen","appointment_type_code":"MED_NEW","start":"2026-09-01T09:00:00","end":"2026-09-01T09:30:00","description":"New patient visit"}'
+#   -d '{"location_id":"loc_park_ave","provider_id":"prov_chen","appointment_type_code":"NP_MED","start":"2026-09-01T09:00:00","end":"2026-09-01T09:30:00"}'
 ```

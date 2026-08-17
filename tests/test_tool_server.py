@@ -69,15 +69,22 @@ def _tool_flags(industry: str) -> dict[str, dict[str, Any]]:
 
 
 def _sample_value(name: str, prop: dict[str, Any]) -> Any:
+    if prop.get("enum"):
+        return prop["enum"][0]
     t = prop.get("type", "string")
     if t == "boolean":
         return False
     if t in ("integer", "number"):
         return 1
     if t == "array":
-        return []
+        items = prop.get("items") if isinstance(prop.get("items"), dict) else {}
+        return [_sample_value("item", items)] if items else []
     if t == "object":
         return {}
+    if prop.get("format") == "date":
+        return "2026-08-01"
+    if prop.get("format") == "date-time":
+        return "2026-08-01T09:00:00"
     if "date" in name or name in ("start", "end", "earliest", "latest", "dob"):
         return "2026-08-01"
     return "test"
@@ -117,7 +124,7 @@ _KNOWN_GOOD_ARGS: dict[str, dict[str, dict[str, Any]]] = {
         "get_patient_summary": {},
         "find_slots": {"location_ids": ["loc_park_ave"]},
         "explain_charge": {"line_item_id": "li_noshow"},
-        "search_practice_kb": {"query": "open"},
+        "search_practice_kb": {"topic": "hours"},
     },
     "finance": {
         "search_kb": {"query": "routing number"},
@@ -303,31 +310,27 @@ def test_healthcare_prompt_demands_are_satisfiable() -> None:
         assert tool("verify_identity", {"full_name": "Sam Nguyen", "dob": "1985-11-03"})["ok"]
         for priority, expect in (("stat", "hour"), ("urgent", "four"), ("routine", "business day")):
             msg = tool("create_clinical_message",
-                       {"category": "nurse_question", "priority": priority, "summary": "x"})
+                       {"category": "nurse_question", "priority": priority})
             assert msg["ok"], msg
             assert expect in msg["data"]["callback_window"], (priority, msg["data"])
             assert msg["data"]["spoken_commitment"], msg["data"]
 
-        # D4 — the hours question, phrased the way a caller phrases it, returns hours
-        for query in ("Park Avenue office hours closing time",
-                      "what time does the Park Avenue office close",
-                      "when do you open"):
-            kb = tool("search_practice_kb", {"query": query})
-            assert kb["data"]["source"] == "hours", (query, kb["data"])
-        # and parking still reaches directions
-        assert tool("search_practice_kb", {"query": "where do I park"})["data"]["source"] == "directions"
+        # D4 — each KB topic returns its own bucket
+        for topic in ("hours", "directions", "portal", "fees", "services"):
+            kb = tool("search_practice_kb", {"topic": topic})
+            assert kb["data"]["source"] == topic, (topic, kb["data"])
 
-        # list_locations by NAME, with no zip at all
-        by_name = tool("list_locations", {"name": "Brooklyn Heights"})
-        assert by_name["ok"], by_name
-        first = by_name["data"]["locations"][0]
+        # list_locations by location_id, with no zip at all
+        by_id = tool("list_locations", {"location_id": "loc_brooklyn_heights"})
+        assert by_id["ok"], by_id
+        first = by_id["data"]["locations"][0]
         assert first["id"] == "loc_brooklyn_heights", first
         assert first["floor"], first
         # zip still works and still wins for the caller's own zip
         assert tool("list_locations", {"zip": "34786"})["data"]["locations"][0]["id"] == "loc_windermere"
 
         # a rejected carrier gets no misleading alternatives
-        med = tool("check_plan_accepted", {"carrier": "Medicaid", "location_id": "Park Avenue"})
+        med = tool("check_plan_accepted", {"carrier": "medicaid", "location_id": "loc_park_ave"})
         assert med["data"]["accepted"] is False
         assert med["data"]["alternative_locations"] == [], med["data"]
         assert "not accepted at any" in med["data"]["notes"], med["data"]
@@ -438,7 +441,7 @@ def test_healthcare_flow_through_dispatch() -> None:
         booked = tool("book_appointment", {
             "slot_id": slot["slot_id"], "appointment_type_code": "MED_FOLLOWUP",
             "location_id": slot["location_id"], "provider_id": slot["provider_id"],
-            "start": slot["start"], "end": slot["end"], "description": "follow-up",
+            "start": slot["start"], "end": slot["end"],
         })
         assert booked["ok"], booked
         state = client.get("/state").json()
@@ -626,7 +629,6 @@ def test_industry_writes_do_not_leak_across_call_ids() -> None:
         "healthcare": [("create_callback_task", {
             "queue": "front_desk",
             "callback_number": "+12125550100",
-            "topic": "isolation write",
         })],
         "finance": [("escalate_to_human", {"reason_code": "caller_request"})],
         "legal": [
@@ -664,6 +666,75 @@ def test_industry_writes_do_not_leak_across_call_ids() -> None:
                 assert after_a != seed, industry
 
 
+_FREE_STRING_ALLOWLIST = {
+    ("identify_patient", "first_name"),
+    ("identify_patient", "last_name"),
+    ("verify_identity", "full_name"),
+    ("request_rx_refill", "medication_name"),
+}
+
+
+def test_healthcare_tool_inputs_are_closed() -> None:
+    """Every healthcare input is an enum, format, pattern, number, or bool.
+
+    Identity names and medication_name stay as patterned strings because they
+    are facts the caller speaks. Prose fields (summaries, queries, reasons)
+    are not allowed.
+    """
+    tools = json.loads(
+        (ROOT / "industries" / "healthcare" / "tools.json").read_text()
+    )["tools"]
+
+    def closed(prop: dict[str, Any]) -> bool:
+        if prop.get("enum") or prop.get("format") or prop.get("pattern"):
+            return True
+        types = prop.get("type")
+        type_set = {types} if isinstance(types, str) else set(types or [])
+        if type_set <= {"boolean", "integer", "number"}:
+            return True
+        if "array" in type_set:
+            items = prop.get("items") if isinstance(prop.get("items"), dict) else {}
+            return bool(items) and closed(items)
+        if "object" in type_set:
+            nested = prop.get("properties") or {}
+            return all(closed(child) for child in nested.values()) if nested else True
+        return False
+
+    leaks: list[str] = []
+    for spec in tools:
+        props = (spec.get("inputSchema") or {}).get("properties") or {}
+        for key, prop in props.items():
+            if (spec["name"], key) in _FREE_STRING_ALLOWLIST:
+                assert prop.get("pattern") or prop.get("enum"), (spec["name"], key)
+                continue
+            if not closed(prop):
+                leaks.append(f"{spec['name']}.{key}")
+    assert leaks == []
+
+
+def test_healthcare_expected_calls_match_schema() -> None:
+    """Checked-in expected calls must only send keys the tool actually accepts."""
+    tools = {
+        spec["name"]: set((spec.get("inputSchema") or {}).get("properties") or {})
+        for spec in json.loads(
+            (ROOT / "industries" / "healthcare" / "tools.json").read_text()
+        )["tools"]
+    }
+    extras: list[str] = []
+    for path in sorted((ROOT / "industries" / "healthcare" / "tasks").glob("*/task.json")):
+        task = json.loads(path.read_text())
+        for call in task.get("exp_tool_calls") or []:
+            name = call.get("name")
+            allowed = tools.get(name)
+            if allowed is None:
+                extras.append(f"{path.parent.name} unknown tool {name}")
+                continue
+            extra = sorted(set(call.get("parameters") or {}) - allowed)
+            if extra:
+                extras.append(f"{path.parent.name} {name} extra {extra}")
+    assert extras == []
+
+
 if __name__ == "__main__":
     test_dispatch_every_industry_tool()
     test_control_industry_rest_and_dispatch()
@@ -671,6 +742,8 @@ if __name__ == "__main__":
     test_finance_guards_survive_dispatch()
     test_healthcare_flow_through_dispatch()
     test_healthcare_calls_are_isolated()
+    test_healthcare_tool_inputs_are_closed()
+    test_healthcare_expected_calls_match_schema()
     test_healthcare_prompt_demands_are_satisfiable()
     test_healthcare_list_locations_has_what_the_prompts_require()
     test_travel_guards_survive_dispatch()

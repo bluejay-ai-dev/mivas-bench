@@ -49,7 +49,10 @@
   ],
   "exp_tool_calls": [
     {
-      "name": "transfer_to_identity"
+      "name": "transfer_to_identity",
+      "parameters": {
+        "next_intent": "clinical"
+      }
     },
     {
       "name": "transfer_to_clinical"
@@ -74,14 +77,16 @@
         "data": {
           "status": "resulted_pending_review"
         }
+      },
+      "parameters": {
+        "order_type": "pathology"
       }
     },
     {
       "name": "create_clinical_message",
       "parameters": {
         "priority": "urgent",
-        "category": "results_followup",
-        "summary": "Jordan Lee asking about results"
+        "category": "results_followup"
       },
       "output": {
         "ok": true
@@ -313,8 +318,7 @@
         "payload": {
           "patient_id": "pat_jordan_lee",
           "priority": "urgent",
-          "category": "results_followup",
-          "summary": "Jordan Lee asking about results"
+          "category": "results_followup"
         }
       },
       {
