@@ -1,6 +1,6 @@
 {
   "task_name": "C4-E1-SIG: Botox cost inquiry",
-  "intent": "You have been thinking about Botox and you want a sense of the price before you commit to coming in. Ask how much Botox costs at the Park Avenue office. You are not booking a consult on this call unless they really push it \u2014 a range is enough. Once you have a price range, thank them and end the call.",
+  "intent": "Ask how much Botox costs at the Park Avenue office. You want a price range only. Once you have it, thank them and end the call. Do not book a consult even if they offer one. If they offer a waitlist, financing, a deposit, a text, or a transfer to a person, decline. Do not ask to book, reschedule, or cancel. Do not ask to add insurance, for a callback, a bill, a payment, the patient portal, or the street, floor, or suite.",
   "traits": [
     {
       "trait_name": "preferred_office",
@@ -32,8 +32,29 @@
       }
     }
   ],
-  "behaviors": {},
-  "scripted_responses": {},
+  "behaviors": {
+    "creativity": 0
+  },
+  "scripted_responses": [
+    {
+      "match_type": "context",
+      "match_phrase": "offers to transfer you to a human, a person, the front desk, or a live agent. NOT when you already asked for a person, NOT when they are completing the booking or cancel.",
+      "response_type": "phrase",
+      "response_value": "No, I don't need a person. Please finish what I asked on this call."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers the waitlist, a later opening, or to add you to a list. NOT when offering a specific appointment time to book now, NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "No waitlist. Please just finish what I asked."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when asking for a payment-link number, NOT when asking for your mobile number for identity.",
+      "response_type": "phrase",
+      "response_value": "No thanks, I don't need a text."
+    }
+  ],
   "customer_name": "Bettina Rausch",
   "customer_available_tools": {},
   "metadata": {

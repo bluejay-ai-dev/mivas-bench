@@ -1,6 +1,6 @@
 {
   "task_name": "C3-E1-SIG: UnitedHealthcare at Brooklyn Heights",
-  "intent": "You are calling just to check coverage before you bother making an appointment. Ask whether Straus takes your insurance at the Brooklyn Heights office \u2014 that location specifically. If they ask which carrier, tell them. Once you have a clear office-specific answer, thank them and end the call.",
+  "intent": "Ask whether Straus takes UnitedHealthcare at the Brooklyn Heights office, that location specifically, not a yes for the whole practice. If they ask which carrier or plan, say UnitedHealthcare. You need a yes or no for UnitedHealthcare at Brooklyn Heights. If they say acceptance depends on the provider, tell them you do not have a provider yet and you still need that office-level yes or no; do not pick a provider and do not agree to wait until you book. Once they have given you a yes or no for that office, thank them and end the call. Do not ask to book, reschedule, or cancel. Do not ask to add or change insurance. Do not ask for a callback, to speak to a person, a bill, a payment, the patient portal, a waitlist, a text, financing, or the street, floor, or suite. A spoken yes for the whole practice is not enough. A spoken yes or no that names the office is enough. Thank them and end once you have that office-level answer.",
   "traits": [
     {
       "trait_name": "preferred_office",
@@ -21,23 +21,37 @@
   "exp_tool_calls": [
     {
       "name": "transfer_to_coverage"
-    },
-    {
-      "name": "check_plan_accepted",
-      "parameters": {
-        "carrier": "unitedhealthcare",
-        "location_id": "loc_brooklyn_heights"
-      },
-      "output": {
-        "ok": true,
-        "data": {
-          "accepted": true
-        }
-      }
     }
   ],
-  "behaviors": {},
-  "scripted_responses": {},
+  "behaviors": {
+    "creativity": 0
+  },
+  "scripted_responses": [
+    {
+      "match_type": "context",
+      "match_phrase": "offers to transfer you to a human, a person, the front desk, or a live agent. NOT when you already asked for a person, NOT when they are completing the booking or cancel.",
+      "response_type": "phrase",
+      "response_value": "No, I don't need a person. Please finish what I asked on this call."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers the waitlist, a later opening, or to add you to a list. NOT when offering a specific appointment time to book now, NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "No waitlist. Please just finish what I asked."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when asking for a payment-link number, NOT when asking for your mobile number for identity.",
+      "response_type": "phrase",
+      "response_value": "No thanks, I don't need a text."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "says they take the plan, accept the insurance, or that you are covered, without naming the office they just checked. NOT when they have just said they checked Brooklyn Heights specifically.",
+      "response_type": "phrase",
+      "response_value": "Which office did you check? I need Brooklyn Heights specifically, not the whole practice."
+    }
+  ],
   "customer_name": "Ellen Sturgis",
   "customer_available_tools": {},
   "metadata": {

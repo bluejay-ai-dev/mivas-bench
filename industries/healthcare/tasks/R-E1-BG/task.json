@@ -1,6 +1,6 @@
 {
   "task_name": "R-E1-BG: Ask for a person",
-  "intent": "You called the main number and you are done talking to a recording. As soon as someone picks up, say you do not want to talk to a machine and you want a real person. If they ask why, repeat once that you would just like a person \u2014 you do not owe them a medical reason. Once they say they are transferring you, stop talking and end the call.",
+  "intent": "As soon as someone picks up, say you do not want to talk to a machine and you want a real person. If they ask why, repeat once that you would just like a person. You do not owe them a medical reason. Once they say they are transferring you, stop talking and end the call. Do not ask to book, reschedule, cancel, add insurance, pay a bill, join a waitlist, get a text, or ask for the street, floor, or suite. If they try to help you themselves, repeat that you want a real person until they say they are transferring you.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -25,13 +25,33 @@
       }
     }
   ],
-  "behaviors": {},
+  "behaviors": {
+    "creativity": 0
+  },
   "scripted_responses": [
     {
       "match_type": "context",
       "match_phrase": "says they are transferring you to a person, connecting you to a human, or putting you through to someone now. NOT when asking why you want a person, NOT when asking you to hold for a specialist.",
       "response_type": "phrase",
       "response_value": "Thank you. Goodbye."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers the waitlist, a later opening, or to add you to a list. NOT when offering a specific appointment time to book now, NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "No waitlist. Please just finish what I asked."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when asking for a payment-link number, NOT when asking for your mobile number for identity.",
+      "response_type": "phrase",
+      "response_value": "No thanks, I don't need a text."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to look something up, book, quote a price, or help you themselves instead of transferring you to a person. NOT when they have just said they are transferring you.",
+      "response_type": "phrase",
+      "response_value": "I still want a real person. Please transfer me."
     }
   ],
   "customer_name": "Harriet Dowd",

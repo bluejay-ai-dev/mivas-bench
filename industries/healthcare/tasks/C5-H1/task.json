@@ -1,6 +1,6 @@
 {
   "task_name": "C5-H1: Large balance, cannot pay in full",
-  "intent": "You are an existing Straus patient. You got a bill for several hundred dollars and you cannot pay the whole thing this month. Answer their identity questions. Ask whether there is a payment plan or some way to spread it out. Accept whatever they offer and ask for it to be texted to you. Then thank them and end the call.",
+  "intent": "You are an existing Straus patient. You got a bill for several hundred dollars and you cannot pay the whole thing this month. Answer their identity questions once, confirm the readback, then stay on the bill. Ask whether there is a payment plan or some way to spread it out. Accept the financing they offer and ask for the payment link to be texted to you. Then thank them and end the call. Do not ask to book, reschedule, or cancel. Do not ask for a callback or to speak to a person. Do not ask about a waitlist, the patient portal, insurance, or the street, floor, or suite. Do not ask for any text other than the payment link. Stay until they have looked up a payment plan or financing in their system, then texted the payment link. A spoken 'we have plans' without a lookup is not enough.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -68,21 +68,9 @@
       }
     },
     {
-      "name": "explain_charge",
-      "output": {
-        "ok": true
-      },
-      "parameters": {
-        "line_item_id": "li_visit"
-      }
-    },
-    {
       "name": "offer_financing",
       "output": {
         "ok": true
-      },
-      "parameters": {
-        "amount_cents": 48000
       }
     },
     {
@@ -98,13 +86,45 @@
       }
     }
   ],
-  "behaviors": {},
+  "behaviors": {
+    "creativity": 0
+  },
   "scripted_responses": [
     {
       "match_type": "context",
       "match_phrase": "asks for your full name and date of birth, or asks you to confirm who you are, or asks for the patient's name and date of birth. NOT when asking only for a member ID or insurance card, NOT when asking which office or location, NOT when asking for a phone or mobile number, NOT when asking about an appointment day or time, NOT when reading your name and date of birth back to you for confirmation.",
       "response_type": "phrase",
       "response_value": "Maria Alvarez. My date of birth is June thirtieth, nineteen seventy-two."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "reads your name and date of birth back to you and asks whether that is right, or asks you to confirm the name and date of birth they just repeated. NOT when first asking for your name and date of birth, NOT when asking for a phone or mobile number.",
+      "response_type": "phrase",
+      "response_value": "Yes, that's right."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to transfer you to a human, a person, the front desk, or a live agent. NOT when you already asked for a person, NOT when they are completing the booking or cancel.",
+      "response_type": "phrase",
+      "response_value": "No, I don't need a person. Please finish what I asked on this call."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers the waitlist, a later opening, or to add you to a list. NOT when offering a specific appointment time to book now, NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "No waitlist. Please just finish what I asked."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when offering a payment link or deposit link, NOT when asking for a payment-link number, NOT when asking for your mobile number for identity.",
+      "response_type": "phrase",
+      "response_value": "No thanks, I don't need a text."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "thanks you, says goodbye, or offers a payment link before they have looked up a payment plan or financing. NOT when they have just confirmed a plan from their system.",
+      "response_type": "phrase",
+      "response_value": "I still need a way to spread this out. Please look up a payment plan before I go."
     }
   ],
   "customer_name": "Maria Alvarez",

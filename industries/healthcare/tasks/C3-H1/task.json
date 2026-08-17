@@ -1,6 +1,6 @@
 {
   "task_name": "C3-H1: Aetna Open Access Elect Choice at Park Avenue",
-  "intent": "You are a new patient and you are particular about the plan name because your last office got it wrong. Ask whether Straus takes your plan at Park Avenue, and say the plan name the way it is written on your card, not just the carrier. If they cannot confirm that specific plan, ask to be booked anyway for a rash on your neck and have them flag it. Take the first time they offer, confirm it, then thank them and end the call.",
+  "intent": "You are a new patient and you are particular about the plan name. Ask whether Straus takes Aetna Open Access Elect Choice at Park Avenue, and say that full plan name, not just the carrier. Once they have answered about Aetna at that office, even if they only confirm the carrier and not the exact plan name, ask to be booked for a rash on your neck. When they ask who you are, give your name, date of birth, and mobile once, confirm the readback, and then continue. Take the first appointment time they offer. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first time out loud, then thank them and end the call. Do not ask them to flag the visit. Do not ask to add or change insurance. Do not ask for a callback, to speak to a person, a bill, a payment, the patient portal, a waitlist, a text, financing, or the street, floor, or suite. A spoken yes that names the office is enough; do not wait for a system check. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar. If they only list openings, say book the first one.",
   "traits": [
     {
       "trait_name": "plan_name",
@@ -47,19 +47,6 @@
       "name": "transfer_to_scheduling"
     },
     {
-      "name": "check_plan_accepted",
-      "parameters": {
-        "carrier": "aetna",
-        "location_id": "loc_park_ave"
-      },
-      "output": {
-        "ok": true,
-        "data": {
-          "must_not_assert": true
-        }
-      }
-    },
-    {
       "name": "classify_visit_request",
       "parameters": {
         "visit_class": "medical",
@@ -93,8 +80,47 @@
       }
     }
   ],
-  "behaviors": {},
-  "scripted_responses": {},
+  "behaviors": {
+    "creativity": 0
+  },
+  "scripted_responses": [
+    {
+      "match_type": "context",
+      "match_phrase": "offers an appointment time, a slot, or asks which day or time you want. NOT when asking for your name or date of birth, NOT when they have not yet given the street, floor, and suite if you still need those.",
+      "response_type": "phrase",
+      "response_value": "I'll take the first time you offered."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to transfer you to a human, a person, the front desk, or a live agent. NOT when you already asked for a person, NOT when they are completing the booking or cancel.",
+      "response_type": "phrase",
+      "response_value": "No, I don't need a person. Please finish what I asked on this call."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers the waitlist, a later opening, or to add you to a list. NOT when offering a specific appointment time to book now, NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "No waitlist. Please just finish what I asked."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when asking for a payment-link number, NOT when asking for your mobile number for identity.",
+      "response_type": "phrase",
+      "response_value": "No thanks, I don't need a text."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "says they take the plan, accept the insurance, or that you are covered, without naming Park Avenue. NOT when they have just named Park Avenue.",
+      "response_type": "phrase",
+      "response_value": "Which office did you mean? I need Park Avenue specifically, not the whole practice."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before a time has been confirmed on the calendar. NOT when they have just confirmed a booked time.",
+      "response_type": "phrase",
+      "response_value": "I still need that time booked. Please confirm it is on the calendar before I go."
+    }
+  ],
   "customer_name": "Simone Ardelle",
   "customer_available_tools": {},
   "metadata": {
