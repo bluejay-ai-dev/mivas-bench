@@ -4,12 +4,10 @@
   "traits": [
     {
       "trait_name": "full_name",
-      "trait_data_type": "STRING",
       "value": "Bettina Rausch"
     },
     {
       "trait_name": "preferred_office",
-      "trait_data_type": "STRING",
       "value": "Park Avenue"
     }
   ],
@@ -43,9 +41,7 @@
     "category": "C4",
     "category_slug": "cosmetic-concierge",
     "difficulty": "easy",
-    "audio_condition": "perfect",
-    "source_case_key": "T4-E1",
-    "digital_human_id": 195946
+    "audio_condition": "perfect"
   },
   "exp_db_state": {
     "appointments": [

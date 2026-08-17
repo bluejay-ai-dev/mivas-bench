@@ -131,7 +131,6 @@ def customer_traits(dh: dict[str, Any]) -> list[dict[str, Any]]:
             continue
         kept.append({
             "trait_name": item.get("trait_name"),
-            "trait_data_type": item.get("trait_data_type") or "STRING",
             "value": item.get("value"),
         })
     return kept
@@ -361,12 +360,19 @@ def behaviors(dh: dict[str, Any]) -> dict[str, Any]:
     return raw if isinstance(raw, dict) else {}
 
 
+_SCRIPTED_KEEP = ("match_type", "match_phrase", "response_type", "response_value")
+
+
 def scripted_responses(dh: dict[str, Any]) -> Any:
     raw = dh.get("scripted_responses")
     if isinstance(raw, dict):
         return raw
     if isinstance(raw, list) and raw:
-        return raw
+        return [
+            {key: item[key] for key in _SCRIPTED_KEEP if key in item}
+            for item in raw
+            if isinstance(item, dict)
+        ]
     return {}
 
 
@@ -401,8 +407,6 @@ def encode(dh: dict[str, Any]) -> tuple[str, dict[str, Any]]:
             "category_slug": CATEGORY_SLUGS[category],
             "difficulty": difficulty_of(folder),
             "audio_condition": audio_of(folder),
-            "source_case_key": source_key,
-            "digital_human_id": dh.get("id"),
         },
         "exp_db_state": state,
     }

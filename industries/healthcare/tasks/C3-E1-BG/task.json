@@ -4,17 +4,14 @@
   "traits": [
     {
       "trait_name": "carrier",
-      "trait_data_type": "STRING",
       "value": "UnitedHealthcare"
     },
     {
       "trait_name": "preferred_office",
-      "trait_data_type": "STRING",
       "value": "Brooklyn Heights"
     },
     {
       "trait_name": "full_name",
-      "trait_data_type": "STRING",
       "value": "Ellen Sturgis"
     }
   ],
@@ -48,9 +45,7 @@
     "category": "C3",
     "category_slug": "coverage-and-benefits",
     "difficulty": "easy",
-    "audio_condition": "background_noise",
-    "source_case_key": "T3-E1-BG",
-    "digital_human_id": 195977
+    "audio_condition": "background_noise"
   },
   "exp_db_state": {
     "appointments": [

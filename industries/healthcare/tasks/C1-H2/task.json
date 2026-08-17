@@ -4,37 +4,30 @@
   "traits": [
     {
       "trait_name": "zip",
-      "trait_data_type": "STRING",
       "value": "10016"
     },
     {
       "trait_name": "patient_status",
-      "trait_data_type": "STRING",
       "value": "new"
     },
     {
       "trait_name": "full_name",
-      "trait_data_type": "STRING",
       "value": "Owen Castellanos"
     },
     {
       "trait_name": "carrier",
-      "trait_data_type": "STRING",
       "value": "Medicare"
     },
     {
       "trait_name": "mobile",
-      "trait_data_type": "STRING",
       "value": "212-555-0196"
     },
     {
       "trait_name": "date_of_birth",
-      "trait_data_type": "DATE",
       "value": "1957-01-30"
     },
     {
       "trait_name": "preferred_office",
-      "trait_data_type": "STRING",
       "value": "Park Avenue"
     }
   ],
@@ -116,9 +109,7 @@
     "category": "C1",
     "category_slug": "new-patient-access",
     "difficulty": "hard",
-    "audio_condition": "perfect",
-    "source_case_key": "T1-H2",
-    "digital_human_id": 195926
+    "audio_condition": "perfect"
   },
   "exp_db_state": {
     "appointments": [
