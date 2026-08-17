@@ -41,6 +41,7 @@ from harness import (  # noqa: E402
     end_session,
     ensure_agent,
     for_provider,
+    hangup_tool_names,
     industry_path,
     livekit_url,
     load_blueprint,
@@ -61,6 +62,7 @@ app = FastAPI(title="mivas retell chirp bridge")
 # ponytail: one agent id + one active call per process — benchmark runs are
 # sequential (max_concurrent=1). Per-call routing needs a call_id → root map.
 CFG: dict[str, Any] = {}
+_hangups: dict[str, asyncio.Event] = {}
 
 
 @app.post("/tool/{name}")
@@ -72,6 +74,11 @@ async def tool_webhook(name: str, request: Request) -> dict:
     for_provider(call_id)
     result = await run_tool(name, args, call_id=call_id)
     print(f"chirp tool {name} args={args} -> {result}", flush=True)
+    if name in (CFG.get("hangup_names") or set()) and call_id:
+        ev = _hangups.get(call_id)
+        if ev is not None:
+            ev.set()
+        print(f"chirp hangup after {name}", flush=True)
     return result
 
 
@@ -116,6 +123,7 @@ async def _bridge(ws: WebSocket) -> None:
     print(f"chirp retell call_id={call['call_id']}", flush=True)
 
     end = asyncio.Event()
+    _hangups[call["call_id"]] = end
     outq: asyncio.Queue[bytes | str] = asyncio.Queue()
     agent_otel = None
     agent_utt: str | None = None
@@ -259,6 +267,7 @@ async def _bridge(ws: WebSocket) -> None:
                 if not t.cancelled() and t.exception() is not None:
                     raise t.exception()  # type: ignore[misc]
     finally:
+        _hangups.pop(call["call_id"], None)
         unbind_provider(call["call_id"])
         end_session(session_key)
 
@@ -277,9 +286,11 @@ def main(model: str | None = None) -> None:
 
     industry_dir = industry_path(a.industry)
     ids = ensure_agent(industry_dir, public_url)
+    bp = load_blueprint(industry_dir)
     CFG.update(
         agent_id=ids["agent_id"],
-        bp=load_blueprint(industry_dir),
+        bp=bp,
+        hangup_names=hangup_tool_names(bp),
         model=a.model,
         workflow=f"mivas-{Path(industry_dir).name}-{a.model}",
     )

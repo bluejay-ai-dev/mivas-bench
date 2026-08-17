@@ -62,5 +62,5 @@ def test_session_config_handoff_update_skips_greeting(monkeypatch) -> None:
 def test_chirp_handoff_rewires_and_ends_human_transfer() -> None:
     text = (FAMILY / "adapters" / "chirp.py").read_text()
     assert 'session_config(bp, agent=role, greeting="")' in text
-    assert '"transfer_to_human"' in text
+    assert "should_end = should_end or stop" in text
     assert '{"type": "session.end"}' in text

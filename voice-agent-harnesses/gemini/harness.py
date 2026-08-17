@@ -209,7 +209,9 @@ async def _execute_tool(
         }, False
 
     if local is not None and local.get("session"):
-        return {"success": True}, True
+        if name == "end_call":
+            return {"success": True}, True
+        return await _dispatch(name, args), True
 
     # A handoff/session tool still visible from a *previous* agent (Gemini can
     # keep offering it post-handoff) must stay harness-native and fail here,

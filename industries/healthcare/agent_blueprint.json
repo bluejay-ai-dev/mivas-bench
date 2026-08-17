@@ -19,7 +19,8 @@
         },
         {
           "name": "transfer_to_human",
-          "handoff": false
+          "handoff": false,
+          "session": true
         },
         {
           "name": "end_call",
@@ -73,7 +74,8 @@
         },
         {
           "name": "transfer_to_human",
-          "handoff": false
+          "handoff": false,
+          "session": true
         },
         {
           "name": "end_call",
@@ -136,7 +138,8 @@
         },
         {
           "name": "transfer_to_human",
-          "handoff": false
+          "handoff": false,
+          "session": true
         },
         {
           "name": "end_call",
@@ -213,7 +216,8 @@
         },
         {
           "name": "transfer_to_human",
-          "handoff": false
+          "handoff": false,
+          "session": true
         },
         {
           "name": "end_call",
@@ -265,7 +269,8 @@
         },
         {
           "name": "transfer_to_human",
-          "handoff": false
+          "handoff": false,
+          "session": true
         },
         {
           "name": "end_call",
@@ -325,7 +330,8 @@
         },
         {
           "name": "transfer_to_human",
-          "handoff": false
+          "handoff": false,
+          "session": true
         },
         {
           "name": "end_call",
@@ -381,7 +387,8 @@
         },
         {
           "name": "transfer_to_human",
-          "handoff": false
+          "handoff": false,
+          "session": true
         },
         {
           "name": "end_call",

@@ -1764,7 +1764,7 @@ def _selfcheck() -> None:
             flags.setdefault(t["name"], t)
     dispatchable = {n for n in names
                     if not flags.get(n, {}).get("handoff")
-                    and not flags.get(n, {}).get("session")}
+                    and n != "end_call"}
     assert dispatchable == set(DISPATCH), sorted(dispatchable ^ set(DISPATCH))
 
     for absent in ("not_a_tool", "end_call", "transfer_to_irrops"):

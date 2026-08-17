@@ -233,7 +233,7 @@ async def _execute_tool(
         state["agent"] = target
         return {"success": True, "role": target}, False
 
-    if name == "end_call" or is_session_tool(bp, state["agent"], name):
+    if name == "end_call":
         return {"success": True}, True
 
     async with httpx.AsyncClient(timeout=30.0) as client:
@@ -242,7 +242,10 @@ async def _execute_tool(
             json={"arguments": args},
             headers=tool_headers(),
         )
-        return resp.json(), False
+        result = resp.json()
+        if is_session_tool(bp, state["agent"], name):
+            return result, True
+        return result, False
 
 
 async def run_tool(

@@ -40,6 +40,7 @@ from call_id import (  # noqa: E402
     set_call_id,
     unbind_provider,
 )
+from session_tools import hangup_tool_names as _hangup_names  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 HARNESS_DIR = Path(__file__).resolve().parent
@@ -87,6 +88,11 @@ def load_blueprint(industry_dir: str | Path) -> dict[str, Any]:
         # would open with the control-industry repair-shop greeting
         "greeting": blueprint.get("greeting"),
     }
+
+
+def hangup_tool_names(bp: dict[str, Any]) -> set[str]:
+    """Human-transfer session tools: POST, then the chirp bridge hangs up."""
+    return _hangup_names(bp["agents"].values())
 
 
 def _api_key() -> str:
@@ -187,7 +193,7 @@ def _build_tools(
                     )
                 )
             continue
-        if t.get("session") or name == "end_call":
+        if name == "end_call":
             tools.append({"type": "endCall"})
             continue
         spec = bp["catalog"].get(name)
@@ -335,13 +341,14 @@ def start_websocket_call(squad_id: str) -> tuple[str, str]:
 
 
 def webhook_tool_names(bp: dict[str, Any]) -> set[str]:
-    """The tools that execute through our webhook: every non-handoff,
-    non-session blueprint tool (handoff/endCall run Vapi-side)."""
+    """The tools that execute through our webhook: every non-handoff
+    blueprint tool except `end_call` (handoff/endCall run Vapi-side).
+    Human-transfer session tools stay named function tools so they POST."""
     return {
         t["name"]
         for entry in bp["agents"].values()
         for t in entry["tools"]
-        if not t.get("handoff") and not t.get("session") and t["name"] in bp["catalog"]
+        if not t.get("handoff") and t["name"] != "end_call" and t["name"] in bp["catalog"]
     }
 
 
