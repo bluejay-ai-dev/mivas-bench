@@ -4,37 +4,30 @@
   "traits": [
     {
       "trait_name": "full_name",
-      "trait_data_type": "STRING",
       "value": "Priya Raghunathan"
     },
     {
       "trait_name": "mobile",
-      "trait_data_type": "STRING",
       "value": "718-555-0192"
     },
     {
       "trait_name": "zip",
-      "trait_data_type": "STRING",
       "value": "11201"
     },
     {
       "trait_name": "patient_status",
-      "trait_data_type": "STRING",
       "value": "new"
     },
     {
       "trait_name": "carrier",
-      "trait_data_type": "STRING",
       "value": "Cigna"
     },
     {
       "trait_name": "date_of_birth",
-      "trait_data_type": "DATE",
       "value": "1990-02-27"
     },
     {
       "trait_name": "preferred_office",
-      "trait_data_type": "STRING",
       "value": "Brooklyn Heights"
     }
   ],
@@ -89,9 +82,7 @@
     "category": "C1",
     "category_slug": "new-patient-access",
     "difficulty": "medium",
-    "audio_condition": "perfect",
-    "source_case_key": "T1-M2",
-    "digital_human_id": 195923
+    "audio_condition": "perfect"
   },
   "exp_db_state": {
     "appointments": [

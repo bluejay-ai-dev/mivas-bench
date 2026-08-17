@@ -4,32 +4,26 @@
   "traits": [
     {
       "trait_name": "full_name",
-      "trait_data_type": "STRING",
       "value": "Lorraine Hobbs"
     },
     {
       "trait_name": "zip",
-      "trait_data_type": "STRING",
       "value": "10016"
     },
     {
       "trait_name": "patient_status",
-      "trait_data_type": "STRING",
       "value": "new"
     },
     {
       "trait_name": "mobile",
-      "trait_data_type": "STRING",
       "value": "212-555-0184"
     },
     {
       "trait_name": "date_of_birth",
-      "trait_data_type": "DATE",
       "value": "1966-07-27"
     },
     {
       "trait_name": "preferred_office",
-      "trait_data_type": "STRING",
       "value": "Park Avenue"
     }
   ],
@@ -74,9 +68,7 @@
     "category": "C4",
     "category_slug": "cosmetic-concierge",
     "difficulty": "medium",
-    "audio_condition": "perfect",
-    "source_case_key": "T4-M2",
-    "digital_human_id": 195950
+    "audio_condition": "perfect"
   },
   "exp_db_state": {
     "appointments": [

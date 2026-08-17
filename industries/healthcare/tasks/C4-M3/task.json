@@ -4,17 +4,14 @@
   "traits": [
     {
       "trait_name": "full_name",
-      "trait_data_type": "STRING",
       "value": "Ruth Ellinger"
     },
     {
       "trait_name": "mobile",
-      "trait_data_type": "STRING",
       "value": "718-555-0188"
     },
     {
       "trait_name": "preferred_office",
-      "trait_data_type": "STRING",
       "value": "Brooklyn Heights"
     }
   ],
@@ -52,9 +49,7 @@
     "category": "C4",
     "category_slug": "cosmetic-concierge",
     "difficulty": "medium",
-    "audio_condition": "perfect",
-    "source_case_key": "T4-M3",
-    "digital_human_id": 195951
+    "audio_condition": "perfect"
   },
   "exp_db_state": {
     "appointments": [

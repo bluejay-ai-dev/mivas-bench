@@ -4,37 +4,30 @@
   "traits": [
     {
       "trait_name": "full_name",
-      "trait_data_type": "STRING",
       "value": "Hal Brenner"
     },
     {
       "trait_name": "mobile",
-      "trait_data_type": "STRING",
       "value": "212-555-0194"
     },
     {
       "trait_name": "date_of_birth",
-      "trait_data_type": "DATE",
       "value": "1975-12-02"
     },
     {
       "trait_name": "carrier",
-      "trait_data_type": "STRING",
       "value": "Aetna"
     },
     {
       "trait_name": "patient_status",
-      "trait_data_type": "STRING",
       "value": "new"
     },
     {
       "trait_name": "zip",
-      "trait_data_type": "STRING",
       "value": "10016"
     },
     {
       "trait_name": "preferred_office",
-      "trait_data_type": "STRING",
       "value": "Park Avenue"
     }
   ],
@@ -99,9 +92,7 @@
     "category": "C1",
     "category_slug": "new-patient-access",
     "difficulty": "medium",
-    "audio_condition": "perfect",
-    "source_case_key": "T1-M1",
-    "digital_human_id": 195922
+    "audio_condition": "perfect"
   },
   "exp_db_state": {
     "appointments": [

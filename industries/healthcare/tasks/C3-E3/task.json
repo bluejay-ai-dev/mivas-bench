@@ -4,17 +4,14 @@
   "traits": [
     {
       "trait_name": "full_name",
-      "trait_data_type": "STRING",
       "value": "Nadine Corliss"
     },
     {
       "trait_name": "preferred_office",
-      "trait_data_type": "STRING",
       "value": "Park Avenue"
     },
     {
       "trait_name": "carrier",
-      "trait_data_type": "STRING",
       "value": "Aetna"
     }
   ],
@@ -48,9 +45,7 @@
     "category": "C3",
     "category_slug": "coverage-and-benefits",
     "difficulty": "easy",
-    "audio_condition": "perfect",
-    "source_case_key": "T3-E3",
-    "digital_human_id": 195939
+    "audio_condition": "perfect"
   },
   "exp_db_state": {
     "appointments": [

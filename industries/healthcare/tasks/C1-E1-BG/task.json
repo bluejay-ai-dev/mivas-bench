@@ -4,27 +4,22 @@
   "traits": [
     {
       "trait_name": "carrier",
-      "trait_data_type": "STRING",
       "value": "Aetna"
     },
     {
       "trait_name": "zip",
-      "trait_data_type": "STRING",
       "value": "10016"
     },
     {
       "trait_name": "preferred_office",
-      "trait_data_type": "STRING",
       "value": "Park Avenue"
     },
     {
       "trait_name": "patient_status",
-      "trait_data_type": "STRING",
       "value": "new"
     },
     {
       "trait_name": "full_name",
-      "trait_data_type": "STRING",
       "value": "Dana Whitfield"
     }
   ],
@@ -59,9 +54,7 @@
     "category": "C1",
     "category_slug": "new-patient-access",
     "difficulty": "easy",
-    "audio_condition": "background_noise",
-    "source_case_key": "T1-E1-BG",
-    "digital_human_id": 195973
+    "audio_condition": "background_noise"
   },
   "exp_db_state": {
     "appointments": [

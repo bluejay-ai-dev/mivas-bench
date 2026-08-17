@@ -4,37 +4,30 @@
   "traits": [
     {
       "trait_name": "mobile",
-      "trait_data_type": "STRING",
       "value": "212-555-0185"
     },
     {
       "trait_name": "preferred_office",
-      "trait_data_type": "STRING",
       "value": "Park Avenue"
     },
     {
       "trait_name": "full_name",
-      "trait_data_type": "STRING",
       "value": "Yvette Marchetti"
     },
     {
       "trait_name": "date_of_birth",
-      "trait_data_type": "DATE",
       "value": "1974-03-15"
     },
     {
       "trait_name": "carrier",
-      "trait_data_type": "STRING",
       "value": "Aetna"
     },
     {
       "trait_name": "patient_status",
-      "trait_data_type": "STRING",
       "value": "new"
     },
     {
       "trait_name": "zip",
-      "trait_data_type": "STRING",
       "value": "10016"
     }
   ],
@@ -115,9 +108,7 @@
     "category": "C4",
     "category_slug": "cosmetic-concierge",
     "difficulty": "hard",
-    "audio_condition": "perfect",
-    "source_case_key": "T4-H3",
-    "digital_human_id": 195954
+    "audio_condition": "perfect"
   },
   "exp_db_state": {
     "appointments": [

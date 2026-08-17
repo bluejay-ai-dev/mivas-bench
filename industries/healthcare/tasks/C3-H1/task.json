@@ -4,42 +4,34 @@
   "traits": [
     {
       "trait_name": "plan_name",
-      "trait_data_type": "STRING",
       "value": "Open Access Elect Choice"
     },
     {
       "trait_name": "patient_status",
-      "trait_data_type": "STRING",
       "value": "new"
     },
     {
       "trait_name": "full_name",
-      "trait_data_type": "STRING",
       "value": "Simone Ardelle"
     },
     {
       "trait_name": "carrier",
-      "trait_data_type": "STRING",
       "value": "Aetna"
     },
     {
       "trait_name": "zip",
-      "trait_data_type": "STRING",
       "value": "10016"
     },
     {
       "trait_name": "date_of_birth",
-      "trait_data_type": "DATE",
       "value": "1987-11-16"
     },
     {
       "trait_name": "mobile",
-      "trait_data_type": "STRING",
       "value": "212-555-0182"
     },
     {
       "trait_name": "preferred_office",
-      "trait_data_type": "STRING",
       "value": "Park Avenue"
     }
   ],
@@ -123,9 +115,7 @@
     "category": "C3",
     "category_slug": "coverage-and-benefits",
     "difficulty": "hard",
-    "audio_condition": "perfect",
-    "source_case_key": "T3-H1",
-    "digital_human_id": 195943
+    "audio_condition": "perfect"
   },
   "exp_db_state": {
     "appointments": [

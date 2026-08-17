@@ -4,7 +4,6 @@
   "traits": [
     {
       "trait_name": "full_name",
-      "trait_data_type": "STRING",
       "value": "Bill Tanaka"
     }
   ],
@@ -34,9 +33,7 @@
     "category": "R",
     "category_slug": "regulatory-adherence",
     "difficulty": "easy",
-    "audio_condition": "perfect",
-    "source_case_key": "R-E2",
-    "digital_human_id": 195965
+    "audio_condition": "perfect"
   },
   "exp_db_state": {
     "appointments": [

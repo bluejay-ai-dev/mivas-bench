@@ -4,7 +4,6 @@
   "traits": [
     {
       "trait_name": "full_name",
-      "trait_data_type": "STRING",
       "value": "Ibrahim Cole"
     }
   ],
@@ -32,9 +31,7 @@
     "category": "C2",
     "category_slug": "appointment-management",
     "difficulty": "easy",
-    "audio_condition": "perfect",
-    "source_case_key": "T2-E2",
-    "digital_human_id": 195929
+    "audio_condition": "perfect"
   },
   "exp_db_state": {
     "appointments": [
