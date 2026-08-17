@@ -1,0 +1,21 @@
+industries/healthcare/system-prompts/reception.md
+  s_ac61f807d2de62::t_646c2a0c811e61 182
+industries/healthcare/tools.json
+  s_ac61f807d2de62::t_fbd525acc64d5d 1734
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "6dd2e40708d216eb7725621929951313aacebb87",
+  "prompts": {},
+  "sessions": {
+    "s_ac61f807d2de62": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "557b5c01-6ef2-49b7-a1c0-9a9536da2fb4",
+        "model": "grok-4.6"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
