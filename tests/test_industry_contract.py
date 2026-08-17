@@ -35,7 +35,8 @@ KNOWN_GAPS: dict[str, set[str]] = {
 
 REQUIRED_FILES = {"README.md", "agent_blueprint.json", "tools.json",
                   "tool_server.py", "requirements.txt"}
-ALLOWED_EXTRA = {"agent_blueprint.mmd", "db", "system-prompts", "docs", "__pycache__", ".DS_Store"}
+ALLOWED_EXTRA = {"agent_blueprint.mmd", "db", "system-prompts", "docs", "tasks",
+                 "__pycache__", ".DS_Store"}
 
 
 def _industry_params():
