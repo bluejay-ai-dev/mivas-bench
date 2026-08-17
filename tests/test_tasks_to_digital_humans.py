@@ -134,3 +134,53 @@ def test_success_criteria_from_tools() -> None:
     ])
     assert three == "Success requires A, B, and C to have been called."
     assert three.startswith("Success requires")
+
+
+def test_claim_updates_include_expected_tool_calls() -> None:
+    want = _humans()[0]
+    live = [{
+        "id": 99,
+        "test_name": want["test_name"],
+        "traits": want["traits"],
+        "expected_tool_calls": [],
+    }]
+    updates = conv.claim_updates([want], live)
+    assert len(updates) == 1
+    patch = updates[0]["update"]
+    assert patch["expected_tool_calls"] == want["expected_tool_calls"]
+    assert patch["intent"] == want["intent"]
+    assert patch["success_criteria"] == want["success_criteria"]
+    assert patch["test_name"] == want["test_name"]
+    assert patch["traits"] == want["traits"]
+
+
+def test_api_url_reads_env_after_import(monkeypatch) -> None:
+    monkeypatch.setenv("BLUEJAY_API_URL", "https://example.test/v1/")
+    assert conv.api_url() == "https://example.test/v1"
+
+
+def test_json_emits_raw_digital_humans(capsys) -> None:
+    import json
+
+    conv.main(["--industry", "healthcare", "--json"])
+    body = json.loads(capsys.readouterr().out)
+    humans = body["digital_humans"]
+    assert len(humans) == 66
+    assert "digital_human" not in humans[0]
+    assert "expected_tool_calls" in humans[0]
+    assert "test_name" in humans[0]
+
+
+def test_encoder_slugs_stay_inside_enums() -> None:
+    spec = importlib.util.spec_from_file_location(
+        "encode_healthcare_tasks", ROOT / "scripts" / "encode_healthcare_tasks.py"
+    )
+    assert spec is not None and spec.loader is not None
+    enc = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(enc)
+    assert enc.slug_carrier("Humana") == "other"
+    assert enc.slug_location("unknown clinic") is None
+    assert enc.slug_cosmetic("laser") is None
+    assert enc.slug_cosmetic("thread lift") is None
+    assert enc.slug_cosmetic("botox") == "botox"
+    assert enc.slug_location("Park Avenue") == "loc_park_ave"

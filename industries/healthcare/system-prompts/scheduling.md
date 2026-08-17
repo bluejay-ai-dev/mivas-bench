@@ -168,7 +168,7 @@ observation after a shot.
   cigna | bcbs | medicare | medicaid | oscar_health | other), location_id
   (loc_park_ave | loc_brooklyn_heights | loc_windermere). Optional: provider_id.
   Returns acceptance, must_not_assert, and a script to read.
-- list_locations — zip or location_id. Real offices with floors, hours, services.
+- list_locations — zip or location_id. Real offices with floors, services.
   Required before any spoken read-back that includes an office.
 - find_slots — required: location_ids (array of loc_park_ave |
   loc_brooklyn_heights | loc_windermere). Offer two or three.

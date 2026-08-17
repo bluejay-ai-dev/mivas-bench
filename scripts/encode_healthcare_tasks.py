@@ -626,7 +626,7 @@ def slug_carrier(value: Any) -> str | None:
     compact = "".join(ch for ch in str(value or "").lower() if ch.isalnum())
     if not compact:
         return None
-    return CARRIER_SLUGS.get(compact, compact)
+    return CARRIER_SLUGS.get(compact, "other")
 
 
 def slug_location(value: Any) -> str | None:
@@ -638,12 +638,12 @@ def slug_location(value: Any) -> str | None:
     for key, loc_id in OFFICE_TO_LOCATION.items():
         if key in said or said in key:
             return loc_id
-    return said
+    return None
 
 
-def slug_cosmetic(value: Any) -> str:
+def slug_cosmetic(value: Any) -> str | None:
     slug = str(value or "").strip().lower().replace(" ", "_")
-    return slug if slug in COSMETIC_SERVICES else slug
+    return slug if slug in COSMETIC_SERVICES else None
 
 
 def infer_next_intent(calls: list[dict[str, Any]]) -> str:
@@ -676,11 +676,15 @@ def cosmetic_interest(task: dict[str, Any], calls: list[dict[str, Any]]) -> list
         if call.get("name") == "quote_cosmetic_service":
             service = (call.get("parameters") or {}).get("service")
             if service:
-                return [str(service).replace(" ", "_")]
+                mapped = slug_cosmetic(service)
+                if mapped:
+                    return [mapped]
     intent = str(task.get("intent") or "").lower()
-    for service in ("botox", "filler", "thread lift", "laser", "chemical peel", "microneedling"):
+    for service in ("botox", "filler", "chemical peel", "microneedling"):
         if service in intent:
-            return [service.replace(" ", "_")]
+            mapped = slug_cosmetic(service)
+            if mapped:
+                return [mapped]
     return ["botox"]
 
 
@@ -713,7 +717,9 @@ def complete_call(
         for key, value in slot.items():
             params.setdefault(key, value)
         params.setdefault("service_interest", cosmetic_interest(task, calls))
-        params["service_interest"] = [slug_cosmetic(item) for item in params["service_interest"]]
+        params["service_interest"] = [
+            slug for slug in (slug_cosmetic(item) for item in params["service_interest"]) if slug
+        ] or ["botox"]
         params.setdefault("policy_acknowledged", True)
         params.pop("end", None)
 
@@ -737,9 +743,8 @@ def complete_call(
         )
         params["appointment_type_code"] = wait_type
         params.setdefault("location_ids", [loc])
-        params["location_ids"] = [
-            slug_location(item) or str(item) for item in params["location_ids"]
-        ]
+        mapped_ids = [slug_location(item) for item in params["location_ids"]]
+        params["location_ids"] = [item for item in mapped_ids if item] or [loc]
         params.setdefault("earliest", "2026-08-24T00:00:00")
         params.setdefault("latest", "2026-09-30T23:59:59")
 
@@ -813,9 +818,10 @@ def complete_call(
 
     elif name == "find_slots":
         params.setdefault("location_ids", [location_id_from(task, params)])
+        mapped_ids = [slug_location(item) for item in params["location_ids"]]
         params["location_ids"] = [
-            slug_location(item) or str(item) for item in params["location_ids"]
-        ]
+            item for item in mapped_ids if item
+        ] or [location_id_from(task, params)]
 
     elif name == "transfer_to_human":
         params.setdefault("destination", "patient_support_center")
@@ -846,7 +852,11 @@ def complete_call(
 
     elif name == "quote_cosmetic_service":
         if params.get("service"):
-            params["service"] = slug_cosmetic(params["service"])
+            mapped = slug_cosmetic(params["service"])
+            if mapped:
+                params["service"] = mapped
+            else:
+                params.pop("service", None)
 
     elif name == "list_locations":
         params.pop("name", None)

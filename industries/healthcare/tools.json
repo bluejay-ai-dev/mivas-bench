@@ -10,14 +10,14 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 80,
-            "pattern": "^[A-Za-z][A-Za-z '\\-]{0,79}$",
+            "pattern": "^[A-Za-zÀ-ÖØ-öø-ÿ][A-Za-zÀ-ÖØ-öø-ÿ '.\\-]{0,79}$",
             "description": "Given name as stated."
           },
           "last_name": {
             "type": "string",
             "minLength": 1,
             "maxLength": 80,
-            "pattern": "^[A-Za-z][A-Za-z '\\-]{0,79}$",
+            "pattern": "^[A-Za-zÀ-ÖØ-öø-ÿ][A-Za-zÀ-ÖØ-öø-ÿ '.\\-]{0,79}$",
             "description": "Family name as stated."
           },
           "dob": {
@@ -64,7 +64,7 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 80,
-            "pattern": "^[A-Za-z][A-Za-z '\\-]{0,79}$",
+            "pattern": "^[A-Za-zÀ-ÖØ-öø-ÿ][A-Za-zÀ-ÖØ-öø-ÿ '.\\-]{0,79}$",
             "description": "Full legal name, given name then family name."
           },
           "dob": {
@@ -1151,7 +1151,7 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 80,
-            "pattern": "^[A-Za-z][A-Za-z0-9 \\-]{0,79}$",
+            "pattern": "^[A-Za-z][A-Za-z0-9 ./()&\\-]{0,79}$",
             "description": "Medication name as stated."
           },
           "pharmacy_phone": {
