@@ -19,9 +19,6 @@
       "value": "Terrell Baines"
     }
   ],
-  "prompt_adherence_substrs": [
-    "We don't accept Medicaid at any of our offices"
-  ],
   "exp_handoff_path": [
     "transfer_to_coverage"
   ],

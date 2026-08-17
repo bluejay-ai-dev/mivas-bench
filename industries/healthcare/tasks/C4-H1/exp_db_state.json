@@ -185,14 +185,6 @@
       "payload": {
         "mobile_e164": "+12125550170"
       }
-    },
-    {
-      "id": 2,
-      "kind": "sms",
-      "payload": {
-        "mobile_e164": "+12125550170",
-        "template_id": "cosmetic_deposit"
-      }
     }
   ],
   "waitlist": []

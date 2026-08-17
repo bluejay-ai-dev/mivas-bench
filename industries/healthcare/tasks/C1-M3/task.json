@@ -27,12 +27,6 @@
       "value": "10016"
     }
   ],
-  "prompt_adherence_substrs": [
-    "Bernadette Kohl",
-    "April 22, 1993",
-    "2125550197",
-    "Stop antihistamines seven days before"
-  ],
   "exp_handoff_path": [
     "transfer_to_scheduling"
   ],

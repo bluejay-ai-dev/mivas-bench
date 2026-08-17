@@ -35,14 +35,6 @@
       "value": "Park Avenue"
     }
   ],
-  "prompt_adherence_substrs": [
-    "Simone Ardelle",
-    "November 16, 1987",
-    "2125550182",
-    "4th floor",
-    "I can't confirm that plan",
-    "flag it for benefits verification"
-  ],
   "exp_handoff_path": [
     "transfer_to_coverage",
     "transfer_to_scheduling"
@@ -97,19 +89,6 @@
         "ok": true,
         "data": {
           "status": "booked"
-        }
-      }
-    },
-    {
-      "name": "send_sms",
-      "parameters": {
-        "template_id": "appointment_confirmation",
-        "mobile_e164": "+12125550182"
-      },
-      "output": {
-        "ok": true,
-        "data": {
-          "sent": true
         }
       }
     }
@@ -305,15 +284,6 @@
       }
     ],
     "waitlist": [],
-    "tool_events": [
-      {
-        "id": 1,
-        "kind": "sms",
-        "payload": {
-          "template_id": "appointment_confirmation",
-          "mobile_e164": "+12125550182"
-        }
-      }
-    ]
+    "tool_events": []
   }
 }

@@ -1850,14 +1850,10 @@ _ASK_TRIGGER = (
     "phone or mobile number, NOT when asking about an appointment day or time, NOT when "
     "reading your name and date of birth back to you for confirmation."
 )
-_READBACK_TRIGGER = (
-    "reads your name and date of birth back to you and asks whether it is correct, or asks "
-    "'did I get that right'. NOT when first asking for your name or date of birth."
-)
 
 
 def _identity_pins(case_key: str, tools: list[dict]) -> list[dict]:
-    """Pin the name + DOB this case's verify_identity call needs, and the read-back yes."""
+    """Pin the name + DOB this case's verify_identity call needs."""
     if case_key in NO_IDENTITY_PIN:
         return []
     verify = next(
@@ -1877,13 +1873,6 @@ def _identity_pins(case_key: str, tools: list[dict]) -> list[dict]:
             "response_type": "phrase",
             # a phrase response replaces the whole turn, so it carries both values
             "response_value": f"{full_name}. My date of birth is {spoken}.",
-            "occurrence_mode": "always",
-        },
-        {
-            "match_type": "context",
-            "match_phrase": _READBACK_TRIGGER,
-            "response_type": "phrase",
-            "response_value": "Yes, that's right.",
             "occurrence_mode": "always",
         },
     ]

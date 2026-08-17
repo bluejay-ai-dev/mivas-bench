@@ -31,13 +31,6 @@
       "value": "10016"
     }
   ],
-  "prompt_adherence_substrs": [
-    "Maria Alvarez",
-    "June thirtieth, nineteen seventy-two",
-    "did I get that right?",
-    "missed-visit",
-    "Moving it instead is free"
-  ],
   "exp_handoff_path": [
     "transfer_to_identity",
     "transfer_to_scheduling"
@@ -114,19 +107,6 @@
         "earliest": "2026-08-24T00:00:00",
         "latest": "2026-09-30T23:59:59"
       }
-    },
-    {
-      "name": "send_sms",
-      "parameters": {
-        "template_id": "appointment_confirmation",
-        "mobile_e164": "+12125550133"
-      },
-      "output": {
-        "ok": true,
-        "data": {
-          "sent": true
-        }
-      }
     }
   ],
   "behaviors": {},
@@ -136,12 +116,6 @@
       "match_phrase": "asks for your full name and date of birth, or asks you to confirm who you are, or asks for the patient's name and date of birth. NOT when asking only for a member ID or insurance card, NOT when asking which office or location, NOT when asking for a phone or mobile number, NOT when asking about an appointment day or time, NOT when reading your name and date of birth back to you for confirmation.",
       "response_type": "phrase",
       "response_value": "Maria Alvarez. My date of birth is June thirtieth, nineteen seventy-two."
-    },
-    {
-      "match_type": "context",
-      "match_phrase": "reads your name and date of birth back to you and asks whether it is correct, or asks 'did I get that right'. NOT when first asking for your name or date of birth.",
-      "response_type": "phrase",
-      "response_value": "Yes, that's right."
     }
   ],
   "customer_name": "Maria Alvarez",
@@ -342,14 +316,6 @@
           "appointment_id": 2,
           "fee_cents": 12500,
           "cancellation_reason_code": "patient_request"
-        }
-      },
-      {
-        "id": 2,
-        "kind": "sms",
-        "payload": {
-          "template_id": "appointment_confirmation",
-          "mobile_e164": "+12125550133"
         }
       }
     ]

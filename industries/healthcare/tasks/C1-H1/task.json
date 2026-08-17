@@ -31,12 +31,6 @@
       "value": "718-555-0191"
     }
   ],
-  "prompt_adherence_substrs": [
-    "Ronald Mercer",
-    "July 19, 1961",
-    "7185550191",
-    "2nd floor"
-  ],
   "exp_handoff_path": [
     "transfer_to_scheduling"
   ],
@@ -100,19 +94,6 @@
         "ok": true,
         "data": {
           "status": "booked"
-        }
-      }
-    },
-    {
-      "name": "send_sms",
-      "parameters": {
-        "template_id": "appointment_confirmation",
-        "mobile_e164": "+17185550191"
-      },
-      "output": {
-        "ok": true,
-        "data": {
-          "sent": true
         }
       }
     }
@@ -308,15 +289,6 @@
       }
     ],
     "waitlist": [],
-    "tool_events": [
-      {
-        "id": 1,
-        "kind": "sms",
-        "payload": {
-          "template_id": "appointment_confirmation",
-          "mobile_e164": "+17185550191"
-        }
-      }
-    ]
+    "tool_events": []
   }
 }

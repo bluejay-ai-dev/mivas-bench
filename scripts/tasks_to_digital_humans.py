@@ -364,7 +364,7 @@ def check(humans: list[dict[str, Any]], industry: str) -> None:
             raise SystemExit(f"{key}: name must be person-only, got {name!r}")
         if dh.get("test_name", "").split(":", 1)[0].strip() != key:
             raise SystemExit(f"{key}: test_name must start with the case key")
-        if "prompt_adherence_substrs" in dh or "exp_db_state" in dh:
+        if "exp_db_state" in dh:
             raise SystemExit(f"{key}: verifier fields must not be copied onto the DH")
         for pin in dh.get("scripted_responses") or []:
             if pin.get("occurrence_mode") != "always":

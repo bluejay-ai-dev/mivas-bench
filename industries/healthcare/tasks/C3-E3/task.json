@@ -15,7 +15,6 @@
       "value": "Aetna"
     }
   ],
-  "prompt_adherence_substrs": [],
   "exp_handoff_path": [
     "transfer_to_coverage"
   ],

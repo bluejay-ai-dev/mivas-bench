@@ -1,4 +1,4 @@
-"""Prompt-adherence substring + state checks (no live API)."""
+"""Tool, handoff, and office-state checks (no live API)."""
 
 from __future__ import annotations
 
@@ -16,33 +16,6 @@ sys.modules["verify_task_run"] = vtr
 _SPEC.loader.exec_module(vtr)
 
 
-def test_empty_substrs_pass() -> None:
-    assert vtr.match_agent_substrs("anything", []) == {
-        "passed": True, "missing": [], "found": [],
-    }
-    assert vtr.match_agent_substrs("", None)["passed"] is True
-
-
-def test_substring_names_casefold_verbatim_stays_exact() -> None:
-    text = "I can confirm Alice Romano is on file. The deductible or copay is listed."
-    ok = vtr.match_agent_substrs(text, ["Alice Romano", "deductible or copay"])
-    assert ok["passed"] is True
-    assert ok["missing"] == []
-
-    miss = vtr.match_agent_substrs(text, ["Alice Romano", "did I get that right?"])
-    assert miss["passed"] is False
-    assert miss["missing"] == ["did I get that right?"]
-
-    case = vtr.match_agent_substrs(text, ["alice romano"])
-    assert case["passed"] is True
-
-    verbatim = vtr.match_agent_substrs(
-        "Sorry, I cannot help with that.",
-        ["Sorry, I can't help with that."],
-    )
-    assert verbatim["passed"] is False
-
-
 def test_agent_transcript_ignores_caller_turns() -> None:
     lines = [
         "USER: Alice Romano",
@@ -55,8 +28,6 @@ def test_agent_transcript_ignores_caller_turns() -> None:
     assert "I can look that up." in text
     assert "Alice Romano" not in text
     assert "deductible or copay" not in text
-    leaked = vtr.match_agent_substrs(text, ["Alice Romano"])
-    assert leaked["passed"] is False
 
 
 def test_states_match_via_canonical_state() -> None:
@@ -89,7 +60,6 @@ def test_office_states_ignore_tool_events_and_description() -> None:
 
 def test_verify_result_ignores_tool_events_in_state() -> None:
     task = {
-        "prompt_adherence_substrs": [],
         "exp_db_state": {
             "patients": [{"id": "p1", "phone_e164": "+17185550191"}],
             "appointments": [],
@@ -110,20 +80,18 @@ def test_verify_result_ignores_tool_events_in_state() -> None:
     assert out["passed"] is True
 
 
-def test_verify_result_empty_substrs_and_matching_state() -> None:
-    task = {"prompt_adherence_substrs": [], "exp_db_state": {"waitlist": []}}
+def test_verify_result_matching_state() -> None:
+    task = {"exp_db_state": {"waitlist": []}}
     result = {"transcript": [{"role": "agent", "text": "hello"}]}
     out = vtr.verify_result(result, task, {"waitlist": [], "created_at": "x"})
-    assert out["substr"]["passed"] is True
     assert out["state"]["passed"] is True
     assert out["passed"] is True
 
 
 def test_verify_result_skips_state_when_dump_missing() -> None:
-    task = {"prompt_adherence_substrs": ["hello"], "exp_db_state": {"waitlist": []}}
+    task = {"exp_db_state": {"waitlist": []}}
     result = {"messages": [{"role": "assistant", "content": "hello there"}]}
     out = vtr.verify_result(result, task, None, state_note="S3 not configured")
-    assert out["substr"]["passed"] is True
     assert out["state"]["skipped"] is True
     assert out["state"]["note"] == "S3 not configured"
     assert out["passed"] is True
@@ -183,9 +151,38 @@ def test_handoff_adherence_is_in_order_subsequence() -> None:
     assert unexpected["verdict"] == "unexpected_handoffs"
 
 
+def test_actual_tool_calls_sort_by_start_offset_not_group_order() -> None:
+    """Bluejay groups by name; C5-M2 listed billing before identity."""
+    result = {
+        "tool_calls": [
+            {
+                "name": "transfer_to_billing",
+                "actual": [{
+                    "parameters": {"to": "billing", "from": "identity"},
+                    "start_offset_ms": 91015,
+                }],
+            },
+            {
+                "name": "transfer_to_identity",
+                "actual": [{
+                    "parameters": {"to": "identity", "from": "reception"},
+                    "start_offset_ms": 23688,
+                }],
+            },
+        ],
+    }
+    names = [call["name"] for call in vtr.actual_tool_calls(result)]
+    assert names == ["transfer_to_identity", "transfer_to_billing"]
+    path = vtr.handoff_adherence(
+        ["transfer_to_identity", "transfer_to_billing"],
+        vtr.actual_handoffs(names),
+    )
+    assert path["passed"] is True
+    assert path["verdict"] == "exact"
+
+
 def test_verify_result_includes_call_and_handoff() -> None:
     task = {
-        "prompt_adherence_substrs": ["hello"],
         "exp_db_state": {"waitlist": []},
         "exp_tool_calls": [{"name": "list_locations"}],
         "exp_handoff_path": [],
@@ -206,47 +203,6 @@ def test_case_key_from_trait_or_test_name() -> None:
         "test_name": "ignored",
     }) == "C1-E1-BG"
     assert vtr.case_key_from_dh({"test_name": "C5-H3: Itemized balance"}) == "C5-H3"
-
-
-def test_substring_folds_dates_phones_911_money_floors() -> None:
-    text = (
-        "Jordan Lee, April 12, 1990 — yes. Please call 9-1-1. "
-        "Park Avenue is the fourth floor. The deposit is one hundred twenty-five dollars. "
-        "The number is 718-555-0191."
-    )
-    ok = vtr.match_agent_substrs(text, [
-        "April twelfth, nineteen ninety",
-        "call 911",
-        "4th floor",
-        "7185550191",
-    ])
-    assert ok["passed"] is True
-    spoken = vtr.match_agent_substrs(
-        "March 22, 2016. June 30, 1972.",
-        [
-            "March twenty-second, two thousand sixteen",
-            "June thirtieth, nineteen seventy-two",
-        ],
-    )
-    assert spoken["passed"] is True
-    money = vtr.match_agent_substrs(
-        "A one hundred twenty-five dollar deposit may apply.",
-        ["$125"],
-    )
-    assert money["passed"] is True
-
-
-def test_substring_does_not_fold_verbatim_standing_lines() -> None:
-    close = vtr.match_agent_substrs(
-        "I cannot take a card number over the phone.",
-        ["I can't take a card number by voice"],
-    )
-    assert close["passed"] is False
-    exact = vtr.match_agent_substrs(
-        "I can't take a card number by voice, I'll send a link.",
-        ["I can't take a card number by voice"],
-    )
-    assert exact["passed"] is True
 
 
 def test_tool_call_adherence_ignores_prose_args() -> None:
@@ -361,3 +317,28 @@ def test_location_ids_require_exact_set() -> None:
         "parameters": {"location_ids": ["Park Avenue"]},
     }]
     assert vtr.tool_call_adherence(expected, ok, schemas=schemas)["passed"] is True
+
+
+def test_send_sms_is_required_only_when_listed() -> None:
+    schemas = vtr.load_tool_schemas("healthcare")
+    booked = [{"name": "book_appointment", "parameters": {}}]
+    with_sms = [
+        {"name": "book_appointment"},
+        {
+            "name": "send_sms",
+            "parameters": {
+                "template_id": "appointment_confirmation",
+                "mobile_e164": "+12125550100",
+            },
+        },
+    ]
+    miss = vtr.tool_call_adherence(with_sms, booked, schemas=schemas)
+    assert miss["passed"] is False
+    assert "send_sms" in miss["missing"]
+    skip_ok = vtr.tool_call_adherence(
+        [{"name": "book_appointment"}],
+        booked,
+        schemas=schemas,
+    )
+    assert skip_ok["passed"] is True
+

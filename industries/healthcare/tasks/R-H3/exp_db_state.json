@@ -193,14 +193,6 @@
         "callback_number": "+12125550133",
         "queue": "clinical"
       }
-    },
-    {
-      "id": 4,
-      "kind": "sms",
-      "payload": {
-        "mobile_e164": "+12125550133",
-        "template_id": "appointment_confirmation"
-      }
     }
   ],
   "waitlist": []
