@@ -42,6 +42,12 @@
   ],
   "exp_tool_calls": [
     {
+      "name": "transfer_to_identity"
+    },
+    {
+      "name": "transfer_to_billing"
+    },
+    {
       "name": "verify_identity",
       "parameters": {
         "dob": "1985-11-03",
@@ -62,12 +68,6 @@
           "balance_cents": 0
         }
       }
-    },
-    {
-      "name": "transfer_to_identity"
-    },
-    {
-      "name": "transfer_to_billing"
     }
   ],
   "behaviors": {},

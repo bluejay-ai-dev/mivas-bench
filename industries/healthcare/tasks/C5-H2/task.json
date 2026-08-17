@@ -48,6 +48,15 @@
   ],
   "exp_tool_calls": [
     {
+      "name": "transfer_to_identity"
+    },
+    {
+      "name": "transfer_to_billing"
+    },
+    {
+      "name": "transfer_to_scheduling"
+    },
+    {
       "name": "verify_identity",
       "parameters": {
         "dob": "1990-04-12",
@@ -99,15 +108,6 @@
         "new_start": "2026-08-25T11:30:00",
         "new_end": "2026-08-25T12:00:00"
       }
-    },
-    {
-      "name": "transfer_to_identity"
-    },
-    {
-      "name": "transfer_to_billing"
-    },
-    {
-      "name": "transfer_to_scheduling"
     }
   ],
   "behaviors": {},

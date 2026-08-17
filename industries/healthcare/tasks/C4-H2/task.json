@@ -42,6 +42,12 @@
   ],
   "exp_tool_calls": [
     {
+      "name": "transfer_to_identity"
+    },
+    {
+      "name": "transfer_to_cosmetic"
+    },
+    {
       "name": "verify_identity",
       "parameters": {
         "dob": "1972-06-30",
@@ -74,12 +80,6 @@
       "parameters": {
         "amount_cents": 48000
       }
-    },
-    {
-      "name": "transfer_to_identity"
-    },
-    {
-      "name": "transfer_to_cosmetic"
     }
   ],
   "behaviors": {},

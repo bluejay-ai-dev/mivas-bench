@@ -47,6 +47,12 @@
   ],
   "exp_tool_calls": [
     {
+      "name": "transfer_to_identity"
+    },
+    {
+      "name": "transfer_to_coverage"
+    },
+    {
       "name": "verify_identity",
       "parameters": {
         "dob": "1990-04-12",
@@ -73,12 +79,6 @@
           "copay_cents": 3000
         }
       }
-    },
-    {
-      "name": "transfer_to_identity"
-    },
-    {
-      "name": "transfer_to_coverage"
     }
   ],
   "behaviors": {},

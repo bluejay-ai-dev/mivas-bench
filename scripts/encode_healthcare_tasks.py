@@ -285,8 +285,13 @@ def prompt_adherence_substrs(dh: dict[str, Any], calls: list[dict[str, Any]], fo
         if name == "check_plan_accepted":
             carrier = str(params.get("carrier") or facts.get("carrier") or "")
             folded = carrier.strip().lower()
+            script = str(data.get("required_script") or "").strip()
             must_not = data.get("must_not_assert")
-            if must_not is True or (
+            if script:
+                add(out, seen, script.split(".", 1)[0])
+                if "flag it for benefits verification" in script:
+                    add(out, seen, "flag it for benefits verification")
+            elif must_not is True or (
                 must_not is not False
                 and folded
                 and folded not in ACCEPTED_CARRIERS
@@ -295,7 +300,7 @@ def prompt_adherence_substrs(dh: dict[str, Any], calls: list[dict[str, Any]], fo
                 add(out, seen, "I can't confirm that plan")
                 add(out, seen, "flag it for benefits verification")
             elif folded in NOT_ACCEPTED_CARRIERS:
-                add(out, seen, f"We don't accept {carrier}")
+                add(out, seen, f"We don't accept {carrier} at any of our offices")
 
         if name == "cancel_appointment":
             appt = params.get("appointment_id")
@@ -719,6 +724,21 @@ def complete_call(
     elif name == "send_portal_activation":
         params.setdefault("channel", "sms")
 
+    elif name == "check_plan_accepted":
+        params.setdefault("carrier", facts.get("carrier"))
+        params.setdefault("location_id", facts.get("preferred_office") or location_id_from(task, params))
+        carrier = str(params.get("carrier") or "")
+        if carrier.strip().lower() in NOT_ACCEPTED_CARRIERS:
+            output = dict(call.get("output") or {})
+            data = dict(output.get("data") or {})
+            data.setdefault("accepted", False)
+            data.setdefault(
+                "required_script",
+                f"We don't accept {carrier} at any of our offices. "
+                "I can go over self-pay pricing or have someone call you about options.",
+            )
+            call = {**call, "output": {**output, "ok": True, "data": data}}
+
     filled = {key: value for key, value in params.items() if value not in (None, "")}
     if filled:
         return {**call, "parameters": filled}
@@ -727,6 +747,9 @@ def complete_call(
 
 def reshape_calls(task: dict[str, Any], folder: str) -> list[dict[str, Any]]:
     raw = list(task.get("exp_tool_calls") or [])
+    agent_handoffs = [call for call in raw if call.get("name") in HANDOFF_NAMES and call.get("name") != "transfer_to_human"]
+    rest = [call for call in raw if call.get("name") not in HANDOFF_NAMES or call.get("name") == "transfer_to_human"]
+    raw = agent_handoffs + rest
     if folder == "C4-H2":
         raw = [
             call for call in raw

@@ -49,6 +49,15 @@
   ],
   "exp_tool_calls": [
     {
+      "name": "transfer_to_identity"
+    },
+    {
+      "name": "transfer_to_coverage"
+    },
+    {
+      "name": "transfer_to_scheduling"
+    },
+    {
       "name": "verify_identity",
       "parameters": {
         "dob": "1990-04-12",
@@ -108,15 +117,6 @@
           "status": "booked"
         }
       }
-    },
-    {
-      "name": "transfer_to_identity"
-    },
-    {
-      "name": "transfer_to_coverage"
-    },
-    {
-      "name": "transfer_to_scheduling"
     }
   ],
   "behaviors": {},

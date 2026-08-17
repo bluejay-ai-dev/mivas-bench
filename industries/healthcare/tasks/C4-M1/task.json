@@ -39,6 +39,9 @@
   ],
   "exp_tool_calls": [
     {
+      "name": "transfer_to_cosmetic"
+    },
+    {
       "name": "quote_cosmetic_service",
       "parameters": {
         "service": "microneedling"
@@ -75,9 +78,6 @@
       "parameters": {
         "mobile_e164": "+12125550171"
       }
-    },
-    {
-      "name": "transfer_to_cosmetic"
     }
   ],
   "behaviors": {},
