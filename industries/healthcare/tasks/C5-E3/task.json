@@ -1,6 +1,6 @@
 {
   "task_name": "C5-E3: Card on file to hold an appointment",
-  "intent": "You are about to book something and you want to know the hold policy first. Ask whether you need a credit card on file to hold an appointment. You are not reading a card number out on this call. Once you have the answer, thank them and end the call.",
+  "intent": "Ask whether you need a credit card on file to hold an appointment. You are not reading a card number out on this call and you are not booking. Once you have the answer, thank them and end the call. Do not ask to book, reschedule, or cancel. Do not ask to add insurance, for a callback, to speak to a person, a bill, a payment, the patient portal, a waitlist, a text, financing, or the street, floor, or suite.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -9,8 +9,29 @@
   ],
   "exp_handoff_path": [],
   "exp_tool_calls": [],
-  "behaviors": {},
-  "scripted_responses": {},
+  "behaviors": {
+    "creativity": 0
+  },
+  "scripted_responses": [
+    {
+      "match_type": "context",
+      "match_phrase": "offers to transfer you to a human, a person, the front desk, or a live agent. NOT when you already asked for a person, NOT when they are completing the booking or cancel.",
+      "response_type": "phrase",
+      "response_value": "No, I don't need a person. Please finish what I asked on this call."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers the waitlist, a later opening, or to add you to a list. NOT when offering a specific appointment time to book now, NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "No waitlist. Please just finish what I asked."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when asking for a payment-link number, NOT when asking for your mobile number for identity.",
+      "response_type": "phrase",
+      "response_value": "No thanks, I don't need a text."
+    }
+  ],
   "customer_name": "Carl Nguyen",
   "customer_available_tools": {},
   "metadata": {

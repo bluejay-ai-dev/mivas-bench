@@ -1,6 +1,6 @@
 {
   "task_name": "C1-E3: Medicaid coverage at Park Avenue",
-  "intent": "You are a new patient with a scalp rash that has been bothering you for a couple of weeks. Before you come in, you need to know whether they take your insurance at the Park Avenue office. If they say no, ask what your options are \u2014 another office, self-pay, or someone you can talk to. You are not trying to book a visit on this call. Once you have a real next step, thank them and end the call.",
+  "intent": "You are a new patient with a scalp rash. Ask whether the Park Avenue office takes Medicaid. If they ask which plan, say Medicaid. Stay on that office-level question: if they say they need a provider name first, tell them you do not have one yet and still need to know whether Park Avenue takes Medicaid. If they say Medicaid is not accepted, ask whether self-pay is an option. Once they have answered whether Park Avenue takes Medicaid and, if not, whether self-pay is possible, thank them and hang up. If they ask your name, say Terrell Baines once and continue with the Medicaid question. Do not ask to book, reschedule, or cancel. Do not ask about other offices. Do not ask for a callback, to speak to a person, a bill, a payment, the patient portal, a waitlist, a text, or the street, floor, or suite. Do not offer a date of birth, member ID, or ZIP. A spoken yes for the whole practice is not enough. A spoken yes or no that names the office is enough. Thank them and end once you have that office-level answer.",
   "traits": [
     {
       "trait_name": "patient_status",
@@ -25,24 +25,37 @@
   "exp_tool_calls": [
     {
       "name": "transfer_to_coverage"
-    },
-    {
-      "name": "check_plan_accepted",
-      "parameters": {
-        "carrier": "medicaid",
-        "location_id": "loc_park_ave"
-      },
-      "output": {
-        "ok": true,
-        "data": {
-          "accepted": false,
-          "required_script": "We don't accept Medicaid at any of our offices. I can go over self-pay pricing or have someone call you about options."
-        }
-      }
     }
   ],
-  "behaviors": {},
-  "scripted_responses": {},
+  "behaviors": {
+    "creativity": 0
+  },
+  "scripted_responses": [
+    {
+      "match_type": "context",
+      "match_phrase": "offers to transfer you to a human, a person, the front desk, or a live agent. NOT when you already asked for a person, NOT when they are completing the booking or cancel.",
+      "response_type": "phrase",
+      "response_value": "No, I don't need a person. Please finish what I asked on this call."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers the waitlist, a later opening, or to add you to a list. NOT when offering a specific appointment time to book now, NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "No waitlist. Please just finish what I asked."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when asking for a payment-link number, NOT when asking for your mobile number for identity.",
+      "response_type": "phrase",
+      "response_value": "No thanks, I don't need a text."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "says they take the plan, accept the insurance, or that you are covered, without naming the office they just checked. NOT when they have just said they checked Park Avenue specifically.",
+      "response_type": "phrase",
+      "response_value": "Which office did you check? I need Park Avenue specifically, not the whole practice."
+    }
+  ],
   "customer_name": "Terrell Baines",
   "customer_available_tools": {},
   "metadata": {
