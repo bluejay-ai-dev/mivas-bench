@@ -1242,7 +1242,7 @@ def _selfcheck() -> None:
         assert (INDUSTRY_DIR / agent["system_prompt"]).is_file(), agent["system_prompt"]
         for t in agent["tools"]:
             assert t["name"] in names, f"{agent['name']}: {t['name']} not in tools.json"
-            if t.get("handoff") or t.get("session"):
+            if t.get("handoff") or t["name"] == "end_call":
                 session_or_handoff.add(t["name"])
             else:
                 dispatchable.add(t["name"])

@@ -41,6 +41,7 @@ from call_id import (  # noqa: E402
     set_call_id,
     unbind_provider,
 )
+from session_tools import hangup_tool_names as _hangup_names  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 HARNESS_DIR = Path(__file__).resolve().parent
@@ -81,6 +82,11 @@ def load_blueprint(industry_dir: str | Path) -> dict[str, Any]:
         "agents": agents,
         "catalog": catalog,
     }
+
+
+def hangup_tool_names(bp: dict[str, Any]) -> set[str]:
+    """Human-transfer session tools: POST, then the chirp bridge hangs up."""
+    return _hangup_names(bp["agents"].values())
 
 
 def _api_key() -> str:
@@ -159,7 +165,7 @@ def _state_tools(agent_entry: dict[str, Any], bp: dict[str, Any], public_url: st
         name = t["name"]
         if t.get("handoff"):
             continue
-        if t.get("session") or name == "end_call":
+        if name == "end_call":
             spec = bp["catalog"].get(name) or {}
             tools.append(
                 {

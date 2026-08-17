@@ -1,8 +1,9 @@
 """Smoke tests for every industry state API + the generic /tools/{name} dispatch.
 
-The invariant: every non-handoff, non-session tool in an industry's tools.json
-is dispatchable via POST /tools/{name} {"arguments": {...}} and answers with
-that industry's declared envelope; session/handoff/unknown names 404.
+The invariant: every non-handoff tool in an industry's tools.json except
+`end_call` is dispatchable via POST /tools/{name} {"arguments": {...}} and
+answers with that industry's declared envelope; handoff/`end_call`/unknown
+names 404. Human-transfer session tools still dispatch (they write state).
 """
 
 from __future__ import annotations
@@ -194,7 +195,7 @@ def test_dispatch_every_industry_tool() -> None:
                     entry = flags.get(name, {})
                     args, must_succeed = _dispatch_args(industry, spec)
                     resp = client.post(f"/tools/{name}", json={"arguments": args})
-                    if entry.get("session") or entry.get("handoff"):
+                    if entry.get("handoff") or name == "end_call":
                         assert resp.status_code == 404, f"{industry}/{name} must stay harness-native"
                         continue
                     assert resp.status_code == 200, f"{industry}/{name}: {resp.text[:200]}"
@@ -211,8 +212,8 @@ def test_dispatch_every_industry_tool() -> None:
                 declared = {
                     spec["name"]
                     for spec in tools
-                    if not (flags.get(spec["name"], {}).get("session")
-                            or flags.get(spec["name"], {}).get("handoff"))
+                    if spec["name"] != "end_call"
+                    and not flags.get(spec["name"], {}).get("handoff")
                 }
                 orphans = set(module.DISPATCH) - declared
                 assert not orphans, f"{industry}: DISPATCH entries not in tools.json: {sorted(orphans)}"
