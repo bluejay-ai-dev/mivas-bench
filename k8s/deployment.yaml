@@ -203,6 +203,36 @@ spec:
                   name: mivas-secrets
                   key: XAI_API_KEY
                   optional: true
+            - name: DASHSCOPE_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: mivas-secrets
+                  key: DASHSCOPE_API_KEY
+                  optional: true
+            - name: QWEN_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: mivas-secrets
+                  key: QWEN_API_KEY
+                  optional: true
+            - name: QWEN_WS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: mivas-secrets
+                  key: QWEN_WS_URL
+                  optional: true
+            - name: QWEN_WORKSPACE_ID
+              valueFrom:
+                secretKeyRef:
+                  name: mivas-secrets
+                  key: QWEN_WORKSPACE_ID
+                  optional: true
+            - name: QWEN_REGION
+              valueFrom:
+                secretKeyRef:
+                  name: mivas-secrets
+                  key: QWEN_REGION
+                  optional: true
             - name: LIVEKIT_URL
               valueFrom:
                 secretKeyRef:
