@@ -1,0 +1,21 @@
+tests/test_tool_server.py
+  s_ac61f807d2de62::t_08f67b4ea042c7 14
+  s_ac61f807d2de62::t_443fa72c5f78cc 739-776
+  s_ac61f807d2de62::t_f6306c6ff6d8ce 786
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "beafca45473d915a68936b952d1039ce03343cfc",
+  "prompts": {},
+  "sessions": {
+    "s_ac61f807d2de62": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "557b5c01-6ef2-49b7-a1c0-9a9536da2fb4",
+        "model": "grok-4.6"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
