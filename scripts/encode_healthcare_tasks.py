@@ -759,6 +759,8 @@ def reshape_calls(task: dict[str, Any], folder: str) -> list[dict[str, Any]]:
     agent_handoffs = [call for call in raw if call.get("name") in HANDOFF_NAMES and call.get("name") != "transfer_to_human"]
     rest = [call for call in raw if call.get("name") not in HANDOFF_NAMES or call.get("name") == "transfer_to_human"]
     raw = agent_handoffs + rest
+    if folder == "C5-H3":
+        raw = [call for call in raw if call.get("name") != "create_callback_task"]
     if folder == "C4-H2":
         raw = [
             call for call in raw

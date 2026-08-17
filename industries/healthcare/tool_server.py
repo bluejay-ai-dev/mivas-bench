@@ -962,7 +962,10 @@ def _d_request_rx_refill(a: dict[str, Any]) -> dict[str, Any]:
     for keywords, route, note in _RX_HARD_STOPS:
         if any(k in med for k in keywords):
             _event("rx_refill_request", {"patient_id": patient["id"], **a, "route": route})
-            return {"route": route, "hard_stop": True, "approved": False, "note": note}
+            payload = {"route": route, "hard_stop": True, "approved": False, "note": note}
+            if route == "controlled_substance":
+                payload["spoken_commitment"] = note
+            return payload
     _event("rx_refill_request", {"patient_id": patient["id"], **a, "route": "routed_to_provider"})
     return {"route": "routed_to_provider", "hard_stop": False, "approved": False,
             "pharmacy_needed": not a.get("pharmacy_name"),

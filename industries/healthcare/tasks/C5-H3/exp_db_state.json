@@ -174,15 +174,6 @@
       "payload": {
         "mobile_e164": "+14075550155"
       }
-    },
-    {
-      "id": 2,
-      "kind": "callback_task",
-      "payload": {
-        "callback_number": "+14075550155",
-        "queue": "billing",
-        "topic": "C5-H3 follow-up"
-      }
     }
   ],
   "waitlist": []
