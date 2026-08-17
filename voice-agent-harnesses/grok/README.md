@@ -10,7 +10,7 @@ Shared builder: `harness.py`. Tracing/reporting: `report.py` (`BLUEJAY_SERVICE_N
 
 - Industry tools → industry state API (`TOOL_SERVER_URL`)
 - Session tools (`session: true`, e.g. `end_call`) → harness-local + close
-- Handoffs → hard dual-session switch (one Grok WS per blueprint agent; idle gets no audio)
+- Handoffs → soft `session.update` on the same WebSocket (history stays)
 - Speak-first: bare `response.create` after `session.updated` (pack owns greeting text)
 - Audio: Grok PCM 24 kHz ↔ CHIRP 16 kHz `pcm_s16le` + `speech.started` / `speech.completed`
 - Tracing → Bluejay OTel `voice.call` (`agent.speech` / `customer.speech` / `execute_tool`); Chirp stamps `X-Simulation-Result-Id` and POSTs `{trace_ids}`
