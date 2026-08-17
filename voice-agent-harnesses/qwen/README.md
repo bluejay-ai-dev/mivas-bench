@@ -16,7 +16,7 @@ Frontend-only: no ACP coding-agent backend. Shared builder: `harness.py`. Tracin
 - Barge-in: Qwen `server_vad` (never mute on CHIRP VAD alone)
 - Clock: `Today is …` injected into every session instructions
 - Tools: nested `{type: function, function: {name, description, parameters}}` per Model Studio docs
-- Tracing → Bluejay OTel `voice.call`; Chirp stamps `X-Simulation-Result-Id`
+- Tracing → LangSmith-shaped Bluejay OTel `realtime_session` → `turn` → {user_message, model (gen_ai.usage.* tokens + TTFT), execute_tool}; Chirp stamps `X-Simulation-Result-Id`
 
 ```bash
 uv sync

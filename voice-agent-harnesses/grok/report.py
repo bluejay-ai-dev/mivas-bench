@@ -1,12 +1,14 @@
 """OpenTelemetry → Bluejay OTLP for Grok / xAI voice harnesses.
 
-The xAI Speech-to-Speech WebSocket has no Agents-SDK span tree, so we emit
-GenAI-native spans:
+The xAI Speech-to-Speech WebSocket has no Agents-SDK span tree, so we emit a
+LangSmith-shaped GenAI tree (feed raw events to ``handle_event``):
 
-  voice.call (root) — gen_ai.provider.name=xai
-    ├── agent.speech          (TTS / agent audio turns)
-    ├── customer.speech       (CHIRP speech.started / completed)
-    └── execute_tool <name>   (gen_ai.tool.*)
+  realtime_session (root) — gen_ai.system=xai
+    └── turn                  (one caller utterance → all ensuing agent activity)
+          ├── user_message    (caller transcript)
+          ├── model           (one generation per response: gen_ai.usage.* tokens
+          │                    + time-to-first-token + output)
+          └── execute_tool <name>   (tool calls / handoffs — Bluejay reads these)
 
 After the call we POST to update-simulation-result with:
   - trace_ids  → waterfall flamegraph
@@ -33,7 +35,10 @@ from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExport
 from opentelemetry.sdk.resources import SERVICE_NAME, Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from opentelemetry.trace import Span, SpanKind, Status, StatusCode
+from opentelemetry.semconv._incubating.attributes import (
+    gen_ai_attributes as GenAIAttributes,
+)
+from opentelemetry.trace import Span, SpanKind, Status, StatusCode, Tracer
 
 logger = logging.getLogger("mivas.otel.grok")
 if not logger.handlers:
@@ -94,6 +99,64 @@ def _json_attr(value: Any) -> str:
         return str(value)
 
 
+_MAX_ATTR = 4000
+
+
+def _clip(value: Any, n: int = _MAX_ATTR) -> str:
+    s = value if isinstance(value, str) else json.dumps(value, default=str)
+    return s if len(s) <= n else s[: n - 3] + "..."
+
+
+def _deep_get(obj: Any, *path: str) -> Any:
+    for key in path:
+        if obj is None:
+            return None
+        obj = obj.get(key) if isinstance(obj, dict) else getattr(obj, key, None)
+    return obj
+
+
+def _usage_attrs(usage: Any) -> dict[str, int]:
+    """Realtime response usage → gen_ai.usage.* ints (audio/text/cached broken out)."""
+    out: dict[str, int] = {}
+    if usage is None:
+        return out
+
+    def put(key: str, *path: str) -> None:
+        v = _deep_get(usage, *path)
+        if isinstance(v, int):
+            out[key] = v
+
+    put(GenAIAttributes.GEN_AI_USAGE_INPUT_TOKENS, "input_tokens")
+    put(GenAIAttributes.GEN_AI_USAGE_OUTPUT_TOKENS, "output_tokens")
+    put("gen_ai.usage.total_tokens", "total_tokens")
+    put("gen_ai.usage.input_audio_tokens", "input_token_details", "audio_tokens")
+    put("gen_ai.usage.input_text_tokens", "input_token_details", "text_tokens")
+    put("gen_ai.usage.cached_tokens", "input_token_details", "cached_tokens")
+    put("gen_ai.usage.output_audio_tokens", "output_token_details", "audio_tokens")
+    put("gen_ai.usage.output_text_tokens", "output_token_details", "text_tokens")
+    put("gen_ai.usage.output_reasoning_tokens", "output_token_details", "reasoning_tokens")
+    return out
+
+
+# Active LangSmith-shaped tracer for the current call; set by traced_run.
+_active_tracer: ContextVar["RealtimeEventTracer | None"] = ContextVar(
+    "mivas_grok_active_tracer", default=None
+)
+_active_tracer_mod: "RealtimeEventTracer | None" = None
+
+
+def active_tracer() -> "RealtimeEventTracer | None":
+    t = _active_tracer.get()
+    return t if t is not None else _active_tracer_mod
+
+
+def handle_event(event: Any) -> None:
+    """Feed one raw xAI websocket event dict to the active tracer (no-op if none)."""
+    t = active_tracer()
+    if t is not None and isinstance(event, dict):
+        t.handle_raw(event)
+
+
 def call_offset_ms() -> int:
     t0 = _call_t0.get()
     if t0 is None:
@@ -143,6 +206,190 @@ def flush() -> None:
             logger.error("otel flush failed: %s", e)
 
 
+class RealtimeEventTracer:
+    """xAI websocket events → a LangSmith-shaped tree under ``realtime_session``.
+
+        realtime_session
+          turn                    (one caller utterance → all ensuing agent activity)
+            user_message          (caller transcript)
+            model                 (generation: gen_ai.usage.* tokens + TTFT + output)
+            execute_tool <name>   (tool calls / handoffs — Bluejay reads these)
+
+    Turn boundary = ``conversation.item.input_audio_transcription.completed`` (a new
+    caller utterance); greetings open a turn lazily on ``response.created``.
+    """
+
+    def __init__(self, tracer: Tracer, root: Span, model: str | None = None) -> None:
+        self._tracer = tracer
+        self.root = root
+        self._model = model
+        self._turn: Span | None = None
+        self._turn_index = 0
+        self._seen_user_text: set[str] = set()
+        self._llm_span: Span | None = None
+        self._resp_start_mono: float | None = None
+        self._resp_ttft_ms: float | None = None
+        self._usage_input = 0
+        self._usage_output = 0
+        self._response_count = 0
+        self._event_count = 0
+
+    def current_turn(self) -> Span:
+        if self._turn is None:
+            self._turn_index += 1
+            self._turn = self._tracer.start_span(
+                "turn",
+                context=otel_trace.set_span_in_context(self.root),
+                kind=SpanKind.INTERNAL,
+                attributes={"mivas.turn.index": self._turn_index},
+            )
+        return self._turn
+
+    def _turn_ctx(self):
+        return otel_trace.set_span_in_context(self.current_turn())
+
+    def _close_turn(self) -> None:
+        if self._llm_span is not None:
+            self._finish_llm(None)
+        if self._turn is not None:
+            self._turn.set_status(Status(StatusCode.OK))
+            self._turn.end()
+            self._turn = None
+
+    def _start_llm(self, response: Any) -> None:
+        if self._llm_span is not None:
+            self._finish_llm(None)
+        self._resp_start_mono = time.monotonic()
+        self._resp_ttft_ms = None
+        model = self._model or _deep_get(response, "model")
+        attrs: dict[str, Any] = {
+            GenAIAttributes.GEN_AI_OPERATION_NAME: "chat",
+            GenAIAttributes.GEN_AI_SYSTEM: PROVIDER,
+            "gen_ai.provider.name": PROVIDER,
+            "mivas.modality": "audio",
+            "mivas.event": "response.created",
+        }
+        if model:
+            attrs[GenAIAttributes.GEN_AI_REQUEST_MODEL] = str(model)
+        rid = _deep_get(response, "id")
+        if rid:
+            attrs[GenAIAttributes.GEN_AI_RESPONSE_ID] = str(rid)
+        self._llm_span = self._tracer.start_span(
+            "model",
+            context=self._turn_ctx(),
+            kind=SpanKind.CLIENT,
+            attributes=attrs,
+        )
+
+    def _mark_first_output(self) -> None:
+        if (
+            self._llm_span is None
+            or self._resp_ttft_ms is not None
+            or self._resp_start_mono is None
+        ):
+            return
+        self._resp_ttft_ms = (time.monotonic() - self._resp_start_mono) * 1000.0
+
+    def _finish_llm(self, response: Any) -> None:
+        span = self._llm_span
+        self._llm_span = None
+        ttft = self._resp_ttft_ms
+        self._resp_start_mono = None
+        self._resp_ttft_ms = None
+        if span is None:
+            return
+
+        attrs = _usage_attrs(_deep_get(response, "usage"))
+        for key, value in attrs.items():
+            span.set_attribute(key, value)
+        rid = _deep_get(response, "id")
+        if rid:
+            span.set_attribute(GenAIAttributes.GEN_AI_RESPONSE_ID, str(rid))
+        rmodel = _deep_get(response, "model") or self._model
+        if rmodel:
+            span.set_attribute(GenAIAttributes.GEN_AI_RESPONSE_MODEL, str(rmodel))
+        if ttft is not None:
+            span.set_attribute("gen_ai.server.time_to_first_token", ttft / 1000.0)
+            span.set_attribute("mivas.ttft_ms", round(ttft, 2))
+        span.set_status(Status(StatusCode.OK))
+        span.end()
+
+        self._usage_input += attrs.get(GenAIAttributes.GEN_AI_USAGE_INPUT_TOKENS, 0)
+        self._usage_output += attrs.get(GenAIAttributes.GEN_AI_USAGE_OUTPUT_TOKENS, 0)
+        self._response_count += 1
+        self.root.set_attribute(GenAIAttributes.GEN_AI_USAGE_INPUT_TOKENS, self._usage_input)
+        self.root.set_attribute(GenAIAttributes.GEN_AI_USAGE_OUTPUT_TOKENS, self._usage_output)
+        self.root.set_attribute("gen_ai.usage.total_tokens", self._usage_input + self._usage_output)
+        self.root.set_attribute("mivas.response.count", self._response_count)
+
+    def _user_message(self, text: str) -> None:
+        key = text.strip()
+        if not key or key in self._seen_user_text:
+            return
+        self._seen_user_text.add(key)
+        span = self._tracer.start_span(
+            "user_message",
+            context=self._turn_ctx(),
+            kind=SpanKind.INTERNAL,
+            attributes={
+                "mivas.role": "user",
+                "mivas.transcript": _clip(text),
+                GenAIAttributes.GEN_AI_INPUT_MESSAGES: _clip([{"role": "user", "content": text}]),
+            },
+        )
+        span.set_status(Status(StatusCode.OK))
+        span.end()
+
+    def handle_raw(self, event: dict) -> None:
+        etype = event.get("type")
+        self._event_count += 1
+        try:
+            self._raw(etype, event)
+        except Exception:
+            logger.debug("grok tracer failed on %s", etype, exc_info=True)
+
+    def _raw(self, etype: str | None, event: dict) -> None:
+        if not etype:
+            return
+        if etype == "conversation.item.input_audio_transcription.completed":
+            tr = (event.get("transcript") or "").strip()
+            if tr:
+                self._close_turn()  # new caller utterance → fresh turn
+                self._user_message(tr)
+            return
+        if etype == "response.created":
+            self._start_llm(event.get("response") or {})
+            return
+        if etype in {
+            "response.audio.delta",
+            "response.output_audio.delta",
+            "response.output_audio_transcript.delta",
+            "response.output_text.delta",
+        }:
+            if event.get("delta") or event.get("audio"):
+                self._mark_first_output()
+            return
+        if etype == "response.output_audio_transcript.done":
+            tr = (event.get("transcript") or "").strip()
+            if tr and self._llm_span is not None:
+                self._llm_span.set_attribute("mivas.transcript", _clip(tr))
+                self._llm_span.set_attribute(
+                    GenAIAttributes.GEN_AI_OUTPUT_MESSAGES,
+                    _clip([{"role": "assistant", "content": tr}]),
+                )
+            return
+        if etype == "response.done":
+            resp = dict(event.get("response") or {})
+            if "usage" not in resp and event.get("usage") is not None:
+                resp["usage"] = event["usage"]
+            self._finish_llm(resp)
+            return
+
+    def close(self) -> None:
+        self._close_turn()
+        self.root.set_attribute("mivas.event_count", self._event_count)
+
+
 def _parent_span() -> Span | None:
     """Always the voice.call root — never the current speech/tool span.
 
@@ -190,8 +437,12 @@ def tool_span(
     call_id: str | None = None,
     parent: Span | None = None,
 ) -> Iterator[Span | None]:
-    """Sibling of speech spans under voice.call. No-op outside traced_run."""
-    root = parent if parent is not None and parent.get_span_context().is_valid else _parent_span()
+    """Tool call under the active turn (LangSmith shape). No-op outside traced_run."""
+    if parent is not None and parent.get_span_context().is_valid:
+        root = parent
+    else:
+        t = active_tracer()
+        root = t.current_turn() if t is not None else _parent_span()
     if root is None:
         yield None
         return
@@ -246,43 +497,6 @@ def finish_tool_span(
     else:
         span.set_status(Status(StatusCode.ERROR, _json_attr(output)[:400]))
     # tool_span ends the span on exit; this only fills attributes.
-
-
-def start_speech_span(
-    utterance_id: str, *, speaker: str = "agent", parent: Span | None = None
-) -> Span | None:
-    """Begin agent.speech or customer.speech as a direct child of voice.call."""
-    root = parent if parent is not None and parent.get_span_context().is_valid else _parent_span()
-    if root is None:
-        return None
-    tracer = otel_trace.get_tracer(TRACER_NAME)
-    parent_ctx = otel_trace.set_span_in_context(root)
-    is_customer = speaker in ("customer", "user", "digital_human")
-    span_name = "customer.speech" if is_customer else "agent.speech"
-    attrs: dict[str, Any] = {
-        "gen_ai.operation.name": (
-            "speech_to_text" if is_customer else "text_to_speech"
-        ),
-        "gen_ai.provider.name": PROVIDER,
-        "mivas.utterance_id": str(utterance_id),
-        "mivas.speech.speaker": "customer" if is_customer else "agent",
-        "bluejay.speech.start_offset_ms": call_offset_ms(),
-    }
-    span = tracer.start_span(
-        span_name,
-        context=parent_ctx,
-        kind=SpanKind.INTERNAL,
-        attributes=attrs,
-    )
-    return span
-
-
-def end_speech_span(span: Span | None) -> None:
-    if span is None:
-        return
-    span.set_attribute("bluejay.speech.end_offset_ms", call_offset_ms())
-    span.set_status(Status(StatusCode.OK))
-    span.end()
 
 
 async def _await_terminal_upsert(
@@ -488,7 +702,7 @@ async def traced_run(
     model: str | None = None,
 ) -> AsyncIterator[Span | None]:
     """OTel voice.call root; flush + link trace_ids/tool_calls on exit."""
-    global _active_root, _active_t0, _active_tools
+    global _active_root, _active_t0, _active_tools, _active_tracer_mod
 
     provider = setup_otel()
     if provider is None:
@@ -499,7 +713,7 @@ async def traced_run(
     attrs: dict[str, Any] = {
         "gen_ai.system": PROVIDER,
         "gen_ai.provider.name": PROVIDER,
-        "gen_ai.operation.name": "invoke_agent",
+        "gen_ai.operation.name": "realtime_session",
         "mivas.workflow.name": workflow_name,
     }
     if model:
@@ -510,23 +724,29 @@ async def traced_run(
     otel_tid: str | None = None
     root_token = None
     tools_token = None
+    tracer_token = None
+    event_tracer: RealtimeEventTracer | None = None
     t0 = time.monotonic()
     t0_token = _call_t0.set(t0)
     tool_buf: list[dict[str, Any]] = []
     prev_active = _active_root
     prev_t0 = _active_t0
     prev_tools = _active_tools
+    prev_tracer_mod = _active_tracer_mod
     try:
         with tracer.start_as_current_span(
-            "voice.call",
+            "realtime_session",
             kind=SpanKind.SERVER,
             attributes=attrs,
         ) as root:
             root_token = _root_span.set(root)
             tools_token = _reported_tools.set(tool_buf)
+            event_tracer = RealtimeEventTracer(tracer, root, model=model)
+            tracer_token = _active_tracer.set(event_tracer)
             _active_root = root
             _active_t0 = t0
             _active_tools = tool_buf
+            _active_tracer_mod = event_tracer
             ctx = root.get_span_context()
             if ctx.is_valid:
                 otel_tid = format(ctx.trace_id, "032x")
@@ -544,14 +764,19 @@ async def traced_run(
                     root.set_status(Status(StatusCode.OK))
                 else:
                     raise
+            finally:
+                event_tracer.close()
     finally:
         _active_root = prev_active
         _active_t0 = prev_t0
         _active_tools = prev_tools
+        _active_tracer_mod = prev_tracer_mod
         if root_token is not None:
             _root_span.reset(root_token)
         if tools_token is not None:
             _reported_tools.reset(tools_token)
+        if tracer_token is not None:
+            _active_tracer.reset(tracer_token)
         _call_t0.reset(t0_token)
         flush()
         if simulation_result_id and (otel_tid or tool_buf):

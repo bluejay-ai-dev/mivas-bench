@@ -60,7 +60,7 @@ from harness import (  # noqa: E402
     ws_url,
 )
 from pcm import PcmPacer  # noqa: E402
-from report import end_speech_span, start_speech_span, traced_run  # noqa: E402
+from report import handle_event, traced_run  # noqa: E402
 
 W, R_GROK, R_CHIRP = 2, SAMPLE_RATE, 16_000
 
@@ -187,9 +187,7 @@ class _Turns:
         self.agent_text = []
         self.agent_started_mono = time.monotonic()
         self.agent_out_bytes = 0
-        self.agent_span = start_speech_span(
-            self.agent_utt, speaker="agent", parent=self.root
-        )
+        self.agent_span = None  # OTel now via report.handle_event (turn/model tree)
         await self.ws.send(_event("speech.started", {"utterance_id": self.agent_utt}))
         _log(f"agent.speech START uid={self.agent_utt}")
 
@@ -200,9 +198,6 @@ class _Turns:
         if self.agent_started_mono is not None:
             dur_ms = int((time.monotonic() - self.agent_started_mono) * 1000)
         text = "".join(self.agent_text).strip()
-        if text and self.agent_span is not None:
-            with contextlib.suppress(Exception):
-                self.agent_span.set_attribute("mivas.transcript", text[:500])
         chop = dur_ms < CHOP_WARN_MS and why.startswith("barge")
         if chop:
             self.stats.chops += 1
@@ -215,7 +210,6 @@ class _Turns:
             await self.ws.send(
                 _event("speech.completed", {"utterance_id": self.agent_utt})
             )
-        end_speech_span(self.agent_span)
         self.agent_utt = None
         self.agent_span = None
         self.agent_text = []
@@ -232,19 +226,14 @@ class _Turns:
     async def start_customer(self, uid: str, *, why: str = "") -> None:
         # Tracing only — do NOT end agent audio here. Ending agent.speech for
         # OTel must not imply we drop PCM (that was the hard-chop bug).
-        if self.customer_utt is not None:
-            end_speech_span(self.customer_span)
         self.customer_utt = uid
-        self.customer_span = start_speech_span(
-            uid, speaker="customer", parent=self.root
-        )
+        self.customer_span = None  # caller turn now traced via report.handle_event
         _log(f"customer.speech START uid={uid} why={why}")
 
     async def end_customer(self, *, why: str = "") -> None:
         if self.customer_utt is None:
             return
         _log(f"customer.speech END uid={self.customer_utt} why={why}")
-        end_speech_span(self.customer_span)
         self.customer_utt = None
         self.customer_span = None
 
@@ -676,6 +665,10 @@ async def _bridge(ws, industry: str, model: str) -> None:
                             continue
                         etype = event.get("type")
                         is_active = state["agent"] == agent
+
+                        # LangSmith-shaped tracing: realtime_session → turn → model.
+                        if is_active:
+                            handle_event(event)
 
                         # Grok server_vad — authoritative barge-in signal (xAI docs).
                         if etype == "input_audio_buffer.speech_started":

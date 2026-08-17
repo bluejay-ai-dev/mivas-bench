@@ -1,17 +1,21 @@
 """Realtime session events → Bluejay OTel traces.
 
-LangSmith-style proxy: wrap the ``RealtimeSession``, parse session events,
-and emit an OTel tree for Bluejay:
+LangSmith-shaped proxy: wrap the ``RealtimeSession``, parse its event stream,
+and emit the same tree a proper tracing SDK (LangSmith/Langfuse) would:
 
-  voice.call
-    ├── user.turn          (what the user said)
-    ├── agent.turn         (what the agent said)
-    ├── agent.speech       (audio segment + transcript)
-    ├── execute_tool <n>   (tool calls + handoffs-as-tools)
-    └── agent.<name>       (agent active window)
+  realtime_session
+    └── turn                   (one caller utterance → all ensuing agent activity)
+          ├── user_message     (caller transcript)
+          ├── model            (one generation per response: gen_ai.usage.* token
+          │                     breakdown + time-to-first-token + output)
+          ├── execute_tool <n> (tool calls + handoffs-as-tools; Bluejay reads these)
+          └── audio_interrupted (barge-in)
 
-Protocol chatter (audio chunks, history_updated, …) is parsed for those
-spans only — it is not dumped onto the root as OTel span events.
+Token counts + TTFT are pulled off the Realtime response.created/response.done
+events into standard OTel GenAI (`gen_ai.*`) attributes and rolled up onto the
+root, exported to Bluejay's own OTLP. Turn boundaries come from OpenAI's
+``input_audio_buffer.speech_started``; per-chunk audio is parsed for TTFT only,
+never emitted as spans.
 """
 
 from __future__ import annotations
@@ -20,6 +24,7 @@ import asyncio
 import json
 import logging
 import os
+import time
 from contextlib import asynccontextmanager
 from typing import Any, AsyncIterator, Optional
 
@@ -74,19 +79,36 @@ def _clip(value: Any, n: int = _MAX_ATTR) -> str:
     return s if len(s) <= n else s[: n - 3] + "..."
 
 
-def _extract_content_text(item_content: Any) -> str | None:
-    if isinstance(item_content, str):
-        return item_content
-    if not item_content or not isinstance(item_content, list):
-        return None
-    for part in item_content:
-        if isinstance(part, dict):
-            text = part.get("text") or part.get("transcript")
-        else:
-            text = getattr(part, "text", None) or getattr(part, "transcript", None)
-        if text:
-            return str(text)
-    return None
+def _deep_get(obj: Any, *path: str) -> Any:
+    """Read a dotted path off a pydantic model or a plain dict."""
+    for key in path:
+        if obj is None:
+            return None
+        obj = obj.get(key) if isinstance(obj, dict) else getattr(obj, key, None)
+    return obj
+
+
+def _usage_attrs(usage: Any) -> dict[str, int]:
+    """Realtime response usage → gen_ai.usage.* ints (audio/text/cached broken out)."""
+    out: dict[str, int] = {}
+    if usage is None:
+        return out
+
+    def put(key: str, *path: str) -> None:
+        v = _deep_get(usage, *path)
+        if isinstance(v, int):
+            out[key] = v
+
+    put(GenAIAttributes.GEN_AI_USAGE_INPUT_TOKENS, "input_tokens")
+    put(GenAIAttributes.GEN_AI_USAGE_OUTPUT_TOKENS, "output_tokens")
+    put("gen_ai.usage.total_tokens", "total_tokens")
+    put("gen_ai.usage.input_audio_tokens", "input_token_details", "audio_tokens")
+    put("gen_ai.usage.input_text_tokens", "input_token_details", "text_tokens")
+    put("gen_ai.usage.cached_tokens", "input_token_details", "cached_tokens")
+    put("gen_ai.usage.output_audio_tokens", "output_token_details", "audio_tokens")
+    put("gen_ai.usage.output_text_tokens", "output_token_details", "text_tokens")
+    put("gen_ai.usage.output_reasoning_tokens", "output_token_details", "reasoning_tokens")
+    return out
 
 
 def _unwrap_raw(data: Any) -> tuple[str | None, Any]:
@@ -243,112 +265,178 @@ async def post_trace_ids(simulation_result_id: str, trace_id: str) -> None:
 
 
 class RealtimeEventTracer:
-    """Maps RealtimeSession events → child spans under ``voice.call``."""
+    """RealtimeSession events → a LangSmith-shaped tree under ``realtime_session``.
 
-    def __init__(self, tracer: Tracer, root: Span) -> None:
+        realtime_session
+          turn                    (one caller utterance → all ensuing agent activity)
+            user_message          (caller transcript)
+            model                 (generation: gen_ai.usage.* tokens + TTFT + output)
+            execute_tool <name>   (tool calls / handoffs — Bluejay reads these)
+            audio_interrupted     (barge-in)
+
+    No per-chunk speech spans and no separate agent-window / agent.turn / agent.speech
+    spans: the caller turn is one ``user_message``, the agent turn is the ``model``
+    generation. Turn boundaries come from OpenAI ``input_audio_buffer.speech_started``.
+    """
+
+    def __init__(self, tracer: Tracer, root: Span, model: str | None = None) -> None:
         self._tracer = tracer
         self.root = root
-        self._agent_spans: dict[str, Span] = {}
+        self._model = model
+        self._turn: Span | None = None
+        self._turn_index = 0
         self._tool_spans: dict[str, Span] = {}
-        self._speech_spans: dict[str, Span] = {}
-        self._speech_text: dict[str, list[str]] = {}
-        self._customer_speech: Span | None = None
-        self._seen_agent_text: set[str] = set()
         self._seen_user_text: set[str] = set()
+        # One generation span per Realtime response (response.created → response.done),
+        # carrying tokens + TTFT, the way LangSmith/Langfuse report a model call.
+        self._llm_span: Span | None = None
+        self._resp_start_mono: float | None = None
+        self._resp_ttft_ms: float | None = None
+        self._usage_input = 0
+        self._usage_output = 0
+        self._response_count = 0
+        self._event_count = 0
 
     def wrap(self, session: Any) -> "TracedRealtimeSession":
         return TracedRealtimeSession(session, self)
 
-    def start_customer_speech(self, utterance_id: str) -> Span | None:
-        """CHIRP inbound speech.* → customer.speech under voice.call."""
-        self.end_customer_speech()
-        span = self._tracer.start_span(
-            "customer.speech",
-            context=otel_trace.set_span_in_context(self.root),
-            kind=SpanKind.INTERNAL,
-            attributes={
-                GenAIAttributes.GEN_AI_OPERATION_NAME: "speech_to_text",
-                "mivas.speech.speaker": "customer",
-                "mivas.utterance_id": str(utterance_id),
-                "mivas.event": "chirp.speech.started",
-            },
+    def _current_turn(self) -> Span:
+        if self._turn is None:
+            self._turn_index += 1
+            self._turn = self._tracer.start_span(
+                "turn",
+                context=otel_trace.set_span_in_context(self.root),
+                kind=SpanKind.INTERNAL,
+                attributes={"mivas.turn.index": self._turn_index},
+            )
+        return self._turn
+
+    def _turn_ctx(self):
+        return otel_trace.set_span_in_context(self._current_turn())
+
+    def _close_turn(self) -> None:
+        """End the model span, any open tools, and the turn itself."""
+        if self._llm_span is not None:
+            self._finish_llm(None)
+        for span in list(self._tool_spans.values()):
+            span.set_status(Status(StatusCode.OK))
+            span.end()
+        self._tool_spans.clear()
+        if self._turn is not None:
+            self._turn.set_status(Status(StatusCode.OK))
+            self._turn.end()
+            self._turn = None
+
+    def _start_llm(self, response: Any) -> None:
+        """response.created → open a generation span; duration = model latency."""
+        if self._llm_span is not None:
+            self._finish_llm(None)  # never leak a span if done was missed
+        self._resp_start_mono = time.monotonic()
+        self._resp_ttft_ms = None
+        model = self._model or _deep_get(response, "model")
+        attrs: dict[str, Any] = {
+            GenAIAttributes.GEN_AI_OPERATION_NAME: "chat",
+            GenAIAttributes.GEN_AI_SYSTEM: "openai",
+            "mivas.modality": "audio",
+            "mivas.event": "response.created",
+        }
+        if model:
+            attrs[GenAIAttributes.GEN_AI_REQUEST_MODEL] = str(model)
+        rid = _deep_get(response, "id")
+        if rid:
+            attrs[GenAIAttributes.GEN_AI_RESPONSE_ID] = str(rid)
+        self._llm_span = self._tracer.start_span(
+            "model",
+            context=self._turn_ctx(),
+            kind=SpanKind.CLIENT,
+            attributes=attrs,
         )
-        self._customer_speech = span
-        return span
 
-    def end_customer_speech(self, span: Span | None = None) -> None:
-        target = span if span is not None else self._customer_speech
-        if target is None:
+    def _mark_first_output(self) -> None:
+        """First audio/transcript chunk of the current response → time to first token."""
+        if (
+            self._llm_span is None
+            or self._resp_ttft_ms is not None
+            or self._resp_start_mono is None
+        ):
             return
-        if self._customer_speech is target:
-            self._customer_speech = None
-        target.set_status(Status(StatusCode.OK))
-        target.end()
+        self._resp_ttft_ms = (time.monotonic() - self._resp_start_mono) * 1000.0
 
-    def _parent_ctx(self, agent_name: str | None = None):
-        if agent_name and agent_name in self._agent_spans:
-            return otel_trace.set_span_in_context(self._agent_spans[agent_name])
-        return otel_trace.set_span_in_context(self.root)
+    def _finish_llm(self, response: Any) -> None:
+        """response.done → stamp usage + TTFT, end the span, roll totals onto root."""
+        span = self._llm_span
+        self._llm_span = None
+        ttft = self._resp_ttft_ms
+        self._resp_start_mono = None
+        self._resp_ttft_ms = None
+        if span is None:
+            return
+
+        attrs = _usage_attrs(_deep_get(response, "usage"))
+        for key, value in attrs.items():
+            span.set_attribute(key, value)
+        rid = _deep_get(response, "id")
+        if rid:
+            span.set_attribute(GenAIAttributes.GEN_AI_RESPONSE_ID, str(rid))
+        rmodel = _deep_get(response, "model") or self._model
+        if rmodel:
+            span.set_attribute(GenAIAttributes.GEN_AI_RESPONSE_MODEL, str(rmodel))
+        if ttft is not None:
+            # semconv metric name (seconds) + a ms attribute, as the SDKs surface both.
+            span.set_attribute("gen_ai.server.time_to_first_token", ttft / 1000.0)
+            span.set_attribute("mivas.ttft_ms", round(ttft, 2))
+        if _deep_get(response, "status") == "failed":
+            msg = _deep_get(response, "status_details", "error", "message") or "response failed"
+            span.set_status(Status(StatusCode.ERROR, str(msg)))
+        else:
+            span.set_status(Status(StatusCode.OK))
+        span.end()
+
+        self._usage_input += attrs.get(GenAIAttributes.GEN_AI_USAGE_INPUT_TOKENS, 0)
+        self._usage_output += attrs.get(GenAIAttributes.GEN_AI_USAGE_OUTPUT_TOKENS, 0)
+        self._response_count += 1
+        self.root.set_attribute(
+            GenAIAttributes.GEN_AI_USAGE_INPUT_TOKENS, self._usage_input
+        )
+        self.root.set_attribute(
+            GenAIAttributes.GEN_AI_USAGE_OUTPUT_TOKENS, self._usage_output
+        )
+        self.root.set_attribute(
+            "gen_ai.usage.total_tokens", self._usage_input + self._usage_output
+        )
+        self.root.set_attribute("mivas.response.count", self._response_count)
 
     def handle(self, event: Any) -> None:
         etype = getattr(event, "type", None) or "unknown"
+        self._event_count += 1
         try:
             self._dispatch(etype, event)
         except Exception:
             logger.debug("event tracer failed on %s", etype, exc_info=True)
 
     def _dispatch(self, etype: str, event: Any) -> None:
-        if etype == "agent_start":
-            agent = getattr(event, "agent", None)
-            name = getattr(agent, "name", None) or "Unknown"
-            if name not in self._agent_spans:
-                span = self._tracer.start_span(
-                    f"agent.{name}",
-                    context=otel_trace.set_span_in_context(self.root),
-                    kind=SpanKind.INTERNAL,
-                    attributes={
-                        GenAIAttributes.GEN_AI_AGENT_NAME: name,
-                        "mivas.event": "agent_start",
-                    },
-                )
-                self._agent_spans[name] = span
-
-        elif etype == "agent_end":
-            agent = getattr(event, "agent", None)
-            name = getattr(agent, "name", None) or "Unknown"
-            span = self._agent_spans.pop(name, None)
-            if span is not None:
-                span.set_status(Status(StatusCode.OK))
-                span.end()
-
-        elif etype == "tool_start":
+        if etype == "tool_start":
             tool = getattr(event, "tool", None)
-            agent = getattr(event, "agent", None)
             name = getattr(tool, "name", None) or "unknown_tool"
-            agent_name = getattr(agent, "name", None) if agent else None
             args = getattr(event, "arguments", None)
             attrs: dict[str, Any] = {
                 GenAIAttributes.GEN_AI_OPERATION_NAME: "execute_tool",
                 GenAIAttributes.GEN_AI_TOOL_NAME: name,
                 "mivas.event": "tool_start",
             }
-            if agent_name:
-                attrs[GenAIAttributes.GEN_AI_AGENT_NAME] = agent_name
             if args is not None:
                 attrs[GenAIAttributes.GEN_AI_TOOL_CALL_ARGUMENTS] = _clip(args)
-            span = self._tracer.start_span(
+            self._tool_spans[name] = self._tracer.start_span(
                 f"execute_tool {name}",
-                context=self._parent_ctx(agent_name),
+                context=self._turn_ctx(),
                 kind=SpanKind.INTERNAL,
                 attributes=attrs,
             )
-            self._tool_spans[name] = span
 
         elif etype == "tool_end":
             tool = getattr(event, "tool", None)
             name = getattr(tool, "name", None) or "unknown_tool"
             output = getattr(event, "output", None)
-            args = getattr(event, "arguments", None)
             span = self._tool_spans.pop(name, None)
             if span is not None:
                 if output is not None:
@@ -367,7 +455,7 @@ class RealtimeEventTracer:
             # Bluejay tool_calls path: handoffs show up as execute_tool.
             with self._tracer.start_as_current_span(
                 f"execute_tool {tool_name}",
-                context=self._parent_ctx(from_name),
+                context=self._turn_ctx(),
                 kind=SpanKind.INTERNAL,
                 attributes={
                     GenAIAttributes.GEN_AI_OPERATION_NAME: "execute_tool",
@@ -386,66 +474,21 @@ class RealtimeEventTracer:
                     _clip({"success": True, "to_agent": to_name}),
                 )
                 span.set_status(Status(StatusCode.OK))
-            # Close the from-agent window; to-agent will get agent_start.
-            old = self._agent_spans.pop(from_name, None)
-            if old is not None:
-                old.set_status(Status(StatusCode.OK))
-                old.end()
 
         elif etype == "audio":
-            item_id = getattr(event, "item_id", None) or "unknown"
-            content_index = getattr(event, "content_index", 0)
-            key = f"{item_id}:{content_index}"
-            if key not in self._speech_spans:
-                self._speech_spans[key] = self._tracer.start_span(
-                    "agent.speech",
-                    context=self._parent_ctx(),
-                    kind=SpanKind.INTERNAL,
-                    attributes={
-                        "mivas.event": "audio",
-                        "mivas.item_id": str(item_id),
-                        "mivas.content_index": int(content_index or 0),
-                    },
-                )
-                self._speech_text[key] = []
+            self._mark_first_output()  # first audio chunk → TTFT; no per-chunk span
 
-        elif etype in {"audio_end", "audio_interrupted"}:
-            item_id = getattr(event, "item_id", None) or "unknown"
-            content_index = getattr(event, "content_index", 0)
-            key = f"{item_id}:{content_index}"
-            span = self._speech_spans.pop(key, None)
-            parts = self._speech_text.pop(key, [])
-            if span is not None:
-                if parts:
-                    text = "".join(parts)
-                    span.set_attribute("mivas.transcript", _clip(text))
-                    span.set_attribute(
-                        GenAIAttributes.GEN_AI_OUTPUT_MESSAGES,
-                        _clip([{"role": "assistant", "content": text}]),
-                    )
-                if etype == "audio_interrupted":
-                    span.set_attribute("mivas.interrupted", True)
-                span.set_status(Status(StatusCode.OK))
-                span.end()
-
-        elif etype == "history_added":
-            item = getattr(event, "item", None)
-            role = getattr(item, "role", None) if item else None
-            text = _extract_content_text(getattr(item, "content", None) if item else None)
-            if text and role == "user":
-                self._user_turn(text, source="history_added")
-            elif text and role == "assistant":
-                self._agent_turn(text, source="history_added")
-
-        elif etype == "history_updated":
-            history = getattr(event, "history", None)
-            if isinstance(history, list):
-                for item in reversed(history):
-                    role = getattr(item, "role", None)
-                    text = _extract_content_text(getattr(item, "content", None))
-                    if text and role == "assistant":
-                        self._agent_turn(text, source="history_updated")
-                        break
+        elif etype == "audio_interrupted":
+            if self._llm_span is not None:
+                self._llm_span.set_attribute("mivas.interrupted", True)
+            span = self._tracer.start_span(
+                "audio_interrupted",
+                context=self._turn_ctx(),
+                kind=SpanKind.INTERNAL,
+                attributes={"mivas.event": "audio_interrupted"},
+            )
+            span.set_status(Status(StatusCode.OK))
+            span.end()
 
         elif etype == "error":
             err = getattr(event, "error", "Unknown error")
@@ -466,25 +509,27 @@ class RealtimeEventTracer:
                 return obj.get(key, default)
             return getattr(obj, key, default)
 
+        if dtype == "input_audio_buffer.speech_started":
+            # New caller utterance → the previous turn is done; open a fresh one.
+            self._close_turn()
+            self._current_turn()
+            return
+
         if dtype in {
             "conversation.item.input_audio_transcription.completed",
             "input_audio_transcription_completed",
         }:
             transcript = _get(data, "transcript")
             if transcript:
-                self._user_turn(str(transcript), source=dtype)
+                self._user_message(str(transcript))
             return
 
         if dtype in {
             "response.output_audio_transcript.delta",
             "response.audio_transcript.delta",
         }:
-            delta = _get(data, "delta") or ""
-            item_id = _get(data, "item_id") or "unknown"
-            content_index = _get(data, "content_index", 0)
-            key = f"{item_id}:{content_index}"
-            if key in self._speech_text and delta:
-                self._speech_text[key].append(str(delta))
+            if _get(data, "delta"):
+                self._mark_first_output()
             return
 
         if dtype in {
@@ -492,81 +537,46 @@ class RealtimeEventTracer:
             "response.audio_transcript.done",
         }:
             transcript = _get(data, "transcript")
-            item_id = _get(data, "item_id") or "unknown"
-            content_index = _get(data, "content_index", 0)
-            key = f"{item_id}:{content_index}"
-            if transcript and key in self._speech_spans:
-                self._speech_spans[key].set_attribute(
-                    "mivas.transcript", _clip(transcript)
+            if transcript and self._llm_span is not None:
+                self._llm_span.set_attribute("mivas.transcript", _clip(transcript))
+                self._llm_span.set_attribute(
+                    GenAIAttributes.GEN_AI_OUTPUT_MESSAGES,
+                    _clip([{"role": "assistant", "content": str(transcript)}]),
                 )
-            if transcript:
-                self._agent_turn(str(transcript), source=dtype)
+            return
+
+        if dtype == "response.created":
+            self._start_llm(_get(data, "response"))
             return
 
         if dtype == "response.done":
-            usage = None
-            response = _get(data, "response")
-            if isinstance(response, dict):
-                usage = response.get("usage")
-            elif response is not None:
-                usage = getattr(response, "usage", None)
-            if usage is not None:
-                self.root.set_attribute("mivas.usage", _clip(usage))
+            self._finish_llm(_get(data, "response"))
+            return
 
-    def _user_turn(self, text: str, *, source: str) -> None:
+    def _user_message(self, text: str) -> None:
+        """Caller transcript → a point ``user_message`` span under the current turn."""
         key = text.strip()
         if not key or key in self._seen_user_text:
             return
         self._seen_user_text.add(key)
-        with self._tracer.start_as_current_span(
-            "user.turn",
-            context=otel_trace.set_span_in_context(self.root),
+        span = self._tracer.start_span(
+            "user_message",
+            context=self._turn_ctx(),
             kind=SpanKind.INTERNAL,
             attributes={
-                "mivas.event": source,
                 "mivas.role": "user",
                 "mivas.transcript": _clip(text),
                 GenAIAttributes.GEN_AI_INPUT_MESSAGES: _clip(
                     [{"role": "user", "content": text}]
                 ),
             },
-        ) as span:
-            span.set_status(Status(StatusCode.OK))
-
-    def _agent_turn(self, text: str, *, source: str) -> None:
-        key = text.strip()
-        if not key or key in self._seen_agent_text:
-            return
-        self._seen_agent_text.add(key)
-        with self._tracer.start_as_current_span(
-            "agent.turn",
-            context=self._parent_ctx(),
-            kind=SpanKind.INTERNAL,
-            attributes={
-                "mivas.event": source,
-                "mivas.role": "assistant",
-                "mivas.transcript": _clip(text),
-                GenAIAttributes.GEN_AI_OUTPUT_MESSAGES: _clip(
-                    [{"role": "assistant", "content": text}]
-                ),
-            },
-        ) as span:
-            span.set_status(Status(StatusCode.OK))
+        )
+        span.set_status(Status(StatusCode.OK))
+        span.end()
 
     def close(self) -> None:
-        self.end_customer_speech()
-        for span in list(self._tool_spans.values()):
-            span.set_status(Status(StatusCode.OK))
-            span.end()
-        self._tool_spans.clear()
-        for span in list(self._speech_spans.values()):
-            span.set_status(Status(StatusCode.OK))
-            span.end()
-        self._speech_spans.clear()
-        for span in list(self._agent_spans.values()):
-            span.set_status(Status(StatusCode.OK))
-            span.end()
-        self._agent_spans.clear()
+        self._close_turn()
+        self.root.set_attribute("mivas.event_count", self._event_count)
 
 
 class TracedRealtimeSession:
@@ -606,6 +616,7 @@ async def traced_run(
     workflow_name: str,
     *,
     simulation_result_id: str | None = None,
+    model: str | None = None,
 ) -> AsyncIterator[Optional[RealtimeEventTracer]]:
     """Open ``voice.call`` root; yield an event tracer (or None if no API key)."""
     provider = setup_otel()
@@ -616,7 +627,8 @@ async def traced_run(
     tracer = otel_trace.get_tracer("mivas.openai.realtime")
     attrs: dict[str, Any] = {
         "mivas.workflow.name": workflow_name,
-        GenAIAttributes.GEN_AI_OPERATION_NAME: "voice.call",
+        GenAIAttributes.GEN_AI_OPERATION_NAME: "realtime_session",
+        GenAIAttributes.GEN_AI_SYSTEM: "openai",
     }
     if simulation_result_id:
         attrs["bluejay.simulation_result_id"] = str(simulation_result_id)
@@ -625,7 +637,7 @@ async def traced_run(
     event_tracer: RealtimeEventTracer | None = None
     try:
         with tracer.start_as_current_span(
-            "voice.call",
+            "realtime_session",
             kind=SpanKind.SERVER,
             attributes=attrs,
         ) as root:
@@ -638,7 +650,9 @@ async def traced_run(
                     simulation_result_id,
                     workflow_name,
                 )
-            event_tracer = RealtimeEventTracer(tracer, root)
+            if model:
+                root.set_attribute(GenAIAttributes.GEN_AI_REQUEST_MODEL, str(model))
+            event_tracer = RealtimeEventTracer(tracer, root, model=model)
             yield event_tracer
             event_tracer.close()
     finally:
