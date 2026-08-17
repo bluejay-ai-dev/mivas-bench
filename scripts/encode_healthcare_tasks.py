@@ -144,9 +144,15 @@ def task_name_for(folder: str, test_name: str) -> str:
     return f"{folder}: {test_name}"
 
 
+DEFAULT_CREATIVITY = 0
+
+
 def behaviors(dh: dict[str, Any]) -> dict[str, Any]:
     raw = dh.get("behaviors")
-    return raw if isinstance(raw, dict) else {}
+    out = dict(raw) if isinstance(raw, dict) else {}
+    # always stamp 0 so a live DH creativity of 0.15 cannot rewrite task.json
+    out["creativity"] = DEFAULT_CREATIVITY
+    return out
 
 
 _SCRIPTED_KEEP = ("match_type", "match_phrase", "response_type", "response_value")
@@ -481,7 +487,7 @@ def complete_call(
         params.pop("end", None)
 
     elif name == "reschedule_appointment":
-        slot = slot_for(task, params, later=True)
+        slot = slot_for(task, params)
         params.setdefault("appointment_id", APPOINTMENT_BY_NAME.get(caller, 1))
         params.setdefault("new_start", slot["start"])
         params.setdefault("new_end", slot["end"])
@@ -503,7 +509,9 @@ def complete_call(
         mapped_ids = [slug_location(item) for item in params["location_ids"]]
         params["location_ids"] = [item for item in mapped_ids if item] or [loc]
         params.setdefault("earliest", "2026-08-24T00:00:00")
-        params.setdefault("latest", "2026-09-30T23:59:59")
+        # DH names calendar dates only. The office default when no clock time
+        # is given is 23:59:59; stamp that on replay, not on expected args.
+        params.pop("latest", None)
 
     elif name == "send_sms":
         params.setdefault("mobile_e164", mobile)
@@ -518,7 +526,8 @@ def complete_call(
         params.setdefault("line_item_id", default)
 
     elif name == "offer_financing":
-        params.setdefault("amount_cents", BALANCE_BY_NAME.get(caller, 48000))
+        # DH asks to spread cost out, not a cent value. Name-only match.
+        params.pop("amount_cents", None)
 
     elif name == "request_fee_waiver":
         params.setdefault("fee_line_item_id", "li_noshow")
@@ -547,6 +556,8 @@ def complete_call(
 
     elif name == "schedule_allergy_service":
         params.setdefault("location_id", location_id_from(task, params))
+        loc = str(params["location_id"])
+        params.setdefault("window_start", SLOTS_BY_LOCATION.get(loc, PARK_1)["start"])
 
     elif name == "run_eligibility_check":
         params.setdefault("carrier", facts.get("carrier"))
@@ -561,6 +572,7 @@ def complete_call(
         if params.get("carrier"):
             params["carrier"] = slug_carrier(params["carrier"]) or params["carrier"]
         params.setdefault("member_id", facts.get("member_id"))
+        params.pop("group_number", None)
 
     elif name == "create_callback_task":
         params.setdefault("queue", "front_desk")
@@ -618,6 +630,8 @@ def complete_call(
     elif name == "list_locations":
         params.pop("name", None)
         params.pop("radius_miles", None)
+        # DH names the office; ZIP is unearned unless they volunteered it.
+        params.pop("zip", None)
         if params.get("location_id"):
             mapped = slug_location(params["location_id"])
             if mapped:
@@ -796,9 +810,13 @@ def reshape_calls(task: dict[str, Any], folder: str) -> list[dict[str, Any]]:
         ]
         raw = raw[:insert_at] + extra + raw[insert_at:]
         names = [call.get("name") for call in raw]
-    if "book_appointment" in names and "find_slots" not in names:
+    book_name = next(
+        (n for n in ("book_appointment", "book_cosmetic_consult") if n in names),
+        None,
+    )
+    if book_name and "find_slots" not in names:
         insert_at = next(
-            i for i, call in enumerate(raw) if call.get("name") == "book_appointment"
+            i for i, call in enumerate(raw) if call.get("name") == book_name
         )
         loc = location_id_from(task, {})
         raw = raw[:insert_at] + [{
@@ -884,13 +902,31 @@ def add_member_id_pin(task: dict[str, Any]) -> None:
     pins.append(dict(MEMBER_ID_PIN))
 
 
-def replay_task(folder: str, calls: list[dict[str, Any]]) -> dict[str, Any]:
+JOIN_WAITLIST_REPLAY_LATEST = "2026-09-30T23:59:59"
+
+
+def replay_arguments(call: dict[str, Any], task: dict[str, Any] | None = None) -> dict[str, Any]:
+    """Fill tool-required args that are omitted from expected params."""
+    name = call.get("name")
+    params = dict(call.get("parameters") or {})
+    if name == "join_waitlist":
+        params.setdefault("earliest", "2026-08-24T00:00:00")
+        params.setdefault("latest", JOIN_WAITLIST_REPLAY_LATEST)
+    elif name == "offer_financing" and params.get("amount_cents") in (None, ""):
+        facts = facts_from_task(task or {})
+        caller = facts.get("full_name") or str((task or {}).get("customer_name") or "")
+        params["amount_cents"] = BALANCE_BY_NAME.get(caller, 48000)
+    return {**call, "parameters": params} if params else call
+
+
+def replay_task(folder: str, calls: list[dict[str, Any]], task: dict[str, Any] | None = None) -> dict[str, Any]:
+    replay_calls = [replay_arguments(call, task) for call in calls]
     dh = {
         "id": folder,
         "name": folder,
         "test_name": folder,
         "traits": [{"trait_name": "case_key", "value": folder}],
-        "expected_tool_calls": calls,
+        "expected_tool_calls": replay_calls,
     }
     flags = tool_flags("healthcare")
     with load_tool_server("healthcare") as module:
@@ -925,7 +961,7 @@ def repair_tasks() -> int:
             add_member_id_pin(task)
         task["exp_db_state"] = drop_courtesy_sms_events({
             **task,
-            "exp_db_state": replay_task(folder, task["exp_tool_calls"]),
+            "exp_db_state": replay_task(folder, task["exp_tool_calls"], task),
         })
         write_task(folder, task)
         print(

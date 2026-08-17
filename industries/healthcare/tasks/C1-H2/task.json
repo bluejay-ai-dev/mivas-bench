@@ -1,6 +1,6 @@
 {
   "task_name": "C1-H2: Hours, directions, then an urgent rash booking",
-  "intent": "You are a new patient calling from the subway and you are a little flustered. Start by asking what time the Park Avenue office opens and how you get there on the train, and ask them to text you the address so you have it. If they ask whether you want that address by text, say yes — you do want it. After that, tell them the real reason you called: a rash on your side is spreading and painful and you need the soonest visit they have. Take the earliest time, confirm it, then thank them and end the call.",
+  "intent": "You are a new patient with no chart at Straus. In your first real answer, say that you are a new patient and ask what time the Park Avenue office opens on a weekday and how you get there on the train. Stay until they have looked up weekday hours, texted you the Park Avenue street address, and told you the floor and the suite out loud. If they quote hours or directions without looking them up, ask them to check. Name the office as Park Avenue; do not volunteer a ZIP. If they ask whether you want that address by text, say yes. Do not thank them or end the call after hours or directions \u2014 you still have to book. Right after they say the floor and the suite, or that they sent the text, tell them the real reason you called: a rash on your side is spreading and painful and you need the soonest new-patient visit they have at Park Avenue. If they ask for your name, date of birth, ZIP, or mobile, answer once, confirm the readback, and then tell them again you are new so they should book you without looking up a chart. Take the first appointment time they offer. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first time out loud, then thank them and end the call. Do not ask to add or change insurance. Do not ask for a callback, to speak to a person, a bill, a payment, the patient portal, a waitlist, or financing. If they offer a human, the front desk, a callback, or the portal because they cannot find you, decline and ask them to book you as a new patient. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar. If they only list openings, say book the first one. Do not hang up after the visit is booked until they have also looked up weekday hours and texted the Park Avenue address.",
   "traits": [
     {
       "trait_name": "zip",
@@ -51,10 +51,7 @@
       }
     },
     {
-      "name": "list_locations",
-      "parameters": {
-        "zip": "10016"
-      }
+      "name": "list_locations"
     },
     {
       "name": "send_sms",
@@ -109,13 +106,63 @@
       }
     }
   ],
-  "behaviors": {},
+  "behaviors": {
+    "creativity": 0
+  },
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "asks whether you want a text, SMS, or the address sent to your phone. NOT when asking for your mobile number itself, NOT when offering a confirmation text for the appointment after it is booked.",
+      "match_phrase": "asks whether you want a text, SMS, or the address sent to your phone, or quotes hours or directions without offering to text the address. NOT when asking for your mobile number itself, NOT when offering a confirmation text for the appointment after it is booked, NOT when they have already said they texted the address.",
       "response_type": "phrase",
       "response_value": "Yes, please text me the address."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "gives the floor and the suite, or says they texted or sent the Park Avenue address. NOT when they have only given hours or train directions without the floor and suite, NOT when already booking a visit, NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "Thanks. I also have a spreading painful rash on my side and I need the soonest new-patient visit at Park Avenue."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to transfer you to a human, the front desk, a person, or the patient portal because they cannot find your chart. NOT when booking is already proceeding.",
+      "response_type": "phrase",
+      "response_value": "No, I am a new patient. Please just book me the soonest visit at Park Avenue."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers an appointment time, a slot, or asks which day or time you want AFTER already saying the street address, the floor, and the suite. NOT when they have not yet given all three, NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "I'll take the first time you offered."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to transfer you to a human, a person, the front desk, or a live agent. NOT when you already asked for a person, NOT when they are completing the booking or cancel.",
+      "response_type": "phrase",
+      "response_value": "No, I don't need a person. Please finish what I asked on this call."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers the waitlist, a later opening, or to add you to a list. NOT when offering a specific appointment time to book now, NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "No waitlist. Please just finish what I asked."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers an appointment time, asks you to confirm a slot, or quotes an office name without the street address, floor, and suite. NOT when they have already said the street, the floor, and the suite.",
+      "response_type": "phrase",
+      "response_value": "Before I take a time, I need the street address, the floor, and the suite."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "quotes weekday hours, opening time, or train directions without saying they looked it up or checked the hours. NOT when they have just said they checked the hours or directions.",
+      "response_type": "phrase",
+      "response_value": "Can you look that up in the office hours? Then text me the Park Avenue street address and tell me the floor and the suite."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "thanks you, says goodbye, or asks if you need anything else after booking but before they have looked up weekday hours and texted the Park Avenue address. NOT when they have just confirmed hours and that the address was texted.",
+      "response_type": "phrase",
+      "response_value": "I still need weekday hours and the address texted to me before I go."
     }
   ],
   "customer_name": "Owen Castellanos",

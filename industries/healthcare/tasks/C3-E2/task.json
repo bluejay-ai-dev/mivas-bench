@@ -1,6 +1,6 @@
 {
   "task_name": "C3-E2: Medicaid at Brooklyn Heights",
-  "intent": "You are trying to find a dermatology office that will take your insurance. Ask whether the Brooklyn Heights location takes it. If they say no, ask what your options are \u2014 another office, self-pay, or a callback. You are not booking today. Once you have a real next step, thank them and end the call.",
+  "intent": "You are checking coverage only. Ask whether the Brooklyn Heights office takes Medicaid \u2014 that office as a whole, not one doctor. You have not chosen a clinician and you will not pick one on this call. If they ask which doctor you see, say you do not have one yet and you still need a yes or no for that office. Stay on the line until they have clearly said whether Brooklyn Heights takes Medicaid; do not accept 'call back when you pick a doctor' as the answer. If they say the office does not take Medicaid, ask whether self-pay is an option. Once you have that office-level yes or no, and if no a self-pay next step, thank them and end the call. Do not ask to book, reschedule, or cancel. Do not ask for a callback or to speak to a person. Do not ask them to text you. Do not ask for the street, floor, suite, or office id. Do not give a member ID or group number. If they try to look you up as a patient, give your name once and go straight back to the Medicaid question \u2014 do not loop on date of birth. Do not ask about a waitlist, a bill, or financing. A spoken yes for the whole practice is not enough. A spoken yes or no that names the office is enough. Thank them and end once you have that office-level answer.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -21,24 +21,37 @@
   "exp_tool_calls": [
     {
       "name": "transfer_to_coverage"
-    },
-    {
-      "name": "check_plan_accepted",
-      "parameters": {
-        "carrier": "medicaid",
-        "location_id": "loc_brooklyn_heights"
-      },
-      "output": {
-        "ok": true,
-        "data": {
-          "accepted": false,
-          "required_script": "We don't accept Medicaid at any of our offices. I can go over self-pay pricing or have someone call you about options."
-        }
-      }
     }
   ],
-  "behaviors": {},
-  "scripted_responses": {},
+  "behaviors": {
+    "creativity": 0
+  },
+  "scripted_responses": [
+    {
+      "match_type": "context",
+      "match_phrase": "offers to transfer you to a human, a person, the front desk, or a live agent. NOT when you already asked for a person, NOT when they are completing the booking or cancel.",
+      "response_type": "phrase",
+      "response_value": "No, I don't need a person. Please finish what I asked on this call."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers the waitlist, a later opening, or to add you to a list. NOT when offering a specific appointment time to book now, NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "No waitlist. Please just finish what I asked."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when asking for a payment-link number, NOT when asking for your mobile number for identity.",
+      "response_type": "phrase",
+      "response_value": "No thanks, I don't need a text."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "says they take the plan, accept the insurance, or that you are covered, without naming the office they just checked. NOT when they have just said they checked Brooklyn Heights specifically.",
+      "response_type": "phrase",
+      "response_value": "Which office did you check? I need Brooklyn Heights specifically, not the whole practice."
+    }
+  ],
   "customer_name": "Vince Okafor",
   "customer_available_tools": {},
   "metadata": {

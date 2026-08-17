@@ -178,23 +178,6 @@
       "name": "Dr. Luis Ruiz"
     }
   ],
-  "tool_events": [
-    {
-      "id": 1,
-      "kind": "callback_task",
-      "payload": {
-        "callback_number": "+12125550176",
-        "queue": "front_desk"
-      }
-    },
-    {
-      "id": 2,
-      "kind": "sms",
-      "payload": {
-        "mobile_e164": "+12125550176",
-        "template_id": "directions"
-      }
-    }
-  ],
+  "tool_events": [],
   "waitlist": []
 }

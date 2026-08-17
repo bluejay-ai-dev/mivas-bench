@@ -1,6 +1,6 @@
 {
   "task_name": "C2-M1: Move tomorrow's follow-up",
-  "intent": "You are an existing Straus patient. You have a follow-up tomorrow morning at Park Avenue and something came up, so you need to move it to a later date. Answer their identity questions. Ask whether moving it costs you anything. When they offer a later time, take the first one, confirm the new day and time, then thank them and end the call.",
+  "intent": "You are an existing Straus patient. You have a follow-up tomorrow morning at Park Avenue and you need that visit moved to a later date, not cancelled. When they ask who you are, give your name and date of birth once; if they read them back, confirm and continue. Ask whether moving it costs you anything. If they ask which day, week, time, or office you prefer, say you will take the first opening they can offer. Do not name a week, day, time, or office of your own. When they offer appointment times, take the first one they say, confirm that first time out loud, then thank them and end the call. Do not ask to cancel. Do not ask to join a waitlist. Do not ask to add insurance, for a callback, to speak to a person, a bill, a payment, the patient portal, a text, financing, or the street address, floor, suite, or location id. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar. If they only list openings, say move me into that first time. Do not hang up until they confirm the visit was moved on the calendar.",
   "traits": [
     {
       "trait_name": "preferred_office",
@@ -63,6 +63,14 @@
       }
     },
     {
+      "name": "find_slots",
+      "parameters": {
+        "location_ids": [
+          "loc_park_ave"
+        ]
+      }
+    },
+    {
       "name": "reschedule_appointment",
       "output": {
         "ok": true,
@@ -72,18 +80,68 @@
       },
       "parameters": {
         "appointment_id": "1",
-        "new_start": "2026-08-25T11:30:00",
-        "new_end": "2026-08-25T12:00:00"
+        "new_start": "2026-08-24T09:00:00",
+        "new_end": "2026-08-24T09:30:00"
       }
     }
   ],
-  "behaviors": {},
+  "behaviors": {
+    "creativity": 0
+  },
   "scripted_responses": [
     {
       "match_type": "context",
       "match_phrase": "asks for your full name and date of birth, or asks you to confirm who you are, or asks for the patient's name and date of birth. NOT when asking only for a member ID or insurance card, NOT when asking which office or location, NOT when asking for a phone or mobile number, NOT when asking about an appointment day or time, NOT when reading your name and date of birth back to you for confirmation.",
       "response_type": "phrase",
       "response_value": "Jordan Lee. My date of birth is April twelfth, nineteen ninety."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks which day, week, date range, or time of day you prefer, or asks whether you want later this week or next week. NOT when offering specific appointment times for you to choose from, NOT when asking who you are, NOT when asking whether moving costs anything.",
+      "response_type": "phrase",
+      "response_value": "I'll take the first opening you can offer."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "reads your name and date of birth back to you and asks whether that is right, or asks you to confirm the name and date of birth they just repeated. NOT when first asking for your name and date of birth, NOT when asking for a phone or mobile number.",
+      "response_type": "phrase",
+      "response_value": "Yes, that's right."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers an appointment time, a slot, or asks which day or time you want. NOT when asking for your name or date of birth, NOT when they have not yet given the street, floor, and suite if you still need those.",
+      "response_type": "phrase",
+      "response_value": "I'll take the first time you offered."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to transfer you to a human, a person, the front desk, or a live agent. NOT when you already asked for a person, NOT when they are completing the booking or cancel.",
+      "response_type": "phrase",
+      "response_value": "No, I don't need a person. Please finish what I asked on this call."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers the waitlist, a later opening, or to add you to a list. NOT when offering a specific appointment time to book now, NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "No waitlist. Please just finish what I asked."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when asking for a payment-link number, NOT when asking for your mobile number for identity.",
+      "response_type": "phrase",
+      "response_value": "No thanks, I don't need a text."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "thanks you, says goodbye, or asks if you need anything else after listing openings but before confirming the visit was moved. NOT when they have just confirmed the appointment was rescheduled or moved.",
+      "response_type": "phrase",
+      "response_value": "Please move me into that first time and confirm it is on the calendar before I go."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before a time has been confirmed on the calendar. NOT when they have just confirmed a booked time.",
+      "response_type": "phrase",
+      "response_value": "I still need that time booked. Please confirm it is on the calendar before I go."
     }
   ],
   "customer_name": "Jordan Lee",
@@ -235,8 +293,8 @@
         "location_id": "loc_park_ave",
         "provider_id": "prov_chen",
         "appointment_type_code": "MED_FOLLOWUP",
-        "start": "2026-08-25T11:30:00",
-        "end": "2026-08-25T12:00:00",
+        "start": "2026-08-24T09:00:00",
+        "end": "2026-08-24T09:30:00",
         "description": "Follow-up acne check",
         "status": "booked"
       },

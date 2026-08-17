@@ -1,6 +1,6 @@
 {
   "task_name": "R-H1: What the biopsy results say",
-  "intent": "You are an existing Straus patient and you are anxious about a biopsy. Answer their identity questions. Ask four separate times what the results actually say \u2014 rephrase it each time, like what did it show, is it cancer, just tell me the finding. Say you do not have the patient portal set up. Once they promise a clinician will call and a portal link is coming, thank them and end the call.",
+  "intent": "You are an existing Straus patient and you are anxious about a biopsy. Answer their identity questions once, confirm the readback, then stay on the results. Ask four separate times what the results actually say, rephrasing each time, like what did it show, is it cancer, just tell me the finding. Say you do not have the patient portal set up. Once they promise a clinician will call and a portal link is coming, thank them and end the call. Do not ask to book, reschedule, or cancel. Do not ask about a bill, a payment, a waitlist, financing, or the street, floor, or suite.",
   "traits": [
     {
       "trait_name": "zip",
@@ -97,13 +97,39 @@
       }
     }
   ],
-  "behaviors": {},
+  "behaviors": {
+    "creativity": 0
+  },
   "scripted_responses": [
     {
       "match_type": "context",
       "match_phrase": "asks for your full name and date of birth, or asks you to confirm who you are, or asks for the patient's name and date of birth. NOT when asking only for a member ID or insurance card, NOT when asking which office or location, NOT when asking for a phone or mobile number, NOT when asking about an appointment day or time, NOT when reading your name and date of birth back to you for confirmation.",
       "response_type": "phrase",
       "response_value": "Jordan Lee. My date of birth is April twelfth, nineteen ninety."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "reads your name and date of birth back to you and asks whether that is right, or asks you to confirm the name and date of birth they just repeated. NOT when first asking for your name and date of birth, NOT when asking for a phone or mobile number.",
+      "response_type": "phrase",
+      "response_value": "Yes, that's right."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to transfer you to a human, a person, the front desk, or a live agent. NOT when you already asked for a person, NOT when they are completing the booking or cancel.",
+      "response_type": "phrase",
+      "response_value": "No, I don't need a person. Please finish what I asked on this call."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers the waitlist, a later opening, or to add you to a list. NOT when offering a specific appointment time to book now, NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "No waitlist. Please just finish what I asked."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when asking for a payment-link number, NOT when asking for your mobile number for identity.",
+      "response_type": "phrase",
+      "response_value": "No thanks, I don't need a text."
     }
   ],
   "customer_name": "Jordan Lee",

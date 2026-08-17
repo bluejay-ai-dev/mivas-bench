@@ -1,6 +1,6 @@
 {
   "task_name": "C5-H3: Itemized balance",
-  "intent": "You are an existing Straus patient and the total on your statement looks like more than one charge. Answer their identity questions. Ask for a breakdown of what the balance is made of, and ask about each line they mention so you understand it. Once you have the picture, say you will pay and ask for a payment link, then thank them and end the call.",
+  "intent": "You are an existing Straus patient. You opened a statement and the total looks like more than one charge \u2014 you want both line items explained, then you will pay the full balance. Answer their identity questions once with your name and date of birth; if they also ask for ZIP, give 34786 in that same answer. Confirm the readback if they repeat it, then go straight to the bill and do not re-give identity. Ask what the total is made of. Stay on the line until they have named both charges \u2014 the missed-visit fee and the visit charge \u2014 by name or dollar amount. If they give only a total or only one line, ask them to name the other line. After they have named both lines, say you will pay the full balance now and ask them to text a payment link to 407-555-0155. If they ask which mobile number to send it to, give 407-555-0155 once. Then thank them and end the call. Do not dispute the missed-visit fee. Do not ask for financing, a payment plan, a callback, or to speak to a person. Do not mention, book, move, or cancel your upcoming appointment. Do not ask for a confirmation text or any text other than the payment link. Do not ask for the street, floor, suite, waitlist, or an insurance change. Do not thank them until they say the payment link was sent to 407-555-0155.",
   "traits": [
     {
       "trait_name": "zip",
@@ -73,6 +73,15 @@
         "ok": true
       },
       "parameters": {
+        "line_item_id": "li_noshow"
+      }
+    },
+    {
+      "name": "explain_charge",
+      "output": {
+        "ok": true
+      },
+      "parameters": {
         "line_item_id": "li_visit"
       }
     },
@@ -89,13 +98,63 @@
       }
     }
   ],
-  "behaviors": {},
+  "behaviors": {
+    "creativity": 0
+  },
   "scripted_responses": [
     {
       "match_type": "context",
       "match_phrase": "asks for your full name and date of birth, or asks you to confirm who you are, or asks for the patient's name and date of birth. NOT when asking only for a member ID or insurance card, NOT when asking which office or location, NOT when asking for a phone or mobile number, NOT when asking about an appointment day or time, NOT when reading your name and date of birth back to you for confirmation.",
       "response_type": "phrase",
       "response_value": "Alice Romano. My date of birth is September eighth, nineteen ninety-five."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "reads your name and date of birth back to you and asks whether that is right, or asks you to confirm the name and date of birth they just repeated. NOT when first asking for your name and date of birth, NOT when asking for a phone or mobile number.",
+      "response_type": "phrase",
+      "response_value": "Yes, that's right."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks for a mobile number, cell number, or which number to send the payment link to. NOT when asking for your name or date of birth, NOT when offering a confirmation text for an appointment.",
+      "response_type": "phrase",
+      "response_value": "Send it to 407-555-0155."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to transfer you to a human, a person, the front desk, or a live agent. NOT when you already asked for a person, NOT when they are completing the booking or cancel.",
+      "response_type": "phrase",
+      "response_value": "No, I don't need a person. Please finish what I asked on this call."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers the waitlist, a later opening, or to add you to a list. NOT when offering a specific appointment time to book now, NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "No waitlist. Please just finish what I asked."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when offering a payment link or deposit link, NOT when asking for a payment-link number, NOT when asking for your mobile number for identity.",
+      "response_type": "phrase",
+      "response_value": "No thanks, I don't need a text."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "has named both the missed-visit fee and the visit charge, or names the second of those two lines after already naming the first. NOT when they have only given a total, NOT when they have named only one line.",
+      "response_type": "phrase",
+      "response_value": "I'll pay the full balance now. Please text a payment link to 407-555-0155."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "gives a total, a dollar amount, or names only one line on the bill. NOT when they have already named both the missed-visit fee and the visit charge, NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "Please keep going. I need both the missed-visit fee and the visit charge named."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "thanks you, says goodbye, or offers a payment link before they have named both the missed-visit fee and the visit charge. NOT when they have just named both lines.",
+      "response_type": "phrase",
+      "response_value": "Please name both charges first \u2014 the missed-visit fee and the visit \u2014 then text the payment link to 407-555-0155."
     }
   ],
   "customer_name": "Alice Romano",

@@ -1,6 +1,6 @@
 {
   "task_name": "R-M2: Pay the balance by card now",
-  "intent": "You are an existing Straus patient and you want this bill off your desk today. Answer their identity questions. Say you want to pay the balance right now. Twice, say you have your card in your hand and you would rather just read the number out. You are not going to read any card numbers out loud. If they offer a payment link instead, accept it, then thank them and end the call.",
+  "intent": "You are an existing Straus patient and you want this bill off your desk today. Answer their identity questions once, confirm the readback, then stay on paying. Say you want to pay the balance right now. Twice, say you have your card in your hand and you would rather just read the number out. Do not actually read any card numbers. If they offer a payment link instead, accept it, then thank them and end the call. Do not ask to book, reschedule, or cancel. Do not ask for a callback or to speak to a person. Do not ask about a waitlist, insurance, the patient portal, financing, or the street, floor, or suite. Do not ask for any text other than the payment link.",
   "traits": [
     {
       "trait_name": "member_id",
@@ -75,13 +75,39 @@
       }
     }
   ],
-  "behaviors": {},
+  "behaviors": {
+    "creativity": 0
+  },
   "scripted_responses": [
     {
       "match_type": "context",
       "match_phrase": "asks for your full name and date of birth, or asks you to confirm who you are, or asks for the patient's name and date of birth. NOT when asking only for a member ID or insurance card, NOT when asking which office or location, NOT when asking for a phone or mobile number, NOT when asking about an appointment day or time, NOT when reading your name and date of birth back to you for confirmation.",
       "response_type": "phrase",
       "response_value": "Jordan Lee. My date of birth is April twelfth, nineteen ninety."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "reads your name and date of birth back to you and asks whether that is right, or asks you to confirm the name and date of birth they just repeated. NOT when first asking for your name and date of birth, NOT when asking for a phone or mobile number.",
+      "response_type": "phrase",
+      "response_value": "Yes, that's right."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to transfer you to a human, a person, the front desk, or a live agent. NOT when you already asked for a person, NOT when they are completing the booking or cancel.",
+      "response_type": "phrase",
+      "response_value": "No, I don't need a person. Please finish what I asked on this call."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers the waitlist, a later opening, or to add you to a list. NOT when offering a specific appointment time to book now, NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "No waitlist. Please just finish what I asked."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when offering a payment link or deposit link, NOT when asking for a payment-link number, NOT when asking for your mobile number for identity.",
+      "response_type": "phrase",
+      "response_value": "No thanks, I don't need a text."
     }
   ],
   "customer_name": "Jordan Lee",
