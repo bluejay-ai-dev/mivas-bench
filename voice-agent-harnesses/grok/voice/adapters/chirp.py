@@ -1,8 +1,7 @@
 """CHIRP (16 kHz pcm_s16le) ↔ xAI Grok Voice (24 kHz PCM).
 
-Hard multi-agent: one Grok Realtime WS per blueprint agent; only the active
-agent receives input audio and has its output forwarded. Handoff rewires
-CHIRP audio to the target session and nudges it with bare `response.create`.
+Soft multi-agent: one Grok Realtime WS per call. Handoff is session.update
+on that socket (instructions + tools for the target agent); history stays.
 
 Speak-first: after session.updated, send `{"type":"response.create"}`.
 
@@ -48,13 +47,14 @@ from harness import (  # noqa: E402
     configure_session,
     connect_grok,
     handle_function_call,
+    handoff_nudge_event,
     handoff_role,
-    handoff_seed_events,
     industry_path,
     infer_schedule_appointment,
     load_blueprint,
     nudge_greeting,
     run_tool,
+    session_update_for_agent,
     set_call_id,
     tool_names,
     ws_url,
@@ -242,35 +242,30 @@ class _Turns:
         await self.end_customer(why="close")
 
 
-async def _open_sessions(bp: dict[str, Any], model: str) -> tuple[dict[str, Any], list[Any]]:
-    async def one(agent: str) -> tuple[str, Any, Any]:
-        cm = connect_grok(model)
-        grok = await cm.__aenter__()
-        try:
-            raw = await asyncio.wait_for(grok.recv(), timeout=60)
-            first = json.loads(raw) if isinstance(raw, str) else {}
-            _log(f"grok[{agent}] {first.get('type')}")
-            updated = await configure_session(grok, agent, bp)
-            n = len((updated.get("session") or {}).get("tools") or [])
-            _log(f"grok[{agent}] session.updated tools_registered={n}")
-        except Exception:
-            with contextlib.suppress(Exception):
-                await cm.__aexit__(None, None, None)
-            raise
-        return agent, grok, cm
-
-    results = await asyncio.gather(*(one(a) for a in bp["agents"]))
-    sessions = {name: grok for name, grok, _ in results}
-    cms = [cm for _, _, cm in results]
-    return sessions, cms
+async def _open_session(bp: dict[str, Any], model: str) -> tuple[Any, Any]:
+    """One Grok Realtime WS for the call, configured as the start agent."""
+    agent = bp["start"]
+    cm = connect_grok(model)
+    grok = await cm.__aenter__()
+    try:
+        raw = await asyncio.wait_for(grok.recv(), timeout=60)
+        first = json.loads(raw) if isinstance(raw, str) else {}
+        _log(f"grok[{agent}] {first.get('type')}")
+        updated = await configure_session(grok, agent, bp)
+        n = len((updated.get("session") or {}).get("tools") or [])
+        _log(f"grok[{agent}] session.updated tools_registered={n}")
+    except Exception:
+        with contextlib.suppress(Exception):
+            await cm.__aexit__(None, None, None)
+        raise
+    return grok, cm
 
 
-async def _close_all(sessions: dict[str, Any], chirp_ws, end: asyncio.Event) -> None:
+async def _close_all(grok, chirp_ws, end: asyncio.Event) -> None:
     await asyncio.sleep(END_CALL_CLOSE_DELAY_S)
     end.set()
-    for _name, grok in list(sessions.items()):
-        with contextlib.suppress(Exception):
-            await grok.close()
+    with contextlib.suppress(Exception):
+        await grok.close()
     with contextlib.suppress(Exception):
         await chirp_ws.close(1000)
 
@@ -295,15 +290,14 @@ async def _bridge(ws, industry: str, model: str) -> None:
         f"echo_suppress={ECHO_SUPPRESS_S}s user_rms_on={USER_RMS_ON}"
     )
 
-    sessions: dict[str, Any] = {}
-    session_cms: list[Any] = []
+    grok_cm = None
     try:
         # call_session freezes this call's DB to S3 on exit.
         async with traced_run(
             workflow, simulation_result_id=sim_id, model=model
         ) as otel_root, call_session(sim_id):
             state["_otel_root"] = otel_root
-            sessions, session_cms = await _open_sessions(bp, model)
+            grok, grok_cm = await _open_session(bp, model)
             turns = _Turns(ws, otel_root, stats)
             ctl = {
                 "customer_speaking": False,  # CHIRP VAD (may be echo)
@@ -313,14 +307,14 @@ async def _bridge(ws, industry: str, model: str) -> None:
                 "need_continue": False,
                 "audio_done": True,
                 "response_active": False,
+                "reconfiguring": False,
                 "last_agent_loud": 0.0,
                 "last_user_loud": 0.0,
                 "mute_why": "",
-                # Handoff context — last USER_ASR + agent transcript before switch.
                 "last_user_asr": "",
                 "last_spoken": "",
             }
-            spoken: dict[str, list[str]] = {a: [] for a in sessions}
+            spoken: dict[str, list[str]] = {a: [] for a in bp["agents"]}
 
             async def _paced_send(frame: bytes) -> None:
                 # stamp loudness when PCM actually hits CHIRP so the echo
@@ -335,7 +329,7 @@ async def _bridge(ws, industry: str, model: str) -> None:
             pacer_task = asyncio.create_task(pacer.run())
 
             def active_ws():
-                return sessions[state["agent"]]
+                return grok
 
             def _agent_echo_risk(now: float | None = None) -> bool:
                 now = now if now is not None else time.monotonic()
@@ -530,9 +524,6 @@ async def _bridge(ws, industry: str, model: str) -> None:
                 ):
                     return
                 handled_tools.add(key)
-                if state["agent"] != outgoing:
-                    _log(f"grok[{outgoing}] ignore tool on inactive {name}")
-                    return
                 # Do not end_agent here in a way that implies audio chop — tool
                 # spans are siblings; close the speech span cleanly first.
                 if turns.agent_utt is not None:
@@ -562,29 +553,21 @@ async def _bridge(ws, industry: str, model: str) -> None:
                 )
                 role = handoff_role(result, bp)
                 if role and role != outgoing:
-                    user_ctx = str(ctl.get("last_user_asr") or "")
-                    prior = str(ctl.get("last_spoken") or "")
-                    _log(
-                        f"grok handoff → {role} "
-                        f"user={user_ctx[:80]!r} prior={prior[:80]!r}"
-                    )
+                    _log(f"grok handoff session.update {outgoing} → {role}")
                     ctl["need_continue"] = False
+                    ctl["reconfiguring"] = True
                     await _set_forward(True, why="handoff")
-                    # Seed cold dual-session target with prior turns (OpenAI soft
-                    # handoff equivalent), then nudge — not a blank greeting.
-                    target = sessions[role]
-                    for ev in handoff_seed_events(
-                        user_said=user_ctx, prior_agent_said=prior
-                    ):
-                        with contextlib.suppress(Exception):
-                            await target.send(json.dumps(ev))
-                            _log(f"handoff seed → {role} role={ev['item']['role']}")
+                    if ctl["response_active"]:
+                        await _cancel_active(why="handoff")
                     with contextlib.suppress(Exception):
-                        await target.send(json.dumps(nudge_greeting()))
-                        _log(f"handoff nudge → {role}")
+                        await grok.send(
+                            json.dumps(
+                                session_update_for_agent(bp, role, mid_call=True)
+                            )
+                        )
                 elif stop:
                     await pacer.wait_until_idle()
-                    asyncio.create_task(_close_all(sessions, ws, end))
+                    asyncio.create_task(_close_all(grok, ws, end))
                 else:
                     ctl["need_continue"] = True
                     if ctl["pending_fn"] == 0 and ctl["audio_done"]:
@@ -614,7 +597,7 @@ async def _bridge(ws, industry: str, model: str) -> None:
                     arguments=args,
                     call_id=f"infer_{agent}_{_eid()[:8]}",
                     outgoing=agent,
-                    outgoing_ws=sessions[agent],
+                    outgoing_ws=grok,
                     notify_model=False,
                     source="infer",
                 )
@@ -647,16 +630,14 @@ async def _bridge(ws, industry: str, model: str) -> None:
                 stats.maybe_summary()
                 return down_state
 
-            async def outbound_agent(agent: str) -> None:
-                grok = sessions[agent]
+            async def outbound() -> None:
                 down = None
                 try:
                     async for raw in grok:
                         if end.is_set():
                             break
+                        agent = state["agent"]
                         if isinstance(raw, bytes):
-                            if state["agent"] != agent:
-                                continue
                             down = await _forward_agent_pcm(agent, raw, down)
                             continue
                         try:
@@ -664,40 +645,34 @@ async def _bridge(ws, industry: str, model: str) -> None:
                         except json.JSONDecodeError:
                             continue
                         etype = event.get("type")
-                        is_active = state["agent"] == agent
 
                         # LangSmith-shaped tracing: realtime_session → turn → model.
-                        if is_active:
-                            handle_event(event)
+                        handle_event(event)
 
                         # Grok server_vad — authoritative barge-in signal (xAI docs).
                         if etype == "input_audio_buffer.speech_started":
-                            if is_active:
-                                stats.grok_speech_starts += 1
-                                if _agent_echo_risk():
-                                    stats.echo_ignores += 1
-                                    _log(
-                                        f"grok VAD speech_started IGNORED echo "
-                                        f"{_ctl_snap()}"
-                                    )
-                                    continue
-                                ctl["grok_user_speaking"] = True
-                                _log(f"grok VAD speech_started {_ctl_snap()}")
-                                await _on_real_barge_in(why="grok_vad")
+                            stats.grok_speech_starts += 1
+                            if _agent_echo_risk():
+                                stats.echo_ignores += 1
+                                _log(
+                                    f"grok VAD speech_started IGNORED echo "
+                                    f"{_ctl_snap()}"
+                                )
+                                continue
+                            ctl["grok_user_speaking"] = True
+                            _log(f"grok VAD speech_started {_ctl_snap()}")
+                            await _on_real_barge_in(why="grok_vad")
                             continue
                         if etype == "input_audio_buffer.speech_stopped":
-                            if is_active:
-                                ctl["grok_user_speaking"] = False
-                                _log(f"grok VAD speech_stopped {_ctl_snap()}")
-                                await _set_forward(True, why="grok_vad_stopped")
+                            ctl["grok_user_speaking"] = False
+                            _log(f"grok VAD speech_stopped {_ctl_snap()}")
+                            await _set_forward(True, why="grok_vad_stopped")
                             continue
 
                         if etype in {
                             "response.output_audio.delta",
                             "response.audio.delta",
                         }:
-                            if not is_active:
-                                continue
                             # New agent audio after barge-in → resume unless Grok
                             # still hears the user.
                             if not ctl["forward_agent"] and not ctl["grok_user_speaking"]:
@@ -713,37 +688,35 @@ async def _bridge(ws, industry: str, model: str) -> None:
                             "response.audio.done",
                             "response.done",
                         }:
-                            if is_active:
-                                await pacer.wait_until_idle()
-                                await turns.end_agent(why=etype)
-                                ctl["audio_done"] = True
-                                ctl["response_active"] = False
-                                if (
-                                    ctl["need_continue"]
-                                    and ctl["pending_fn"] == 0
-                                    and not end.is_set()
-                                ):
-                                    ctl["need_continue"] = False
-                                    with contextlib.suppress(Exception):
-                                        await grok.send(json.dumps(nudge_greeting()))
+                            await pacer.wait_until_idle()
+                            await turns.end_agent(why=etype)
+                            ctl["audio_done"] = True
+                            ctl["response_active"] = False
+                            if (
+                                ctl["need_continue"]
+                                and ctl["pending_fn"] == 0
+                                and not ctl["reconfiguring"]
+                                and not end.is_set()
+                            ):
+                                ctl["need_continue"] = False
+                                with contextlib.suppress(Exception):
+                                    await grok.send(json.dumps(nudge_greeting()))
 
                         elif etype in {
                             "response.output_audio_transcript.delta",
                             "response.output_text.delta",
                         }:
-                            if is_active:
-                                turns.note_agent_text(event.get("delta") or "")
+                            turns.note_agent_text(event.get("delta") or "")
 
                         elif etype == "response.output_audio_transcript.done":
-                            if is_active:
-                                tr = (event.get("transcript") or "").strip()
-                                if tr:
-                                    _log(f"grok[{agent}] transcript={tr[:160]}")
-                                    spoken.setdefault(agent, []).append(tr)
-                                    ctl["last_spoken"] = tr
-                                    if tr not in "".join(turns.agent_text):
-                                        turns.note_agent_text(tr)
-                                    await _maybe_infer_schedule(agent, tr)
+                            tr = (event.get("transcript") or "").strip()
+                            if tr:
+                                _log(f"grok[{agent}] transcript={tr[:160]}")
+                                spoken.setdefault(agent, []).append(tr)
+                                ctl["last_spoken"] = tr
+                                if tr not in "".join(turns.agent_text):
+                                    turns.note_agent_text(tr)
+                                await _maybe_infer_schedule(agent, tr)
 
                         elif etype in {
                             "conversation.item.input_audio_transcription.completed",
@@ -751,18 +724,17 @@ async def _bridge(ws, industry: str, model: str) -> None:
                         }:
                             # What Grok actually heard from the DH — gold signal for
                             # "DH audio cut off before the model".
-                            if is_active:
-                                tr = (event.get("transcript") or "").strip()
-                                if tr and etype.endswith("completed"):
-                                    ctl["last_user_asr"] = tr
-                                tag = (
-                                    "USER_ASR"
-                                    if etype.endswith("completed")
-                                    else "USER_ASR_partial"
-                                )
-                                _log(
-                                    f"grok[{agent}] {tag}={tr[:200]!r} {_ctl_snap()}"
-                                )
+                            tr = (event.get("transcript") or "").strip()
+                            if tr and etype.endswith("completed"):
+                                ctl["last_user_asr"] = tr
+                            tag = (
+                                "USER_ASR"
+                                if etype.endswith("completed")
+                                else "USER_ASR_partial"
+                            )
+                            _log(
+                                f"grok[{agent}] {tag}={tr[:200]!r} {_ctl_snap()}"
+                            )
 
                         elif etype == "response.function_call_arguments.done":
                             await _dispatch_tool(
@@ -779,26 +751,29 @@ async def _bridge(ws, industry: str, model: str) -> None:
                             _log(f"grok[{agent}] error: {err}")
                         elif etype == "session.end":
                             _log(f"grok[{agent}] session.end")
-                            if is_active:
-                                end.set()
-                                break
-                        elif etype in {
-                            "response.created",
-                            "response.cancelled",
-                            "rate_limits.updated",
-                            "session.updated",
-                        }:
-                            if etype == "response.cancelled" and is_active:
-                                ctl["response_active"] = False
-                                _log(f"grok[{agent}] response.cancelled {_ctl_snap()}")
-                            elif etype == "response.created" and is_active:
-                                _log(f"grok[{agent}] response.created")
+                            end.set()
+                            break
+                        elif etype == "session.updated":
+                            n = len((event.get("session") or {}).get("tools") or [])
+                            _log(
+                                f"grok[{agent}] session.updated tools_registered={n} "
+                                f"reconfig={ctl['reconfiguring']}"
+                            )
+                            if ctl["reconfiguring"]:
+                                ctl["reconfiguring"] = False
+                                with contextlib.suppress(Exception):
+                                    await grok.send(json.dumps(handoff_nudge_event()))
+                                    _log(f"handoff nudge → {agent}")
+                        elif etype == "response.cancelled":
+                            ctl["response_active"] = False
+                            _log(f"grok[{agent}] response.cancelled {_ctl_snap()}")
+                        elif etype == "response.created":
+                            _log(f"grok[{agent}] response.created")
                 finally:
-                    if state["agent"] == agent:
-                        await turns.end_agent(why="outbound_exit")
-                        end.set()
+                    await turns.end_agent(why="outbound_exit")
+                    end.set()
 
-            await sessions[bp["start"]].send(json.dumps(nudge_greeting()))
+            await grok.send(json.dumps(nudge_greeting()))
             _log(f"grok nudge_greeting → {bp['start']}")
 
             async def _greeting_watchdog() -> None:
@@ -818,11 +793,12 @@ async def _bridge(ws, industry: str, model: str) -> None:
                     return
                 _log("greeting watchdog re-nudge")
                 with contextlib.suppress(Exception):
-                    await sessions[state["agent"]].send(json.dumps(nudge_greeting()))
+                    await grok.send(json.dumps(nudge_greeting()))
 
             watchdog = asyncio.create_task(_greeting_watchdog())
-            tasks = [asyncio.create_task(inbound())] + [
-                asyncio.create_task(outbound_agent(a)) for a in sessions
+            tasks = [
+                asyncio.create_task(inbound()),
+                asyncio.create_task(outbound()),
             ]
             done, pending = await asyncio.wait(
                 tasks, return_when=asyncio.FIRST_COMPLETED
@@ -853,9 +829,9 @@ async def _bridge(ws, industry: str, model: str) -> None:
                 ):
                     raise exc
     finally:
-        for cm in reversed(session_cms):
+        if grok_cm is not None:
             with contextlib.suppress(Exception):
-                await cm.__aexit__(None, None, None)
+                await grok_cm.__aexit__(None, None, None)
 
 
 async def _handler(ws, industry: str, model: str) -> None:

@@ -3,8 +3,9 @@
 family/runtime = grok/voice
 Docs: https://docs.x.ai/developers/model-capabilities/audio/voice-agent
 
-Multi-agent: one Grok Realtime session per blueprint agent (dual-session switch).
-Speak-first: bare `response.create` after session.updated (no greeting strings).
+Multi-agent: one Grok Realtime session for the call; handoff is session.update
+(prompt + tools) on that socket. Speak-first: bare `response.create` after
+session.updated (no greeting strings).
 """
 
 from __future__ import annotations
