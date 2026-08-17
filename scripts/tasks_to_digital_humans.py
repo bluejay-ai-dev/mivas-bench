@@ -27,7 +27,7 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 INDUSTRY_ROOT = ROOT / "industries"
-API = os.environ.get("BLUEJAY_API_URL", "https://api.getbluejay.ai/v1").rstrip("/")
+DEFAULT_API = "https://api.getbluejay.ai/v1"
 
 DEFAULT_AGENTS = {
     "healthcare": 32161,  # mivas healthcare · openai realtime-2.1 (not the k8s twin)
@@ -90,6 +90,10 @@ def voices() -> list[tuple[str, str]]:
     return list(module.VOICES)
 
 
+def api_url() -> str:
+    return os.environ.get("BLUEJAY_API_URL", DEFAULT_API).rstrip("/")
+
+
 def _api_key() -> str:
     key = os.environ.get("BLUEJAY_API_KEY")
     if not key:
@@ -107,7 +111,7 @@ def _req(
     data = json.dumps(payload).encode() if payload is not None else None
     key = _api_key()
     req = urllib.request.Request(
-        f"{API}/{path}",
+        f"{api_url()}/{path}",
         data=data,
         method=method,
         headers={
@@ -422,12 +426,17 @@ def _duration_seconds(sim: dict[str, Any]) -> int | None:
     return value
 
 
-def create_simulation(industry: str, agent_id: int, name: str | None) -> dict[str, Any]:
+def create_simulation(
+    industry: str,
+    agent_id: int,
+    name: str | None,
+    n_humans: int = 66,
+) -> dict[str, Any]:
     title = name or f"mivas {industry} · prompt-adherence 66-case review"
     created = _req("POST", "create-simulation", {
         "agent_id": str(agent_id),
         "name": title,
-        "max_concurrent": 6,
+        "max_concurrent": n_humans,
         "max_call_duration": 8,
         "max_call_duration_units": "minutes",
         "runs_per_digital_human": 1,
@@ -540,6 +549,42 @@ def vacate_test_name(title: str, keep_ids: set[int]) -> str | None:
     return renamed
 
 
+CLAIM_FIELDS = (
+    "test_name",
+    "intent",
+    "success_criteria",
+    "expected_tool_calls",
+    "traits",
+    "scripted_responses",
+)
+
+
+def claim_updates(
+    humans: list[dict[str, Any]],
+    live: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Patch live DHs with the generated contract, matched by case_key."""
+    generated = {}
+    for dh in humans:
+        try:
+            generated[case_key_of(dh)] = dh
+        except ValueError:
+            continue
+    updates = []
+    for dh in live:
+        try:
+            key = case_key_of(dh)
+        except ValueError:
+            test_name = str(dh.get("test_name") or "")
+            key = test_name.split(":", 1)[0].strip() if ":" in test_name else ""
+        want = generated.get(key)
+        if not want or dh.get("id") is None:
+            continue
+        patch = {field: want[field] for field in CLAIM_FIELDS if field in want}
+        updates.append({"digital_human_id": int(dh["id"]), "update": patch})
+    return updates
+
+
 def claim_test_names(humans: list[dict[str, Any]], live: list[dict[str, Any]]) -> int:
     """Give this suite the MIVAS titles. Older holders get a mild (prior) suffix."""
     want = {case_key_of(dh): dh["test_name"] for dh in humans}
@@ -549,20 +594,7 @@ def claim_test_names(humans: list[dict[str, Any]], live: list[dict[str, Any]]) -
     for title in want.values():
         if vacate_test_name(title, keep_ids):
             vacated += 1
-    updates = []
-    for dh in hydrated:
-        try:
-            key = case_key_of(dh)
-        except ValueError:
-            test_name = str(dh.get("test_name") or "")
-            key = test_name.split(":", 1)[0].strip() if ":" in test_name else ""
-        if not key or key not in want:
-            continue
-        if dh.get("test_name") != want[key]:
-            updates.append({
-                "digital_human_id": int(dh["id"]),
-                "update": {"test_name": want[key]},
-            })
+    updates = claim_updates(humans, hydrated)
     claimed = 0
     for i in range(0, len(updates), 20):
         resp = _req("PUT", "update-digital-humans", {"updates": updates[i : i + 20]})
@@ -614,7 +646,7 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.push:
         agent_id = args.agent_id or default_agent_id(args.industry)
-        sim = create_simulation(args.industry, agent_id, args.name)
+        sim = create_simulation(args.industry, agent_id, args.name, n_humans=len(humans))
         sim_id = int(sim["id"])
         print(f"simulation {sim_id} on agent {agent_id}", flush=True)
         for title in (dh["test_name"] for dh in humans):
@@ -632,9 +664,8 @@ def main(argv: list[str] | None = None) -> int:
             raise SystemExit(f"expected {len(humans)} live DHs, got {len(live)}")
         return 0
 
-    payloads = create_payloads(humans)
     if args.json:
-        json.dump({"digital_humans": payloads}, sys.stdout, indent=2)
+        json.dump({"digital_humans": humans}, sys.stdout, indent=2)
         sys.stdout.write("\n")
         return 0
 
