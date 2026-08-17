@@ -1,0 +1,143 @@
+voice-agent-harnesses/aws/test_llm_usage_span.py
+  s_e5feaf0cdec7f5::t_6aeb80149d8463 1-87
+voice-agent-harnesses/aws/report.py
+  s_e5feaf0cdec7f5::t_a23a3b8dec82f7 3-24
+  s_e5feaf0cdec7f5::t_1131cdb8662a2e 152-153,183,192,204,218,232,238,242-399,436,453,517
+  s_e5feaf0cdec7f5::t_f8649b35e255a3 499
+  s_e5feaf0cdec7f5::t_01fedc78bbafda 70-135,141
+  s_e5feaf0cdec7f5::t_1d00c1874e733e 473-486
+  s_e5feaf0cdec7f5::t_5fe4ac9a9f7450 1-2
+  s_e5feaf0cdec7f5::t_a9b9ab5792d537 25-27,67-69
+  s_e5feaf0cdec7f5::t_86aa2278df00ac 136-140
+  s_e5feaf0cdec7f5::t_fa102919c9380d 142-144,149-151
+  s_e5feaf0cdec7f5::t_f63cbc33e1c78a 154-156,180-182
+  s_e5feaf0cdec7f5::t_ed64b70a1d4263 184-186,189-191
+  s_e5feaf0cdec7f5::t_083f6dc3bae2ca 193-195,201-203
+  s_e5feaf0cdec7f5::t_62ff17d216e66d 205-207,215-217
+  s_e5feaf0cdec7f5::t_ce38a6f5dc9944 219-221,229-231
+  s_e5feaf0cdec7f5::t_f1af2df4d815c8 233-237
+  s_e5feaf0cdec7f5::t_8b7078cbbb2787 239-241
+  s_e5feaf0cdec7f5::t_735ae3dc40884d 400-402,433-435
+  s_e5feaf0cdec7f5::t_7ffcb795ddbeb8 437-439,450-452
+  s_e5feaf0cdec7f5::t_9e694c8652c1b0 454-456,470-472
+  s_e5feaf0cdec7f5::t_3735c01a748a44 487-489,496-498
+  s_e5feaf0cdec7f5::t_5744c1a5b235e8 500-502,514-516
+  s_e5feaf0cdec7f5::t_cb78c0fa975d64 28-66,145-148,157-179,187-188,196-200,208-214,222-228,403-432,440-449,457-469,490-495,503-513
+voice-agent-harnesses/aws/adapters/chirp.py
+  s_e5feaf0cdec7f5::t_dc66757492e386 138-140
+  s_e5feaf0cdec7f5::t_7e67822e475cf1 214-215
+  s_e5feaf0cdec7f5::t_6dd5bdaba29347 315-323
+  s_e5feaf0cdec7f5::t_c35937f6795dd0 256-261
+  s_e5feaf0cdec7f5::t_0869c0b168f4f8 135-137
+  s_e5feaf0cdec7f5::t_28bff076ff74a3 141-143,211-213
+  s_e5feaf0cdec7f5::t_d2bbc8e5136f16 216-218,253-255
+  s_e5feaf0cdec7f5::t_e633d0426a93bc 262-264,312-314
+  s_e5feaf0cdec7f5::t_2da4969fa8e1cf 324-326
+  s_e5feaf0cdec7f5::t_761ddfd962865c 1-134,144-210,219-252,265-311,327-415
+voice-agent-harnesses/aws/README.md
+  s_e5feaf0cdec7f5::t_60542482c8f9a4 18
+  s_e5feaf0cdec7f5::t_baf51d7e5821c2 15-17
+  s_e5feaf0cdec7f5::t_c039a6d32c2bf1 19-21
+uv.lock
+  s_67d6bd048d0229::t_dd9356db06c80a 60-104,499-554,717,728,741,752,1331-1403
+voice-agent-harnesses/aws/harness.py
+  s_67d6bd048d0229::t_48aac476b49d03 1-913
+voice-agent-harnesses/gemini/adapters/chirp.py
+  s_e5feaf0cdec7f5::t_433edd0fff4288 24,74,123-127,138,144-147,151-152,165-181,211
+voice-agent-harnesses/nvidia/test_llm_usage_span.py
+  s_e5feaf0cdec7f5::t_d4efa1016f06c4 1-58
+voice-agent-harnesses/gemini/harness.py
+  s_f47107c84fc61f::t_537bf3718fd92e 142-145
+voice-agent-harnesses/gemini/report.py
+  s_f47107c84fc61f::t_2755d5795c29b4 3-22,78-81,159-162,255-290,292-447,672-674,678,686,703-705,708,714-715,719,731,737-738,743,748-749
+voice-agent-harnesses/gemini/test_llm_usage_span.py
+  s_f47107c84fc61f::t_5a14b74494079c 1-89
+voice-agent-harnesses/grok/report.py
+  s_b814d0c0a3c294::t_176b70d326c1bf 3-4,6-11,38-41,102-159,209-392,440-445,705,716,727-728,735,738,744-745,749,767-768,773,778-779
+voice-agent-harnesses/grok/test_llm_usage_span.py
+  s_b814d0c0a3c294::t_44af2571ecc26e 1-75
+voice-agent-harnesses/grok/voice/adapters/chirp.py
+  s_b814d0c0a3c294::t_b3bdf42cfad327 63,190,230,669-672
+voice-agent-harnesses/nvidia/nemotron-voicechat/adapters/chirp.py
+  s_1b2b66d8a2096d::t_881c3b98204b85 33,111-115,281-285,291,636,702,754,770,803,828,831-833,859
+voice-agent-harnesses/nvidia/report.py
+  s_1b2b66d8a2096d::t_1274b1ae43b410 86-88,98-134,329-469,670-671,673-677,689,708
+voice-agent-harnesses/openai/README.md
+  s_e5feaf0cdec7f5::t_b43f0eff53c21c 15
+voice-agent-harnesses/openai/adapters/chirp.py
+  s_e5feaf0cdec7f5::t_ae5c5de137736c 4-6,92,136-137
+voice-agent-harnesses/openai/realtime-2.1-mini/agent.py
+  s_e5feaf0cdec7f5::t_25e3f99afec9dd 32
+voice-agent-harnesses/openai/realtime-2.1/agent.py
+  s_e5feaf0cdec7f5::t_374fd8a56cad4d 32
+voice-agent-harnesses/openai/report.py
+  s_e5feaf0cdec7f5::t_4e17845299bb8d 3-18,27,82-111,268-280,282,285-287,290-298,303-352,355-372,375-407,411,418,429,431,458,479,481-491,512-517,524,531-532,540-544,546-549,553-557,562-564,573-575,578-579,619,630-631,640,653-655
+voice-agent-harnesses/openai/test_llm_usage_span.py
+  s_e5feaf0cdec7f5::t_77f5a7d8614272 1-85
+voice-agent-harnesses/qwen/README.md
+  s_f570b822b93e04::t_d4a2a442162f82 19
+voice-agent-harnesses/qwen/adapters/chirp.py
+  s_f570b822b93e04::t_0c70d27b2e5939 124,165-166,174-175,210-211,226-227
+voice-agent-harnesses/qwen/harness.py
+  s_f570b822b93e04::t_715ea5d99e920a 438
+voice-agent-harnesses/qwen/report.py
+  s_b814d0c0a3c294::t_8aa6d533271cab 3-16,25,71-101,208,210-220,223-282,285-290,292-332,334-335,338-340,343-344,346-348,350-379,382-383,447,457-458,461-462,470,483
+voice-agent-harnesses/qwen/test_llm_usage_span.py
+  s_f570b822b93e04::t_c68c570161c12f 1-83
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "20d9df56d9d1ff0f0c1081ecf7d6dbd62dbf7423",
+  "prompts": {},
+  "sessions": {
+    "s_1b2b66d8a2096d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-a300327796876020c",
+        "model": "unknown"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    },
+    "s_67d6bd048d0229": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "51662aa7-a677-47e1-89a9-2dd3d08326c8",
+        "model": "grok-4.6"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    },
+    "s_b814d0c0a3c294": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-a41263fe416183af1",
+        "model": "unknown"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    },
+    "s_e5feaf0cdec7f5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1c53b6b1-58f4-458b-af32-21421c44b4b0",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    },
+    "s_f47107c84fc61f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-af2ee00fc1a9257a9",
+        "model": "unknown"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    },
+    "s_f570b822b93e04": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-a6f53c99daea973c0",
+        "model": "unknown"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}
