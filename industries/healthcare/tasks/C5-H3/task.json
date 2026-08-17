@@ -35,8 +35,7 @@
     "Alice Romano",
     "September eighth, nineteen ninety-five",
     "did I get that right?",
-    "deductible or copay",
-    "will call you back"
+    "deductible or copay"
   ],
   "exp_handoff_path": [
     "transfer_to_identity",
@@ -90,17 +89,6 @@
       },
       "parameters": {
         "mobile_e164": "+14075550155"
-      }
-    },
-    {
-      "name": "create_callback_task",
-      "parameters": {
-        "queue": "billing",
-        "callback_number": "+14075550155",
-        "topic": "C5-H3 follow-up"
-      },
-      "output": {
-        "ok": true
       }
     }
   ],
@@ -303,15 +291,6 @@
         "kind": "payment_link",
         "payload": {
           "mobile_e164": "+14075550155"
-        }
-      },
-      {
-        "id": 2,
-        "kind": "callback_task",
-        "payload": {
-          "queue": "billing",
-          "callback_number": "+14075550155",
-          "topic": "C5-H3 follow-up"
         }
       }
     ]
