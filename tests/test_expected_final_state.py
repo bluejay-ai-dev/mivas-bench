@@ -22,6 +22,7 @@ call_id_for = efs.call_id_for
 canonical_state = efs.canonical_state
 case_key = efs.case_key
 is_harness_native = efs.is_harness_native
+load_from_spec = efs.load_from_spec
 load_tool_server = efs.load_tool_server
 replay_case = efs.replay_case
 states_match = efs.states_match
@@ -140,6 +141,36 @@ def test_write_industry_emits_one_file_per_case(tmp_path: Path) -> None:
     assert manifest["count"] == 1
     dumped = json.loads(path.read_text())
     assert dumped["appointments"][0]["date"] == "08/15/2026"
+
+
+def test_healthcare_expected_calls_replay() -> None:
+    """Every healthcare expected industry call must succeed against a fresh seed,
+    except the one case that declares a payer failure."""
+    humans = load_from_spec("healthcare")
+    flags = tool_flags("healthcare")
+    with load_tool_server("healthcare") as module, TestClient(module.app) as client:
+        for dh in humans:
+            result = replay_case(client, dh, flags)
+            expected = [
+                call for call in dh.get("expected_tool_calls") or []
+                if call.get("name") and not is_harness_native(call["name"], flags)
+            ]
+            assert len(result["replayed"]) == len(expected), result["case_key"]
+            for replayed, call in zip(result["replayed"], expected, strict=True):
+                assert replayed["status_code"] == 200, (
+                    f"{result['case_key']}/{replayed['name']}: {replayed}"
+                )
+                want = call.get("output") or {}
+                if want.get("ok") is False:
+                    assert replayed["ok"] is False, (result["case_key"], replayed)
+                    assert replayed["error_code"] == want["error_code"], (
+                        result["case_key"], replayed
+                    )
+                else:
+                    assert replayed["ok"] is True, (
+                        f"{result['case_key']}/{replayed['name']} "
+                        f"args={replayed['arguments']} → {replayed}"
+                    )
 
 
 def test_isolated_call_ids_do_not_share_writes() -> None:

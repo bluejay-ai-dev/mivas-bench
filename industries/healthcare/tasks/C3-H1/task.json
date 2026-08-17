@@ -1,0 +1,310 @@
+{
+  "task_name": "C3-H1: Aetna Open Access Elect Choice at Park Avenue",
+  "intent": "You are a new patient and you are particular about the plan name because your last office got it wrong. Ask whether Straus takes your plan at Park Avenue, and say the plan name the way it is written on your card, not just the carrier. If they cannot confirm that specific plan, ask to be booked anyway for a rash on your neck and have them flag it. Take the first time they offer, confirm it, then thank them and end the call.",
+  "traits": [
+    {
+      "trait_name": "plan_name",
+      "trait_data_type": "STRING",
+      "value": "Open Access Elect Choice"
+    },
+    {
+      "trait_name": "patient_status",
+      "trait_data_type": "STRING",
+      "value": "new"
+    },
+    {
+      "trait_name": "full_name",
+      "trait_data_type": "STRING",
+      "value": "Simone Ardelle"
+    },
+    {
+      "trait_name": "carrier",
+      "trait_data_type": "STRING",
+      "value": "Aetna"
+    },
+    {
+      "trait_name": "zip",
+      "trait_data_type": "STRING",
+      "value": "10016"
+    },
+    {
+      "trait_name": "date_of_birth",
+      "trait_data_type": "DATE",
+      "value": "1987-11-16"
+    },
+    {
+      "trait_name": "mobile",
+      "trait_data_type": "STRING",
+      "value": "212-555-0182"
+    },
+    {
+      "trait_name": "preferred_office",
+      "trait_data_type": "STRING",
+      "value": "Park Avenue"
+    }
+  ],
+  "prompt_adherence_substrs": [
+    "Simone Ardelle",
+    "November 16, 1987",
+    "2125550182",
+    "4th floor",
+    "I can't confirm that plan",
+    "flag it for benefits verification"
+  ],
+  "exp_handoff_path": [
+    "transfer_to_coverage",
+    "transfer_to_scheduling"
+  ],
+  "exp_tool_calls": [
+    {
+      "name": "check_plan_accepted",
+      "parameters": {
+        "carrier": "Aetna",
+        "plan_name": "Open Access Elect Choice",
+        "location_id": "Park Avenue"
+      },
+      "output": {
+        "ok": true,
+        "data": {
+          "must_not_assert": true
+        }
+      }
+    },
+    {
+      "name": "classify_visit_request",
+      "parameters": {
+        "reason_text": "rash on neck"
+      }
+    },
+    {
+      "name": "find_slots",
+      "parameters": {
+        "location_ids": [
+          "loc_park_ave"
+        ]
+      }
+    },
+    {
+      "name": "book_appointment",
+      "parameters": {
+        "location_id": "loc_park_ave"
+      },
+      "output": {
+        "ok": true,
+        "data": {
+          "status": "booked"
+        }
+      }
+    },
+    {
+      "name": "send_sms",
+      "parameters": {
+        "template_id": "appointment_confirmation"
+      },
+      "output": {
+        "ok": true,
+        "data": {
+          "sent": true
+        }
+      }
+    },
+    {
+      "name": "transfer_to_coverage"
+    },
+    {
+      "name": "transfer_to_scheduling"
+    }
+  ],
+  "behaviors": {},
+  "scripted_responses": {},
+  "customer_name": "Simone Ardelle",
+  "customer_available_tools": {},
+  "metadata": {
+    "category": "C3",
+    "category_slug": "coverage-and-benefits",
+    "difficulty": "hard",
+    "audio_condition": "perfect",
+    "source_case_key": "T3-H1",
+    "digital_human_id": 195943
+  },
+  "exp_db_state": {
+    "appointments": [
+      {
+        "appointment_type_code": "MED_FOLLOWUP",
+        "description": "Follow-up acne check",
+        "end": "2026-08-20T10:20:00",
+        "id": 1,
+        "location_id": "loc_park_ave",
+        "patient_id": "pat_jordan_lee",
+        "provider_id": "prov_chen",
+        "start": "2026-08-20T10:00:00",
+        "status": "booked"
+      },
+      {
+        "appointment_type_code": "COS_CONSULT",
+        "description": "Botox consult",
+        "end": "2026-08-21T15:30:00",
+        "id": 2,
+        "location_id": "loc_park_ave",
+        "patient_id": "pat_maria_alvarez",
+        "provider_id": "prov_chen",
+        "start": "2026-08-21T15:00:00",
+        "status": "booked"
+      },
+      {
+        "appointment_type_code": "MED_FOLLOWUP",
+        "description": "Eczema follow-up",
+        "end": "2026-09-15T09:20:00",
+        "id": 3,
+        "location_id": "loc_windermere",
+        "patient_id": "pat_alice_romano",
+        "provider_id": "prov_patel",
+        "start": "2026-09-15T09:00:00",
+        "status": "booked"
+      }
+    ],
+    "locations": [
+      {
+        "address": "142 Montague Street, Brooklyn, NY 11201",
+        "floor": "2nd floor",
+        "hours": "Mon-Fri 8am-5pm",
+        "id": "loc_brooklyn_heights",
+        "name": "Brooklyn Heights",
+        "offers_cosmetic": 1,
+        "parking": "Street parking; garage on Clinton Street",
+        "services": "medical, surgical, cosmetic, allergy",
+        "suite": "Suite 2B",
+        "transit": "Two blocks from Borough Hall",
+        "zip": "11201"
+      },
+      {
+        "address": "386 Park Avenue South, New York, NY 10016",
+        "floor": "4th floor",
+        "hours": "Mon-Fri 8am-5pm, Sat 9am-1pm",
+        "id": "loc_park_ave",
+        "name": "Park Avenue",
+        "offers_cosmetic": 1,
+        "parking": "Garage next door on East 27th",
+        "services": "medical, surgical, cosmetic, allergy",
+        "suite": "Suite 410",
+        "transit": "One block from the 6 train at 33rd Street",
+        "zip": "10016"
+      },
+      {
+        "address": "7600 Conroy Windermere Road, Windermere, FL 34786",
+        "floor": "Ground floor",
+        "hours": "Mon-Fri 8am-5pm",
+        "id": "loc_windermere",
+        "name": "Windermere",
+        "offers_cosmetic": 0,
+        "parking": "Free surface lot",
+        "services": "medical, surgical, allergy",
+        "suite": "Suite 100",
+        "transit": "No transit nearby",
+        "zip": "34786"
+      }
+    ],
+    "patients": [
+      {
+        "balance_cents": 32000,
+        "carrier": "Oscar Health",
+        "dob": "1995-09-08",
+        "first_name": "Alice",
+        "home_office_id": "loc_windermere",
+        "id": "pat_alice_romano",
+        "language": "en",
+        "last_name": "Romano",
+        "member_id": "O778899001",
+        "phone_e164": "+14075550155",
+        "plan_name": "Circle EPO",
+        "zip": "34786"
+      },
+      {
+        "balance_cents": 12500,
+        "carrier": "Aetna",
+        "dob": "1990-04-12",
+        "first_name": "Jordan",
+        "home_office_id": "loc_park_ave",
+        "id": "pat_jordan_lee",
+        "language": "en",
+        "last_name": "Lee",
+        "member_id": "W123456789",
+        "phone_e164": "+12125550100",
+        "plan_name": "Open Access Elect Choice",
+        "zip": "10016"
+      },
+      {
+        "balance_cents": 0,
+        "carrier": "Aetna",
+        "dob": "2016-03-22",
+        "first_name": "Leo",
+        "home_office_id": "loc_brooklyn_heights",
+        "id": "pat_leo_park",
+        "language": "en",
+        "last_name": "Park",
+        "member_id": "W998877665",
+        "phone_e164": "+17185550166",
+        "plan_name": "Open Access Elect Choice",
+        "zip": "11201"
+      },
+      {
+        "balance_cents": 48000,
+        "carrier": "Cigna",
+        "dob": "1972-06-30",
+        "first_name": "Maria",
+        "home_office_id": "loc_park_ave",
+        "id": "pat_maria_alvarez",
+        "language": "en",
+        "last_name": "Alvarez",
+        "member_id": "C445566778",
+        "phone_e164": "+12125550133",
+        "plan_name": "Open Access Plus",
+        "zip": "10016"
+      },
+      {
+        "balance_cents": 0,
+        "carrier": "UnitedHealthcare",
+        "dob": "1985-11-03",
+        "first_name": "Sam",
+        "home_office_id": "loc_brooklyn_heights",
+        "id": "pat_sam_nguyen",
+        "language": "en",
+        "last_name": "Nguyen",
+        "member_id": "U987654321",
+        "phone_e164": "+17185550122",
+        "plan_name": "Choice Plus",
+        "zip": "11201"
+      }
+    ],
+    "providers": [
+      {
+        "credentials": "MD, FAAD",
+        "id": "prov_chen",
+        "location_id": "loc_park_ave",
+        "name": "Dr. Amy Chen"
+      },
+      {
+        "credentials": "DO",
+        "id": "prov_patel",
+        "location_id": "loc_windermere",
+        "name": "Dr. Neha Patel"
+      },
+      {
+        "credentials": "MD",
+        "id": "prov_ruiz",
+        "location_id": "loc_brooklyn_heights",
+        "name": "Dr. Luis Ruiz"
+      }
+    ],
+    "tool_events": [
+      {
+        "id": 1,
+        "kind": "sms",
+        "payload": {
+          "template_id": "appointment_confirmation"
+        }
+      }
+    ],
+    "waitlist": []
+  }
+}
