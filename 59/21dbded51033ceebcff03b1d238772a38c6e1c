@@ -1,0 +1,40 @@
+voice-agent-harnesses/grok/README.md
+  s_0abb6161dcff02::t_4f74e363a46e59 13
+voice-agent-harnesses/grok/voice/agent.py
+  s_0abb6161dcff02::t_1f6f37b65c3b8c 6-8
+voice-agent-harnesses/grok/voice/adapters/chirp.py
+  s_0abb6161dcff02::t_6e9b9bedd4a0d9 832,834
+  s_0abb6161dcff02::t_51742edaee2e18 245-261,264,267-268
+  s_0abb6161dcff02::t_c66ddcc59460b8 796,799-801
+  s_0abb6161dcff02::t_d15a20337532c2 556,558,560-561,563-567,570
+  s_0abb6161dcff02::t_7e64be5950f496 332
+  s_0abb6161dcff02::t_450253629fe516 50,57
+  s_0abb6161dcff02::t_d921f59f218cd2 600
+  s_0abb6161dcff02::t_21efddd10cda1a 293,300,310,317
+  s_0abb6161dcff02::t_247227327399b5 3-4
+  s_0abb6161dcff02::t_f1a238f6ace1d3 633,639,650,654-664,667-669,691-703,709,712-719,727-737,754-771,773-774,776
+voice-agent-harnesses/grok/harness.py
+  s_0abb6161dcff02::t_e00ddf5043639f 259-266,270-298,302
+  s_0abb6161dcff02::t_d88af070415475 443-444
+  s_0abb6161dcff02::t_704638d708ece1 7-8
+  s_0abb6161dcff02::t_150d8d59d2965e 385-387
+  s_0abb6161dcff02::t_c9374db7b55e58 410-412,416
+  s_0abb6161dcff02::t_a3a6f52de54ba9 480-483
+  s_0abb6161dcff02::t_be539181699357 430,440-442,446-448
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "5921dbded51033ceebcff03b1d238772a38c6e1c",
+  "prompts": {},
+  "sessions": {
+    "s_0abb6161dcff02": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "6a84b186-0d59-482c-ac76-17ebf367f979",
+        "model": "grok-4.6"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}
