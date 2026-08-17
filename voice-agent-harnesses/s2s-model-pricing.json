@@ -1,0 +1,33 @@
+{
+  "_comment": "Speech-to-speech / realtime model pricing for the mivas-bench S2S harnesses. Use with the gen_ai.usage.* token counts the report.py tracers emit to estimate LLM cost per call. `null` = the model has no such lane.",
+  "units": {
+    "token_pricing": "USD per 1,000,000 tokens",
+    "per_minute_pricing": "USD per minute of audio"
+  },
+  "normalize_model_id": "lowercase, strip provider prefix before the last '/', strip @YYYYMMDD and -YYYY-MM-DD date suffixes, collapse -preview-MM-YYYY to -preview, and -native-audio-preview to -native-audio",
+  "token_pricing": {
+    "gpt-realtime-2.1":              { "inputText": 4.0,  "inputAudio": 32.0, "cachedText": 0.4,  "cachedAudio": 0.4, "outputText": 24.0, "outputAudio": 64.0 },
+    "gpt-realtime-2.1-mini":         { "inputText": 0.6,  "inputAudio": 10.0, "cachedText": 0.06, "cachedAudio": 0.3, "outputText": 2.4,  "outputAudio": 20.0 },
+    "gpt-realtime-2":                { "inputText": 4.0,  "inputAudio": 32.0, "cachedText": 0.4,  "cachedAudio": 0.4, "outputText": 24.0, "outputAudio": 64.0 },
+    "gpt-realtime-1.5":              { "inputText": 4.0,  "inputAudio": 32.0, "cachedText": 0.4,  "cachedAudio": 0.4, "outputText": 16.0, "outputAudio": 64.0 },
+    "gpt-realtime":                  { "inputText": 4.0,  "inputAudio": 32.0, "cachedText": 0.4,  "cachedAudio": 0.4, "outputText": 16.0, "outputAudio": 64.0 },
+    "gpt-realtime-mini":             { "inputText": 0.6,  "inputAudio": 10.0, "cachedText": 0.06, "cachedAudio": 0.3, "outputText": 2.4,  "outputAudio": 20.0 },
+    "gpt-4o-realtime-preview":       { "inputText": 5.0,  "inputAudio": 40.0, "cachedText": 2.5,  "cachedAudio": 2.5, "outputText": 20.0, "outputAudio": 80.0 },
+    "gpt-4o-mini-realtime-preview":  { "inputText": 0.6,  "inputAudio": 10.0, "cachedText": 0.3,  "cachedAudio": 0.3, "outputText": 2.4,  "outputAudio": 20.0 },
+
+    "gemini-2.5-flash-native-audio": { "inputText": 0.5,  "inputAudio": 3.0,  "cachedText": null, "cachedAudio": null, "outputText": 2.0, "outputAudio": 12.0 },
+    "gemini-3.1-flash-live-preview": { "inputText": 0.75, "inputAudio": 3.0,  "cachedText": null, "cachedAudio": null, "outputText": 4.5, "outputAudio": 12.0 },
+    "gemini-live-2.5-flash-preview": { "inputText": 0.35, "inputAudio": 2.1,  "cachedText": null, "cachedAudio": null, "outputText": 1.5, "outputAudio": 8.5 },
+
+    "amazon.nova-2-sonic-v1:0":      { "inputText": 0.33, "inputAudio": 3.0,  "cachedText": null, "cachedAudio": null, "outputText": 2.75, "outputAudio": 12.0 },
+    "amazon.nova-sonic-v1:0":        { "inputText": 0.06, "inputAudio": 3.4,  "cachedText": null, "cachedAudio": null, "outputText": 0.24, "outputAudio": 13.6 },
+
+    "qwen3-omni-flash-realtime":     { "inputText": 0.52, "inputAudio": 4.57, "cachedText": null, "cachedAudio": null, "outputText": 1.99, "outputAudio": 3.67 },
+    "qwen-omni-turbo-realtime":      { "inputText": 0.27, "inputAudio": 4.44, "cachedText": null, "cachedAudio": null, "outputText": 1.07, "outputAudio": 2.52 }
+  },
+  "per_minute_pricing": {
+    "grok-voice-latest":             0.08,
+    "grok-voice-think-fast-2.0":     0.08,
+    "grok-voice-think-fast-1.0":     0.05
+  }
+}
