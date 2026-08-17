@@ -15,9 +15,6 @@
       "value": "Brooklyn Heights"
     }
   ],
-  "prompt_adherence_substrs": [
-    "will call you back"
-  ],
   "exp_handoff_path": [
     "transfer_to_cosmetic"
   ],
