@@ -2,7 +2,8 @@
 
 Hangup freezes GET /state to S3 as `{id}.final.json`. This script produces the
 matching expected dump: copy schema+seed, POST /tools/{name} in declared order
-(skipping harness-native handoff/session tools), then write GET /state.
+(skipping harness-native handoff tools and `end_call`), then write GET /state.
+Human-transfer session tools still POST so escalations land in the dump.
 
     uv run python scripts/expected_final_state.py                  # all v2 packs
     uv run python scripts/expected_final_state.py --industry customer-support
@@ -148,8 +149,15 @@ def tool_flags(industry: str) -> dict[str, dict[str, Any]]:
 
 
 def is_harness_native(name: str, flags: dict[str, dict[str, Any]]) -> bool:
+    """Handoffs and `end_call` never hit the industry server.
+
+    Human-transfer session tools (`escalate_to_human`, `transfer_to_human`)
+    still POST — they write escalations — then the harness hangs up.
+    """
     spec = flags.get(name) or {}
-    return bool(spec.get("handoff") or spec.get("session"))
+    if spec.get("handoff"):
+        return True
+    return name == "end_call"
 
 
 def canonical_state(value: Any) -> Any:

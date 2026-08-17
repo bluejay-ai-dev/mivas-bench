@@ -724,7 +724,7 @@ def _selfcheck() -> None:
         for t in agent["tools"]:
             flags.setdefault(t["name"], t)
     dispatchable = {n for n in names
-                    if not flags.get(n, {}).get("handoff") and not flags.get(n, {}).get("session")}
+                    if not flags.get(n, {}).get("handoff") and n != "end_call"}
     assert dispatchable == set(DISPATCH), (dispatchable ^ set(DISPATCH))
 
     d = dispatch_tool("lookup_caller", ToolCall(

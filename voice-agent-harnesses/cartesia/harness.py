@@ -47,6 +47,7 @@ from call_id import (  # noqa: E402
     set_call_id,
     unbind_provider,
 )
+from session_tools import hangup_tool_names as _hangup_names  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 HARNESS_DIR = Path(__file__).resolve().parent
@@ -102,6 +103,11 @@ def load_blueprint(industry_dir: str | Path) -> dict[str, Any]:
         # answering-node opener; without it Line defaults to the repair-shop line
         "greeting": blueprint.get("greeting"),
     }
+
+
+def hangup_tool_names(bp: dict[str, Any]) -> set[str]:
+    """Human-transfer session tools: POST, then the chirp bridge hangs up."""
+    return _hangup_names(bp["agents"].values())
 
 
 def _cli(*args: str) -> str:

@@ -22,7 +22,16 @@ import websockets
 from websockets.asyncio.server import serve
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from harness import call_session, ensure_agents, get_signed_url, industry_path, load_blueprint, run_tool, set_call_id  # noqa: E402
+from harness import (  # noqa: E402
+    call_session,
+    ensure_agents,
+    get_signed_url,
+    hangup_tool_names,
+    industry_path,
+    load_blueprint,
+    run_tool,
+    set_call_id,
+)
 from report import (  # noqa: E402
     end_speech_span,
     finish_tool_span,
@@ -65,6 +74,7 @@ def _simulation_result_id(ws) -> str | None:
 
 async def _bridge(ws, model: str, industry: str) -> None:
     bp = load_blueprint(industry)
+    hangup_names = hangup_tool_names(bp)
     industry_dir = industry_path(industry)
     workflow = f"mivas-{Path(industry_dir).name}-{model}"
     sim_id = _simulation_result_id(ws)
@@ -235,11 +245,9 @@ async def _bridge(ws, model: str, industry: str) -> None:
                                     }
                                 )
                             )
-                            # CHIRP smoke has no human to join. Leaving the socket
-                            # open after transfer_to_human is dead air, and Bluejay
-                            # can leave the result RUNNING with no start_time.
-                            if tool_name == "transfer_to_human":
-                                print("chirp hangup after transfer_to_human", flush=True)
+                            # no human to join — hang up as soon as a transfer tool fires
+                            if tool_name in hangup_names:
+                                print(f"chirp hangup after {tool_name}", flush=True)
                                 break
                         elif etype == "agent_tool_response":
                             # System tools (transfer_to_agent / end_call) run server-side

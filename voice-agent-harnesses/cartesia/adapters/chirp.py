@@ -39,6 +39,7 @@ from harness import (  # noqa: E402
     end_session,
     ensure_agent,
     for_provider,
+    hangup_tool_names,
     industry_name,
     load_blueprint,
     provider_id_from_request,
@@ -94,6 +95,11 @@ async def tool_webhook(name: str, request: Request) -> dict[str, Any]:
     for_provider(provider_id_from_request(args, query=request.query_params, headers=request.headers))
     result = await run_tool(name, dict(args), emit_span=False)
     print(f"chirp tool {name} args={args} -> {result}", flush=True)
+    if name in STATE.get("hangup_names", ()):
+        ev = STATE.get("end")
+        if ev is not None:
+            ev.set()
+        print(f"chirp hangup after {name}", flush=True)
     return result
 
 
@@ -124,6 +130,7 @@ async def _bridge(ws: WebSocket) -> None:
 
     url = STREAM_URL.format(agent_id=STATE["agent_id"], version=CARTESIA_VERSION)
     end = asyncio.Event()
+    STATE["end"] = end
     agent_span = None
     customer_span = None
     utt: str | None = None
@@ -265,7 +272,11 @@ async def _bridge(ws: WebSocket) -> None:
                         with contextlib.suppress(Exception):
                             await ws.close(1000)
 
-                tasks = [asyncio.create_task(inbound()), asyncio.create_task(outbound())]
+                tasks = [
+                    asyncio.create_task(inbound()),
+                    asyncio.create_task(outbound()),
+                    asyncio.create_task(end.wait()),
+                ]
                 done, pending = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
                 for t in pending:
                     t.cancel()
@@ -281,6 +292,7 @@ async def _bridge(ws: WebSocket) -> None:
                     ):
                         raise exc
     finally:
+        STATE.pop("end", None)
         end_session(session_key)
 
 
@@ -311,6 +323,11 @@ def _record_line_tools(calls: list[dict[str, Any]], seen: set[str]) -> None:
         print(f"chirp line tool {name} {args}", flush=True)
         with tool_span(name, args, call_id=call.get("id")) as span:
             finish_tool_span(span, result, ok=ok)
+        if name in STATE.get("hangup_names", ()):
+            ev = STATE.get("end")
+            if ev is not None:
+                ev.set()
+            print(f"chirp hangup after {name}", flush=True)
 
 
 def main(model: str | None = None) -> None:
@@ -330,11 +347,12 @@ def main(model: str | None = None) -> None:
         industry=a.industry,
         model=a.model,
         agent_id=ensure_agent(a.industry),
+        hangup_names=hangup_tool_names(bp),
         native_tools={
             t["name"]
             for agent in bp["agents"].values()
             for t in agent["tools"]
-            if t.get("handoff") or t.get("session")
+            if t.get("handoff") or t["name"] == "end_call"
         },
     )
     print(

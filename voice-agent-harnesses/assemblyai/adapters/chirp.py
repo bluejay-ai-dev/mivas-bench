@@ -190,10 +190,7 @@ async def _bridge(ws, model: str, industry: str) -> None:
                                         state,
                                         call_id=call.get("call_id"),
                                     )
-                                    should_end = should_end or stop or call["name"] in (
-                                        "transfer_to_human",
-                                        "end_call",
-                                    )
+                                    should_end = should_end or stop or call["name"] == "end_call"
                                     role = result.get("role")
                                     if role:
                                         print(f"chirp handoff → {role}", flush=True)

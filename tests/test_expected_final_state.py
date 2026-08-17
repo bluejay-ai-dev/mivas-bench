@@ -106,8 +106,25 @@ def test_support_read_leaves_write_tables_empty() -> None:
     assert result["state"]["customers"], "seed customers must be in the dump"
 
 
+def test_human_transfer_is_session_but_still_replayed() -> None:
+    """Human-transfer tools end the call but still POST, so expected state includes them."""
+    for industry, tool in (
+        ("customer-support", "escalate_to_human"),
+        ("finance", "escalate_to_human"),
+        ("legal", "escalate_to_human"),
+        ("travel", "escalate_to_human"),
+        ("healthcare", "transfer_to_human"),
+    ):
+        flags = tool_flags(industry)
+        assert flags[tool].get("session") is True, industry
+        assert not is_harness_native(tool, flags), industry
+        assert is_harness_native("end_call", flags), industry
+
+
 def test_support_write_appends_escalation() -> None:
     flags = tool_flags("customer-support")
+    assert flags["escalate_to_human"].get("session") is True
+    assert not is_harness_native("escalate_to_human", flags)
     with load_tool_server("customer-support") as module, TestClient(module.app) as client:
         result = replay_case(client, SUPPORT_WRITE, flags)
     assert result["skipped"] == []
