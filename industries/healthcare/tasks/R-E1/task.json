@@ -22,7 +22,6 @@
       },
       "parameters": {
         "destination": "patient_support_center",
-        "context_summary": "R-E1: Ask for a person",
         "reason": "caller_request"
       }
     }
@@ -220,7 +219,6 @@
         "kind": "transfer",
         "payload": {
           "destination": "patient_support_center",
-          "context_summary": "R-E1: Ask for a person",
           "reason": "caller_request"
         }
       }

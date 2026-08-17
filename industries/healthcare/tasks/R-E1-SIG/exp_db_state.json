@@ -172,7 +172,6 @@
       "id": 1,
       "kind": "transfer",
       "payload": {
-        "context_summary": "R-E1-SIG: Ask for a person",
         "destination": "patient_support_center",
         "reason": "caller_request"
       }

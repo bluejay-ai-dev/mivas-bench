@@ -47,7 +47,10 @@
   ],
   "exp_tool_calls": [
     {
-      "name": "transfer_to_identity"
+      "name": "transfer_to_identity",
+      "parameters": {
+        "next_intent": "coverage"
+      }
     },
     {
       "name": "transfer_to_coverage"
@@ -69,7 +72,7 @@
       "name": "run_eligibility_check",
       "parameters": {
         "member_id": "W123456789",
-        "carrier": "Aetna",
+        "carrier": "aetna",
         "dob": "1990-04-12",
         "service_date": "2026-08-24"
       },

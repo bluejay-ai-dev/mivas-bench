@@ -38,6 +38,11 @@ from expected_final_state import (  # noqa: E402
 
 TASKS = ROOT / "industries" / "healthcare" / "tasks"
 EXPECTED = ROOT / "expected-final-state" / "healthcare"
+_TOOLS = json.loads((ROOT / "industries" / "healthcare" / "tools.json").read_text())
+TOOL_INPUT_KEYS = {
+    spec["name"]: set((spec.get("inputSchema") or {}).get("properties") or {})
+    for spec in _TOOLS.get("tools") or []
+}
 
 CATEGORY_SLUGS = {
     "C1": "new-patient-access",
@@ -300,7 +305,8 @@ def prompt_adherence_substrs(dh: dict[str, Any], calls: list[dict[str, Any]], fo
                 add(out, seen, "I can't confirm that plan")
                 add(out, seen, "flag it for benefits verification")
             elif folded in NOT_ACCEPTED_CARRIERS:
-                add(out, seen, f"We don't accept {carrier} at any of our offices")
+                label = {"medicaid": "Medicaid"}.get(folded, carrier)
+                add(out, seen, f"We don't accept {label} at any of our offices")
 
         if name == "cancel_appointment":
             appt = params.get("appointment_id")
@@ -479,7 +485,52 @@ OFFICE_TO_LOCATION = {
     "park avenue": "loc_park_ave",
     "brooklyn heights": "loc_brooklyn_heights",
     "windermere": "loc_windermere",
+    "loc_park_ave": "loc_park_ave",
+    "loc_brooklyn_heights": "loc_brooklyn_heights",
+    "loc_windermere": "loc_windermere",
 }
+CARRIER_SLUGS = {
+    "aetna": "aetna",
+    "unitedhealthcare": "unitedhealthcare",
+    "cigna": "cigna",
+    "bcbs": "bcbs",
+    "bluecross": "bcbs",
+    "bluecrossblueshield": "bcbs",
+    "medicare": "medicare",
+    "medicaid": "medicaid",
+    "oscarhealth": "oscar_health",
+    "oscar": "oscar_health",
+    "other": "other",
+}
+DROPPED_TOOL_ARGS = frozenset({
+    "handoff_summary", "context_summary", "best_time",
+    "stated_reason", "summary", "description", "reason_text", "query",
+    "plan_name", "plan_type", "pharmacy_name", "contact_preference",
+    "name", "variables", "context",
+})
+QUERY_TO_TOPIC = {
+    "missed visit fee": "fees",
+    "cancellation fee": "fees",
+    "hours subway": "hours",
+    "allergy testing service": "services",
+}
+REASON_TO_VISIT = {
+    "mole on cheek": ("medical", "routine"),
+    "rash on neck": ("medical", "routine"),
+    "hives allergy testing": ("allergy", "routine"),
+    "itchy rash on forearm": ("medical", "routine"),
+    "spreading painful rash": ("medical", "urgent"),
+    "mole on back": ("medical", "routine"),
+    "spot could be skin cancer": ("mohs", "urgent"),
+}
+NEXT_INTENT_FROM_HANDOFF = {
+    "transfer_to_scheduling": "scheduling",
+    "transfer_to_billing": "billing",
+    "transfer_to_clinical": "clinical",
+    "transfer_to_coverage": "coverage",
+    "transfer_to_cosmetic": "cosmetic",
+}
+COSMETIC_SERVICES = {"botox", "filler", "chemical_peel", "microneedling"}
 APPOINTMENT_BY_NAME = {
     "Jordan Lee": 1,
     "Maria Alvarez": 2,
@@ -571,22 +622,53 @@ def appointment_type(task: dict[str, Any], folder: str) -> str:
     return "MED_FOLLOWUP"
 
 
-def book_description(task: dict[str, Any], folder: str) -> str:
-    intent = str(task.get("intent") or "")
-    lowered = intent.lower()
-    if "isotretinoin" in lowered or "accutane" in lowered:
-        return "isotretinoin program visit"
-    if "mohs" in lowered or "skin cancer" in lowered:
-        return "possible skin cancer on shoulder"
-    if "wart" in lowered:
-        return "wart on thumb"
-    if "mole" in lowered:
-        return "mole on back"
-    if "eczema" in lowered:
-        return "eczema on hands follow-up"
-    if facts_from_task(task).get("patient_status") == "new":
-        return "new patient visit"
-    return f"{folder} booked visit"
+def slug_carrier(value: Any) -> str | None:
+    compact = "".join(ch for ch in str(value or "").lower() if ch.isalnum())
+    if not compact:
+        return None
+    return CARRIER_SLUGS.get(compact, "other")
+
+
+def slug_location(value: Any) -> str | None:
+    said = str(value or "").strip().lower()
+    if not said:
+        return None
+    if said in OFFICE_TO_LOCATION:
+        return OFFICE_TO_LOCATION[said]
+    for key, loc_id in OFFICE_TO_LOCATION.items():
+        if key in said or said in key:
+            return loc_id
+    return None
+
+
+def slug_cosmetic(value: Any) -> str | None:
+    slug = str(value or "").strip().lower().replace(" ", "_")
+    return slug if slug in COSMETIC_SERVICES else None
+
+
+def infer_next_intent(calls: list[dict[str, Any]]) -> str:
+    for call in calls:
+        mapped = NEXT_INTENT_FROM_HANDOFF.get(str(call.get("name") or ""))
+        if mapped:
+            return mapped
+    return "scheduling"
+
+
+def visit_class_from_reason(text: str) -> tuple[str, str]:
+    mapped = REASON_TO_VISIT.get(text.strip().lower())
+    if mapped:
+        return mapped
+    lowered = text.lower()
+    if any(k in lowered for k in ("botox", "filler", "cosmetic", "peel")):
+        return "cosmetic", "routine"
+    if any(k in lowered for k in ("mohs", "skin cancer", "melanoma", "biopsy")):
+        return "mohs", "urgent"
+    if any(k in lowered for k in ("allergy", "allergies", "hives", "asthma")):
+        return "allergy", "routine"
+    urgency = "urgent" if any(
+        k in lowered for k in ("bleeding", "spreading", "infected", "severe", "painful")
+    ) else "routine"
+    return "medical", urgency
 
 
 def cosmetic_interest(task: dict[str, Any], calls: list[dict[str, Any]]) -> list[str]:
@@ -594,11 +676,15 @@ def cosmetic_interest(task: dict[str, Any], calls: list[dict[str, Any]]) -> list
         if call.get("name") == "quote_cosmetic_service":
             service = (call.get("parameters") or {}).get("service")
             if service:
-                return [str(service).replace(" ", "_")]
+                mapped = slug_cosmetic(service)
+                if mapped:
+                    return [mapped]
     intent = str(task.get("intent") or "").lower()
-    for service in ("botox", "filler", "thread lift", "laser", "chemical peel", "microneedling"):
+    for service in ("botox", "filler", "chemical peel", "microneedling"):
         if service in intent:
-            return [service.replace(" ", "_")]
+            mapped = slug_cosmetic(service)
+            if mapped:
+                return [mapped]
     return ["botox"]
 
 
@@ -624,14 +710,18 @@ def complete_call(
         for key, value in slot.items():
             params.setdefault(key, value)
         params.setdefault("appointment_type_code", appointment_type(task, folder))
-        params.setdefault("description", book_description(task, folder))
+        params.pop("description", None)
 
     elif name == "book_cosmetic_consult":
         slot = slot_for(task, params)
         for key, value in slot.items():
             params.setdefault(key, value)
         params.setdefault("service_interest", cosmetic_interest(task, calls))
+        params["service_interest"] = [
+            slug for slug in (slug_cosmetic(item) for item in params["service_interest"]) if slug
+        ] or ["botox"]
         params.setdefault("policy_acknowledged", True)
+        params.pop("end", None)
 
     elif name == "reschedule_appointment":
         slot = slot_for(task, params, later=True)
@@ -653,6 +743,8 @@ def complete_call(
         )
         params["appointment_type_code"] = wait_type
         params.setdefault("location_ids", [loc])
+        mapped_ids = [slug_location(item) for item in params["location_ids"]]
+        params["location_ids"] = [item for item in mapped_ids if item] or [loc]
         params.setdefault("earliest", "2026-08-24T00:00:00")
         params.setdefault("latest", "2026-09-30T23:59:59")
 
@@ -673,7 +765,7 @@ def complete_call(
 
     elif name == "request_fee_waiver":
         params.setdefault("fee_line_item_id", "li_noshow")
-        params.setdefault("stated_reason", "called to cancel and nobody picked up")
+        params.pop("stated_reason", None)
 
     elif name == "request_rx_refill":
         if "medication" in params and "medication_name" not in params:
@@ -701,41 +793,99 @@ def complete_call(
 
     elif name == "run_eligibility_check":
         params.setdefault("carrier", facts.get("carrier"))
+        if params.get("carrier"):
+            params["carrier"] = slug_carrier(params["carrier"]) or params["carrier"]
         params.setdefault("member_id", facts.get("member_id"))
         params.setdefault("dob", facts.get("date_of_birth") or facts.get("dob"))
         params.setdefault("service_date", "2026-08-24")
 
     elif name == "capture_insurance_update":
         params.setdefault("carrier", facts.get("carrier"))
+        if params.get("carrier"):
+            params["carrier"] = slug_carrier(params["carrier"]) or params["carrier"]
         params.setdefault("member_id", facts.get("member_id"))
 
     elif name == "create_callback_task":
         params.setdefault("queue", "front_desk")
         params.setdefault("callback_number", mobile)
-        params.setdefault("topic", f"{folder} follow-up")
+        params.pop("topic", None)
+        params.pop("best_time", None)
 
     elif name == "create_clinical_message":
         params.setdefault("category", "results_followup")
         params.setdefault("priority", "routine")
-        params.setdefault("summary", f"{caller} asking about results")
+        params.pop("summary", None)
 
     elif name == "find_slots":
         params.setdefault("location_ids", [location_id_from(task, params)])
+        mapped_ids = [slug_location(item) for item in params["location_ids"]]
+        params["location_ids"] = [
+            item for item in mapped_ids if item
+        ] or [location_id_from(task, params)]
 
     elif name == "transfer_to_human":
         params.setdefault("destination", "patient_support_center")
-        params.setdefault("context_summary", str(task.get("task_name") or folder))
+        params.pop("context_summary", None)
         params.setdefault(
             "reason",
             "clinical_emergency" if scored == "R-E2" else "caller_request",
         )
+
+    elif name == "transfer_to_identity":
+        params.setdefault("next_intent", infer_next_intent(calls))
+        params.pop("handoff_summary", None)
+
+    elif name.startswith("transfer_to_"):
+        params.pop("handoff_summary", None)
+
+    elif name == "search_practice_kb":
+        query = str(params.pop("query", "") or "")
+        params.setdefault("topic", QUERY_TO_TOPIC.get(query.strip().lower(), "hours"))
+
+    elif name == "classify_visit_request":
+        reason = str(params.pop("reason_text", "") or "")
+        visit_class, urgency = visit_class_from_reason(reason)
+        params.setdefault("visit_class", visit_class)
+        params.setdefault("urgency", urgency)
+        if "is_new_patient" not in params:
+            params["is_new_patient"] = facts.get("patient_status") == "new"
+
+    elif name == "quote_cosmetic_service":
+        if params.get("service"):
+            mapped = slug_cosmetic(params["service"])
+            if mapped:
+                params["service"] = mapped
+            else:
+                params.pop("service", None)
+
+    elif name == "list_locations":
+        params.pop("name", None)
+        params.pop("radius_miles", None)
+        if params.get("location_id"):
+            mapped = slug_location(params["location_id"])
+            if mapped:
+                params["location_id"] = mapped
+
+    elif name == "end_call":
+        reason = str(params.get("reason") or "caller_done").strip().lower()
+        params["reason"] = reason if reason in {"caller_done", "spam", "wrong_number"} else "caller_done"
+
+    elif name == "get_results_status":
+        params.setdefault("order_type", "pathology")
 
     elif name == "send_portal_activation":
         params.setdefault("channel", "sms")
 
     elif name == "check_plan_accepted":
         params.setdefault("carrier", facts.get("carrier"))
-        params.setdefault("location_id", facts.get("preferred_office") or location_id_from(task, params))
+        params.setdefault("location_id", location_id_from(task, params))
+        if params.get("carrier"):
+            params["carrier"] = slug_carrier(params["carrier"]) or params["carrier"]
+        mapped_loc = slug_location(params.get("location_id"))
+        if mapped_loc:
+            params["location_id"] = mapped_loc
+        params.pop("plan_name", None)
+        params.pop("plan_type", None)
         carrier = str(params.get("carrier") or "")
         if carrier.strip().lower() in NOT_ACCEPTED_CARRIERS:
             output = dict(call.get("output") or {})
@@ -743,15 +893,24 @@ def complete_call(
             data.setdefault("accepted", False)
             data.setdefault(
                 "required_script",
-                f"We don't accept {carrier} at any of our offices. "
+                "We don't accept Medicaid at any of our offices. "
                 "I can go over self-pay pricing or have someone call you about options.",
             )
             call = {**call, "output": {**output, "ok": True, "data": data}}
 
-    filled = {key: value for key, value in params.items() if value not in (None, "")}
+    if params.get("appointment_id") is not None:
+        params["appointment_id"] = str(params["appointment_id"])
+    filled = {
+        key: value
+        for key, value in params.items()
+        if value not in (None, "") and key not in DROPPED_TOOL_ARGS
+    }
+    allowed = TOOL_INPUT_KEYS.get(str(name))
+    if allowed is not None:
+        filled = {key: value for key, value in filled.items() if key in allowed}
     if filled:
         return {**call, "parameters": filled}
-    return call
+    return {key: value for key, value in call.items() if key != "parameters"}
 
 
 def reshape_calls(task: dict[str, Any], folder: str) -> list[dict[str, Any]]:
@@ -781,7 +940,6 @@ def reshape_calls(task: dict[str, Any], folder: str) -> list[dict[str, Any]]:
                 "parameters": {
                     "category": "results_followup",
                     "priority": "routine",
-                    "summary": "Jordan Lee asking whether biopsy results are back",
                 },
                 "output": {"ok": True},
             },
@@ -804,6 +962,24 @@ def reshape_calls(task: dict[str, Any], folder: str) -> list[dict[str, Any]]:
         }] + raw[insert_at:]
 
     completed = [complete_call(call, task, folder, raw) for call in raw]
+    if folder == "C1-H2":
+        split: list[dict[str, Any]] = []
+        kb_emitted = False
+        for call in completed:
+            if call.get("name") == "search_practice_kb":
+                if not kb_emitted:
+                    split.append({
+                        "name": "search_practice_kb",
+                        "parameters": {"topic": "hours"},
+                    })
+                    split.append({
+                        "name": "search_practice_kb",
+                        "parameters": {"topic": "directions"},
+                    })
+                    kb_emitted = True
+                continue
+            split.append(call)
+        completed = split
     deduped: list[dict[str, Any]] = []
     for call in completed:
         prev = deduped[-1] if deduped else None

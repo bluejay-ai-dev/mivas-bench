@@ -35,7 +35,7 @@
     },
     {
       "appointment_type_code": "MOHS_CONSULT",
-      "description": "possible skin cancer on shoulder",
+      "description": "Mohs consult",
       "end": "2026-08-24T09:30:00",
       "id": 4,
       "location_id": "loc_brooklyn_heights",

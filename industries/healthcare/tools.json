@@ -2,25 +2,36 @@
   "tools": [
     {
       "name": "identify_patient",
-      "description": "Find the patient record. The number they're calling from is tried automatically \u2014 try that before asking for anything. dob is YYYY-MM-DD. Returns masked candidates only.",
+      "description": "Find the patient record. The number they're calling from is tried automatically — try that before asking for anything. dob is YYYY-MM-DD. Returns masked candidates only.",
       "inputSchema": {
         "type": "object",
         "properties": {
           "first_name": {
-            "type": "string"
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80,
+            "pattern": "^[A-Za-zÀ-ÖØ-öø-ÿ][A-Za-zÀ-ÖØ-öø-ÿ '.\\-]{0,79}$",
+            "description": "Given name as stated."
           },
           "last_name": {
-            "type": "string"
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80,
+            "pattern": "^[A-Za-zÀ-ÖØ-öø-ÿ][A-Za-zÀ-ÖØ-öø-ÿ '.\\-]{0,79}$",
+            "description": "Family name as stated."
           },
           "dob": {
             "type": "string",
             "format": "date",
-            "description": "YYYY-MM-DD"
+            "description": "YYYY-MM-DD."
           },
           "zip": {
-            "type": "string"
+            "type": "string",
+            "pattern": "^[0-9]{5}$",
+            "description": "US ZIP, five digits."
           }
-        }
+        },
+        "additionalProperties": false
       },
       "outputSchema": {
         "type": "object",
@@ -45,26 +56,33 @@
     },
     {
       "name": "verify_identity",
-      "description": "Verify the caller. Needs full name and date of birth (YYYY-MM-DD); add a second factor \u2014 their zip or the last four of the phone on file \u2014 if the tool asks for one. Never ask for a Social Security number. After the third failure this locks; when it does, stop and offer the front desk or a callback.",
+      "description": "Verify the caller. Needs full name and date of birth (YYYY-MM-DD); add a second factor — their zip or the last four of the phone on file — if the tool asks for one. Never ask for a Social Security number. After the third failure this locks; when it does, stop and offer the front desk or a callback.",
       "inputSchema": {
         "type": "object",
         "properties": {
           "full_name": {
-            "type": "string"
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80,
+            "pattern": "^[A-Za-zÀ-ÖØ-öø-ÿ][A-Za-zÀ-ÖØ-öø-ÿ '.\\-]{0,79}$",
+            "description": "Full legal name, given name then family name."
           },
           "dob": {
             "type": "string",
             "format": "date",
-            "description": "YYYY-MM-DD"
+            "description": "YYYY-MM-DD."
           },
           "second_factor": {
-            "type": "string"
+            "type": "string",
+            "pattern": "^([0-9]{4}|[0-9]{5})$",
+            "description": "ZIP (5 digits) or last four of the phone on file."
           }
         },
         "required": [
           "full_name",
           "dob"
-        ]
+        ],
+        "additionalProperties": false
       },
       "outputSchema": {
         "type": "object",
@@ -89,7 +107,7 @@
     },
     {
       "name": "get_patient_summary",
-      "description": "Load everything the chart already knows \u2014 name, language, home office, last visit, upcoming appointments, insurance, balance, card on file, portal status, open orders and clinical flags. Call this the moment verification passes, before handing off.",
+      "description": "Load everything the chart already knows — name, language, home office, last visit, upcoming appointments, insurance, balance, card on file, portal status, open orders and clinical flags. Call this the moment verification passes, before handing off.",
       "inputSchema": {
         "type": "object",
         "properties": {},
@@ -118,22 +136,26 @@
     },
     {
       "name": "list_locations",
-      "description": "Offices by zip OR by name: address, floor, suite, hours, services, transit, parking, and whether the office does cosmetic work. The only source of an office address, floor or location_id.",
+      "description": "Offices by zip OR location_id: address, floor, suite, hours, services, transit, parking, and whether the office does cosmetic work. The only source of an office address, floor or location_id. Map caller names to loc_park_ave, loc_brooklyn_heights, or loc_windermere.",
       "inputSchema": {
         "type": "object",
         "properties": {
           "zip": {
-            "type": "string"
-          },
-          "radius_miles": {
-            "type": "integer"
-          },
-          "name": {
             "type": "string",
-            "description": "Office name or whatever the caller called it (\"Park Avenue\", \"Montague Street\"). Either this or zip."
+            "pattern": "^[0-9]{5}$",
+            "description": "US ZIP, five digits."
+          },
+          "location_id": {
+            "type": "string",
+            "enum": [
+              "loc_park_ave",
+              "loc_brooklyn_heights",
+              "loc_windermere"
+            ],
+            "description": "Office id. Map caller names: Park Avenue → loc_park_ave, Brooklyn Heights → loc_brooklyn_heights, Windermere → loc_windermere."
           }
         },
-        "required": []
+        "additionalProperties": false
       },
       "outputSchema": {
         "type": "object",
@@ -158,20 +180,37 @@
     },
     {
       "name": "classify_visit_request",
-      "description": "Map the reason for the visit to an appointment type, visit class, required credential, duration, urgency and constraints. Always call this before find_slots \u2014 it is what stops a Mohs consult being booked with a PA.",
+      "description": "Map the visit to an appointment type. Pass visit_class (cosmetic | mohs | allergy | medical), is_new_patient when you know, and urgency when spreading/painful/bleeding. Always call this before find_slots — it is what stops a Mohs consult being booked with a PA.",
       "inputSchema": {
         "type": "object",
         "properties": {
-          "reason_text": {
-            "type": "string"
+          "visit_class": {
+            "type": "string",
+            "enum": [
+              "cosmetic",
+              "mohs",
+              "allergy",
+              "medical"
+            ],
+            "description": "Closed visit class. cosmetic = injectables/lasers/peels; mohs = skin cancer / Mohs; allergy = hives/testing/shots; medical = everything else."
           },
           "is_new_patient": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True if they have never been seen at Straus."
+          },
+          "urgency": {
+            "type": "string",
+            "enum": [
+              "routine",
+              "urgent"
+            ],
+            "description": "urgent for spreading, painful, bleeding, or infected complaints; routine otherwise."
           }
         },
         "required": [
-          "reason_text"
-        ]
+          "visit_class"
+        ],
+        "additionalProperties": false
       },
       "outputSchema": {
         "type": "object",
@@ -203,22 +242,38 @@
           "location_ids": {
             "type": "array",
             "items": {
-              "type": "string"
-            }
+              "type": "string",
+              "enum": [
+                "loc_park_ave",
+                "loc_brooklyn_heights",
+                "loc_windermere"
+              ],
+              "description": "Office id. Map caller names: Park Avenue → loc_park_ave, Brooklyn Heights → loc_brooklyn_heights, Windermere → loc_windermere."
+            },
+            "minItems": 1,
+            "description": "One or more office ids to search."
           },
           "window_start": {
-            "type": "string"
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO-8601 local datetime, e.g. 2026-08-24T09:00:00."
           },
           "window_end": {
-            "type": "string"
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO-8601 local datetime, e.g. 2026-08-24T09:00:00."
           },
           "max_results": {
-            "type": "integer"
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 12,
+            "description": "Cap on returned slots."
           }
         },
         "required": [
           "location_ids"
-        ]
+        ],
+        "additionalProperties": false
       },
       "outputSchema": {
         "type": "object",
@@ -243,13 +298,14 @@
     },
     {
       "name": "book_appointment",
-      "description": "Create the appointment. Only after you have read back the day, the time, the office WITH THE FLOOR and the provider with credentials, and the caller said yes.",
+      "description": "Create the appointment. Only after you have read back the day, the time, the office WITH THE FLOOR and the provider with credentials, and the caller said yes. Description is derived from appointment_type_code — do not pass one.",
       "inputSchema": {
         "type": "object",
         "properties": {
           "slot_id": {
             "type": "string",
-            "description": "Id returned by find_slots, e.g. slot_loc_park_ave_1. Must match location_id, provider_id, start, and end."
+            "pattern": "^slot_loc_(park_ave|brooklyn_heights|windermere)_[0-9]+$",
+            "description": "slot_id from find_slots, e.g. slot_loc_park_ave_1."
           },
           "appointment_type_code": {
             "type": "string",
@@ -259,31 +315,36 @@
               "MOHS_CONSULT",
               "COS_CONSULT",
               "ALLERGY_EVAL"
-            ]
+            ],
+            "description": "Appointment type code from classify_visit_request."
           },
           "location_id": {
             "type": "string",
-            "description": "Must equal the slot's location_id (loc_park_ave, loc_brooklyn_heights, loc_windermere)."
+            "enum": [
+              "loc_park_ave",
+              "loc_brooklyn_heights",
+              "loc_windermere"
+            ],
+            "description": "Office id. Map caller names: Park Avenue → loc_park_ave, Brooklyn Heights → loc_brooklyn_heights, Windermere → loc_windermere."
           },
           "provider_id": {
             "type": "string",
-            "description": "Must equal the slot's provider_id (prov_chen, prov_ruiz, prov_patel)."
+            "enum": [
+              "prov_chen",
+              "prov_ruiz",
+              "prov_patel"
+            ],
+            "description": "Provider id from find_slots or get_patient_summary: prov_chen, prov_ruiz, or prov_patel."
           },
           "start": {
             "type": "string",
             "format": "date-time",
-            "description": "Must equal the slot start, e.g. 2026-08-24T09:00:00"
+            "description": "ISO-8601 local datetime, e.g. 2026-08-24T09:00:00."
           },
           "end": {
             "type": "string",
             "format": "date-time",
-            "description": "Must equal the slot end, e.g. 2026-08-24T09:30:00"
-          },
-          "description": {
-            "type": "string"
-          },
-          "new_patient": {
-            "type": "boolean"
+            "description": "ISO-8601 local datetime, e.g. 2026-08-24T09:00:00."
           }
         },
         "required": [
@@ -292,9 +353,9 @@
           "location_id",
           "provider_id",
           "start",
-          "end",
-          "description"
-        ]
+          "end"
+        ],
+        "additionalProperties": false
       },
       "outputSchema": {
         "type": "object",
@@ -319,36 +380,37 @@
     },
     {
       "name": "reschedule_appointment",
-      "description": "Move an existing appointment. This is an update, never a cancel-then-rebook, and it never costs anything \u2014 say so. Always offer this before cancelling.",
+      "description": "Move an existing appointment. This is an update, never a cancel-then-rebook, and it never costs anything — say so. Always offer this before cancelling.",
       "inputSchema": {
         "type": "object",
         "properties": {
           "appointment_id": {
             "type": "string",
-            "description": "Seeded appointment id as a string, e.g. \"1\"."
+            "pattern": "^[0-9]+$",
+            "description": "Appointment id as a decimal string, e.g. \"1\"."
           },
           "new_slot_id": {
-            "type": "string"
+            "type": "string",
+            "pattern": "^slot_loc_(park_ave|brooklyn_heights|windermere)_[0-9]+$",
+            "description": "slot_id from find_slots, e.g. slot_loc_park_ave_1."
           },
           "new_start": {
             "type": "string",
             "format": "date-time",
-            "description": "ISO-8601 local datetime, e.g. 2026-08-25T11:30:00"
+            "description": "ISO-8601 local datetime, e.g. 2026-08-24T09:00:00."
           },
           "new_end": {
             "type": "string",
             "format": "date-time",
-            "description": "ISO-8601 local datetime, e.g. 2026-08-25T12:00:00"
-          },
-          "reason": {
-            "type": "string"
+            "description": "ISO-8601 local datetime, e.g. 2026-08-24T09:00:00."
           }
         },
         "required": [
           "appointment_id",
           "new_start",
           "new_end"
-        ]
+        ],
+        "additionalProperties": false
       },
       "outputSchema": {
         "type": "object",
@@ -378,7 +440,9 @@
         "type": "object",
         "properties": {
           "appointment_id": {
-            "type": "string"
+            "type": "string",
+            "pattern": "^[0-9]+$",
+            "description": "Appointment id as a decimal string, e.g. \"1\"."
           },
           "cancellation_reason_code": {
             "type": "string",
@@ -388,16 +452,19 @@
               "weather",
               "illness",
               "other"
-            ]
+            ],
+            "description": "Why the visit is being cancelled."
           },
           "fee_disclosed_and_accepted": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "False on the first call. True only after they accepted the spoken fee."
           }
         },
         "required": [
           "appointment_id",
           "cancellation_reason_code"
-        ]
+        ],
+        "additionalProperties": false
       },
       "outputSchema": {
         "type": "object",
@@ -422,27 +489,44 @@
     },
     {
       "name": "join_waitlist",
-      "description": "Put them on the earlier-appointment list. Offer this to anyone who cancels without rebooking, and to anyone who doesn't like the times you found.",
+      "description": "Put them on the earlier-appointment list. Required: appointment_type_code, location_ids, earliest, latest.",
       "inputSchema": {
         "type": "object",
         "properties": {
           "appointment_type_code": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "NP_MED",
+              "MED_FOLLOWUP",
+              "MOHS_CONSULT",
+              "COS_CONSULT",
+              "ALLERGY_EVAL"
+            ],
+            "description": "Appointment type code from classify_visit_request."
           },
           "location_ids": {
             "type": "array",
             "items": {
-              "type": "string"
-            }
+              "type": "string",
+              "enum": [
+                "loc_park_ave",
+                "loc_brooklyn_heights",
+                "loc_windermere"
+              ],
+              "description": "Office id. Map caller names: Park Avenue → loc_park_ave, Brooklyn Heights → loc_brooklyn_heights, Windermere → loc_windermere."
+            },
+            "minItems": 1,
+            "description": "Offices they will take an earlier opening at."
           },
           "earliest": {
-            "type": "string"
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO-8601 local datetime, e.g. 2026-08-24T09:00:00."
           },
           "latest": {
-            "type": "string"
-          },
-          "contact_preference": {
-            "type": "string"
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO-8601 local datetime, e.g. 2026-08-24T09:00:00."
           }
         },
         "required": [
@@ -450,7 +534,8 @@
           "location_ids",
           "earliest",
           "latest"
-        ]
+        ],
+        "additionalProperties": false
       },
       "outputSchema": {
         "type": "object",
@@ -489,25 +574,34 @@
               "drops_pickup",
               "asthma_eval",
               "immunotherapy_buildup"
-            ]
+            ],
+            "description": "Allergy service slug."
           },
           "location_id": {
             "type": "string",
-            "description": "Location id (loc_park_ave) or the office name the caller used."
+            "enum": [
+              "loc_park_ave",
+              "loc_brooklyn_heights",
+              "loc_windermere"
+            ],
+            "description": "Office id. Map caller names: Park Avenue → loc_park_ave, Brooklyn Heights → loc_brooklyn_heights, Windermere → loc_windermere."
           },
           "window_start": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "ISO-8601 local datetime, e.g. 2026-08-24T09:00:00."
           },
           "window_end": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "ISO-8601 local datetime, e.g. 2026-08-24T09:00:00."
           }
         },
         "required": [
           "service",
           "location_id"
-        ]
+        ],
+        "additionalProperties": false
       },
       "outputSchema": {
         "type": "object",
@@ -532,30 +626,48 @@
     },
     {
       "name": "check_plan_accepted",
-      "description": "Carrier by plan by OFFICE by provider. location_id accepts a real id OR whatever the caller called the office \u2014 \"Park Avenue\", \"Brooklyn Heights\", \"Windermere\" \u2014 so pass their words straight through rather than refusing for want of an id. If must_not_assert is true you may not say they're covered or not covered: say required_script and create a callback or point them at the text line. If accepted is no, say so plainly and offer alternative_locations by distance.",
+      "description": "Carrier by OFFICE by provider. Pass carrier as a slug (aetna, unitedhealthcare, cigna, bcbs, medicare, medicaid, oscar_health, other) and location_id as loc_park_ave | loc_brooklyn_heights | loc_windermere. If must_not_assert is true you may not say they're covered or not covered: say required_script and create a callback. If accepted is no, say so plainly.",
       "inputSchema": {
         "type": "object",
         "properties": {
           "carrier": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "aetna",
+              "unitedhealthcare",
+              "cigna",
+              "bcbs",
+              "medicare",
+              "medicaid",
+              "oscar_health",
+              "other"
+            ],
+            "description": "Payer slug. Map caller names: Aetna → aetna, UnitedHealthcare → unitedhealthcare, Blue Cross → bcbs, Oscar Health → oscar_health, Medicaid → medicaid. Unknown payers → other."
           },
           "location_id": {
-            "type": "string"
-          },
-          "plan_name": {
-            "type": "string"
-          },
-          "plan_type": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "loc_park_ave",
+              "loc_brooklyn_heights",
+              "loc_windermere"
+            ],
+            "description": "Office id. Map caller names: Park Avenue → loc_park_ave, Brooklyn Heights → loc_brooklyn_heights, Windermere → loc_windermere."
           },
           "provider_id": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "prov_chen",
+              "prov_ruiz",
+              "prov_patel"
+            ],
+            "description": "Provider id from find_slots or get_patient_summary: prov_chen, prov_ruiz, or prov_patel."
           }
         },
         "required": [
           "carrier",
           "location_id"
-        ]
+        ],
+        "additionalProperties": false
       },
       "outputSchema": {
         "type": "object",
@@ -580,20 +692,33 @@
     },
     {
       "name": "run_eligibility_check",
-      "description": "Live copay, deductible and coinsurance. Only if they gave you a member ID. If the payer doesn't answer, say you couldn't get the number \u2014 never guess at a copay.",
+      "description": "Live copay, deductible and coinsurance. Only if they gave you a member ID. If the payer doesn't answer, say you couldn't get the number — never guess at a copay.",
       "inputSchema": {
         "type": "object",
         "properties": {
           "carrier": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "aetna",
+              "unitedhealthcare",
+              "cigna",
+              "bcbs",
+              "medicare",
+              "medicaid",
+              "oscar_health",
+              "other"
+            ],
+            "description": "Payer slug. Map caller names: Aetna → aetna, UnitedHealthcare → unitedhealthcare, Blue Cross → bcbs, Oscar Health → oscar_health, Medicaid → medicaid. Unknown payers → other."
           },
           "member_id": {
-            "type": "string"
+            "type": "string",
+            "pattern": "^[A-Za-z0-9]{4,20}$",
+            "description": "Member or subscriber id, letters and digits only."
           },
           "dob": {
             "type": "string",
             "format": "date",
-            "description": "YYYY-MM-DD"
+            "description": "YYYY-MM-DD."
           },
           "service_date": {
             "type": "string",
@@ -606,7 +731,8 @@
           "member_id",
           "dob",
           "service_date"
-        ]
+        ],
+        "additionalProperties": false
       },
       "outputSchema": {
         "type": "object",
@@ -636,22 +762,45 @@
         "type": "object",
         "properties": {
           "carrier": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "aetna",
+              "unitedhealthcare",
+              "cigna",
+              "bcbs",
+              "medicare",
+              "medicaid",
+              "oscar_health",
+              "other"
+            ],
+            "description": "Payer slug. Map caller names: Aetna → aetna, UnitedHealthcare → unitedhealthcare, Blue Cross → bcbs, Oscar Health → oscar_health, Medicaid → medicaid. Unknown payers → other."
           },
           "member_id": {
-            "type": "string"
+            "type": "string",
+            "pattern": "^[A-Za-z0-9]{4,20}$",
+            "description": "Member or subscriber id, letters and digits only."
           },
           "group_number": {
-            "type": "string"
+            "type": "string",
+            "pattern": "^[A-Za-z0-9]{2,20}$",
+            "description": "Group number, letters and digits only."
           },
           "subscriber_relationship": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "self",
+              "spouse",
+              "child",
+              "other"
+            ],
+            "description": "Who the subscriber is relative to the patient."
           }
         },
         "required": [
           "carrier",
           "member_id"
-        ]
+        ],
+        "additionalProperties": false
       },
       "outputSchema": {
         "type": "object",
@@ -705,7 +854,7 @@
     },
     {
       "name": "explain_charge",
-      "description": "The approved explanation for a charge. Say approved_script as written \u2014 do not improvise a billing explanation.",
+      "description": "The approved explanation for a charge. Say approved_script as written — do not improvise a billing explanation.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -714,12 +863,14 @@
             "enum": [
               "li_noshow",
               "li_visit"
-            ]
+            ],
+            "description": "Balance line to explain."
           }
         },
         "required": [
           "line_item_id"
-        ]
+        ],
+        "additionalProperties": false
       },
       "outputSchema": {
         "type": "object",
@@ -744,21 +895,25 @@
     },
     {
       "name": "send_payment_link",
-      "description": "Text a secure payment link. The only payment path \u2014 never take a card by voice.",
+      "description": "Text a secure payment link. The only payment path — never take a card by voice.",
       "inputSchema": {
         "type": "object",
         "properties": {
           "mobile_e164": {
             "type": "string",
-            "description": "E.164, e.g. +12125550100"
+            "pattern": "^\\+[1-9][0-9]{7,14}$",
+            "description": "E.164, e.g. +12125550100."
           },
           "amount_cents": {
-            "type": "integer"
+            "type": "integer",
+            "minimum": 1,
+            "description": "Amount in cents."
           }
         },
         "required": [
           "mobile_e164"
-        ]
+        ],
+        "additionalProperties": false
       },
       "outputSchema": {
         "type": "object",
@@ -783,20 +938,20 @@
     },
     {
       "name": "offer_financing",
-      "description": "CareCredit for a balance they can't pay at once. Over two hundred fifty dollars.",
+      "description": "CareCredit for a balance they can't pay at once. Over two hundred fifty dollars. Required: amount_cents.",
       "inputSchema": {
         "type": "object",
         "properties": {
           "amount_cents": {
-            "type": "integer"
-          },
-          "context": {
-            "type": "string"
+            "type": "integer",
+            "minimum": 1,
+            "description": "Balance in cents being financed."
           }
         },
         "required": [
           "amount_cents"
-        ]
+        ],
+        "additionalProperties": false
       },
       "outputSchema": {
         "type": "object",
@@ -821,7 +976,7 @@
     },
     {
       "name": "request_fee_waiver",
-      "description": "Open a review of a missed-visit fee. You do NOT waive it yourself. Say the SLA the tool gives you out loud.",
+      "description": "Open a review of a missed-visit fee. You do NOT waive it yourself. Required: fee_line_item_id. Say the SLA the tool gives you out loud.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -830,16 +985,14 @@
             "enum": [
               "li_noshow",
               "li_visit"
-            ]
-          },
-          "stated_reason": {
-            "type": "string"
+            ],
+            "description": "Fee line to send for review. You do not waive it."
           }
         },
         "required": [
-          "fee_line_item_id",
-          "stated_reason"
-        ]
+          "fee_line_item_id"
+        ],
+        "additionalProperties": false
       },
       "outputSchema": {
         "type": "object",
@@ -864,18 +1017,25 @@
     },
     {
       "name": "quote_cosmetic_service",
-      "description": "The only source of a cosmetic price. If it returns a range you may say that range and must add that the consult settles the number. If it returns no range, pricing depends on the treatment plan \u2014 never invent, estimate, or say 'probably around'.",
+      "description": "The only source of a cosmetic price. service is botox | filler | chemical_peel | microneedling. If it returns a range you may say that range and must add that the consult settles the number. If it returns no range, never invent a number.",
       "inputSchema": {
         "type": "object",
         "properties": {
           "service": {
             "type": "string",
-            "description": "Cosmetic service slug. Known priced: botox, filler, chemical_peel, microneedling. Unknown names return no range."
+            "enum": [
+              "botox",
+              "filler",
+              "chemical_peel",
+              "microneedling"
+            ],
+            "description": "Priced cosmetic service slug."
           }
         },
         "required": [
           "service"
-        ]
+        ],
+        "additionalProperties": false
       },
       "outputSchema": {
         "type": "object",
@@ -900,30 +1060,56 @@
     },
     {
       "name": "book_cosmetic_consult",
-      "description": "Book the consult. Leave policy_acknowledged false the first time \u2014 the tool hands you the exact four policy lines to say (deposit, 72 hours, forfeited, balance due). Say them, get a real yes, then call again with true.",
+      "description": "Book the consult. Leave policy_acknowledged false the first time — the tool hands you the exact four policy lines to say (deposit, 72 hours, forfeited, balance due). Say them, get a real yes, then call again with true.",
       "inputSchema": {
         "type": "object",
         "properties": {
           "slot_id": {
-            "type": "string"
+            "type": "string",
+            "pattern": "^slot_loc_(park_ave|brooklyn_heights|windermere)_[0-9]+$",
+            "description": "slot_id from find_slots, e.g. slot_loc_park_ave_1."
           },
           "service_interest": {
             "type": "array",
             "items": {
-              "type": "string"
-            }
+              "type": "string",
+              "enum": [
+                "botox",
+                "filler",
+                "chemical_peel",
+                "microneedling"
+              ],
+              "description": "Priced cosmetic service slug."
+            },
+            "minItems": 1,
+            "description": "Cosmetic services they want discussed at the consult."
           },
           "location_id": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "loc_park_ave",
+              "loc_brooklyn_heights",
+              "loc_windermere"
+            ],
+            "description": "Office id. Map caller names: Park Avenue → loc_park_ave, Brooklyn Heights → loc_brooklyn_heights, Windermere → loc_windermere."
           },
           "provider_id": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "prov_chen",
+              "prov_ruiz",
+              "prov_patel"
+            ],
+            "description": "Provider id from find_slots or get_patient_summary: prov_chen, prov_ruiz, or prov_patel."
           },
           "start": {
-            "type": "string"
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO-8601 local datetime, e.g. 2026-08-24T09:00:00."
           },
           "policy_acknowledged": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "False on the first call. True only after they accepted the four policy lines."
           }
         },
         "required": [
@@ -931,7 +1117,8 @@
           "location_id",
           "provider_id",
           "start"
-        ]
+        ],
+        "additionalProperties": false
       },
       "outputSchema": {
         "type": "object",
@@ -956,26 +1143,32 @@
     },
     {
       "name": "request_rx_refill",
-      "description": "Open a refill request. This NEVER approves a refill. Follow the route it returns; on a no_recent_visit hard stop, offer to book the visit on this call. Call it as soon as you know the medication \u2014 do NOT wait for a pharmacy name; hard-stop routes (isotretinoin, controlled, biologics) don't need one.",
+      "description": "Open a refill request. This NEVER approves a refill. Required: medication_name. Optional: pharmacy_phone (E.164), last_fill_date (YYYY-MM-DD). Follow the route it returns; on a no_recent_visit hard stop, offer to book the visit on this call.",
       "inputSchema": {
         "type": "object",
         "properties": {
           "medication_name": {
-            "type": "string"
-          },
-          "pharmacy_name": {
-            "type": "string"
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80,
+            "pattern": "^[A-Za-z][A-Za-z0-9 ./()&\\-]{0,79}$",
+            "description": "Medication name as stated."
           },
           "pharmacy_phone": {
-            "type": "string"
+            "type": "string",
+            "pattern": "^\\+[1-9][0-9]{7,14}$",
+            "description": "E.164, e.g. +12125550100."
           },
           "last_fill_date": {
-            "type": "string"
+            "type": "string",
+            "format": "date",
+            "description": "YYYY-MM-DD."
           }
         },
         "required": [
           "medication_name"
-        ]
+        ],
+        "additionalProperties": false
       },
       "outputSchema": {
         "type": "object",
@@ -1000,14 +1193,24 @@
     },
     {
       "name": "get_results_status",
-      "description": "STATUS of pathology, lab or allergy testing \u2014 never the content. Say approved_script. If they push for what the results say, hold the line warmly every time and create a clinical message instead.",
+      "description": "STATUS of pathology, lab or allergy testing — never the content. Required: order_type (pathology | lab | allergy). Say approved_script. If they push for what the results say, hold the line warmly every time and create a clinical message instead.",
       "inputSchema": {
         "type": "object",
         "properties": {
           "order_type": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "pathology",
+              "lab",
+              "allergy"
+            ],
+            "description": "Which kind of result they are asking about."
           }
-        }
+        },
+        "required": [
+          "order_type"
+        ],
+        "additionalProperties": false
       },
       "outputSchema": {
         "type": "object",
@@ -1032,7 +1235,7 @@
     },
     {
       "name": "create_clinical_message",
-      "description": "Task the clinical team. priority stat for anything emergent, urgent otherwise.",
+      "description": "Task the clinical team. priority stat for anything emergent, urgent otherwise. Say the callback_window it returns out loud.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -1043,7 +1246,8 @@
               "results_followup",
               "rx_question",
               "other"
-            ]
+            ],
+            "description": "Clinical inbox bucket."
           },
           "priority": {
             "type": "string",
@@ -1051,20 +1255,20 @@
               "stat",
               "urgent",
               "routine"
-            ]
-          },
-          "summary": {
-            "type": "string"
+            ],
+            "description": "stat for anything emergent, urgent otherwise, routine for results follow-up."
           },
           "callback_number": {
-            "type": "string"
+            "type": "string",
+            "pattern": "^\\+[1-9][0-9]{7,14}$",
+            "description": "E.164, e.g. +12125550100."
           }
         },
         "required": [
           "category",
-          "priority",
-          "summary"
-        ]
+          "priority"
+        ],
+        "additionalProperties": false
       },
       "outputSchema": {
         "type": "object",
@@ -1089,17 +1293,26 @@
     },
     {
       "name": "search_practice_kb",
-      "description": "Look up a grounded answer about Straus: hours, directions, parking, policies, fees, the portal, what we treat. Only say what this returns \u2014 if it finds no source, do not make one up.",
+      "description": "Look up a grounded Straus answer. topic is hours | directions | portal | fees | services. Only say what this returns — if it finds no source, do not make one up.",
       "inputSchema": {
         "type": "object",
         "properties": {
-          "query": {
-            "type": "string"
+          "topic": {
+            "type": "string",
+            "enum": [
+              "hours",
+              "directions",
+              "portal",
+              "fees",
+              "services"
+            ],
+            "description": "KB bucket. hours = open/close; directions = parking/transit; portal = login; fees = cancel/no-show; services = what we treat."
           }
         },
         "required": [
-          "query"
-        ]
+          "topic"
+        ],
+        "additionalProperties": false
       },
       "outputSchema": {
         "type": "object",
@@ -1130,7 +1343,8 @@
         "properties": {
           "mobile_e164": {
             "type": "string",
-            "description": "E.164, e.g. +12125550100"
+            "pattern": "^\\+[1-9][0-9]{7,14}$",
+            "description": "E.164, e.g. +12125550100."
           },
           "template_id": {
             "type": "string",
@@ -1141,16 +1355,15 @@
               "insurance_card_upload",
               "directions",
               "cosmetic_deposit"
-            ]
-          },
-          "variables": {
-            "type": "object"
+            ],
+            "description": "Approved SMS template."
           }
         },
         "required": [
           "mobile_e164",
           "template_id"
-        ]
+        ],
+        "additionalProperties": false
       },
       "outputSchema": {
         "type": "object",
@@ -1175,14 +1388,20 @@
     },
     {
       "name": "send_portal_activation",
-      "description": "Send the portal activation link when the portal isn't active.",
+      "description": "Send the portal activation link when the portal isn't active. Optional: channel (sms | email).",
       "inputSchema": {
         "type": "object",
         "properties": {
           "channel": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "sms",
+              "email"
+            ],
+            "description": "Delivery channel for the activation link."
           }
-        }
+        },
+        "additionalProperties": false
       },
       "outputSchema": {
         "type": "object",
@@ -1213,10 +1432,8 @@
         "properties": {
           "callback_number": {
             "type": "string",
-            "description": "E.164, e.g. +12125550100"
-          },
-          "topic": {
-            "type": "string"
+            "pattern": "^\\+[1-9][0-9]{7,14}$",
+            "description": "E.164, e.g. +12125550100."
           },
           "queue": {
             "type": "string",
@@ -1226,20 +1443,24 @@
               "front_desk",
               "cosmetic",
               "records"
-            ]
+            ],
+            "description": "Team that will call back."
           },
           "priority": {
-            "type": "string"
-          },
-          "best_time": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "stat",
+              "urgent",
+              "routine"
+            ],
+            "description": "Callback SLA. routine is the default."
           }
         },
         "required": [
           "callback_number",
-          "topic",
           "queue"
-        ]
+        ],
+        "additionalProperties": false
       },
       "outputSchema": {
         "type": "object",
@@ -1264,23 +1485,26 @@
     },
     {
       "name": "transfer_to_identity",
-      "description": "Invisible handoff to Identity & Verification when chart access is required before the real work (existing patient scheduling, billing, clinical, or insurance update). Pass next_intent so identity knows where to continue after verification.",
+      "description": "Invisible handoff to Identity & Verification when chart access is required before the real work. Pass next_intent (scheduling | billing | clinical | coverage | cosmetic) so identity knows where to continue. Call history is already visible — do not pass a summary.",
       "inputSchema": {
         "type": "object",
         "properties": {
-          "handoff_summary": {
-            "type": "string",
-            "description": "one or two sentences: who is calling and what they want, so identity never re-asks."
-          },
           "next_intent": {
             "type": "string",
-            "description": "where to continue after verification: scheduling, billing, clinical, coverage, or cosmetic."
+            "enum": [
+              "scheduling",
+              "billing",
+              "clinical",
+              "coverage",
+              "cosmetic"
+            ],
+            "description": "Where identity should continue after verification."
           }
         },
         "required": [
-          "handoff_summary",
           "next_intent"
-        ]
+        ],
+        "additionalProperties": false
       },
       "outputSchema": {
         "type": "object",
@@ -1305,18 +1529,11 @@
     },
     {
       "name": "transfer_to_scheduling",
-      "description": "Invisible handoff to Scheduling & Access for booking, rescheduling, cancelling, waitlist, or allergy visits.",
+      "description": "Invisible handoff to Scheduling & Access for booking, rescheduling, cancelling, waitlist, or allergy visits. Call history is already visible — no arguments.",
       "inputSchema": {
         "type": "object",
-        "properties": {
-          "handoff_summary": {
-            "type": "string",
-            "description": "one or two sentences: patient name if known, what they want booked/moved/cancelled, office or carrier already discussed."
-          }
-        },
-        "required": [
-          "handoff_summary"
-        ]
+        "properties": {},
+        "additionalProperties": false
       },
       "outputSchema": {
         "type": "object",
@@ -1341,18 +1558,11 @@
     },
     {
       "name": "transfer_to_coverage",
-      "description": "Invisible handoff to Coverage & Benefits for plan acceptance, referrals, eligibility, or capturing a new insurance card.",
+      "description": "Invisible handoff to Coverage & Benefits for plan acceptance, referrals, eligibility, or capturing a new insurance card. Call history is already visible — no arguments.",
       "inputSchema": {
         "type": "object",
-        "properties": {
-          "handoff_summary": {
-            "type": "string",
-            "description": "one or two sentences: carrier if known, office in play, and the coverage question."
-          }
-        },
-        "required": [
-          "handoff_summary"
-        ]
+        "properties": {},
+        "additionalProperties": false
       },
       "outputSchema": {
         "type": "object",
@@ -1377,18 +1587,11 @@
     },
     {
       "name": "transfer_to_cosmetic",
-      "description": "Invisible handoff to Cosmetic Concierge for Botox, fillers, lasers, peels, cosmetic pricing, or cosmetic consult booking.",
+      "description": "Invisible handoff to Cosmetic Concierge for Botox, fillers, lasers, peels, cosmetic pricing, or cosmetic consult booking. Call history is already visible — no arguments.",
       "inputSchema": {
         "type": "object",
-        "properties": {
-          "handoff_summary": {
-            "type": "string",
-            "description": "one or two sentences: the cosmetic service they asked about and any price or consult intent."
-          }
-        },
-        "required": [
-          "handoff_summary"
-        ]
+        "properties": {},
+        "additionalProperties": false
       },
       "outputSchema": {
         "type": "object",
@@ -1413,18 +1616,11 @@
     },
     {
       "name": "transfer_to_billing",
-      "description": "Invisible handoff to Billing & Payments for balances, charge explanations, payment links, financing, or fee waivers. Caller must already be identity-verified.",
+      "description": "Invisible handoff to Billing & Payments for balances, charge explanations, payment links, financing, or fee waivers. Caller must already be identity-verified. Call history is already visible — no arguments.",
       "inputSchema": {
         "type": "object",
-        "properties": {
-          "handoff_summary": {
-            "type": "string",
-            "description": "one or two sentences: patient name, balance or charge in question, and what they want done."
-          }
-        },
-        "required": [
-          "handoff_summary"
-        ]
+        "properties": {},
+        "additionalProperties": false
       },
       "outputSchema": {
         "type": "object",
@@ -1449,18 +1645,11 @@
     },
     {
       "name": "transfer_to_clinical",
-      "description": "Invisible handoff to Clinical Liaison for results status, refills, nurse messages, prior auth, portal, or records. Caller must already be identity-verified.",
+      "description": "Invisible handoff to Clinical Liaison for results status, refills, nurse messages, prior auth, portal, or records. Caller must already be identity-verified. Call history is already visible — no arguments.",
       "inputSchema": {
         "type": "object",
-        "properties": {
-          "handoff_summary": {
-            "type": "string",
-            "description": "one or two sentences: patient name, open orders or flags that matter, and what they want (results, refill, nurse callback)."
-          }
-        },
-        "required": [
-          "handoff_summary"
-        ]
+        "properties": {},
+        "additionalProperties": false
       },
       "outputSchema": {
         "type": "object",
@@ -1485,7 +1674,7 @@
     },
     {
       "name": "transfer_to_human",
-      "description": "Transfer the caller to a human. Use only when (1) the caller asks for a human, or (2) after telling them to call 911 and saying you are transferring them for a clinical emergency. Destinations include patient_support_center, billing_team, location_front_desk, cosmetic_coordinator, clinical_triage, records, or on_call.",
+      "description": "Transfer the caller to a human. Use only when (1) the caller asks for a human, or (2) after telling them to call 911 and saying you are transferring them for a clinical emergency. Required: destination and reason enums. Call history is already visible — do not pass a summary.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -1499,10 +1688,8 @@
               "clinical_triage",
               "records",
               "on_call"
-            ]
-          },
-          "context_summary": {
-            "type": "string"
+            ],
+            "description": "Human destination."
           },
           "reason": {
             "type": "string",
@@ -1511,14 +1698,15 @@
               "clinical_emergency",
               "identity_locked",
               "other"
-            ]
+            ],
+            "description": "Why this is leaving the voice agent."
           }
         },
         "required": [
           "destination",
-          "context_summary",
           "reason"
-        ]
+        ],
+        "additionalProperties": false
       },
       "outputSchema": {
         "type": "object",
@@ -1543,17 +1731,24 @@
     },
     {
       "name": "end_call",
-      "description": "End the call once the caller is done, or immediately if it's spam or a wrong number. Say goodbye first.",
+      "description": "End the call once the caller is done, or immediately if it's spam or a wrong number. Say goodbye first. reason is caller_done | spam | wrong_number. There is no silent-hangup reason — a finished call after goodbye is caller_done.",
       "inputSchema": {
         "type": "object",
         "properties": {
           "reason": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "caller_done",
+              "spam",
+              "wrong_number"
+            ],
+            "description": "Why the call is ending."
           }
         },
         "required": [
           "reason"
-        ]
+        ],
+        "additionalProperties": false
       },
       "outputSchema": {
         "type": "object",

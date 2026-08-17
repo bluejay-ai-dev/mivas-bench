@@ -32,8 +32,8 @@
     {
       "name": "check_plan_accepted",
       "parameters": {
-        "carrier": "Medicaid",
-        "location_id": "Park Avenue"
+        "carrier": "medicaid",
+        "location_id": "loc_park_ave"
       },
       "output": {
         "ok": true,

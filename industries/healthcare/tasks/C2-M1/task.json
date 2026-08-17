@@ -46,7 +46,10 @@
   ],
   "exp_tool_calls": [
     {
-      "name": "transfer_to_identity"
+      "name": "transfer_to_identity",
+      "parameters": {
+        "next_intent": "scheduling"
+      }
     },
     {
       "name": "transfer_to_scheduling"
@@ -73,7 +76,7 @@
         }
       },
       "parameters": {
-        "appointment_id": 1,
+        "appointment_id": "1",
         "new_start": "2026-08-25T11:30:00",
         "new_end": "2026-08-25T12:00:00"
       }
