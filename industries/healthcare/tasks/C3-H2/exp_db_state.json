@@ -184,8 +184,7 @@
       "kind": "callback_task",
       "payload": {
         "callback_number": "+12125550176",
-        "queue": "front_desk",
-        "topic": "C3-H2 follow-up"
+        "queue": "front_desk"
       }
     },
     {

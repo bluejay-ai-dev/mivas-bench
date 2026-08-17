@@ -243,21 +243,14 @@ def infer_transfer_tool(
     blob = (user_text or "").lower()
     if not blob or not advertised:
         return None
-    summary = user_text.strip()[:280]
     if any(w in blob for w in ("cancel", "reschedule")):
         if "transfer_to_identity" in advertised:
             return {
                 "name": "transfer_to_identity",
-                "arguments": {
-                    "handoff_summary": summary,
-                    "next_intent": "scheduling",
-                },
+                "arguments": {"next_intent": "scheduling"},
             }
         if "transfer_to_scheduling" in advertised:
-            return {
-                "name": "transfer_to_scheduling",
-                "arguments": {"handoff_summary": summary},
-            }
+            return {"name": "transfer_to_scheduling", "arguments": {}}
     if any(
         w in blob
         for w in ("bill", "balance", "charge", "payment", "invoice", "owe")
@@ -265,16 +258,10 @@ def infer_transfer_tool(
         if "transfer_to_identity" in advertised:
             return {
                 "name": "transfer_to_identity",
-                "arguments": {
-                    "handoff_summary": summary,
-                    "next_intent": "billing",
-                },
+                "arguments": {"next_intent": "billing"},
             }
         if "transfer_to_billing" in advertised:
-            return {
-                "name": "transfer_to_billing",
-                "arguments": {"handoff_summary": summary},
-            }
+            return {"name": "transfer_to_billing", "arguments": {}}
     scored: list[tuple[int, str]] = []
     for name, needles in _TRANSFER_HINTS:
         if name not in advertised:
@@ -288,5 +275,7 @@ def infer_transfer_tool(
     if len(scored) > 1 and scored[0][0] == scored[1][0]:
         return None
     name = scored[0][1]
-    args: dict[str, Any] = {"handoff_summary": summary}
+    args: dict[str, Any] = {}
+    if name == "transfer_to_identity":
+        args["next_intent"] = "scheduling"
     return {"name": name, "arguments": args}

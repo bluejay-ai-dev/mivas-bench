@@ -35,7 +35,7 @@
     },
     {
       "appointment_type_code": "NP_MED",
-      "description": "mole on back",
+      "description": "new patient visit",
       "end": "2026-08-24T09:30:00",
       "id": 4,
       "location_id": "loc_park_ave",

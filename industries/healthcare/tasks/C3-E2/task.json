@@ -28,8 +28,8 @@
     {
       "name": "check_plan_accepted",
       "parameters": {
-        "carrier": "Medicaid",
-        "location_id": "Brooklyn Heights"
+        "carrier": "medicaid",
+        "location_id": "loc_brooklyn_heights"
       },
       "output": {
         "ok": true,

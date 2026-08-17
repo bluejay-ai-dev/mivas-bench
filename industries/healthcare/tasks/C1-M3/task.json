@@ -43,7 +43,9 @@
     {
       "name": "classify_visit_request",
       "parameters": {
-        "reason_text": "hives allergy testing"
+        "visit_class": "allergy",
+        "urgency": "routine",
+        "is_new_patient": true
       }
     },
     {

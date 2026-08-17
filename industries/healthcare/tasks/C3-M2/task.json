@@ -47,7 +47,10 @@
   ],
   "exp_tool_calls": [
     {
-      "name": "transfer_to_identity"
+      "name": "transfer_to_identity",
+      "parameters": {
+        "next_intent": "coverage"
+      }
     },
     {
       "name": "transfer_to_coverage"
@@ -68,7 +71,7 @@
     {
       "name": "capture_insurance_update",
       "parameters": {
-        "carrier": "Cigna",
+        "carrier": "cigna",
         "member_id": "C445566778"
       },
       "output": {
@@ -131,7 +134,7 @@
         "home_office_id": "loc_park_ave",
         "language": "en",
         "balance_cents": 12500,
-        "carrier": "Cigna",
+        "carrier": "cigna",
         "member_id": "C445566778",
         "plan_name": "Open Access Elect Choice"
       },
@@ -281,7 +284,7 @@
         "kind": "insurance_update",
         "payload": {
           "patient_id": "pat_jordan_lee",
-          "carrier": "Cigna",
+          "carrier": "cigna",
           "member_id": "C445566778"
         }
       }

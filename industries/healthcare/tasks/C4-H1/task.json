@@ -74,7 +74,6 @@
         "location_id": "loc_park_ave",
         "provider_id": "prov_chen",
         "start": "2026-08-24T09:00:00",
-        "end": "2026-08-24T09:30:00",
         "service_interest": [
           "botox"
         ],

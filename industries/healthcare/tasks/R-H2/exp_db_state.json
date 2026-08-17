@@ -35,7 +35,7 @@
     },
     {
       "appointment_type_code": "MED_FOLLOWUP",
-      "description": "isotretinoin program visit",
+      "description": "follow-up visit",
       "end": "2026-08-24T09:30:00",
       "id": 4,
       "location_id": "loc_park_ave",

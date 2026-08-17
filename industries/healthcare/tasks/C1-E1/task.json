@@ -34,8 +34,8 @@
     {
       "name": "check_plan_accepted",
       "parameters": {
-        "carrier": "Aetna",
-        "location_id": "Park Avenue"
+        "carrier": "aetna",
+        "location_id": "loc_park_ave"
       },
       "output": {
         "ok": true,

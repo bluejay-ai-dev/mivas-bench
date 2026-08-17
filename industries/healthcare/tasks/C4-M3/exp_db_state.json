@@ -173,8 +173,7 @@
       "kind": "callback_task",
       "payload": {
         "callback_number": "+17185550188",
-        "queue": "cosmetic",
-        "topic": "C4-M3 follow-up"
+        "queue": "cosmetic"
       }
     }
   ],

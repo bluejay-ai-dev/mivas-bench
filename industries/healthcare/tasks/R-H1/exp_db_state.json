@@ -174,8 +174,7 @@
       "payload": {
         "category": "results_followup",
         "patient_id": "pat_jordan_lee",
-        "priority": "urgent",
-        "summary": "Jordan Lee asking about results"
+        "priority": "urgent"
       }
     },
     {

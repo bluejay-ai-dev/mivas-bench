@@ -35,7 +35,7 @@
     },
     {
       "appointment_type_code": "MED_FOLLOWUP",
-      "description": "C3-H3 booked visit",
+      "description": "follow-up visit",
       "end": "2026-08-24T09:30:00",
       "id": 4,
       "location_id": "loc_park_ave",
@@ -103,7 +103,7 @@
     },
     {
       "balance_cents": 12500,
-      "carrier": "Cigna",
+      "carrier": "cigna",
       "dob": "1990-04-12",
       "first_name": "Jordan",
       "home_office_id": "loc_park_ave",
@@ -183,7 +183,7 @@
       "id": 1,
       "kind": "insurance_update",
       "payload": {
-        "carrier": "Cigna",
+        "carrier": "cigna",
         "member_id": "C445566778",
         "patient_id": "pat_jordan_lee"
       }

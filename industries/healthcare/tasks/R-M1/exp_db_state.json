@@ -174,8 +174,7 @@
       "payload": {
         "category": "results_followup",
         "patient_id": "pat_jordan_lee",
-        "priority": "routine",
-        "summary": "Jordan Lee asking whether biopsy results are back"
+        "priority": "routine"
       }
     },
     {

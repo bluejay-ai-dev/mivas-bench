@@ -42,7 +42,10 @@
   ],
   "exp_tool_calls": [
     {
-      "name": "transfer_to_identity"
+      "name": "transfer_to_identity",
+      "parameters": {
+        "next_intent": "billing"
+      }
     },
     {
       "name": "transfer_to_billing"

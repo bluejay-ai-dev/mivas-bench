@@ -57,9 +57,8 @@
     {
       "name": "check_plan_accepted",
       "parameters": {
-        "carrier": "Aetna",
-        "plan_name": "Open Access Elect Choice",
-        "location_id": "Park Avenue"
+        "carrier": "aetna",
+        "location_id": "loc_park_ave"
       },
       "output": {
         "ok": true,
@@ -71,7 +70,9 @@
     {
       "name": "classify_visit_request",
       "parameters": {
-        "reason_text": "rash on neck"
+        "visit_class": "medical",
+        "urgency": "routine",
+        "is_new_patient": true
       }
     },
     {
@@ -90,8 +91,7 @@
         "provider_id": "prov_chen",
         "start": "2026-08-24T09:00:00",
         "end": "2026-08-24T09:30:00",
-        "appointment_type_code": "NP_MED",
-        "description": "new patient visit"
+        "appointment_type_code": "NP_MED"
       },
       "output": {
         "ok": true,
