@@ -63,6 +63,24 @@ PRACTICE_AREA_ALIASES = {
     "debt collector": "consumer", "scam": "consumer",
 }
 
+# USPS 50 states + DC. Writes store the two-letter code; full names map to it.
+US_STATE_NAMES = {
+    "AL": "Alabama", "AK": "Alaska", "AZ": "Arizona", "AR": "Arkansas",
+    "CA": "California", "CO": "Colorado", "CT": "Connecticut", "DE": "Delaware",
+    "DC": "District of Columbia", "FL": "Florida", "GA": "Georgia", "HI": "Hawaii",
+    "ID": "Idaho", "IL": "Illinois", "IN": "Indiana", "IA": "Iowa",
+    "KS": "Kansas", "KY": "Kentucky", "LA": "Louisiana", "ME": "Maine",
+    "MD": "Maryland", "MA": "Massachusetts", "MI": "Michigan", "MN": "Minnesota",
+    "MS": "Mississippi", "MO": "Missouri", "MT": "Montana", "NE": "Nebraska",
+    "NV": "Nevada", "NH": "New Hampshire", "NJ": "New Jersey", "NM": "New Mexico",
+    "NY": "New York", "NC": "North Carolina", "ND": "North Dakota", "OH": "Ohio",
+    "OK": "Oklahoma", "OR": "Oregon", "PA": "Pennsylvania", "RI": "Rhode Island",
+    "SC": "South Carolina", "SD": "South Dakota", "TN": "Tennessee", "TX": "Texas",
+    "UT": "Utah", "VT": "Vermont", "VA": "Virginia", "WA": "Washington",
+    "WV": "West Virginia", "WI": "Wisconsin", "WY": "Wyoming",
+}
+_STATE_BY_NAME = {name.lower(): code for code, name in US_STATE_NAMES.items()}
+
 
 def init_db() -> None:
     _sessions.clear()
@@ -121,6 +139,44 @@ def normalize_practice_area(value: str) -> str:
             "SELECT 1 FROM practice_areas WHERE code = ?", (canonical,)
         ).fetchone()
     return canonical if known else PRACTICE_AREA_ALIASES.get(v, canonical)
+
+
+def _is_placeholder(value: str) -> bool:
+    return bool(re.fullmatch(r"\{\{[^}]*\}\}", value))
+
+
+def normalize_state(value: str) -> str:
+    raw = str(value or "").strip()
+    if not raw or _is_placeholder(raw):
+        raise HTTPException(
+            status_code=400,
+            detail="State not understood. Ask for a two-letter US state (or the state name).")
+    letters = re.sub(r"[^A-Za-z]", "", raw)
+    if len(letters) == 2:
+        code = letters.upper()
+        if code in US_STATE_NAMES:
+            return code
+    name_key = re.sub(r"\s+", " ", re.sub(r"[^a-z ]", "", raw.lower())).strip()
+    code = _STATE_BY_NAME.get(name_key)
+    if code:
+        return code
+    raise HTTPException(
+        status_code=400,
+        detail="State not understood. Ask for a two-letter US state (or the state name).")
+
+
+def normalize_incident_date(value: str) -> str:
+    raw = str(value or "").strip()
+    if not raw or _is_placeholder(raw):
+        raise HTTPException(status_code=400,
+                            detail="Incident date not understood. Ask for the date as "
+                                   "month, day, year.")
+    try:
+        return datetime.strptime(raw, "%Y-%m-%d").date().isoformat()
+    except ValueError:
+        raise HTTPException(status_code=400,
+                            detail="Incident date not understood. Ask for the date as "
+                                   "month, day, year.")
 
 
 # ------------------------------------------------------------------ payloads
@@ -377,11 +433,13 @@ def find_evaluation_slots(practice_area: str, state: str,
 @app.post("/intakes", status_code=201)
 def record_intake(body: IntakeCreate) -> dict[str, Any]:
     pa = normalize_practice_area(body.practice_area)
+    st = normalize_state(body.state)
+    incident_date = normalize_incident_date(body.incident_date)
     with _db() as conn:
         cur = conn.execute(
             "INSERT INTO intakes (caller_id, practice_area, state, incident_date, summary) "
             "VALUES (?, ?, ?, ?, ?)",
-            (body.caller_id, pa, body.state, body.incident_date, body.summary))
+            (body.caller_id, pa, st, incident_date, body.summary))
     return {"intake_id": cur.lastrowid, "recorded": True,
             "summary_recorded": bool(str(body.summary or "").strip())}
 
@@ -675,6 +733,30 @@ def _selfcheck() -> None:
     assert calculate_filing_deadline("NY", "auto_accident", "2026-06-01")["status"] == "ok"
     assert isinstance(http(calculate_filing_deadline, "CA", "auto_accident", "nope"),
                       HTTPException)
+
+    def _intake(**kw):
+        args = dict(caller_id="c_001", practice_area="premises_liability",
+                    state="CA", incident_date="2026-01-18", summary="")
+        args.update(kw)
+        return record_intake(IntakeCreate(**args))
+
+    written = _intake()
+    assert written["recorded"] is True
+    with _db() as conn:
+        row = conn.execute("SELECT state, incident_date FROM intakes WHERE id = ?",
+                           (written["intake_id"],)).fetchone()
+    assert dict(row) == {"state": "CA", "incident_date": "2026-01-18"}
+    named = _intake(state="California")
+    with _db() as conn:
+        assert conn.execute("SELECT state FROM intakes WHERE id = ?",
+                            (named["intake_id"],)).fetchone()["state"] == "CA"
+    ny = _intake(state="ny")
+    with _db() as conn:
+        assert conn.execute("SELECT state FROM intakes WHERE id = ?",
+                            (ny["intake_id"],)).fetchone()["state"] == "NY"
+    for bad in ({"state": ""}, {"state": "{{state}}"}, {"incident_date": "not-a-date"},
+                {"incident_date": ""}, {"incident_date": "{{incident_date}}"}):
+        assert isinstance(http(_intake, **bad), HTTPException), bad
 
     assert get_caller_matters("c_002")["has_represented_matter"] is True
     assert get_caller_matters("c_004")["has_represented_matter"] is False

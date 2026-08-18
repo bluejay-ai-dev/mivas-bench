@@ -399,10 +399,19 @@ def test_clinical_message_allows_irrelevant_optional_parameters() -> None:
 def test_for_whom_matches_casefold() -> None:
     assert vtr._values_equal("for_whom", "Daniel Okonkwo", "daniel okonkwo") is True
     assert vtr._values_equal("for_whom", "Allison Fontaine", " allison fontaine ") is True
+    assert vtr._values_equal("for_whom", "new cases intake", "New cases intake") is True
+    assert vtr._values_equal("for_whom", "new cases intake", "New case intake") is False
     assert vtr._values_equal("for_whom", "Daniel Okonkwo", "Allison Fontaine") is False
     expected = {"name": "take_message", "parameters": {"for_whom": "Daniel Okonkwo"}}
     actual = {"name": "take_message", "parameters": {"for_whom": "daniel okonkwo"}}
     assert vtr._calls_match(expected, actual, None, "legal") is True
+
+
+def test_take_message_without_for_whom_is_name_only() -> None:
+    expected = {"name": "take_message"}
+    for label in ("New case intake", "New cases team", "new cases intake"):
+        actual = {"name": "take_message", "parameters": {"for_whom": label, "message": "x"}}
+        assert vtr._calls_match(expected, actual, None, "legal") is True
 
 
 def test_opposing_party_matches_substring_and_casefold() -> None:

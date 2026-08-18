@@ -337,11 +337,12 @@
           },
           "state": {
             "type": "string",
-            "description": "Two-letter state code."
+            "description": "Two-letter USPS state code (CA, IL, NY, …). Pass the code, not a placeholder or blank."
           },
           "incident_date": {
             "type": "string",
-            "description": "Date of the incident, YYYY-MM-DD."
+            "format": "date",
+            "description": "Date of the incident as YYYY-MM-DD. No placeholders or blanks."
           },
           "summary": {
             "type": "string",

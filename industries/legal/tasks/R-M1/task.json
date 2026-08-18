@@ -19,9 +19,6 @@
       "parameters": {
         "full_name": "Estelle Kowalczyk"
       }
-    },
-    {
-      "name": "escalate_to_human"
     }
   ],
   "behaviors": {
@@ -48,8 +45,7 @@
     "category": "R",
     "category_slug": "clients-and-refusals",
     "difficulty": "medium",
-    "audio_condition": "perfect",
-    "escalation": true
+    "audio_condition": "perfect"
   },
   "exp_db_state": {
     "callers": [
@@ -90,12 +86,6 @@
     "holds": [],
     "evaluations": [],
     "messages": [],
-    "escalations": [
-      {
-        "id": 1,
-        "caller_id": "c_new",
-        "reason_code": "legal_advice_requested"
-      }
-    ]
+    "escalations": []
   }
 }
