@@ -146,7 +146,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers to transfer you to a human, a person, the front desk, or a live agent. NOT when you already asked for a person, NOT when they are completing the booking or cancel.",
+      "match_phrase": "offers to transfer you to a human, a person, the front desk, or a live agent. NOT when you already asked for a person, NOT when they are completing the booking or cancel, NOT when offering a callback or saying the front desk will call or follow up.",
       "response_type": "phrase",
       "response_value": "No, I don't need a person. Please finish what I asked on this call."
     },
