@@ -388,7 +388,7 @@ def test_clinical_message_allows_irrelevant_optional_parameters() -> None:
     wrong_category = [{
         "name": "create_clinical_message",
         "parameters": {
-            "category": "medication_question",
+            "category": "nurse_question",
             "priority": "routine",
         },
     }]

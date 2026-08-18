@@ -106,7 +106,13 @@
       "match_type": "context",
       "match_phrase": "asks for your full name and date of birth, or asks you to confirm who you are, or asks for the patient's name and date of birth. NOT when asking only for a member ID or insurance card, NOT when asking which office or location, NOT when asking for a phone or mobile number, NOT when asking about an appointment day or time, NOT when reading your name and date of birth back to you for confirmation.",
       "response_type": "phrase",
-      "response_value": "Alice Romano. My date of birth is September eighth, nineteen ninety-five, and my ZIP code is 34786."
+      "response_value": "Alice Romano. My date of birth is September eighth, nineteen ninety-five."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks for a ZIP code or postal code as a second identity check after confirming your name and date of birth. NOT when asking for an office ZIP, NOT when reading the ZIP back for confirmation.",
+      "response_type": "phrase",
+      "response_value": "My ZIP code is 34786."
     },
     {
       "match_type": "context",

@@ -411,8 +411,8 @@ def test_healthcare_leftover_holes_are_closed() -> None:
         and "any line" in (p.get("match_phrase") or "")
         for p in c5h3["scripted_responses"]
     )
-    assert "34786" in pin_blob(c5h3)
-    assert "407-555-0155" in pin_blob(c5h3)
+    assert "34786" in pin_blob(c5h3), "C5-H3"
+    assert "407-555-0155" in pin_blob(c5h3), "C5-H3"
 
     c2h3 = load("C2-H3")
     assert "join_waitlist" not in [c["name"] for c in c2h3["exp_tool_calls"]]
@@ -422,12 +422,13 @@ def test_healthcare_leftover_holes_are_closed() -> None:
     captured = next(c for c in load("C3-M2")["exp_tool_calls"] if c["name"] == "capture_insurance_update")
     assert "group_number" not in (captured.get("parameters") or {})
 
-    assert "w123456789" in pin_blob(load("C3-M1"))
-    assert "11201" in pin_blob(load("C5-M3"))
-    assert "transfer is not the appointment" in pin_blob(load("C1-H1"))
-    assert "No thanks, I don't need a text." not in [
-        pin.get("response_value") for pin in load("C4-E1").get("scripted_responses") or []
-    ]
+    assert "w123456789" in pin_blob(load("C3-M1")), "C3-M1"
+    assert "11201" in pin_blob(load("C5-M3")), "C5-M3"
+    assert "transfer is not the appointment" in pin_blob(load("C1-H1")), "C1-H1"
+    for key in ("C4-E1", "C4-E1-BG", "C4-E1-SIG"):
+        assert "No thanks, I don't need a text." not in [
+            pin.get("response_value") for pin in load(key).get("scripted_responses") or []
+        ], key
 
     c4h2 = load("C4-H2")
     assert "verify_identity" not in [c["name"] for c in c4h2["exp_tool_calls"]]
@@ -439,22 +440,22 @@ def test_healthcare_leftover_holes_are_closed() -> None:
 
     rh2 = load("R-H2")
     rh2_blob = rh2["intent"].lower() + " " + pin_blob(rh2)
-    assert "parameters" not in next(c for c in rh2["exp_tool_calls"] if c["name"] == "request_rx_refill")
-    assert "do not reschedule the august twentieth acne check" in rh2_blob
-    assert "weekday morning" in rh2_blob
-    assert "reschedule_appointment" not in [c["name"] for c in rh2["exp_tool_calls"]]
+    assert "parameters" not in next(c for c in rh2["exp_tool_calls"] if c["name"] == "request_rx_refill"), "R-H2"
+    assert "do not reschedule the august twentieth acne check" in rh2_blob, "R-H2"
+    assert "weekday morning" in rh2_blob, "R-H2"
+    assert "reschedule_appointment" not in [c["name"] for c in rh2["exp_tool_calls"]], "R-H2"
 
     rh3_names = [c["name"] for c in load("R-H3")["exp_tool_calls"]]
     assert rh3_names.index("request_rx_refill") < rh3_names.index("create_clinical_message")
 
     c4m1 = load("C4-M1")
-    assert "microneedling" in pin_blob(c4m1)
-    assert not any("before a time has been confirmed" in (p.get("match_phrase") or "") for p in c4m1["scripted_responses"])
+    assert "microneedling" in pin_blob(c4m1), "C4-M1"
+    assert not any("before a time has been confirmed" in (p.get("match_phrase") or "") for p in c4m1["scripted_responses"]), "C4-M1"
 
-    assert "212-555-0133" in pin_blob(load("C5-H1"))
+    assert "212-555-0133" in pin_blob(load("C5-H1")), "C5-H1"
     c5h2 = load("C5-H2")
-    assert "move" not in c5h2["scripted_responses"][0]["response_value"].lower()
-    assert "no payment or dispute" in pin_blob(c5h2)
+    assert "move" not in c5h2["scripted_responses"][0]["response_value"].lower(), "C5-H2"
+    assert "no payment or dispute" in pin_blob(c5h2), "C5-H2"
 
     for path in tasks.glob("*/task.json"):
         phrases = [p["match_phrase"] for p in json.loads(path.read_text()).get("scripted_responses") or []]

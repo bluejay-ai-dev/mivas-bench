@@ -89,6 +89,31 @@ def test_repeated_tool_calls_keep_request_output_pairs() -> None:
         ('{"line_item_id":"li_visit"}', '{"line_item_id":"li_visit"}'),
     ]
 
+    exporter2 = InMemorySpanExporter()
+    provider2 = TracerProvider()
+    provider2.add_span_processor(SimpleSpanProcessor(exporter2))
+    tracer2 = provider2.get_tracer("tool-pair-reorder")
+    root2 = tracer2.start_span("realtime_session")
+    tracer2_events = report.RealtimeEventTracer(tracer2, root2)
+    tracer2_events.handle(SimpleNamespace(type="tool_start", tool=tool, arguments='{"id":"a"}'))
+    tracer2_events.handle(SimpleNamespace(type="tool_start", tool=tool, arguments='{"id":"b"}'))
+    tracer2_events.handle(SimpleNamespace(type="tool_end", tool=tool, arguments='{"id":"b"}', output='{"ok":"b"}'))
+    tracer2_events.handle(SimpleNamespace(type="tool_end", tool=tool, arguments='{"id":"a"}', output='{"ok":"a"}'))
+    tracer2_events.close()
+    root2.end()
+    reordered = [
+        (
+            span.attributes["gen_ai.tool.call.arguments"],
+            span.attributes["gen_ai.tool.call.result"],
+        )
+        for span in exporter2.get_finished_spans()
+        if span.name == "execute_tool explain_charge"
+    ]
+    assert sorted(reordered) == [
+        ('{"id":"a"}', '{"ok":"a"}'),
+        ('{"id":"b"}', '{"ok":"b"}'),
+    ]
+
 
 def main() -> None:
     exporter = InMemorySpanExporter()

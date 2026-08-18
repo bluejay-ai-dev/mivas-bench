@@ -377,6 +377,9 @@ def test_allergy_service_window_and_idempotent() -> None:
         assert first["ok"] and repeated["ok"]
         assert repeated["data"]["appointment"]["id"] == first["data"]["appointment"]["id"]
         assert repeated["data"]["idempotent"] is True
+        tight = {**args, "window_end": "2026-08-24T01:00:00"}
+        again = client.post("/tools/schedule_allergy_service", json={"arguments": tight}).json()
+        assert again["ok"] and again["data"]["idempotent"] is True
         matching = [
             row for row in client.get("/state").json()["appointments"]
             if row["patient_id"] == "pat_leo_park"
