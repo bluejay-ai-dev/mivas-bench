@@ -1,0 +1,138 @@
+{
+  "task_name": "C3-M3: Auto accident in Arizona",
+  "customer_name": "Rita Chen",
+  "intent": "Open with exactly: \"Another driver hit me in Phoenix last month.\" Opposing driver: \"Landry Vance.\" State: Arizona. When told a person will take it from here, say exactly: \"Okay, thank you.\" and end the call.",
+  "traits": [
+    {
+      "trait_name": "full_name",
+      "value": "Rita Chen"
+    },
+    {
+      "trait_name": "practice_area",
+      "value": "auto_accident"
+    },
+    {
+      "trait_name": "state",
+      "value": "AZ"
+    },
+    {
+      "trait_name": "phone",
+      "value": "480-555-0120"
+    }
+  ],
+  "exp_handoff_path": [
+    "transfer_to_screening"
+  ],
+  "exp_tool_calls": [
+    {
+      "name": "transfer_to_screening"
+    },
+    {
+      "name": "check_practice_area",
+      "parameters": {
+        "practice_area": "auto_accident"
+      }
+    },
+    {
+      "name": "check_jurisdiction",
+      "parameters": {
+        "state": "AZ",
+        "practice_area": "auto_accident"
+      }
+    },
+    {
+      "name": "escalate_to_human",
+      "parameters": {
+        "reason_code": "jurisdiction"
+      }
+    }
+  ],
+  "behaviors": {
+    "creativity": 0
+  },
+  "scripted_responses": [
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
+      "response_type": "phrase",
+      "response_value": "Rita Chen, 480-555-0120.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "No, nobody represents me.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "It's Landry Vance.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks which state this happened in, or where it took place. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "In Arizona.",
+      "occurrence_mode": "always"
+    }
+  ],
+  "customer_available_tools": {},
+  "metadata": {
+    "category": "C3",
+    "category_slug": "eligibility-gates",
+    "difficulty": "medium",
+    "audio_condition": "perfect",
+    "escalation": true
+  },
+  "exp_db_state": {
+    "callers": [
+      {
+        "id": "c_001",
+        "name": "Dana Whitfield",
+        "phone": "5105550142"
+      },
+      {
+        "id": "c_002",
+        "name": "Marcus Oyelaran",
+        "phone": "4155550188"
+      },
+      {
+        "id": "c_003",
+        "name": "Priya Raghunathan",
+        "phone": "2065550119"
+      },
+      {
+        "id": "c_004",
+        "name": "Thomas Eckhart",
+        "phone": "3125550277"
+      },
+      {
+        "id": "c_005",
+        "name": "Ruth Kealoha",
+        "phone": "8085550233"
+      },
+      {
+        "id": "c_new",
+        "name": "Rita Chen",
+        "phone": "4805550120"
+      }
+    ],
+    "intakes": [],
+    "intake_notes": [],
+    "documents": [],
+    "holds": [],
+    "evaluations": [],
+    "messages": [],
+    "escalations": [
+      {
+        "id": 1,
+        "caller_id": "c_new",
+        "reason_code": "jurisdiction"
+      }
+    ]
+  }
+}

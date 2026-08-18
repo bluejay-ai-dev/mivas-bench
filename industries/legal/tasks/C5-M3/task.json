@@ -1,0 +1,172 @@
+{
+  "task_name": "C5-M3: Hourly consumer consultation",
+  "customer_name": "Estelle Kowalczyk",
+  "intent": "Open with exactly: \"I need a lawyer about a defective product.\" Accept first slot and confirm after fee read-back. Once booked, thank and end.",
+  "traits": [
+    {
+      "trait_name": "full_name",
+      "value": "Estelle Kowalczyk"
+    },
+    {
+      "trait_name": "practice_area",
+      "value": "consumer"
+    },
+    {
+      "trait_name": "state",
+      "value": "CA"
+    },
+    {
+      "trait_name": "opposing_party",
+      "value": "Halloway Toolworks"
+    },
+    {
+      "trait_name": "phone",
+      "value": "916-555-0128"
+    }
+  ],
+  "exp_handoff_path": [
+    "transfer_to_screening",
+    "transfer_to_intake",
+    "transfer_to_scheduling"
+  ],
+  "exp_tool_calls": [
+    {
+      "name": "get_attorney",
+      "parameters": {
+        "attorney_id": "a_10"
+      }
+    },
+    {
+      "name": "hold_evaluation",
+      "parameters": {
+        "practice_area": "consumer"
+      }
+    },
+    {
+      "name": "confirm_evaluation",
+      "parameters": {
+        "confirmation_token": "HR-EVAL-3092"
+      }
+    }
+  ],
+  "behaviors": {
+    "creativity": 0
+  },
+  "scripted_responses": [
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
+      "response_type": "phrase",
+      "response_value": "Estelle Kowalczyk, 916-555-0128.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "No, nobody represents me.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "It's Halloway Toolworks.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks which state this happened in, or where it took place. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "In California.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent has read back the appointment day, time, attorney and fee and is asking whether to go ahead and book it. NOT when first offering times.",
+      "response_type": "phrase",
+      "response_value": "Yes, that's right, go ahead and book it.",
+      "occurrence_mode": "always"
+    }
+  ],
+  "customer_available_tools": {},
+  "metadata": {
+    "category": "C5",
+    "category_slug": "fees-and-booking",
+    "difficulty": "medium",
+    "audio_condition": "perfect",
+    "booking": true
+  },
+  "exp_db_state": {
+    "callers": [
+      {
+        "id": "c_001",
+        "name": "Dana Whitfield",
+        "phone": "5105550142"
+      },
+      {
+        "id": "c_002",
+        "name": "Marcus Oyelaran",
+        "phone": "4155550188"
+      },
+      {
+        "id": "c_003",
+        "name": "Priya Raghunathan",
+        "phone": "2065550119"
+      },
+      {
+        "id": "c_004",
+        "name": "Thomas Eckhart",
+        "phone": "3125550277"
+      },
+      {
+        "id": "c_005",
+        "name": "Ruth Kealoha",
+        "phone": "8085550233"
+      },
+      {
+        "id": "c_new",
+        "name": "Estelle Kowalczyk",
+        "phone": "9165550128"
+      }
+    ],
+    "intakes": [
+      {
+        "id": 1,
+        "caller_id": "c_new",
+        "practice_area": "consumer",
+        "state": "CA",
+        "incident_date": "",
+        "summary": "Defective product."
+      }
+    ],
+    "intake_notes": [],
+    "documents": [],
+    "holds": [
+      {
+        "token": "HR-EVAL-3092",
+        "kind": "evaluation",
+        "caller_id": "c_new",
+        "slot_id": "s_100",
+        "evaluation_id": null,
+        "practice_area": "consumer",
+        "reason": null,
+        "summary": "Priya Raghunathan on 2026-08-12 at 10:00. The consultation fee is $175.",
+        "consumed": 1
+      }
+    ],
+    "evaluations": [
+      {
+        "id": "ev_001",
+        "caller_id": "c_new",
+        "slot_id": "s_100",
+        "attorney_id": "a_10",
+        "starts_at": "2026-08-12T10:00",
+        "fee_type": "hourly",
+        "status": "booked"
+      }
+    ],
+    "messages": [],
+    "escalations": []
+  }
+}

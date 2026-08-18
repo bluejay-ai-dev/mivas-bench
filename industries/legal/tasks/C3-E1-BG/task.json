@@ -1,0 +1,108 @@
+{
+  "task_name": "C3-E1-BG: Bankruptcy matter declined",
+  "customer_name": "Silas Dunmore",
+  "intent": "Open with exactly: \"I need help with a bankruptcy matter.\" If asked who this would be against on a personal-debt matter, say exactly: \"Nobody really, it's just my own situation.\" Accept if told the firm does not handle this. When told a person will take it from here, say exactly: \"Okay, thank you.\" and end the call.",
+  "traits": [
+    {
+      "trait_name": "full_name",
+      "value": "Silas Dunmore"
+    },
+    {
+      "trait_name": "practice_area",
+      "value": "bankruptcy"
+    },
+    {
+      "trait_name": "phone",
+      "value": "215-555-0287"
+    }
+  ],
+  "exp_handoff_path": [],
+  "exp_tool_calls": [
+    {
+      "name": "check_practice_area",
+      "parameters": {
+        "practice_area": "bankruptcy"
+      }
+    },
+    {
+      "name": "escalate_to_human",
+      "parameters": {
+        "reason_code": "practice_area"
+      }
+    }
+  ],
+  "behaviors": {
+    "creativity": 0
+  },
+  "scripted_responses": [
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
+      "response_type": "phrase",
+      "response_value": "Silas Dunmore, 215-555-0287.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "No, nobody represents me.",
+      "occurrence_mode": "always"
+    }
+  ],
+  "customer_available_tools": {},
+  "metadata": {
+    "category": "C3",
+    "category_slug": "eligibility-gates",
+    "difficulty": "easy",
+    "audio_condition": "background_noise",
+    "escalation": true
+  },
+  "exp_db_state": {
+    "callers": [
+      {
+        "id": "c_001",
+        "name": "Dana Whitfield",
+        "phone": "5105550142"
+      },
+      {
+        "id": "c_002",
+        "name": "Marcus Oyelaran",
+        "phone": "4155550188"
+      },
+      {
+        "id": "c_003",
+        "name": "Priya Raghunathan",
+        "phone": "2065550119"
+      },
+      {
+        "id": "c_004",
+        "name": "Thomas Eckhart",
+        "phone": "3125550277"
+      },
+      {
+        "id": "c_005",
+        "name": "Ruth Kealoha",
+        "phone": "8085550233"
+      },
+      {
+        "id": "c_new",
+        "name": "Silas Dunmore",
+        "phone": "2155550287"
+      }
+    ],
+    "intakes": [],
+    "intake_notes": [],
+    "documents": [],
+    "holds": [],
+    "evaluations": [],
+    "messages": [],
+    "escalations": [
+      {
+        "id": 1,
+        "caller_id": "c_new",
+        "reason_code": "practice_area"
+      }
+    ]
+  }
+}
