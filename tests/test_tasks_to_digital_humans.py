@@ -484,6 +484,50 @@ def test_healthcare_leftover_holes_are_closed() -> None:
         params = allergy.get("parameters") or {}
         assert "window_start" not in params
         assert "window_end" not in params
+
+    c2h2 = load("C2-H2")
+    c2h2_blob = c2h2["intent"].lower() + " " + pin_blob(c2h2)
+    assert "first available" in c2h2_blob
+    assert "not yes" in c2h2_blob
+    assert "no callback" in c2h2_blob
+    assert "allergy shot scheduled" in c2h2_blob
+    assert [c["name"] for c in c2h2["exp_tool_calls"]].count("schedule_allergy_service") == 1
+
+    c3m3 = load("C3-M3")
+    c3m3_blob = c3m3["intent"].lower() + " " + pin_blob(c3m3)
+    assert "no callback" in c3m3_blob
+    assert "searched openings" in c3m3_blob
+    assert "windermere" in c3m3_blob
+    assert [c["name"] for c in c3m3["exp_tool_calls"]] == [
+        "transfer_to_coverage",
+        "transfer_to_scheduling",
+        "find_slots",
+        "book_appointment",
+    ]
+
+    c2h3_blob = c2h3["intent"].lower() + " " + pin_blob(c2h3)
+    assert "do not transfer me to a person" in c2h3_blob
+    assert "i accept the missed-visit fee" in c2h3_blob
+    assert "talk to a person" in c2h3_blob
+    assert "friday is cancelled" in c2h3_blob
+    assert [c["name"] for c in c2h3["exp_tool_calls"]].count("cancel_appointment") == 2
+    assert "transfer_to_human" not in [c["name"] for c in c2h3["exp_tool_calls"]]
+
+    c4h1 = load("C4-H1")
+    c4h1_blob = c4h1["intent"].lower() + " " + pin_blob(c4h1)
+    assert "cosmetic team" in c4h1_blob
+    assert "quote botox" in c4h1_blob
+    assert "don't want a person" in c4h1_blob or "do not want a person" in c4h1_blob
+    names = [c["name"] for c in c4h1["exp_tool_calls"]]
+    assert names == [
+        "transfer_to_cosmetic",
+        "quote_cosmetic_service",
+        "list_locations",
+        "find_slots",
+        "book_cosmetic_consult",
+        "send_payment_link",
+    ]
+    assert "transfer_to_human" not in names
     rh2_dh = by_key["R-H2"]
     book = next(c for c in rh2_dh["expected_tool_calls"] if c["name"] == "book_appointment")
     assert book["parameters"]["slot_id"] == "slot_loc_park_ave_1"
