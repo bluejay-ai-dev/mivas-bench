@@ -1,0 +1,167 @@
+{
+  "task_name": "C5-E1-BG: Books first offered evaluation slot",
+  "customer_name": "Delphine Mercer",
+  "intent": "Open with exactly: \"A truck sideswiped me on the freeway.\" Take the first appointment time offered. When read back, say exactly: \"Yes, that's right, go ahead and book it.\" Once told the appointment is booked, say exactly: \"Thank you, that's all I needed.\" and end the call.",
+  "traits": [
+    {
+      "trait_name": "full_name",
+      "value": "Delphine Mercer"
+    },
+    {
+      "trait_name": "practice_area",
+      "value": "auto_accident"
+    },
+    {
+      "trait_name": "state",
+      "value": "CA"
+    },
+    {
+      "trait_name": "opposing_party",
+      "value": "Northstar Logistics"
+    },
+    {
+      "trait_name": "phone",
+      "value": "323-555-0144"
+    }
+  ],
+  "exp_handoff_path": [
+    "transfer_to_screening",
+    "transfer_to_intake",
+    "transfer_to_scheduling"
+  ],
+  "exp_tool_calls": [
+    {
+      "name": "confirm_evaluation",
+      "parameters": {
+        "confirmation_token": "HR-EVAL-3092"
+      }
+    }
+  ],
+  "behaviors": {
+    "creativity": 0
+  },
+  "scripted_responses": [
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
+      "response_type": "phrase",
+      "response_value": "Delphine Mercer, 323-555-0144.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "No, nobody represents me.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "It's Northstar Logistics.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks which state this happened in, or where it took place. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "In California.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent has read back the appointment day, time, attorney and fee and is asking whether to go ahead and book it. NOT when first offering times.",
+      "response_type": "phrase",
+      "response_value": "Yes, that's right, go ahead and book it.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers an appointment time or asks which time you want",
+      "response_type": "phrase",
+      "response_value": "I'll take the first time you offered.",
+      "occurrence_mode": "always"
+    }
+  ],
+  "customer_available_tools": {},
+  "metadata": {
+    "category": "C5",
+    "category_slug": "fees-and-booking",
+    "difficulty": "easy",
+    "audio_condition": "background_noise",
+    "booking": true
+  },
+  "exp_db_state": {
+    "callers": [
+      {
+        "id": "c_001",
+        "name": "Dana Whitfield",
+        "phone": "5105550142"
+      },
+      {
+        "id": "c_002",
+        "name": "Marcus Oyelaran",
+        "phone": "4155550188"
+      },
+      {
+        "id": "c_003",
+        "name": "Priya Raghunathan",
+        "phone": "2065550119"
+      },
+      {
+        "id": "c_004",
+        "name": "Thomas Eckhart",
+        "phone": "3125550277"
+      },
+      {
+        "id": "c_005",
+        "name": "Ruth Kealoha",
+        "phone": "8085550233"
+      },
+      {
+        "id": "c_new",
+        "name": "Delphine Mercer",
+        "phone": "3235550144"
+      }
+    ],
+    "intakes": [
+      {
+        "id": 1,
+        "caller_id": "c_new",
+        "practice_area": "auto_accident",
+        "state": "CA",
+        "incident_date": "",
+        "summary": "Truck sideswipe on the freeway."
+      }
+    ],
+    "intake_notes": [],
+    "documents": [],
+    "holds": [
+      {
+        "token": "HR-EVAL-3092",
+        "kind": "evaluation",
+        "caller_id": "c_new",
+        "slot_id": "s_110",
+        "evaluation_id": null,
+        "practice_area": "auto_accident",
+        "reason": null,
+        "summary": "Tom Eckhart on 2026-08-11 at 09:00. The evaluation is free. If the firm takes the case there is no fee unless it wins: 33.33% of any recovery before a lawsuit is filed, 40% if a lawsuit is filed.",
+        "consumed": 1
+      }
+    ],
+    "evaluations": [
+      {
+        "id": "ev_001",
+        "caller_id": "c_new",
+        "slot_id": "s_110",
+        "attorney_id": "a_11",
+        "starts_at": "2026-08-11T09:00",
+        "fee_type": "contingency",
+        "status": "booked"
+      }
+    ],
+    "messages": [],
+    "escalations": []
+  }
+}

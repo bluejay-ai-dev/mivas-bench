@@ -1,0 +1,167 @@
+{
+  "task_name": "C2-H2: Conflict unclear, hospital and surgeon",
+  "customer_name": "Gloria Mensah",
+  "intent": "Open with exactly: \"I think the hospital and the surgeon both messed up my surgery.\" When asked who this would be against, say exactly: \"St. Benedict Medical Center and the surgeon involved.\" State: Illinois. Date: November second, twenty twenty five. When told a person will review, say exactly: \"Okay, thank you.\" and end.",
+  "traits": [
+    {
+      "trait_name": "full_name",
+      "value": "Gloria Mensah"
+    },
+    {
+      "trait_name": "opposing_party",
+      "value": "St. Benedict Medical Center"
+    },
+    {
+      "trait_name": "state",
+      "value": "IL"
+    },
+    {
+      "trait_name": "incident_date",
+      "value": "2025-11-02"
+    },
+    {
+      "trait_name": "phone",
+      "value": "312-555-0266"
+    }
+  ],
+  "exp_handoff_path": [
+    "transfer_to_screening",
+    "transfer_to_intake"
+  ],
+  "exp_tool_calls": [
+    {
+      "name": "get_caller_matters"
+    },
+    {
+      "name": "transfer_to_screening"
+    },
+    {
+      "name": "check_conflict",
+      "parameters": {
+        "opposing_party": "St. Benedict Medical Center and the surgeon involved"
+      }
+    },
+    {
+      "name": "transfer_to_intake"
+    },
+    {
+      "name": "record_intake",
+      "parameters": {
+        "practice_area": "medical_malpractice",
+        "state": "IL",
+        "incident_date": "2025-11-02",
+        "summary": ""
+      }
+    },
+    {
+      "name": "escalate_to_human",
+      "parameters": {
+        "reason_code": "conflict_review"
+      }
+    }
+  ],
+  "behaviors": {
+    "creativity": 0
+  },
+  "scripted_responses": [
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
+      "response_type": "phrase",
+      "response_value": "Gloria Mensah, 312-555-0266.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "No, nobody represents me.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "It's St. Benedict Medical Center and the surgeon involved.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks which state this happened in, or where it took place. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "In Illinois.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks when the incident happened, or for the date of the accident, injury or event. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "It was November second, twenty twenty five.",
+      "occurrence_mode": "always"
+    }
+  ],
+  "customer_available_tools": {},
+  "metadata": {
+    "category": "C2",
+    "category_slug": "conflicts-and-barred",
+    "difficulty": "hard",
+    "audio_condition": "perfect",
+    "escalation": true
+  },
+  "exp_db_state": {
+    "callers": [
+      {
+        "id": "c_001",
+        "name": "Dana Whitfield",
+        "phone": "5105550142"
+      },
+      {
+        "id": "c_002",
+        "name": "Marcus Oyelaran",
+        "phone": "4155550188"
+      },
+      {
+        "id": "c_003",
+        "name": "Priya Raghunathan",
+        "phone": "2065550119"
+      },
+      {
+        "id": "c_004",
+        "name": "Thomas Eckhart",
+        "phone": "3125550277"
+      },
+      {
+        "id": "c_005",
+        "name": "Ruth Kealoha",
+        "phone": "8085550233"
+      },
+      {
+        "id": "c_new",
+        "name": "Gloria Mensah",
+        "phone": "3125550266"
+      }
+    ],
+    "intakes": [
+      {
+        "id": 1,
+        "caller_id": "c_new",
+        "practice_area": "medical_malpractice",
+        "state": "IL",
+        "incident_date": "2025-11-02",
+        "summary": "Intake summary."
+      }
+    ],
+    "intake_notes": [],
+    "documents": [],
+    "holds": [],
+    "evaluations": [],
+    "messages": [],
+    "escalations": [
+      {
+        "id": 1,
+        "caller_id": "c_new",
+        "reason_code": "conflict_review"
+      }
+    ]
+  }
+}

@@ -1,0 +1,169 @@
+{
+  "task_name": "C5-M2: Workers comp booking in Florida",
+  "customer_name": "Martin Iwu",
+  "intent": "Open with exactly: \"I was hurt on a job site in Florida.\" Take first slot and confirm. Once booked, thank and end.",
+  "traits": [
+    {
+      "trait_name": "full_name",
+      "value": "Martin Iwu"
+    },
+    {
+      "trait_name": "practice_area",
+      "value": "workers_comp"
+    },
+    {
+      "trait_name": "state",
+      "value": "FL"
+    },
+    {
+      "trait_name": "opposing_party",
+      "value": "Gulf Coast Rigging"
+    },
+    {
+      "trait_name": "phone",
+      "value": "727-555-0311"
+    }
+  ],
+  "exp_handoff_path": [
+    "transfer_to_screening",
+    "transfer_to_intake",
+    "transfer_to_scheduling"
+  ],
+  "exp_tool_calls": [
+    {
+      "name": "transfer_to_scheduling"
+    },
+    {
+      "name": "hold_evaluation",
+      "parameters": {
+        "practice_area": "workers_comp"
+      }
+    },
+    {
+      "name": "confirm_evaluation",
+      "parameters": {
+        "confirmation_token": "HR-EVAL-3092"
+      }
+    }
+  ],
+  "behaviors": {
+    "creativity": 0
+  },
+  "scripted_responses": [
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
+      "response_type": "phrase",
+      "response_value": "Martin Iwu, 727-555-0311.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "No, nobody represents me.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "It's Gulf Coast Rigging.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks which state this happened in, or where it took place. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "In Florida.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent has read back the appointment day, time, attorney and fee and is asking whether to go ahead and book it. NOT when first offering times.",
+      "response_type": "phrase",
+      "response_value": "Yes, that's right, go ahead and book it.",
+      "occurrence_mode": "always"
+    }
+  ],
+  "customer_available_tools": {},
+  "metadata": {
+    "category": "C5",
+    "category_slug": "fees-and-booking",
+    "difficulty": "medium",
+    "audio_condition": "perfect",
+    "booking": true
+  },
+  "exp_db_state": {
+    "callers": [
+      {
+        "id": "c_001",
+        "name": "Dana Whitfield",
+        "phone": "5105550142"
+      },
+      {
+        "id": "c_002",
+        "name": "Marcus Oyelaran",
+        "phone": "4155550188"
+      },
+      {
+        "id": "c_003",
+        "name": "Priya Raghunathan",
+        "phone": "2065550119"
+      },
+      {
+        "id": "c_004",
+        "name": "Thomas Eckhart",
+        "phone": "3125550277"
+      },
+      {
+        "id": "c_005",
+        "name": "Ruth Kealoha",
+        "phone": "8085550233"
+      },
+      {
+        "id": "c_new",
+        "name": "Martin Iwu",
+        "phone": "7275550311"
+      }
+    ],
+    "intakes": [
+      {
+        "id": 1,
+        "caller_id": "c_new",
+        "practice_area": "workers_comp",
+        "state": "FL",
+        "incident_date": "",
+        "summary": "Job site injury."
+      }
+    ],
+    "intake_notes": [],
+    "documents": [],
+    "holds": [
+      {
+        "token": "HR-EVAL-3092",
+        "kind": "evaluation",
+        "caller_id": "c_new",
+        "slot_id": "s_130",
+        "evaluation_id": null,
+        "practice_area": "workers_comp",
+        "reason": null,
+        "summary": "Daniel Okonkwo on 2026-08-11 at 08:30. The evaluation is free. If the firm takes the case there is no fee unless it wins: 20% of any recovery before a lawsuit is filed, 20% if a lawsuit is filed.",
+        "consumed": 1
+      }
+    ],
+    "evaluations": [
+      {
+        "id": "ev_001",
+        "caller_id": "c_new",
+        "slot_id": "s_130",
+        "attorney_id": "a_13",
+        "starts_at": "2026-08-11T08:30",
+        "fee_type": "contingency",
+        "status": "booked"
+      }
+    ],
+    "messages": [],
+    "escalations": []
+  }
+}

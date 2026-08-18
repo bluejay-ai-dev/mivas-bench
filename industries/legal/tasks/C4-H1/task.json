@@ -1,0 +1,193 @@
+{
+  "task_name": "C4-H1: Product injury intake with packet and note",
+  "customer_name": "Franklin Deshpande",
+  "intent": "Open with exactly: \"A ladder I bought collapsed under me.\" Manufacturer Halloway Toolworks. Georgia. April twenty second, twenty twenty six. Mention witness Ruth Callahan once. Accept email packet. Decline booking. Once finished, say exactly: \"Thank you, that's all I needed.\" and end the call.",
+  "traits": [
+    {
+      "trait_name": "full_name",
+      "value": "Franklin Deshpande"
+    },
+    {
+      "trait_name": "practice_area",
+      "value": "product_liability"
+    },
+    {
+      "trait_name": "state",
+      "value": "GA"
+    },
+    {
+      "trait_name": "incident_date",
+      "value": "2026-04-22"
+    },
+    {
+      "trait_name": "opposing_party",
+      "value": "Halloway Toolworks"
+    },
+    {
+      "trait_name": "phone",
+      "value": "706-555-0173"
+    }
+  ],
+  "exp_handoff_path": [
+    "transfer_to_screening",
+    "transfer_to_intake"
+  ],
+  "exp_tool_calls": [
+    {
+      "name": "transfer_to_screening"
+    },
+    {
+      "name": "check_conflict",
+      "parameters": {
+        "opposing_party": "Halloway Toolworks"
+      }
+    },
+    {
+      "name": "check_practice_area",
+      "parameters": {
+        "practice_area": "product_liability"
+      }
+    },
+    {
+      "name": "transfer_to_intake"
+    },
+    {
+      "name": "record_intake",
+      "parameters": {
+        "practice_area": "product_liability",
+        "state": "GA",
+        "incident_date": "2026-04-22",
+        "summary": "Ladder collapse injury."
+      }
+    },
+    {
+      "name": "send_intake_packet",
+      "parameters": {
+        "channel": "email"
+      }
+    },
+    {
+      "name": "add_intake_note",
+      "parameters": {
+        "note": "Witness Ruth Callahan; ladder preserved."
+      }
+    }
+  ],
+  "behaviors": {
+    "creativity": 0
+  },
+  "scripted_responses": [
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
+      "response_type": "phrase",
+      "response_value": "Franklin Deshpande, 706-555-0173.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "No, nobody represents me.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "It's Halloway Toolworks.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks which state this happened in, or where it took place. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "In Georgia.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks when the incident happened, or for the date of the accident, injury or event. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "It was April twenty second, twenty twenty six.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers the new client packet by email or text",
+      "response_type": "phrase",
+      "response_value": "Email is fine.",
+      "occurrence_mode": "always"
+    }
+  ],
+  "customer_available_tools": {},
+  "metadata": {
+    "category": "C4",
+    "category_slug": "intake-and-documents",
+    "difficulty": "hard",
+    "audio_condition": "perfect"
+  },
+  "exp_db_state": {
+    "callers": [
+      {
+        "id": "c_001",
+        "name": "Dana Whitfield",
+        "phone": "5105550142"
+      },
+      {
+        "id": "c_002",
+        "name": "Marcus Oyelaran",
+        "phone": "4155550188"
+      },
+      {
+        "id": "c_003",
+        "name": "Priya Raghunathan",
+        "phone": "2065550119"
+      },
+      {
+        "id": "c_004",
+        "name": "Thomas Eckhart",
+        "phone": "3125550277"
+      },
+      {
+        "id": "c_005",
+        "name": "Ruth Kealoha",
+        "phone": "8085550233"
+      },
+      {
+        "id": "c_new",
+        "name": "Franklin Deshpande",
+        "phone": "7065550173"
+      }
+    ],
+    "intakes": [
+      {
+        "id": 1,
+        "caller_id": "c_new",
+        "practice_area": "product_liability",
+        "state": "GA",
+        "incident_date": "2026-04-22",
+        "summary": "Ladder collapse injury."
+      }
+    ],
+    "intake_notes": [
+      {
+        "id": 1,
+        "caller_id": "c_new",
+        "note": "Witness Ruth Callahan; ladder preserved."
+      }
+    ],
+    "documents": [
+      {
+        "id": 1,
+        "caller_id": "c_new",
+        "kind": "intake_packet",
+        "target": "email"
+      }
+    ],
+    "holds": [],
+    "evaluations": [],
+    "messages": [],
+    "escalations": []
+  }
+}

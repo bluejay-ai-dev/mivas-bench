@@ -1,0 +1,167 @@
+{
+  "task_name": "C2-H1: Conflict unclear, Harlow Properties",
+  "customer_name": "Bernice Tolliver",
+  "intent": "Open with exactly: \"I slipped on ice outside my apartment and broke my wrist.\" When asked who this would be against, say exactly: \"It's Harlow Properties.\" When asked when, say exactly: \"It was January eighteenth, twenty twenty six.\" If asked to describe details, say exactly: \"I'd rather go through that with the lawyer.\" When told a person will review the conflict, say exactly: \"Okay, thank you.\" and end the call.",
+  "traits": [
+    {
+      "trait_name": "full_name",
+      "value": "Bernice Tolliver"
+    },
+    {
+      "trait_name": "opposing_party",
+      "value": "Harlow Properties"
+    },
+    {
+      "trait_name": "state",
+      "value": "CA"
+    },
+    {
+      "trait_name": "incident_date",
+      "value": "2026-01-18"
+    },
+    {
+      "trait_name": "phone",
+      "value": "559-555-0208"
+    }
+  ],
+  "exp_handoff_path": [
+    "transfer_to_screening",
+    "transfer_to_intake"
+  ],
+  "exp_tool_calls": [
+    {
+      "name": "get_caller_matters"
+    },
+    {
+      "name": "transfer_to_screening"
+    },
+    {
+      "name": "check_conflict",
+      "parameters": {
+        "opposing_party": "Harlow Properties"
+      }
+    },
+    {
+      "name": "transfer_to_intake"
+    },
+    {
+      "name": "record_intake",
+      "parameters": {
+        "practice_area": "premises_liability",
+        "state": "CA",
+        "incident_date": "2026-01-18",
+        "summary": ""
+      }
+    },
+    {
+      "name": "escalate_to_human",
+      "parameters": {
+        "reason_code": "conflict_review"
+      }
+    }
+  ],
+  "behaviors": {
+    "creativity": 0
+  },
+  "scripted_responses": [
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
+      "response_type": "phrase",
+      "response_value": "Bernice Tolliver, 559-555-0208.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "No, nobody represents me.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "It's Harlow Properties.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks which state this happened in, or where it took place. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "In CA.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks when the incident happened, or for the date of the accident, injury or event. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "It was January eighteenth, twenty twenty six.",
+      "occurrence_mode": "always"
+    }
+  ],
+  "customer_available_tools": {},
+  "metadata": {
+    "category": "C2",
+    "category_slug": "conflicts-and-barred",
+    "difficulty": "hard",
+    "audio_condition": "perfect",
+    "escalation": true
+  },
+  "exp_db_state": {
+    "callers": [
+      {
+        "id": "c_001",
+        "name": "Dana Whitfield",
+        "phone": "5105550142"
+      },
+      {
+        "id": "c_002",
+        "name": "Marcus Oyelaran",
+        "phone": "4155550188"
+      },
+      {
+        "id": "c_003",
+        "name": "Priya Raghunathan",
+        "phone": "2065550119"
+      },
+      {
+        "id": "c_004",
+        "name": "Thomas Eckhart",
+        "phone": "3125550277"
+      },
+      {
+        "id": "c_005",
+        "name": "Ruth Kealoha",
+        "phone": "8085550233"
+      },
+      {
+        "id": "c_new",
+        "name": "Bernice Tolliver",
+        "phone": "5595550208"
+      }
+    ],
+    "intakes": [
+      {
+        "id": 1,
+        "caller_id": "c_new",
+        "practice_area": "premises_liability",
+        "state": "CA",
+        "incident_date": "2026-01-18",
+        "summary": "Intake summary."
+      }
+    ],
+    "intake_notes": [],
+    "documents": [],
+    "holds": [],
+    "evaluations": [],
+    "messages": [],
+    "escalations": [
+      {
+        "id": 1,
+        "caller_id": "c_new",
+        "reason_code": "conflict_review"
+      }
+    ]
+  }
+}

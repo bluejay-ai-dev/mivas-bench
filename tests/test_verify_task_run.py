@@ -73,12 +73,12 @@ def test_office_waitlist_allows_extra_rows_when_expected_is_nonempty() -> None:
     }
     expected = {"patients": [], "appointments": [], "waitlist": [expected_row]}
     actual = {"patients": [], "appointments": [], "waitlist": [expected_row, extra_row]}
-    assert vtr.office_states_match(expected, actual) is True
+    assert vtr.office_states_match(expected, actual, industry="healthcare") is True
     missing = {"patients": [], "appointments": [], "waitlist": [extra_row]}
-    assert vtr.office_states_match(expected, missing) is False
+    assert vtr.office_states_match(expected, missing, industry="healthcare") is False
     empty_expected = {"patients": [], "appointments": [], "waitlist": []}
-    assert vtr.office_states_match(empty_expected, actual) is False
-    assert vtr.office_states_match(empty_expected, {"patients": [], "appointments": [], "waitlist": []}) is True
+    assert vtr.office_states_match(empty_expected, actual, industry="healthcare") is False
+    assert vtr.office_states_match(empty_expected, {"patients": [], "appointments": [], "waitlist": []}, industry="healthcare") is True
 
 
 def test_verify_result_ignores_tool_events_in_state() -> None:
@@ -395,4 +395,148 @@ def test_clinical_message_allows_irrelevant_optional_parameters() -> None:
     result = vtr.tool_call_adherence(expected, wrong_category, schemas=schemas)
     assert result["passed"] is False
     assert result["missing"] == ["create_clinical_message"]
+
+
+def test_for_whom_matches_casefold() -> None:
+    assert vtr._values_equal("for_whom", "Daniel Okonkwo", "daniel okonkwo") is True
+    assert vtr._values_equal("for_whom", "Allison Fontaine", " allison fontaine ") is True
+    assert vtr._values_equal("for_whom", "Daniel Okonkwo", "Allison Fontaine") is False
+    expected = {"name": "take_message", "parameters": {"for_whom": "Daniel Okonkwo"}}
+    actual = {"name": "take_message", "parameters": {"for_whom": "daniel okonkwo"}}
+    assert vtr._calls_match(expected, actual, None, "legal") is True
+
+
+def test_opposing_party_matches_substring_and_casefold() -> None:
+    assert vtr._values_equal(
+        "opposing_party",
+        "St. Benedict Medical Center",
+        "St. Benedict Medical Center and the surgeon involved",
+    ) is True
+    assert vtr._values_equal(
+        "opposing_party",
+        "Harborline Industries",
+        "Harbor Line Industries",
+    ) is True
+    assert vtr._values_equal("opposing_party", "Vertex Logistics", "vertex logistics") is True
+    assert vtr._values_equal("opposing_party", "Vertex Logistics", "Northgate Insurance") is False
+    expected = {
+        "name": "check_conflict",
+        "parameters": {"opposing_party": "St. Benedict Medical Center"},
+    }
+    actual = {
+        "name": "check_conflict",
+        "parameters": {
+            "opposing_party": "St. Benedict Medical Center and the surgeon involved",
+        },
+    }
+    assert vtr._calls_match(expected, actual, None, "legal") is True
+
+
+def test_legal_full_name_is_presence_only() -> None:
+    expected = {
+        "name": "lookup_caller",
+        "parameters": {"full_name": "Curtis Beaumont", "phone": "555-555-0012"},
+    }
+    actual = {
+        "name": "lookup_caller",
+        "parameters": {"full_name": "Curtis Bowman", "phone": "5555550012"},
+    }
+    assert vtr._calls_match(expected, actual, None, "legal") is True
+    healthcare = {
+        "name": "lookup_patient",
+        "parameters": {"full_name": "Curtis Beaumont"},
+    }
+    healthcare_asr = {
+        "name": "lookup_patient",
+        "parameters": {"full_name": "Curtis Bowman"},
+    }
+    assert vtr._calls_match(healthcare, healthcare_asr, None, "healthcare") is False
+
+
+def test_legal_office_states_ignore_message_prose() -> None:
+    expected = {
+        "messages": [{
+            "id": 1,
+            "caller_id": "c_new",
+            "for_whom": "Daniel Okonkwo",
+            "message": "Callback requested.",
+        }],
+    }
+    actual = {
+        "messages": [{
+            "id": 1,
+            "caller_id": "c_new",
+            "for_whom": "Daniel Okonkwo",
+            "message": "The forms arrived; question on page four.",
+        }],
+    }
+    assert vtr.office_states_match(expected, actual, industry="legal") is True
+
+
+def test_legal_empty_expected_messages_allows_extra_rows() -> None:
+    expected = {"messages": []}
+    actual = {
+        "messages": [{
+            "id": 1,
+            "caller_id": "c_004",
+            "for_whom": "intake",
+            "message": "Please call back.",
+        }],
+    }
+    assert vtr.office_states_match(expected, actual, industry="legal") is True
+
+
+def test_legal_empty_expected_intakes_rejects_extra_rows() -> None:
+    expected = {"intakes": []}
+    actual = {
+        "intakes": [{
+            "id": 1,
+            "caller_id": "c_new",
+            "practice_area": "auto",
+            "state": "TX",
+            "incident_date": "2026-01-18",
+        }],
+    }
+    assert vtr.office_states_match(expected, actual, industry="legal") is False
+
+
+def test_legal_booking_rows_ignore_slot_identity() -> None:
+    expected = {
+        "evaluations": [{
+            "id": "ev_001",
+            "caller_id": "c_new",
+            "slot_id": "s_110",
+            "attorney_id": "a_11",
+            "starts_at": "2026-08-11T09:00",
+            "status": "booked",
+        }],
+        "holds": [{
+            "token": "HR-EVAL-3092",
+            "kind": "evaluation",
+            "caller_id": "c_new",
+            "slot_id": "s_110",
+            "practice_area": "auto_accident",
+            "consumed": 1,
+        }],
+    }
+    actual = {
+        "evaluations": [{
+            "id": "ev_001",
+            "caller_id": "c_new",
+            "slot_id": "s_111",
+            "attorney_id": "a_10",
+            "starts_at": "2026-08-25T14:00",
+            "status": "booked",
+        }],
+        "holds": [{
+            "token": "HR-EVAL-3092",
+            "kind": "evaluation",
+            "caller_id": "c_new",
+            "slot_id": "s_111",
+            "practice_area": "auto_accident",
+            "consumed": 1,
+        }],
+    }
+    assert vtr.office_states_match(expected, actual, industry="legal") is True
+
 

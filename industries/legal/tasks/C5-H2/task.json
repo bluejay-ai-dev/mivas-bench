@@ -1,0 +1,227 @@
+{
+  "task_name": "C5-H2: Book then cancel and rebook",
+  "customer_name": "Delphine Mercer",
+  "intent": "Open with exactly: \"Book me for the first opening, then I need to change it.\" After first booking, ask to cancel and take the next opening instead. Once the second appointment is booked, thank and end.",
+  "traits": [
+    {
+      "trait_name": "full_name",
+      "value": "Delphine Mercer"
+    },
+    {
+      "trait_name": "practice_area",
+      "value": "auto_accident"
+    },
+    {
+      "trait_name": "state",
+      "value": "CA"
+    },
+    {
+      "trait_name": "opposing_party",
+      "value": "Northstar Logistics"
+    },
+    {
+      "trait_name": "phone",
+      "value": "323-555-0144"
+    }
+  ],
+  "exp_handoff_path": [
+    "transfer_to_screening",
+    "transfer_to_intake",
+    "transfer_to_scheduling"
+  ],
+  "exp_tool_calls": [
+    {
+      "name": "transfer_to_scheduling"
+    },
+    {
+      "name": "find_evaluation_slots",
+      "parameters": {
+        "practice_area": "auto_accident",
+        "state": "CA"
+      }
+    },
+    {
+      "name": "hold_evaluation",
+      "parameters": {
+        "practice_area": "auto_accident"
+      }
+    },
+    {
+      "name": "confirm_evaluation",
+      "parameters": {
+        "confirmation_token": "HR-EVAL-3092"
+      }
+    },
+    {
+      "name": "hold_cancellation",
+      "parameters": {
+        "reason": "caller_request"
+      }
+    },
+    {
+      "name": "confirm_cancellation",
+      "parameters": {
+        "confirmation_token": "HR-CANC-7715"
+      }
+    },
+    {
+      "name": "find_evaluation_slots",
+      "parameters": {
+        "practice_area": "auto_accident",
+        "state": "CA"
+      }
+    },
+    {
+      "name": "hold_evaluation",
+      "parameters": {
+        "practice_area": "auto_accident"
+      }
+    },
+    {
+      "name": "confirm_evaluation",
+      "parameters": {
+        "confirmation_token": "HR-EVAL-3092"
+      }
+    }
+  ],
+  "behaviors": {
+    "creativity": 0
+  },
+  "scripted_responses": [
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
+      "response_type": "phrase",
+      "response_value": "Delphine Mercer, 323-555-0144.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "No, nobody represents me.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "It's Northstar Logistics.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks which state this happened in, or where it took place. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "In California.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent has read back the appointment day, time, attorney and fee and is asking whether to go ahead and book it. NOT when first offering times.",
+      "response_type": "phrase",
+      "response_value": "Yes, that's right, go ahead and book it.",
+      "occurrence_mode": "always"
+    }
+  ],
+  "customer_available_tools": {},
+  "metadata": {
+    "category": "C5",
+    "category_slug": "fees-and-booking",
+    "difficulty": "hard",
+    "audio_condition": "perfect",
+    "booking": true
+  },
+  "exp_db_state": {
+    "callers": [
+      {
+        "id": "c_001",
+        "name": "Dana Whitfield",
+        "phone": "5105550142"
+      },
+      {
+        "id": "c_002",
+        "name": "Marcus Oyelaran",
+        "phone": "4155550188"
+      },
+      {
+        "id": "c_003",
+        "name": "Priya Raghunathan",
+        "phone": "2065550119"
+      },
+      {
+        "id": "c_004",
+        "name": "Thomas Eckhart",
+        "phone": "3125550277"
+      },
+      {
+        "id": "c_005",
+        "name": "Ruth Kealoha",
+        "phone": "8085550233"
+      },
+      {
+        "id": "c_new",
+        "name": "Delphine Mercer",
+        "phone": "3235550144"
+      }
+    ],
+    "intakes": [
+      {
+        "id": 1,
+        "caller_id": "c_new",
+        "practice_area": "auto_accident",
+        "state": "CA",
+        "incident_date": "",
+        "summary": "Interstate wreck."
+      }
+    ],
+    "intake_notes": [],
+    "documents": [],
+    "holds": [
+      {
+        "token": "HR-CANC-7715",
+        "kind": "cancellation",
+        "caller_id": "c_new",
+        "slot_id": null,
+        "evaluation_id": "ev_001",
+        "practice_area": null,
+        "reason": "caller_request",
+        "summary": "Cancelling this case evaluation. There is no cancellation fee.",
+        "consumed": 1
+      },
+      {
+        "token": "HR-EVAL-3092",
+        "kind": "evaluation",
+        "caller_id": "c_new",
+        "slot_id": "s_111",
+        "evaluation_id": null,
+        "practice_area": "auto_accident",
+        "reason": null,
+        "summary": "Tom Eckhart on 2026-08-12 at 15:30. The evaluation is free. If the firm takes the case there is no fee unless it wins: 33.33% of any recovery before a lawsuit is filed, 40% if a lawsuit is filed.",
+        "consumed": 1
+      }
+    ],
+    "evaluations": [
+      {
+        "id": "ev_001",
+        "caller_id": "c_new",
+        "slot_id": "s_110",
+        "attorney_id": "a_11",
+        "starts_at": "2026-08-11T09:00",
+        "fee_type": "contingency",
+        "status": "cancelled"
+      },
+      {
+        "id": "ev_002",
+        "caller_id": "c_new",
+        "slot_id": "s_111",
+        "attorney_id": "a_11",
+        "starts_at": "2026-08-12T15:30",
+        "fee_type": "contingency",
+        "status": "booked"
+      }
+    ],
+    "messages": [],
+    "escalations": []
+  }
+}

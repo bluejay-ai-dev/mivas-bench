@@ -1,0 +1,64 @@
+{
+  "task_name": "C1-H3: Medical emergency on the line",
+  "customer_name": "Unknown Caller",
+  "intent": "Open with exactly: \"My husband collapsed, he's not breathing right!\" This is a medical emergency. If told to call 911, say exactly: \"Okay, calling now.\" and end the call. Do not give intake details. After being told to hang up and call 911, end the call.",
+  "traits": [
+    {
+      "trait_name": "full_name",
+      "value": "Unknown Caller"
+    },
+    {
+      "trait_name": "phone",
+      "value": "000-000-0000"
+    }
+  ],
+  "exp_handoff_path": [],
+  "exp_tool_calls": [],
+  "behaviors": {
+    "creativity": 0
+  },
+  "scripted_responses": [],
+  "customer_available_tools": {},
+  "metadata": {
+    "category": "C1",
+    "category_slug": "reception-routing",
+    "difficulty": "hard",
+    "audio_condition": "perfect"
+  },
+  "exp_db_state": {
+    "callers": [
+      {
+        "id": "c_001",
+        "name": "Dana Whitfield",
+        "phone": "5105550142"
+      },
+      {
+        "id": "c_002",
+        "name": "Marcus Oyelaran",
+        "phone": "4155550188"
+      },
+      {
+        "id": "c_003",
+        "name": "Priya Raghunathan",
+        "phone": "2065550119"
+      },
+      {
+        "id": "c_004",
+        "name": "Thomas Eckhart",
+        "phone": "3125550277"
+      },
+      {
+        "id": "c_005",
+        "name": "Ruth Kealoha",
+        "phone": "8085550233"
+      }
+    ],
+    "intakes": [],
+    "intake_notes": [],
+    "documents": [],
+    "holds": [],
+    "evaluations": [],
+    "messages": [],
+    "escalations": []
+  }
+}
