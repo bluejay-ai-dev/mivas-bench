@@ -81,6 +81,41 @@ def test_office_waitlist_allows_extra_rows_when_expected_is_nonempty() -> None:
     assert vtr.office_states_match(empty_expected, {"patients": [], "appointments": [], "waitlist": []}, industry="healthcare") is True
 
 
+def test_office_datetimes_match_at_minute_precision() -> None:
+    expected_row = {
+        "patient_id": "pat_jordan_lee",
+        "location_id": "loc_park_ave",
+        "earliest": "2026-08-24T00:00:00",
+        "latest": "2026-09-30T23:59:59",
+    }
+    actual_row = {
+        **expected_row,
+        "latest": "2026-09-30T23:59:00",
+    }
+    expected = {"patients": [], "appointments": [], "waitlist": [expected_row]}
+    actual = {"patients": [], "appointments": [], "waitlist": [actual_row]}
+    assert vtr.office_canonical(expected)["waitlist"][0]["latest"] == "2026-09-30T23:59"
+    assert vtr.office_canonical(actual)["waitlist"][0]["latest"] == "2026-09-30T23:59"
+    assert vtr.office_states_match(expected, actual, industry="healthcare") is True
+    minute_off = {
+        "patients": [],
+        "appointments": [],
+        "waitlist": [{**actual_row, "latest": "2026-09-30T23:58:00"}],
+    }
+    assert vtr.office_states_match(expected, minute_off, industry="healthcare") is False
+    expected_apt = {
+        "patients": [],
+        "appointments": [{"id": 1, "start": "2026-08-24T09:00:00"}],
+        "waitlist": [],
+    }
+    actual_apt = {
+        "patients": [],
+        "appointments": [{"id": 1, "start": "2026-08-24T09:00:59.500000"}],
+        "waitlist": [],
+    }
+    assert vtr.office_states_match(expected_apt, actual_apt) is True
+
+
 def test_verify_result_ignores_tool_events_in_state() -> None:
     task = {
         "exp_db_state": {
