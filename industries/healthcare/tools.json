@@ -560,7 +560,7 @@
     },
     {
       "name": "schedule_allergy_service",
-      "description": "They need an allergy service — testing, shots, drops pickup, food challenge, asthma eval, or immunotherapy — not a generic medical visit. Say the prep, the observation time after a shot, and the linked return visits out loud.",
+      "description": "Book a dedicated allergy service after an explicit yes. window_start/window_end are search bounds; the tool picks the first available slot in office hours. Call once after acceptance; repeats return the existing booking. Say prep, observation time, and linked return visits out loud.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -589,12 +589,12 @@
           "window_start": {
             "type": "string",
             "format": "date-time",
-            "description": "ISO-8601 local datetime, e.g. 2026-08-24T09:00:00."
+            "description": "Inclusive search bound, not the booked start. The tool picks an available slot at or after this time."
           },
           "window_end": {
             "type": "string",
             "format": "date-time",
-            "description": "ISO-8601 local datetime, e.g. 2026-08-24T09:00:00."
+            "description": "Inclusive search bound. The selected slot, including duration, must end by this time."
           }
         },
         "required": [
@@ -1143,7 +1143,7 @@
     },
     {
       "name": "request_rx_refill",
-      "description": "They want a medication refill. This never approves a refill — follow the route it returns; on a no-recent-visit hard stop, offer to book the visit on this call. Identity-gated.",
+      "description": "Call immediately after identity verification for any named-medication refill or refill-related prior authorization, before policy talk, extra details, a clinical message, callback, or handoff. medication_name is the only input. Records and routes; never approves. Follow the returned route.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -1153,16 +1153,6 @@
             "maxLength": 80,
             "pattern": "^[A-Za-z][A-Za-z0-9 ./()&\\-]{0,79}$",
             "description": "Medication name as stated."
-          },
-          "pharmacy_phone": {
-            "type": "string",
-            "pattern": "^\\+[1-9][0-9]{7,14}$",
-            "description": "E.164, e.g. +12125550100."
-          },
-          "last_fill_date": {
-            "type": "string",
-            "format": "date",
-            "description": "YYYY-MM-DD."
           }
         },
         "required": [
@@ -1235,7 +1225,7 @@
     },
     {
       "name": "create_clinical_message",
-      "description": "A nurse, results, or refill question needs the clinical team — including when they push for result content you cannot read. Say the callback_window it returns out loud. Identity-gated.",
+      "description": "A nurse, results, or refill question needs the clinical team — including when they push for result content you cannot read. For any named-medication refill or refill-related prior authorization, call request_rx_refill first; this message never replaces the refill request. Say the callback_window it returns out loud. Identity-gated.",
       "inputSchema": {
         "type": "object",
         "properties": {

@@ -92,9 +92,9 @@
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "offers an appointment time, a slot, or asks which day or time you want AFTER already saying the street address, the floor, and the suite. NOT when they have not yet given all three, NOT when asking for your name or date of birth.",
+      "match_phrase": "offers one or more concrete appointment dates or times after saying the Park Avenue street address, floor, and suite, asks which day or time you want after giving that full address, or asks you to choose among concrete consult slots after giving that full address. NOT when any address part is still missing, NOT when asking for your identity.",
       "response_type": "phrase",
-      "response_value": "I'll take the first time you offered."
+      "response_value": "Book the first time you offered."
     },
     {
       "match_type": "context",
@@ -134,9 +134,9 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before a time has been confirmed on the calendar. NOT when they have just confirmed a booked time.",
+      "match_phrase": "reads the cosmetic deposit and cancellation policy, asks whether you agree to it, or says they need a clear yes before booking. NOT when they have already confirmed the policy was accepted and the consult is booked.",
       "response_type": "phrase",
-      "response_value": "I still need that time booked. Please confirm it is on the calendar before I go."
+      "response_value": "Yes. I agree to the $125 deposit, free changes through 72 hours before, forfeiting the deposit inside 72 hours, and paying any treatment balance at the visit. Please book the first time."
     }
   ],
   "customer_name": "Franklin Osei",

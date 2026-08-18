@@ -93,7 +93,7 @@
       "match_type": "context",
       "match_phrase": "asks for your full name and date of birth, or asks you to confirm who you are, or asks for the patient's name and date of birth. NOT when asking only for a member ID or insurance card, NOT when asking which office or location, NOT when asking for a phone or mobile number, NOT when asking about an appointment day or time, NOT when reading your name and date of birth back to you for confirmation.",
       "response_type": "phrase",
-      "response_value": "Jordan Lee. My date of birth is April twelfth, nineteen ninety."
+      "response_value": "Jordan Lee. My date of birth is April twelfth, nineteen ninety. Please keep going with the move."
     },
     {
       "match_type": "context",
@@ -109,9 +109,9 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers an appointment time, a slot, or asks which day or time you want. NOT when asking for your name or date of birth, NOT when they have not yet given the street, floor, and suite if you still need those.",
+      "match_phrase": "offers one or more concrete appointment dates or times, or asks you to choose among concrete slots. NOT when asking for your name, date of birth, mobile number, or ZIP code.",
       "response_type": "phrase",
-      "response_value": "I'll take the first time you offered."
+      "response_value": "Move my visit to the first time you offered and confirm it is on the calendar."
     },
     {
       "match_type": "context",
@@ -136,12 +136,6 @@
       "match_phrase": "thanks you, says goodbye, or asks if you need anything else after listing openings but before confirming the visit was moved. NOT when they have just confirmed the appointment was rescheduled or moved.",
       "response_type": "phrase",
       "response_value": "Please move me into that first time and confirm it is on the calendar before I go."
-    },
-    {
-      "match_type": "context",
-      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before a time has been confirmed on the calendar. NOT when they have just confirmed a booked time.",
-      "response_type": "phrase",
-      "response_value": "I still need that time booked. Please confirm it is on the calendar before I go."
     }
   ],
   "customer_name": "Jordan Lee",

@@ -68,8 +68,7 @@
       "name": "schedule_allergy_service",
       "parameters": {
         "service": "allergy_shot",
-        "location_id": "loc_brooklyn_heights",
-        "window_start": "2026-08-24T09:00:00"
+        "location_id": "loc_brooklyn_heights"
       }
     }
   ],
