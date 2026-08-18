@@ -1,0 +1,196 @@
+{
+  "task_name": "C3-H3: Tight deadline but books intake",
+  "customer_name": "Nadine Carlisle",
+  "intent": "Open with exactly: \"A car pulled out of a driveway and hit my passenger side.\" Accept packet by email if offered. Decline booking for now. Once finished, say exactly: \"Thank you, that's all I needed.\" and end the call.",
+  "traits": [
+    {
+      "trait_name": "full_name",
+      "value": "Nadine Carlisle"
+    },
+    {
+      "trait_name": "practice_area",
+      "value": "auto_accident"
+    },
+    {
+      "trait_name": "state",
+      "value": "CA"
+    },
+    {
+      "trait_name": "incident_date",
+      "value": "2026-03-15"
+    },
+    {
+      "trait_name": "opposing_party",
+      "value": "Wesley Trombley"
+    },
+    {
+      "trait_name": "phone",
+      "value": "805-555-0167"
+    }
+  ],
+  "exp_handoff_path": [
+    "transfer_to_screening",
+    "transfer_to_intake"
+  ],
+  "exp_tool_calls": [
+    {
+      "name": "transfer_to_screening"
+    },
+    {
+      "name": "check_conflict",
+      "parameters": {
+        "opposing_party": "Wesley Trombley"
+      }
+    },
+    {
+      "name": "check_practice_area",
+      "parameters": {
+        "practice_area": "auto_accident"
+      }
+    },
+    {
+      "name": "check_jurisdiction",
+      "parameters": {
+        "state": "CA",
+        "practice_area": "auto_accident"
+      }
+    },
+    {
+      "name": "calculate_filing_deadline",
+      "parameters": {
+        "state": "CA",
+        "practice_area": "auto_accident",
+        "incident_date": "2026-03-15"
+      }
+    },
+    {
+      "name": "transfer_to_intake"
+    },
+    {
+      "name": "record_intake",
+      "parameters": {
+        "practice_area": "auto_accident",
+        "state": "CA",
+        "incident_date": "2026-03-15",
+        "summary": "Driveway pull-out collision."
+      }
+    },
+    {
+      "name": "send_intake_packet",
+      "parameters": {
+        "channel": "email"
+      }
+    }
+  ],
+  "behaviors": {
+    "creativity": 0
+  },
+  "scripted_responses": [
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
+      "response_type": "phrase",
+      "response_value": "Nadine Carlisle, 805-555-0167.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "No, nobody represents me.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "It's Wesley Trombley.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks which state this happened in, or where it took place. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "In California.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks when the incident happened, or for the date of the accident, injury or event. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "It was March fifteenth, twenty twenty six.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers the new client packet by email or text",
+      "response_type": "phrase",
+      "response_value": "Email is better, thanks.",
+      "occurrence_mode": "always"
+    }
+  ],
+  "customer_available_tools": {},
+  "metadata": {
+    "category": "C3",
+    "category_slug": "eligibility-gates",
+    "difficulty": "hard",
+    "audio_condition": "perfect"
+  },
+  "exp_db_state": {
+    "callers": [
+      {
+        "id": "c_001",
+        "name": "Dana Whitfield",
+        "phone": "5105550142"
+      },
+      {
+        "id": "c_002",
+        "name": "Marcus Oyelaran",
+        "phone": "4155550188"
+      },
+      {
+        "id": "c_003",
+        "name": "Priya Raghunathan",
+        "phone": "2065550119"
+      },
+      {
+        "id": "c_004",
+        "name": "Thomas Eckhart",
+        "phone": "3125550277"
+      },
+      {
+        "id": "c_005",
+        "name": "Ruth Kealoha",
+        "phone": "8085550233"
+      },
+      {
+        "id": "c_new",
+        "name": "Nadine Carlisle",
+        "phone": "8055550167"
+      }
+    ],
+    "intakes": [
+      {
+        "id": 1,
+        "caller_id": "c_new",
+        "practice_area": "auto_accident",
+        "state": "CA",
+        "incident_date": "2026-03-15",
+        "summary": "Driveway pull-out collision."
+      }
+    ],
+    "intake_notes": [],
+    "documents": [
+      {
+        "id": 1,
+        "caller_id": "c_new",
+        "kind": "intake_packet",
+        "target": "email"
+      }
+    ],
+    "holds": [],
+    "evaluations": [],
+    "messages": [],
+    "escalations": []
+  }
+}

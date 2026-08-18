@@ -1,0 +1,98 @@
+{
+  "task_name": "C1-E1-BG: Message for Daniel Okonkwo",
+  "customer_name": "Renee Whitmore",
+  "intent": "Open with exactly: \"I need to leave a message for Daniel Okonkwo.\" You are calling about forms Daniel mailed you. You do not want a new matter or an appointment. When asked what the message is, say exactly: \"Tell him the forms he mailed arrived and I have a question about page four.\" If asked about a new matter, say exactly: \"No, just the message please.\" Once finished, say exactly: \"Thank you, that's all I needed.\" and end the call.",
+  "traits": [
+    {
+      "trait_name": "full_name",
+      "value": "Renee Whitmore"
+    },
+    {
+      "trait_name": "phone",
+      "value": "214-555-0163"
+    }
+  ],
+  "exp_handoff_path": [],
+  "exp_tool_calls": [
+    {
+      "name": "take_message",
+      "parameters": {
+        "for_whom": "Daniel Okonkwo"
+      }
+    }
+  ],
+  "behaviors": {
+    "creativity": 0
+  },
+  "scripted_responses": [
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
+      "response_type": "phrase",
+      "response_value": "Renee Whitmore, 214-555-0163.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "No, nobody represents me.",
+      "occurrence_mode": "always"
+    }
+  ],
+  "customer_available_tools": {},
+  "metadata": {
+    "category": "C1",
+    "category_slug": "reception-routing",
+    "difficulty": "easy",
+    "audio_condition": "background_noise"
+  },
+  "exp_db_state": {
+    "callers": [
+      {
+        "id": "c_001",
+        "name": "Dana Whitfield",
+        "phone": "5105550142"
+      },
+      {
+        "id": "c_002",
+        "name": "Marcus Oyelaran",
+        "phone": "4155550188"
+      },
+      {
+        "id": "c_003",
+        "name": "Priya Raghunathan",
+        "phone": "2065550119"
+      },
+      {
+        "id": "c_004",
+        "name": "Thomas Eckhart",
+        "phone": "3125550277"
+      },
+      {
+        "id": "c_005",
+        "name": "Ruth Kealoha",
+        "phone": "8085550233"
+      },
+      {
+        "id": "c_new",
+        "name": "Renee Whitmore",
+        "phone": "2145550163"
+      }
+    ],
+    "intakes": [],
+    "intake_notes": [],
+    "documents": [],
+    "holds": [],
+    "evaluations": [],
+    "messages": [
+      {
+        "id": 1,
+        "caller_id": "c_new",
+        "for_whom": "Daniel Okonkwo",
+        "message": "Callback requested."
+      }
+    ],
+    "escalations": []
+  }
+}

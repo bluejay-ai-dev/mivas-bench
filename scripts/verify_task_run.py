@@ -47,9 +47,23 @@ HANDOFF_TOOLS = frozenset({
     "transfer_to_human",
 })
 
+INDUSTRY_HANDOFF_TOOLS: dict[str, frozenset[str]] = {
+    "healthcare": HANDOFF_TOOLS,
+    "legal": frozenset({
+        "transfer_to_screening", "transfer_to_intake",
+        "transfer_to_scheduling", "transfer_to_client_services",
+    }),
+}
+
 OFFICE_TABLES = ("patients", "appointments", "waitlist")
-IGNORE_ROW_KEYS = frozenset({"created_at", "description"})
-PHONE_KEY_RE = re.compile(r"phone|_e164$", re.I)
+
+INDUSTRY_OFFICE_TABLES: dict[str, tuple[str, ...]] = {
+    "healthcare": OFFICE_TABLES,
+    "legal": (
+        "intakes", "intake_notes", "documents", "holds",
+        "evaluations", "messages", "escalations",
+    ),
+}
 
 PROSE_ARG_KEYS = frozenset({
     "notes", "patient_safe_message",
@@ -63,8 +77,54 @@ FACT_ARG_KEYS = frozenset({
     "appointment_type_code", "cancellation_reason_code", "fee_line_item_id",
     "line_item_id", "next_intent", "subscriber_relationship",
 })
+
+INDUSTRY_PROSE_ARG_KEYS: dict[str, frozenset[str]] = {
+    "healthcare": PROSE_ARG_KEYS,
+    "legal": frozenset({"summary", "note", "message", "handoff_summary", "full_name"}),
+}
+
+INDUSTRY_FACT_ARG_KEYS: dict[str, frozenset[str]] = {
+    "healthcare": FACT_ARG_KEYS,
+    "legal": frozenset({
+        "opposing_party", "practice_area", "state", "incident_date",
+        "reason_code", "slot_id", "confirmation_token", "matter_id",
+        "channel", "for_whom", "provider", "evaluation_id", "attorney_id",
+        "phone", "earliest_date", "reason",
+    }),
+}
+
+
+def handoff_tools_for(industry: str | None) -> frozenset[str]:
+    if industry and industry in INDUSTRY_HANDOFF_TOOLS:
+        return INDUSTRY_HANDOFF_TOOLS[industry]
+    return HANDOFF_TOOLS
+
+
+def office_tables_for(industry: str | None) -> tuple[str, ...]:
+    if industry and industry in INDUSTRY_OFFICE_TABLES:
+        return INDUSTRY_OFFICE_TABLES[industry]
+    return OFFICE_TABLES
+
+
+def fact_arg_keys_for(industry: str | None) -> frozenset[str]:
+    if industry and industry in INDUSTRY_FACT_ARG_KEYS:
+        return INDUSTRY_FACT_ARG_KEYS[industry]
+    return FACT_ARG_KEYS
+
+
+def prose_arg_keys_for(industry: str | None) -> frozenset[str]:
+    if industry and industry in INDUSTRY_PROSE_ARG_KEYS:
+        return INDUSTRY_PROSE_ARG_KEYS[industry]
+    return PROSE_ARG_KEYS
 KEEP_ARG_TYPES = frozenset({"number", "integer", "boolean"})
 KEEP_ARG_FORMATS = frozenset({"date", "date-time"})
+
+IGNORE_ROW_KEYS = frozenset({"created_at", "description"})
+LEGAL_IGNORE_ROW_KEYS = frozenset({
+    "message", "summary", "note",
+    "slot_id", "starts_at", "attorney_id", "datetime",
+})
+PHONE_KEY_RE = re.compile(r"phone|_e164$", re.I)
 
 _TOOL_SCHEMAS: dict[str, dict[str, Any]] = {}
 
@@ -176,12 +236,19 @@ def _is_phone_key(key: str) -> bool:
     return bool(PHONE_KEY_RE.search(key))
 
 
-def _canon_row(row: Any) -> Any:
+def _ignore_row_keys(industry: str | None) -> frozenset[str]:
+    if industry == "legal":
+        return IGNORE_ROW_KEYS | LEGAL_IGNORE_ROW_KEYS
+    return IGNORE_ROW_KEYS
+
+
+def _canon_row(row: Any, industry: str | None = None) -> Any:
     if not isinstance(row, dict):
         return row
+    ignore = _ignore_row_keys(industry)
     out: dict[str, Any] = {}
     for key, value in row.items():
-        if key in IGNORE_ROW_KEYS:
+        if key in ignore:
             continue
         if isinstance(value, str) and _is_phone_key(key):
             out[key] = _digits_phone(value)
@@ -190,15 +257,15 @@ def _canon_row(row: Any) -> Any:
     return out
 
 
-def office_canonical(state: Any) -> dict[str, Any]:
-    """Office records only: patients / appointments / waitlist."""
+def office_canonical(state: Any, industry: str | None = None) -> dict[str, Any]:
+    """Industry write tables from GET /state."""
     src = state if isinstance(state, dict) else {}
     out: dict[str, Any] = {}
-    for table in OFFICE_TABLES:
+    for table in office_tables_for(industry):
         rows = src.get(table) or []
         if not isinstance(rows, list):
             rows = []
-        canon = [_canon_row(row) for row in rows]
+        canon = [_canon_row(row, industry) for row in rows]
         out[table] = sorted(
             canon,
             key=lambda row: json.dumps(row, sort_keys=True, default=str),
@@ -210,21 +277,33 @@ def _row_fingerprint(row: Any) -> str:
     return json.dumps(row, sort_keys=True, default=str)
 
 
-def office_states_match(expected: Any, actual: Any) -> bool:
-    """Patients and appointments must match exactly. Expected waitlist rows
-    must all appear in actual; extra actual waitlist rows are allowed when
-    the expected list is non-empty. An empty expected waitlist still requires
-    an empty actual waitlist (no surprise joins)."""
-    exp = office_canonical(expected)
-    act = office_canonical(actual)
-    if exp["patients"] != act["patients"]:
-        return False
-    if exp["appointments"] != act["appointments"]:
-        return False
-    if not exp["waitlist"]:
-        return act["waitlist"] == []
-    actual_keys = {_row_fingerprint(row) for row in act["waitlist"]}
-    return all(_row_fingerprint(row) in actual_keys for row in exp["waitlist"])
+def office_states_match(expected: Any, actual: Any, industry: str | None = None) -> bool:
+    """Healthcare: patients/appointments exact; waitlist subset when expected non-empty.
+    Legal: mutation tables exact; empty expected table requires empty actual.
+    Legal messages: subset of canonical rows; empty expected allows extra actual rows."""
+    exp = office_canonical(expected, industry)
+    act = office_canonical(actual, industry)
+    if industry == "healthcare":
+        if exp["patients"] != act["patients"]:
+            return False
+        if exp["appointments"] != act["appointments"]:
+            return False
+        if not exp["waitlist"]:
+            return act["waitlist"] == []
+        actual_keys = {_row_fingerprint(row) for row in act["waitlist"]}
+        return all(_row_fingerprint(row) in actual_keys for row in exp["waitlist"])
+    for table in office_tables_for(industry):
+        if industry == "legal" and table == "messages":
+            actual_keys = {_row_fingerprint(row) for row in act[table]}
+            if not all(_row_fingerprint(row) in actual_keys for row in exp[table]):
+                return False
+            continue
+        if not exp[table]:
+            if act[table]:
+                return False
+        elif exp[table] != act[table]:
+            return False
+    return True
 
 
 def load_tool_schemas(industry: str) -> dict[str, Any]:
@@ -258,7 +337,9 @@ def _required_keys(tool: dict[str, Any] | None) -> set[str]:
     return {str(item) for item in required}
 
 
-def _is_prose_arg(key: str, prop: dict[str, Any]) -> bool:
+def _is_prose_arg(key: str, prop: dict[str, Any], industry: str | None = None) -> bool:
+    fact_keys = fact_arg_keys_for(industry)
+    prose_keys = prose_arg_keys_for(industry)
     if prop.get("enum"):
         return False
     types = prop.get("type")
@@ -271,13 +352,13 @@ def _is_prose_arg(key: str, prop: dict[str, Any]) -> bool:
         return False
     if key.endswith("_id") or key.endswith("_ids") or key.endswith("_e164"):
         return False
-    if key in FACT_ARG_KEYS:
+    if key in fact_keys:
         return False
-    if key in PROSE_ARG_KEYS:
+    if key in prose_keys:
         return True
     if key == "reason" and not prop.get("enum"):
         return True
-    return key in PROSE_ARG_KEYS
+    return key in prose_keys
 
 
 def _params_of(call: dict[str, Any] | None) -> dict[str, Any]:
@@ -388,6 +469,15 @@ def _values_equal(key: str, expected: Any, actual: Any) -> bool:
         return True
     if expected is None or actual is None:
         return False
+    if key == "for_whom":
+        return str(expected).strip().casefold() == str(actual).strip().casefold()
+    if key == "opposing_party":
+        left = str(expected).casefold().replace(" ", "").replace(".", "")
+        right = str(actual).casefold().replace(" ", "").replace(".", "")
+        if not left or not right:
+            return False
+        shorter, longer = (left, right) if len(left) <= len(right) else (right, left)
+        return shorter in longer
     if key == "location_id" or key.endswith("location_id"):
         return _same_location(expected, actual)
     if key == "carrier":
@@ -430,6 +520,7 @@ def _calls_match(
     expected: dict[str, Any],
     actual: dict[str, Any],
     schemas: dict[str, Any] | None,
+    industry: str | None = None,
 ) -> bool:
     if str(expected.get("name") or "") != str(actual.get("name") or ""):
         return False
@@ -445,7 +536,7 @@ def _calls_match(
         return True
     for key, exp_value in exp_params.items():
         prop = _prop_schema(tool, key)
-        if _is_prose_arg(key, prop):
+        if _is_prose_arg(key, prop, industry):
             if key in act_params and not _present_nonempty(act_params.get(key)):
                 return False
             continue
@@ -526,6 +617,8 @@ def tool_call_adherence(
     expected: list[Any],
     actual: list[Any],
     schemas: dict[str, Any] | None = None,
+    *,
+    industry: str | None = None,
 ) -> dict[str, Any]:
     """Every expected call must match some actual call of the same name.
 
@@ -545,7 +638,7 @@ def tool_call_adherence(
         for index, act in enumerate(act_calls):
             if index in used:
                 continue
-            if _calls_match(exp, act, schemas):
+            if _calls_match(exp, act, schemas, industry):
                 used.add(index)
                 found = True
                 break
@@ -567,8 +660,9 @@ def expected_handoff_path(task: dict[str, Any] | None) -> list[str]:
     return [str(item) for item in path]
 
 
-def actual_handoffs(actual_tools: list[str]) -> list[str]:
-    return [name for name in actual_tools if name in HANDOFF_TOOLS]
+def actual_handoffs(actual_tools: list[str], industry: str | None = None) -> list[str]:
+    allowed = handoff_tools_for(industry)
+    return [name for name in actual_tools if name in allowed]
 
 
 def handoff_adherence(expected: list[str], actual: list[str]) -> dict[str, Any]:
@@ -643,9 +737,11 @@ def verify_result(
     agent_text = agent_transcript(lines)
     actual_calls = actual_tool_calls(result)
     expected_calls = list((task or {}).get("exp_tool_calls") or [])
-    call = tool_call_adherence(expected_calls, actual_calls, schemas=schemas)
+    call = tool_call_adherence(expected_calls, actual_calls, schemas=schemas, industry=industry)
     actual_tools = [item["name"] for item in actual_calls]
-    handoff = handoff_adherence(expected_handoff_path(task), actual_handoffs(actual_tools))
+    handoff = handoff_adherence(
+        expected_handoff_path(task), actual_handoffs(actual_tools, industry),
+    )
 
     state: dict[str, Any]
     if task is None:
@@ -661,7 +757,7 @@ def verify_result(
         if expected is None:
             state = {"passed": None, "skipped": True, "note": "task has no exp_db_state"}
         else:
-            matched = office_states_match(expected, actual_state)
+            matched = office_states_match(expected, actual_state, industry)
             state = {"passed": matched, "skipped": False, "note": None}
 
     passed = (
@@ -744,6 +840,7 @@ def main(argv: list[str] | None = None) -> int:
 
         check = verify_result(
             detail, task, actual_state, state_note=note, schemas=schemas,
+            industry=args.industry,
         )
         if classified.get("pending"):
             mark = "wait"

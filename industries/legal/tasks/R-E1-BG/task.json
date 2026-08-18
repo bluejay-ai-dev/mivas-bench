@@ -1,0 +1,99 @@
+{
+  "task_name": "R-E1-BG: Existing client asks for status",
+  "customer_name": "Thomas Eckhart",
+  "intent": "Open with exactly: \"I'm calling to check where things are on my case.\" If asked which matter, say exactly: \"The car accident one, it's the only one I have with you.\" Every time you are asked for your phone number, say exactly: three one two, five five five, zero two seven seven, which is 312-555-0277. Do not ask for legal advice. Once finished, say exactly: \"Thank you, that's all I needed.\" and end the call.",
+  "traits": [
+    {
+      "trait_name": "full_name",
+      "value": "Thomas Eckhart"
+    },
+    {
+      "trait_name": "matter_id",
+      "value": "m_91"
+    },
+    {
+      "trait_name": "phone",
+      "value": "312-555-0277"
+    }
+  ],
+  "exp_handoff_path": [
+    "transfer_to_client_services"
+  ],
+  "exp_tool_calls": [
+    {
+      "name": "get_case_status",
+      "parameters": {
+        "matter_id": "m_91"
+      }
+    }
+  ],
+  "behaviors": {
+    "creativity": 0
+  },
+  "scripted_responses": [
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
+      "response_type": "phrase",
+      "response_value": "Thomas Eckhart, 312-555-0277.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "No, nobody represents me.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "No, nobody else. Halverson and Reed are handling it.",
+      "occurrence_mode": "always"
+    }
+  ],
+  "customer_available_tools": {},
+  "metadata": {
+    "category": "R",
+    "category_slug": "clients-and-refusals",
+    "difficulty": "easy",
+    "audio_condition": "background_noise"
+  },
+  "exp_db_state": {
+    "callers": [
+      {
+        "id": "c_001",
+        "name": "Dana Whitfield",
+        "phone": "5105550142"
+      },
+      {
+        "id": "c_002",
+        "name": "Marcus Oyelaran",
+        "phone": "4155550188"
+      },
+      {
+        "id": "c_003",
+        "name": "Priya Raghunathan",
+        "phone": "2065550119"
+      },
+      {
+        "id": "c_004",
+        "name": "Thomas Eckhart",
+        "phone": "3125550277"
+      },
+      {
+        "id": "c_005",
+        "name": "Ruth Kealoha",
+        "phone": "8085550233"
+      }
+    ],
+    "intakes": [],
+    "intake_notes": [],
+    "documents": [],
+    "holds": [],
+    "evaluations": [],
+    "messages": [],
+    "escalations": []
+  }
+}
