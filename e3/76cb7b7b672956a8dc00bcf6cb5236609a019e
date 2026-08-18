@@ -1,0 +1,29 @@
+tests/test_tasks_to_digital_humans.py
+  s_fe90f2f98408ce::t_58522b04b114ae 468-470
+voice-agent-harnesses/openai/report.py
+  s_fe90f2f98408ce::t_286ccab314efba 451,466-471
+industries/healthcare/tasks/C4-H1/task.json
+  s_fe90f2f98408ce::t_db6ff4209dca93 97
+industries/healthcare/tasks/R-H2/task.json
+  s_fe90f2f98408ce::t_59c7c38aeeb748 149
+tests/test_verify_task_run.py
+  s_fe90f2f98408ce::t_4078ba8c6985a0 381
+industries/healthcare/tool_server.py
+  s_fe90f2f98408ce::t_9f6ac4a7e672cd 188-223
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "e376cb7b7b672956a8dc00bcf6cb5236609a019e",
+  "prompts": {},
+  "sessions": {
+    "s_fe90f2f98408ce": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "87cf1cde-07c3-45f9-85f0-06db01052429",
+        "model": "cursor-grok-4.6-high-fast"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
