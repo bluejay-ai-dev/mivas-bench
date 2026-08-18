@@ -447,12 +447,18 @@ def test_healthcare_leftover_holes_are_closed() -> None:
 
     rh3_names = [c["name"] for c in load("R-H3")["exp_tool_calls"]]
     assert rh3_names.index("request_rx_refill") < rh3_names.index("create_clinical_message")
+    rh3_message = next(c for c in load("R-H3")["exp_tool_calls"] if c["name"] == "create_clinical_message")
+    assert rh3_message["parameters"] == {"category": "rx_question"}
 
     c4m1 = load("C4-M1")
     assert "microneedling" in pin_blob(c4m1), "C4-M1"
     assert not any("before a time has been confirmed" in (p.get("match_phrase") or "") for p in c4m1["scripted_responses"]), "C4-M1"
 
-    assert "212-555-0133" in pin_blob(load("C5-H1")), "C5-H1"
+    c5h1 = load("C5-H1")
+    assert "212-555-0133" in pin_blob(c5h1), "C5-H1"
+    assert "No thanks, I don't need a text." not in [
+        pin.get("response_value") for pin in c5h1.get("scripted_responses") or []
+    ], "C5-H1"
     c5h2 = load("C5-H2")
     greeting = next(p for p in c5h2["scripted_responses"] if "greets you" in (p.get("match_phrase") or ""))
     assert "move" not in greeting["response_value"].lower(), "C5-H2"
@@ -461,6 +467,16 @@ def test_healthcare_leftover_holes_are_closed() -> None:
     for path in tasks.glob("*/task.json"):
         phrases = [p["match_phrase"] for p in json.loads(path.read_text()).get("scripted_responses") or []]
         assert len(phrases) == len(set(phrases)), path.parent.name
+
+    c1h2 = load("C1-H2")
+    kb_topics = [
+        call.get("parameters", {}).get("topic")
+        for call in c1h2["exp_tool_calls"]
+        if call["name"] == "search_practice_kb"
+    ]
+    assert kb_topics == ["hours"]
+    c1m2_find = next(call for call in load("C1-M2")["exp_tool_calls"] if call["name"] == "find_slots")
+    assert not c1m2_find.get("parameters")
 
     by_key = {conv.case_key_of(dh): dh for dh in _humans()}
     for case_key in ("C1-M3", "C2-H2"):

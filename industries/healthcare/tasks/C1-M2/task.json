@@ -43,12 +43,7 @@
       "name": "transfer_to_scheduling"
     },
     {
-      "name": "find_slots",
-      "parameters": {
-        "location_ids": [
-          "loc_brooklyn_heights"
-        ]
-      }
+      "name": "find_slots"
     },
     {
       "name": "book_appointment",
