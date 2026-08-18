@@ -114,6 +114,35 @@ def test_repeated_tool_calls_keep_request_output_pairs() -> None:
         ('{"id":"b"}', '{"ok":"b"}'),
     ]
 
+    # arguments that only differ past the 4000-char telemetry clip must still pair
+    prefix = "x" * report._MAX_ATTR
+    long_a = prefix + "A"
+    long_b = prefix + "B"
+    assert report._clip(long_a) == report._clip(long_b)
+    exporter3 = InMemorySpanExporter()
+    provider3 = TracerProvider()
+    provider3.add_span_processor(SimpleSpanProcessor(exporter3))
+    tracer3 = provider3.get_tracer("tool-pair-clip")
+    root3 = tracer3.start_span("realtime_session")
+    tracer3_events = report.RealtimeEventTracer(tracer3, root3)
+    tracer3_events.handle(SimpleNamespace(type="tool_start", tool=tool, arguments=long_a))
+    tracer3_events.handle(SimpleNamespace(type="tool_start", tool=tool, arguments=long_b))
+    tracer3_events.handle(
+        SimpleNamespace(type="tool_end", tool=tool, arguments=long_b, output='{"ok":"b"}')
+    )
+    assert tracer3_events._tool_match_keys["explain_charge"] == [(None, long_a)]
+    tracer3_events.handle(
+        SimpleNamespace(type="tool_end", tool=tool, arguments=long_a, output='{"ok":"a"}')
+    )
+    tracer3_events.close()
+    root3.end()
+    clipped_pairs = [
+        span.attributes["gen_ai.tool.call.result"]
+        for span in exporter3.get_finished_spans()
+        if span.name == "execute_tool explain_charge"
+    ]
+    assert clipped_pairs == ['{"ok":"b"}', '{"ok":"a"}']
+
 
 def main() -> None:
     exporter = InMemorySpanExporter()

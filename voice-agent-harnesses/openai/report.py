@@ -74,8 +74,12 @@ def _api_key() -> str | None:
     return os.environ.get("BLUEJAY_API_KEY") or None
 
 
+def _as_str(value: Any) -> str:
+    return value if isinstance(value, str) else json.dumps(value, default=str)
+
+
 def _clip(value: Any, n: int = _MAX_ATTR) -> str:
-    s = value if isinstance(value, str) else json.dumps(value, default=str)
+    s = _as_str(value)
     return s if len(s) <= n else s[: n - 3] + "..."
 
 
@@ -286,6 +290,8 @@ class RealtimeEventTracer:
         self._turn: Span | None = None
         self._turn_index = 0
         self._tool_spans: dict[str, list[Span]] = {}
+        # unclipped (call_id, args) aligned with `_tool_spans`; clip is telemetry-only
+        self._tool_match_keys: dict[str, list[tuple[str | None, str | None]]] = {}
         self._seen_user_text: set[str] = set()
         # One generation span per Realtime response (response.created → response.done),
         # carrying tokens + TTFT, the way LangSmith/Langfuse report a model call.
@@ -323,6 +329,7 @@ class RealtimeEventTracer:
                 span.set_status(Status(StatusCode.OK))
                 span.end()
         self._tool_spans.clear()
+        self._tool_match_keys.clear()
         if self._turn is not None:
             self._turn.set_status(Status(StatusCode.OK))
             self._turn.end()
@@ -438,6 +445,12 @@ class RealtimeEventTracer:
                     attributes=attrs,
                 )
             )
+            self._tool_match_keys.setdefault(name, []).append(
+                (
+                    str(call_id) if call_id is not None else None,
+                    _as_str(args) if args is not None else None,
+                )
+            )
 
         elif etype == "tool_end":
             tool = getattr(event, "tool", None)
@@ -446,29 +459,31 @@ class RealtimeEventTracer:
             args = getattr(event, "arguments", None)
             call_id = getattr(event, "call_id", None) or getattr(tool, "call_id", None)
             spans = self._tool_spans.get(name)
+            keys = self._tool_match_keys.get(name)
             span = None
-            if spans:
+            if spans and keys:
                 idx = None
                 if call_id is not None:
                     want = str(call_id)
-                    for i, candidate in enumerate(spans):
-                        if candidate.attributes.get("mivas.tool.call_id") == want:
+                    for i, (stored_id, _) in enumerate(keys):
+                        if stored_id == want:
                             idx = i
                             break
                 elif args is not None:
-                    clipped = _clip(args)
-                    for i, candidate in enumerate(spans):
-                        if candidate.attributes.get(
-                            GenAIAttributes.GEN_AI_TOOL_CALL_ARGUMENTS
-                        ) == clipped:
+                    want_args = _as_str(args)
+                    for i, (_, stored_args) in enumerate(keys):
+                        if stored_args == want_args:
                             idx = i
                             break
                 else:
                     idx = 0
                 if idx is not None:
                     span = spans.pop(idx)
+                    keys.pop(idx)
                     if not spans:
                         self._tool_spans.pop(name, None)
+                    if not keys:
+                        self._tool_match_keys.pop(name, None)
             if span is not None:
                 if output is not None:
                     span.set_attribute(
