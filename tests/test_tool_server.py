@@ -351,6 +351,18 @@ def test_allergy_service_window_and_idempotent() -> None:
         assert booked["ok"], booked
         assert booked["data"]["appointment"]["start"] == "2026-08-24T09:00:00"
 
+        tz_ok = client.post(
+            "/tools/schedule_allergy_service",
+            json={"arguments": {
+                "service": "food_challenge",
+                "location_id": "loc_park_ave",
+                "window_start": "2026-08-24T09:00:00-04:00",
+                "window_end": "2026-08-24T17:00:00-04:00",
+            }},
+        ).json()
+        assert tz_ok["ok"], tz_ok
+        assert tz_ok["data"]["appointment"]["start"] == "2026-08-24T09:00:00"
+
         unavailable = client.post(
             "/tools/schedule_allergy_service",
             json={"arguments": {
