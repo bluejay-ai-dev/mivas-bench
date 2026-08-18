@@ -140,6 +140,27 @@ def test_three_by_three_per_category() -> None:
         assert counts == Counter({"easy": 3, "medium": 3, "hard": 3}), area
 
 
+def test_legal_emits_72_payloads() -> None:
+    humans = conv.build("legal")
+    assert len(humans) == 72
+    keys = [conv.case_key_of(dh) for dh in humans]
+    assert len(set(keys)) == 72
+    conv.check(humans, "legal")
+
+
+def test_legal_two_by_four_per_category() -> None:
+    scored: dict[str, Counter] = {}
+    for dh in conv.build("legal"):
+        if conv.trait_value(dh, "audio_condition") != "perfect":
+            continue
+        area = conv.trait_value(dh, "call_area") or ""
+        difficulty = conv.trait_value(dh, "difficulty") or ""
+        scored.setdefault(area, Counter())[difficulty] += 1
+    assert len(scored) == 6
+    for area, counts in scored.items():
+        assert counts == Counter({"easy": 2, "medium": 4, "hard": 4}), area
+
+
 def test_date_of_birth_is_date_type() -> None:
     found = False
     for dh in _humans():
@@ -178,6 +199,27 @@ def test_success_criteria_from_tools() -> None:
 def test_healthcare_creativity_is_zero() -> None:
     for dh in _humans():
         assert dh["creativity"] == 0, conv.case_key_of(dh)
+
+
+def test_diff_pack_vs_live_splits_extras_missing_and_duplicates() -> None:
+    humans = [
+        {"traits": [{"trait_name": "case_key", "value": "C1-E2"}]},
+        {"traits": [{"trait_name": "case_key", "value": "C1-M4"}]},
+    ]
+    live = [
+        {"id": 1, "traits": [{"trait_name": "case_key", "value": "C1-E2"}]},
+        {"id": 2, "test_name": "C1-E3: leftover easy"},
+        {"id": 3, "traits": [{"trait_name": "case_key", "value": "C1-E2"}]},
+    ]
+    diff = conv.diff_pack_vs_live(humans, live)
+    assert [dh["id"] for dh in diff.extras] == [2]
+    assert [dh["id"] for dh in diff.duplicates] == [3]
+    assert [conv.case_key_of(dh) for dh in diff.missing] == ["C1-M4"]
+    assert conv.owned_by_industry(
+        {"tags": ["mivas_legal"], "test_name": "C1-E3: leftover"},
+        "legal",
+    )
+    assert not conv.owned_by_industry({"id": 9, "test_name": "unrelated"}, "legal")
 
 
 def test_claim_updates_include_expected_tool_calls() -> None:
@@ -551,4 +593,71 @@ def test_legal_fairness_c2h1_state_pin_and_rm_lookup_only() -> None:
     assert "for_whom" not in (take.get("parameters") or {})
     for row in (c1m3.get("exp_db_state") or {}).get("messages") or []:
         assert "for_whom" not in row
+
+    c3e2 = load("C3-E2")
+    assert 'Open with exactly: "I need help with a divorce and custody matter."' in c3e2["intent"]
+    assert 'say exactly: "It\'s Edwin Carrick."' in c3e2["intent"]
+    assert "personal matter" not in c3e2["intent"].lower()
+    assert "nobody really" not in c3e2["intent"].lower()
+    assert any(pin.get("response_value") == "It's Edwin Carrick." for pin in c3e2["scripted_responses"])
+    assert not any(
+        "personal matter" in (pin.get("response_value") or "").lower()
+        for pin in c3e2["scripted_responses"]
+    )
+    names = [c["name"] for c in c3e2["exp_tool_calls"]]
+    assert names == ["check_practice_area", "escalate_to_human"]
+    area = next(c for c in c3e2["exp_tool_calls"] if c["name"] == "check_practice_area")
+    assert (area.get("parameters") or {}) == {"practice_area": "family"}
+    assert (c3e2.get("exp_db_state") or {}).get("escalations") == [
+        {"id": 1, "caller_id": "c_new", "reason_code": "practice_area"}
+    ]
+
+    c1m4 = load("C1-M4")
+    assert [c["name"] for c in c1m4["exp_tool_calls"]] == ["lookup_caller", "transfer_to_screening"]
+    assert "check_practice_area" not in [c["name"] for c in c1m4["exp_tool_calls"]]
+    assert (c1m4.get("exp_db_state") or {}).get("escalations") == []
+    assert (c1m4.get("exp_db_state") or {}).get("intakes") == []
+    assert "That's all I needed today" in c1m4["intent"]
+
+    c1h4 = load("C1-H4")
+    assert [c["name"] for c in c1h4["exp_tool_calls"]] == ["escalate_to_human"]
+    assert (c1h4.get("exp_db_state") or {}).get("escalations") == [
+        {"id": 1, "caller_id": "c_new", "reason_code": "caller_request"}
+    ]
+
+    c2m4 = load("C2-M4")
+    assert [c["name"] for c in c2m4["exp_tool_calls"]] == ["lookup_caller", "transfer_to_screening"]
+    assert "escalate_to_human" not in [c["name"] for c in c2m4["exp_tool_calls"]]
+    assert not c2m4.get("metadata", {}).get("escalation")
+    assert (c2m4.get("exp_db_state") or {}).get("escalations") == []
+    assert any(
+        "didn't hire them" in (pin.get("response_value") or "")
+        for pin in c2m4["scripted_responses"]
+    )
+
+    c2h4 = load("C2-H4")
+    assert "I need to talk about a car accident." in c2h4["intent"]
+    assert "I'm the one being sued" not in c2h4["intent"].split("Open with exactly", 1)[1].split("When asked", 1)[0]
+    assert any(
+        pin.get("response_value") == "I'm the one being sued. Your client hit me."
+        for pin in c2h4["scripted_responses"]
+    )
+    assert [c["name"] for c in c2h4["exp_tool_calls"]] == ["escalate_to_human"]
+    assert (c2h4.get("exp_db_state") or {}).get("escalations") == [
+        {"id": 1, "caller_id": "c_new", "reason_code": "adverse_party"}
+    ]
+
+    c3m4 = load("C3-M4")
+    assert any(c["name"] == "check_conflict" and (c.get("parameters") or {}).get("opposing_party") == "USCIS" for c in c3m4["exp_tool_calls"])
+    assert any(c["name"] == "check_practice_area" and (c.get("parameters") or {}).get("practice_area") == "immigration" for c in c3m4["exp_tool_calls"])
+    assert (c3m4.get("exp_db_state") or {}).get("escalations") == [
+        {"id": 1, "caller_id": "c_new", "reason_code": "practice_area"}
+    ]
+
+    c5h4 = load("C5-H4")
+    names = [c["name"] for c in c5h4["exp_tool_calls"]]
+    assert "record_intake" not in names
+    assert names[-1] == "confirm_evaluation"
+    assert not (next(c for c in c5h4["exp_tool_calls"] if c["name"] == "confirm_evaluation").get("parameters") or {}).get("confirmation_token")
+    assert (c5h4.get("exp_db_state") or {}).get("intakes")
 
