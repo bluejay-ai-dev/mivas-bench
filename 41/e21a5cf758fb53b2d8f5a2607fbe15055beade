@@ -1,0 +1,103 @@
+industries/legal/tasks/C3-M4/task.json
+  s_db3f161d9f83e0::t_d417b9a1973b5f 1-127
+scripts/encode_legal_tasks.py
+  s_db3f161d9f83e0::t_aeca648672bff2 149-158
+  s_db3f161d9f83e0::t_c8137dc683aed9 272,275,278-279,306-310,312
+industries/legal/tasks/R-H4/task.json
+  s_db3f161d9f83e0::t_d417b9a1973b5f 1-121
+scripts/tasks_to_digital_humans.py
+  s_db3f161d9f83e0::t_6c61c58673586e 845-848
+  s_db3f161d9f83e0::t_8aca5c420a414d 456,458
+  s_db3f161d9f83e0::t_fd2e5c726868f3 686-798
+  s_db3f161d9f83e0::t_ffb75fd0013da8 862-863,875-884,893
+  s_db3f161d9f83e0::t_c3b29546b46077 377-379
+  s_db3f161d9f83e0::t_89cefea177a48b 26
+  s_db3f161d9f83e0::t_0ede3d56d33c09 11
+  s_db3f161d9f83e0::t_734a32e1029873 130-133
+  s_db3f161d9f83e0::t_7bd4584d313f82 844
+industries/legal/tasks/C3-H4/task.json
+  s_db3f161d9f83e0::t_91844469757ba8 4
+  s_db3f161d9f83e0::t_d417b9a1973b5f 1-3,5-210
+industries/legal/tasks/C5-H4/task.json
+  s_db3f161d9f83e0::t_d417b9a1973b5f 1-183,194-223
+  s_db3f161d9f83e0::t_149c341e7923fa 184-193
+industries/legal/tasks/C1-E2/task.json
+  s_db3f161d9f83e0::t_1cbd6f724dd39b 2-4,8,12,18,29,38-44,52-53,81-85,93-94,97-98,100
+scripts/rebuild_legal_dashboard.py
+  s_db3f161d9f83e0::t_ca4e8424737a4c 323
+  s_db3f161d9f83e0::t_0c83a8443946f9 949
+  s_db3f161d9f83e0::t_31f1512bf81de4 799-800
+  s_db3f161d9f83e0::t_1e3f3003ea4a7d 908,911,913
+  s_db3f161d9f83e0::t_b47125e3409be0 458
+  s_db3f161d9f83e0::t_a40f7979962f04 886
+  s_db3f161d9f83e0::t_9bad1b3c8eb8d1 437
+  s_db3f161d9f83e0::t_194c695f0819ab 442
+  s_db3f161d9f83e0::t_2ab740988c12ec 1006
+industries/legal/tasks/R-M4/task.json
+  s_db3f161d9f83e0::t_d417b9a1973b5f 1-115
+industries/legal/tasks/C2-H1/task.json
+  s_db3f161d9f83e0::t_d417b9a1973b5f 143
+industries/legal/tasks/C5-E2/task.json
+  s_db3f161d9f83e0::t_1cbd6f724dd39b 2-4,8,16,20,28,38-41,52,66,73,92,94,106,108,117,148-149,157,159,169,173-174,177
+industries/legal/tasks/R-E2/task.json
+  s_db3f161d9f83e0::t_1cbd6f724dd39b 2,4,18,45-46,81-82,86,88
+industries/legal/tasks/C4-H4/task.json
+  s_db3f161d9f83e0::t_d417b9a1973b5f 1-221
+industries/legal/tasks/C3-E2/task.json
+  s_db3f161d9f83e0::t_e760a24aa903ff 4,55
+industries/legal/tasks/C2-H4/task.json
+  s_db3f161d9f83e0::t_d417b9a1973b5f 1-3,5-43,58-116
+  s_db3f161d9f83e0::t_91844469757ba8 4,44-57
+industries/legal/tasks/C4-E2/task.json
+  s_db3f161d9f83e0::t_1cbd6f724dd39b 2-4,8,16,20,24,28,36,38-41,53,67,74,81,121-122,130-132,136
+industries/legal/tasks/C2-E2/task.json
+  s_db3f161d9f83e0::t_1cbd6f724dd39b 2-4,8,12,29,38-44,92-93
+industries/legal/tasks/C2-H2/task.json
+  s_db3f161d9f83e0::t_d417b9a1973b5f 143
+industries/legal/tasks/C5-M4/task.json
+  s_db3f161d9f83e0::t_066fb97bb1ffce 102,104,109,111
+  s_db3f161d9f83e0::t_d417b9a1973b5f 1-101,103,105-108,110,112-195
+scripts/legal_task_spec.py
+  s_db3f161d9f83e0::t_7d8dcc60193121 387,661,667-671,837,989,1010,1013,1216,1219,1373,1376,1603,1778,1992
+  s_db3f161d9f83e0::t_ded1e3b633b08b 686
+  s_db3f161d9f83e0::t_30da65224f63d9 302-304
+  s_db3f161d9f83e0::t_dd698427199562 2037
+  s_db3f161d9f83e0::t_f512ce358e909d 654-657
+  s_db3f161d9f83e0::t_8abe5f979f614a 987-988
+  s_db3f161d9f83e0::t_b45af0f97cbbc0 309,313,542,547,672,829,844,980,1002,1015,1193,1207,1220,1346,1364,1377,1593,1609,1617-1618,1623,1768,1790,1798,1800-1804,1911,1915,2000,2004
+  s_db3f161d9f83e0::t_9d246bfc73a9ae 1615,1796
+  s_db3f161d9f83e0::t_f0e0feca531a4a 534-537
+  s_db3f161d9f83e0::t_da00cfbc456022 382
+  s_db3f161d9f83e0::t_2a57c06cc13b7a 1,186,292-301,305-308,310-312,314,372-381,383-386,388-394,524-533,538-541,543-546,548,643-653,658-660,662-666,673-675,821-828,830-836,838-843,845-851,970-979,981-986,990-1001,1003-1009,1011-1012,1014,1016-1017,1183-1192,1194-1206,1208-1215,1217-1218,1221-1222,1336-1345,1347-1363,1365-1372,1374-1375,1378-1379,1583-1592,1594-1602,1604-1608,1610-1614,1616,1619-1622,1624-1625,1758-1767,1769-1777,1779-1789,1791-1795,1797,1799,1805,1896-1910,1912-1914,1916-1917,1977-1991,1993-1999,2001-2003,2005-2006,2042-2043,2052
+industries/legal/tasks/C1-H4/task.json
+  s_db3f161d9f83e0::t_d417b9a1973b5f 1-95
+industries/legal/tasks/C1-M4/task.json
+  s_db3f161d9f83e0::t_d417b9a1973b5f 1-3,5-103
+  s_db3f161d9f83e0::t_149c341e7923fa 4
+industries/legal/tasks/C4-M4/task.json
+  s_db3f161d9f83e0::t_d417b9a1973b5f 1-198
+industries/legal/tasks/C2-M4/task.json
+  s_db3f161d9f83e0::t_149c341e7923fa 4
+  s_db3f161d9f83e0::t_d417b9a1973b5f 1-3,5-103
+tests/test_tasks_to_digital_humans.py
+  s_db3f161d9f83e0::t_f6b9886fc1ca08 204-224
+  s_db3f161d9f83e0::t_20c47c5809ee49 143-163
+  s_db3f161d9f83e0::t_da475e4d4c120a 615-663
+  s_db3f161d9f83e0::t_277b6d4857dec7 597-614
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "41e21a5cf758fb53b2d8f5a2607fbe15055beade",
+  "prompts": {},
+  "sessions": {
+    "s_db3f161d9f83e0": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "d9be1db5-e1ad-4f92-a906-c3f4fd329833",
+        "model": "default"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}
