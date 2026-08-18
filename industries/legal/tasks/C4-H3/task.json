@@ -1,0 +1,177 @@
+{
+  "task_name": "C4-H3: Employment intake in Washington",
+  "customer_name": "Clara Whitman",
+  "intent": "Open with exactly: \"I was fired after I reported safety violations.\" Give a short account when asked. Accept email packet. Once finished, say exactly: \"Thank you, that's all I needed.\" and end the call.",
+  "traits": [
+    {
+      "trait_name": "full_name",
+      "value": "Clara Whitman"
+    },
+    {
+      "trait_name": "practice_area",
+      "value": "employment"
+    },
+    {
+      "trait_name": "state",
+      "value": "WA"
+    },
+    {
+      "trait_name": "incident_date",
+      "value": "2026-04-05"
+    },
+    {
+      "trait_name": "phone",
+      "value": "206-555-0220"
+    }
+  ],
+  "exp_handoff_path": [
+    "transfer_to_screening",
+    "transfer_to_intake"
+  ],
+  "exp_tool_calls": [
+    {
+      "name": "transfer_to_screening"
+    },
+    {
+      "name": "check_conflict",
+      "parameters": {
+        "opposing_party": "Harborline Industries"
+      }
+    },
+    {
+      "name": "check_practice_area",
+      "parameters": {
+        "practice_area": "employment"
+      }
+    },
+    {
+      "name": "check_jurisdiction",
+      "parameters": {
+        "state": "WA",
+        "practice_area": "employment"
+      }
+    },
+    {
+      "name": "transfer_to_intake"
+    },
+    {
+      "name": "record_intake",
+      "parameters": {
+        "practice_area": "employment",
+        "state": "WA",
+        "incident_date": "2026-04-05",
+        "summary": "Retaliation after safety report."
+      }
+    },
+    {
+      "name": "send_intake_packet",
+      "parameters": {
+        "channel": "email"
+      }
+    }
+  ],
+  "behaviors": {
+    "creativity": 0
+  },
+  "scripted_responses": [
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
+      "response_type": "phrase",
+      "response_value": "Clara Whitman, 206-555-0220.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "No, nobody represents me.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "It's Harborline Industries.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks which state this happened in, or where it took place. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "In Washington.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks when the incident happened, or for the date of the accident, injury or event. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "It was April fifth, twenty twenty six.",
+      "occurrence_mode": "always"
+    }
+  ],
+  "customer_available_tools": {},
+  "metadata": {
+    "category": "C4",
+    "category_slug": "intake-and-documents",
+    "difficulty": "hard",
+    "audio_condition": "perfect"
+  },
+  "exp_db_state": {
+    "callers": [
+      {
+        "id": "c_001",
+        "name": "Dana Whitfield",
+        "phone": "5105550142"
+      },
+      {
+        "id": "c_002",
+        "name": "Marcus Oyelaran",
+        "phone": "4155550188"
+      },
+      {
+        "id": "c_003",
+        "name": "Priya Raghunathan",
+        "phone": "2065550119"
+      },
+      {
+        "id": "c_004",
+        "name": "Thomas Eckhart",
+        "phone": "3125550277"
+      },
+      {
+        "id": "c_005",
+        "name": "Ruth Kealoha",
+        "phone": "8085550233"
+      },
+      {
+        "id": "c_new",
+        "name": "Clara Whitman",
+        "phone": "2065550220"
+      }
+    ],
+    "intakes": [
+      {
+        "id": 1,
+        "caller_id": "c_new",
+        "practice_area": "employment",
+        "state": "WA",
+        "incident_date": "2026-04-05",
+        "summary": "Retaliation after safety report."
+      }
+    ],
+    "intake_notes": [],
+    "documents": [
+      {
+        "id": 1,
+        "caller_id": "c_new",
+        "kind": "intake_packet",
+        "target": "email"
+      }
+    ],
+    "holds": [],
+    "evaluations": [],
+    "messages": [],
+    "escalations": []
+  }
+}
