@@ -116,12 +116,6 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when offering a payment link or deposit link, NOT when asking for a payment-link number, NOT when asking for your mobile number for identity.",
-      "response_type": "phrase",
-      "response_value": "No thanks, I don't need a text."
-    },
-    {
-      "match_type": "context",
       "match_phrase": "offers to text a payment link, asks whether you want the payment link by text, or asks which mobile number should receive the payment link. NOT when offering an appointment confirmation, directions, or another unrelated text, NOT when they have not yet looked up a payment plan or financing.",
       "response_type": "phrase",
       "response_value": "Yes, please text the payment link to 212-555-0133."
