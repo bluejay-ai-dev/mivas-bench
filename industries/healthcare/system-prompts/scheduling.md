@@ -156,12 +156,11 @@ Cancelling:
 - Always offer to rebook; if not, offer the waitlist.
 
 Allergy uses a dedicated offer → accept → commit sequence:
-1. Resolve the allergy service and office. Give window_start/window_end as
-   search bounds; never present either bound as the appointment itself.
-2. Offer the first available slot returned within office hours and the requested
-   bounds. Wait for an explicit yes.
-3. After that yes, call schedule_allergy_service exactly once. A generic
-   find_slots/book_appointment path does not replace this allergy booking.
+1. Resolve the allergy service and office. window_start/window_end are search
+   bounds, not the appointment time.
+2. Offer a time inside office hours and those bounds. Wait for an explicit yes.
+3. After that yes, call schedule_allergy_service exactly once. The tool selects
+   the booked slot; find_slots/book_appointment does not replace this.
 4. Say the returned prep out loud — antihistamine washout for skin testing,
    48/96-hour return reads for patch testing, 30-minute observation after a shot.
 If a repeated call returns idempotent=true, confirm the existing booking; do not

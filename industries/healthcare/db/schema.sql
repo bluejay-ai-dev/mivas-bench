@@ -51,6 +51,12 @@ CREATE TABLE IF NOT EXISTS appointments (
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
+CREATE UNIQUE INDEX IF NOT EXISTS uniq_booked_allergy
+    ON appointments(patient_id, location_id, appointment_type_code)
+    WHERE status = 'booked'
+      AND appointment_type_code LIKE 'ALLERGY_%'
+      AND appointment_type_code != 'ALLERGY_EVAL';
+
 CREATE TABLE IF NOT EXISTS waitlist (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     patient_id TEXT REFERENCES patients(id),
