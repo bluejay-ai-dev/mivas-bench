@@ -164,7 +164,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "asks what you want to do after naming both the missed-visit fee and the visit charge, or asks whether you want to pay the full balance. NOT when only one line has been named.",
+      "match_phrase": "asks what you want to do after naming both the missed-visit fee and the visit charge, or asks whether you want to pay the full balance. NOT when only one line has been named, NOT when neither charge has been named.",
       "response_type": "phrase",
       "response_value": "I'll pay the full balance now. Please text a payment link to 407-555-0155."
     }

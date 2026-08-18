@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS appointments (
 -- one booked allergy-service row per patient/office; a later distinct slot
 -- for the same service is not a fixture case.
 CREATE UNIQUE INDEX IF NOT EXISTS uniq_booked_allergy
-    ON appointments(patient_id, location_id, appointment_type_code)
+    ON appointments(ifnull(patient_id, ''), location_id, appointment_type_code)
     WHERE status = 'booked'
       AND appointment_type_code LIKE 'ALLERGY_%'
       AND appointment_type_code != 'ALLERGY_EVAL';

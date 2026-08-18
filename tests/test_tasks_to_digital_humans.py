@@ -440,7 +440,7 @@ def test_healthcare_leftover_holes_are_closed() -> None:
 
     rh2 = load("R-H2")
     rh2_blob = rh2["intent"].lower() + " " + pin_blob(rh2)
-    assert "parameters" not in next(c for c in rh2["exp_tool_calls"] if c["name"] == "request_rx_refill"), "R-H2"
+    assert next(c for c in rh2["exp_tool_calls"] if c["name"] == "request_rx_refill").get("parameters", {}).get("medication_name") == "Accutane", "R-H2"
     assert "do not reschedule the august twentieth acne check" in rh2_blob, "R-H2"
     assert "weekday morning" in rh2_blob, "R-H2"
     assert "reschedule_appointment" not in [c["name"] for c in rh2["exp_tool_calls"]], "R-H2"
@@ -454,7 +454,8 @@ def test_healthcare_leftover_holes_are_closed() -> None:
 
     assert "212-555-0133" in pin_blob(load("C5-H1")), "C5-H1"
     c5h2 = load("C5-H2")
-    assert "move" not in c5h2["scripted_responses"][0]["response_value"].lower(), "C5-H2"
+    greeting = next(p for p in c5h2["scripted_responses"] if "greets you" in (p.get("match_phrase") or ""))
+    assert "move" not in greeting["response_value"].lower(), "C5-H2"
     assert "no payment or dispute" in pin_blob(c5h2), "C5-H2"
 
     for path in tasks.glob("*/task.json"):

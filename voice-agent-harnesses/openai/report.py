@@ -420,11 +420,14 @@ class RealtimeEventTracer:
             tool = getattr(event, "tool", None)
             name = getattr(tool, "name", None) or "unknown_tool"
             args = getattr(event, "arguments", None)
+            call_id = getattr(event, "call_id", None) or getattr(tool, "call_id", None)
             attrs: dict[str, Any] = {
                 GenAIAttributes.GEN_AI_OPERATION_NAME: "execute_tool",
                 GenAIAttributes.GEN_AI_TOOL_NAME: name,
                 "mivas.event": "tool_start",
             }
+            if call_id is not None:
+                attrs["mivas.tool.call_id"] = str(call_id)
             if args is not None:
                 attrs[GenAIAttributes.GEN_AI_TOOL_CALL_ARGUMENTS] = _clip(args)
             self._tool_spans.setdefault(name, []).append(
@@ -441,11 +444,18 @@ class RealtimeEventTracer:
             name = getattr(tool, "name", None) or "unknown_tool"
             output = getattr(event, "output", None)
             args = getattr(event, "arguments", None)
+            call_id = getattr(event, "call_id", None) or getattr(tool, "call_id", None)
             spans = self._tool_spans.get(name)
             span = None
             if spans:
                 idx = 0
-                if args is not None:
+                if call_id is not None:
+                    want = str(call_id)
+                    for i, candidate in enumerate(spans):
+                        if candidate.attributes.get("mivas.tool.call_id") == want:
+                            idx = i
+                            break
+                elif args is not None:
                     clipped = _clip(args)
                     for i, candidate in enumerate(spans):
                         if candidate.attributes.get(
