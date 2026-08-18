@@ -25,7 +25,6 @@ import json
 import logging
 import os
 import time
-from collections import deque
 from contextlib import asynccontextmanager
 from typing import Any, AsyncIterator, Optional
 
@@ -286,7 +285,7 @@ class RealtimeEventTracer:
         self._model = model
         self._turn: Span | None = None
         self._turn_index = 0
-        self._tool_spans: dict[str, deque[Span]] = {}
+        self._tool_spans: dict[str, list[Span]] = {}
         self._seen_user_text: set[str] = set()
         # One generation span per Realtime response (response.created → response.done),
         # carrying tokens + TTFT, the way LangSmith/Langfuse report a model call.
@@ -428,7 +427,7 @@ class RealtimeEventTracer:
             }
             if args is not None:
                 attrs[GenAIAttributes.GEN_AI_TOOL_CALL_ARGUMENTS] = _clip(args)
-            self._tool_spans.setdefault(name, deque()).append(
+            self._tool_spans.setdefault(name, []).append(
                 self._tracer.start_span(
                     f"execute_tool {name}",
                     context=self._turn_ctx(),
@@ -441,10 +440,22 @@ class RealtimeEventTracer:
             tool = getattr(event, "tool", None)
             name = getattr(tool, "name", None) or "unknown_tool"
             output = getattr(event, "output", None)
+            args = getattr(event, "arguments", None)
             spans = self._tool_spans.get(name)
-            span = spans.popleft() if spans else None
-            if spans is not None and not spans:
-                self._tool_spans.pop(name, None)
+            span = None
+            if spans:
+                idx = 0
+                if args is not None:
+                    clipped = _clip(args)
+                    for i, candidate in enumerate(spans):
+                        if candidate.attributes.get(
+                            GenAIAttributes.GEN_AI_TOOL_CALL_ARGUMENTS
+                        ) == clipped:
+                            idx = i
+                            break
+                span = spans.pop(idx)
+                if not spans:
+                    self._tool_spans.pop(name, None)
             if span is not None:
                 if output is not None:
                     span.set_attribute(

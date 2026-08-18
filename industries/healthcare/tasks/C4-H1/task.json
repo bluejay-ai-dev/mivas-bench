@@ -92,7 +92,7 @@
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "offers one or more concrete appointment dates or times after saying the Park Avenue street address, floor, and suite, or asks you to choose among concrete consult slots after giving that full address. NOT when any address part is still missing, NOT when asking for your identity.",
+      "match_phrase": "offers one or more concrete appointment dates or times after saying the Park Avenue street address, floor, and suite, asks which day or time you want after giving that full address, or asks you to choose among concrete consult slots after giving that full address. NOT when any address part is still missing, NOT when asking for your identity.",
       "response_type": "phrase",
       "response_value": "Book the first time you offered. I agree to the deposit and cancellation policy, and I still need the deposit payment link texted to my phone."
     },

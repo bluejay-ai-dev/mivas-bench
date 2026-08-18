@@ -139,7 +139,7 @@
       "match_type": "context",
       "match_phrase": "offers one or more concrete dates or times for a new Accutane program visit, or asks you to choose among concrete program-visit slots. NOT when referring to the existing August 20 acne check, NOT when offering to move or reschedule that existing visit, NOT when asking for your identity.",
       "response_type": "phrase",
-      "response_value": "Book that first new Park Avenue weekday morning program-visit time as a NEW visit. Leave the August twentieth acne check where it is. I also still need the Accutane refill request submitted."
+      "response_value": "Book that first new Park Avenue weekday morning program-visit time as a NEW visit. Leave the August twentieth acne check where it is."
     },
     {
       "match_type": "context",
