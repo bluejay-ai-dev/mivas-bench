@@ -1,31 +1,19 @@
 {
-  "task_name": "C3-E3: Criminal matter declined",
-  "customer_name": "Devon Price",
-  "intent": "Open with exactly: \"I have a DUI charge from the Wayne County prosecutor.\" When asked who this would be against, say exactly: \"It's the Wayne County prosecutor.\" Accept if told the firm does not handle this. When told a person will take it from here, say exactly: \"Okay, thank you.\" and end the call.",
+  "task_name": "C2-H4: Other driver reveals after looking like a new client",
+  "customer_name": "Wade Killian",
+  "intent": "Open with exactly: \"I need to talk about a car accident.\" You sound like someone starting a new claim. Do not say you are being sued or that a client of this firm hit you unless asked who this would be against or who the other side is. When asked that, say exactly: \"I'm the one being sued. Your client hit me.\" You are the person being sued, not bringing a claim. After that, if they ask which state, when it happened, or for a written account, say exactly: \"I'm the other driver. I don't want to start a claim.\" If they offer an appointment, say exactly: \"That's all I needed today. Thank you.\" When told a person will take it from here, say exactly: \"Okay, thank you.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
-      "value": "Devon Price"
-    },
-    {
-      "trait_name": "practice_area",
-      "value": "criminal"
+      "value": "Wade Killian"
     },
     {
       "trait_name": "phone",
-      "value": "313-555-0111"
+      "value": "469-555-0288"
     }
   ],
-  "exp_handoff_path": [
-    "transfer_to_screening"
-  ],
+  "exp_handoff_path": [],
   "exp_tool_calls": [
-    {
-      "name": "check_practice_area",
-      "parameters": {
-        "practice_area": "criminal"
-      }
-    },
     {
       "name": "escalate_to_human"
     }
@@ -38,7 +26,7 @@
       "match_type": "context",
       "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
       "response_type": "phrase",
-      "response_value": "Devon Price, 313-555-0111.",
+      "response_value": "Wade Killian, 469-555-0288.",
       "occurrence_mode": "always"
     },
     {
@@ -52,15 +40,29 @@
       "match_type": "context",
       "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question.",
       "response_type": "phrase",
-      "response_value": "It's the Wayne County prosecutor.",
+      "response_value": "I'm the one being sued. Your client hit me.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks which state this happened in, or where it took place. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "I'm the other driver. I don't want to start a claim.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks when the incident happened, or for a written account of the accident",
+      "response_type": "phrase",
+      "response_value": "I'm the other driver. I don't want to start a claim.",
       "occurrence_mode": "always"
     }
   ],
   "customer_available_tools": {},
   "metadata": {
-    "category": "C3",
-    "category_slug": "eligibility-gates",
-    "difficulty": "easy",
+    "category": "C2",
+    "category_slug": "conflicts-and-barred",
+    "difficulty": "hard",
     "audio_condition": "perfect",
     "escalation": true
   },
@@ -93,8 +95,8 @@
       },
       {
         "id": "c_new",
-        "name": "Devon Price",
-        "phone": "3135550111"
+        "name": "Wade Killian",
+        "phone": "4695550288"
       }
     ],
     "intakes": [],
@@ -107,7 +109,7 @@
       {
         "id": 1,
         "caller_id": "c_new",
-        "reason_code": "practice_area"
+        "reason_code": "adverse_party"
       }
     ]
   }

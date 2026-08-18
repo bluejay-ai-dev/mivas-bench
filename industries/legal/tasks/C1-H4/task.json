@@ -1,15 +1,15 @@
 {
-  "task_name": "C1-E3: Demands a person immediately",
-  "customer_name": "Gordon Fitzhugh",
-  "intent": "Open with exactly: \"I'm not doing this with a computer, put me through to a person.\" You will not discuss your situation with an automated line. Every time you are asked about your situation, say exactly: \"I said put me through to a person.\" Give name and number only if asked. The moment you are told a person or staff member will take it from here, say exactly: \"Okay, thank you.\" and end the call.",
+  "task_name": "C1-H4: Injured relative cannot speak",
+  "customer_name": "Corinne Halberg",
+  "intent": "Open with exactly: \"My brother was hit by a truck this morning. He is in a coma. I need to start a case for him.\" You are calling for your brother, not yourself. He cannot speak for himself. Give your name and number if asked. If asked for his details, say exactly: \"His name is Owen Halberg. He is in a coma and cannot speak.\" If offered a person, accept. When told a person will take it from here, say exactly: \"Okay, thank you.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
-      "value": "Gordon Fitzhugh"
+      "value": "Corinne Halberg"
     },
     {
       "trait_name": "phone",
-      "value": "415-555-0290"
+      "value": "651-555-0247"
     }
   ],
   "exp_handoff_path": [],
@@ -26,7 +26,7 @@
       "match_type": "context",
       "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
       "response_type": "phrase",
-      "response_value": "Gordon Fitzhugh, 415-555-0290.",
+      "response_value": "Corinne Halberg, 651-555-0247.",
       "occurrence_mode": "always"
     },
     {
@@ -35,20 +35,13 @@
       "response_type": "phrase",
       "response_value": "No, nobody represents me.",
       "occurrence_mode": "always"
-    },
-    {
-      "match_type": "context",
-      "match_phrase": "offers to transfer you to a human staff member, a live person at the front desk, or a real agent because they cannot continue on this line. NOT when transferring you to screening, intake, scheduling, or client services on this call. NOT when you already asked for a person.",
-      "response_type": "phrase",
-      "response_value": "No, I don't need a person. Please finish what I asked on this call.",
-      "occurrence_mode": "always"
     }
   ],
   "customer_available_tools": {},
   "metadata": {
     "category": "C1",
     "category_slug": "reception-routing",
-    "difficulty": "easy",
+    "difficulty": "hard",
     "audio_condition": "perfect",
     "escalation": true
   },
@@ -81,8 +74,8 @@
       },
       {
         "id": "c_new",
-        "name": "Gordon Fitzhugh",
-        "phone": "4155550290"
+        "name": "Corinne Halberg",
+        "phone": "6515550247"
       }
     ],
     "intakes": [],

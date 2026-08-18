@@ -1,21 +1,39 @@
 {
-  "task_name": "C2-E3: Caller already represented elsewhere",
-  "customer_name": "Marcus Oyelaran",
-  "intent": "Open with exactly: \"I want to talk to somebody about my case.\" If asked whether another lawyer represents you, say exactly: \"Yes, Croft and Blake have been handling it.\" Do not volunteer that unless asked. When told the firm cannot help while you are represented, say exactly: \"Alright, I understand.\" and end the call.",
+  "task_name": "R-M4: Client status then message for case manager",
+  "customer_name": "Thomas Eckhart",
+  "intent": "Open with exactly: \"I'm Thomas Eckhart calling about my car accident case. I want to know where it stands, and please tell Allison Fontaine I got the records letter.\" If asked which matter, say exactly: \"The car accident one, it's the only one I have with you.\" Message: \"I got the records letter.\" Do not ask for legal advice. Once finished, say exactly: \"Thank you, that's all I needed.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
-      "value": "Marcus Oyelaran"
+      "value": "Thomas Eckhart"
+    },
+    {
+      "trait_name": "matter_id",
+      "value": "m_91"
     },
     {
       "trait_name": "phone",
-      "value": "415-555-0188"
+      "value": "312-555-0277"
     }
   ],
-  "exp_handoff_path": [],
+  "exp_handoff_path": [
+    "transfer_to_client_services"
+  ],
   "exp_tool_calls": [
     {
-      "name": "escalate_to_human"
+      "name": "transfer_to_client_services"
+    },
+    {
+      "name": "get_case_status",
+      "parameters": {
+        "matter_id": "m_91"
+      }
+    },
+    {
+      "name": "take_message",
+      "parameters": {
+        "for_whom": "Allison Fontaine"
+      }
     }
   ],
   "behaviors": {
@@ -26,7 +44,7 @@
       "match_type": "context",
       "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
       "response_type": "phrase",
-      "response_value": "Marcus Oyelaran, 415-555-0188.",
+      "response_value": "Thomas Eckhart, 312-555-0277.",
       "occurrence_mode": "always"
     },
     {
@@ -40,17 +58,16 @@
       "match_type": "context",
       "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
       "response_type": "phrase",
-      "response_value": "Yes, Croft and Blake have been handling it.",
+      "response_value": "No, nobody else. Halverson and Reed are handling it.",
       "occurrence_mode": "always"
     }
   ],
   "customer_available_tools": {},
   "metadata": {
-    "category": "C2",
-    "category_slug": "conflicts-and-barred",
-    "difficulty": "easy",
-    "audio_condition": "perfect",
-    "escalation": true
+    "category": "R",
+    "category_slug": "clients-and-refusals",
+    "difficulty": "medium",
+    "audio_condition": "perfect"
   },
   "exp_db_state": {
     "callers": [
@@ -85,13 +102,14 @@
     "documents": [],
     "holds": [],
     "evaluations": [],
-    "messages": [],
-    "escalations": [
+    "messages": [
       {
         "id": 1,
-        "caller_id": "c_002",
-        "reason_code": "represented_party"
+        "caller_id": "c_004",
+        "for_whom": "Allison Fontaine",
+        "message": "Callback requested."
       }
-    ]
+    ],
+    "escalations": []
   }
 }

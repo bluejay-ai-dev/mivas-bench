@@ -320,7 +320,7 @@ def build(
                 snapshots += 1
 
     def band_for(case_key: str, passes: list[bool]) -> str:
-        if len(passes) != 3:
+        if not passes:
             return "partial"
         if all(passes):
             return "always"
@@ -434,12 +434,12 @@ def build(
         sim_name = "mivas legal · latest aggregate (newer run supersedes per case)"
         run_url = f"https://app.getbluejay.ai/simulations/{SIM_ID}/runs/{latest_run_id}"
         data_gaps = [
-            "For each case, k=3 attempts come from the newest run that includes that case.",
+            "For each case, attempts come from the newest run that includes that case.",
             "Bluejay custom metrics not joined to this dashboard.",
             "DB compare is exact on prose columns — replay placeholders inflate mismatch rate vs tool-only success.",
         ]
     else:
-        sim_name = "mivas legal · prompt-adherence 66-case review"
+        sim_name = "mivas legal · prompt-adherence 72-case review"
         run_url = f"https://app.getbluejay.ai/simulations/{SIM_ID}/runs/{run_id}"
         data_gaps = [
             "Bluejay custom metrics not joined to this dashboard.",
@@ -455,7 +455,7 @@ def build(
         "runUrl": run_url,
         "simulationUrl": f"https://app.getbluejay.ai/simulations/{SIM_ID}",
         "generatedAt": now,
-        "runsPerDh": 3,
+        "runsPerDh": max((row["attempts"] for row in k_detail), default=3),
         "s3Bucket": S3_BUCKET,
         "s3Prefix": S3_PREFIX,
         "snapshotsFetched": snapshots,
@@ -796,8 +796,8 @@ export default function MivasLegalLatest() {
         <H1>{META.aggregate ? "Legal MIVAS — latest aggregate" : `Legal MIVAS — run ${META.runId}`}</H1>
         <Text tone="secondary">
           {META.aggregate
-            ? `Same scoring as a single-run dashboard. For each case, the newest run that includes it supersedes older k=3 attempts. Generated ${META.generatedAt}.`
-            : `Full k=3 deterministic scoring from a single simulation run. Generated ${META.generatedAt}.`}
+            ? `Same scoring as a single-run dashboard. For each case, the newest run that includes it supersedes older k=${META.runsPerDh} attempts. Generated ${META.generatedAt}.`
+            : `Full k=${META.runsPerDh} deterministic scoring from a single simulation run. Generated ${META.generatedAt}.`}
         </Text>
         <Row gap={16} wrap>
           <Link href={META.simulationUrl}>Simulation {META.simulationId}</Link>
@@ -883,7 +883,7 @@ export default function MivasLegalLatest() {
               categories={diffInBandCategories}
               series={diffInBandSeries}
             />
-            <Text size="small" tone="tertiary">{sourceNote} · k=3 case bands</Text>
+            <Text size="small" tone="tertiary">{sourceNote} · k={META.runsPerDh} case bands</Text>
           </CardBody>
         </Card>
         <Card>
@@ -905,12 +905,12 @@ export default function MivasLegalLatest() {
 
       <Grid columns={2} gap={24}>
         <Card>
-          <CardHeader>k=3 consistency bands</CardHeader>
+          <CardHeader>k={META.runsPerDh} consistency bands</CardHeader>
           <CardBody>
             <PieChart donut size={200} data={[
-              { label: "always (3/3)", value: K_BANDS.always ?? 0, tone: "success" },
+              { label: `always (${META.runsPerDh}/${META.runsPerDh})`, value: K_BANDS.always ?? 0, tone: "success" },
               { label: "mixed", value: K_BANDS.mixed ?? 0, tone: "warning" },
-              { label: "never (0/3)", value: K_BANDS.never ?? 0, tone: "danger" },
+              { label: `never (0/${META.runsPerDh})`, value: K_BANDS.never ?? 0, tone: "danger" },
             ]} />
             <Text size="small" tone="tertiary">{sourceNote}</Text>
           </CardBody>
@@ -946,7 +946,7 @@ export default function MivasLegalLatest() {
       </Stack>
 
       <Card>
-        <CardHeader trailing={`${K_DETAIL.length} cases`}>Case k=3 bands</CardHeader>
+        <CardHeader trailing={`${K_DETAIL.length} cases`}>Case k={META.runsPerDh} bands</CardHeader>
         <CardBody>
           <Table
             headers={["Case", "Band", "Pass", "Source run"]}
@@ -1003,7 +1003,7 @@ export default function MivasLegalLatest() {
 
       <Callout tone="info" title="Actionable clusters">
         <Stack gap={4}>
-          <Text size="small">1. Combined pass {COUNTS.combined_pass}/{COUNTS.scored_deterministic} — always {K_BANDS.always ?? 0} / mixed {K_BANDS.mixed ?? 0} / never {K_BANDS.never ?? 0} at k=3.</Text>
+          <Text size="small">1. Combined pass {COUNTS.combined_pass}/{COUNTS.scored_deterministic} — always {K_BANDS.always ?? 0} / mixed {K_BANDS.mixed ?? 0} / never {K_BANDS.never ?? 0} at k={META.runsPerDh}.</Text>
           <Text size="small">2. Tool misses: {topMissing || "none"}.</Text>
           <Text size="small">3. DB mismatches {COUNTS.db_fail}/{COUNTS.db_scored} — prose fields may differ from replay placeholders even when tools fire.</Text>
         </Stack>

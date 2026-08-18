@@ -1,43 +1,84 @@
 {
-  "task_name": "C5-E2: Declines after fee disclosure",
-  "customer_name": "Percival Ndiaye",
-  "intent": "Open with exactly: \"I was rear-ended by a Summit Hauling truck and I'm thinking about talking to a lawyer.\" When asked when, say exactly: \"It was July tenth, twenty twenty six.\" If asked to book a free evaluation before any fee numbers, say yes and look at times. When times are offered, take the first slot so they can hold it. After they have held a slot and read back that fee, say exactly: \"That's more than I expected \u2014 I'll call back later.\" Do not confirm booking. Do not ask for a staff member. End after declining to book.",
+  "task_name": "C3-H4: Employment in Washington clears screening",
+  "customer_name": "Wilhelmina Prado",
+  "intent": "Open with exactly: \"I was fired after I reported a safety problem at work.\" When asked who this would be against, say exactly: \"It's Evergreen Millwork.\" State is Washington. Date: June second, twenty twenty six. Accept packet by email if offered. Decline booking. After they send the packet or confirm intake is done, say exactly: \"Thank you, that's all I needed.\" Do not book an evaluation. End the call.",
   "traits": [
     {
       "trait_name": "full_name",
-      "value": "Percival Ndiaye"
-    },
-    {
-      "trait_name": "practice_area",
-      "value": "auto_accident"
-    },
-    {
-      "trait_name": "state",
-      "value": "CA"
+      "value": "Wilhelmina Prado"
     },
     {
       "trait_name": "opposing_party",
-      "value": "Summit Hauling"
+      "value": "Evergreen Millwork"
+    },
+    {
+      "trait_name": "practice_area",
+      "value": "employment"
+    },
+    {
+      "trait_name": "state",
+      "value": "WA"
     },
     {
       "trait_name": "incident_date",
-      "value": "2026-07-10"
+      "value": "2026-06-02"
     },
     {
       "trait_name": "phone",
-      "value": "404-555-0192"
+      "value": "360-555-0149"
     }
   ],
   "exp_handoff_path": [
     "transfer_to_screening",
-    "transfer_to_intake",
-    "transfer_to_scheduling"
+    "transfer_to_intake"
   ],
   "exp_tool_calls": [
     {
-      "name": "hold_evaluation",
+      "name": "transfer_to_screening"
+    },
+    {
+      "name": "check_conflict",
       "parameters": {
-        "practice_area": "auto_accident"
+        "opposing_party": "Evergreen Millwork"
+      }
+    },
+    {
+      "name": "check_practice_area",
+      "parameters": {
+        "practice_area": "employment"
+      }
+    },
+    {
+      "name": "check_jurisdiction",
+      "parameters": {
+        "state": "WA",
+        "practice_area": "employment"
+      }
+    },
+    {
+      "name": "calculate_filing_deadline",
+      "parameters": {
+        "state": "WA",
+        "practice_area": "employment",
+        "incident_date": "2026-06-02"
+      }
+    },
+    {
+      "name": "transfer_to_intake"
+    },
+    {
+      "name": "record_intake",
+      "parameters": {
+        "practice_area": "employment",
+        "state": "WA",
+        "incident_date": "2026-06-02",
+        "summary": "Retaliation after a workplace safety report."
+      }
+    },
+    {
+      "name": "send_intake_packet",
+      "parameters": {
+        "channel": "email"
       }
     }
   ],
@@ -49,7 +90,7 @@
       "match_type": "context",
       "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
       "response_type": "phrase",
-      "response_value": "Percival Ndiaye, 404-555-0192.",
+      "response_value": "Wilhelmina Prado, 360-555-0149.",
       "occurrence_mode": "always"
     },
     {
@@ -63,21 +104,21 @@
       "match_type": "context",
       "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question.",
       "response_type": "phrase",
-      "response_value": "It's Summit Hauling.",
+      "response_value": "It's Evergreen Millwork.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
       "match_phrase": "The agent asks which state this happened in, or where it took place. NOT any other question.",
       "response_type": "phrase",
-      "response_value": "In California.",
+      "response_value": "In Washington.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
       "match_phrase": "The agent asks when the incident happened, or for the date of the accident, injury or event. NOT any other question.",
       "response_type": "phrase",
-      "response_value": "It was July tenth, twenty twenty six.",
+      "response_value": "It was June second, twenty twenty six.",
       "occurrence_mode": "always"
     },
     {
@@ -89,31 +130,24 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks whether you want to book a free case evaluation or set up an evaluation appointment, before stating any percentage fee, dollar fee, or contingency number. NOT after a fee amount has already been read back.",
+      "match_phrase": "asks whether you want to book a case evaluation, a free evaluation, or an appointment",
       "response_type": "phrase",
-      "response_value": "Yes, let's look at times.",
+      "response_value": "No thank you. Intake is enough. That's all I needed.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent offers available appointment times or asks which slot to hold. NOT after a slot is already held and they are asking to confirm that booking.",
+      "match_phrase": "The agent asks whether to send the packet by email or text, or which channel to use. NOT any other question.",
       "response_type": "phrase",
-      "response_value": "I'll take the first time you offered.",
-      "occurrence_mode": "always"
-    },
-    {
-      "match_type": "context",
-      "match_phrase": "The agent has already held a slot and is reading back that held appointment's fee, asking whether to confirm it. NOT when listing open times or asking which slot to hold, even if a fee percentage was mentioned on that same turn.",
-      "response_type": "phrase",
-      "response_value": "That's more than I expected \u2014 I'll call back later.",
+      "response_value": "Email is fine.",
       "occurrence_mode": "always"
     }
   ],
   "customer_available_tools": {},
   "metadata": {
-    "category": "C5",
-    "category_slug": "fees-and-booking",
-    "difficulty": "easy",
+    "category": "C3",
+    "category_slug": "eligibility-gates",
+    "difficulty": "hard",
     "audio_condition": "perfect"
   },
   "exp_db_state": {
@@ -145,35 +179,30 @@
       },
       {
         "id": "c_new",
-        "name": "Percival Ndiaye",
-        "phone": "4045550192"
+        "name": "Wilhelmina Prado",
+        "phone": "3605550149"
       }
     ],
     "intakes": [
       {
         "id": 1,
         "caller_id": "c_new",
-        "practice_area": "auto_accident",
-        "state": "CA",
-        "incident_date": "2026-07-10",
-        "summary": "Rear-end collision."
+        "practice_area": "employment",
+        "state": "WA",
+        "incident_date": "2026-06-02",
+        "summary": "Retaliation after a workplace safety report."
       }
     ],
     "intake_notes": [],
-    "documents": [],
-    "holds": [
+    "documents": [
       {
-        "token": "HR-EVAL-3092",
-        "kind": "evaluation",
+        "id": 1,
         "caller_id": "c_new",
-        "slot_id": "s_110",
-        "evaluation_id": null,
-        "practice_area": "auto_accident",
-        "reason": null,
-        "summary": "Tom Eckhart on 2026-08-11 at 09:00. The evaluation is free. If the firm takes the case there is no fee unless it wins: 33.33% of any recovery before a lawsuit is filed, 40% if a lawsuit is filed.",
-        "consumed": 0
+        "kind": "intake_packet",
+        "target": "email"
       }
     ],
+    "holds": [],
     "evaluations": [],
     "messages": [],
     "escalations": []
