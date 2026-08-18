@@ -45,12 +45,6 @@
       }
     },
     {
-      "name": "search_practice_kb",
-      "parameters": {
-        "topic": "directions"
-      }
-    },
-    {
       "name": "list_locations"
     },
     {
