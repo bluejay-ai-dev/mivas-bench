@@ -1,0 +1,23 @@
+tests/test_verify_task_run.py
+  s_2b9cb68c67e91b::t_9b8de996a585c5 84-118
+scripts/verify_task_run.py
+  s_2b9cb68c67e91b::t_95799b165645fc 252-265,277
+  s_2b9cb68c67e91b::t_a605f5e4744b5b 34
+  s_2b9cb68c67e91b::t_cc841dbc5e3f47 129-134
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "4b23d2bcf52ee597b5649b4fa17a3b1b4708a06d",
+  "prompts": {},
+  "sessions": {
+    "s_2b9cb68c67e91b": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "c8af8cf2-bbd2-4e91-a9bb-f9b97c47bb30",
+        "model": "cursor-grok-4.6-high-fast"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
