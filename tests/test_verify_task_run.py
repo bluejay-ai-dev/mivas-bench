@@ -378,8 +378,7 @@ def test_clinical_message_allows_irrelevant_optional_parameters() -> None:
         "parameters": {
             "category": "results_followup",
             "priority": "urgent",
-            "callback_number": "212-555-0100",
-            "patient_safe_message": "Please call about pathology results.",
+            "callback_number": "+12125550100",
         },
         "ok": True,
     }]

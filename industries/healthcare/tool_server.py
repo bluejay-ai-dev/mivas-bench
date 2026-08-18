@@ -185,26 +185,42 @@ def create_appointment(body: AppointmentCreate) -> dict[str, Any]:
             "SELECT 1 FROM providers WHERE id = ?", (body.provider_id,)
         ).fetchone() is None:
             raise HTTPException(status_code=400, detail="unknown provider_id")
-        cur = conn.execute(
-            """
-            INSERT INTO appointments (
-              patient_id, location_id, provider_id, appointment_type_code,
-              start, end, description
-            ) VALUES (?, ?, ?, ?, ?, ?, ?)
-            """,
-            (
-                body.patient_id,
-                body.location_id,
-                body.provider_id,
-                body.appointment_type_code,
-                body.start,
-                body.end,
-                body.description,
-            ),
-        )
-        row = conn.execute(
-            "SELECT * FROM appointments WHERE id = ?", (cur.lastrowid,)
-        ).fetchone()
+        try:
+            cur = conn.execute(
+                """
+                INSERT INTO appointments (
+                  patient_id, location_id, provider_id, appointment_type_code,
+                  start, end, description
+                ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    body.patient_id,
+                    body.location_id,
+                    body.provider_id,
+                    body.appointment_type_code,
+                    body.start,
+                    body.end,
+                    body.description,
+                ),
+            )
+        except sqlite3.IntegrityError:
+            row = conn.execute(
+                """
+                SELECT * FROM appointments
+                WHERE ifnull(patient_id, '') = ifnull(?, '')
+                  AND location_id = ?
+                  AND appointment_type_code = ?
+                  AND status = 'booked'
+                ORDER BY id LIMIT 1
+                """,
+                (body.patient_id, body.location_id, body.appointment_type_code),
+            ).fetchone()
+            if row is None:
+                raise HTTPException(status_code=409, detail="appointment conflict")
+        else:
+            row = conn.execute(
+                "SELECT * FROM appointments WHERE id = ?", (cur.lastrowid,)
+            ).fetchone()
     if row is None:
         raise HTTPException(status_code=500, detail="insert failed")
     return _appointment(row)
