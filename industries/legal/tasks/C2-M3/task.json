@@ -21,13 +21,7 @@
       }
     },
     {
-      "name": "get_caller_matters"
-    },
-    {
-      "name": "escalate_to_human",
-      "parameters": {
-        "reason_code": "represented_party"
-      }
+      "name": "escalate_to_human"
     }
   ],
   "behaviors": {

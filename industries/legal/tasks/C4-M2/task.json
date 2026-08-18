@@ -1,7 +1,7 @@
 {
   "task_name": "C4-M2: Witness detail captured as note",
   "customer_name": "Franklin Deshpande",
-  "intent": "Open with exactly: \"The ladder rung snapped while I was standing on it.\" The manufacturer is Halloway Toolworks. After giving basics, add exactly once: \"My neighbour Ruth Callahan saw it and still has the broken ladder.\" After you have given the witness name and the manufacturer, wait for the agent to finish intake. Then thank and end.",
+  "intent": "Open with exactly: \"The ladder rung snapped while I was standing on it. It was a Halloway Toolworks ladder. My neighbour Ruth Callahan saw it and still has the broken ladder.\" If asked for more, repeat the manufacturer and witness. Stay on the line through intake so the witness can be written down. After they record intake, say exactly: \"Please add an intake note that Ruth Callahan saw it and I still have the broken ladder.\" Decline booking. After intake is done, thank and end. Do not hang up when asked for the manufacturer \u2014 you already named Halloway Toolworks.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -74,6 +74,27 @@
       "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question.",
       "response_type": "phrase",
       "response_value": "It's Halloway Toolworks.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "has recorded the intake or asks if there is anything else to add",
+      "response_type": "phrase",
+      "response_value": "Please add an intake note that Ruth Callahan saw it and I still have the broken ladder.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to transfer you to a human staff member, a live person at the front desk, or a real agent because they cannot continue on this line. NOT when transferring you to screening, intake, scheduling, or client services on this call. NOT when you already asked for a person.",
+      "response_type": "phrase",
+      "response_value": "No, I don't need a person. Please finish what I asked on this call.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks whether you want to book a case evaluation or appointment",
+      "response_type": "phrase",
+      "response_value": "No thank you. Intake is enough.",
       "occurrence_mode": "always"
     }
   ],

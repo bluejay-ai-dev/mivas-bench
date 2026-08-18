@@ -19,6 +19,9 @@
       "parameters": {
         "full_name": "Percival Ndiaye"
       }
+    },
+    {
+      "name": "escalate_to_human"
     }
   ],
   "behaviors": {
@@ -45,7 +48,8 @@
     "category": "R",
     "category_slug": "clients-and-refusals",
     "difficulty": "medium",
-    "audio_condition": "perfect"
+    "audio_condition": "perfect",
+    "escalation": true
   },
   "exp_db_state": {
     "callers": [
@@ -86,6 +90,12 @@
     "holds": [],
     "evaluations": [],
     "messages": [],
-    "escalations": []
+    "escalations": [
+      {
+        "id": 1,
+        "caller_id": "c_new",
+        "reason_code": "legal_advice_requested"
+      }
+    ]
   }
 }

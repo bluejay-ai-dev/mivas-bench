@@ -30,9 +30,6 @@
   ],
   "exp_tool_calls": [
     {
-      "name": "get_caller_matters"
-    },
-    {
       "name": "transfer_to_screening"
     },
     {
@@ -49,15 +46,11 @@
       "parameters": {
         "practice_area": "premises_liability",
         "state": "CA",
-        "incident_date": "2026-01-18",
         "summary": ""
       }
     },
     {
-      "name": "escalate_to_human",
-      "parameters": {
-        "reason_code": "conflict_review"
-      }
+      "name": "escalate_to_human"
     }
   ],
   "behaviors": {
@@ -147,7 +140,7 @@
         "caller_id": "c_new",
         "practice_area": "premises_liability",
         "state": "CA",
-        "incident_date": "2026-01-18",
+        "incident_date": "",
         "summary": "Intake summary."
       }
     ],

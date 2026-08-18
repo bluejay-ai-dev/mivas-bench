@@ -15,10 +15,7 @@
   "exp_handoff_path": [],
   "exp_tool_calls": [
     {
-      "name": "escalate_to_human",
-      "parameters": {
-        "reason_code": "caller_request"
-      }
+      "name": "escalate_to_human"
     }
   ],
   "behaviors": {
@@ -41,7 +38,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers to transfer you to a human, a person, the front desk, or a live agent. NOT when you already asked for a person.",
+      "match_phrase": "offers to transfer you to a human staff member, a live person at the front desk, or a real agent because they cannot continue on this line. NOT when transferring you to screening, intake, scheduling, or client services on this call. NOT when you already asked for a person.",
       "response_type": "phrase",
       "response_value": "No, I don't need a person. Please finish what I asked on this call.",
       "occurrence_mode": "always"

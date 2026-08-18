@@ -1,7 +1,7 @@
 {
   "task_name": "C4-M1: Medical records authorization",
   "customer_name": "Franklin Deshpande",
-  "intent": "Open with exactly: \"A ladder I bought collapsed and I broke my ankle.\" Manufacturer Halloway Toolworks. Georgia. April twenty second, twenty twenty six. If records release offered, accept. Once finished, say exactly: \"Thank you, that's all I needed.\" and end the call.",
+  "intent": "Open with exactly: \"A ladder I bought collapsed and I broke my ankle.\" Manufacturer Halloway Toolworks. Georgia. April twenty second, twenty twenty six. If records release offered, accept. When asked which doctor, hospital, clinic, or provider treated you, say exactly: \"Northside Orthopedic.\" Once finished, say exactly: \"Thank you, that's all I needed.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -84,6 +84,13 @@
       "match_phrase": "The agent asks when the incident happened, or for the date of the accident, injury or event. NOT any other question.",
       "response_type": "phrase",
       "response_value": "It was April twenty second, twenty twenty six.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks which doctor, hospital, clinic, or medical provider treated you, or where to send a records authorization. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "Northside Orthopedic.",
       "occurrence_mode": "always"
     }
   ],

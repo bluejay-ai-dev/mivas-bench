@@ -30,9 +30,6 @@
   ],
   "exp_tool_calls": [
     {
-      "name": "get_caller_matters"
-    },
-    {
       "name": "transfer_to_screening"
     },
     {
@@ -49,15 +46,11 @@
       "parameters": {
         "practice_area": "medical_malpractice",
         "state": "IL",
-        "incident_date": "2025-11-02",
         "summary": ""
       }
     },
     {
-      "name": "escalate_to_human",
-      "parameters": {
-        "reason_code": "conflict_review"
-      }
+      "name": "escalate_to_human"
     }
   ],
   "behaviors": {
@@ -147,7 +140,7 @@
         "caller_id": "c_new",
         "practice_area": "medical_malpractice",
         "state": "IL",
-        "incident_date": "2025-11-02",
+        "incident_date": "",
         "summary": "Intake summary."
       }
     ],

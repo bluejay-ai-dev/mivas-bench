@@ -16,7 +16,9 @@
       "value": "770-555-0193"
     }
   ],
-  "exp_handoff_path": [],
+  "exp_handoff_path": [
+    "transfer_to_screening"
+  ],
   "exp_tool_calls": [
     {
       "name": "check_practice_area",
@@ -25,10 +27,7 @@
       }
     },
     {
-      "name": "escalate_to_human",
-      "parameters": {
-        "reason_code": "practice_area"
-      }
+      "name": "escalate_to_human"
     }
   ],
   "behaviors": {
@@ -47,6 +46,13 @@
       "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
       "response_type": "phrase",
       "response_value": "No, nobody represents me.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "It's a personal matter, not a claim against a company.",
       "occurrence_mode": "always"
     }
   ],
