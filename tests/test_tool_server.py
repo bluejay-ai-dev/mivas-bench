@@ -337,6 +337,62 @@ def test_healthcare_prompt_demands_are_satisfiable() -> None:
         assert "not accepted at any" in med["data"]["notes"], med["data"]
 
 
+def test_allergy_service_window_and_idempotent() -> None:
+    with _load_tool_server("healthcare") as module, TestClient(module.app) as client:
+        booked = client.post(
+            "/tools/schedule_allergy_service",
+            json={"arguments": {
+                "service": "skin_testing",
+                "location_id": "loc_park_ave",
+                "window_start": "2026-08-24T00:00:00",
+                "window_end": "2026-08-24T17:00:00",
+            }},
+        ).json()
+        assert booked["ok"], booked
+        assert booked["data"]["appointment"]["start"] == "2026-08-24T09:00:00"
+
+        unavailable = client.post(
+            "/tools/schedule_allergy_service",
+            json={"arguments": {
+                "service": "patch_testing",
+                "location_id": "loc_park_ave",
+                "window_start": "2026-08-24T00:00:00",
+                "window_end": "2026-08-24T01:00:00",
+            }},
+        ).json()
+        assert unavailable["error_code"] == "NO_AVAILABILITY"
+
+        args = {
+            "service": "allergy_shot",
+            "location_id": "loc_brooklyn_heights",
+            "window_start": "2026-08-24T00:00:00",
+            "window_end": "2026-08-24T17:00:00",
+        }
+        assert client.post(
+            "/tools/verify_identity",
+            json={"arguments": {"full_name": "Leo Park", "dob": "2016-03-22"}},
+        ).json()["ok"]
+        first = client.post("/tools/schedule_allergy_service", json={"arguments": args}).json()
+        repeated = client.post("/tools/schedule_allergy_service", json={"arguments": args}).json()
+        assert first["ok"] and repeated["ok"]
+        assert repeated["data"]["appointment"]["id"] == first["data"]["appointment"]["id"]
+        assert repeated["data"]["idempotent"] is True
+        matching = [
+            row for row in client.get("/state").json()["appointments"]
+            if row["patient_id"] == "pat_leo_park"
+            and row["appointment_type_code"] == "ALLERGY_ALLERGY_SHOT"
+            and row["status"] == "booked"
+        ]
+        assert len(matching) == 1
+
+
+def test_refill_tool_takes_only_medication_name() -> None:
+    tools = json.loads((ROOT / "industries" / "healthcare" / "tools.json").read_text())["tools"]
+    refill = next(tool for tool in tools if tool["name"] == "request_rx_refill")
+    assert refill["inputSchema"]["required"] == ["medication_name"]
+    assert set(refill["inputSchema"]["properties"]) == {"medication_name"}
+
+
 def test_healthcare_calls_are_isolated() -> None:
     """Two concurrent calls must not share an identity pin, a balance or a row.
 

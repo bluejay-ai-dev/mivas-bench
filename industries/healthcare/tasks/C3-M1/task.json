@@ -1,6 +1,6 @@
 {
   "task_name": "C3-M1: Copay for a Park Avenue visit",
-  "intent": "Open by saying you are Jordan Lee, date of birth April twelfth nineteen ninety, an existing Straus patient, and you need your copay for a regular visit at Park Avenue on August twenty-fourth, twenty twenty-six. You are an existing Straus patient. You want to know your copay for a regular visit at Park Avenue on August twenty-fourth, twenty twenty-six. If they ask who you are, give your name and date of birth once, confirm the readback, then continue with the copay. You do not have your insurance card with you; they should already have Aetna on file. If they still ask for the member ID after they have looked you up, give it. Once they tell you the copay, thank them and end the call. Do not ask to book, reschedule, or cancel. Do not ask to change insurance. Do not ask for a callback, to speak to a person, a payment, the patient portal, a waitlist, a text, financing, or the street, floor, or suite. If they try to quote a copay without looking you up, give your name and date of birth again and ask them to pull your chart. Stay until they have looked up the copay on your chart. A spoken guess without a lookup is not enough.",
+  "intent": "Open by saying you are Jordan Lee, date of birth April twelfth nineteen ninety, an existing Straus patient, and you need your copay for a regular visit at Park Avenue on August twenty-fourth, twenty twenty-six. You are an existing Straus patient. You want to know your copay for a regular visit at Park Avenue on August twenty-fourth, twenty twenty-six. If they ask who you are, give your name and date of birth once, confirm the readback, then continue with the copay. They should already have Aetna on file, but you know your member ID is W123456789. If they ask for the member ID after they have looked you up, give that exact ID. Once they tell you the copay, thank them and end the call. Do not ask to book, reschedule, or cancel. Do not ask to change insurance. Do not ask for a callback, to speak to a person, a payment, the patient portal, a waitlist, a text, financing, or the street, floor, or suite. If they try to quote a copay without looking you up, give your name and date of birth again and ask them to pull your chart. Stay until they have looked up the copay on your chart. A spoken guess without a lookup is not enough.",
   "traits": [
     {
       "trait_name": "date_of_birth",
@@ -90,9 +90,15 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "asks for your member ID, insurance card, or to read the numbers off your card, and they have not already confirmed your name. NOT when they already looked you up or verified you, NOT when they are reading a member ID back for confirmation, NOT when asking only for the visit date or which office.",
+      "match_phrase": "asks for your member ID or insurance card before verifying you or opening your chart. NOT when they already looked you up or verified you, NOT when they are reading a member ID back for confirmation, NOT when asking only for the visit date or which office.",
       "response_type": "phrase",
-      "response_value": "I don't have my card with me. I'm already a patient \u2014 it should be on file."
+      "response_value": "Please verify me and pull my chart first. My Aetna information should already be on file."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks for your member ID after saying your identity was verified or your chart was opened. NOT when they are reading the member ID back for confirmation, NOT before identity verification.",
+      "response_type": "phrase",
+      "response_value": "My Aetna member ID is W123456789."
     },
     {
       "match_type": "context",

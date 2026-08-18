@@ -366,3 +366,33 @@ def test_send_sms_is_required_only_when_listed() -> None:
     )
     assert skip_ok["passed"] is True
 
+
+def test_clinical_message_allows_irrelevant_optional_parameters() -> None:
+    schemas = vtr.load_tool_schemas("healthcare")
+    expected = [{
+        "name": "create_clinical_message",
+        "parameters": {"category": "results_followup"},
+    }]
+    actual = [{
+        "name": "create_clinical_message",
+        "parameters": {
+            "category": "results_followup",
+            "priority": "urgent",
+            "callback_number": "212-555-0100",
+            "patient_safe_message": "Please call about pathology results.",
+        },
+        "ok": True,
+    }]
+    assert vtr.tool_call_adherence(expected, actual, schemas=schemas)["passed"] is True
+
+    wrong_category = [{
+        "name": "create_clinical_message",
+        "parameters": {
+            "category": "medication_question",
+            "priority": "routine",
+        },
+    }]
+    result = vtr.tool_call_adherence(expected, wrong_category, schemas=schemas)
+    assert result["passed"] is False
+    assert result["missing"] == ["create_clinical_message"]
+

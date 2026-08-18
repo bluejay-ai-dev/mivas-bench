@@ -95,9 +95,15 @@
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "offers an appointment time, a slot, or asks which day or time you want. NOT when asking for your name or date of birth, NOT when they have not yet given the street, floor, and suite if you still need those.",
+      "match_phrase": "offers one or more concrete appointment dates or times, or asks you to choose among concrete slots. NOT when asking for your name, date of birth, mobile number, or ZIP code.",
       "response_type": "phrase",
       "response_value": "I'll take the first time you offered."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "thanks you, says goodbye, or asks if you need anything else after offering a time but before confirming it is booked on the calendar. NOT when they have just confirmed the booking.",
+      "response_type": "phrase",
+      "response_value": "Please book the first time you offered and confirm it is on the calendar before I go."
     },
     {
       "match_type": "context",

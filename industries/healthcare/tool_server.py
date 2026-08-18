@@ -733,24 +733,62 @@ def _d_schedule_allergy_service(a: dict[str, Any]) -> dict[str, Any]:
     if spec is None:
         raise ToolError("UNKNOWN_SERVICE", f"No allergy service named {a['service']!r}.")
     loc = _resolve_location(a["location_id"])
+    window_start = str(a.get("window_start") or "")
+    window_end = str(a.get("window_end") or "")
+    duration_minutes = 30 + spec["observation_min"]
+    available = [
+        slot_start
+        for slot_start in _SLOT_TIMES
+        if (not window_start or slot_start >= window_start)
+        and (
+            not window_end
+            or _iso_plus_minutes(slot_start, duration_minutes) <= window_end
+        )
+    ]
+    if not available:
+        raise ToolError(
+            "NO_AVAILABILITY",
+            "No allergy appointment is available inside that window. Offer another window.",
+        )
+    start = available[0]
+    patient_id = _session_state().get("patient_id")
+    appointment_type_code = f"ALLERGY_{service.upper()}"
     with _db() as conn:
         prov = conn.execute(
             "SELECT * FROM providers WHERE location_id = ? ORDER BY id LIMIT 1", (loc["id"],)
         ).fetchone()
-    start = str(a.get("window_start") or _SLOT_TIMES[0])
+        existing = conn.execute(
+            """
+            SELECT * FROM appointments
+            WHERE patient_id IS ? AND location_id = ? AND appointment_type_code = ?
+              AND status = 'booked'
+            ORDER BY id LIMIT 1
+            """,
+            (patient_id, loc["id"], appointment_type_code),
+        ).fetchone()
+    if existing is not None:
+        return {
+            "appointment": _appointment(existing),
+            "idempotent": True,
+            "prep_instructions": spec["prep"],
+            "observation_minutes_after": spec["observation_min"],
+            "linked_return_visits": spec["linked_visits"],
+            "note": "This allergy service was already booked; do not create it again.",
+        }
     created = create_appointment(
         AppointmentCreate(
-            patient_id=_session_state().get("patient_id"),
+            patient_id=patient_id,
             location_id=loc["id"],
             provider_id=prov["id"],
-            appointment_type_code=f"ALLERGY_{service.upper()}",
+            appointment_type_code=appointment_type_code,
             start=start,
-            end=_iso_plus_minutes(start, 30 + spec["observation_min"]),
+            end=_iso_plus_minutes(start, duration_minutes),
             description=f"Allergy service: {service}",
         )
     )
     return {
         "appointment": created,
+        "idempotent": False,
         "prep_instructions": spec["prep"],
         "observation_minutes_after": spec["observation_min"],
         "linked_return_visits": spec["linked_visits"],
