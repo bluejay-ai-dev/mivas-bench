@@ -448,7 +448,7 @@ class RealtimeEventTracer:
             spans = self._tool_spans.get(name)
             span = None
             if spans:
-                idx = 0
+                idx = None
                 if call_id is not None:
                     want = str(call_id)
                     for i, candidate in enumerate(spans):
@@ -463,9 +463,12 @@ class RealtimeEventTracer:
                         ) == clipped:
                             idx = i
                             break
-                span = spans.pop(idx)
-                if not spans:
-                    self._tool_spans.pop(name, None)
+                else:
+                    idx = 0
+                if idx is not None:
+                    span = spans.pop(idx)
+                    if not spans:
+                        self._tool_spans.pop(name, None)
             if span is not None:
                 if output is not None:
                     span.set_attribute(

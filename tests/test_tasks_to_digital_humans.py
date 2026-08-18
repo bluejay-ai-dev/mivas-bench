@@ -465,8 +465,9 @@ def test_healthcare_leftover_holes_are_closed() -> None:
     by_key = {conv.case_key_of(dh): dh for dh in _humans()}
     for case_key in ("C1-M3", "C2-H2"):
         allergy = next(c for c in by_key[case_key]["expected_tool_calls"] if c["name"] == "schedule_allergy_service")
-        assert "window_start" not in allergy["parameters"]
-        assert "window_end" not in allergy["parameters"]
+        params = allergy.get("parameters") or {}
+        assert "window_start" not in params
+        assert "window_end" not in params
     rh2_dh = by_key["R-H2"]
     book = next(c for c in rh2_dh["expected_tool_calls"] if c["name"] == "book_appointment")
     assert book["parameters"]["slot_id"] == "slot_loc_park_ave_1"
