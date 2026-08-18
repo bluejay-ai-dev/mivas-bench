@@ -1,6 +1,6 @@
 {
   "task_name": "C2-H2: Allergy shot for a child",
-  "intent": "You are a parent calling on behalf of your son. He is an existing patient and he is due for his next allergy shot at Brooklyn Heights. When they ask who the patient is, give his name and date of birth once, say you are his father if they ask who is calling, then continue. Do not repeat his name or date of birth unless they say it did not match. Ask how long you have to stay after the shot so you can plan pickup from school. If they ask what day or search window you want, say first available. Do not suggest a date, date range, or time of your own, and do not ask for a different office. Take the first daytime appointment they offer at Brooklyn Heights. If they offer a time outside office hours, such as midnight, say that does not sound right and take the first daytime time they offer next. Confirm that time out loud, then thank them and end the call. Do not move, reschedule, or cancel any other appointment. Do not ask for a regular medical visit. Do not ask to add insurance, for a callback, to speak to a person, a bill, a payment, the patient portal, a waitlist, a text, financing, or the street, floor, or suite. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar. If they only list openings, say book the first one. If they start to book a regular medical visit, stop them and say this is his allergy shot, not a regular appointment. Stay until the shot is scheduled.",
+  "intent": "You are a parent calling on behalf of your son. He is an existing patient and he is due for his next allergy shot at Brooklyn Heights. When they ask who the patient is, give his name and date of birth once, say you are his father if they ask who is calling, then continue. Do not repeat his name or date of birth unless they say it did not match. Ask how long you have to stay after the shot so you can plan pickup from school. If they ask what day or search window you want, or yes or no to search a date range, say first available, not yes. If they offer a callback, decline. Do not suggest a date, date range, or time of your own, and do not ask for a different office. Take the first daytime appointment they offer at Brooklyn Heights. If they offer a time outside office hours, such as midnight, say that does not sound right and take the first daytime time they offer next. Confirm that time out loud, then thank them and end the call. Do not move, reschedule, or cancel any other appointment. Do not ask for a regular medical visit. Do not ask to add insurance, for a callback, to speak to a person, a bill, a payment, the patient portal, a waitlist, a text, financing, or the street, floor, or suite. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar. If they only list openings, say book the first one. If they start to book a regular medical visit, stop them and say this is his allergy shot, not a regular appointment. Stay until the shot is scheduled.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -90,9 +90,27 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers an appointment time, a slot, or asks which day or time you want. NOT when asking for your name or date of birth, NOT when they have not yet given the street, floor, and suite if you still need those.",
+      "match_phrase": "offers a specific appointment clock time, or asks you to confirm a specific day and time they just named. NOT when asking for your name or date of birth, NOT when they have not yet given the street, floor, and suite if you still need those, NOT when they are only asking permission to search a date range and have not named a clock time.",
       "response_type": "phrase",
       "response_value": "I'll take the first daytime time you offered."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks what day or search window you want, asks permission to search a date range, or asks yes or no for next week or a window, without having offered a specific appointment clock time. NOT when they have just named a specific day and clock time, NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "First available. Please book the first daytime time at Brooklyn Heights."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers a callback, asks for a number to call you back, says the front desk will call or follow up, or says they cannot schedule the shot on this call. NOT when they have just confirmed the allergy shot is on the calendar, NOT when asking for your identity.",
+      "response_type": "phrase",
+      "response_value": "No callback. Please schedule the allergy shot on this call."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before the allergy shot is confirmed on the calendar. NOT when they have just confirmed the shot is booked.",
+      "response_type": "phrase",
+      "response_value": "I still need the allergy shot scheduled. Please confirm a daytime time is on the calendar before I go."
     },
     {
       "match_type": "context",
