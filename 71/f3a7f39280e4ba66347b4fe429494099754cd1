@@ -1,0 +1,152 @@
+industries/healthcare/tasks/C3-M1/task.json
+  s_866a5388a42d8e::t_1f99e6f8ace735 3,93,95-101
+industries/healthcare/tasks/C5-H1/task.json
+  s_aaa40aea2fb2f8::t_22664713636deb 125-128
+  s_aaa40aea2fb2f8::t_53e12f83b7a5f5 123-124
+industries/healthcare/system-prompts/scheduling.md
+  s_5039cc521d49fc::t_cf14ffa021bc77 158-168,198-201
+industries/healthcare/system-prompts/clinical.md
+  s_fe90f2f98408ce::t_0007b9f1fd7a1b 142-147
+  s_03bf0a0b2c4276::t_351ef35c6e764f 133-138,140-141
+  s_6a7be852ecf16f::t_b2d383a5f3b546 139
+tests/test_tool_server.py
+  s_5039cc521d49fc::t_3421f40031ec7d 354-355,362-363
+  s_5039cc521d49fc::t_ca9909b8cac7e5 388
+  s_fe90f2f98408ce::t_a18936e7698ea3 340,342,344-352,356-361,375-376,381-384,389-390
+  s_5039cc521d49fc::t_790392f2ffc353 365-374,377-380,385-386
+  s_5039cc521d49fc::t_493a1150219fff 394-395
+  s_5039cc521d49fc::t_4a02888ce9fd8c 341,343,353,364
+  s_5039cc521d49fc::t_8396e9beaf8ca8 387
+  s_03bf0a0b2c4276::t_d184373631acb2 391-393
+industries/healthcare/system-prompts/billing.md
+  s_5039cc521d49fc::t_5735c4a102a433 120-127
+voice-agent-harnesses/openai/test_llm_usage_span.py
+  s_fe90f2f98408ce::t_07bb8d0ca35850 144
+  s_5039cc521d49fc::t_46299240ccf17f 34-92
+industries/healthcare/tasks/C4-M1/task.json
+  s_aaa40aea2fb2f8::t_2fb22602db3a1f 92-95
+  s_aaa40aea2fb2f8::t_2169bc4ae7a132 90-91
+industries/healthcare/tasks/C5-H2/task.json
+  s_aaa40aea2fb2f8::t_232adf95a145ba 131,133,170-175
+industries/healthcare/tasks/C1-M3/task.json
+  s_6a7be852ecf16f::t_d00de8bcad0660 49
+industries/healthcare/tasks/C2-H2/task.json
+  s_6a7be852ecf16f::t_f36aad8dd7807d 71
+industries/healthcare/tasks/C5-M3/task.json
+  s_866a5388a42d8e::t_4e88f38c886c5d 3,87-98
+industries/healthcare/tasks/C2-M3/task.json
+  s_aaa40aea2fb2f8::t_d320049c54457f 105,107
+industries/healthcare/tasks/R-H2/task.json
+  s_93606885ec9071::t_0f85505bac2c2e 3
+  s_93606885ec9071::t_c26fdbfbeccc7c 158-161
+  s_93606885ec9071::t_83b168e86ac49a 182,184
+  s_93606885ec9071::t_ce4e9198edd688 140,142
+  s_93606885ec9071::t_f1d86d91e6c6e2 122-128,130,156-157
+industries/healthcare/tasks/C4-H1/task.json
+  s_aaa40aea2fb2f8::t_02d8825ed97a70 95,97
+industries/healthcare/system-prompts/coverage.md
+  s_5039cc521d49fc::t_41522f5e36419c 144-150
+voice-agent-harnesses/openai/report.py
+  s_5039cc521d49fc::t_ba89c84bf7d444 28,289,322-325,431-437,444-447
+industries/healthcare/tasks/C1-H1/task.json
+  s_aaa40aea2fb2f8::t_7daec2fab82f74 105-108
+  s_aaa40aea2fb2f8::t_41a8365a78663f 103-104
+industries/healthcare/tasks/C3-H1/task.json
+  s_aaa40aea2fb2f8::t_676f799a3239fa 89,91
+tests/test_tasks_to_digital_humans.py
+  s_aaa40aea2fb2f8::t_2211cbbb2bbbf8 438-439,449-450,453
+  s_fe90f2f98408ce::t_a205f61c9a13c6 370-379,384,390,396-397,399,401,405-410,412-415,417,420,422,426-433,436,440-445,447-448,451-452,454,457-470
+  s_93606885ec9071::t_6bf6657078a999 446
+  s_aaa40aea2fb2f8::t_198b9f489e6a97 455-456
+  s_866a5388a42d8e::t_2e47db4845eba2 78-107,434-435,437
+  s_fe90f2f98408ce::t_925776694a7c26 425
+  s_fe90f2f98408ce::t_2dd20c572aaaa0 6
+  s_5039cc521d49fc::t_760a766692f837 387-389
+  s_fe90f2f98408ce::t_63bf0646860b92 391-393
+  s_fe90f2f98408ce::t_98b40126523c41 471
+industries/healthcare/tasks/C2-M1/task.json
+  s_aaa40aea2fb2f8::t_18d4cd7f72f6f1 96
+  s_aaa40aea2fb2f8::t_985195ff938c1f 112,114
+industries/healthcare/tasks/C5-H3/task.json
+  s_aaa40aea2fb2f8::t_6c4a8bf00c8229 109,158-163
+tests/test_verify_task_run.py
+  s_aaa40aea2fb2f8::t_250a9f7c5acd66 369-398
+industries/healthcare/tool_server.py
+  s_5039cc521d49fc::t_88b236263e81c4 736-753,785
+  s_5039cc521d49fc::t_3028be8e8d8df1 754-755,760-777,780,783,791
+industries/healthcare/tasks/C1-H2/task.json
+  s_5039cc521d49fc::t_47c7be2f1d5a2d 159,163,165-171
+industries/healthcare/tasks/C1-H3/task.json
+  s_aaa40aea2fb2f8::t_bd2340fd50662e 98,102-106
+  s_aaa40aea2fb2f8::t_de26a3aefe22bb 107
+industries/healthcare/tools.json
+  s_fe90f2f98408ce::t_0961313cd80a0c 597
+  s_fe90f2f98408ce::t_fec708b9041619 563
+  s_fe90f2f98408ce::t_ccb0aacd906870 1146
+  s_fe90f2f98408ce::t_551aa184cdc328 592
+  s_03bf0a0b2c4276::t_c8abcb1e668fb2 1228
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "71f3a7f39280e4ba66347b4fe429494099754cd1",
+  "prompts": {},
+  "sessions": {
+    "s_03bf0a0b2c4276": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "cce7d148-1827-4f08-9610-7f23b4c69826",
+        "model": "gpt-5.6-sol-medium-fast"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    },
+    "s_5039cc521d49fc": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "6b03f847-61a2-43d4-a11b-19a9778dbc05",
+        "model": "gpt-5.6-sol-medium-fast"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    },
+    "s_6a7be852ecf16f": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "968b6b8d-413e-45d9-be56-f8768d3e89b0",
+        "model": "gpt-5.6-sol-medium-fast"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    },
+    "s_866a5388a42d8e": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "e51c9ae0-312f-4584-99a1-e690678e77f7",
+        "model": "gpt-5.6-sol-medium-fast"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    },
+    "s_93606885ec9071": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "0233d708-8298-4859-b26d-bf7c4395ce7d",
+        "model": "cursor-grok-4.6-high-fast"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    },
+    "s_aaa40aea2fb2f8": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "5dca1a30-3e19-4eaa-9f87-ad51959f4504",
+        "model": "gpt-5.6-sol-medium-fast"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    },
+    "s_fe90f2f98408ce": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "87cf1cde-07c3-45f9-85f0-06db01052429",
+        "model": "cursor-grok-4.6-high-fast"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
