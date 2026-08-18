@@ -128,9 +128,9 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers an appointment time, a slot, or asks which day or time you want. NOT when asking for your name or date of birth, NOT when they have not yet given the street, floor, and suite if you still need those.",
+      "match_phrase": "offers one or more concrete appointment dates or times after the balance and a charge explanation have been given, or asks you to choose among concrete slots. NOT before billing is explained, NOT when asking for your identity.",
       "response_type": "phrase",
-      "response_value": "I'll take the first time you offered."
+      "response_value": "Move tomorrow's visit to the first time you offered and confirm it is on the calendar."
     },
     {
       "match_type": "context",
@@ -167,6 +167,12 @@
       "match_phrase": "states the balance and explains a charge, then thanks you or starts wrapping up before moving tomorrow's appointment. NOT when scheduling is already finding a new time.",
       "response_type": "phrase",
       "response_value": "Thanks. I also cannot make tomorrow's Park Avenue appointment. Please move it to the first later opening."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks whether you want to pay, finance, dispute, or receive a payment link after stating the balance and explaining a charge. NOT before both the balance and a charge explanation have been given.",
+      "response_type": "phrase",
+      "response_value": "No payment or dispute. Now move tomorrow's Park Avenue appointment to the first later opening."
     }
   ],
   "customer_name": "Jordan Lee",

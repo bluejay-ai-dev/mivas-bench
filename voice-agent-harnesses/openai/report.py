@@ -25,6 +25,7 @@ import json
 import logging
 import os
 import time
+from collections import deque
 from contextlib import asynccontextmanager
 from typing import Any, AsyncIterator, Optional
 
@@ -285,7 +286,7 @@ class RealtimeEventTracer:
         self._model = model
         self._turn: Span | None = None
         self._turn_index = 0
-        self._tool_spans: dict[str, Span] = {}
+        self._tool_spans: dict[str, deque[Span]] = {}
         self._seen_user_text: set[str] = set()
         # One generation span per Realtime response (response.created → response.done),
         # carrying tokens + TTFT, the way LangSmith/Langfuse report a model call.
@@ -318,9 +319,10 @@ class RealtimeEventTracer:
         """End the model span, any open tools, and the turn itself."""
         if self._llm_span is not None:
             self._finish_llm(None)
-        for span in list(self._tool_spans.values()):
-            span.set_status(Status(StatusCode.OK))
-            span.end()
+        for spans in list(self._tool_spans.values()):
+            for span in spans:
+                span.set_status(Status(StatusCode.OK))
+                span.end()
         self._tool_spans.clear()
         if self._turn is not None:
             self._turn.set_status(Status(StatusCode.OK))
@@ -426,18 +428,23 @@ class RealtimeEventTracer:
             }
             if args is not None:
                 attrs[GenAIAttributes.GEN_AI_TOOL_CALL_ARGUMENTS] = _clip(args)
-            self._tool_spans[name] = self._tracer.start_span(
-                f"execute_tool {name}",
-                context=self._turn_ctx(),
-                kind=SpanKind.INTERNAL,
-                attributes=attrs,
+            self._tool_spans.setdefault(name, deque()).append(
+                self._tracer.start_span(
+                    f"execute_tool {name}",
+                    context=self._turn_ctx(),
+                    kind=SpanKind.INTERNAL,
+                    attributes=attrs,
+                )
             )
 
         elif etype == "tool_end":
             tool = getattr(event, "tool", None)
             name = getattr(tool, "name", None) or "unknown_tool"
             output = getattr(event, "output", None)
-            span = self._tool_spans.pop(name, None)
+            spans = self._tool_spans.get(name)
+            span = spans.popleft() if spans else None
+            if spans is not None and not spans:
+                self._tool_spans.pop(name, None)
             if span is not None:
                 if output is not None:
                     span.set_attribute(

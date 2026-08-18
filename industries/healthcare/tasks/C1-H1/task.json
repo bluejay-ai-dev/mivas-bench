@@ -102,6 +102,12 @@
     },
     {
       "match_type": "context",
+      "match_phrase": "says you have been transferred, connected, or sent to scheduling but no appointment time has been confirmed on the calendar. NOT when a specific time has already been booked.",
+      "response_type": "phrase",
+      "response_value": "The transfer is not the appointment. Please keep going and book the first available doctor time at Brooklyn Heights."
+    },
+    {
+      "match_type": "context",
       "match_phrase": "offers the waitlist, a later opening, or to add you to a list. NOT when offering a specific appointment time to book now, NOT when asking for your name or date of birth.",
       "response_type": "phrase",
       "response_value": "No waitlist. Please just finish what I asked."

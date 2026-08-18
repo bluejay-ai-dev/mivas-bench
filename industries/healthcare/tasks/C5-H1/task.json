@@ -122,6 +122,12 @@
     },
     {
       "match_type": "context",
+      "match_phrase": "offers to text a payment link, asks whether you want the payment link by text, or asks which mobile number should receive the payment link. NOT when offering an appointment confirmation, directions, or another unrelated text.",
+      "response_type": "phrase",
+      "response_value": "Yes, please text the payment link to 212-555-0133."
+    },
+    {
+      "match_type": "context",
       "match_phrase": "thanks you, says goodbye, or offers a payment link before they have looked up a payment plan or financing. NOT when they have just confirmed a plan from their system.",
       "response_type": "phrase",
       "response_value": "I still need a way to spread this out. Please look up a payment plan before I go."

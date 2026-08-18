@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import sys
 from collections import Counter
 from pathlib import Path
@@ -72,6 +73,36 @@ def test_clones_share_source_easy_voice() -> None:
         clone = by_key[key]
         assert (clone["accent"], clone["gender"]) == (source["accent"], source["gender"])
         assert clone["name"] == source["name"]
+
+
+def test_clones_match_source_semantics_except_audio_metadata() -> None:
+    tasks_dir = ROOT / "industries" / "healthcare" / "tasks"
+    for clone_path in sorted(tasks_dir.glob("*-BG/task.json")) + sorted(
+        tasks_dir.glob("*-SIG/task.json")
+    ):
+        clone_key = clone_path.parent.name
+        source_key = conv.source_case_key(clone_key)
+        clone = json.loads(clone_path.read_text())
+        source = json.loads((tasks_dir / source_key / "task.json").read_text())
+
+        assert {
+            item["trait_name"]: item.get("value") for item in clone["traits"]
+        } == {
+            item["trait_name"]: item.get("value") for item in source["traits"]
+        }, clone_key
+        for field in (
+            "intent",
+            "exp_handoff_path",
+            "exp_tool_calls",
+            "behaviors",
+            "scripted_responses",
+            "customer_name",
+            "customer_available_tools",
+            "exp_db_state",
+        ):
+            assert clone.get(field) == source.get(field), f"{clone_key}: {field}"
+        for field in ("category", "category_slug", "difficulty"):
+            assert clone["metadata"][field] == source["metadata"][field], clone_key
 
 
 def test_audio_condition_mapping() -> None:
@@ -170,8 +201,6 @@ def test_api_url_reads_env_after_import(monkeypatch) -> None:
 
 
 def test_json_emits_raw_digital_humans(capsys) -> None:
-    import json
-
     conv.main(["--industry", "healthcare", "--json"])
     body = json.loads(capsys.readouterr().out)
     humans = body["digital_humans"]
@@ -282,8 +311,6 @@ def test_encoder_stamps_creativity_zero() -> None:
 
 
 def test_healthcare_send_sms_only_when_caller_wants_text() -> None:
-    import json
-
     enc = _encoder()
     keep: list[str] = []
     for path in sorted((ROOT / "industries" / "healthcare" / "tasks").glob("*/task.json")):
@@ -338,50 +365,107 @@ def test_encoder_omits_waitlist_latest_and_location_zip() -> None:
 
 
 def test_healthcare_leftover_holes_are_closed() -> None:
-    import json
-
     tasks = ROOT / "industries" / "healthcare" / "tasks"
 
-    c2h1 = json.loads((tasks / "C2-H1" / "task.json").read_text())
+    def load(key: str) -> dict:
+        return json.loads((tasks / key / "task.json").read_text())
+
+    def pin_blob(task: dict) -> str:
+        return " ".join(
+            f"{pin.get('match_phrase', '')} {pin.get('response_value', '')}"
+            for pin in task.get("scripted_responses") or []
+        ).lower()
+
+    c2h1 = load("C2-H1")
     wait = next(c for c in c2h1["exp_tool_calls"] if c["name"] == "join_waitlist")
     assert "latest" not in (wait.get("parameters") or {})
     assert "23:59:59" not in json.dumps(wait)
 
-    c1h2 = json.loads((tasks / "C1-H2" / "task.json").read_text())
+    c1h2 = load("C1-H2")
     loc = next(c for c in c1h2["exp_tool_calls"] if c["name"] == "list_locations")
     assert "zip" not in (loc.get("parameters") or {})
+    opening = c1h2["intent"].split("Stay until", 1)[0].lower()
+    assert "weekday" in opening and "train" in opening
+    for requirement in ("train", "street address", "floor", "suite", "calendar"):
+        assert requirement in pin_blob(c1h2)
+    spoken = (c1h2["intent"] + " " + pin_blob(c1h2)).lower()
+    assert "search_practice_kb" not in spoken
+    assert "verifier" not in spoken
 
     for key in ("C4-M1", "C4-M2"):
-        task = json.loads((tasks / key / "task.json").read_text())
-        pins = task.get("scripted_responses") or []
-        assert isinstance(pins, list) and pins, key
+        task = load(key)
+        assert task.get("scripted_responses"), key
         loc = next(c for c in task["exp_tool_calls"] if c["name"] == "list_locations")
-        assert (loc.get("parameters") or {}) in ({}, None) or "zip" not in loc.get("parameters", {})
+        assert "zip" not in (loc.get("parameters") or {})
 
-    c4m2 = json.loads((tasks / "C4-M2" / "task.json").read_text())
+    c4m2 = load("C4-M2")
     names = [c["name"] for c in c4m2["exp_tool_calls"]]
     assert "offer_financing" not in names
     assert "find_slots" in names
-    pin_text = " ".join(p.get("response_value") or "" for p in c4m2["scripted_responses"])
-    assert "calendar" in pin_text.lower() or "booked" in pin_text.lower()
+    assert "calendar" in pin_blob(c4m2) or "booked" in pin_blob(c4m2)
 
-    c5h3 = json.loads((tasks / "C5-H3" / "task.json").read_text())
-    explains = [c for c in c5h3["exp_tool_calls"] if c["name"] == "explain_charge"]
-    assert len(explains) == 2
-    premature = [
-        p for p in c5h3["scripted_responses"]
-        if "I'll pay the full balance now" in (p.get("response_value") or "")
+    c5h3 = load("C5-H3")
+    assert len([c for c in c5h3["exp_tool_calls"] if c["name"] == "explain_charge"]) == 2
+    assert not any(
+        "I'll pay the full balance now" in (p.get("response_value") or "")
         and "any line" in (p.get("match_phrase") or "")
-    ]
-    assert not premature
+        for p in c5h3["scripted_responses"]
+    )
+    assert "34786" in pin_blob(c5h3)
+    assert "407-555-0155" in pin_blob(c5h3)
 
-    c2h3 = json.loads((tasks / "C2-H3" / "task.json").read_text())
+    c2h3 = load("C2-H3")
     assert "join_waitlist" not in [c["name"] for c in c2h3["exp_tool_calls"]]
     assert (c2h3.get("exp_db_state") or {}).get("waitlist") == []
-    sibling = json.loads((tasks / "C2-H3" / "exp_db_state.json").read_text())
-    assert sibling.get("waitlist") == []
+    assert json.loads((tasks / "C2-H3" / "exp_db_state.json").read_text()).get("waitlist") == []
 
-    c3m2 = json.loads((tasks / "C3-M2" / "task.json").read_text())
-    captured = next(c for c in c3m2["exp_tool_calls"] if c["name"] == "capture_insurance_update")
+    captured = next(c for c in load("C3-M2")["exp_tool_calls"] if c["name"] == "capture_insurance_update")
     assert "group_number" not in (captured.get("parameters") or {})
+
+    assert "w123456789" in pin_blob(load("C3-M1"))
+    assert "11201" in pin_blob(load("C5-M3"))
+    assert "transfer is not the appointment" in pin_blob(load("C1-H1"))
+    assert "No thanks, I don't need a text." not in [
+        pin.get("response_value") for pin in load("C4-E1").get("scripted_responses") or []
+    ]
+
+    c4h2 = load("C4-H2")
+    assert "verify_identity" not in [c["name"] for c in c4h2["exp_tool_calls"]]
+    assert "transfer_to_identity" not in c4h2["exp_handoff_path"]
+
+    rh1 = load("R-H1")
+    message = next(c for c in rh1["exp_tool_calls"] if c["name"] == "create_clinical_message")
+    assert message["parameters"] == {"category": "results_followup"}
+
+    rh2 = load("R-H2")
+    rh2_blob = rh2["intent"].lower() + " " + pin_blob(rh2)
+    assert "parameters" not in next(c for c in rh2["exp_tool_calls"] if c["name"] == "request_rx_refill")
+    assert "do not reschedule the august twentieth acne check" in rh2_blob
+    assert "weekday morning" in rh2_blob
+    assert "reschedule_appointment" not in [c["name"] for c in rh2["exp_tool_calls"]]
+
+    rh3_names = [c["name"] for c in load("R-H3")["exp_tool_calls"]]
+    assert rh3_names.index("request_rx_refill") < rh3_names.index("create_clinical_message")
+
+    c4m1 = load("C4-M1")
+    assert "microneedling" in pin_blob(c4m1)
+    assert not any("before a time has been confirmed" in (p.get("match_phrase") or "") for p in c4m1["scripted_responses"])
+
+    assert "212-555-0133" in pin_blob(load("C5-H1"))
+    c5h2 = load("C5-H2")
+    assert "move" not in c5h2["scripted_responses"][0]["response_value"].lower()
+    assert "no payment or dispute" in pin_blob(c5h2)
+
+    for path in tasks.glob("*/task.json"):
+        phrases = [p["match_phrase"] for p in json.loads(path.read_text()).get("scripted_responses") or []]
+        assert len(phrases) == len(set(phrases)), path.parent.name
+
+    by_key = {conv.case_key_of(dh): dh for dh in _humans()}
+    for case_key in ("C1-M3", "C2-H2"):
+        allergy = next(c for c in by_key[case_key]["expected_tool_calls"] if c["name"] == "schedule_allergy_service")
+        assert "window_start" not in allergy["parameters"]
+        assert "window_end" not in allergy["parameters"]
+    rh2_dh = by_key["R-H2"]
+    book = next(c for c in rh2_dh["expected_tool_calls"] if c["name"] == "book_appointment")
+    assert book["parameters"]["slot_id"] == "slot_loc_park_ave_1"
 

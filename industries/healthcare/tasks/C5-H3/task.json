@@ -106,7 +106,7 @@
       "match_type": "context",
       "match_phrase": "asks for your full name and date of birth, or asks you to confirm who you are, or asks for the patient's name and date of birth. NOT when asking only for a member ID or insurance card, NOT when asking which office or location, NOT when asking for a phone or mobile number, NOT when asking about an appointment day or time, NOT when reading your name and date of birth back to you for confirmation.",
       "response_type": "phrase",
-      "response_value": "Alice Romano. My date of birth is September eighth, nineteen ninety-five."
+      "response_value": "Alice Romano. My date of birth is September eighth, nineteen ninety-five, and my ZIP code is 34786."
     },
     {
       "match_type": "context",
@@ -155,6 +155,12 @@
       "match_phrase": "thanks you, says goodbye, or offers a payment link before they have named both the missed-visit fee and the visit charge. NOT when they have just named both lines.",
       "response_type": "phrase",
       "response_value": "Please name both charges first \u2014 the missed-visit fee and the visit \u2014 then text the payment link to 407-555-0155."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks what you want to do after naming both the missed-visit fee and the visit charge, or asks whether you want to pay the full balance. NOT when only one line has been named.",
+      "response_type": "phrase",
+      "response_value": "I'll pay the full balance now. Please text a payment link to 407-555-0155."
     }
   ],
   "customer_name": "Alice Romano",

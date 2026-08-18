@@ -92,9 +92,9 @@
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "offers an appointment time, a slot, or asks which day or time you want AFTER already saying the street address, the floor, and the suite. NOT when they have not yet given all three, NOT when asking for your name or date of birth.",
+      "match_phrase": "offers one or more concrete appointment dates or times after saying the Park Avenue street address, floor, and suite, or asks you to choose among concrete consult slots after giving that full address. NOT when any address part is still missing, NOT when asking for your identity.",
       "response_type": "phrase",
-      "response_value": "I'll take the first time you offered."
+      "response_value": "Book the first time you offered. I agree to the deposit and cancellation policy, and I still need the deposit payment link texted to my phone."
     },
     {
       "match_type": "context",
@@ -131,12 +131,6 @@
       "match_phrase": "thanks you, says goodbye, confirms a consult time, or asks if you need anything else before saying a deposit payment link was sent. NOT when they have just said the payment link or deposit link was sent.",
       "response_type": "phrase",
       "response_value": "Please text me the deposit payment link before I go."
-    },
-    {
-      "match_type": "context",
-      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before a time has been confirmed on the calendar. NOT when they have just confirmed a booked time.",
-      "response_type": "phrase",
-      "response_value": "I still need that time booked. Please confirm it is on the calendar before I go."
     }
   ],
   "customer_name": "Franklin Osei",
