@@ -1,0 +1,25 @@
+voice-agent-harnesses/openai/report.py
+  s_fe90f2f98408ce::t_11ac710d3db3fa 448-453,462,464,468-469,473-475,482,485-486
+  s_fe90f2f98408ce::t_c0f96352319dc2 293-294
+  s_fe90f2f98408ce::t_1a90ac37091e1b 332
+  s_fe90f2f98408ce::t_a92cf870f34b61 77-80,82
+voice-agent-harnesses/openai/test_llm_usage_span.py
+  s_fe90f2f98408ce::t_8fc3412ab74f4c 133
+  s_fe90f2f98408ce::t_e3415641b1ace0 117-132,134-145
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "b08022e110067cd4b2c5e7f7204e468fdf22930e",
+  "prompts": {},
+  "sessions": {
+    "s_fe90f2f98408ce": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "87cf1cde-07c3-45f9-85f0-06db01052429",
+        "model": "cursor-grok-4.6-high-fast"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
