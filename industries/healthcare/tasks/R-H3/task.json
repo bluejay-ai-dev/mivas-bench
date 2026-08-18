@@ -74,7 +74,6 @@
     {
       "name": "create_clinical_message",
       "parameters": {
-        "priority": "urgent",
         "category": "rx_question"
       },
       "output": {

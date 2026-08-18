@@ -367,6 +367,35 @@ def test_send_sms_is_required_only_when_listed() -> None:
     assert skip_ok["passed"] is True
 
 
+def test_clinical_message_allows_irrelevant_optional_parameters() -> None:
+    schemas = vtr.load_tool_schemas("healthcare")
+    expected = [{
+        "name": "create_clinical_message",
+        "parameters": {"category": "results_followup"},
+    }]
+    actual = [{
+        "name": "create_clinical_message",
+        "parameters": {
+            "category": "results_followup",
+            "priority": "urgent",
+            "callback_number": "+12125550100",
+        },
+        "ok": True,
+    }]
+    assert vtr.tool_call_adherence(expected, actual, schemas=schemas)["passed"] is True
+
+    wrong_category = [{
+        "name": "create_clinical_message",
+        "parameters": {
+            "category": "nurse_question",
+            "priority": "routine",
+        },
+    }]
+    result = vtr.tool_call_adherence(expected, wrong_category, schemas=schemas)
+    assert result["passed"] is False
+    assert result["missing"] == ["create_clinical_message"]
+
+
 def test_for_whom_matches_casefold() -> None:
     assert vtr._values_equal("for_whom", "Daniel Okonkwo", "daniel okonkwo") is True
     assert vtr._values_equal("for_whom", "Allison Fontaine", " allison fontaine ") is True
@@ -508,4 +537,5 @@ def test_legal_booking_rows_ignore_slot_identity() -> None:
         }],
     }
     assert vtr.office_states_match(expected, actual, industry="legal") is True
+
 

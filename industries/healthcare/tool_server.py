@@ -185,26 +185,42 @@ def create_appointment(body: AppointmentCreate) -> dict[str, Any]:
             "SELECT 1 FROM providers WHERE id = ?", (body.provider_id,)
         ).fetchone() is None:
             raise HTTPException(status_code=400, detail="unknown provider_id")
-        cur = conn.execute(
-            """
-            INSERT INTO appointments (
-              patient_id, location_id, provider_id, appointment_type_code,
-              start, end, description
-            ) VALUES (?, ?, ?, ?, ?, ?, ?)
-            """,
-            (
-                body.patient_id,
-                body.location_id,
-                body.provider_id,
-                body.appointment_type_code,
-                body.start,
-                body.end,
-                body.description,
-            ),
-        )
-        row = conn.execute(
-            "SELECT * FROM appointments WHERE id = ?", (cur.lastrowid,)
-        ).fetchone()
+        try:
+            cur = conn.execute(
+                """
+                INSERT INTO appointments (
+                  patient_id, location_id, provider_id, appointment_type_code,
+                  start, end, description
+                ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    body.patient_id,
+                    body.location_id,
+                    body.provider_id,
+                    body.appointment_type_code,
+                    body.start,
+                    body.end,
+                    body.description,
+                ),
+            )
+        except sqlite3.IntegrityError:
+            row = conn.execute(
+                """
+                SELECT * FROM appointments
+                WHERE ifnull(patient_id, '') = ifnull(?, '')
+                  AND location_id = ?
+                  AND appointment_type_code = ?
+                  AND status = 'booked'
+                ORDER BY id LIMIT 1
+                """,
+                (body.patient_id, body.location_id, body.appointment_type_code),
+            ).fetchone()
+            if row is None:
+                raise HTTPException(status_code=409, detail="appointment conflict")
+        else:
+            row = conn.execute(
+                "SELECT * FROM appointments WHERE id = ?", (cur.lastrowid,)
+            ).fetchone()
     if row is None:
         raise HTTPException(status_code=500, detail="insert failed")
     return _appointment(row)
@@ -332,6 +348,11 @@ def _iso_plus_minutes(start: str, minutes: int) -> str:
     from datetime import datetime, timedelta
 
     return (datetime.fromisoformat(start) + timedelta(minutes=minutes)).isoformat()
+
+
+def _naive_iso(ts: str) -> str:
+    ts = str(ts or "")
+    return ts.replace("Z", "+00:00")[:19] if ts else ts
 
 
 # --- identity ----------------------------------------------------------------
@@ -733,24 +754,84 @@ def _d_schedule_allergy_service(a: dict[str, Any]) -> dict[str, Any]:
     if spec is None:
         raise ToolError("UNKNOWN_SERVICE", f"No allergy service named {a['service']!r}.")
     loc = _resolve_location(a["location_id"])
+    duration_minutes = 30 + spec["observation_min"]
+    patient_id = _session_state().get("patient_id")
+    appointment_type_code = f"ALLERGY_{service.upper()}"
     with _db() as conn:
         prov = conn.execute(
             "SELECT * FROM providers WHERE location_id = ? ORDER BY id LIMIT 1", (loc["id"],)
         ).fetchone()
-    start = str(a.get("window_start") or _SLOT_TIMES[0])
-    created = create_appointment(
-        AppointmentCreate(
-            patient_id=_session_state().get("patient_id"),
-            location_id=loc["id"],
-            provider_id=prov["id"],
-            appointment_type_code=f"ALLERGY_{service.upper()}",
-            start=start,
-            end=_iso_plus_minutes(start, 30 + spec["observation_min"]),
-            description=f"Allergy service: {service}",
+        existing = conn.execute(
+            """
+            SELECT * FROM appointments
+            WHERE patient_id IS ? AND location_id = ? AND appointment_type_code = ?
+              AND status = 'booked'
+            ORDER BY id LIMIT 1
+            """,
+            (patient_id, loc["id"], appointment_type_code),
+        ).fetchone()
+    if existing is not None:
+        return {
+            "appointment": _appointment(existing),
+            "idempotent": True,
+            "prep_instructions": spec["prep"],
+            "observation_minutes_after": spec["observation_min"],
+            "linked_return_visits": spec["linked_visits"],
+            "note": "This allergy service was already booked; do not create it again.",
+        }
+    window_start = _naive_iso(str(a.get("window_start") or ""))
+    window_end = _naive_iso(str(a.get("window_end") or ""))
+    available = [
+        slot_start
+        for slot_start in _SLOT_TIMES
+        if (not window_start or slot_start >= window_start)
+        and (
+            not window_end
+            or _naive_iso(_iso_plus_minutes(slot_start, duration_minutes)) <= window_end
         )
-    )
+    ]
+    if not available:
+        raise ToolError(
+            "NO_AVAILABILITY",
+            "No allergy appointment is available inside that window. Offer another window.",
+        )
+    start = available[0]
+    try:
+        created = create_appointment(
+            AppointmentCreate(
+                patient_id=patient_id,
+                location_id=loc["id"],
+                provider_id=prov["id"],
+                appointment_type_code=appointment_type_code,
+                start=start,
+                end=_iso_plus_minutes(start, duration_minutes),
+                description=f"Allergy service: {service}",
+            )
+        )
+    except sqlite3.IntegrityError:
+        with _db() as conn:
+            existing = conn.execute(
+                """
+                SELECT * FROM appointments
+                WHERE patient_id IS ? AND location_id = ? AND appointment_type_code = ?
+                  AND status = 'booked'
+                ORDER BY id LIMIT 1
+                """,
+                (patient_id, loc["id"], appointment_type_code),
+            ).fetchone()
+        if existing is None:
+            raise
+        return {
+            "appointment": _appointment(existing),
+            "idempotent": True,
+            "prep_instructions": spec["prep"],
+            "observation_minutes_after": spec["observation_min"],
+            "linked_return_visits": spec["linked_visits"],
+            "note": "This allergy service was already booked; do not create it again.",
+        }
     return {
         "appointment": created,
+        "idempotent": False,
         "prep_instructions": spec["prep"],
         "observation_minutes_after": spec["observation_min"],
         "linked_return_visits": spec["linked_visits"],
@@ -1025,7 +1106,6 @@ def _d_request_rx_refill(a: dict[str, Any]) -> dict[str, Any]:
             return payload
     _event("rx_refill_request", {"patient_id": patient["id"], **a, "route": "routed_to_provider"})
     return {"route": "routed_to_provider", "hard_stop": False, "approved": False,
-            "pharmacy_needed": not a.get("pharmacy_phone"),
             "note": "The request is with the clinical team; this never approves a refill."}
 
 
