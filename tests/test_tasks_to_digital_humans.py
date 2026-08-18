@@ -508,3 +508,47 @@ def test_healthcare_leftover_holes_are_closed() -> None:
     book = next(c for c in rh2_dh["expected_tool_calls"] if c["name"] == "book_appointment")
     assert book["parameters"]["slot_id"] == "slot_loc_park_ave_1"
 
+
+def test_legal_fairness_c2h1_state_pin_and_rm_lookup_only() -> None:
+    tasks = ROOT / "industries" / "legal" / "tasks"
+
+    def load(key: str) -> dict:
+        return json.loads((tasks / key / "task.json").read_text())
+
+    c2h1 = load("C2-H1")
+    opening, _, rest = c2h1["intent"].partition('"')
+    first_line, _, body = rest.partition('"')
+    assert first_line == "I slipped on ice outside my apartment and broke my wrist."
+    assert "CA" not in first_line
+    assert "california" not in first_line.lower()
+    assert "january" not in first_line.lower()
+    assert "twenty twenty six" not in first_line.lower()
+    assert 'say exactly: "In CA."' in body
+    assert "which state" in body.lower()
+    pins = c2h1.get("scripted_responses") or []
+    assert any(pin.get("response_value") == "In CA." for pin in pins)
+    assert any(
+        "which state this happened in" in (pin.get("match_phrase") or "").lower()
+        for pin in pins
+    )
+    intake = next(c for c in c2h1["exp_tool_calls"] if c["name"] == "record_intake")
+    assert (intake.get("parameters") or {}) == {
+        "practice_area": "premises_liability",
+        "state": "CA",
+        "summary": "",
+    }
+
+    for key in ("R-M1", "R-M2"):
+        task = load(key)
+        names = [c["name"] for c in task["exp_tool_calls"]]
+        assert names == ["lookup_caller"], key
+        assert "escalate_to_human" not in names, key
+        assert not task.get("metadata", {}).get("escalation"), key
+        assert (task.get("exp_db_state") or {}).get("escalations") == [], key
+
+    c1m3 = load("C1-M3")
+    take = next(c for c in c1m3["exp_tool_calls"] if c["name"] == "take_message")
+    assert "for_whom" not in (take.get("parameters") or {})
+    for row in (c1m3.get("exp_db_state") or {}).get("messages") or []:
+        assert "for_whom" not in row
+

@@ -302,7 +302,7 @@ def all_cases() -> list[dict[str, Any]]:
             "two oh six, five five five, zero three eight four.\" Message: \"Tell them "
             "Wendell Marsh called about a fall at a grocery store and wants a call back.\"",
         ),
-        "tools": [t("take_message", for_whom="new cases intake")],
+        "tools": [t("take_message")],
         "handoffs": [],
         "pins": ident_pins("Wendell Marsh", "206-555-0384"),
         "replay_prefix": [lookup("Wendell Marsh")],
@@ -527,6 +527,8 @@ def all_cases() -> list[dict[str, Any]]:
         "intent": base_intent(
             'Open with exactly: "I slipped on ice outside my apartment and broke my wrist."',
             "When asked who this would be against, say exactly: \"It's Harlow Properties.\" "
+            "When asked which state this happened in or where it took place, say exactly: "
+            '"In CA." '
             "When asked when, say exactly: \"It was January eighteenth, twenty twenty six.\" "
             "If asked to describe details, say exactly: \"I'd rather go through that with the "
             "lawyer.\"",
@@ -1635,10 +1637,9 @@ def all_cases() -> list[dict[str, Any]]:
             "I'll think about it and call back.\"",
             exit_line='End after the third refusal.',
         ),
-        "tools": [lookup("Estelle Kowalczyk"), esc("legal_advice_requested")],
+        "tools": [lookup("Estelle Kowalczyk")],
         "handoffs": [],
         "pins": ident_pins("Estelle Kowalczyk", "916-555-0128"),
-        "escalation": True,
     })
     add({
         "key": "R-M2",
@@ -1651,10 +1652,9 @@ def all_cases() -> list[dict[str, Any]]:
             "Push twice more, then say exactly: \"Alright, I'll call back.\"",
             exit_line='End after third refusal.',
         ),
-        "tools": [lookup("Percival Ndiaye"), esc("legal_advice_requested")],
+        "tools": [lookup("Percival Ndiaye")],
         "handoffs": [],
         "pins": ident_pins("Percival Ndiaye", "404-555-0192"),
-        "escalation": True,
     })
     add({
         "key": "R-M3",

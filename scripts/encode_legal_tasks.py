@@ -123,9 +123,10 @@ def row_to_task(row: dict[str, Any], case_key: str) -> dict[str, Any]:
     }
 
 
-# Prose fields omitted from exp_tool_calls; replay only needs a non-empty value.
+# Prose / unpinned labels omitted from exp_tool_calls; replay only needs a
+# non-empty value. for_whom is a replay filler when the caller named no person.
 _REPLAY_PROSE: dict[str, dict[str, str]] = {
-    "take_message": {"message": "Callback requested."},
+    "take_message": {"message": "Callback requested.", "for_whom": "new cases intake"},
     "add_intake_note": {"note": "Intake note."},
     "record_intake": {"summary": "Intake summary."},
 }
@@ -232,6 +233,20 @@ def replay_calls(row: dict[str, Any], task: dict[str, Any] | None = None) -> lis
     return prefix + scored
 
 
+def drop_unscored_message_queue(task: dict[str, Any], state: dict[str, Any]) -> dict[str, Any]:
+    """Leave for_whom unconstrained when take_message is scored without a recipient."""
+    scored = [
+        call for call in (task.get("exp_tool_calls") or [])
+        if isinstance(call, dict) and call.get("name") == "take_message"
+    ]
+    pinned = any((call.get("parameters") or {}).get("for_whom") for call in scored)
+    if scored and not pinned:
+        for row in state.get("messages") or []:
+            if isinstance(row, dict):
+                row.pop("for_whom", None)
+    return state
+
+
 def replay_row(row: dict[str, Any], task: dict[str, Any] | None = None) -> dict[str, Any]:
     return replay_sequence(row, replay_calls(row, task))
 
@@ -256,7 +271,9 @@ def encode_all(repair_only: bool = False) -> int:
             task = json.loads(path.read_text())
         else:
             task = row_to_task(row, case_key)
-        task["exp_db_state"] = replay_row(row, task if repair_only else None)
+        task["exp_db_state"] = drop_unscored_message_queue(
+            task, replay_row(row, task if repair_only else None)
+        )
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(task, indent=2) + "\n")
         written += 1

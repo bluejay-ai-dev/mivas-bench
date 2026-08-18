@@ -118,6 +118,12 @@ _KNOWN_GOOD_ARGS: dict[str, dict[str, dict[str, Any]]] = {
             "earliest_date": "2026-08-01",
         },
         "get_attorney": {"attorney_id": "a_10"},
+        "record_intake": {
+            "practice_area": "premises_liability",
+            "state": "CA",
+            "incident_date": "2026-01-18",
+            "summary": "",
+        },
     },
     "healthcare": {
         "list_locations": {"zip": "10016"},
@@ -173,6 +179,7 @@ _DISPATCH_BEFORE: dict[str, list[str]] = {
     "healthcare": ["verify_identity"],
     "finance": ["identify_member", "verify_identity"],
     "travel": ["find_reservation"],
+    "legal": ["lookup_caller"],
 }
 
 
@@ -270,6 +277,43 @@ def test_legal_guards_survive_dispatch() -> None:
         assert tool("confirm_evaluation", {"confirmation_token": token})["data"]["status"] == "booked"
         reuse = tool("confirm_evaluation", {"confirmation_token": token})
         assert reuse["ok"] is False and reuse["error_code"], "token must stay single-use"
+
+
+def test_legal_record_intake_rejects_garbage() -> None:
+    with _load_tool_server("legal") as module, TestClient(module.app) as client:
+        def tool(name: str, args: dict[str, Any]) -> dict[str, Any]:
+            resp = client.post(f"/tools/{name}", json={"arguments": args})
+            assert resp.status_code == 200, resp.text
+            return resp.json()
+
+        found = tool("lookup_caller", {"full_name": "Dana Whitfield", "phone": "5105550142"})
+        assert found["ok"]
+
+        base = {
+            "practice_area": "premises_liability",
+            "state": "CA",
+            "incident_date": "2026-01-18",
+            "summary": "",
+        }
+        for args in (
+            {**base, "state": ""},
+            {**base, "state": "{{state}}"},
+            {**base, "incident_date": "nope"},
+        ):
+            body = tool("record_intake", args)
+            assert body["ok"] is False, args
+
+        good = tool("record_intake", base)
+        assert good["ok"] is True
+        ny = tool("record_intake", {**base, "state": "NY"})
+        assert ny["ok"] is True
+        named = tool("record_intake", {**base, "state": "illinois"})
+        assert named["ok"] is True
+        intakes = {row["id"]: row for row in client.get("/state").json()["intakes"]}
+        assert intakes[good["data"]["intake_id"]]["state"] == "CA"
+        assert intakes[good["data"]["intake_id"]]["incident_date"] == "2026-01-18"
+        assert intakes[ny["data"]["intake_id"]]["state"] == "NY"
+        assert intakes[named["data"]["intake_id"]]["state"] == "IL"
 
 
 def test_healthcare_list_locations_has_what_the_prompts_require() -> None:
