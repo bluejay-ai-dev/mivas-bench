@@ -1,6 +1,6 @@
 {
   "task_name": "C4-H1: Botox consult with deposit",
-  "intent": "You are calling about Botox at Park Avenue. Ask how much it costs there, then ask to come in for a consult at that office. You need the Park Avenue street address, the floor, and the suite before you will take any time \u2014 if they skip any of those, ask again. If they ask your name or date of birth, answer once and go back to the consult. When they explain the deposit and cancellation rules, agree. Ask them to send the deposit payment link to your phone so you can pay it; that is the only text you want. After you have the address, take the first appointment time they offer. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first time out loud, then thank them and end the call. Do not thank them until a time is confirmed on the calendar. Do not ask for a callback, to speak to a person, about a medical bill, the patient portal, a waitlist, financing, or a confirmation text. Do not book anything except this Park Avenue Botox consult. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar. If they only list openings, say book the first one. Do not thank them or hang up until they confirm a time is on the calendar and that a deposit payment link was sent to your phone. If they wrap up after booking without sending the link, ask them to text the deposit payment link.",
+  "intent": "You are calling about Botox at Park Avenue. Ask how much it costs there, then ask to come in for a consult at that office. You need the Park Avenue street address, the floor, and the suite before you will take any time \u2014 if they skip any of those, ask again. If they ask your name or date of birth, answer once and go back to the consult. When they explain the deposit and cancellation rules, agree. Ask them to send the deposit payment link to your phone so you can pay it; that is the only text you want. After you have the address, take the first appointment time they offer. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first time out loud, then thank them and end the call. Do not thank them until a time is confirmed on the calendar. Do not ask for a callback, to speak to a person, about a medical bill, the patient portal, a waitlist, financing, or a confirmation text. Never ask to speak to a person, a live agent, or the cosmetic team. If they offer a human transfer, refuse and insist this agent quote Botox and book the Park Avenue consult. Do not book anything except this Park Avenue Botox consult. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar. If they only list openings, say book the first one. Do not thank them or hang up until they confirm a time is on the calendar and that a deposit payment link was sent to your phone. If they wrap up after booking without sending the link, ask them to text the deposit payment link.",
   "traits": [
     {
       "trait_name": "date_of_birth",
@@ -98,9 +98,9 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers to transfer you to a human, a person, the front desk, or a live agent. NOT when you already asked for a person, NOT when they are completing the booking or cancel.",
+      "match_phrase": "offers to transfer you to a human, a person, the cosmetic team, a live agent, or the front desk, or asks if you want to talk to someone. NOT when they are quoting Botox or booking the Park Avenue consult.",
       "response_type": "phrase",
-      "response_value": "No, I don't need a person. Please finish what I asked on this call."
+      "response_value": "No, I don't want a person or the cosmetic team. Quote Botox and book the Park Avenue consult on this call."
     },
     {
       "match_type": "context",

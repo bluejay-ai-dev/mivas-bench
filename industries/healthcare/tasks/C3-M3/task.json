@@ -1,6 +1,6 @@
 {
   "task_name": "C3-M3: Medicare at Windermere then a booking",
-  "intent": "You are a new patient in Florida. You have a sore on your forearm that will not heal and you want to be seen at the Windermere office. Start by asking whether that office takes Medicare. After they say yes, ask to book the visit there. Answer their intake questions once, then proceed. Take the first appointment time they offer. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first time out loud, then thank them and end the call. Do not ask to add or change insurance. Do not ask for a callback, to speak to a person, a bill, a payment, the patient portal, a waitlist, a text, financing, or the street, floor, or suite. A spoken yes that names the office is enough; do not wait for a system check. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar. If they only list openings, say book the first one.",
+  "intent": "You are a new patient in Florida. You have a sore on your forearm that will not heal and you want to be seen at the Windermere office. Start by asking whether that office takes Medicare. After they say yes, ask to book the visit there. Answer their intake questions once, then proceed. Take the first appointment time they offer. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first time out loud, then thank them and end the call. Do not ask to add or change insurance. Do not ask for a callback, to speak to a person, a bill, a payment, the patient portal, a waitlist, a text, financing, or the street, floor, or suite. A spoken yes that names the office is enough; do not wait for a system check. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar. If they only list openings, say book the first one. If they offer a callback, decline and stay until they have searched openings and confirmed a Windermere time is on the calendar.",
   "traits": [
     {
       "trait_name": "zip",
@@ -101,6 +101,12 @@
       "match_phrase": "says they take the plan, accept the insurance, or that you are covered, without naming Windermere. NOT when they have just named Windermere.",
       "response_type": "phrase",
       "response_value": "Which office did you mean? I need Windermere specifically, not the whole practice."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers a callback, asks for a number to call you back, says the front desk will call or follow up, or says they cannot book the visit on this call. NOT when they have just confirmed a booked time, NOT when asking for your identity.",
+      "response_type": "phrase",
+      "response_value": "No callback. Please book the soonest new-patient visit at Windermere on this call."
     },
     {
       "match_type": "context",

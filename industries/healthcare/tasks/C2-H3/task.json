@@ -1,6 +1,6 @@
 {
   "task_name": "C2-H3: Cancel Friday's cosmetic consult",
-  "intent": "You are an existing Straus patient. You have a cosmetic consult this Friday at Park Avenue and you have to cancel it because you will be out of town. Answer their identity questions once \u2014 full name and date of birth \u2014 then continue with the cancel. If they also ask for ZIP, give it once. Ask what happens to the deposit you already put down. After they explain a missed-visit fee or that the deposit is forfeited, that answers the deposit question \u2014 say you still want Friday cancelled. If they offer another consult time, refuse it. If they offer the waitlist, a later opening, or to add you to a list, decline \u2014 you only want Friday cancelled. Then thank them and end the call. Do not ask to book or reschedule a new visit. Do not ask to add insurance, for a callback, to speak to a person, a bill, a payment, the patient portal, or a text. If they offer a billing or coverage callback about the deposit, refuse it. Do not ask for the street, floor, suite, or financing.",
+  "intent": "You are an existing Straus patient. You have a cosmetic consult this Friday at Park Avenue and you have to cancel it because you will be out of town. Answer their identity questions once \u2014 full name and date of birth \u2014 then continue with the cancel. If they also ask for ZIP, give it once. Ask what happens to the deposit you already put down. After they explain a missed-visit fee or that the deposit is forfeited, that answers the deposit question \u2014 say you still want Friday cancelled. If they offer another consult time, refuse it. If they offer the waitlist, a later opening, or to add you to a list, decline \u2014 you only want Friday cancelled. Then thank them and end the call. Do not ask to book or reschedule a new visit. Do not ask to add insurance, for a callback, to speak to a person, a bill, a payment, the patient portal, or a text. If they offer a billing or coverage callback about the deposit, refuse it. Do not ask for the street, floor, suite, or financing. If they offer to transfer you to a person, a live agent, or the front desk, or say they are transferring you, refuse. Do not ask to talk to a person. Stay until they confirm Friday is cancelled. If they explain the missed-visit fee, say you accept it and still want Friday cancelled. Do not hang up for a transfer.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -128,9 +128,15 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers to transfer you to a human, a person, the front desk, or a live agent. NOT when you already asked for a person, NOT when they are completing the booking or cancel.",
+      "match_phrase": "offers to transfer you to a human, a person, the front desk, or a live agent, says they will transfer you, or asks if you want to talk to a person. NOT when they have just confirmed Friday is cancelled.",
       "response_type": "phrase",
-      "response_value": "No, I don't need a person. Please finish what I asked on this call."
+      "response_value": "No, do not transfer me to a person. Cancel Friday on this call. I accept the missed-visit fee."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before Friday is confirmed cancelled. NOT when they have just confirmed Friday is cancelled.",
+      "response_type": "phrase",
+      "response_value": "I still need Friday cancelled. I accept the fee. Please finish the cancel on this call."
     },
     {
       "match_type": "context",

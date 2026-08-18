@@ -78,6 +78,21 @@ def test_office_waitlist_allows_extra_rows_when_expected_is_nonempty() -> None:
     assert vtr.office_states_match(expected, missing, industry="healthcare") is False
     empty_expected = {"patients": [], "appointments": [], "waitlist": []}
     assert vtr.office_states_match(empty_expected, actual, industry="healthcare") is False
+    # extra listing consumes id=1; the matching window is id=2
+    expected_with_id = {
+        "patients": [],
+        "appointments": [],
+        "waitlist": [{**expected_row, "id": 1}],
+    }
+    actual_id_shifted = {
+        "patients": [],
+        "appointments": [],
+        "waitlist": [
+            {**extra_row, "id": 1},
+            {**expected_row, "id": 2},
+        ],
+    }
+    assert vtr.office_states_match(expected_with_id, actual_id_shifted, industry="healthcare") is True
     assert vtr.office_states_match(empty_expected, {"patients": [], "appointments": [], "waitlist": []}, industry="healthcare") is True
 
 
