@@ -92,13 +92,30 @@ def row_to_task(row: dict[str, Any], case_key: str) -> dict[str, Any]:
     if row.get("booking"):
         meta["booking"] = True
 
+    expected_calls = copy.deepcopy(row.get("tools") or [])
+    for call in expected_calls:
+        if not isinstance(call, dict):
+            continue
+        name = str(call.get("name") or "")
+        params = call.get("parameters")
+        if not isinstance(params, dict):
+            continue
+        # Fairness: reason/token fields are system-internal confirmations that
+        # do not materially change customer-visible success.
+        if name == "escalate_to_human":
+            params.pop("reason_code", None)
+        if name in {"confirm_evaluation", "confirm_cancellation"}:
+            params.pop("confirmation_token", None)
+        if not params:
+            call.pop("parameters", None)
+
     return {
         "task_name": f"{case_key}: {row['title']}",
         "customer_name": row["name"],
         "intent": row["intent"],
         "traits": customer_traits(row),
         "exp_handoff_path": list(row.get("handoffs") or []),
-        "exp_tool_calls": copy.deepcopy(row.get("tools") or []),
+        "exp_tool_calls": expected_calls,
         "behaviors": {"creativity": 0},
         "scripted_responses": copy.deepcopy(row.get("pins") or []),
         "customer_available_tools": {},

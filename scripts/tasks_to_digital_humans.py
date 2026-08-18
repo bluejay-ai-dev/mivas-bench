@@ -244,11 +244,15 @@ def person_name(task: dict[str, Any]) -> str:
     raise SystemExit("task is missing customer_name")
 
 
-def audio_fields(condition: str) -> dict[str, Any]:
+def audio_fields(condition: str, industry: str = "") -> dict[str, Any]:
     mapped = AUDIO.get(condition)
     if mapped is None:
         raise SystemExit(f"unknown audio_condition: {condition}")
-    return dict(mapped)
+    out = dict(mapped)
+    # Legal identity pins are 10-digit callbacks; 0.8 traffic buried them in ASR.
+    if industry == "legal" and condition == "background_noise":
+        out["background_noise_volume"] = 0.1
+    return out
 
 
 def assign_voices(rows: list[dict[str, Any]]) -> dict[str, tuple[str, str]]:
@@ -324,7 +328,7 @@ def task_to_digital_human(
         "allow_silence_tool": True,
         "allow_dtmf_tool": False,
         "num_runs": 1,
-        **audio_fields(audio_condition),
+        **audio_fields(audio_condition, industry),
     }
     pins = scripted_responses(task.get("scripted_responses"))
     if pins:
@@ -383,7 +387,7 @@ def check(humans: list[dict[str, Any]], industry: str) -> None:
             if pin.get("occurrence_mode") != "always":
                 raise SystemExit(f"{key}: scripted_responses need occurrence_mode=always")
         audio = trait_value(dh, "audio_condition")
-        mapped = audio_fields(audio or "")
+        mapped = audio_fields(audio or "", industry)
         for field, want in mapped.items():
             if dh.get(field) != want:
                 raise SystemExit(f"{key}: {field}={dh.get(field)!r} want {want!r}")
@@ -563,6 +567,7 @@ def vacate_test_name(title: str, keep_ids: set[int]) -> str | None:
 
 
 CLAIM_FIELDS = (
+    "name",
     "test_name",
     "intent",
     "success_criteria",
@@ -570,7 +575,49 @@ CLAIM_FIELDS = (
     "traits",
     "scripted_responses",
     "creativity",
+    "tags",
+    "background_noise",
+    "background_noise_volume",
+    "audio_quality",
 )
+
+
+def claim_patch(want: dict[str, Any]) -> dict[str, Any]:
+    patch = {field: want[field] for field in CLAIM_FIELDS if field in want}
+    patch["scripted_responses"] = want.get("scripted_responses") or []
+    return patch
+
+
+def _norm_traits(traits: Any) -> list[dict[str, Any]]:
+    rows = traits if isinstance(traits, list) else []
+    out: list[dict[str, Any]] = []
+    for item in rows:
+        if not isinstance(item, dict):
+            continue
+        out.append({
+            "trait_name": item.get("trait_name"),
+            "trait_data_type": item.get("trait_data_type"),
+            "value": item.get("value"),
+            "is_sip_header": item.get("is_sip_header"),
+        })
+    return sorted(out, key=lambda row: str(row.get("trait_name") or ""))
+
+
+def _norm_claim_field(field: str, value: Any) -> Any:
+    if field == "expected_tool_calls":
+        return expected_tool_calls(value)
+    if field == "scripted_responses":
+        rows = scripted_responses(value)
+        return sorted(
+            rows,
+            key=lambda row: (
+                str(row.get("match_phrase") or ""),
+                str(row.get("response_value") or ""),
+            ),
+        )
+    if field == "traits":
+        return _norm_traits(value)
+    return value
 
 
 def claim_updates(
@@ -594,10 +641,40 @@ def claim_updates(
         want = generated.get(key)
         if not want or dh.get("id") is None:
             continue
-        patch = {field: want[field] for field in CLAIM_FIELDS if field in want}
-        patch["scripted_responses"] = want.get("scripted_responses") or []
-        updates.append({"digital_human_id": int(dh["id"]), "update": patch})
+        updates.append({"digital_human_id": int(dh["id"]), "update": claim_patch(want)})
     return updates
+
+
+def verify_against_live(humans: list[dict[str, Any]], live: list[dict[str, Any]]) -> list[str]:
+    """Return human-readable mismatches between generated DHs and live sim DHs."""
+    generated: dict[str, dict[str, Any]] = {}
+    for dh in humans:
+        try:
+            generated[case_key_of(dh)] = dh
+        except ValueError:
+            continue
+    errors: list[str] = []
+    seen: set[str] = set()
+    for raw in live:
+        dh = hydrate_human(raw)
+        try:
+            key = case_key_of(dh)
+        except ValueError:
+            test_name = str(dh.get("test_name") or "")
+            key = test_name.split(":", 1)[0].strip() if ":" in test_name else "?"
+        seen.add(key)
+        want = generated.get(key)
+        if not want:
+            errors.append(f"{key}: live DH {dh.get('id')} not in generated pack")
+            continue
+        for field, expected in claim_patch(want).items():
+            got = dh.get(field)
+            if _norm_claim_field(field, got) != _norm_claim_field(field, expected):
+                errors.append(f"{key}: {field}={got!r} want {expected!r}")
+    missing = sorted(set(generated) - seen)
+    for key in missing:
+        errors.append(f"{key}: generated DH missing from simulation")
+    return errors
 
 
 def claim_test_names(humans: list[dict[str, Any]], live: list[dict[str, Any]]) -> int:
@@ -645,6 +722,11 @@ def main(argv: list[str] | None = None) -> int:
         type=int,
         help="Claim MIVAS test_name titles on an existing simulation (renames older holders)",
     )
+    parser.add_argument(
+        "--verify-only",
+        action="store_true",
+        help="With --simulation-id: check live DHs match generated pack; do not push",
+    )
     parser.add_argument("--agent-id", type=int, help="Bluejay agent id (healthcare default: 32161)")
     parser.add_argument("--name", help="Simulation name")
     args = parser.parse_args(argv)
@@ -654,8 +736,29 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.simulation_id and not args.push:
         live = list_simulation_humans(args.simulation_id)
+        if args.verify_only:
+            mismatches = verify_against_live(humans, live)
+            if mismatches:
+                for line in mismatches[:20]:
+                    print(line, flush=True)
+                if len(mismatches) > 20:
+                    print(f"... and {len(mismatches) - 20} more", flush=True)
+                raise SystemExit(f"{len(mismatches)} live DH mismatches")
+            print(f"verified {len(humans)} digital humans on simulation {args.simulation_id}")
+            return 0
         patched = claim_test_names(humans, live)
+        live = list_simulation_humans(args.simulation_id)
+        mismatches = verify_against_live(humans, live)
+        if mismatches:
+            for line in mismatches[:20]:
+                print(line, flush=True)
+            if len(mismatches) > 20:
+                print(f"... and {len(mismatches) - 20} more", flush=True)
+            raise SystemExit(
+                f"claimed {patched} DHs but {len(mismatches)} fields still mismatched — not safe to run"
+            )
         print(f"claimed test_name on {patched} digital humans for simulation {args.simulation_id}")
+        print(f"verified {len(humans)} digital humans")
         print(f"https://app.getbluejay.ai/simulations/{args.simulation_id}")
         return 0
 

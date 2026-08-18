@@ -105,6 +105,15 @@ def test_clones_match_source_semantics_except_audio_metadata() -> None:
             assert clone["metadata"][field] == source["metadata"][field], clone_key
 
 
+def test_legal_background_noise_is_quieter_than_default() -> None:
+    default = conv.audio_fields("background_noise")
+    legal = conv.audio_fields("background_noise", "legal")
+    assert default["background_noise_volume"] == 0.8
+    assert legal["background_noise_volume"] == 0.1
+    healthcare = conv.audio_fields("background_noise", "healthcare")
+    assert healthcare["background_noise_volume"] == 0.8
+
+
 def test_audio_condition_mapping() -> None:
     by_audio = Counter()
     for dh in _humans():
@@ -193,6 +202,17 @@ def test_claim_updates_include_expected_tool_calls() -> None:
     pinless.pop("scripted_responses", None)
     cleared = conv.claim_updates([pinless], live)
     assert cleared[0]["update"]["scripted_responses"] == []
+
+
+def test_claim_updates_include_audio_fields_for_legal_bg_clone() -> None:
+    legal = conv.build("legal")
+    bg = next(dh for dh in legal if conv.case_key_of(dh).endswith("-BG"))
+    live = [{"id": 1, "test_name": bg["test_name"], "traits": bg["traits"]}]
+    patch = conv.claim_updates([bg], live)[0]["update"]
+    assert patch["background_noise"] == "traffic"
+    assert patch["background_noise_volume"] == 0.1
+    assert patch["audio_quality"] == "high"
+    assert "mivas_legal" in patch["tags"]
 
 
 def test_api_url_reads_env_after_import(monkeypatch) -> None:

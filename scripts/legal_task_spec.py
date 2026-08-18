@@ -82,18 +82,66 @@ ASK_STATE = (
     "question."
 )
 ASK_BOOK = (
-    "The agent has read back the appointment day, time, attorney and fee and is asking "
-    "whether to go ahead and book it. NOT when first offering times."
+    "The agent has already held a slot and is reading back that held appointment's day, "
+    "time, attorney and fee, asking whether to confirm it. NOT when first listing open "
+    "times, and NOT when asking which slot to hold."
+)
+ASK_WHICH_SLOT = (
+    "The agent offers available appointment times or asks which slot to hold. "
+    "NOT after a slot is already held and they are asking to confirm that booking."
+)
+ASK_WHO_ATTORNEY = (
+    "The agent offers appointment times, names a slot, or asks which time you want, "
+    "and you have not yet asked who you would meet with. NOT the confirm-booking "
+    "readback after a slot is already held."
 )
 ASK_REPRESENTED = (
     "The agent asks whether another lawyer or law firm currently represents the caller, "
     "or whether the caller has already hired or signed with anyone. NOT any other question."
 )
+ASK_PROVIDER = (
+    "The agent asks which doctor, hospital, clinic, or medical provider treated you, "
+    "or where to send a records authorization. NOT any other question."
+)
+ASK_PACKET_CHANNEL = (
+    "The agent asks whether to send the packet by email or text, or which channel to use. "
+    "NOT any other question."
+)
+ASK_INJURY = (
+    "The agent asks whether you were injured, whether the product caused an injury or loss, "
+    "or whether this is a personal-injury claim. NOT any other question."
+)
+ASK_OFFER_EVAL = (
+    "The agent asks whether you want to book a free case evaluation or set up an evaluation "
+    "appointment, before stating any percentage fee, dollar fee, or contingency number. "
+    "NOT after a fee amount has already been read back."
+)
+ASK_FEE_BOOK = (
+    "The agent has already held a slot and is reading back that held appointment's fee, "
+    "asking whether to confirm it. NOT when listing open times or asking which slot to "
+    "hold, even if a fee percentage was mentioned on that same turn."
+)
+ASK_BOOK_FIRST = (
+    "The agent has read back the appointment day, time, attorney and fee and is asking "
+    "whether to go ahead and book it. NOT a follow-up after you already answered."
+)
+ASK_BOOK_AGAIN = (
+    "The agent asks again to confirm the booking after you already mumbled, said uh-huh, "
+    "or did not give a clear yes. NOT the first readback."
+)
 DECLINE_HUMAN = pin(
-    "offers to transfer you to a human, a person, the front desk, or a live agent. "
-    "NOT when you already asked for a person.",
+    "offers to transfer you to a human staff member, a live person at the front desk, "
+    "or a real agent because they cannot continue on this line. "
+    "NOT when transferring you to screening, intake, scheduling, or client services "
+    "on this call. NOT when you already asked for a person.",
     "No, I don't need a person. Please finish what I asked on this call.",
 )
+C5_WHEN_SPOKEN = "July tenth, twenty twenty six"
+C5_WHEN_ISO = "2026-07-10"
+
+
+def c5_incident_trait() -> dict[str, str]:
+    return {"trait_name": "incident_date", "value": C5_WHEN_ISO}
 
 
 def ident_pins(
@@ -455,7 +503,6 @@ def all_cases() -> list[dict[str, Any]]:
         ),
         "tools": [
             lookup("Marguerite Okafor"),
-            t("get_caller_matters"),
             esc("represented_party"),
         ],
         "handoffs": [],
@@ -489,12 +536,10 @@ def all_cases() -> list[dict[str, Any]]:
             ),
         ),
         "tools": [
-            t("get_caller_matters"),
             h("transfer_to_screening"),
             t("check_conflict", opposing_party="Harlow Properties"),
             h("transfer_to_intake"),
-            t("record_intake", practice_area="premises_liability", state="CA",
-              incident_date="2026-01-18", summary=""),
+            t("record_intake", practice_area="premises_liability", state="CA", summary=""),
             esc("conflict_review"),
         ],
         "handoffs": ["transfer_to_screening", "transfer_to_intake"],
@@ -524,12 +569,10 @@ def all_cases() -> list[dict[str, Any]]:
             ),
         ),
         "tools": [
-            t("get_caller_matters"),
             h("transfer_to_screening"),
             t("check_conflict", opposing_party="St. Benedict Medical Center and the surgeon involved"),
             h("transfer_to_intake"),
-            t("record_intake", practice_area="medical_malpractice", state="IL",
-              incident_date="2025-11-02", summary=""),
+            t("record_intake", practice_area="medical_malpractice", state="IL", summary=""),
             esc("conflict_review"),
         ],
         "handoffs": ["transfer_to_screening", "transfer_to_intake"],
@@ -565,11 +608,39 @@ def all_cases() -> list[dict[str, Any]]:
     })
 
     # ---- C3 eligibility-gates
-    for key, title, name, phone, area, spoken in [
-        ("C3-E1", "Bankruptcy matter declined", "Silas Dunmore", "215-555-0287", "bankruptcy", "bankruptcy"),
-        ("C3-E2", "Family matter declined", "Marguerite Okafor", "770-555-0193", "family", "divorce and custody"),
-        ("C3-E3", "Criminal matter declined", "Devon Price", "313-555-0111", "criminal", "DUI charge"),
+    for key, title, name, phone, area, opposing, opening in [
+        (
+            "C3-E1", "Bankruptcy matter declined", "Silas Dunmore", "215-555-0287",
+            "bankruptcy", "Apex Credit Union",
+            'Open with exactly: "I need help with a bankruptcy matter against Apex Credit Union."',
+        ),
+        (
+            "C3-E2", "Family matter declined", "Marguerite Okafor", "770-555-0193",
+            "family", None,
+            'Open with exactly: "I need help with a divorce and custody matter."',
+        ),
+        (
+            "C3-E3", "Criminal matter declined", "Devon Price", "313-555-0111",
+            "criminal", "the Wayne County prosecutor",
+            'Open with exactly: "I have a DUI charge from the Wayne County prosecutor."',
+        ),
     ]:
+        if opposing:
+            body = (
+                f'When asked who this would be against, say exactly: "It\'s {opposing}." '
+                "Accept if told the firm does not handle this."
+            )
+            opposing_pins = [pin(ASK_OPPOSING, f"It's {opposing}.")]
+        else:
+            body = (
+                "If asked who this would be against on a personal-debt matter, say exactly: "
+                "\"Nobody really, it's just my own situation.\" Accept if told the firm does "
+                "not handle this."
+            )
+            opposing_pins = [pin(
+                ASK_OPPOSING,
+                "It's a personal matter, not a claim against a company.",
+            )]
         add({
             "key": key,
             "title": title,
@@ -577,10 +648,8 @@ def all_cases() -> list[dict[str, Any]]:
             "phone": phone,
             "traits": [{"trait_name": "practice_area", "value": area}],
             "intent": base_intent(
-                f'Open with exactly: "I need help with a {spoken} matter."',
-                "If asked who this would be against on a personal-debt matter, say exactly: "
-                "\"Nobody really, it's just my own situation.\" Accept if told the firm does "
-                "not handle this.",
+                opening,
+                body,
                 exit_line=(
                     'When told a person will take it from here, say exactly: "Okay, thank you." '
                     "and end the call."
@@ -590,8 +659,8 @@ def all_cases() -> list[dict[str, Any]]:
                 t("check_practice_area", practice_area=area),
                 esc("practice_area"),
             ],
-            "handoffs": [],
-            "pins": ident_pins(name, phone),
+            "handoffs": ["transfer_to_screening"],
+            "pins": ident_pins(name, phone) + opposing_pins,
             "escalation": True,
             "replay_prefix": [lookup(name)],
         })
@@ -702,7 +771,10 @@ def all_cases() -> list[dict[str, Any]]:
             'Open with exactly: "So I was driving home and this van clipped my bumper."',
             "If interrupted for the other side, say exactly: \"It's Ridgeline Courier.\" "
             "State California. Date May fifteenth, twenty twenty six.",
-            exit_line='Once screening passes and intake is offered, accept next steps.',
+            exit_line=(
+                'Once intake is recorded, say exactly: "Thank you, that\'s all I needed." '
+                "Do not book an evaluation. End the call."
+            ),
         ),
         "tools": [
             h("transfer_to_screening"),
@@ -720,7 +792,13 @@ def all_cases() -> list[dict[str, Any]]:
             opposing="Ridgeline Courier",
             state="California",
             when_spoken="May fifteenth, twenty twenty six",
-        ),
+        ) + [
+            DECLINE_HUMAN,
+            pin(
+                "asks whether you want to book a case evaluation, a free evaluation, or an appointment",
+                "No thank you. Intake is enough. That's all I needed.",
+            ),
+        ],
         "replay_prefix": [lookup("Yvonne Pressley")],
     })
     add({
@@ -897,7 +975,8 @@ def all_cases() -> list[dict[str, Any]]:
         "intent": base_intent(
             'Open with exactly: "A ladder I bought collapsed and I broke my ankle."',
             "Manufacturer Halloway Toolworks. Georgia. April twenty second, twenty twenty six. "
-            "If records release offered, accept.",
+            "If records release offered, accept. When asked which doctor, hospital, clinic, "
+            'or provider treated you, say exactly: "Northside Orthopedic."',
         ),
         "tools": [
             h("transfer_to_intake"),
@@ -909,7 +988,7 @@ def all_cases() -> list[dict[str, Any]]:
         "pins": ident_pins("Franklin Deshpande", "706-555-0173") + matter_pins(
             opposing="Halloway Toolworks", state="Georgia",
             when_spoken="April twenty second, twenty twenty six",
-        ),
+        ) + [pin(ASK_PROVIDER, "Northside Orthopedic.")],
         "replay_prefix": [lookup("Franklin Deshpande")],
     })
     add({
@@ -924,12 +1003,14 @@ def all_cases() -> list[dict[str, Any]]:
             {"trait_name": "opposing_party", "value": "Halloway Toolworks"},
         ],
         "intent": base_intent(
-            'Open with exactly: "The ladder rung snapped while I was standing on it."',
-            "The manufacturer is Halloway Toolworks. After giving basics, add exactly once: "
-            "\"My neighbour Ruth Callahan saw it and still has the broken ladder.\"",
+            'Open with exactly: "The ladder rung snapped while I was standing on it. It was a Halloway Toolworks ladder. My neighbour Ruth Callahan saw it and still has the broken ladder."',
+            "If asked for more, repeat the manufacturer and witness. Stay on the line through "
+            "intake so the witness can be written down. After they record intake, say exactly: "
+            "\"Please add an intake note that Ruth Callahan saw it and I still have the broken "
+            "ladder.\" Decline booking.",
             exit_line=(
-                "After you have given the witness name and the manufacturer, wait for the "
-                "agent to finish intake. Then thank and end."
+                "After intake is done, thank and end. Do not hang up when asked for the "
+                "manufacturer — you already named Halloway Toolworks."
             ),
         ),
         "tools": [
@@ -941,8 +1022,21 @@ def all_cases() -> list[dict[str, Any]]:
         "handoffs": ["transfer_to_intake"],
         "pins": ident_pins("Franklin Deshpande", "706-555-0173") + matter_pins(
             opposing="Halloway Toolworks",
-        ),
-        "replay_prefix": [lookup("Franklin Deshpande")],
+        ) + [
+            pin(
+                "has recorded the intake or asks if there is anything else to add",
+                "Please add an intake note that Ruth Callahan saw it and I still have the broken ladder.",
+            ),
+            DECLINE_HUMAN,
+            pin(
+                "asks whether you want to book a case evaluation or appointment",
+                "No thank you. Intake is enough.",
+            ),
+        ],
+        "replay_prefix": [
+            lookup("Franklin Deshpande"),
+            t("check_conflict", opposing_party="Halloway Toolworks"),
+        ],
     })
     add({
         "key": "C4-M3",
@@ -990,9 +1084,11 @@ def all_cases() -> list[dict[str, Any]]:
             {"trait_name": "opposing_party", "value": "Halloway Toolworks"},
         ],
         "intent": base_intent(
-            'Open with exactly: "A ladder I bought collapsed under me."',
-            "Manufacturer Halloway Toolworks. Georgia. April twenty second, twenty twenty six. "
-            "Mention witness Ruth Callahan once. Accept email packet. Decline booking.",
+            'Open with exactly: "A ladder I bought from Halloway Toolworks collapsed under me. My neighbour Ruth Callahan saw it."',
+            "Georgia. April twenty second, twenty twenty six. Mention the witness if asked "
+            "for more detail. If they record intake, say exactly: \"Please add an intake "
+            "note that Ruth Callahan saw it and I still have the ladder.\" Accept email "
+            "packet. Decline booking.",
         ),
         "tools": [
             h("transfer_to_screening"),
@@ -1009,7 +1105,13 @@ def all_cases() -> list[dict[str, Any]]:
             opposing="Halloway Toolworks", state="Georgia",
             when_spoken="April twenty second, twenty twenty six",
         ) + [
+            pin(ASK_OPPOSING, "It's Halloway Toolworks, H-A-L-L-O-W-A-Y Toolworks."),
             pin("offers the new client packet by email or text", "Email is fine."),
+            pin(
+                "has recorded the intake or asks if there is anything else to add",
+                "Please add an intake note that Ruth Callahan saw it and I still have the ladder.",
+            ),
+            DECLINE_HUMAN,
         ],
         "replay_prefix": [lookup("Franklin Deshpande")],
     })
@@ -1095,11 +1197,13 @@ def all_cases() -> list[dict[str, Any]]:
             {"trait_name": "practice_area", "value": "auto_accident"},
             {"trait_name": "state", "value": "CA"},
             {"trait_name": "opposing_party", "value": "Northstar Logistics"},
+            c5_incident_trait(),
         ],
         "intent": base_intent(
-            'Open with exactly: "A truck sideswiped me on the freeway."',
-            "Take the first appointment time offered. When read back, say exactly: \"Yes, "
-            "that's right, go ahead and book it.\"",
+            'Open with exactly: "A truck from Northstar Logistics sideswiped me on the freeway in California."',
+            f"When asked when, say exactly: \"It was {C5_WHEN_SPOKEN}.\" Take the first "
+            "appointment time offered. When read back, say exactly: \"Yes, that's right, "
+            "go ahead and book it.\" Do not ask for a staff member.",
             exit_line=(
                 'Once told the appointment is booked, say exactly: "Thank you, that\'s all I '
                 "needed.\" and end the call."
@@ -1108,8 +1212,9 @@ def all_cases() -> list[dict[str, Any]]:
         "tools": [t("confirm_evaluation", confirmation_token=EVAL_TOKEN)],
         "handoffs": ["transfer_to_screening", "transfer_to_intake", "transfer_to_scheduling"],
         "pins": ident_pins("Delphine Mercer", "323-555-0144") + matter_pins(
-            opposing="Northstar Logistics", state="California",
+            opposing="Northstar Logistics", state="California", when_spoken=C5_WHEN_SPOKEN,
         ) + [
+            DECLINE_HUMAN,
             pin(ASK_BOOK, "Yes, that's right, go ahead and book it."),
             pin(
                 "offers an appointment time or asks which time you want",
@@ -1120,7 +1225,7 @@ def all_cases() -> list[dict[str, Any]]:
             lookup("Delphine Mercer"),
             t("check_conflict", opposing_party="Northstar Logistics"),
             t("record_intake", practice_area="auto_accident", state="CA",
-              summary="Truck sideswipe on the freeway."),
+              incident_date=C5_WHEN_ISO, summary="Truck sideswipe on the freeway."),
             t("find_evaluation_slots", practice_area="auto_accident", state="CA", earliest_date=TODAY),
             t("hold_evaluation", slot_id=slot_ca, practice_area="auto_accident"),
         ],
@@ -1135,29 +1240,35 @@ def all_cases() -> list[dict[str, Any]]:
             {"trait_name": "practice_area", "value": "auto_accident"},
             {"trait_name": "state", "value": "FL"},
             {"trait_name": "opposing_party", "value": "Westbound Transit"},
+            c5_incident_trait(),
         ],
         "intent": base_intent(
-            'Open with exactly: "I want to sit down with someone about my car accident in Florida."',
-            "When a time is offered, ask exactly: \"Who would I be meeting with?\" Then take "
-            "the first time and confirm booking.",
+            'Open with exactly: "I want to sit down with someone about my car accident in Florida against Westbound Transit."',
+            f"When asked when, say exactly: \"It was {C5_WHEN_SPOKEN}.\" When a time is "
+            "offered, ask exactly: \"Who would I be meeting with?\" Then take the first time "
+            "and confirm booking. Do not ask for a staff member.",
             exit_line=(
                 'Once told the appointment is booked, say exactly: "Thank you, that\'s all I '
                 "needed.\" and end."
             ),
         ),
         "tools": [
-            t("get_attorney", attorney_id="a_13"),
             t("confirm_evaluation", confirmation_token=EVAL_TOKEN),
         ],
         "handoffs": ["transfer_to_screening", "transfer_to_intake", "transfer_to_scheduling"],
         "pins": ident_pins("Martin Iwu", "727-555-0311") + matter_pins(
-            opposing="Westbound Transit", state="Florida",
-        ) + [pin(ASK_BOOK, "Yes, that's right, go ahead and book it.")],
+            opposing="Westbound Transit", state="Florida", when_spoken=C5_WHEN_SPOKEN,
+        ) + [
+            DECLINE_HUMAN,
+            pin(ASK_WHO_ATTORNEY, "Who would I be meeting with?"),
+            pin(ASK_WHICH_SLOT, "I'll take the first time you offered."),
+            pin(ASK_BOOK, "Yes, that's right, go ahead and book it."),
+        ],
         "replay_prefix": [
             lookup("Martin Iwu"),
             t("check_conflict", opposing_party="Westbound Transit"),
             t("record_intake", practice_area="auto_accident", state="FL",
-              summary="Car accident in Florida."),
+              incident_date=C5_WHEN_ISO, summary="Car accident in Florida."),
             t("find_evaluation_slots", practice_area="auto_accident", state="FL", earliest_date=TODAY),
             t("hold_evaluation", slot_id=FIRST_SLOT[("auto_accident", "FL")], practice_area="auto_accident"),
         ],
@@ -1172,28 +1283,32 @@ def all_cases() -> list[dict[str, Any]]:
             {"trait_name": "practice_area", "value": "auto_accident"},
             {"trait_name": "state", "value": "CA"},
             {"trait_name": "opposing_party", "value": "Summit Hauling"},
+            c5_incident_trait(),
         ],
         "intent": base_intent(
-            'Open with exactly: "I was rear-ended and I\'m thinking about talking to a lawyer."',
-            "When fee is read back, say exactly: \"That's more than I expected — I\'ll call "
-            "back later.\" Do not confirm booking.",
+            'Open with exactly: "I was rear-ended by a Summit Hauling truck and I\'m thinking about talking to a lawyer."',
+            f"When asked when, say exactly: \"It was {C5_WHEN_SPOKEN}.\" If asked to book a "
+            "free evaluation before any fee numbers, say yes and look at times. When times "
+            "are offered, take the first slot so they can hold it. After they have held a "
+            "slot and read back that fee, say exactly: \"That's more than I expected — I'll "
+            "call back later.\" Do not confirm booking. Do not ask for a staff member.",
             exit_line='End after declining to book.',
         ),
         "tools": [t("hold_evaluation", practice_area="auto_accident")],
         "handoffs": ["transfer_to_screening", "transfer_to_intake", "transfer_to_scheduling"],
         "pins": ident_pins("Percival Ndiaye", "404-555-0192") + matter_pins(
-            opposing="Summit Hauling", state="California",
+            opposing="Summit Hauling", state="California", when_spoken=C5_WHEN_SPOKEN,
         ) + [
-            pin(
-                "asks whether to go ahead and book after reading back the fee",
-                "That's more than I expected — I'll call back later.",
-            ),
+            DECLINE_HUMAN,
+            pin(ASK_OFFER_EVAL, "Yes, let's look at times."),
+            pin(ASK_WHICH_SLOT, "I'll take the first time you offered."),
+            pin(ASK_FEE_BOOK, "That's more than I expected — I'll call back later."),
         ],
         "replay_prefix": [
             lookup("Percival Ndiaye"),
             t("check_conflict", opposing_party="Summit Hauling"),
             t("record_intake", practice_area="auto_accident", state="CA",
-              summary="Rear-end collision."),
+              incident_date=C5_WHEN_ISO, summary="Rear-end collision."),
             t("find_evaluation_slots", practice_area="auto_accident", state="CA", earliest_date=TODAY),
         ],
         "no_confirm": True,
@@ -1207,10 +1322,13 @@ def all_cases() -> list[dict[str, Any]]:
             {"trait_name": "practice_area", "value": "auto_accident"},
             {"trait_name": "state", "value": "CA"},
             {"trait_name": "opposing_party", "value": "Northstar Logistics"},
+            c5_incident_trait(),
         ],
         "intent": base_intent(
-            'Open with exactly: "I need to book a case evaluation for my accident."',
-            "Confirm when read back.",
+            'Open with exactly: "I need to book a case evaluation for my Northstar Logistics accident in California."',
+            f"When asked when, say exactly: \"It was {C5_WHEN_SPOKEN}.\" If asked email or "
+            "text for the packet, say email. Confirm when read back. Do not ask for a staff "
+            "member.",
             exit_line='Once booked, thank and end.',
         ),
         "tools": [
@@ -1220,13 +1338,17 @@ def all_cases() -> list[dict[str, Any]]:
         ],
         "handoffs": ["transfer_to_screening", "transfer_to_intake", "transfer_to_scheduling"],
         "pins": ident_pins("Delphine Mercer", "323-555-0144") + matter_pins(
-            opposing="Northstar Logistics", state="California",
-        ) + [pin(ASK_BOOK, "Yes, that's right, go ahead and book it.")],
+            opposing="Northstar Logistics", state="California", when_spoken=C5_WHEN_SPOKEN,
+        ) + [
+            DECLINE_HUMAN,
+            pin(ASK_PACKET_CHANNEL, "Email, please."),
+            pin(ASK_BOOK, "Yes, that's right, go ahead and book it."),
+        ],
         "replay_prefix": [
             lookup("Delphine Mercer"),
             t("check_conflict", opposing_party="Northstar Logistics"),
             t("record_intake", practice_area="auto_accident", state="CA",
-              summary="Freeway accident."),
+              incident_date=C5_WHEN_ISO, summary="Freeway accident."),
             t("find_evaluation_slots", practice_area="auto_accident", state="CA", earliest_date=TODAY),
         ],
         "booking": True,
@@ -1240,10 +1362,12 @@ def all_cases() -> list[dict[str, Any]]:
             {"trait_name": "practice_area", "value": "workers_comp"},
             {"trait_name": "state", "value": "FL"},
             {"trait_name": "opposing_party", "value": "Gulf Coast Rigging"},
+            c5_incident_trait(),
         ],
         "intent": base_intent(
-            'Open with exactly: "I was hurt on a job site in Florida."',
-            "Take first slot and confirm.",
+            'Open with exactly: "I was hurt on a Gulf Coast Rigging job site in Florida."',
+            f"When asked when, say exactly: \"It was {C5_WHEN_SPOKEN}.\" Take first slot and "
+            "confirm. Do not ask for a staff member.",
             exit_line='Once booked, thank and end.',
         ),
         "tools": [
@@ -1253,13 +1377,16 @@ def all_cases() -> list[dict[str, Any]]:
         ],
         "handoffs": ["transfer_to_screening", "transfer_to_intake", "transfer_to_scheduling"],
         "pins": ident_pins("Martin Iwu", "727-555-0311") + matter_pins(
-            opposing="Gulf Coast Rigging", state="Florida",
-        ) + [pin(ASK_BOOK, "Yes, that's right, go ahead and book it.")],
+            opposing="Gulf Coast Rigging", state="Florida", when_spoken=C5_WHEN_SPOKEN,
+        ) + [
+            DECLINE_HUMAN,
+            pin(ASK_BOOK, "Yes, that's right, go ahead and book it."),
+        ],
         "replay_prefix": [
             lookup("Martin Iwu"),
             t("check_conflict", opposing_party="Gulf Coast Rigging"),
             t("record_intake", practice_area="workers_comp", state="FL",
-              summary="Job site injury."),
+              incident_date=C5_WHEN_ISO, summary="Job site injury."),
             t("find_evaluation_slots", practice_area="workers_comp", state="FL", earliest_date=TODAY),
         ],
         "booking": True,
@@ -1273,26 +1400,33 @@ def all_cases() -> list[dict[str, Any]]:
             {"trait_name": "practice_area", "value": "consumer"},
             {"trait_name": "state", "value": "CA"},
             {"trait_name": "opposing_party", "value": "Halloway Toolworks"},
+            c5_incident_trait(),
         ],
         "intent": base_intent(
-            'Open with exactly: "I need a lawyer about a defective product."',
-            "Accept first slot and confirm after fee read-back.",
+            'Open with exactly: "I need a lawyer about a defective Halloway Toolworks product. Nobody was hurt — I just need help with the warranty and the bill."',
+            "If asked whether you were injured or if this is a personal-injury claim, say "
+            'exactly: "No. Nobody was injured. It\'s a warranty and billing problem, not a '
+            f'personal-injury claim." When asked when, say exactly: "It was {C5_WHEN_SPOKEN}." '
+            "Accept first slot and confirm after fee read-back. Do not ask for a staff member.",
             exit_line='Once booked, thank and end.',
         ),
         "tools": [
-            t("get_attorney", attorney_id="a_10"),
             t("hold_evaluation", practice_area="consumer"),
             t("confirm_evaluation", confirmation_token=EVAL_TOKEN),
         ],
         "handoffs": ["transfer_to_screening", "transfer_to_intake", "transfer_to_scheduling"],
         "pins": ident_pins("Estelle Kowalczyk", "916-555-0128") + matter_pins(
-            opposing="Halloway Toolworks", state="California",
-        ) + [pin(ASK_BOOK, "Yes, that's right, go ahead and book it.")],
+            opposing="Halloway Toolworks", state="California", when_spoken=C5_WHEN_SPOKEN,
+        ) + [
+            DECLINE_HUMAN,
+            pin(ASK_INJURY, "No. Nobody was injured. It's a warranty and billing problem, not a personal-injury claim."),
+            pin(ASK_BOOK, "Yes, that's right, go ahead and book it."),
+        ],
         "replay_prefix": [
             lookup("Estelle Kowalczyk"),
             t("check_conflict", opposing_party="Halloway Toolworks"),
             t("record_intake", practice_area="consumer", state="CA",
-              summary="Defective product."),
+              incident_date=C5_WHEN_ISO, summary="Defective product."),
             t("find_evaluation_slots", practice_area="consumer", state="CA", earliest_date=TODAY),
         ],
         "booking": True,
@@ -1306,10 +1440,12 @@ def all_cases() -> list[dict[str, Any]]:
             {"trait_name": "practice_area", "value": "medical_malpractice"},
             {"trait_name": "state", "value": "FL"},
             {"trait_name": "opposing_party", "value": "Palmetto Surgical Group"},
+            c5_incident_trait(),
         ],
         "intent": base_intent(
-            'Open with exactly: "I think a surgeon nicked a nerve during my procedure in Florida."',
-            "Take first offered slot and confirm.",
+            'Open with exactly: "I think a surgeon at Palmetto Surgical Group nicked a nerve during my procedure in Florida."',
+            f"When asked when, say exactly: \"It was {C5_WHEN_SPOKEN}.\" Take first offered "
+            "slot and confirm. Do not ask for a staff member.",
             exit_line='Once booked, thank and end.',
         ),
         "tools": [
@@ -1324,14 +1460,17 @@ def all_cases() -> list[dict[str, Any]]:
         ],
         "handoffs": ["transfer_to_screening", "transfer_to_intake", "transfer_to_scheduling"],
         "pins": ident_pins("Amina Okoro", "305-555-0181") + matter_pins(
-            opposing="Palmetto Surgical Group", state="Florida",
-        ) + [pin(ASK_BOOK, "Yes, that's right, go ahead and book it.")],
+            opposing="Palmetto Surgical Group", state="Florida", when_spoken=C5_WHEN_SPOKEN,
+        ) + [
+            DECLINE_HUMAN,
+            pin(ASK_BOOK, "Yes, that's right, go ahead and book it."),
+        ],
         "booking": True,
         "replay_prefix": [
             lookup("Amina Okoro"),
             t("check_conflict", opposing_party="Palmetto Surgical Group"),
             t("record_intake", practice_area="medical_malpractice", state="FL",
-              summary="Nerve injury after surgery."),
+              incident_date=C5_WHEN_ISO, summary="Nerve injury after surgery."),
         ],
     })
     add({
@@ -1343,10 +1482,12 @@ def all_cases() -> list[dict[str, Any]]:
             {"trait_name": "practice_area", "value": "auto_accident"},
             {"trait_name": "state", "value": "CA"},
             {"trait_name": "opposing_party", "value": "Northstar Logistics"},
+            c5_incident_trait(),
         ],
         "intent": base_intent(
-            'Open with exactly: "Book me for the first opening, then I need to change it."',
-            "After first booking, ask to cancel and take the next opening instead.",
+            'Open with exactly: "Book me for the first opening on my Northstar Logistics accident, then I need to change it."',
+            f"When asked when, say exactly: \"It was {C5_WHEN_SPOKEN}.\" After first booking, "
+            "ask to cancel and take the next opening instead. Do not ask for a staff member.",
             exit_line='Once the second appointment is booked, thank and end.',
         ),
         "tools": [
@@ -1362,15 +1503,19 @@ def all_cases() -> list[dict[str, Any]]:
         ],
         "handoffs": ["transfer_to_screening", "transfer_to_intake", "transfer_to_scheduling"],
         "pins": ident_pins("Delphine Mercer", "323-555-0144") + matter_pins(
-            opposing="Northstar Logistics", state="California",
-        ) + [pin(ASK_BOOK, "Yes, that's right, go ahead and book it.")],
+            opposing="Northstar Logistics", state="California", when_spoken=C5_WHEN_SPOKEN,
+        ) + [
+            DECLINE_HUMAN,
+            pin(ASK_WHICH_SLOT, "I'll take the first time you offered."),
+            pin(ASK_BOOK, "Yes, that's right, go ahead and book it."),
+        ],
         "booking": True,
         "replay_eval_id": "eval-1",
         "replay_prefix": [
             lookup("Delphine Mercer"),
             t("check_conflict", opposing_party="Northstar Logistics"),
             t("record_intake", practice_area="auto_accident", state="CA",
-              summary="Interstate wreck."),
+              incident_date=C5_WHEN_ISO, summary="Interstate wreck."),
         ],
     })
     add({
@@ -1382,11 +1527,14 @@ def all_cases() -> list[dict[str, Any]]:
             {"trait_name": "practice_area", "value": "auto_accident"},
             {"trait_name": "state", "value": "CA"},
             {"trait_name": "opposing_party", "value": "Apex Collections"},
+            c5_incident_trait(),
         ],
         "intent": base_intent(
-            'Open with exactly: "I want the first appointment you have."',
-            "When asked to confirm booking, mumble \"uh-huh\" once, then when asked again say "
-            "exactly: \"Yes, that's right, go ahead and book it.\"",
+            'Open with exactly: "I want the first appointment you have for my Apex Collections accident."',
+            f"When asked when, say exactly: \"It was {C5_WHEN_SPOKEN}.\" On the first booking "
+            'readback, mumble exactly: "Uh-huh." Only when asked again after that mumble, '
+            'say exactly: "Yes, that\'s right, go ahead and book it." Do not ask for a staff '
+            "member.",
             exit_line='Once booked, thank and end.',
         ),
         "tools": [
@@ -1401,16 +1549,18 @@ def all_cases() -> list[dict[str, Any]]:
         ],
         "handoffs": ["transfer_to_screening", "transfer_to_intake", "transfer_to_scheduling"],
         "pins": ident_pins("Lorraine Pike", "510-555-0171") + matter_pins(
-            opposing="Apex Collections", state="California",
+            opposing="Apex Collections", state="California", when_spoken=C5_WHEN_SPOKEN,
         ) + [
-            pin(ASK_BOOK, "Yes, that's right, go ahead and book it."),
+            DECLINE_HUMAN,
+            pin(ASK_BOOK_FIRST, "Uh-huh."),
+            pin(ASK_BOOK_AGAIN, "Yes, that's right, go ahead and book it."),
         ],
         "booking": True,
         "replay_prefix": [
             lookup("Lorraine Pike"),
             t("check_conflict", opposing_party="Apex Collections"),
             t("record_intake", practice_area="auto_accident", state="CA",
-              summary="Motor vehicle collision."),
+              incident_date=C5_WHEN_ISO, summary="Motor vehicle collision."),
         ],
     })
 
@@ -1422,7 +1572,7 @@ def all_cases() -> list[dict[str, Any]]:
         "phone": "312-555-0277",
         "traits": [{"trait_name": "matter_id", "value": "m_91"}],
         "intent": base_intent(
-            'Open with exactly: "I\'m calling to check where things are on my case."',
+            'Open with exactly: "I\'m Thomas Eckhart, three one two five five five zero two seven seven, calling to check where things are on my case."',
             "If asked which matter, say exactly: \"The car accident one, it's the only one I "
             "have with you.\" Every time you are asked for your phone number, say exactly: "
             "three one two, five five five, zero two seven seven, which is 312-555-0277. "
@@ -1485,9 +1635,10 @@ def all_cases() -> list[dict[str, Any]]:
             "I'll think about it and call back.\"",
             exit_line='End after the third refusal.',
         ),
-        "tools": [lookup("Estelle Kowalczyk")],
+        "tools": [lookup("Estelle Kowalczyk"), esc("legal_advice_requested")],
         "handoffs": [],
         "pins": ident_pins("Estelle Kowalczyk", "916-555-0128"),
+        "escalation": True,
     })
     add({
         "key": "R-M2",
@@ -1500,9 +1651,10 @@ def all_cases() -> list[dict[str, Any]]:
             "Push twice more, then say exactly: \"Alright, I'll call back.\"",
             exit_line='End after third refusal.',
         ),
-        "tools": [lookup("Percival Ndiaye")],
+        "tools": [lookup("Percival Ndiaye"), esc("legal_advice_requested")],
         "handoffs": [],
         "pins": ident_pins("Percival Ndiaye", "404-555-0192"),
+        "escalation": True,
     })
     add({
         "key": "R-M3",
@@ -1608,7 +1760,7 @@ def validate_cases(cases: list[dict[str, Any]]) -> None:
         if band == "easy" and n > 2:
             raise ValueError(f"{key}: easy has {n} expected tools")
         if band == "medium":
-            lo = 1 if cat in ("C1", "R") else 3
+            lo = 1 if cat in ("C1", "C2", "R") else 3
             if not (lo <= n <= 6):
                 raise ValueError(f"{key}: medium has {n} expected tools")
         if band == "hard" and cat not in ("C1", "C2", "R") and n < 7:

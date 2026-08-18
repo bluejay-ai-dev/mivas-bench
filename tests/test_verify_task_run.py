@@ -418,6 +418,7 @@ def test_opposing_party_matches_substring_and_casefold() -> None:
     ) is True
     assert vtr._values_equal("opposing_party", "Vertex Logistics", "vertex logistics") is True
     assert vtr._values_equal("opposing_party", "Vertex Logistics", "Northgate Insurance") is False
+    assert vtr._values_equal("opposing_party", "Halloway Toolworks", "Holloway Tool Works") is True
     expected = {
         "name": "check_conflict",
         "parameters": {"opposing_party": "St. Benedict Medical Center"},
@@ -428,6 +429,12 @@ def test_opposing_party_matches_substring_and_casefold() -> None:
             "opposing_party": "St. Benedict Medical Center and the surgeon involved",
         },
     }
+    assert vtr._calls_match(expected, actual, None, "legal") is True
+
+
+def test_legal_hold_cancellation_reason_is_unconstrained() -> None:
+    expected = {"name": "hold_cancellation", "parameters": {"reason": "caller_request"}}
+    actual = {"name": "hold_cancellation", "parameters": {"reason": "scheduling_conflict"}}
     assert vtr._calls_match(expected, actual, None, "legal") is True
 
 
@@ -472,6 +479,32 @@ def test_legal_office_states_ignore_message_prose() -> None:
     assert vtr.office_states_match(expected, actual, industry="legal") is True
 
 
+def test_legal_office_for_whom_is_case_insensitive() -> None:
+    expected = {
+        "messages": [{
+            "id": 1,
+            "for_whom": "new cases intake",
+            "message": "Callback requested.",
+        }],
+    }
+    actual = {
+        "messages": [{
+            "id": 1,
+            "for_whom": "New cases intake",
+            "message": "Caller asked for a callback.",
+        }],
+    }
+    assert vtr.office_states_match(expected, actual, industry="legal") is True
+    wrong_queue = {
+        "messages": [{
+            "id": 1,
+            "for_whom": "New cases",
+            "message": "Caller asked for a callback.",
+        }],
+    }
+    assert vtr.office_states_match(expected, wrong_queue, industry="legal") is False
+
+
 def test_legal_empty_expected_messages_allows_extra_rows() -> None:
     expected = {"messages": []}
     actual = {
@@ -497,6 +530,54 @@ def test_legal_empty_expected_intakes_rejects_extra_rows() -> None:
         }],
     }
     assert vtr.office_states_match(expected, actual, industry="legal") is False
+
+
+def test_legal_empty_expected_documents_and_notes_allow_extras() -> None:
+    expected = {"documents": [], "intake_notes": []}
+    actual = {
+        "documents": [{"id": 1, "kind": "intake_packet", "target": "email"}],
+        "intake_notes": [{"id": 1, "note": "Caller is sore."}],
+    }
+    assert vtr.office_states_match(expected, actual, industry="legal") is True
+
+
+def test_legal_empty_expected_holds_and_evaluations_allow_extras() -> None:
+    expected = {"holds": [], "evaluations": []}
+    actual = {
+        "holds": [{"id": 1, "practice_area": "auto_accident", "consumed": True}],
+        "evaluations": [{"id": 1, "status": "booked"}],
+    }
+    assert vtr.office_states_match(expected, actual, industry="legal") is True
+
+
+def test_legal_empty_expected_incident_date_is_unconstrained() -> None:
+    expected = {
+        "intakes": [{
+            "id": 1,
+            "caller_id": "c_new",
+            "practice_area": "auto_accident",
+            "state": "CA",
+            "incident_date": "",
+        }],
+    }
+    actual = {
+        "intakes": [{
+            "id": 1,
+            "caller_id": "c_new",
+            "practice_area": "auto_accident",
+            "state": "CA",
+            "incident_date": "2026-08-01",
+        }],
+    }
+    assert vtr.office_states_match(expected, actual, industry="legal") is True
+    actual["intakes"][0]["practice_area"] = "consumer"
+    assert vtr.office_states_match(expected, actual, industry="legal") is False
+
+
+def test_legal_identity_failed_escalation_ignores_caller_id() -> None:
+    expected = {"escalations": [{"id": 1, "caller_id": "c_new", "reason_code": "identity_failed"}]}
+    actual = {"escalations": [{"id": 1, "caller_id": "", "reason_code": "identity_failed"}]}
+    assert vtr.office_states_match(expected, actual, industry="legal") is True
 
 
 def test_legal_booking_rows_ignore_slot_identity() -> None:
@@ -538,4 +619,36 @@ def test_legal_booking_rows_ignore_slot_identity() -> None:
     }
     assert vtr.office_states_match(expected, actual, industry="legal") is True
 
+
+def test_legal_intake_note_without_packet_matches() -> None:
+    expected = {
+        "intakes": [{
+            "id": 1,
+            "caller_id": "c_new",
+            "practice_area": "product_liability",
+            "state": "GA",
+            "incident_date": "2026-04-22",
+        }],
+        "documents": [],
+        "intake_notes": [],
+    }
+    actual = {
+        "intakes": [{
+            "id": 1,
+            "caller_id": "c_new",
+            "practice_area": "product_liability",
+            "state": "GA",
+            "incident_date": "2026-04-22",
+            "summary": "Caller reports a ladder broke.",
+        }],
+        "intake_notes": [{
+            "id": 1,
+            "caller_id": "c_new",
+            "note": "Witness Ruth Callahan saw the ladder break.",
+        }],
+        "documents": [],
+    }
+    assert vtr.office_states_match(expected, actual, industry="legal") is True
+    expected["documents"] = [{"id": 1, "kind": "intake_packet", "target": "email"}]
+    assert vtr.office_states_match(expected, actual, industry="legal") is False
 
