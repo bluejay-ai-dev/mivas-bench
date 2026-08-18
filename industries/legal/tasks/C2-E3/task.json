@@ -15,10 +15,7 @@
   "exp_handoff_path": [],
   "exp_tool_calls": [
     {
-      "name": "escalate_to_human",
-      "parameters": {
-        "reason_code": "represented_party"
-      }
+      "name": "escalate_to_human"
     }
   ],
   "behaviors": {

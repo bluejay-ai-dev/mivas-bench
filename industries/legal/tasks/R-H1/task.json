@@ -21,10 +21,7 @@
       }
     },
     {
-      "name": "escalate_to_human",
-      "parameters": {
-        "reason_code": "adverse_party"
-      }
+      "name": "escalate_to_human"
     }
   ],
   "behaviors": {
