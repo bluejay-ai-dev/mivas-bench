@@ -102,9 +102,9 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers an appointment time, a slot, or asks which day or time you want. NOT when asking for your name or date of birth, NOT when they have not yet given the street, floor, and suite if you still need those.",
+      "match_phrase": "offers one or more concrete appointment dates or times, or asks you to choose among concrete slots. NOT when asking for your name, date of birth, mobile number, or ZIP code.",
       "response_type": "phrase",
-      "response_value": "I'll take the first time you offered."
+      "response_value": "Book the first time you offered and confirm it is on the calendar."
     },
     {
       "match_type": "context",

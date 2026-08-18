@@ -1,6 +1,6 @@
 {
   "task_name": "R-H2: Accutane refill",
-  "intent": "You are an existing Straus patient on isotretinoin, which you call Accutane. You want your next refill sent to your pharmacy because you are getting low. When they ask who you are, give your name and date of birth once; if they read them back, confirm and continue with the refill. If they ask the medication name, say Accutane. If they say a visit is needed first, agree and ask to book a new Accutane program visit at Park Avenue. If they say you already have an acne check or follow-up on August 20, or that you are already set for that date, tell them that visit is not the Accutane program visit and you still need a new program visit booked at Park Avenue. Do not move, cancel, or keep the August 20 acne check as the substitute. Take the first new appointment time they offer for that program visit. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first new time out loud, then thank them and end the call. Do not ask for a text. Do not ask for the street address, floor, suite, or location id. Do not ask to add insurance, for a callback, to speak to a person, a bill, a payment, the patient portal, a waitlist, financing, or any other appointment besides that Accutane program visit. Stay until they confirm the Accutane refill was sent to the pharmacy, not just that a visit is booked.",
+  "intent": "You are an existing Straus patient on isotretinoin, which you call Accutane. You want your next refill sent to your pharmacy because you are getting low. When they ask who you are, give your name and date of birth once; if they read them back, confirm and continue with the refill. If they ask the medication name, say Accutane. If they say a visit is needed first, agree and ask to book a NEW Accutane program visit at Park Avenue, separate from anything already on the calendar. If they say you already have an acne check or follow-up on August 20, that you are already set for that date, that moving it costs nothing, or they offer to move, reschedule, or switch that existing visit to another time, refuse the move. Tell them to leave the August 20 acne check where it is; that visit is not the Accutane program visit. Ask them to book a NEW separate Accutane program visit at the first Park Avenue weekday morning opening they find. Take that first new weekday morning time. If they say they cannot book it on this call, or they offer a callback or a front-desk follow-up, refuse and insist they book that new program visit now. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first new time out loud, then thank them and end the call. Do not ask for a text. Do not ask for the street address, floor, suite, or location id. Do not ask to add insurance, for a callback, to speak to a person, a bill, a payment, the patient portal, a waitlist, financing, or any other appointment besides that new Accutane program visit. Stay until they confirm the Accutane refill was sent to the pharmacy, not just that a visit is booked.",
   "traits": [
     {
       "trait_name": "mobile",
@@ -72,9 +72,6 @@
     },
     {
       "name": "request_rx_refill",
-      "parameters": {
-        "medication_name": "Accutane"
-      },
       "output": {
         "ok": true,
         "data": {
@@ -122,9 +119,15 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "tells you that you already have a visit, follow-up, or acne check on August 20, or that you are already set for August 20, or offers that existing appointment as enough for the Accutane refill. NOT when offering a newly found appointment time after searching for openings.",
+      "match_phrase": "tells you that you already have a visit, follow-up, or acne check on August 20, or that you are already set for August 20, or offers that existing appointment as enough for the Accutane refill, or asks whether to keep the August 20 visit. NOT when offering a brand-new separate appointment without mentioning August 20 or moving the existing visit.",
       "response_type": "phrase",
-      "response_value": "That August twentieth acne check is not the Accutane program visit. I still need a new program visit at Park Avenue. What's the soonest new opening there?"
+      "response_value": "Leave the August twentieth acne check where it is. That is not the Accutane program visit. I need a NEW program visit at the first Park Avenue weekday morning opening."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to move, reschedule, switch, or change the existing August 20 acne check or follow-up to another date, or asks you to confirm moving that visit, or says moving that existing visit costs nothing. NOT when offering a brand-new separate appointment without moving the existing one, NOT when asking for your identity.",
+      "response_type": "phrase",
+      "response_value": "No. Do not reschedule the August twentieth acne check. Leave that visit. Book a NEW Accutane program visit at the first Park Avenue weekday morning slot."
     },
     {
       "match_type": "context",
@@ -134,9 +137,9 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers an appointment time, a slot, or asks which day or time you want. NOT when asking for your name or date of birth, NOT when they have not yet given the street, floor, and suite if you still need those.",
+      "match_phrase": "offers one or more concrete dates or times for a new Accutane program visit, or asks you to choose among concrete program-visit slots. NOT when referring to the existing August 20 acne check, NOT when offering to move or reschedule that existing visit, NOT when asking for your identity.",
       "response_type": "phrase",
-      "response_value": "I'll take the first time you offered."
+      "response_value": "Book that first new Park Avenue weekday morning program-visit time as a NEW visit. Leave the August twentieth acne check where it is. I also still need the Accutane refill request submitted."
     },
     {
       "match_type": "context",
@@ -149,6 +152,12 @@
       "match_phrase": "offers the waitlist, a later opening, or to add you to a list. NOT when offering a specific appointment time to book now, NOT when asking for your name or date of birth.",
       "response_type": "phrase",
       "response_value": "No waitlist. Please just finish what I asked."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers a callback, asks for a number to call you back, says the front desk will call or follow up, or says they cannot book the visit on this call. NOT when confirming a booked appointment time, NOT when asking for your identity.",
+      "response_type": "phrase",
+      "response_value": "No callback. Please book the NEW Accutane program visit on this call at the first Park Avenue weekday morning opening. Leave the August twentieth acne check where it is."
     },
     {
       "match_type": "context",
@@ -170,9 +179,9 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "says a visit is required for the Accutane refill but has not confirmed that the refill request was submitted. NOT when they have just confirmed the refill request was sent.",
+      "match_phrase": "says a visit is required for the Accutane refill but has not confirmed that the refill request was submitted. NOT when they have just confirmed the refill request was sent. NOT when offering to move or reschedule the existing August 20 visit.",
       "response_type": "phrase",
-      "response_value": "Please submit the Accutane refill request, and if a program visit is required, book the first new Park Avenue time too."
+      "response_value": "Please submit the Accutane refill request. If a program visit is required, book a NEW Park Avenue program visit at the first weekday morning opening, and leave my August twentieth acne check where it is."
     }
   ],
   "customer_name": "Jordan Lee",

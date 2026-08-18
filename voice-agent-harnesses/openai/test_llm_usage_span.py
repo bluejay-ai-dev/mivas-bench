@@ -31,6 +31,65 @@ def _raw(payload: dict) -> SimpleNamespace:
     return SimpleNamespace(type="raw_model_event", data=payload)
 
 
+def test_repeated_tool_calls_keep_request_output_pairs() -> None:
+    exporter = InMemorySpanExporter()
+    provider = TracerProvider()
+    provider.add_span_processor(SimpleSpanProcessor(exporter))
+    tracer = provider.get_tracer("tool-pair-test")
+    root = tracer.start_span("realtime_session")
+    event_tracer = report.RealtimeEventTracer(tracer, root)
+    tool = SimpleNamespace(name="explain_charge")
+
+    event_tracer.handle(
+        SimpleNamespace(
+            type="tool_start",
+            tool=tool,
+            arguments='{"line_item_id":"li_noshow"}',
+        )
+    )
+    event_tracer.handle(
+        SimpleNamespace(
+            type="tool_start",
+            tool=tool,
+            arguments='{"line_item_id":"li_visit"}',
+        )
+    )
+    event_tracer.handle(
+        SimpleNamespace(
+            type="tool_end",
+            tool=tool,
+            output='{"line_item_id":"li_noshow"}',
+        )
+    )
+    event_tracer.handle(
+        SimpleNamespace(
+            type="tool_end",
+            tool=tool,
+            output='{"line_item_id":"li_visit"}',
+        )
+    )
+    event_tracer.close()
+    root.end()
+
+    spans = [
+        span
+        for span in exporter.get_finished_spans()
+        if span.name == "execute_tool explain_charge"
+    ]
+    assert len(spans) == 2
+    pairs = [
+        (
+            span.attributes["gen_ai.tool.call.arguments"],
+            span.attributes["gen_ai.tool.call.result"],
+        )
+        for span in spans
+    ]
+    assert pairs == [
+        ('{"line_item_id":"li_noshow"}', '{"line_item_id":"li_noshow"}'),
+        ('{"line_item_id":"li_visit"}', '{"line_item_id":"li_visit"}'),
+    ]
+
+
 def main() -> None:
     exporter = InMemorySpanExporter()
     provider = TracerProvider()
@@ -82,4 +141,5 @@ def main() -> None:
 
 
 if __name__ == "__main__":
+    test_repeated_tool_calls_keep_request_output_pairs()
     main()

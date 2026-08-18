@@ -32,31 +32,11 @@
     }
   ],
   "exp_handoff_path": [
-    "transfer_to_identity",
     "transfer_to_cosmetic"
   ],
   "exp_tool_calls": [
     {
-      "name": "transfer_to_identity",
-      "parameters": {
-        "next_intent": "cosmetic"
-      }
-    },
-    {
       "name": "transfer_to_cosmetic"
-    },
-    {
-      "name": "verify_identity",
-      "parameters": {
-        "dob": "1972-06-30",
-        "full_name": "Maria Alvarez"
-      },
-      "output": {
-        "ok": true,
-        "data": {
-          "verified": true
-        }
-      }
     },
     {
       "name": "quote_cosmetic_service",

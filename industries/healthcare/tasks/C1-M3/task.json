@@ -46,8 +46,7 @@
       "name": "schedule_allergy_service",
       "parameters": {
         "service": "skin_testing",
-        "location_id": "loc_park_ave",
-        "window_start": "2026-08-24T09:00:00"
+        "location_id": "loc_park_ave"
       }
     }
   ],

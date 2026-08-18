@@ -77,7 +77,6 @@
     {
       "name": "create_clinical_message",
       "parameters": {
-        "priority": "urgent",
         "category": "results_followup"
       },
       "output": {
