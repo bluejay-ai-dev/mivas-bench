@@ -72,6 +72,9 @@
     },
     {
       "name": "request_rx_refill",
+      "parameters": {
+        "medication_name": "Accutane"
+      },
       "output": {
         "ok": true,
         "data": {

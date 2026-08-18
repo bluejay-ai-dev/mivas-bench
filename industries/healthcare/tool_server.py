@@ -334,6 +334,11 @@ def _iso_plus_minutes(start: str, minutes: int) -> str:
     return (datetime.fromisoformat(start) + timedelta(minutes=minutes)).isoformat()
 
 
+def _naive_iso(ts: str) -> str:
+    ts = str(ts or "")
+    return ts.replace("Z", "+00:00")[:19] if ts else ts
+
+
 # --- identity ----------------------------------------------------------------
 
 
@@ -758,15 +763,15 @@ def _d_schedule_allergy_service(a: dict[str, Any]) -> dict[str, Any]:
             "linked_return_visits": spec["linked_visits"],
             "note": "This allergy service was already booked; do not create it again.",
         }
-    window_start = str(a.get("window_start") or "")
-    window_end = str(a.get("window_end") or "")
+    window_start = _naive_iso(str(a.get("window_start") or ""))
+    window_end = _naive_iso(str(a.get("window_end") or ""))
     available = [
         slot_start
         for slot_start in _SLOT_TIMES
         if (not window_start or slot_start >= window_start)
         and (
             not window_end
-            or _iso_plus_minutes(slot_start, duration_minutes) <= window_end
+            or _naive_iso(_iso_plus_minutes(slot_start, duration_minutes)) <= window_end
         )
     ]
     if not available:
