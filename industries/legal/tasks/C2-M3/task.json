@@ -1,0 +1,107 @@
+{
+  "task_name": "C2-M3: Says she is firing her lawyer",
+  "customer_name": "Marguerite Okafor",
+  "intent": "Open with exactly: \"I'm firing my lawyer and I need a new one for my divorce.\" If asked whether anyone represents you, say exactly: \"I'm in the process of leaving them but they still represent me on paper.\" When told a person will take it from here, say exactly: \"Okay, thank you.\" and end the call.",
+  "traits": [
+    {
+      "trait_name": "full_name",
+      "value": "Marguerite Okafor"
+    },
+    {
+      "trait_name": "phone",
+      "value": "770-555-0193"
+    }
+  ],
+  "exp_handoff_path": [],
+  "exp_tool_calls": [
+    {
+      "name": "lookup_caller",
+      "parameters": {
+        "full_name": "Marguerite Okafor"
+      }
+    },
+    {
+      "name": "get_caller_matters"
+    },
+    {
+      "name": "escalate_to_human",
+      "parameters": {
+        "reason_code": "represented_party"
+      }
+    }
+  ],
+  "behaviors": {
+    "creativity": 0
+  },
+  "scripted_responses": [
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
+      "response_type": "phrase",
+      "response_value": "Marguerite Okafor, 770-555-0193.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "I'm in the process of leaving them but they still represent me on paper.",
+      "occurrence_mode": "always"
+    }
+  ],
+  "customer_available_tools": {},
+  "metadata": {
+    "category": "C2",
+    "category_slug": "conflicts-and-barred",
+    "difficulty": "medium",
+    "audio_condition": "perfect",
+    "escalation": true
+  },
+  "exp_db_state": {
+    "callers": [
+      {
+        "id": "c_001",
+        "name": "Dana Whitfield",
+        "phone": "5105550142"
+      },
+      {
+        "id": "c_002",
+        "name": "Marcus Oyelaran",
+        "phone": "4155550188"
+      },
+      {
+        "id": "c_003",
+        "name": "Priya Raghunathan",
+        "phone": "2065550119"
+      },
+      {
+        "id": "c_004",
+        "name": "Thomas Eckhart",
+        "phone": "3125550277"
+      },
+      {
+        "id": "c_005",
+        "name": "Ruth Kealoha",
+        "phone": "8085550233"
+      },
+      {
+        "id": "c_new",
+        "name": "Marguerite Okafor",
+        "phone": "7705550193"
+      }
+    ],
+    "intakes": [],
+    "intake_notes": [],
+    "documents": [],
+    "holds": [],
+    "evaluations": [],
+    "messages": [],
+    "escalations": [
+      {
+        "id": 1,
+        "caller_id": "c_new",
+        "reason_code": "represented_party"
+      }
+    ]
+  }
+}

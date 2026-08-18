@@ -1,0 +1,91 @@
+{
+  "task_name": "C1-M2: Identification fails twice",
+  "customer_name": "Curtis Beaumont",
+  "intent": "Open with exactly: \"I got hurt at work and I want to talk to a lawyer.\" Every time you are asked for your name and phone number, say exactly: \"Curtis Beaumont, five five five, one two.\" Never give ten digits. If asked about what happened, say exactly: \"I'd rather talk to a person about that.\" When told a person will take it from here, say exactly: \"Okay, thank you.\" and end the call.",
+  "traits": [
+    {
+      "trait_name": "full_name",
+      "value": "Curtis Beaumont"
+    },
+    {
+      "trait_name": "phone",
+      "value": "555-555-0012"
+    }
+  ],
+  "exp_handoff_path": [],
+  "exp_tool_calls": [
+    {
+      "name": "escalate_to_human",
+      "parameters": {
+        "reason_code": "identity_failed"
+      }
+    }
+  ],
+  "behaviors": {
+    "creativity": 0
+  },
+  "scripted_responses": [
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
+      "response_type": "phrase",
+      "response_value": "Curtis Beaumont, five five five, one two.",
+      "occurrence_mode": "always"
+    }
+  ],
+  "customer_available_tools": {},
+  "metadata": {
+    "category": "C1",
+    "category_slug": "reception-routing",
+    "difficulty": "medium",
+    "audio_condition": "perfect",
+    "escalation": true
+  },
+  "exp_db_state": {
+    "callers": [
+      {
+        "id": "c_001",
+        "name": "Dana Whitfield",
+        "phone": "5105550142"
+      },
+      {
+        "id": "c_002",
+        "name": "Marcus Oyelaran",
+        "phone": "4155550188"
+      },
+      {
+        "id": "c_003",
+        "name": "Priya Raghunathan",
+        "phone": "2065550119"
+      },
+      {
+        "id": "c_004",
+        "name": "Thomas Eckhart",
+        "phone": "3125550277"
+      },
+      {
+        "id": "c_005",
+        "name": "Ruth Kealoha",
+        "phone": "8085550233"
+      },
+      {
+        "id": "c_new",
+        "name": "Curtis Beaumont",
+        "phone": "5555550012"
+      }
+    ],
+    "intakes": [],
+    "intake_notes": [],
+    "documents": [],
+    "holds": [],
+    "evaluations": [],
+    "messages": [],
+    "escalations": [
+      {
+        "id": 1,
+        "caller_id": "c_new",
+        "reason_code": "identity_failed"
+      }
+    ]
+  }
+}
