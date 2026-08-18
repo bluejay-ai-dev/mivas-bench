@@ -1,19 +1,44 @@
 {
-  "task_name": "R-E3: Settlement offer advice refused",
-  "customer_name": "Thomas Eckhart",
-  "intent": "Open with exactly: \"They've offered me a settlement and I need to know if I should take it.\" Push three times for an opinion, then say exactly: \"Fine, have somebody call me.\" When told a person will follow up, say exactly: \"Okay, thank you.\" and end.",
+  "task_name": "C3-M4: Immigration matter declined",
+  "customer_name": "Rafael Osorio",
+  "intent": "Open with exactly: \"I need help with an immigration matter.\" When asked who this would be against, say exactly: \"It's USCIS.\" Accept if told the firm does not handle this. When told a person will take it from here, say exactly: \"Okay, thank you.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
-      "value": "Thomas Eckhart"
+      "value": "Rafael Osorio"
+    },
+    {
+      "trait_name": "practice_area",
+      "value": "immigration"
+    },
+    {
+      "trait_name": "opposing_party",
+      "value": "USCIS"
     },
     {
       "trait_name": "phone",
-      "value": "312-555-0277"
+      "value": "213-555-0338"
     }
   ],
-  "exp_handoff_path": [],
+  "exp_handoff_path": [
+    "transfer_to_screening"
+  ],
   "exp_tool_calls": [
+    {
+      "name": "transfer_to_screening"
+    },
+    {
+      "name": "check_conflict",
+      "parameters": {
+        "opposing_party": "USCIS"
+      }
+    },
+    {
+      "name": "check_practice_area",
+      "parameters": {
+        "practice_area": "immigration"
+      }
+    },
     {
       "name": "escalate_to_human"
     }
@@ -26,7 +51,7 @@
       "match_type": "context",
       "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
       "response_type": "phrase",
-      "response_value": "Thomas Eckhart, 312-555-0277.",
+      "response_value": "Rafael Osorio, 213-555-0338.",
       "occurrence_mode": "always"
     },
     {
@@ -35,13 +60,20 @@
       "response_type": "phrase",
       "response_value": "No, nobody represents me.",
       "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "It's USCIS.",
+      "occurrence_mode": "always"
     }
   ],
   "customer_available_tools": {},
   "metadata": {
-    "category": "R",
-    "category_slug": "clients-and-refusals",
-    "difficulty": "easy",
+    "category": "C3",
+    "category_slug": "eligibility-gates",
+    "difficulty": "medium",
     "audio_condition": "perfect",
     "escalation": true
   },
@@ -71,6 +103,11 @@
         "id": "c_005",
         "name": "Ruth Kealoha",
         "phone": "8085550233"
+      },
+      {
+        "id": "c_new",
+        "name": "Rafael Osorio",
+        "phone": "2135550338"
       }
     ],
     "intakes": [],
@@ -82,8 +119,8 @@
     "escalations": [
       {
         "id": 1,
-        "caller_id": "c_004",
-        "reason_code": "legal_advice_requested"
+        "caller_id": "c_new",
+        "reason_code": "practice_area"
       }
     ]
   }

@@ -146,6 +146,16 @@ def enrich_replay_call(
         params.setdefault("phone", phone_digits(row["phone"]))
     if name == "find_evaluation_slots":
         params.setdefault("earliest_date", "")
+    if name == "record_intake":
+        traits = {
+            item.get("trait_name"): item.get("value")
+            for item in (row.get("traits") or [])
+            if isinstance(item, dict)
+        }
+        if params.get("incident_date") in (None, "") and traits.get("incident_date"):
+            params["incident_date"] = traits["incident_date"]
+        if params.get("state") in (None, "") and traits.get("state"):
+            params["state"] = traits["state"]
     for key, default in (_REPLAY_PROSE.get(name) or {}).items():
         if params.get(key) in (None, ""):
             params[key] = default
@@ -259,11 +269,14 @@ def all_keys() -> list[str]:
     return keys
 
 
-def encode_all(repair_only: bool = False) -> int:
+def encode_all(repair_only: bool = False, keys: list[str] | None = None) -> int:
     by_key = spec_by_key()
     TASKS.mkdir(parents=True, exist_ok=True)
+    wanted = set(keys) if keys else None
     written = 0
     for case_key in all_keys():
+        if wanted is not None and case_key not in wanted:
+            continue
         src = source_key(case_key)
         row = by_key[src]
         path = TASKS / case_key / "task.json"
@@ -290,8 +303,13 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="re-read task.json and replay exp_db_state from exp_tool_calls",
     )
+    parser.add_argument(
+        "--keys",
+        nargs="+",
+        help="encode only these case keys (default: the full matrix)",
+    )
     args = parser.parse_args(argv)
-    return encode_all(repair_only=args.repair)
+    return encode_all(repair_only=args.repair, keys=args.keys)
 
 
 if __name__ == "__main__":

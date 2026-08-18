@@ -8,6 +8,7 @@ here and never written back onto the task.
     uv run python scripts/tasks_to_digital_humans.py --industry healthcare --json
     uv run python scripts/tasks_to_digital_humans.py --industry healthcare --push
     uv run python scripts/tasks_to_digital_humans.py --industry healthcare --simulation-id 30606
+    uv run python scripts/tasks_to_digital_humans.py --industry legal --simulation-id SIM --sync
 """
 
 from __future__ import annotations
@@ -22,6 +23,7 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
@@ -125,7 +127,10 @@ def _req(
     )
     try:
         with urllib.request.urlopen(req, timeout=120) as resp:
-            return json.load(resp)
+            raw = resp.read()
+            if not raw.strip():
+                return {}
+            return json.loads(raw)
     except urllib.error.HTTPError as e:
         if not_found_ok and e.code == 404:
             return {}
@@ -369,8 +374,9 @@ def case_key_of(dh: dict[str, Any]) -> str:
 
 
 def check(humans: list[dict[str, Any]], industry: str) -> None:
-    if industry in ("healthcare", "legal") and len(humans) != 66:
-        raise SystemExit(f"expected 66 {industry} digital humans, got {len(humans)}")
+    expected = {"healthcare": 66, "legal": 72}.get(industry)
+    if expected is not None and len(humans) != expected:
+        raise SystemExit(f"expected {expected} {industry} digital humans, got {len(humans)}")
     keys = [case_key_of(dh) for dh in humans]
     if len(keys) != len(set(keys)):
         raise SystemExit("duplicate case_key values")
@@ -447,9 +453,9 @@ def create_simulation(
     industry: str,
     agent_id: int,
     name: str | None,
-    n_humans: int = 66,
+    n_humans: int,
 ) -> dict[str, Any]:
-    title = name or f"mivas {industry} · prompt-adherence 66-case review"
+    title = name or f"mivas {industry} · prompt-adherence {n_humans}-case review"
     created = _req("POST", "create-simulation", {
         "agent_id": str(agent_id),
         "name": title,
@@ -677,6 +683,119 @@ def verify_against_live(humans: list[dict[str, Any]], live: list[dict[str, Any]]
     return errors
 
 
+@dataclass
+class PackDiff:
+    extras: list[dict[str, Any]] = field(default_factory=list)
+    duplicates: list[dict[str, Any]] = field(default_factory=list)
+    missing: list[dict[str, Any]] = field(default_factory=list)
+
+
+def diff_pack_vs_live(
+    humans: list[dict[str, Any]],
+    live: list[dict[str, Any]],
+) -> PackDiff:
+    """Split live DHs into pack matches, leftovers, and duplicate case_keys."""
+    generated: dict[str, dict[str, Any]] = {}
+    for dh in humans:
+        try:
+            generated[case_key_of(dh)] = dh
+        except ValueError:
+            continue
+    seen: set[str] = set()
+    extras: list[dict[str, Any]] = []
+    duplicates: list[dict[str, Any]] = []
+    for dh in live:
+        try:
+            key = case_key_of(dh)
+        except ValueError:
+            extras.append(dh)
+            continue
+        if key not in generated:
+            extras.append(dh)
+            continue
+        if key in seen:
+            duplicates.append(dh)
+            continue
+        seen.add(key)
+    missing = [generated[key] for key in generated if key not in seen]
+    return PackDiff(extras=extras, duplicates=duplicates, missing=missing)
+
+
+def industry_tag(industry: str) -> str:
+    return f"mivas_{industry.replace('-', '_')}"
+
+
+def owned_by_industry(dh: dict[str, Any], industry: str) -> bool:
+    want = industry_tag(industry)
+    tags = dh.get("tags") or []
+    if want in tags or dh.get("tag") == want:
+        return True
+    try:
+        return bool(CASE_KEY_RE.match(case_key_of(dh)))
+    except ValueError:
+        return False
+
+
+def delete_digital_human(dh_id: int) -> None:
+    _req("DELETE", f"digital-human/{dh_id}")
+
+
+def align_simulation(simulation_id: int, industry: str, n_humans: int) -> None:
+    title = f"mivas {industry} · prompt-adherence {n_humans}-case review"
+    _req("PUT", f"simulation/{simulation_id}", {
+        "name": title,
+        "max_concurrent": n_humans,
+    })
+    print(f"simulation {simulation_id}: {title} · max_concurrent={n_humans}", flush=True)
+
+
+def sync_simulation(
+    humans: list[dict[str, Any]],
+    simulation_id: int,
+    industry: str,
+) -> PackDiff:
+    """Create missing pack DHs, delete leftovers, then claim titles on the sim."""
+    live = [hydrate_human(dh) for dh in list_simulation_humans(simulation_id)]
+    diff = diff_pack_vs_live(humans, live)
+    stray = [
+        dh for dh in diff.extras + diff.duplicates
+        if not owned_by_industry(dh, industry)
+    ]
+    if stray:
+        ids = [dh.get("id") for dh in stray]
+        raise SystemExit(f"refusing to delete DHs not tagged {industry_tag(industry)}: {ids}")
+
+    for dh in diff.extras + diff.duplicates:
+        hid = int(dh["id"])
+        key = "?"
+        try:
+            key = case_key_of(dh)
+        except ValueError:
+            key = str(dh.get("test_name") or hid)
+        delete_digital_human(hid)
+        print(f"  deleted leftover {key} dh {hid}", flush=True)
+        time.sleep(PACE_S)
+
+    if diff.missing:
+        keep_ids = {
+            int(dh["id"])
+            for dh in live
+            if dh.get("id") is not None
+            and dh not in diff.extras
+            and dh not in diff.duplicates
+        }
+        for want in diff.missing:
+            vacate_test_name(want["test_name"], keep_ids)
+        print(f"creating {len(diff.missing)} missing digital humans", flush=True)
+        push_digital_humans(diff.missing, simulation_id)
+
+    live = list_simulation_humans(simulation_id)
+    claimed = claim_test_names(humans, live)
+    print(f"claimed test_name on {claimed} digital humans", flush=True)
+    align_simulation(simulation_id, industry, len(humans))
+    return diff
+
+
 def claim_test_names(humans: list[dict[str, Any]], live: list[dict[str, Any]]) -> int:
     """Give this suite the MIVAS titles. Older holders get a mild (prior) suffix."""
     want = {case_key_of(dh): dh["test_name"] for dh in humans}
@@ -723,6 +842,11 @@ def main(argv: list[str] | None = None) -> int:
         help="Claim MIVAS test_name titles on an existing simulation (renames older holders)",
     )
     parser.add_argument(
+        "--sync",
+        action="store_true",
+        help="With --simulation-id: create missing pack DHs and delete leftovers, then claim",
+    )
+    parser.add_argument(
         "--verify-only",
         action="store_true",
         help="With --simulation-id: check live DHs match generated pack; do not push",
@@ -735,6 +859,8 @@ def main(argv: list[str] | None = None) -> int:
     check(humans, args.industry)
 
     if args.simulation_id and not args.push:
+        if args.verify_only and args.sync:
+            raise SystemExit("--verify-only and --sync cannot be combined")
         live = list_simulation_humans(args.simulation_id)
         if args.verify_only:
             mismatches = verify_against_live(humans, live)
@@ -746,7 +872,16 @@ def main(argv: list[str] | None = None) -> int:
                 raise SystemExit(f"{len(mismatches)} live DH mismatches")
             print(f"verified {len(humans)} digital humans on simulation {args.simulation_id}")
             return 0
-        patched = claim_test_names(humans, live)
+        if args.sync:
+            diff = sync_simulation(humans, args.simulation_id, args.industry)
+            print(
+                f"sync: deleted {len(diff.extras) + len(diff.duplicates)} leftover, "
+                f"created {len(diff.missing)} missing",
+                flush=True,
+            )
+        else:
+            patched = claim_test_names(humans, live)
+            print(f"claimed test_name on {patched} digital humans for simulation {args.simulation_id}")
         live = list_simulation_humans(args.simulation_id)
         mismatches = verify_against_live(humans, live)
         if mismatches:
@@ -755,9 +890,8 @@ def main(argv: list[str] | None = None) -> int:
             if len(mismatches) > 20:
                 print(f"... and {len(mismatches) - 20} more", flush=True)
             raise SystemExit(
-                f"claimed {patched} DHs but {len(mismatches)} fields still mismatched — not safe to run"
+                f"{len(mismatches)} fields still mismatched — not safe to run"
             )
-        print(f"claimed test_name on {patched} digital humans for simulation {args.simulation_id}")
         print(f"verified {len(humans)} digital humans")
         print(f"https://app.getbluejay.ai/simulations/{args.simulation_id}")
         return 0

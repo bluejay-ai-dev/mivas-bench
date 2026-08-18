@@ -1,23 +1,23 @@
 {
-  "task_name": "C5-E3: Declines after fee disclosure",
-  "customer_name": "Percival Ndiaye",
-  "intent": "Open with exactly: \"I was rear-ended by a Summit Hauling truck and I'm thinking about talking to a lawyer.\" When asked when, say exactly: \"It was July tenth, twenty twenty six.\" If asked to book a free evaluation before any fee numbers, say yes and look at times. When times are offered, take the first slot so they can hold it. After they have held a slot and read back that fee, say exactly: \"That's more than I expected \u2014 I'll call back later.\" Do not confirm booking. Do not ask for a staff member. End after declining to book.",
+  "task_name": "C5-M4: Employment evaluation booked in Washington",
+  "customer_name": "Marisol Quintana",
+  "intent": "Open with exactly: \"I was fired after I complained about safety at work in Washington.\" When asked who this would be against, say exactly: \"It's Puget Sound Fabrication.\" When asked when, say exactly: \"It was July tenth, twenty twenty six.\" Take the first appointment time offered. When read back, say exactly: \"Yes, that's right, go ahead and book it.\" Do not ask for a staff member. Once told the appointment is booked, say exactly: \"Thank you, that's all I needed.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
-      "value": "Percival Ndiaye"
+      "value": "Marisol Quintana"
     },
     {
       "trait_name": "practice_area",
-      "value": "auto_accident"
+      "value": "employment"
     },
     {
       "trait_name": "state",
-      "value": "CA"
+      "value": "WA"
     },
     {
       "trait_name": "opposing_party",
-      "value": "Summit Hauling"
+      "value": "Puget Sound Fabrication"
     },
     {
       "trait_name": "incident_date",
@@ -25,7 +25,7 @@
     },
     {
       "trait_name": "phone",
-      "value": "404-555-0192"
+      "value": "206-555-0412"
     }
   ],
   "exp_handoff_path": [
@@ -35,10 +35,20 @@
   ],
   "exp_tool_calls": [
     {
+      "name": "find_evaluation_slots",
+      "parameters": {
+        "practice_area": "employment",
+        "state": "WA"
+      }
+    },
+    {
       "name": "hold_evaluation",
       "parameters": {
-        "practice_area": "auto_accident"
+        "practice_area": "employment"
       }
+    },
+    {
+      "name": "confirm_evaluation"
     }
   ],
   "behaviors": {
@@ -49,7 +59,7 @@
       "match_type": "context",
       "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
       "response_type": "phrase",
-      "response_value": "Percival Ndiaye, 404-555-0192.",
+      "response_value": "Marisol Quintana, 206-555-0412.",
       "occurrence_mode": "always"
     },
     {
@@ -63,14 +73,14 @@
       "match_type": "context",
       "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question.",
       "response_type": "phrase",
-      "response_value": "It's Summit Hauling.",
+      "response_value": "It's Puget Sound Fabrication.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
       "match_phrase": "The agent asks which state this happened in, or where it took place. NOT any other question.",
       "response_type": "phrase",
-      "response_value": "In California.",
+      "response_value": "In Washington.",
       "occurrence_mode": "always"
     },
     {
@@ -89,13 +99,6 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks whether you want to book a free case evaluation or set up an evaluation appointment, before stating any percentage fee, dollar fee, or contingency number. NOT after a fee amount has already been read back.",
-      "response_type": "phrase",
-      "response_value": "Yes, let's look at times.",
-      "occurrence_mode": "always"
-    },
-    {
-      "match_type": "context",
       "match_phrase": "The agent offers available appointment times or asks which slot to hold. NOT after a slot is already held and they are asking to confirm that booking.",
       "response_type": "phrase",
       "response_value": "I'll take the first time you offered.",
@@ -103,9 +106,9 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent has already held a slot and is reading back that held appointment's fee, asking whether to confirm it. NOT when listing open times or asking which slot to hold, even if a fee percentage was mentioned on that same turn.",
+      "match_phrase": "The agent has already held a slot and is reading back that held appointment's day, time, attorney and fee, asking whether to confirm it. NOT when first listing open times, and NOT when asking which slot to hold.",
       "response_type": "phrase",
-      "response_value": "That's more than I expected \u2014 I'll call back later.",
+      "response_value": "Yes, that's right, go ahead and book it.",
       "occurrence_mode": "always"
     }
   ],
@@ -113,8 +116,9 @@
   "metadata": {
     "category": "C5",
     "category_slug": "fees-and-booking",
-    "difficulty": "easy",
-    "audio_condition": "perfect"
+    "difficulty": "medium",
+    "audio_condition": "perfect",
+    "booking": true
   },
   "exp_db_state": {
     "callers": [
@@ -145,18 +149,18 @@
       },
       {
         "id": "c_new",
-        "name": "Percival Ndiaye",
-        "phone": "4045550192"
+        "name": "Marisol Quintana",
+        "phone": "2065550412"
       }
     ],
     "intakes": [
       {
         "id": 1,
         "caller_id": "c_new",
-        "practice_area": "auto_accident",
-        "state": "CA",
+        "practice_area": "employment",
+        "state": "WA",
         "incident_date": "2026-07-10",
-        "summary": "Rear-end collision."
+        "summary": "Fired after a safety complaint."
       }
     ],
     "intake_notes": [],
@@ -166,15 +170,25 @@
         "token": "HR-EVAL-3092",
         "kind": "evaluation",
         "caller_id": "c_new",
-        "slot_id": "s_110",
+        "slot_id": "s_100",
         "evaluation_id": null,
-        "practice_area": "auto_accident",
+        "practice_area": "employment",
         "reason": null,
-        "summary": "Tom Eckhart on 2026-08-11 at 09:00. The evaluation is free. If the firm takes the case there is no fee unless it wins: 33.33% of any recovery before a lawsuit is filed, 40% if a lawsuit is filed.",
-        "consumed": 0
+        "summary": "Priya Raghunathan on 2026-08-12 at 10:00. The evaluation is free. If the firm takes the case there is no fee unless it wins: 33.33% of any recovery before a lawsuit is filed, 40% if a lawsuit is filed.",
+        "consumed": 1
       }
     ],
-    "evaluations": [],
+    "evaluations": [
+      {
+        "id": "ev_001",
+        "caller_id": "c_new",
+        "slot_id": "s_100",
+        "attorney_id": "a_10",
+        "starts_at": "2026-08-12T10:00",
+        "fee_type": "contingency",
+        "status": "booked"
+      }
+    ],
     "messages": [],
     "escalations": []
   }
