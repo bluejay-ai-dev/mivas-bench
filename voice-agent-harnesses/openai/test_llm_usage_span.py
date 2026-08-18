@@ -31,6 +31,119 @@ def _raw(payload: dict) -> SimpleNamespace:
     return SimpleNamespace(type="raw_model_event", data=payload)
 
 
+def test_repeated_tool_calls_keep_request_output_pairs() -> None:
+    exporter = InMemorySpanExporter()
+    provider = TracerProvider()
+    provider.add_span_processor(SimpleSpanProcessor(exporter))
+    tracer = provider.get_tracer("tool-pair-test")
+    root = tracer.start_span("realtime_session")
+    event_tracer = report.RealtimeEventTracer(tracer, root)
+    tool = SimpleNamespace(name="explain_charge")
+
+    event_tracer.handle(
+        SimpleNamespace(
+            type="tool_start",
+            tool=tool,
+            arguments='{"line_item_id":"li_noshow"}',
+        )
+    )
+    event_tracer.handle(
+        SimpleNamespace(
+            type="tool_start",
+            tool=tool,
+            arguments='{"line_item_id":"li_visit"}',
+        )
+    )
+    event_tracer.handle(
+        SimpleNamespace(
+            type="tool_end",
+            tool=tool,
+            output='{"line_item_id":"li_noshow"}',
+        )
+    )
+    event_tracer.handle(
+        SimpleNamespace(
+            type="tool_end",
+            tool=tool,
+            output='{"line_item_id":"li_visit"}',
+        )
+    )
+    event_tracer.close()
+    root.end()
+
+    spans = [
+        span
+        for span in exporter.get_finished_spans()
+        if span.name == "execute_tool explain_charge"
+    ]
+    assert len(spans) == 2
+    pairs = [
+        (
+            span.attributes["gen_ai.tool.call.arguments"],
+            span.attributes["gen_ai.tool.call.result"],
+        )
+        for span in spans
+    ]
+    assert pairs == [
+        ('{"line_item_id":"li_noshow"}', '{"line_item_id":"li_noshow"}'),
+        ('{"line_item_id":"li_visit"}', '{"line_item_id":"li_visit"}'),
+    ]
+
+    exporter2 = InMemorySpanExporter()
+    provider2 = TracerProvider()
+    provider2.add_span_processor(SimpleSpanProcessor(exporter2))
+    tracer2 = provider2.get_tracer("tool-pair-reorder")
+    root2 = tracer2.start_span("realtime_session")
+    tracer2_events = report.RealtimeEventTracer(tracer2, root2)
+    tracer2_events.handle(SimpleNamespace(type="tool_start", tool=tool, arguments='{"id":"a"}'))
+    tracer2_events.handle(SimpleNamespace(type="tool_start", tool=tool, arguments='{"id":"b"}'))
+    tracer2_events.handle(SimpleNamespace(type="tool_end", tool=tool, arguments='{"id":"b"}', output='{"ok":"b"}'))
+    tracer2_events.handle(SimpleNamespace(type="tool_end", tool=tool, arguments='{"id":"a"}', output='{"ok":"a"}'))
+    tracer2_events.close()
+    root2.end()
+    reordered = [
+        (
+            span.attributes["gen_ai.tool.call.arguments"],
+            span.attributes["gen_ai.tool.call.result"],
+        )
+        for span in exporter2.get_finished_spans()
+        if span.name == "execute_tool explain_charge"
+    ]
+    assert sorted(reordered) == [
+        ('{"id":"a"}', '{"ok":"a"}'),
+        ('{"id":"b"}', '{"ok":"b"}'),
+    ]
+
+    # arguments that only differ past the 4000-char telemetry clip must still pair
+    prefix = "x" * report._MAX_ATTR
+    long_a = prefix + "A"
+    long_b = prefix + "B"
+    assert report._clip(long_a) == report._clip(long_b)
+    exporter3 = InMemorySpanExporter()
+    provider3 = TracerProvider()
+    provider3.add_span_processor(SimpleSpanProcessor(exporter3))
+    tracer3 = provider3.get_tracer("tool-pair-clip")
+    root3 = tracer3.start_span("realtime_session")
+    tracer3_events = report.RealtimeEventTracer(tracer3, root3)
+    tracer3_events.handle(SimpleNamespace(type="tool_start", tool=tool, arguments=long_a))
+    tracer3_events.handle(SimpleNamespace(type="tool_start", tool=tool, arguments=long_b))
+    tracer3_events.handle(
+        SimpleNamespace(type="tool_end", tool=tool, arguments=long_b, output='{"ok":"b"}')
+    )
+    assert tracer3_events._tool_match_keys["explain_charge"] == [(None, long_a)]
+    tracer3_events.handle(
+        SimpleNamespace(type="tool_end", tool=tool, arguments=long_a, output='{"ok":"a"}')
+    )
+    tracer3_events.close()
+    root3.end()
+    clipped_pairs = [
+        span.attributes["gen_ai.tool.call.result"]
+        for span in exporter3.get_finished_spans()
+        if span.name == "execute_tool explain_charge"
+    ]
+    assert clipped_pairs == ['{"ok":"b"}', '{"ok":"a"}']
+
+
 def main() -> None:
     exporter = InMemorySpanExporter()
     provider = TracerProvider()
@@ -82,4 +195,5 @@ def main() -> None:
 
 
 if __name__ == "__main__":
+    test_repeated_tool_calls_keep_request_output_pairs()
     main()

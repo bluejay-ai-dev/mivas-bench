@@ -110,6 +110,12 @@
     },
     {
       "match_type": "context",
+      "match_phrase": "asks for a ZIP code or postal code as a second identity check after confirming your name and date of birth. NOT when asking for an office ZIP, NOT when reading the ZIP back for confirmation.",
+      "response_type": "phrase",
+      "response_value": "My ZIP code is 34786."
+    },
+    {
+      "match_type": "context",
       "match_phrase": "reads your name and date of birth back to you and asks whether that is right, or asks you to confirm the name and date of birth they just repeated. NOT when first asking for your name and date of birth, NOT when asking for a phone or mobile number.",
       "response_type": "phrase",
       "response_value": "Yes, that's right."
@@ -155,6 +161,12 @@
       "match_phrase": "thanks you, says goodbye, or offers a payment link before they have named both the missed-visit fee and the visit charge. NOT when they have just named both lines.",
       "response_type": "phrase",
       "response_value": "Please name both charges first \u2014 the missed-visit fee and the visit \u2014 then text the payment link to 407-555-0155."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks what you want to do after naming both the missed-visit fee and the visit charge, or asks whether you want to pay the full balance. NOT when only one line has been named, NOT when neither charge has been named.",
+      "response_type": "phrase",
+      "response_value": "I'll pay the full balance now. Please text a payment link to 407-555-0155."
     }
   ],
   "customer_name": "Alice Romano",

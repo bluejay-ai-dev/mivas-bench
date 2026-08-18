@@ -45,12 +45,6 @@
       }
     },
     {
-      "name": "search_practice_kb",
-      "parameters": {
-        "topic": "directions"
-      }
-    },
-    {
       "name": "list_locations"
     },
     {
@@ -156,13 +150,19 @@
       "match_type": "context",
       "match_phrase": "quotes weekday hours, opening time, or train directions without saying they looked it up or checked the hours. NOT when they have just said they checked the hours or directions.",
       "response_type": "phrase",
-      "response_value": "Can you look that up in the office hours? Then text me the Park Avenue street address and tell me the floor and the suite."
+      "response_value": "Can you look up both the weekday hours and how to get there by train? Then text me the Park Avenue street address and tell me the floor and the suite."
     },
     {
       "match_type": "context",
-      "match_phrase": "thanks you, says goodbye, or asks if you need anything else after booking but before they have looked up weekday hours and texted the Park Avenue address. NOT when they have just confirmed hours and that the address was texted.",
+      "match_phrase": "answers the weekday hours or gives the Park Avenue address but has not answered how to get there by train. NOT when train or subway directions have already been given.",
       "response_type": "phrase",
-      "response_value": "I still need weekday hours and the address texted to me before I go."
+      "response_value": "I still need the train directions. Please look up how to get to Park Avenue by train."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before the booking is confirmed on the calendar, the weekday hours are answered, the train directions are answered, the street address is texted, and the floor and suite are spoken. NOT when all of those are complete.",
+      "response_type": "phrase",
+      "response_value": "Before I go, I still need the booking confirmed on the calendar, the weekday hours, the train directions, the street address texted to me, and the floor and suite."
     }
   ],
   "customer_name": "Owen Castellanos",
