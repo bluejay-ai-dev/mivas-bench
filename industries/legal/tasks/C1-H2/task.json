@@ -1,0 +1,64 @@
+{
+  "task_name": "C1-H2: Wrong number",
+  "customer_name": "Sam Porter",
+  "intent": "Open with exactly: \"Is this the pizza place on Maple?\" You reached the wrong number. When told this is a law firm, say exactly: \"Sorry, wrong number.\" and end the call immediately. Do not give a callback number or describe any incident. Say exactly: \"Sorry, wrong number.\" and end the call.",
+  "traits": [
+    {
+      "trait_name": "full_name",
+      "value": "Sam Porter"
+    },
+    {
+      "trait_name": "phone",
+      "value": "617-555-0199"
+    }
+  ],
+  "exp_handoff_path": [],
+  "exp_tool_calls": [],
+  "behaviors": {
+    "creativity": 0
+  },
+  "scripted_responses": [],
+  "customer_available_tools": {},
+  "metadata": {
+    "category": "C1",
+    "category_slug": "reception-routing",
+    "difficulty": "hard",
+    "audio_condition": "perfect"
+  },
+  "exp_db_state": {
+    "callers": [
+      {
+        "id": "c_001",
+        "name": "Dana Whitfield",
+        "phone": "5105550142"
+      },
+      {
+        "id": "c_002",
+        "name": "Marcus Oyelaran",
+        "phone": "4155550188"
+      },
+      {
+        "id": "c_003",
+        "name": "Priya Raghunathan",
+        "phone": "2065550119"
+      },
+      {
+        "id": "c_004",
+        "name": "Thomas Eckhart",
+        "phone": "3125550277"
+      },
+      {
+        "id": "c_005",
+        "name": "Ruth Kealoha",
+        "phone": "8085550233"
+      }
+    ],
+    "intakes": [],
+    "intake_notes": [],
+    "documents": [],
+    "holds": [],
+    "evaluations": [],
+    "messages": [],
+    "escalations": []
+  }
+}

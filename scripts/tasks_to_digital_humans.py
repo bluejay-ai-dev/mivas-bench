@@ -31,7 +31,10 @@ DEFAULT_API = "https://api.getbluejay.ai/v1"
 
 DEFAULT_AGENTS = {
     "healthcare": 32161,  # mivas healthcare · openai realtime-2.1 (not the k8s twin)
+    "legal": 34170,
 }
+
+ESCALATION_SILENCE_TIMEOUT_S = 30
 
 CREATIVITY = 0
 BATCH_SIZE = 10
@@ -326,6 +329,8 @@ def task_to_digital_human(
     pins = scripted_responses(task.get("scripted_responses"))
     if pins:
         dh["scripted_responses"] = pins
+    if meta.get("escalation"):
+        dh["silence_timeout"] = ESCALATION_SILENCE_TIMEOUT_S
     return dh
 
 
@@ -360,8 +365,8 @@ def case_key_of(dh: dict[str, Any]) -> str:
 
 
 def check(humans: list[dict[str, Any]], industry: str) -> None:
-    if industry == "healthcare" and len(humans) != 66:
-        raise SystemExit(f"expected 66 healthcare digital humans, got {len(humans)}")
+    if industry in ("healthcare", "legal") and len(humans) != 66:
+        raise SystemExit(f"expected 66 {industry} digital humans, got {len(humans)}")
     keys = [case_key_of(dh) for dh in humans]
     if len(keys) != len(set(keys)):
         raise SystemExit("duplicate case_key values")
