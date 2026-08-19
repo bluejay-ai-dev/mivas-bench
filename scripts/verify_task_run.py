@@ -31,6 +31,7 @@ import json
 import os
 import re
 import sys
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -129,6 +130,12 @@ LEGAL_EXTRA_OK_TABLES = frozenset({
     "messages", "intake_notes", "documents", "holds", "evaluations",
 })
 PHONE_KEY_RE = re.compile(r"phone|_e164$", re.I)
+# ISO date + hour + minute; seconds, micros, and timezone are optional.
+_DATETIME_RE = re.compile(
+    r"^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}"
+    r"(?::\d{2}(?:\.\d+)?)?"
+    r"(?:Z|[+-]\d{2}:?\d{2})?$"
+)
 
 _TOOL_SCHEMAS: dict[str, dict[str, Any]] = {}
 
@@ -246,6 +253,20 @@ def _ignore_row_keys(industry: str | None) -> frozenset[str]:
     return IGNORE_ROW_KEYS
 
 
+def _minute_datetime(value: Any) -> Any:
+    """Collapse datetime-like strings to date+hour+minute (drop seconds/micros)."""
+    if not isinstance(value, str):
+        return value
+    text = value.strip()
+    if not _DATETIME_RE.match(text):
+        return value
+    try:
+        parsed = datetime.fromisoformat(text.replace("Z", "+00:00"))
+    except ValueError:
+        return value
+    return parsed.strftime("%Y-%m-%dT%H:%M")
+
+
 def _canon_row(row: Any, industry: str | None = None) -> Any:
     if not isinstance(row, dict):
         return row
@@ -257,7 +278,10 @@ def _canon_row(row: Any, industry: str | None = None) -> Any:
         if isinstance(value, str) and _is_phone_key(key):
             out[key] = _digits_phone(value)
         elif isinstance(value, str):
-            out[key] = value.strip().casefold()
+            # collapse T15:30 vs T15:30:00 first; casefold after so dump seconds
+            # cannot disagree with a minute-precision seed.
+            collapsed = _minute_datetime(value)
+            out[key] = collapsed.strip().casefold() if isinstance(collapsed, str) else collapsed
         else:
             out[key] = value
     return out
