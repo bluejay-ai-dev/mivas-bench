@@ -1,0 +1,48 @@
+industries/healthcare/tasks/C1-E1-SIG/task.json
+  s_b298d94c42f664::t_76c7939165ab92 74-91
+  s_b298d94c42f664::t_5b76fb3e3fa26c 32-44
+tests/test_tasks_to_digital_humans.py
+  s_b298d94c42f664::t_28245f3f07beb1 570-573,577-588
+  s_b298d94c42f664::t_36a98b6552c875 589
+industries/healthcare/tasks/C3-E1/task.json
+  s_b298d94c42f664::t_f1eb7948f57066 3
+  s_b298d94c42f664::t_9c176e39662dc1 24-36
+  s_b298d94c42f664::t_364b65288e4836 66-83
+industries/healthcare/tasks/C1-E3/task.json
+  s_fdb9dc6469f776::t_f78be12e7a078a 28-40
+  s_b298d94c42f664::t_d8d6fd3128da22 70-93
+  s_b298d94c42f664::t_754a7c2c422e3d 3
+industries/healthcare/tasks/C1-E1/task.json
+  s_b298d94c42f664::t_61193d2fe122a2 32-44
+  s_b298d94c42f664::t_e80a3c28a2e7ee 74-91
+industries/healthcare/tasks/C1-E1-BG/task.json
+  s_b298d94c42f664::t_b270f174f056cc 74-91
+  s_b298d94c42f664::t_afe8f6539bef48 32-44
+industries/healthcare/tasks/C2-H3/task.json
+  s_b298d94c42f664::t_36769f29fb2f61 131-136
+  s_b298d94c42f664::t_330156fb03d77a 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "8af4a00fac1e7623e9c6f63dde6bffc0747f4150",
+  "prompts": {},
+  "sessions": {
+    "s_b298d94c42f664": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "bbfc9e70-c7af-4f74-b8d5-0694575ff316",
+        "model": "grok-4.6"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    },
+    "s_fdb9dc6469f776": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "3ac7f812-0ef4-4f79-ad0f-8d2f26a4a791",
+        "model": "cursor-grok-4.6-high-fast"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
