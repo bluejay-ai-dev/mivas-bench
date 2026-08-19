@@ -1,0 +1,769 @@
+{
+  "task_name": "T4-M4: Quote a Plus to Total upgrade",
+  "customer_name": "Selina Cortez",
+  "intent": "Open with exactly: \"What would it cost to upgrade my Plus membership to Total today?\" Give identity when asked. You only want the prorated upgrade quote. Do not confirm the charge. Hang up once they say the amount due. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
+  "traits": [
+    {
+      "trait_name": "full_name",
+      "value": "Selina Cortez"
+    },
+    {
+      "trait_name": "phone",
+      "value": "541-555-0171"
+    },
+    {
+      "trait_name": "postal_code",
+      "value": "97035"
+    },
+    {
+      "trait_name": "card_last4",
+      "value": "1156"
+    },
+    {
+      "trait_name": "email",
+      "value": "selina.cortez@example.test"
+    },
+    {
+      "trait_name": "order_number",
+      "value": "KE-4498870"
+    }
+  ],
+  "exp_handoff_path": [
+    "transfer_to_verification",
+    "transfer_to_membership"
+  ],
+  "exp_tool_calls": [
+    {
+      "name": "transfer_to_verification"
+    },
+    {
+      "name": "identify_customer"
+    },
+    {
+      "name": "verify_identity",
+      "parameters": {
+        "postal_code": "97035",
+        "card_last4": "1156"
+      }
+    },
+    {
+      "name": "get_customer_summary"
+    },
+    {
+      "name": "transfer_to_membership"
+    },
+    {
+      "name": "quote_membership_upgrade"
+    }
+  ],
+  "behaviors": {
+    "creativity": 0
+  },
+  "scripted_responses": [
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks for the caller's full name and a phone number, or for a name and the number on the account. NOT when asking for ZIP, card last four, or an order number alone.",
+      "response_type": "phrase",
+      "response_value": "Selina Cortez, 541-555-0171.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks for the ZIP code on the order and the last four digits of the card, together or in either order. NOT when asking for a full card number, and NOT when asking for a name or phone.",
+      "response_type": "phrase",
+      "response_value": "ZIP 97035, card ending 1156.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks for an order number, which order, or which item. NOT when asking for name, phone, ZIP, or card last four.",
+      "response_type": "phrase",
+      "response_value": "Order KE-4498870, the speaker.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to transfer you to a human, a care advocate, the front desk, or a live agent because they cannot continue on this line. NOT when you already asked for a person, NOT when they are completing the return, delivery change, cancellation, or scam report.",
+      "response_type": "phrase",
+      "response_value": "No, I don't need a person. Please finish what I asked on this call.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to book a repair, start a return, move a delivery, cancel a membership, send a confirmation text, or add another request after the thing you called about is already done. NOT when still working on the original request.",
+      "response_type": "phrase",
+      "response_value": "That's all I needed. Thank you.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks whether to charge the upgrade now. NOT when first quoting the amount.",
+      "response_type": "phrase",
+      "response_value": "Don't charge it. I only needed the quote.",
+      "occurrence_mode": "always"
+    }
+  ],
+  "customer_available_tools": {},
+  "metadata": {
+    "category": "T4",
+    "category_slug": "membership",
+    "difficulty": "medium",
+    "audio_condition": "perfect"
+  },
+  "exp_db_state": {
+    "customers": [
+      {
+        "id": "cust_dana",
+        "name": "Dana Whitlock",
+        "phone": "5415550188",
+        "email": "dana.whitlock@example.test",
+        "postal_code": "97330",
+        "card_last4": "4417",
+        "tier": "total",
+        "membership_start": "2026-03-01",
+        "membership_paid_cents": 19999,
+        "auto_renew": 1
+      },
+      {
+        "id": "cust_marcus",
+        "name": "Marcus Iyer",
+        "phone": "5415550104",
+        "email": "marcus.iyer@example.test",
+        "postal_code": "97402",
+        "card_last4": "8802",
+        "tier": "standard",
+        "membership_start": "",
+        "membership_paid_cents": 0,
+        "auto_renew": 0
+      },
+      {
+        "id": "cust_priya",
+        "name": "Priya Raman",
+        "phone": "5415550119",
+        "email": "priya.raman@example.test",
+        "postal_code": "98104",
+        "card_last4": "3361",
+        "tier": "plus",
+        "membership_start": "2026-01-20",
+        "membership_paid_cents": 2999,
+        "auto_renew": 1
+      },
+      {
+        "id": "cust_glen",
+        "name": "Glen Aldridge",
+        "phone": "5415550127",
+        "email": "glen.aldridge@example.test",
+        "postal_code": "97213",
+        "card_last4": "5540",
+        "tier": "total",
+        "membership_start": "2025-12-05",
+        "membership_paid_cents": 19999,
+        "auto_renew": 1
+      },
+      {
+        "id": "cust_rosalind",
+        "name": "Rosalind Baptiste",
+        "phone": "5415550133",
+        "email": "rosalind.baptiste@example.test",
+        "postal_code": "97401",
+        "card_last4": "7719",
+        "tier": "standard",
+        "membership_start": "",
+        "membership_paid_cents": 0,
+        "auto_renew": 0
+      },
+      {
+        "id": "cust_tomas",
+        "name": "Tomas Ferreira",
+        "phone": "5415550146",
+        "email": "tomas.ferreira@example.test",
+        "postal_code": "94110",
+        "card_last4": "2208",
+        "tier": "plus",
+        "membership_start": "2026-05-10",
+        "membership_paid_cents": 2999,
+        "auto_renew": 1
+      },
+      {
+        "id": "cust_amina",
+        "name": "Amina Kalu",
+        "phone": "5415550152",
+        "email": "amina.kalu@example.test",
+        "postal_code": "98661",
+        "card_last4": "6673",
+        "tier": "plus",
+        "membership_start": "2026-04-02",
+        "membership_paid_cents": 2999,
+        "auto_renew": 1
+      },
+      {
+        "id": "cust_victor",
+        "name": "Victor Nunes",
+        "phone": "5415550165",
+        "email": "victor.nunes@example.test",
+        "postal_code": "43081",
+        "card_last4": "9014",
+        "tier": "total",
+        "membership_start": "2026-02-11",
+        "membership_paid_cents": 19999,
+        "auto_renew": 1
+      },
+      {
+        "id": "cust_selina",
+        "name": "Selina Cortez",
+        "phone": "5415550171",
+        "email": "selina.cortez@example.test",
+        "postal_code": "97035",
+        "card_last4": "1156",
+        "tier": "plus",
+        "membership_start": "2026-02-15",
+        "membership_paid_cents": 2999,
+        "auto_renew": 1
+      },
+      {
+        "id": "cust_owen",
+        "name": "Owen Tsai",
+        "phone": "5415550183",
+        "email": "owen.tsai@example.test",
+        "postal_code": "43215",
+        "card_last4": "4482",
+        "tier": "total",
+        "membership_start": "2025-09-20",
+        "membership_paid_cents": 19999,
+        "auto_renew": 1
+      },
+      {
+        "id": "cust_nadia",
+        "name": "Nadia Grant",
+        "phone": "5415550196",
+        "email": "nadia.grant@example.test",
+        "postal_code": "98042",
+        "card_last4": "7735",
+        "tier": "total",
+        "membership_start": "2026-06-01",
+        "membership_paid_cents": 19999,
+        "auto_renew": 1
+      },
+      {
+        "id": "cust_felix",
+        "name": "Felix Moreau",
+        "phone": "5415550108",
+        "email": "felix.moreau@example.test",
+        "postal_code": "94612",
+        "card_last4": "3390",
+        "tier": "plus",
+        "membership_start": "2026-03-22",
+        "membership_paid_cents": 2999,
+        "auto_renew": 1
+      },
+      {
+        "id": "cust_grace",
+        "name": "Grace Okonkwo",
+        "phone": "5415550112",
+        "email": "grace.okonkwo@example.test",
+        "postal_code": "97005",
+        "card_last4": "6628",
+        "tier": "total",
+        "membership_start": "2025-10-01",
+        "membership_paid_cents": 19999,
+        "auto_renew": 1
+      }
+    ],
+    "orders": [
+      {
+        "order_number": "KE-4471209",
+        "customer_id": "cust_dana",
+        "order_date": "2026-07-20",
+        "status": "scheduled",
+        "fulfillment": "kestrel",
+        "seller_name": "",
+        "purchase_state": "OR",
+        "delivered_date": "",
+        "delivery_date": "2026-08-14",
+        "delivery_window": "8am-12pm",
+        "install": 1,
+        "haul_away": 1
+      },
+      {
+        "order_number": "KE-4408117",
+        "customer_id": "cust_marcus",
+        "order_date": "2026-07-08",
+        "status": "delivered",
+        "fulfillment": "kestrel",
+        "seller_name": "",
+        "purchase_state": "OR",
+        "delivered_date": "2026-07-10",
+        "delivery_date": "",
+        "delivery_window": "",
+        "install": 0,
+        "haul_away": 0
+      },
+      {
+        "order_number": "KE-4399052",
+        "customer_id": "cust_marcus",
+        "order_date": "2026-06-15",
+        "status": "delivered",
+        "fulfillment": "kestrel",
+        "seller_name": "",
+        "purchase_state": "OR",
+        "delivered_date": "2026-06-18",
+        "delivery_date": "",
+        "delivery_window": "",
+        "install": 0,
+        "haul_away": 0
+      },
+      {
+        "order_number": "KE-4462884",
+        "customer_id": "cust_priya",
+        "order_date": "2026-07-18",
+        "status": "delivered",
+        "fulfillment": "kestrel",
+        "seller_name": "",
+        "purchase_state": "WA",
+        "delivered_date": "2026-07-20",
+        "delivery_date": "",
+        "delivery_window": "",
+        "install": 0,
+        "haul_away": 0
+      },
+      {
+        "order_number": "KE-4455031",
+        "customer_id": "cust_glen",
+        "order_date": "2026-07-13",
+        "status": "delivered",
+        "fulfillment": "kestrel",
+        "seller_name": "",
+        "purchase_state": "OR",
+        "delivered_date": "2026-07-15",
+        "delivery_date": "",
+        "delivery_window": "",
+        "install": 0,
+        "haul_away": 0
+      },
+      {
+        "order_number": "KE-4431775",
+        "customer_id": "cust_rosalind",
+        "order_date": "2026-06-02",
+        "status": "delivered",
+        "fulfillment": "kestrel",
+        "seller_name": "",
+        "purchase_state": "OR",
+        "delivered_date": "2026-06-05",
+        "delivery_date": "",
+        "delivery_window": "",
+        "install": 0,
+        "haul_away": 0
+      },
+      {
+        "order_number": "KE-4479002",
+        "customer_id": "cust_tomas",
+        "order_date": "2026-07-24",
+        "status": "delivered",
+        "fulfillment": "marketplace",
+        "seller_name": "Northwind Supply Co",
+        "purchase_state": "CA",
+        "delivered_date": "2026-07-27",
+        "delivery_date": "",
+        "delivery_window": "",
+        "install": 0,
+        "haul_away": 0
+      },
+      {
+        "order_number": "KE-4483316",
+        "customer_id": "cust_amina",
+        "order_date": "2026-07-26",
+        "status": "delivered",
+        "fulfillment": "kestrel",
+        "seller_name": "",
+        "purchase_state": "WA",
+        "delivered_date": "2026-07-29",
+        "delivery_date": "",
+        "delivery_window": "",
+        "install": 0,
+        "haul_away": 0
+      },
+      {
+        "order_number": "KE-4490224",
+        "customer_id": "cust_victor",
+        "order_date": "2026-05-30",
+        "status": "delivered",
+        "fulfillment": "kestrel",
+        "seller_name": "",
+        "purchase_state": "OH",
+        "delivered_date": "2026-06-03",
+        "delivery_date": "",
+        "delivery_window": "",
+        "install": 0,
+        "haul_away": 0
+      },
+      {
+        "order_number": "KE-4498870",
+        "customer_id": "cust_selina",
+        "order_date": "2026-07-30",
+        "status": "processing",
+        "fulfillment": "kestrel",
+        "seller_name": "",
+        "purchase_state": "OR",
+        "delivered_date": "",
+        "delivery_date": "",
+        "delivery_window": "",
+        "install": 0,
+        "haul_away": 0
+      },
+      {
+        "order_number": "KE-4487740",
+        "customer_id": "cust_owen",
+        "order_date": "2026-07-22",
+        "status": "delivered",
+        "fulfillment": "kestrel",
+        "seller_name": "",
+        "purchase_state": "OH",
+        "delivered_date": "2026-07-25",
+        "delivery_date": "",
+        "delivery_window": "",
+        "install": 0,
+        "haul_away": 0
+      },
+      {
+        "order_number": "KE-4492551",
+        "customer_id": "cust_nadia",
+        "order_date": "2026-07-23",
+        "status": "delivered",
+        "fulfillment": "kestrel",
+        "seller_name": "",
+        "purchase_state": "WA",
+        "delivered_date": "2026-07-26",
+        "delivery_date": "",
+        "delivery_window": "",
+        "install": 0,
+        "haul_away": 0
+      },
+      {
+        "order_number": "KE-4495108",
+        "customer_id": "cust_felix",
+        "order_date": "2026-07-27",
+        "status": "delivered",
+        "fulfillment": "kestrel",
+        "seller_name": "",
+        "purchase_state": "CA",
+        "delivered_date": "2026-07-29",
+        "delivery_date": "",
+        "delivery_window": "",
+        "install": 0,
+        "haul_away": 0
+      },
+      {
+        "order_number": "KE-4471860",
+        "customer_id": "cust_grace",
+        "order_date": "2025-11-06",
+        "status": "delivered",
+        "fulfillment": "kestrel",
+        "seller_name": "",
+        "purchase_state": "OR",
+        "delivered_date": "2025-11-10",
+        "delivery_date": "",
+        "delivery_window": "",
+        "install": 0,
+        "haul_away": 0
+      },
+      {
+        "order_number": "KE-4500001",
+        "customer_id": "cust_nadia",
+        "order_date": "2026-07-30",
+        "status": "scheduled",
+        "fulfillment": "kestrel",
+        "seller_name": "",
+        "purchase_state": "WA",
+        "delivered_date": "",
+        "delivery_date": "2026-08-03",
+        "delivery_window": "8am-12pm",
+        "install": 1,
+        "haul_away": 1
+      }
+    ],
+    "order_items": [
+      {
+        "id": "it_01",
+        "order_number": "KE-4471209",
+        "sku": "SKU-APP-2210",
+        "name": "Northwind 26 cu ft French Door Refrigerator",
+        "category": "appliance",
+        "price_cents": 214999,
+        "opened": 0,
+        "activatable": 0,
+        "restock_class": "none",
+        "condition_grade": "new",
+        "recalled": 0,
+        "hazmat": 0
+      },
+      {
+        "id": "it_02",
+        "order_number": "KE-4408117",
+        "sku": "SKU-CMP-1180",
+        "name": "Kestrel Aurora 14 Laptop",
+        "category": "computing",
+        "price_cents": 89999,
+        "opened": 1,
+        "activatable": 0,
+        "restock_class": "none",
+        "condition_grade": "new",
+        "recalled": 0,
+        "hazmat": 0
+      },
+      {
+        "id": "it_03",
+        "order_number": "KE-4399052",
+        "sku": "SKU-CMP-2280",
+        "name": "Kestrel Vista 27 Monitor",
+        "category": "computing",
+        "price_cents": 32999,
+        "opened": 1,
+        "activatable": 0,
+        "restock_class": "none",
+        "condition_grade": "new",
+        "recalled": 0,
+        "hazmat": 0
+      },
+      {
+        "id": "it_04",
+        "order_number": "KE-4462884",
+        "sku": "SKU-MOB-7702",
+        "name": "Solstice X5 Smartphone",
+        "category": "mobile",
+        "price_cents": 109999,
+        "opened": 1,
+        "activatable": 1,
+        "restock_class": "activatable",
+        "condition_grade": "new",
+        "recalled": 0,
+        "hazmat": 0
+      },
+      {
+        "id": "it_05",
+        "order_number": "KE-4455031",
+        "sku": "SKU-MOB-7702",
+        "name": "Solstice X5 Smartphone",
+        "category": "mobile",
+        "price_cents": 109999,
+        "opened": 1,
+        "activatable": 1,
+        "restock_class": "activatable",
+        "condition_grade": "new",
+        "recalled": 0,
+        "hazmat": 0
+      },
+      {
+        "id": "it_06",
+        "order_number": "KE-4431775",
+        "sku": "SKU-BWM-0450",
+        "name": "Bellwether Ease 4 Phone",
+        "category": "mobile",
+        "price_cents": 14999,
+        "opened": 1,
+        "activatable": 1,
+        "restock_class": "activatable",
+        "condition_grade": "new",
+        "recalled": 0,
+        "hazmat": 0
+      },
+      {
+        "id": "it_07",
+        "order_number": "KE-4479002",
+        "sku": "SKU-AUD-3390",
+        "name": "Corva Studio Headphones",
+        "category": "audio",
+        "price_cents": 24999,
+        "opened": 1,
+        "activatable": 0,
+        "restock_class": "none",
+        "condition_grade": "new",
+        "recalled": 0,
+        "hazmat": 0
+      },
+      {
+        "id": "it_08",
+        "order_number": "KE-4483316",
+        "sku": "SKU-PWR-5510",
+        "name": "Voltbank 20K Power Bank",
+        "category": "accessories",
+        "price_cents": 7999,
+        "opened": 1,
+        "activatable": 0,
+        "restock_class": "none",
+        "condition_grade": "new",
+        "recalled": 0,
+        "hazmat": 1
+      },
+      {
+        "id": "it_09",
+        "order_number": "KE-4490224",
+        "sku": "SKU-HOM-6120",
+        "name": "Emberline Ceramic Space Heater",
+        "category": "home",
+        "price_cents": 14999,
+        "opened": 1,
+        "activatable": 0,
+        "restock_class": "none",
+        "condition_grade": "new",
+        "recalled": 1,
+        "hazmat": 0
+      },
+      {
+        "id": "it_10",
+        "order_number": "KE-4498870",
+        "sku": "SKU-AUD-3350",
+        "name": "Corva Mini Bluetooth Speaker",
+        "category": "audio",
+        "price_cents": 18999,
+        "opened": 0,
+        "activatable": 0,
+        "restock_class": "none",
+        "condition_grade": "new",
+        "recalled": 0,
+        "hazmat": 0
+      },
+      {
+        "id": "it_11",
+        "order_number": "KE-4487740",
+        "sku": "SKU-DRN-4400",
+        "name": "Skyward Vireo 3 Drone",
+        "category": "drone",
+        "price_cents": 99999,
+        "opened": 1,
+        "activatable": 0,
+        "restock_class": "percent_15",
+        "condition_grade": "new",
+        "recalled": 0,
+        "hazmat": 0
+      },
+      {
+        "id": "it_12",
+        "order_number": "KE-4492551",
+        "sku": "SKU-DRN-4400",
+        "name": "Skyward Vireo 3 Drone",
+        "category": "drone",
+        "price_cents": 99999,
+        "opened": 1,
+        "activatable": 0,
+        "restock_class": "percent_15",
+        "condition_grade": "new",
+        "recalled": 0,
+        "hazmat": 0
+      },
+      {
+        "id": "it_13",
+        "order_number": "KE-4495108",
+        "sku": "SKU-AUD-7720",
+        "name": "Aurelian Halo Soundbar",
+        "category": "audio",
+        "price_cents": 54999,
+        "opened": 0,
+        "activatable": 0,
+        "restock_class": "none",
+        "condition_grade": "new",
+        "recalled": 0,
+        "hazmat": 0
+      },
+      {
+        "id": "it_14",
+        "order_number": "KE-4495108",
+        "sku": "SKU-TV-4410",
+        "name": "Kestrel Vista 55 4K TV",
+        "category": "television",
+        "price_cents": 39999,
+        "opened": 1,
+        "activatable": 0,
+        "restock_class": "none",
+        "condition_grade": "open_box_excellent",
+        "recalled": 0,
+        "hazmat": 0
+      },
+      {
+        "id": "it_15",
+        "order_number": "KE-4471860",
+        "sku": "SKU-CMP-9930",
+        "name": "Kestrel Aurora Pro 16 Laptop",
+        "category": "computing",
+        "price_cents": 149999,
+        "opened": 1,
+        "activatable": 0,
+        "restock_class": "none",
+        "condition_grade": "new",
+        "recalled": 0,
+        "hazmat": 0
+      },
+      {
+        "id": "it_16",
+        "order_number": "KE-4500001",
+        "sku": "SKU-APP-7740",
+        "name": "Emberline Induction Range",
+        "category": "appliance",
+        "price_cents": 149999,
+        "opened": 0,
+        "activatable": 0,
+        "restock_class": "none",
+        "condition_grade": "new",
+        "recalled": 0,
+        "hazmat": 0
+      },
+      {
+        "id": "it_17",
+        "order_number": "KE-4495108",
+        "sku": "SKU-AUD-8820",
+        "name": "Aurelian Soundbar Mini",
+        "category": "audio",
+        "price_cents": 44999,
+        "opened": 0,
+        "activatable": 0,
+        "restock_class": "none",
+        "condition_grade": "new",
+        "recalled": 0,
+        "hazmat": 0
+      }
+    ],
+    "protection_plans": [
+      {
+        "id": "pp_priya",
+        "customer_id": "cust_priya",
+        "order_number": "KE-4462884",
+        "sku": "SKU-MOB-7702",
+        "plan_name": "TechCrew Protect Mobile",
+        "start_date": "2026-07-20",
+        "end_date": "2028-07-20",
+        "deductible_cents": 14900
+      },
+      {
+        "id": "pp_nadia",
+        "customer_id": "cust_nadia",
+        "order_number": "KE-4492551",
+        "sku": "SKU-DRN-4400",
+        "plan_name": "TechCrew Protect Drone",
+        "start_date": "2026-07-26",
+        "end_date": "2028-07-26",
+        "deductible_cents": 24900
+      }
+    ],
+    "refunds": [
+      {
+        "rma_number": "RMA-778201",
+        "customer_id": "cust_marcus",
+        "order_number": "KE-4399052",
+        "received_date": "2026-07-28",
+        "amount_cents": 32999,
+        "stage": "processing",
+        "posts_by": "2026-08-05",
+        "method": "Visa ending 8802"
+      }
+    ],
+    "holds": [],
+    "rmas": [],
+    "return_labels": [],
+    "price_matches": [],
+    "delivery_changes": [],
+    "order_cancellations": [],
+    "service_appointments": [],
+    "membership_changes": [],
+    "scam_reports": [],
+    "escalations": []
+  }
+}

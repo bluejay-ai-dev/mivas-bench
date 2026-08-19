@@ -34,6 +34,7 @@ DEFAULT_API = "https://api.getbluejay.ai/v1"
 DEFAULT_AGENTS = {
     "healthcare": 32161,  # mivas healthcare · openai realtime-2.1 (not the k8s twin)
     "legal": 34170,
+    "customer-support": 36693,  # k8s · customer-support · openai realtime-2.1
 }
 
 ESCALATION_SILENCE_TIMEOUT_S = 30
@@ -374,7 +375,7 @@ def case_key_of(dh: dict[str, Any]) -> str:
 
 
 def check(humans: list[dict[str, Any]], industry: str) -> None:
-    expected = {"healthcare": 66, "legal": 72}.get(industry)
+    expected = {"healthcare": 66, "legal": 72, "customer-support": 72}.get(industry)
     if expected is not None and len(humans) != expected:
         raise SystemExit(f"expected {expected} {industry} digital humans, got {len(humans)}")
     keys = [case_key_of(dh) for dh in humans]
