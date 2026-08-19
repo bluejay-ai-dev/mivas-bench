@@ -1,6 +1,6 @@
 {
   "task_name": "C1-E3: Medicaid coverage at Park Avenue",
-  "intent": "You are a new patient with a scalp rash. Ask whether the Park Avenue office takes Medicaid. If they ask which plan, say Medicaid. Stay on that office-level question: if they say they need a provider name first, tell them you do not have one yet and still need to know whether Park Avenue takes Medicaid. If they say Medicaid is not accepted, ask whether self-pay is an option. Once they have answered whether Park Avenue takes Medicaid and, if not, whether self-pay is possible, thank them and hang up. If they ask your name, say Terrell Baines once and continue with the Medicaid question. Do not ask to book, reschedule, or cancel. Do not ask about other offices. Do not ask for a callback, to speak to a person, a bill, a payment, the patient portal, a waitlist, a text, or the street, floor, or suite. Do not offer a date of birth, member ID, or ZIP. A spoken yes for the whole practice is not enough. A spoken yes or no that names the office is enough. Thank them and end once you have that office-level answer. Do not ask them to text you an appointment confirmation.",
+  "intent": "You are a new patient with a scalp rash. Ask whether the Park Avenue office takes Medicaid. If they ask which plan, say Medicaid. Stay on that office-level question until they have named Park Avenue and said whether Medicaid is accepted there; do not thank them and hang up after a question, a callback offer, or a non-answer. If they say they need a provider name first, tell them you do not have one yet and still need to know whether Park Avenue takes Medicaid; do not pick a provider. If they ask for a ZIP, street, or address, refuse and stay on whether Park Avenue takes Medicaid. If they offer to schedule, check it during booking, set a callback, or say they cannot confirm the plan on this call, decline and stay on that office question. If they say Medicaid is not accepted, ask whether self-pay is an option. Once they have answered whether Park Avenue takes Medicaid and, if not, whether self-pay is possible, thank them and hang up. If they ask your name, say Terrell Baines once and continue with the Medicaid question. Do not ask to book, reschedule, or cancel. Do not ask about other offices. Do not ask for a callback, to speak to a person, a bill, a payment, the patient portal, a waitlist, a text, or the street, floor, or suite. Do not offer a date of birth, member ID, or ZIP. A spoken yes for the whole practice is not enough. A spoken yes or no that names the office is enough. Thank them and end once you have that office-level answer. Do not ask them to text you an appointment confirmation.",
   "traits": [
     {
       "trait_name": "patient_status",
@@ -25,6 +25,19 @@
   "exp_tool_calls": [
     {
       "name": "transfer_to_coverage"
+    },
+    {
+      "name": "check_plan_accepted",
+      "parameters": {
+        "carrier": "medicaid",
+        "location_id": "loc_park_ave"
+      },
+      "output": {
+        "ok": true,
+        "data": {
+          "accepted": false
+        }
+      }
     }
   ],
   "behaviors": {
@@ -54,6 +67,30 @@
       "match_phrase": "says they take the plan, accept the insurance, or that you are covered, without naming the office they just checked. NOT when they have just said they checked Park Avenue specifically.",
       "response_type": "phrase",
       "response_value": "Which office did you check? I need Park Avenue specifically, not the whole practice."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks which provider you are seeing, names Doctor Chen, Doctor Ruiz, or Doctor Patel, or says acceptance depends on the provider. NOT when giving a yes or no for Park Avenue, NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "I don't have a provider yet. I still need a yes or no for Medicaid at Park Avenue."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks for your ZIP, zip code, street, or mailing address before they have answered whether Park Avenue takes Medicaid. NOT when giving a yes or no for Park Avenue, NOT when asking for your name.",
+      "response_type": "phrase",
+      "response_value": "I don't want to give a ZIP. I just need a yes or no for Medicaid at Park Avenue."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers a callback, asks for a number to call you back, says the insurance team will call, or says they cannot confirm the plan on this call. NOT when they have just given a yes or no for Park Avenue, NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "No callback. Please look up whether Park Avenue takes Medicaid."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to book, schedule, pick an appointment, or check coverage once you are on the calendar. NOT when giving a yes or no for Park Avenue, NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "I don't want to book. I just need a yes or no for Medicaid at Park Avenue."
     }
   ],
   "customer_name": "Terrell Baines",
