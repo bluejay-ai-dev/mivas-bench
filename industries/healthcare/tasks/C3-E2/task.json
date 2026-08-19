@@ -1,6 +1,6 @@
 {
   "task_name": "C3-E2: Medicaid at Brooklyn Heights",
-  "intent": "You are checking coverage only. Ask whether the Brooklyn Heights office takes Medicaid \u2014 that office as a whole, not one doctor. You have not chosen a clinician and you will not pick one on this call. If they ask which doctor you see, say you do not have one yet and you still need a yes or no for that office. Stay on the line until they have clearly said whether Brooklyn Heights takes Medicaid; do not accept 'call back when you pick a doctor' as the answer. If they say the office does not take Medicaid, ask whether self-pay is an option. Once you have that office-level yes or no, and if no a self-pay next step, thank them and end the call. Do not ask to book, reschedule, or cancel. Do not ask for a callback or to speak to a person. Do not ask them to text you. Do not ask for the street, floor, suite, or office id. Do not give a member ID or group number. If they try to look you up as a patient, give your name once and go straight back to the Medicaid question \u2014 do not loop on date of birth. Do not ask about a waitlist, a bill, or financing. A spoken yes for the whole practice is not enough. A spoken yes or no that names the office is enough. Thank them and end once you have that office-level answer.",
+  "intent": "You are checking coverage only. Ask whether the Brooklyn Heights office takes Medicaid \u2014 that office as a whole, not one doctor. You have not chosen a clinician and you will not pick one on this call. If they ask which doctor you see, say you do not have one yet and you still need a yes or no for that office. Stay on the line until they have clearly said whether Brooklyn Heights takes Medicaid; do not accept 'call back when you pick a doctor' as the answer. If they say the office does not take Medicaid, ask whether self-pay is an option. Once you have that office-level yes or no, and if no a self-pay next step, thank them and end the call. Do not ask to book, reschedule, or cancel. Do not ask for a callback or to speak to a person. Do not ask them to text you. Do not ask for the street, floor, suite, or office id. Do not give a member ID or group number. If they try to look you up as a patient, give your name once and go straight back to the Medicaid question \u2014 do not loop on date of birth. Do not ask about a waitlist, a bill, or financing. A spoken yes for the whole practice is not enough. A spoken yes or no that names the office is enough. Stay until they have looked up Medicaid at Brooklyn Heights in their system. If they quote yes or no without looking it up, ask them to check. If they say they cannot answer until you pick a clinician, say you still need the office-level answer and do not pick a clinician. Do not thank them, say goodbye, or hang up until they have given that office-level answer after a lookup.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -21,6 +21,13 @@
   "exp_tool_calls": [
     {
       "name": "transfer_to_coverage"
+    },
+    {
+      "name": "check_plan_accepted",
+      "parameters": {
+        "carrier": "medicaid",
+        "location_id": "loc_brooklyn_heights"
+      }
     }
   ],
   "behaviors": {
@@ -50,6 +57,18 @@
       "match_phrase": "says they take the plan, accept the insurance, or that you are covered, without naming the office they just checked. NOT when they have just said they checked Brooklyn Heights specifically.",
       "response_type": "phrase",
       "response_value": "Which office did you check? I need Brooklyn Heights specifically, not the whole practice."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before they have given a yes or no for Medicaid at Brooklyn Heights after looking it up. NOT when they have just given that office-level answer from a check.",
+      "response_type": "phrase",
+      "response_value": "I still need a yes or no for Medicaid at Brooklyn Heights after you look it up, before I go."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "says acceptance depends on the provider, asks you to pick a clinician before they will answer, or tells you to call back once you have a provider. NOT when they have just given an office-level yes or no from a lookup.",
+      "response_type": "phrase",
+      "response_value": "I do not have a provider yet. I still need a yes or no for that office as a whole, not one doctor. Please check Brooklyn Heights."
     }
   ],
   "customer_name": "Vince Okafor",
