@@ -1,0 +1,19 @@
+industries/healthcare/system-prompts/cosmetic.md
+  s_34675135c3ff90::t_293f9ba3f389ce 54-57
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "9acbf1b727a865c8db84276487bf04ed84e57536",
+  "prompts": {},
+  "sessions": {
+    "s_34675135c3ff90": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "93db147e-88f0-46a7-8477-5a54647ff5bb",
+        "model": "cursor-grok-4.6-high-fast"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
