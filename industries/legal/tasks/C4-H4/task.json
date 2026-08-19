@@ -1,49 +1,82 @@
 {
-  "task_name": "C4-M1: Medical records authorization",
-  "customer_name": "Franklin Deshpande",
-  "intent": "Open with exactly: \"A ladder I bought collapsed and I broke my ankle.\" Manufacturer Halloway Toolworks. Georgia. April twenty second, twenty twenty six. If records release offered, accept. When asked which doctor, hospital, clinic, or provider treated you, say exactly: \"Northside Orthopedic.\" Once finished, say exactly: \"Thank you, that's all I needed.\" and end the call.",
+  "task_name": "C4-H4: Medical malpractice Florida intake with records",
+  "customer_name": "Aisha Rahman",
+  "intent": "Open with exactly: \"A clinic in Florida left a sponge in after surgery and I had to go back.\" When asked who this would be against, say exactly: \"It's Gulfshore Clinic.\" Florida. May twentieth, twenty twenty six. If records release offered, accept. When asked which doctor, hospital, clinic, or provider treated you, say exactly: \"Jackson Memorial.\" Accept email packet. Decline booking. Once finished, say exactly: \"Thank you, that's all I needed.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
-      "value": "Franklin Deshpande"
+      "value": "Aisha Rahman"
     },
     {
       "trait_name": "practice_area",
-      "value": "product_liability"
+      "value": "medical_malpractice"
     },
     {
       "trait_name": "state",
-      "value": "GA"
+      "value": "FL"
     },
     {
       "trait_name": "incident_date",
-      "value": "2026-04-22"
+      "value": "2026-05-20"
+    },
+    {
+      "trait_name": "opposing_party",
+      "value": "Gulfshore Clinic"
     },
     {
       "trait_name": "phone",
-      "value": "706-555-0173"
+      "value": "305-555-0288"
     }
   ],
   "exp_handoff_path": [
+    "transfer_to_screening",
     "transfer_to_intake"
   ],
   "exp_tool_calls": [
+    {
+      "name": "transfer_to_screening"
+    },
+    {
+      "name": "check_conflict",
+      "parameters": {
+        "opposing_party": "Gulfshore Clinic"
+      }
+    },
+    {
+      "name": "check_practice_area",
+      "parameters": {
+        "practice_area": "medical_malpractice"
+      }
+    },
+    {
+      "name": "check_jurisdiction",
+      "parameters": {
+        "state": "FL",
+        "practice_area": "medical_malpractice"
+      }
+    },
     {
       "name": "transfer_to_intake"
     },
     {
       "name": "record_intake",
       "parameters": {
-        "practice_area": "product_liability",
-        "state": "GA",
-        "incident_date": "2026-04-22",
-        "summary": "Ladder collapse injury."
+        "practice_area": "medical_malpractice",
+        "state": "FL",
+        "incident_date": "2026-05-20",
+        "summary": "Retained sponge after surgery."
       }
     },
     {
       "name": "request_records_authorization",
       "parameters": {
-        "provider": "Northside Orthopedic"
+        "provider": "Jackson Memorial"
+      }
+    },
+    {
+      "name": "send_intake_packet",
+      "parameters": {
+        "channel": "email"
       }
     }
   ],
@@ -55,7 +88,7 @@
       "match_type": "context",
       "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
       "response_type": "phrase",
-      "response_value": "Franklin Deshpande, 706-555-0173.",
+      "response_value": "Aisha Rahman, 305-555-0288.",
       "occurrence_mode": "always"
     },
     {
@@ -69,28 +102,49 @@
       "match_type": "context",
       "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question.",
       "response_type": "phrase",
-      "response_value": "It's Halloway Toolworks.",
+      "response_value": "It's Gulfshore Clinic.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
       "match_phrase": "The agent asks which state this happened in, or where it took place. NOT any other question.",
       "response_type": "phrase",
-      "response_value": "In Georgia.",
+      "response_value": "In Florida.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
       "match_phrase": "The agent asks when the incident happened, or for the date of the accident, injury or event. NOT any other question.",
       "response_type": "phrase",
-      "response_value": "It was April twenty second, twenty twenty six.",
+      "response_value": "It was May twentieth, twenty twenty six.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
       "match_phrase": "The agent asks which doctor, hospital, clinic, or medical provider treated you, or where to send a records authorization. NOT any other question.",
       "response_type": "phrase",
-      "response_value": "Northside Orthopedic.",
+      "response_value": "Jackson Memorial.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether to send the packet by email or text, or which channel to use. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "Email is fine.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to transfer you to a human staff member, a live person at the front desk, or a real agent because they cannot continue on this line. NOT when transferring you to screening, intake, scheduling, or client services on this call. NOT when you already asked for a person.",
+      "response_type": "phrase",
+      "response_value": "No, I don't need a person. Please finish what I asked on this call.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers an appointment or evaluation time",
+      "response_type": "phrase",
+      "response_value": "Not yet, let me read the paperwork first.",
       "occurrence_mode": "always"
     }
   ],
@@ -98,7 +152,7 @@
   "metadata": {
     "category": "C4",
     "category_slug": "intake-and-documents",
-    "difficulty": "medium",
+    "difficulty": "hard",
     "audio_condition": "perfect"
   },
   "exp_db_state": {
@@ -130,18 +184,18 @@
       },
       {
         "id": "c_new",
-        "name": "Franklin Deshpande",
-        "phone": "7065550173"
+        "name": "Aisha Rahman",
+        "phone": "3055550288"
       }
     ],
     "intakes": [
       {
         "id": 1,
         "caller_id": "c_new",
-        "practice_area": "product_liability",
-        "state": "GA",
-        "incident_date": "2026-04-22",
-        "summary": "Ladder collapse injury."
+        "practice_area": "medical_malpractice",
+        "state": "FL",
+        "incident_date": "2026-05-20",
+        "summary": "Retained sponge after surgery."
       }
     ],
     "intake_notes": [],
@@ -150,7 +204,13 @@
         "id": 1,
         "caller_id": "c_new",
         "kind": "records_authorization",
-        "target": "Northside Orthopedic"
+        "target": "Jackson Memorial"
+      },
+      {
+        "id": 2,
+        "caller_id": "c_new",
+        "kind": "intake_packet",
+        "target": "email"
       }
     ],
     "holds": [],

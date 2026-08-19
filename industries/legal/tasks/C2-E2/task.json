@@ -1,24 +1,21 @@
 {
-  "task_name": "C2-E2: Other driver calls",
-  "customer_name": "Kyle Ferriday",
-  "intent": "Open with exactly: \"One of your clients is suing me over a car accident.\" You are the person being sued, not bringing a claim. If asked to clarify, say exactly: \"I'm the other driver. Your client is the one suing me.\" When told a person will take it from here, say exactly: \"Okay, thank you.\" and end the call.",
+  "task_name": "C2-E2: Caller already represented elsewhere",
+  "customer_name": "Marcus Oyelaran",
+  "intent": "Open with exactly: \"I want to talk to somebody about my case.\" If asked whether another lawyer represents you, say exactly: \"Yes, Croft and Blake have been handling it.\" Do not volunteer that unless asked. When told the firm cannot help while you are represented, say exactly: \"Alright, I understand.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
-      "value": "Kyle Ferriday"
+      "value": "Marcus Oyelaran"
     },
     {
       "trait_name": "phone",
-      "value": "469-555-0318"
+      "value": "415-555-0188"
     }
   ],
   "exp_handoff_path": [],
   "exp_tool_calls": [
     {
-      "name": "escalate_to_human",
-      "parameters": {
-        "reason_code": "adverse_party"
-      }
+      "name": "escalate_to_human"
     }
   ],
   "behaviors": {
@@ -29,7 +26,7 @@
       "match_type": "context",
       "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
       "response_type": "phrase",
-      "response_value": "Kyle Ferriday, 469-555-0318.",
+      "response_value": "Marcus Oyelaran, 415-555-0188.",
       "occurrence_mode": "always"
     },
     {
@@ -37,6 +34,13 @@
       "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
       "response_type": "phrase",
       "response_value": "No, nobody represents me.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "Yes, Croft and Blake have been handling it.",
       "occurrence_mode": "always"
     }
   ],
@@ -74,11 +78,6 @@
         "id": "c_005",
         "name": "Ruth Kealoha",
         "phone": "8085550233"
-      },
-      {
-        "id": "c_new",
-        "name": "Kyle Ferriday",
-        "phone": "4695550318"
       }
     ],
     "intakes": [],
@@ -90,8 +89,8 @@
     "escalations": [
       {
         "id": 1,
-        "caller_id": "c_new",
-        "reason_code": "adverse_party"
+        "caller_id": "c_002",
+        "reason_code": "represented_party"
       }
     ]
   }
