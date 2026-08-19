@@ -682,7 +682,11 @@ def test_legal_fairness_c2h1_state_pin_and_rm_lookup_only() -> None:
         pin.get("response_value") == "I'm the one being sued. Your client hit me."
         for pin in c2h4["scripted_responses"]
     )
-    assert [c["name"] for c in c2h4["exp_tool_calls"]] == ["escalate_to_human"]
+    assert [c["name"] for c in c2h4["exp_tool_calls"]] == [
+        "transfer_to_screening",
+        "escalate_to_human",
+    ]
+    assert c2h4.get("exp_handoff_path") == ["transfer_to_screening"]
     assert (c2h4.get("exp_db_state") or {}).get("escalations") == [
         {"id": 1, "caller_id": "c_new", "reason_code": "adverse_party"}
     ]

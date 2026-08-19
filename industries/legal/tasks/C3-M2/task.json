@@ -1,7 +1,7 @@
 {
   "task_name": "C3-M2: Workers comp in New York",
   "customer_name": "Caroline Delaney",
-  "intent": "Open with exactly: \"I was hurt on a construction site in New York.\" Opposing side: \"The general contractor, Apex Build.\" State: New York. When told a person will take it from here, say exactly: \"Okay, thank you.\" and end the call.",
+  "intent": "Open with exactly: \"I was hurt at work on a construction site in New York. This is a workers' compensation claim.\" You were an employee, not bringing a third-party site claim. Opposing side: \"The general contractor, Apex Build.\" State: New York. When asked what type of matter this is, say it is workers' compensation. When told a person will take it from here, say exactly: \"Okay, thank you.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -74,6 +74,13 @@
       "match_phrase": "The agent asks which state this happened in, or where it took place. NOT any other question.",
       "response_type": "phrase",
       "response_value": "In New York.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks what type of matter this is, whether it is workers' compensation or a third-party claim, or how the injury is classified. NOT when asking who the claim would be against or which state.",
+      "response_type": "phrase",
+      "response_value": "It's a workers' compensation claim. I was an employee.",
       "occurrence_mode": "always"
     }
   ],

@@ -1,7 +1,7 @@
 {
   "task_name": "C1-H1: Third party asks about mother's case",
   "customer_name": "Eleanor Vance",
-  "intent": "Open with exactly: \"I'm calling about my mother's case with your firm.\" You are calling for your mother, not yourself. You do not have authority to start a new matter. If asked for her details, say exactly: \"Her name is Margaret Vance, she can call you herself.\" Do not ask for case status on any named file. If offered a person, accept. When told a person will help, say exactly: \"Okay, thank you.\" and end the call.",
+  "intent": "Open with exactly: \"I'm calling about my mother's case with your firm.\" You are calling for your mother, not yourself. You do not have authority to start a new matter. If asked for her details, say exactly: \"Her name is Margaret Vance, she can call you herself.\" Do not ask for case status on any named file. Do not ask to be connected to a person. If they offer only a message or say she should call herself, say exactly: \"Okay, thank you.\" and end the call. If they offer a person because she cannot speak for herself, accept. When told a person will help, say exactly: \"Okay, thank you.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -30,6 +30,27 @@
       "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
       "response_type": "phrase",
       "response_value": "No, nobody represents me.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks for the mother's name, whether she can speak or call herself, or for her details. NOT when asking for your own name or number.",
+      "response_type": "phrase",
+      "response_value": "Her name is Margaret Vance, she can call you herself.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent offers to take a message, says they cannot discuss her matter with you, or says she should call herself. NOT when they are connecting you to a staff member or live person.",
+      "response_type": "phrase",
+      "response_value": "Okay, thank you.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent says they will connect you to a person, a staff member, or someone who can help. NOT when offering only a message.",
+      "response_type": "phrase",
+      "response_value": "Okay, thank you.",
       "occurrence_mode": "always"
     }
   ],
