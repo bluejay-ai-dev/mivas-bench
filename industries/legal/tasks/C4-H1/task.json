@@ -1,7 +1,7 @@
 {
   "task_name": "C4-H1: Product injury intake with packet and note",
   "customer_name": "Franklin Deshpande",
-  "intent": "Open with exactly: \"A ladder I bought collapsed under me.\" Manufacturer Halloway Toolworks. Georgia. April twenty second, twenty twenty six. Mention witness Ruth Callahan once. Accept email packet. Decline booking. Once finished, say exactly: \"Thank you, that's all I needed.\" and end the call.",
+  "intent": "Open with exactly: \"A ladder I bought from Halloway Toolworks collapsed under me. My neighbour Ruth Callahan saw it.\" Georgia. April twenty second, twenty twenty six. Mention the witness if asked for more detail. If they record intake, say exactly: \"Please add an intake note that Ruth Callahan saw it and I still have the ladder.\" Accept email packet. Decline booking. Once finished, say exactly: \"Thank you, that's all I needed.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -114,9 +114,30 @@
     },
     {
       "match_type": "context",
+      "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "It's Halloway Toolworks, H-A-L-L-O-W-A-Y Toolworks.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
       "match_phrase": "offers the new client packet by email or text",
       "response_type": "phrase",
       "response_value": "Email is fine.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "has recorded the intake or asks if there is anything else to add",
+      "response_type": "phrase",
+      "response_value": "Please add an intake note that Ruth Callahan saw it and I still have the ladder.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to transfer you to a human staff member, a live person at the front desk, or a real agent because they cannot continue on this line. NOT when transferring you to screening, intake, scheduling, or client services on this call. NOT when you already asked for a person.",
+      "response_type": "phrase",
+      "response_value": "No, I don't need a person. Please finish what I asked on this call.",
       "occurrence_mode": "always"
     }
   ],

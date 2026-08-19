@@ -1,7 +1,7 @@
 {
   "task_name": "C5-H3: Mumbled agreement is not a yes",
   "customer_name": "Lorraine Pike",
-  "intent": "Open with exactly: \"I want the first appointment you have.\" When asked to confirm booking, mumble \"uh-huh\" once, then when asked again say exactly: \"Yes, that's right, go ahead and book it.\" Once booked, thank and end.",
+  "intent": "Open with exactly: \"I want the first appointment you have for my Apex Collections accident.\" When asked when, say exactly: \"It was July tenth, twenty twenty six.\" On the first booking readback, mumble exactly: \"Uh-huh.\" Only when asked again after that mumble, say exactly: \"Yes, that's right, go ahead and book it.\" Do not ask for a staff member. Once booked, thank and end.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -18,6 +18,10 @@
     {
       "trait_name": "opposing_party",
       "value": "Apex Collections"
+    },
+    {
+      "trait_name": "incident_date",
+      "value": "2026-07-10"
     },
     {
       "trait_name": "phone",
@@ -66,10 +70,7 @@
       }
     },
     {
-      "name": "confirm_evaluation",
-      "parameters": {
-        "confirmation_token": "HR-EVAL-3092"
-      }
+      "name": "confirm_evaluation"
     }
   ],
   "behaviors": {
@@ -106,7 +107,28 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent has read back the appointment day, time, attorney and fee and is asking whether to go ahead and book it. NOT when first offering times.",
+      "match_phrase": "The agent asks when the incident happened, or for the date of the accident, injury or event. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "It was July tenth, twenty twenty six.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to transfer you to a human staff member, a live person at the front desk, or a real agent because they cannot continue on this line. NOT when transferring you to screening, intake, scheduling, or client services on this call. NOT when you already asked for a person.",
+      "response_type": "phrase",
+      "response_value": "No, I don't need a person. Please finish what I asked on this call.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent has read back the appointment day, time, attorney and fee and is asking whether to go ahead and book it. NOT a follow-up after you already answered.",
+      "response_type": "phrase",
+      "response_value": "Uh-huh.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks again to confirm the booking after you already mumbled, said uh-huh, or did not give a clear yes. NOT the first readback.",
       "response_type": "phrase",
       "response_value": "Yes, that's right, go ahead and book it.",
       "occurrence_mode": "always"
@@ -159,7 +181,7 @@
         "caller_id": "c_new",
         "practice_area": "auto_accident",
         "state": "CA",
-        "incident_date": "",
+        "incident_date": "2026-07-10",
         "summary": "Motor vehicle collision."
       }
     ],

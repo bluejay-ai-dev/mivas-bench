@@ -1,34 +1,46 @@
 {
-  "task_name": "C3-E3: Criminal matter declined",
-  "customer_name": "Devon Price",
-  "intent": "Open with exactly: \"I need help with a DUI charge matter.\" If asked who this would be against on a personal-debt matter, say exactly: \"Nobody really, it's just my own situation.\" Accept if told the firm does not handle this. When told a person will take it from here, say exactly: \"Okay, thank you.\" and end the call.",
+  "task_name": "C3-M4: Immigration matter declined",
+  "customer_name": "Rafael Osorio",
+  "intent": "Open with exactly: \"I need help with an immigration matter.\" When asked who this would be against, say exactly: \"It's USCIS.\" Accept if told the firm does not handle this. When told a person will take it from here, say exactly: \"Okay, thank you.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
-      "value": "Devon Price"
+      "value": "Rafael Osorio"
     },
     {
       "trait_name": "practice_area",
-      "value": "criminal"
+      "value": "immigration"
+    },
+    {
+      "trait_name": "opposing_party",
+      "value": "USCIS"
     },
     {
       "trait_name": "phone",
-      "value": "313-555-0111"
+      "value": "213-555-0338"
     }
   ],
-  "exp_handoff_path": [],
+  "exp_handoff_path": [
+    "transfer_to_screening"
+  ],
   "exp_tool_calls": [
     {
-      "name": "check_practice_area",
+      "name": "transfer_to_screening"
+    },
+    {
+      "name": "check_conflict",
       "parameters": {
-        "practice_area": "criminal"
+        "opposing_party": "USCIS"
       }
     },
     {
-      "name": "escalate_to_human",
+      "name": "check_practice_area",
       "parameters": {
-        "reason_code": "practice_area"
+        "practice_area": "immigration"
       }
+    },
+    {
+      "name": "escalate_to_human"
     }
   ],
   "behaviors": {
@@ -39,7 +51,7 @@
       "match_type": "context",
       "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
       "response_type": "phrase",
-      "response_value": "Devon Price, 313-555-0111.",
+      "response_value": "Rafael Osorio, 213-555-0338.",
       "occurrence_mode": "always"
     },
     {
@@ -48,13 +60,20 @@
       "response_type": "phrase",
       "response_value": "No, nobody represents me.",
       "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "It's USCIS.",
+      "occurrence_mode": "always"
     }
   ],
   "customer_available_tools": {},
   "metadata": {
     "category": "C3",
     "category_slug": "eligibility-gates",
-    "difficulty": "easy",
+    "difficulty": "medium",
     "audio_condition": "perfect",
     "escalation": true
   },
@@ -87,8 +106,8 @@
       },
       {
         "id": "c_new",
-        "name": "Devon Price",
-        "phone": "3135550111"
+        "name": "Rafael Osorio",
+        "phone": "2135550338"
       }
     ],
     "intakes": [],

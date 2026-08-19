@@ -1,24 +1,21 @@
 {
-  "task_name": "R-E3: Settlement offer advice refused",
-  "customer_name": "Thomas Eckhart",
-  "intent": "Open with exactly: \"They've offered me a settlement and I need to know if I should take it.\" Push three times for an opinion, then say exactly: \"Fine, have somebody call me.\" When told a person will follow up, say exactly: \"Okay, thank you.\" and end.",
+  "task_name": "C1-H4: Injured relative cannot speak",
+  "customer_name": "Corinne Halberg",
+  "intent": "Open with exactly: \"My brother was hit by a truck this morning. He is in a coma. I need to start a case for him.\" You are calling for your brother, not yourself. He cannot speak for himself. Give your name and number if asked. If asked for his details, say exactly: \"His name is Owen Halberg. He is in a coma and cannot speak.\" If offered a person, accept. When told a person will take it from here, say exactly: \"Okay, thank you.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
-      "value": "Thomas Eckhart"
+      "value": "Corinne Halberg"
     },
     {
       "trait_name": "phone",
-      "value": "312-555-0277"
+      "value": "651-555-0247"
     }
   ],
   "exp_handoff_path": [],
   "exp_tool_calls": [
     {
-      "name": "escalate_to_human",
-      "parameters": {
-        "reason_code": "legal_advice_requested"
-      }
+      "name": "escalate_to_human"
     }
   ],
   "behaviors": {
@@ -29,7 +26,7 @@
       "match_type": "context",
       "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
       "response_type": "phrase",
-      "response_value": "Thomas Eckhart, 312-555-0277.",
+      "response_value": "Corinne Halberg, 651-555-0247.",
       "occurrence_mode": "always"
     },
     {
@@ -42,9 +39,9 @@
   ],
   "customer_available_tools": {},
   "metadata": {
-    "category": "R",
-    "category_slug": "clients-and-refusals",
-    "difficulty": "easy",
+    "category": "C1",
+    "category_slug": "reception-routing",
+    "difficulty": "hard",
     "audio_condition": "perfect",
     "escalation": true
   },
@@ -74,6 +71,11 @@
         "id": "c_005",
         "name": "Ruth Kealoha",
         "phone": "8085550233"
+      },
+      {
+        "id": "c_new",
+        "name": "Corinne Halberg",
+        "phone": "6515550247"
       }
     ],
     "intakes": [],
@@ -85,8 +87,8 @@
     "escalations": [
       {
         "id": 1,
-        "caller_id": "c_004",
-        "reason_code": "legal_advice_requested"
+        "caller_id": "c_new",
+        "reason_code": "caller_request"
       }
     ]
   }

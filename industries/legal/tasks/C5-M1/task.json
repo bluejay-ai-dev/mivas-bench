@@ -1,7 +1,7 @@
 {
   "task_name": "C5-M1: Contingency fee hold and confirm",
   "customer_name": "Delphine Mercer",
-  "intent": "Open with exactly: \"I need to book a case evaluation for my accident.\" Confirm when read back. Once booked, thank and end.",
+  "intent": "Open with exactly: \"I need to book a case evaluation for my Northstar Logistics accident in California.\" When asked when, say exactly: \"It was July tenth, twenty twenty six.\" If asked email or text for the packet, say email. Confirm when read back. Do not ask for a staff member. Once booked, thank and end.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -18,6 +18,10 @@
     {
       "trait_name": "opposing_party",
       "value": "Northstar Logistics"
+    },
+    {
+      "trait_name": "incident_date",
+      "value": "2026-07-10"
     },
     {
       "trait_name": "phone",
@@ -40,10 +44,7 @@
       }
     },
     {
-      "name": "confirm_evaluation",
-      "parameters": {
-        "confirmation_token": "HR-EVAL-3092"
-      }
+      "name": "confirm_evaluation"
     }
   ],
   "behaviors": {
@@ -80,7 +81,28 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent has read back the appointment day, time, attorney and fee and is asking whether to go ahead and book it. NOT when first offering times.",
+      "match_phrase": "The agent asks when the incident happened, or for the date of the accident, injury or event. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "It was July tenth, twenty twenty six.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to transfer you to a human staff member, a live person at the front desk, or a real agent because they cannot continue on this line. NOT when transferring you to screening, intake, scheduling, or client services on this call. NOT when you already asked for a person.",
+      "response_type": "phrase",
+      "response_value": "No, I don't need a person. Please finish what I asked on this call.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether to send the packet by email or text, or which channel to use. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "Email, please.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent has already held a slot and is reading back that held appointment's day, time, attorney and fee, asking whether to confirm it. NOT when first listing open times, and NOT when asking which slot to hold.",
       "response_type": "phrase",
       "response_value": "Yes, that's right, go ahead and book it.",
       "occurrence_mode": "always"
@@ -133,7 +155,7 @@
         "caller_id": "c_new",
         "practice_area": "auto_accident",
         "state": "CA",
-        "incident_date": "",
+        "incident_date": "2026-07-10",
         "summary": "Freeway accident."
       }
     ],

@@ -1,7 +1,7 @@
 {
   "task_name": "C2-H1: Conflict unclear, Harlow Properties",
   "customer_name": "Bernice Tolliver",
-  "intent": "Open with exactly: \"I slipped on ice outside my apartment and broke my wrist.\" When asked who this would be against, say exactly: \"It's Harlow Properties.\" When asked when, say exactly: \"It was January eighteenth, twenty twenty six.\" If asked to describe details, say exactly: \"I'd rather go through that with the lawyer.\" When told a person will review the conflict, say exactly: \"Okay, thank you.\" and end the call.",
+  "intent": "Open with exactly: \"I slipped on ice outside my apartment and broke my wrist.\" When asked who this would be against, say exactly: \"It's Harlow Properties.\" When asked which state this happened in or where it took place, say exactly: \"In CA.\" When asked when, say exactly: \"It was January eighteenth, twenty twenty six.\" If asked to describe details, say exactly: \"I'd rather go through that with the lawyer.\" When told a person will review the conflict, say exactly: \"Okay, thank you.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -30,9 +30,6 @@
   ],
   "exp_tool_calls": [
     {
-      "name": "get_caller_matters"
-    },
-    {
       "name": "transfer_to_screening"
     },
     {
@@ -49,15 +46,11 @@
       "parameters": {
         "practice_area": "premises_liability",
         "state": "CA",
-        "incident_date": "2026-01-18",
         "summary": ""
       }
     },
     {
-      "name": "escalate_to_human",
-      "parameters": {
-        "reason_code": "conflict_review"
-      }
+      "name": "escalate_to_human"
     }
   ],
   "behaviors": {

@@ -1,7 +1,7 @@
 {
   "task_name": "C3-H1: Caller starts the story before conflict check",
   "customer_name": "Yvonne Pressley",
-  "intent": "Open with exactly: \"So I was driving home and this van clipped my bumper.\" If interrupted for the other side, say exactly: \"It's Ridgeline Courier.\" State California. Date May fifteenth, twenty twenty six. Once screening passes and intake is offered, accept next steps.",
+  "intent": "Open with exactly: \"So I was driving home and this van clipped my bumper.\" If interrupted for the other side, say exactly: \"It's Ridgeline Courier.\" State California. Date May fifteenth, twenty twenty six. Once intake is recorded, say exactly: \"Thank you, that's all I needed.\" Do not book an evaluation. End the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -113,6 +113,20 @@
       "match_phrase": "The agent asks when the incident happened, or for the date of the accident, injury or event. NOT any other question.",
       "response_type": "phrase",
       "response_value": "It was May fifteenth, twenty twenty six.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to transfer you to a human staff member, a live person at the front desk, or a real agent because they cannot continue on this line. NOT when transferring you to screening, intake, scheduling, or client services on this call. NOT when you already asked for a person.",
+      "response_type": "phrase",
+      "response_value": "No, I don't need a person. Please finish what I asked on this call.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks whether you want to book a case evaluation, a free evaluation, or an appointment",
+      "response_type": "phrase",
+      "response_value": "No thank you. Intake is enough. That's all I needed.",
       "occurrence_mode": "always"
     }
   ],

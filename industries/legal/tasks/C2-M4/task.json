@@ -1,24 +1,29 @@
 {
-  "task_name": "C2-E3: Caller already represented elsewhere",
-  "customer_name": "Marcus Oyelaran",
-  "intent": "Open with exactly: \"I want to talk to somebody about my case.\" If asked whether another lawyer represents you, say exactly: \"Yes, Croft and Blake have been handling it.\" Do not volunteer that unless asked. When told the firm cannot help while you are represented, say exactly: \"Alright, I understand.\" and end the call.",
+  "task_name": "C2-M4: Consulted a lawyer but did not hire",
+  "customer_name": "Lois Penney",
+  "intent": "Open with exactly: \"I fell at a store and I want to know my options.\" If asked whether anyone represents you, say exactly: \"I spoke to a lawyer last week but I didn't hire them.\" Do not volunteer that unless asked. When asked who this would be against, say exactly: \"It's Greenfield Market.\" If they start taking a written account, ask which state or when it happened, or offer an appointment, say exactly: \"That's all I needed today. Thank you.\" and end the call. Once finished, say exactly: \"Thank you, that's all I needed.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
-      "value": "Marcus Oyelaran"
+      "value": "Lois Penney"
     },
     {
       "trait_name": "phone",
-      "value": "415-555-0188"
+      "value": "414-555-0196"
     }
   ],
-  "exp_handoff_path": [],
+  "exp_handoff_path": [
+    "transfer_to_screening"
+  ],
   "exp_tool_calls": [
     {
-      "name": "escalate_to_human",
+      "name": "lookup_caller",
       "parameters": {
-        "reason_code": "represented_party"
+        "full_name": "Lois Penney"
       }
+    },
+    {
+      "name": "transfer_to_screening"
     }
   ],
   "behaviors": {
@@ -29,21 +34,21 @@
       "match_type": "context",
       "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
       "response_type": "phrase",
-      "response_value": "Marcus Oyelaran, 415-555-0188.",
+      "response_value": "Lois Penney, 414-555-0196.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
       "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
       "response_type": "phrase",
-      "response_value": "No, nobody represents me.",
+      "response_value": "I spoke to a lawyer last week but I didn't hire them.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
+      "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question.",
       "response_type": "phrase",
-      "response_value": "Yes, Croft and Blake have been handling it.",
+      "response_value": "It's Greenfield Market.",
       "occurrence_mode": "always"
     }
   ],
@@ -51,9 +56,8 @@
   "metadata": {
     "category": "C2",
     "category_slug": "conflicts-and-barred",
-    "difficulty": "easy",
-    "audio_condition": "perfect",
-    "escalation": true
+    "difficulty": "medium",
+    "audio_condition": "perfect"
   },
   "exp_db_state": {
     "callers": [
@@ -81,6 +85,11 @@
         "id": "c_005",
         "name": "Ruth Kealoha",
         "phone": "8085550233"
+      },
+      {
+        "id": "c_new",
+        "name": "Lois Penney",
+        "phone": "4145550196"
       }
     ],
     "intakes": [],
@@ -89,12 +98,6 @@
     "holds": [],
     "evaluations": [],
     "messages": [],
-    "escalations": [
-      {
-        "id": 1,
-        "caller_id": "c_002",
-        "reason_code": "represented_party"
-      }
-    ]
+    "escalations": []
   }
 }

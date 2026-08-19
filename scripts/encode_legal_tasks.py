@@ -92,13 +92,30 @@ def row_to_task(row: dict[str, Any], case_key: str) -> dict[str, Any]:
     if row.get("booking"):
         meta["booking"] = True
 
+    expected_calls = copy.deepcopy(row.get("tools") or [])
+    for call in expected_calls:
+        if not isinstance(call, dict):
+            continue
+        name = str(call.get("name") or "")
+        params = call.get("parameters")
+        if not isinstance(params, dict):
+            continue
+        # Fairness: reason/token fields are system-internal confirmations that
+        # do not materially change customer-visible success.
+        if name == "escalate_to_human":
+            params.pop("reason_code", None)
+        if name in {"confirm_evaluation", "confirm_cancellation"}:
+            params.pop("confirmation_token", None)
+        if not params:
+            call.pop("parameters", None)
+
     return {
         "task_name": f"{case_key}: {row['title']}",
         "customer_name": row["name"],
         "intent": row["intent"],
         "traits": customer_traits(row),
         "exp_handoff_path": list(row.get("handoffs") or []),
-        "exp_tool_calls": copy.deepcopy(row.get("tools") or []),
+        "exp_tool_calls": expected_calls,
         "behaviors": {"creativity": 0},
         "scripted_responses": copy.deepcopy(row.get("pins") or []),
         "customer_available_tools": {},
@@ -106,9 +123,10 @@ def row_to_task(row: dict[str, Any], case_key: str) -> dict[str, Any]:
     }
 
 
-# Prose fields omitted from exp_tool_calls; replay only needs a non-empty value.
+# Prose / unpinned labels omitted from exp_tool_calls; replay only needs a
+# non-empty value. for_whom is a replay filler when the caller named no person.
 _REPLAY_PROSE: dict[str, dict[str, str]] = {
-    "take_message": {"message": "Callback requested."},
+    "take_message": {"message": "Callback requested.", "for_whom": "new cases intake"},
     "add_intake_note": {"note": "Intake note."},
     "record_intake": {"summary": "Intake summary."},
 }
@@ -128,6 +146,16 @@ def enrich_replay_call(
         params.setdefault("phone", phone_digits(row["phone"]))
     if name == "find_evaluation_slots":
         params.setdefault("earliest_date", "")
+    if name == "record_intake":
+        traits = {
+            item.get("trait_name"): item.get("value")
+            for item in (row.get("traits") or [])
+            if isinstance(item, dict)
+        }
+        if params.get("incident_date") in (None, "") and traits.get("incident_date"):
+            params["incident_date"] = traits["incident_date"]
+        if params.get("state") in (None, "") and traits.get("state"):
+            params["state"] = traits["state"]
     for key, default in (_REPLAY_PROSE.get(name) or {}).items():
         if params.get(key) in (None, ""):
             params[key] = default
@@ -215,6 +243,20 @@ def replay_calls(row: dict[str, Any], task: dict[str, Any] | None = None) -> lis
     return prefix + scored
 
 
+def drop_unscored_message_queue(task: dict[str, Any], state: dict[str, Any]) -> dict[str, Any]:
+    """Leave for_whom unconstrained when take_message is scored without a recipient."""
+    scored = [
+        call for call in (task.get("exp_tool_calls") or [])
+        if isinstance(call, dict) and call.get("name") == "take_message"
+    ]
+    pinned = any((call.get("parameters") or {}).get("for_whom") for call in scored)
+    if scored and not pinned:
+        for row in state.get("messages") or []:
+            if isinstance(row, dict):
+                row.pop("for_whom", None)
+    return state
+
+
 def replay_row(row: dict[str, Any], task: dict[str, Any] | None = None) -> dict[str, Any]:
     return replay_sequence(row, replay_calls(row, task))
 
@@ -227,11 +269,14 @@ def all_keys() -> list[str]:
     return keys
 
 
-def encode_all(repair_only: bool = False) -> int:
+def encode_all(repair_only: bool = False, keys: list[str] | None = None) -> int:
     by_key = spec_by_key()
     TASKS.mkdir(parents=True, exist_ok=True)
+    wanted = set(keys) if keys else None
     written = 0
     for case_key in all_keys():
+        if wanted is not None and case_key not in wanted:
+            continue
         src = source_key(case_key)
         row = by_key[src]
         path = TASKS / case_key / "task.json"
@@ -239,7 +284,9 @@ def encode_all(repair_only: bool = False) -> int:
             task = json.loads(path.read_text())
         else:
             task = row_to_task(row, case_key)
-        task["exp_db_state"] = replay_row(row, task if repair_only else None)
+        task["exp_db_state"] = drop_unscored_message_queue(
+            task, replay_row(row, task if repair_only else None)
+        )
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(task, indent=2) + "\n")
         written += 1
@@ -256,8 +303,13 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="re-read task.json and replay exp_db_state from exp_tool_calls",
     )
+    parser.add_argument(
+        "--keys",
+        nargs="+",
+        help="encode only these case keys (default: the full matrix)",
+    )
     args = parser.parse_args(argv)
-    return encode_all(repair_only=args.repair)
+    return encode_all(repair_only=args.repair, keys=args.keys)
 
 
 if __name__ == "__main__":
