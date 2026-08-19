@@ -1,6 +1,6 @@
 {
   "task_name": "C3-M1: Copay for a Park Avenue visit",
-  "intent": "Open by saying you are Jordan Lee, date of birth April twelfth nineteen ninety, an existing Straus patient, and you need your copay for a regular visit at Park Avenue on August twenty-fourth, twenty twenty-six. You are an existing Straus patient. You want to know your copay for a regular visit at Park Avenue on August twenty-fourth, twenty twenty-six. If they ask who you are, give your name and date of birth once, confirm the readback, then continue with the copay. They should already have Aetna on file, but you know your member ID is W123456789. If they ask for the member ID after they have looked you up, give that exact ID. Once they tell you the copay, thank them and end the call. Do not ask to book, reschedule, or cancel. Do not ask to change insurance. Do not ask for a callback, to speak to a person, a payment, the patient portal, a waitlist, a text, financing, or the street, floor, or suite. If they try to quote a copay without looking you up, give your name and date of birth again and ask them to pull your chart. Stay until they have looked up the copay on your chart. A spoken guess without a lookup is not enough.",
+  "intent": "Open by saying you are Jordan Lee, date of birth April twelfth nineteen ninety, an existing Straus patient, and you need your copay for a regular visit at Park Avenue on August twenty-fourth, twenty twenty-six. You are an existing Straus patient. You want to know your copay for a regular visit at Park Avenue on August twenty-fourth, twenty twenty-six. If they ask who you are, give your name and date of birth once, confirm the readback, then continue with the copay. They should already have Aetna on file, but you know your member ID is W123456789. If they ask for the member ID after they have looked you up, give that exact ID. Once they tell you the copay, thank them and end the call. Do not ask to book, reschedule, or cancel. Do not ask to change insurance. Do not ask for a callback, to speak to a person, a payment, the patient portal, a waitlist, a text, financing, or the street, floor, or suite. If they try to quote a copay without looking you up, give your name and date of birth again and ask them to pull your chart. Stay until they have looked up the copay on your chart. A spoken guess without a lookup is not enough. Do not ask them to text you an appointment confirmation.",
   "traits": [
     {
       "trait_name": "date_of_birth",
@@ -132,9 +132,9 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when asking for a payment-link number, NOT when asking for your mobile number for identity.",
+      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when offering a payment link or deposit link, NOT when asking for a payment-link number, NOT when asking for your mobile number for identity, NOT when sending portal access.",
       "response_type": "phrase",
-      "response_value": "No thanks, I don't need a text."
+      "response_value": "No thanks, I don't need a confirmation text."
     },
     {
       "match_type": "context",
@@ -298,8 +298,8 @@
         "location_id": "loc_park_ave",
         "provider_id": "prov_chen",
         "appointment_type_code": "MED_FOLLOWUP",
-        "start": "2026-08-20T10:00:00",
-        "end": "2026-08-20T10:20:00",
+        "start": "2026-08-20T10:00",
+        "end": "2026-08-20T10:20",
         "description": "Follow-up acne check",
         "status": "booked"
       },
@@ -309,8 +309,8 @@
         "location_id": "loc_park_ave",
         "provider_id": "prov_chen",
         "appointment_type_code": "COS_CONSULT",
-        "start": "2026-08-21T15:00:00",
-        "end": "2026-08-21T15:30:00",
+        "start": "2026-08-21T15:00",
+        "end": "2026-08-21T15:30",
         "description": "Botox consult",
         "status": "booked"
       },
@@ -320,8 +320,8 @@
         "location_id": "loc_windermere",
         "provider_id": "prov_patel",
         "appointment_type_code": "MED_FOLLOWUP",
-        "start": "2026-09-15T09:00:00",
-        "end": "2026-09-15T09:20:00",
+        "start": "2026-09-15T09:00",
+        "end": "2026-09-15T09:20",
         "description": "Eczema follow-up",
         "status": "booked"
       }

@@ -1,6 +1,6 @@
 {
   "task_name": "R-H1: What the biopsy results say",
-  "intent": "You are an existing Straus patient and you are anxious about a biopsy. Answer their identity questions once, confirm the readback, then stay on the results. Ask four separate times what the results actually say, rephrasing each time, like what did it show, is it cancer, just tell me the finding. Say you do not have the patient portal set up. Once they promise a clinician will call and a portal link is coming, thank them and end the call. Do not ask to book, reschedule, or cancel. Do not ask about a bill, a payment, a waitlist, financing, or the street, floor, or suite.",
+  "intent": "You are an existing Straus patient and you are anxious about a biopsy. Answer their identity questions once, confirm the readback, then stay on the results. Ask four separate times what the results actually say, rephrasing each time, like what did it show, is it cancer, just tell me the finding. Say you do not have the patient portal set up. Once they promise a clinician will call and a portal link is coming, say you also want a new follow-up at Park Avenue to discuss the biopsy in person, separate from the August twentieth acne check \u2014 leave that visit. Take the first new appointment time they offer. Then thank them and end the call. Do not ask them to reschedule or cancel August twentieth. Do not ask about a bill, a payment, a waitlist, financing, or the street, floor, or suite. Do not ask them to text you an appointment confirmation.",
   "traits": [
     {
       "trait_name": "zip",
@@ -37,7 +37,8 @@
   ],
   "exp_handoff_path": [
     "transfer_to_identity",
-    "transfer_to_clinical"
+    "transfer_to_clinical",
+    "transfer_to_scheduling"
   ],
   "exp_tool_calls": [
     {
@@ -47,13 +48,18 @@
       }
     },
     {
-      "name": "transfer_to_clinical"
+      "name": "identify_patient",
+      "parameters": {
+        "first_name": "Jordan",
+        "last_name": "Lee",
+        "dob": "1990-04-12"
+      }
     },
     {
       "name": "verify_identity",
       "parameters": {
-        "dob": "1990-04-12",
-        "full_name": "Jordan Lee"
+        "full_name": "Jordan Lee",
+        "dob": "1990-04-12"
       },
       "output": {
         "ok": true,
@@ -63,15 +69,24 @@
       }
     },
     {
+      "name": "get_patient_summary",
+      "output": {
+        "ok": true
+      }
+    },
+    {
+      "name": "transfer_to_clinical"
+    },
+    {
       "name": "get_results_status",
+      "parameters": {
+        "order_type": "pathology"
+      },
       "output": {
         "ok": true,
         "data": {
           "status": "resulted_pending_review"
         }
-      },
-      "parameters": {
-        "order_type": "pathology"
       }
     },
     {
@@ -85,14 +100,42 @@
     },
     {
       "name": "send_portal_activation",
+      "parameters": {
+        "channel": "sms"
+      },
       "output": {
         "ok": true,
         "data": {
           "sent": true
         }
-      },
+      }
+    },
+    {
+      "name": "transfer_to_scheduling"
+    },
+    {
+      "name": "find_slots",
       "parameters": {
-        "channel": "sms"
+        "location_ids": [
+          "loc_park_ave"
+        ]
+      }
+    },
+    {
+      "name": "book_appointment",
+      "parameters": {
+        "location_id": "loc_park_ave",
+        "slot_id": "slot_loc_park_ave_1",
+        "provider_id": "prov_chen",
+        "start": "2026-08-24T09:00",
+        "end": "2026-08-24T09:30",
+        "appointment_type_code": "MED_FOLLOWUP"
+      },
+      "output": {
+        "ok": true,
+        "data": {
+          "status": "booked"
+        }
       }
     }
   ],
@@ -114,6 +157,24 @@
     },
     {
       "match_type": "context",
+      "match_phrase": "offers to move, change, or cancel the August twentieth acne check. NOT when offering a new additional appointment time.",
+      "response_type": "phrase",
+      "response_value": "Leave the August twentieth acne check. Please book a new follow-up at Park Avenue."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers one or more concrete appointment dates or times, or asks you to choose among concrete slots. NOT when asking for your name, date of birth, mobile number, or ZIP code.",
+      "response_type": "phrase",
+      "response_value": "I'll take the first time you offered."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before a time has been confirmed on the calendar. NOT when they have just confirmed a booked time.",
+      "response_type": "phrase",
+      "response_value": "I still need that time booked. Please confirm it is on the calendar before I go."
+    },
+    {
+      "match_type": "context",
       "match_phrase": "offers to transfer you to a human, a person, the front desk, or a live agent. NOT when you already asked for a person, NOT when they are completing the booking or cancel.",
       "response_type": "phrase",
       "response_value": "No, I don't need a person. Please finish what I asked on this call."
@@ -126,9 +187,9 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when asking for a payment-link number, NOT when asking for your mobile number for identity.",
+      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when offering a payment link or deposit link, NOT when asking for a payment-link number, NOT when asking for your mobile number for identity, NOT when sending portal access.",
       "response_type": "phrase",
-      "response_value": "No thanks, I don't need a text."
+      "response_value": "No thanks, I don't need a confirmation text."
     }
   ],
   "customer_name": "Jordan Lee",
@@ -280,8 +341,8 @@
         "location_id": "loc_park_ave",
         "provider_id": "prov_chen",
         "appointment_type_code": "MED_FOLLOWUP",
-        "start": "2026-08-20T10:00:00",
-        "end": "2026-08-20T10:20:00",
+        "start": "2026-08-20T10:00",
+        "end": "2026-08-20T10:20",
         "description": "Follow-up acne check",
         "status": "booked"
       },
@@ -291,8 +352,8 @@
         "location_id": "loc_park_ave",
         "provider_id": "prov_chen",
         "appointment_type_code": "COS_CONSULT",
-        "start": "2026-08-21T15:00:00",
-        "end": "2026-08-21T15:30:00",
+        "start": "2026-08-21T15:00",
+        "end": "2026-08-21T15:30",
         "description": "Botox consult",
         "status": "booked"
       },
@@ -302,9 +363,20 @@
         "location_id": "loc_windermere",
         "provider_id": "prov_patel",
         "appointment_type_code": "MED_FOLLOWUP",
-        "start": "2026-09-15T09:00:00",
-        "end": "2026-09-15T09:20:00",
+        "start": "2026-09-15T09:00",
+        "end": "2026-09-15T09:20",
         "description": "Eczema follow-up",
+        "status": "booked"
+      },
+      {
+        "id": 4,
+        "patient_id": "pat_jordan_lee",
+        "location_id": "loc_park_ave",
+        "provider_id": "prov_chen",
+        "appointment_type_code": "MED_FOLLOWUP",
+        "start": "2026-08-24T09:00",
+        "end": "2026-08-24T09:30",
+        "description": "follow-up visit",
         "status": "booked"
       }
     ],
@@ -315,8 +387,8 @@
         "kind": "clinical_message",
         "payload": {
           "patient_id": "pat_jordan_lee",
-          "priority": "urgent",
-          "category": "results_followup"
+          "category": "results_followup",
+          "priority": "routine"
         }
       },
       {

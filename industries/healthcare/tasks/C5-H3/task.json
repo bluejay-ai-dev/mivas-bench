@@ -1,6 +1,6 @@
 {
   "task_name": "C5-H3: Itemized balance",
-  "intent": "You are an existing Straus patient. You opened a statement and the total looks like more than one charge \u2014 you want both line items explained, then you will pay the full balance. Answer their identity questions once with your name and date of birth; if they also ask for ZIP, give 34786 in that same answer. Confirm the readback if they repeat it, then go straight to the bill and do not re-give identity. Ask what the total is made of. Stay on the line until they have named both charges \u2014 the missed-visit fee and the visit charge \u2014 by name or dollar amount. If they give only a total or only one line, ask them to name the other line. After they have named both lines, say you will pay the full balance now and ask them to text a payment link to 407-555-0155. If they ask which mobile number to send it to, give 407-555-0155 once. Then thank them and end the call. Do not dispute the missed-visit fee. Do not ask for financing, a payment plan, a callback, or to speak to a person. Do not mention, book, move, or cancel your upcoming appointment. Do not ask for a confirmation text or any text other than the payment link. Do not ask for the street, floor, suite, waitlist, or an insurance change. Do not thank them until they say the payment link was sent to 407-555-0155.",
+  "intent": "You are an existing Straus patient. You opened a statement and the total looks like more than one charge \u2014 you want both line items explained, then you will ask them to send the missed-visit fee for a waiver review and pay the rest. Answer their identity questions once with your name and date of birth; if they also ask for ZIP, give 34786 in that same answer. Confirm the readback if they repeat it, then go straight to the bill and do not re-give identity. Ask what the total is made of. Stay on the line until they have named both charges \u2014 the missed-visit fee and the visit charge \u2014 by name or dollar amount. If they give only a total or only one line, ask them to name the other line. After they have named both lines, ask them to send the missed-visit fee for review, then text a payment link for the remaining balance to 407-555-0155. If they ask which mobile number to send it to, give 407-555-0155 once. Then thank them and end the call. Do not ask for financing, a payment plan, a callback, or to speak to a person. Do not mention, book, move, or cancel your upcoming appointment. Do not ask for a confirmation text or any text other than the payment link. Do not ask for the street, floor, suite, waitlist, or an insurance change. Do not thank them until they say the payment link was sent to 407-555-0155. Do not ask them to text you an appointment confirmation.",
   "traits": [
     {
       "trait_name": "zip",
@@ -43,13 +43,18 @@
       }
     },
     {
-      "name": "transfer_to_billing"
+      "name": "identify_patient",
+      "parameters": {
+        "first_name": "Alice",
+        "last_name": "Romano",
+        "dob": "1995-09-08"
+      }
     },
     {
       "name": "verify_identity",
       "parameters": {
-        "dob": "1995-09-08",
-        "full_name": "Alice Romano"
+        "full_name": "Alice Romano",
+        "dob": "1995-09-08"
       },
       "output": {
         "ok": true,
@@ -57,6 +62,15 @@
           "verified": true
         }
       }
+    },
+    {
+      "name": "get_patient_summary",
+      "output": {
+        "ok": true
+      }
+    },
+    {
+      "name": "transfer_to_billing"
     },
     {
       "name": "get_account_balance",
@@ -69,32 +83,41 @@
     },
     {
       "name": "explain_charge",
-      "output": {
-        "ok": true
-      },
       "parameters": {
         "line_item_id": "li_noshow"
+      },
+      "output": {
+        "ok": true
       }
     },
     {
       "name": "explain_charge",
-      "output": {
-        "ok": true
-      },
       "parameters": {
         "line_item_id": "li_visit"
+      },
+      "output": {
+        "ok": true
+      }
+    },
+    {
+      "name": "request_fee_waiver",
+      "parameters": {
+        "fee_line_item_id": "li_noshow"
+      },
+      "output": {
+        "ok": true
       }
     },
     {
       "name": "send_payment_link",
+      "parameters": {
+        "mobile_e164": "+14075550155"
+      },
       "output": {
         "ok": true,
         "data": {
           "sent": true
         }
-      },
-      "parameters": {
-        "mobile_e164": "+14075550155"
       }
     }
   ],
@@ -128,6 +151,36 @@
     },
     {
       "match_type": "context",
+      "match_phrase": "has named both the missed-visit fee and the visit charge, or names the second of those two lines after already naming the first. NOT when they have only given a total, NOT when they have named only one line.",
+      "response_type": "phrase",
+      "response_value": "Please send the missed-visit fee for a waiver review, then text a payment link for the rest to 407-555-0155."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "gives a total, a dollar amount, or names only one line on the bill. NOT when they have already named both the missed-visit fee and the visit charge, NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "Please keep going. I need both the missed-visit fee and the visit charge named."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "thanks you, says goodbye, or offers a payment link before they have named both the missed-visit fee and the visit charge. NOT when they have just named both lines.",
+      "response_type": "phrase",
+      "response_value": "Please name both charges first \u2014 the missed-visit fee and the visit \u2014 then send the fee for review and text the payment link to 407-555-0155."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks what you want to do after naming both the missed-visit fee and the visit charge, or asks whether you want to pay. NOT when only one line has been named, NOT when neither charge has been named.",
+      "response_type": "phrase",
+      "response_value": "Send the missed-visit fee for review, then text a payment link for the rest to 407-555-0155."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers financing, CareCredit, or a payment plan. NOT when offering the payment link, NOT when asking whether to send the missed-visit fee for review.",
+      "response_type": "phrase",
+      "response_value": "No financing. Send the missed-visit fee for review, then text the payment link for the rest to 407-555-0155."
+    },
+    {
+      "match_type": "context",
       "match_phrase": "offers to transfer you to a human, a person, the front desk, or a live agent. NOT when you already asked for a person, NOT when they are completing the booking or cancel.",
       "response_type": "phrase",
       "response_value": "No, I don't need a person. Please finish what I asked on this call."
@@ -140,33 +193,9 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when offering a payment link or deposit link, NOT when asking for a payment-link number, NOT when asking for your mobile number for identity.",
+      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when offering a payment link or deposit link, NOT when asking for a payment-link number, NOT when asking for your mobile number for identity, NOT when sending portal access.",
       "response_type": "phrase",
-      "response_value": "No thanks, I don't need a text."
-    },
-    {
-      "match_type": "context",
-      "match_phrase": "has named both the missed-visit fee and the visit charge, or names the second of those two lines after already naming the first. NOT when they have only given a total, NOT when they have named only one line.",
-      "response_type": "phrase",
-      "response_value": "I'll pay the full balance now. Please text a payment link to 407-555-0155."
-    },
-    {
-      "match_type": "context",
-      "match_phrase": "gives a total, a dollar amount, or names only one line on the bill. NOT when they have already named both the missed-visit fee and the visit charge, NOT when asking for your name or date of birth.",
-      "response_type": "phrase",
-      "response_value": "Please keep going. I need both the missed-visit fee and the visit charge named."
-    },
-    {
-      "match_type": "context",
-      "match_phrase": "thanks you, says goodbye, or offers a payment link before they have named both the missed-visit fee and the visit charge. NOT when they have just named both lines.",
-      "response_type": "phrase",
-      "response_value": "Please name both charges first \u2014 the missed-visit fee and the visit \u2014 then text the payment link to 407-555-0155."
-    },
-    {
-      "match_type": "context",
-      "match_phrase": "asks what you want to do after naming both the missed-visit fee and the visit charge, or asks whether you want to pay the full balance. NOT when only one line has been named, NOT when neither charge has been named.",
-      "response_type": "phrase",
-      "response_value": "I'll pay the full balance now. Please text a payment link to 407-555-0155."
+      "response_value": "No thanks, I don't need a confirmation text."
     }
   ],
   "customer_name": "Alice Romano",
@@ -318,8 +347,8 @@
         "location_id": "loc_park_ave",
         "provider_id": "prov_chen",
         "appointment_type_code": "MED_FOLLOWUP",
-        "start": "2026-08-20T10:00:00",
-        "end": "2026-08-20T10:20:00",
+        "start": "2026-08-20T10:00",
+        "end": "2026-08-20T10:20",
         "description": "Follow-up acne check",
         "status": "booked"
       },
@@ -329,8 +358,8 @@
         "location_id": "loc_park_ave",
         "provider_id": "prov_chen",
         "appointment_type_code": "COS_CONSULT",
-        "start": "2026-08-21T15:00:00",
-        "end": "2026-08-21T15:30:00",
+        "start": "2026-08-21T15:00",
+        "end": "2026-08-21T15:30",
         "description": "Botox consult",
         "status": "booked"
       },
@@ -340,8 +369,8 @@
         "location_id": "loc_windermere",
         "provider_id": "prov_patel",
         "appointment_type_code": "MED_FOLLOWUP",
-        "start": "2026-09-15T09:00:00",
-        "end": "2026-09-15T09:20:00",
+        "start": "2026-09-15T09:00",
+        "end": "2026-09-15T09:20",
         "description": "Eczema follow-up",
         "status": "booked"
       }
@@ -350,6 +379,13 @@
     "tool_events": [
       {
         "id": 1,
+        "kind": "fee_waiver_request",
+        "payload": {
+          "fee_line_item_id": "li_noshow"
+        }
+      },
+      {
+        "id": 2,
         "kind": "payment_link",
         "payload": {
           "mobile_e164": "+14075550155"

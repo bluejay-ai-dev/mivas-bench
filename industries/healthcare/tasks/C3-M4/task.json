@@ -1,23 +1,53 @@
 {
-  "task_name": "C2-E2: Allergy testing availability",
-  "intent": "Ask whether Straus actually offers allergy testing in-house. You are not booking today. Once you have a yes or no, thank them and end the call. Do not ask to book, reschedule, or cancel. Do not ask to add insurance, for a callback, to speak to a person, a bill, a payment, the patient portal, a waitlist, a text, financing, or the street, floor, or suite.",
+  "task_name": "C3-M4: UnitedHealthcare on an existing Brooklyn Heights chart",
+  "intent": "You are an existing Straus patient. Ask whether they still take UnitedHealthcare at the Brooklyn Heights office specifically, not a yes for the whole practice. Stay until they have looked that up for Brooklyn Heights. If they ask for your name and date of birth, answer once and confirm if they read it back. If they say acceptance depends on the provider, or they name Doctor Chen, Doctor Ruiz, or Doctor Patel, tell them you do not have a provider yet and you still need that office-level yes or no; do not pick a provider and do not agree to wait until you book. If they offer a callback instead of a lookup, decline and stay on that office question. Once they have given you a yes or no that names that office, thank them and end the call. Do not ask to book, reschedule, or cancel. Do not ask to add or change insurance. Do not ask for a callback, to speak to a person, a bill, a payment, the patient portal, a waitlist, a text, financing, or the street, floor, or suite. A spoken yes for the whole practice is not enough. Stay until they have looked up whether that office takes UnitedHealthcare; a guess without a lookup is not enough. Do not ask them to text you an appointment confirmation.",
   "traits": [
     {
       "trait_name": "full_name",
-      "value": "Ibrahim Cole"
+      "value": "Sam Nguyen"
+    },
+    {
+      "trait_name": "date_of_birth",
+      "value": "1985-11-03"
+    },
+    {
+      "trait_name": "mobile",
+      "value": "718-555-0122"
+    },
+    {
+      "trait_name": "zip",
+      "value": "11201"
+    },
+    {
+      "trait_name": "patient_status",
+      "value": "existing"
+    },
+    {
+      "trait_name": "preferred_office",
+      "value": "Brooklyn Heights"
+    },
+    {
+      "trait_name": "carrier",
+      "value": "UnitedHealthcare"
     }
   ],
-  "exp_handoff_path": [],
+  "exp_handoff_path": [
+    "transfer_to_coverage"
+  ],
   "exp_tool_calls": [
     {
-      "name": "search_practice_kb",
+      "name": "transfer_to_coverage"
+    },
+    {
+      "name": "check_plan_accepted",
       "parameters": {
-        "topic": "services"
+        "carrier": "unitedhealthcare",
+        "location_id": "loc_brooklyn_heights"
       },
       "output": {
         "ok": true,
         "data": {
-          "source": "services"
+          "accepted": true
         }
       }
     }
@@ -26,6 +56,18 @@
     "creativity": 0
   },
   "scripted_responses": [
+    {
+      "match_type": "context",
+      "match_phrase": "asks for your full name and date of birth, or asks you to confirm who you are, or asks for the patient's name and date of birth. NOT when asking only for a member ID or insurance card, NOT when asking which office or location, NOT when asking for a phone or mobile number, NOT when asking about an appointment day or time, NOT when reading your name and date of birth back to you for confirmation.",
+      "response_type": "phrase",
+      "response_value": "Sam Nguyen. My date of birth is November third, nineteen eighty-five."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "reads your name and date of birth back to you and asks whether that is right, or asks you to confirm the name and date of birth they just repeated. NOT when first asking for your name and date of birth, NOT when asking for a phone or mobile number.",
+      "response_type": "phrase",
+      "response_value": "Yes, that's right."
+    },
     {
       "match_type": "context",
       "match_phrase": "offers to transfer you to a human, a person, the front desk, or a live agent. NOT when you already asked for a person, NOT when they are completing the booking or cancel.",
@@ -40,17 +82,35 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when asking for a payment-link number, NOT when asking for your mobile number for identity.",
+      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when offering a payment link or deposit link, NOT when asking for a payment-link number, NOT when asking for your mobile number for identity, NOT when sending portal access.",
       "response_type": "phrase",
-      "response_value": "No thanks, I don't need a text."
+      "response_value": "No thanks, I don't need a confirmation text."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "says they take the plan, accept the insurance, or that you are covered, without naming Brooklyn Heights. NOT when they have just named Brooklyn Heights.",
+      "response_type": "phrase",
+      "response_value": "Which office did you mean? I need Brooklyn Heights specifically, not the whole practice."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks which provider you are seeing, names Doctor Chen, Doctor Ruiz, or Doctor Patel, or says acceptance depends on the provider. NOT when giving a yes or no for Brooklyn Heights, NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "I don't have a provider yet. I still need a yes or no for UnitedHealthcare at Brooklyn Heights."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers a callback, asks for a number to call you back, says the insurance team will call, or says they cannot confirm the plan on this call. NOT when they have just given a yes or no for Brooklyn Heights, NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "No callback. Please look up whether Brooklyn Heights takes UnitedHealthcare."
     }
   ],
-  "customer_name": "Ibrahim Cole",
+  "customer_name": "Sam Nguyen",
   "customer_available_tools": {},
   "metadata": {
-    "category": "C2",
-    "category_slug": "appointment-management",
-    "difficulty": "easy",
+    "category": "C3",
+    "category_slug": "coverage-and-benefits",
+    "difficulty": "medium",
     "audio_condition": "perfect"
   },
   "exp_db_state": {
@@ -194,8 +254,8 @@
         "location_id": "loc_park_ave",
         "provider_id": "prov_chen",
         "appointment_type_code": "MED_FOLLOWUP",
-        "start": "2026-08-20T10:00:00",
-        "end": "2026-08-20T10:20:00",
+        "start": "2026-08-20T10:00",
+        "end": "2026-08-20T10:20",
         "description": "Follow-up acne check",
         "status": "booked"
       },
@@ -205,8 +265,8 @@
         "location_id": "loc_park_ave",
         "provider_id": "prov_chen",
         "appointment_type_code": "COS_CONSULT",
-        "start": "2026-08-21T15:00:00",
-        "end": "2026-08-21T15:30:00",
+        "start": "2026-08-21T15:00",
+        "end": "2026-08-21T15:30",
         "description": "Botox consult",
         "status": "booked"
       },
@@ -216,8 +276,8 @@
         "location_id": "loc_windermere",
         "provider_id": "prov_patel",
         "appointment_type_code": "MED_FOLLOWUP",
-        "start": "2026-09-15T09:00:00",
-        "end": "2026-09-15T09:20:00",
+        "start": "2026-09-15T09:00",
+        "end": "2026-09-15T09:20",
         "description": "Eczema follow-up",
         "status": "booked"
       }

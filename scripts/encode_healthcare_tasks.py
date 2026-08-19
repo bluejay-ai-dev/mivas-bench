@@ -271,12 +271,6 @@ DROPPED_TOOL_ARGS = frozenset({
     "plan_name", "plan_type", "pharmacy_name", "contact_preference",
     "name", "variables", "context",
 })
-QUERY_TO_TOPIC = {
-    "missed visit fee": "fees",
-    "cancellation fee": "fees",
-    "hours subway": "hours",
-    "allergy testing service": "services",
-}
 REASON_TO_VISIT = {
     "mole on cheek": ("medical", "routine"),
     "rash on neck": ("medical", "routine"),
@@ -312,9 +306,9 @@ PHONE_BY_NAME = {
     "Leo Park": "+17185550166",
 }
 MEDICATION_BY_FOLDER = {
-    "R-H2": "isotretinoin",
-    "R-H3": "Dupixent",
-    "R-M3": "Xanax",
+    "R-H2": "accutane",
+    "R-H3": "dupixent",
+    "R-M3": "xanax",
 }
 MEMBER_ID_PIN = {
     "match_type": "context",
@@ -508,9 +502,8 @@ def complete_call(
         params.setdefault("location_ids", [loc])
         mapped_ids = [slug_location(item) for item in params["location_ids"]]
         params["location_ids"] = [item for item in mapped_ids if item] or [loc]
-        params.setdefault("earliest", "2026-08-24T00:00:00")
-        # DH names calendar dates only. The office default when no clock time
-        # is given is 23:59:59; stamp that on replay, not on expected args.
+        params.setdefault("earliest", "2026-08-24")
+        # DH names calendar dates only. Do not invent a clock time on expected args.
         params.pop("latest", None)
 
     elif name == "send_sms":
@@ -540,6 +533,7 @@ def complete_call(
             "medication_name",
             facts.get("medication") or MEDICATION_BY_FOLDER.get(scored, "triamcinolone"),
         )
+        params["medication_name"] = str(params["medication_name"]).strip().lower()
         med = str(params["medication_name"]).strip().lower()
         if "isotretinoin" in med or "accutane" in med:
             call = {
@@ -606,10 +600,6 @@ def complete_call(
 
     elif name.startswith("transfer_to_"):
         params.pop("handoff_summary", None)
-
-    elif name == "search_practice_kb":
-        query = str(params.pop("query", "") or "")
-        params.setdefault("topic", QUERY_TO_TOPIC.get(query.strip().lower(), "hours"))
 
     elif name == "classify_visit_request":
         reason = str(params.pop("reason_text", "") or "")
@@ -684,70 +674,57 @@ def complete_call(
     return {key: value for key, value in call.items() if key != "parameters"}
 
 
-# Courtesy confirmation texts after a write are not required. Keep send_sms
-# only when the caller asked to receive a text (or a pin accepts one).
-_SMS_REFUSE = re.compile(
-    r"don'?t want a text|do not want a text|don'?t text me|do not text me|"
-    r"no thanks.{0,40}text|i'?m all set.{0,30}text|"
-    r"refuse.{0,30}(?:a )?text|decline.{0,30}(?:a )?text",
+# Appointment confirmation SMS is never courtesy. Keep send_sms only when the
+# task itself instructs the caller to ask for that confirmation.
+_SMS_ASK = re.compile(
+    r"ask them to text you an appointment confirmation",
     re.I,
 )
-_SMS_POLICY_QUESTION = re.compile(
-    r"when they send (?:appointment )?confirmation texts|"
-    r"how their reminders work",
+_SMS_ACCEPT_PIN = re.compile(
+    r"yes, text me the appointment confirmation",
     re.I,
 )
-_SMS_REQUEST = re.compile(
-    r"text you|text me|texted to you|text the address|"
-    r"send (?:me |you )?(?:a |the )?(?:text|sms)|"
-    r"want (?:a |the )?(?:text|sms)|"
-    r"confirmation text",
+_SMS_FORBID = re.compile(
+    r"do not ask them to text you an appointment confirmation|"
+    r"do not want a text sent to you|"
+    r"do not ask for any text other than|"
+    r"don'?t need a confirmation text",
     re.I,
 )
-_SMS_CONFIRMATION_REQUEST = re.compile(
-    r"confirmation text|text (?:me|you) (?:the )?(?:confirmation|appointment)",
-    re.I,
-)
-
-
-def _sms_corpus(task: dict[str, Any]) -> str:
-    pins = task.get("scripted_responses") or []
-    pin_text = ""
-    if isinstance(pins, list):
-        pin_text = " ".join(
-            str(item.get("response_value") or "")
-            for item in pins
-            if isinstance(item, dict)
-        )
-    return f"{task.get('intent') or ''} {pin_text}"
 
 
 def caller_requests_sms(task: dict[str, Any]) -> bool:
-    """True when receiving an SMS is part of success, not a courtesy after a write."""
-    corpus = _sms_corpus(task)
-    if _SMS_REFUSE.search(corpus) or _SMS_POLICY_QUESTION.search(corpus):
+    """True only when the task makes a confirmation text a required ask."""
+    intent = str(task.get("intent") or "")
+    if _SMS_FORBID.search(intent):
         return False
-    return bool(_SMS_REQUEST.search(corpus))
+    if _SMS_ASK.search(intent):
+        return True
+    pins = task.get("scripted_responses") or []
+    if not isinstance(pins, list):
+        return False
+    return any(
+        _SMS_ACCEPT_PIN.search(str(item.get("response_value") or ""))
+        for item in pins
+        if isinstance(item, dict)
+    ) and not any(
+        _SMS_FORBID.search(str(item.get("response_value") or ""))
+        for item in pins
+        if isinstance(item, dict)
+    )
 
 
 def keep_send_sms_call(
     task: dict[str, Any],
     call: dict[str, Any],
-    names: list[Any] | None = None,
+    names: list[Any] | None = None,  # noqa: ARG001 — kept for encoder call sites
 ) -> bool:
     if call.get("name") != "send_sms":
         return True
     if not caller_requests_sms(task):
         return False
     template = str((call.get("parameters") or {}).get("template_id") or "")
-    names = names or [item.get("name") for item in (task.get("exp_tool_calls") or [])]
-    if template in {"cosmetic_deposit", "payment_link"} and "send_payment_link" in names:
-        return False
-    if template == "portal_activation" and "send_portal_activation" in names:
-        return False
-    if template in {"", "appointment_confirmation"}:
-        return bool(_SMS_CONFIRMATION_REQUEST.search(_sms_corpus(task)))
-    return True
+    return template in {"", "appointment_confirmation"}
 
 
 def drop_unneeded_send_sms(
@@ -825,24 +802,6 @@ def reshape_calls(task: dict[str, Any], folder: str) -> list[dict[str, Any]]:
         }] + raw[insert_at:]
 
     completed = [complete_call(call, task, folder, raw) for call in raw]
-    if folder == "C1-H2":
-        split: list[dict[str, Any]] = []
-        kb_emitted = False
-        for call in completed:
-            if call.get("name") == "search_practice_kb":
-                if not kb_emitted:
-                    split.append({
-                        "name": "search_practice_kb",
-                        "parameters": {"topic": "hours"},
-                    })
-                    split.append({
-                        "name": "search_practice_kb",
-                        "parameters": {"topic": "directions"},
-                    })
-                    kb_emitted = True
-                continue
-            split.append(call)
-        completed = split
     deduped: list[dict[str, Any]] = []
     for call in completed:
         prev = deduped[-1] if deduped else None
@@ -902,7 +861,7 @@ def add_member_id_pin(task: dict[str, Any]) -> None:
     pins.append(dict(MEMBER_ID_PIN))
 
 
-JOIN_WAITLIST_REPLAY_LATEST = "2026-09-30T23:59:59"
+JOIN_WAITLIST_REPLAY_LATEST = "2026-09-30"
 
 
 def replay_arguments(call: dict[str, Any], task: dict[str, Any] | None = None) -> dict[str, Any]:
@@ -910,7 +869,7 @@ def replay_arguments(call: dict[str, Any], task: dict[str, Any] | None = None) -
     name = call.get("name")
     params = dict(call.get("parameters") or {})
     if name == "join_waitlist":
-        params.setdefault("earliest", "2026-08-24T00:00:00")
+        params.setdefault("earliest", "2026-08-24")
         params.setdefault("latest", JOIN_WAITLIST_REPLAY_LATEST)
     elif name == "offer_financing" and params.get("amount_cents") in (None, ""):
         facts = facts_from_task(task or {})
@@ -985,8 +944,8 @@ def main(argv: list[str] | None = None) -> int:
 
     load_dotenv()
     humans = load_from_community(V2_COMMUNITIES["healthcare"])
-    if len(humans) != 66:
-        raise SystemExit(f"expected 66 healthcare DHs, got {len(humans)}")
+    if len(humans) != 72:
+        raise SystemExit(f"expected 72 healthcare DHs, got {len(humans)}")
 
     TASKS.mkdir(parents=True, exist_ok=True)
     written: list[str] = []

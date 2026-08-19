@@ -656,8 +656,15 @@ def tool_call_adherence(
     """
     exp_calls = _as_calls(expected)
     act_calls = _as_calls(actual)
+    extra = _forbidden_extra_calls(exp_calls, act_calls, industry)
     if not exp_calls:
-        return {"passed": True, "score": 1.0, "missing": [], "hit": []}
+        return {
+            "passed": not extra,
+            "score": 0.0 if extra else 1.0,
+            "missing": [],
+            "hit": [],
+            "extra": extra,
+        }
     used: set[int] = set()
     hit: list[str] = []
     missing: list[str] = []
@@ -676,11 +683,28 @@ def tool_call_adherence(
         else:
             missing.append(name)
     return {
-        "passed": not missing,
+        "passed": not missing and not extra,
         "score": len(hit) / len(exp_calls),
         "missing": missing,
         "hit": hit,
+        "extra": extra,
     }
+
+
+def _forbidden_extra_calls(
+    exp_calls: list[dict[str, Any]],
+    act_calls: list[dict[str, Any]],
+    industry: str | None,
+) -> list[str]:
+    """Healthcare confirmation SMS is scored as required or forbidden, never optional."""
+    if industry != "healthcare":
+        return []
+    expected_names = {str(call.get("name") or "") for call in exp_calls}
+    if "send_sms" in expected_names:
+        return []
+    if any(str(call.get("name") or "") == "send_sms" for call in act_calls):
+        return ["send_sms"]
+    return []
 
 
 def expected_handoff_path(task: dict[str, Any] | None) -> list[str]:
