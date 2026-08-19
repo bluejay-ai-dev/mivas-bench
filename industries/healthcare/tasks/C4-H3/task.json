@@ -43,6 +43,14 @@
       }
     },
     {
+      "name": "identify_patient",
+      "parameters": {
+        "first_name": "Sam",
+        "last_name": "Nguyen",
+        "dob": "1985-11-03"
+      }
+    },
+    {
       "name": "verify_identity",
       "parameters": {
         "full_name": "Sam Nguyen",

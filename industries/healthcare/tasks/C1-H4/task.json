@@ -101,7 +101,8 @@
         "location_ids": [
           "loc_brooklyn_heights"
         ],
-        "earliest": "2026-08-24"
+        "earliest": "2026-08-24",
+        "latest": "2026-09-30"
       },
       "output": {
         "ok": true,

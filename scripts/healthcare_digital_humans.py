@@ -1677,7 +1677,7 @@ AREA6 = [
         handoffs=["transfer_to_identity", "transfer_to_clinical", "transfer_to_scheduling"],
         tools=[
             VERIFY_JORDAN, SUMMARY,
-            t("request_rx_refill", {"medication_name": "isotretinoin"},
+            t("request_rx_refill", {"medication_name": "accutane"},
               ok(route="isotretinoin_program", hard_stop=True, approved=False)),
             t("find_slots", {"location_ids": ["loc_park_ave"]}),
             book(PARK_1, "MED_FOLLOWUP", "isotretinoin program visit"),
