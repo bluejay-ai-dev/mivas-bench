@@ -365,8 +365,11 @@ def case_key_of(dh: dict[str, Any]) -> str:
 
 
 def check(humans: list[dict[str, Any]], industry: str) -> None:
-    if industry in ("healthcare", "legal") and len(humans) != 66:
-        raise SystemExit(f"expected 66 {industry} digital humans, got {len(humans)}")
+    expected_n = {"healthcare": 72, "legal": 66}
+    if industry in expected_n and len(humans) != expected_n[industry]:
+        raise SystemExit(
+            f"expected {expected_n[industry]} {industry} digital humans, got {len(humans)}"
+        )
     keys = [case_key_of(dh) for dh in humans]
     if len(keys) != len(set(keys)):
         raise SystemExit("duplicate case_key values")

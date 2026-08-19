@@ -1,6 +1,6 @@
 {
   "task_name": "C2-M1: Move tomorrow's follow-up",
-  "intent": "You are an existing Straus patient. You have a follow-up tomorrow morning at Park Avenue and you need that visit moved to a later date, not cancelled. When they ask who you are, give your name and date of birth once; if they read them back, confirm and continue. Ask whether moving it costs you anything. If they ask which day, week, time, or office you prefer, say you will take the first opening they can offer. Do not name a week, day, time, or office of your own. When they offer appointment times, take the first one they say, confirm that first time out loud, then thank them and end the call. Do not ask to cancel. Do not ask to join a waitlist. Do not ask to add insurance, for a callback, to speak to a person, a bill, a payment, the patient portal, a text, financing, or the street address, floor, suite, or location id. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar. If they only list openings, say move me into that first time. Do not hang up until they confirm the visit was moved on the calendar.",
+  "intent": "You are an existing Straus patient. You have a follow-up tomorrow morning at Park Avenue and you need that visit moved to a later date, not cancelled. When they ask who you are, give your name and date of birth once; if they read them back, confirm and continue. Ask whether moving it costs you anything. If they ask which day, week, time, or office you prefer, say you will take the first opening they can offer. Do not name a week, day, time, or office of your own. When they offer appointment times, take the first one they say and confirm that first time out loud. After they confirm the visit was moved on the calendar, ask them to text you an appointment confirmation. That is the only text you want. Do not ask to cancel. Do not ask to join a waitlist. Do not ask to add insurance, for a callback, to speak to a person, a bill, a payment, the patient portal, financing, or the street address, floor, suite, or location id. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar and that the appointment confirmation was texted. If they only list openings, say move me into that first time. Do not hang up until they confirm the visit was moved on the calendar and that the appointment confirmation was texted. If they confirm the move but have not texted the confirmation, ask them to text you the appointment confirmation.",
   "traits": [
     {
       "trait_name": "preferred_office",
@@ -80,8 +80,21 @@
       },
       "parameters": {
         "appointment_id": "1",
-        "new_start": "2026-08-24T09:00:00",
-        "new_end": "2026-08-24T09:30:00"
+        "new_start": "2026-08-24T09:00",
+        "new_end": "2026-08-24T09:30"
+      }
+    },
+    {
+      "name": "send_sms",
+      "parameters": {
+        "mobile_e164": "+12125550100",
+        "template_id": "appointment_confirmation"
+      },
+      "output": {
+        "ok": true,
+        "data": {
+          "sent": true
+        }
       }
     }
   ],
@@ -127,15 +140,21 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when asking for a payment-link number, NOT when asking for your mobile number for identity.",
-      "response_type": "phrase",
-      "response_value": "No thanks, I don't need a text."
-    },
-    {
-      "match_type": "context",
       "match_phrase": "thanks you, says goodbye, or asks if you need anything else after listing openings but before confirming the visit was moved. NOT when they have just confirmed the appointment was rescheduled or moved.",
       "response_type": "phrase",
       "response_value": "Please move me into that first time and confirm it is on the calendar before I go."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks whether you want a confirmation text, an appointment SMS, or to be texted after the booking. NOT when offering a payment link or deposit link, NOT when asking for your mobile number for identity.",
+      "response_type": "phrase",
+      "response_value": "Yes, text me the appointment confirmation."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "thanks you, says goodbye, or starts wrapping up after confirming the visit was moved but before they confirm they sent the appointment confirmation text. NOT when they have just said the confirmation was texted.",
+      "response_type": "phrase",
+      "response_value": "Please text me the appointment confirmation before I go."
     }
   ],
   "customer_name": "Jordan Lee",
@@ -287,8 +306,8 @@
         "location_id": "loc_park_ave",
         "provider_id": "prov_chen",
         "appointment_type_code": "MED_FOLLOWUP",
-        "start": "2026-08-24T09:00:00",
-        "end": "2026-08-24T09:30:00",
+        "start": "2026-08-24T09:00",
+        "end": "2026-08-24T09:30",
         "description": "Follow-up acne check",
         "status": "booked"
       },
@@ -298,8 +317,8 @@
         "location_id": "loc_park_ave",
         "provider_id": "prov_chen",
         "appointment_type_code": "COS_CONSULT",
-        "start": "2026-08-21T15:00:00",
-        "end": "2026-08-21T15:30:00",
+        "start": "2026-08-21T15:00",
+        "end": "2026-08-21T15:30",
         "description": "Botox consult",
         "status": "booked"
       },
@@ -309,13 +328,22 @@
         "location_id": "loc_windermere",
         "provider_id": "prov_patel",
         "appointment_type_code": "MED_FOLLOWUP",
-        "start": "2026-09-15T09:00:00",
-        "end": "2026-09-15T09:20:00",
+        "start": "2026-09-15T09:00",
+        "end": "2026-09-15T09:20",
         "description": "Eczema follow-up",
         "status": "booked"
       }
     ],
     "waitlist": [],
-    "tool_events": []
+    "tool_events": [
+      {
+        "id": 1,
+        "kind": "sms",
+        "payload": {
+          "mobile_e164": "+12125550100",
+          "template_id": "appointment_confirmation"
+        }
+      }
+    ]
   }
 }

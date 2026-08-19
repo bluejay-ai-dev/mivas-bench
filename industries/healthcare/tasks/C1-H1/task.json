@@ -1,6 +1,6 @@
 {
   "task_name": "C1-H1: Possible skin cancer visit at Brooklyn Heights",
-  "intent": "You are a new patient and you are worried. In your first real answer, say that a doctor in Ohio told you a spot on your shoulder could be skin cancer, and you want a skin-cancer visit soon \u2014 not a regular checkup \u2014 at the Brooklyn Heights office. Before you take a time, ask for the Brooklyn Heights street address, floor, and suite so you know exactly where to go. Then ask for the earliest opening with a doctor, not a nurse or a PA. When they ask who you are, give your name, date of birth, and mobile once, confirm the readback, and then continue. Take the first appointment time they offer. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first time out loud, then thank them and end the call. Do not ask to add or change insurance. Do not ask for a callback, to speak to a person, a bill, a payment, the patient portal, a waitlist, a text, or financing. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar. If they only list openings, say book the first one. In that first answer, say this is urgent \u2014 you need a skin-cancer or Mohs visit with a doctor soon, not a routine checkup. If they offer to transfer you to a person, refuse and stay until a time is booked.",
+  "intent": "You are a new patient and you are worried. In your first real answer, say that a doctor in Ohio told you a spot on your shoulder could be skin cancer, and you want a skin-cancer visit soon \u2014 not a regular checkup \u2014 at the Brooklyn Heights office. Before you take a time, ask for the Brooklyn Heights street address, floor, and suite so you know exactly where to go. When they ask who you are, give your name, date of birth, and mobile once, confirm the readback, and then continue \u2014 you are new, so they will not find a chart. Ask whether they take UnitedHealthcare at Brooklyn Heights, and also whether Park Avenue takes UnitedHealthcare in case you have to travel. Then ask for the earliest opening with a doctor, not a nurse or a PA. Take the first Brooklyn Heights appointment time they offer. Do not ask for a different day, time, or office, and do not suggest any date of your own. After that first time is on the calendar, ask to be waitlisted at Brooklyn Heights from August twenty-fourth through September thirtieth for anything earlier \u2014 those calendar dates only, no clock time. Then ask the records team to call you about transferring the Ohio notes; if they ask for a number, give 718-555-0191. Confirm the booked time out loud, then thank them and end the call. Do not ask to add or change insurance on the chart. Do not ask to speak to a person, a bill, a payment, the patient portal, financing, or a confirmation text. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar, you are on the waitlist, and a records callback is set. If they only list openings, say book the first one. In that first answer, say this is urgent \u2014 you need a skin-cancer or Mohs visit with a doctor soon, not a routine checkup. If they offer to transfer you to a person, refuse and stay until a time is booked. Do not ask them to text you an appointment confirmation.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -32,9 +32,39 @@
     }
   ],
   "exp_handoff_path": [
+    "transfer_to_coverage",
     "transfer_to_scheduling"
   ],
   "exp_tool_calls": [
+    {
+      "name": "transfer_to_coverage"
+    },
+    {
+      "name": "check_plan_accepted",
+      "parameters": {
+        "carrier": "unitedhealthcare",
+        "location_id": "loc_brooklyn_heights"
+      },
+      "output": {
+        "ok": true,
+        "data": {
+          "accepted": true
+        }
+      }
+    },
+    {
+      "name": "check_plan_accepted",
+      "parameters": {
+        "carrier": "unitedhealthcare",
+        "location_id": "loc_park_ave"
+      },
+      "output": {
+        "ok": true,
+        "data": {
+          "accepted": true
+        }
+      }
+    },
     {
       "name": "transfer_to_scheduling"
     },
@@ -70,10 +100,10 @@
       "name": "book_appointment",
       "parameters": {
         "location_id": "loc_brooklyn_heights",
-        "provider_id": "prov_ruiz",
         "slot_id": "slot_loc_brooklyn_heights_1",
-        "start": "2026-08-24T09:00:00",
-        "end": "2026-08-24T09:30:00",
+        "provider_id": "prov_ruiz",
+        "start": "2026-08-24T09:00",
+        "end": "2026-08-24T09:30",
         "appointment_type_code": "MOHS_CONSULT"
       },
       "output": {
@@ -81,6 +111,33 @@
         "data": {
           "status": "booked"
         }
+      }
+    },
+    {
+      "name": "join_waitlist",
+      "parameters": {
+        "appointment_type_code": "MOHS_CONSULT",
+        "location_ids": [
+          "loc_brooklyn_heights"
+        ],
+        "earliest": "2026-08-24",
+        "latest": "2026-09-30"
+      },
+      "output": {
+        "ok": true,
+        "data": {
+          "status": "added"
+        }
+      }
+    },
+    {
+      "name": "create_callback_task",
+      "parameters": {
+        "queue": "records",
+        "callback_number": "+17185550191"
+      },
+      "output": {
+        "ok": true
       }
     }
   ],
@@ -90,15 +147,21 @@
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "offers an appointment time, a slot, or asks which day or time you want AFTER already saying the street address, the floor, and the suite. NOT when they have not yet given all three, NOT when asking for your name or date of birth.",
+      "match_phrase": "greets you and asks what you need, what they can help with, or why you are calling, before you have explained the reason for the call.",
       "response_type": "phrase",
-      "response_value": "I'll take the first time you offered."
+      "response_value": "A doctor in Ohio said a spot on my shoulder could be skin cancer. I need a skin-cancer or Mohs visit soon with a doctor at Brooklyn Heights \u2014 not a checkup."
     },
     {
       "match_type": "context",
-      "match_phrase": "offers to transfer you to a human, a person, the front desk, or a live agent. NOT when you already asked for a person, NOT when they are completing the booking or cancel.",
+      "match_phrase": "asks for your full name and date of birth, or asks you to confirm who you are, or asks for the patient's name and date of birth. NOT when asking only for a member ID or insurance card, NOT when asking which office or location, NOT when asking for a phone or mobile number, NOT when asking about an appointment day or time, NOT when reading your name and date of birth back to you for confirmation.",
       "response_type": "phrase",
-      "response_value": "No, I don't need a person. Please finish what I asked on this call."
+      "response_value": "Ronald Mercer. My date of birth is July nineteenth, nineteen sixty-one."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "reads your name and date of birth back to you and asks whether that is right, or asks you to confirm the name and date of birth they just repeated. NOT when first asking for your name and date of birth, NOT when asking for a phone or mobile number.",
+      "response_type": "phrase",
+      "response_value": "Yes, that's right."
     },
     {
       "match_type": "context",
@@ -108,21 +171,57 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers the waitlist, a later opening, or to add you to a list. NOT when offering a specific appointment time to book now, NOT when asking for your name or date of birth.",
-      "response_type": "phrase",
-      "response_value": "No waitlist. Please just finish what I asked."
-    },
-    {
-      "match_type": "context",
-      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when asking for a payment-link number, NOT when asking for your mobile number for identity.",
-      "response_type": "phrase",
-      "response_value": "No thanks, I don't need a text."
-    },
-    {
-      "match_type": "context",
       "match_phrase": "offers an appointment time, asks you to confirm a slot, or quotes an office name without the street address, floor, and suite. NOT when they have already said the street, the floor, and the suite.",
       "response_type": "phrase",
       "response_value": "Before I take a time, I need the street address, the floor, and the suite."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers an appointment time, a slot, or asks which day or time you want AFTER already saying the street address, the floor, and the suite. NOT when they have not yet given all three, NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "I'll take the first time you offered."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks whether you have UnitedHealthcare, your carrier, or which plan to check. NOT when asking for a member ID.",
+      "response_type": "phrase",
+      "response_value": "UnitedHealthcare. Please check Brooklyn Heights and also Park Avenue in case I have to travel."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks whether you want the waitlist, offers to add you to a list for an earlier opening, or says they can list you if something sooner opens. NOT when asking for the date window, NOT when offering a specific appointment time to book now.",
+      "response_type": "phrase",
+      "response_value": "Yes, add me to the waitlist at Brooklyn Heights from August twenty-fourth through September thirtieth after you book the first time."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks for a waitlist window, start date, end date, earliest date, latest date, or when you would take an earlier opening. NOT when asking for your name or date of birth, NOT when offering a specific appointment time to book now.",
+      "response_type": "phrase",
+      "response_value": "From August twenty-fourth through September thirtieth, at Brooklyn Heights. Dates only \u2014 I don't have a clock time."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks for a number so the records team can call you, or asks which phone to use for the Ohio-notes callback. NOT when asking for your mobile number for identity.",
+      "response_type": "phrase",
+      "response_value": "Call me at 718-555-0191 about the Ohio notes."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before the Brooklyn Heights time is on the calendar, you are on the waitlist, and a records callback is set. NOT when all three are done.",
+      "response_type": "phrase",
+      "response_value": "I still need the first doctor time booked at Brooklyn Heights, the waitlist from August twenty-fourth through September thirtieth, and a records callback about the Ohio notes."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to transfer you to a human, a person, the front desk, or a live agent. NOT when you already asked for a person, NOT when they are completing the booking or cancel.",
+      "response_type": "phrase",
+      "response_value": "No, I don't need a person. Please finish what I asked on this call."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when offering a payment link or deposit link, NOT when asking for a payment-link number, NOT when asking for your mobile number for identity, NOT when sending portal access.",
+      "response_type": "phrase",
+      "response_value": "No thanks, I don't need a confirmation text."
     }
   ],
   "customer_name": "Ronald Mercer",
@@ -274,8 +373,8 @@
         "location_id": "loc_park_ave",
         "provider_id": "prov_chen",
         "appointment_type_code": "MED_FOLLOWUP",
-        "start": "2026-08-20T10:00:00",
-        "end": "2026-08-20T10:20:00",
+        "start": "2026-08-20T10:00",
+        "end": "2026-08-20T10:20",
         "description": "Follow-up acne check",
         "status": "booked"
       },
@@ -285,8 +384,8 @@
         "location_id": "loc_park_ave",
         "provider_id": "prov_chen",
         "appointment_type_code": "COS_CONSULT",
-        "start": "2026-08-21T15:00:00",
-        "end": "2026-08-21T15:30:00",
+        "start": "2026-08-21T15:00",
+        "end": "2026-08-21T15:30",
         "description": "Botox consult",
         "status": "booked"
       },
@@ -296,8 +395,8 @@
         "location_id": "loc_windermere",
         "provider_id": "prov_patel",
         "appointment_type_code": "MED_FOLLOWUP",
-        "start": "2026-09-15T09:00:00",
-        "end": "2026-09-15T09:20:00",
+        "start": "2026-09-15T09:00",
+        "end": "2026-09-15T09:20",
         "description": "Eczema follow-up",
         "status": "booked"
       },
@@ -307,13 +406,33 @@
         "location_id": "loc_brooklyn_heights",
         "provider_id": "prov_ruiz",
         "appointment_type_code": "MOHS_CONSULT",
-        "start": "2026-08-24T09:00:00",
-        "end": "2026-08-24T09:30:00",
+        "start": "2026-08-24T09:00",
+        "end": "2026-08-24T09:30",
         "description": "Mohs consult",
         "status": "booked"
       }
     ],
-    "waitlist": [],
-    "tool_events": []
+    "waitlist": [
+      {
+        "id": 1,
+        "patient_id": null,
+        "appointment_type_code": "MOHS_CONSULT",
+        "location_ids": [
+          "loc_brooklyn_heights"
+        ],
+        "earliest": "2026-08-24",
+        "latest": "2026-09-30"
+      }
+    ],
+    "tool_events": [
+      {
+        "id": 1,
+        "kind": "callback_task",
+        "payload": {
+          "queue": "records",
+          "callback_number": "+17185550191"
+        }
+      }
+    ]
   }
 }
