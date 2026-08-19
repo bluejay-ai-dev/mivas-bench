@@ -470,6 +470,24 @@ def test_healthcare_leftover_holes_are_closed() -> None:
     captured = next(c for c in load("C3-M2")["exp_tool_calls"] if c["name"] == "capture_insurance_update")
     assert "group_number" not in (captured.get("parameters") or {})
 
+    for key, loc, carrier in (
+        ("C3-E1", "loc_brooklyn_heights", "unitedhealthcare"),
+        ("C3-E1-BG", "loc_brooklyn_heights", "unitedhealthcare"),
+        ("C3-E1-SIG", "loc_brooklyn_heights", "unitedhealthcare"),
+        ("C3-E2", "loc_brooklyn_heights", "medicaid"),
+        ("C3-E3", "loc_park_ave", "aetna"),
+    ):
+        names = [c["name"] for c in load(key)["exp_tool_calls"]]
+        assert names == ["transfer_to_coverage", "check_plan_accepted"], key
+        check = next(c for c in load(key)["exp_tool_calls"] if c["name"] == "check_plan_accepted")
+        assert (check.get("parameters") or {}) == {"carrier": carrier, "location_id": loc}, key
+        assert "looked up" in load(key)["intent"].lower(), key
+
+    for key in ("C5-E1", "C5-E1-BG", "C5-E1-SIG"):
+        pins = [p.get("response_value") for p in load(key).get("scripted_responses") or []]
+        assert "I don't need a payment link. I only need to know if I can read my card number on this call." in pins, key
+        assert "payment link" in load(key)["intent"].lower(), key
+
     assert "w123456789" in pin_blob(load("C3-M1")), "C3-M1"
     assert "11201" in pin_blob(load("C5-M3")), "C5-M3"
     assert "transfer is not the appointment" in pin_blob(load("C1-H1")), "C1-H1"
