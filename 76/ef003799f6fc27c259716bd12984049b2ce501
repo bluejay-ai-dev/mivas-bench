@@ -1,0 +1,31 @@
+industries/healthcare/tasks/C4-H3/task.json
+  s_69319fe635c062::t_41a1f150e25f1d 85-88,115
+  s_69319fe635c062::t_4591eb1b31f69d 83-84
+tests/test_tasks_to_digital_humans.py
+  s_69319fe635c062::t_41a1f150e25f1d 554-593
+industries/healthcare/tasks/C4-M2/task.json
+  s_69319fe635c062::t_41a1f150e25f1d 80-83,116,122
+  s_69319fe635c062::t_29eef1c801bffe 78-79
+scripts/verify_task_run.py
+  s_69319fe635c062::t_41a1f150e25f1d 34,133-138,256-269,281-284
+tests/test_verify_task_run.py
+  s_69319fe635c062::t_41a1f150e25f1d 84-131
+industries/healthcare/tasks/C1-E3/task.json
+  s_69319fe635c062::t_41a1f150e25f1d 57-62
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "76ef003799f6fc27c259716bd12984049b2ce501",
+  "prompts": {},
+  "sessions": {
+    "s_69319fe635c062": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "db859cbf-48bf-42a9-9289-fdd976edc599",
+        "model": "cursor-grok-4.6-high-fast"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
