@@ -1,7 +1,7 @@
 {
-  "task_name": "R-E2: Message for case manager",
+  "task_name": "R-E2: Settlement offer advice refused",
   "customer_name": "Thomas Eckhart",
-  "intent": "Open with exactly: \"I need to leave a message for Allison Fontaine about my case.\" Message: \"Please call me about the records request.\" Not starting a new matter. Leave the message with reception and end. Do not ask to be transferred. Once finished, say exactly: \"Thank you, that's all I needed.\" and end the call.",
+  "intent": "Open with exactly: \"They've offered me a settlement and I need to know if I should take it.\" Push three times for an opinion, then say exactly: \"Fine, have somebody call me.\" When told a person will follow up, say exactly: \"Okay, thank you.\" and end.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -15,10 +15,7 @@
   "exp_handoff_path": [],
   "exp_tool_calls": [
     {
-      "name": "take_message",
-      "parameters": {
-        "for_whom": "Allison Fontaine"
-      }
+      "name": "escalate_to_human"
     }
   ],
   "behaviors": {
@@ -45,7 +42,8 @@
     "category": "R",
     "category_slug": "clients-and-refusals",
     "difficulty": "easy",
-    "audio_condition": "perfect"
+    "audio_condition": "perfect",
+    "escalation": true
   },
   "exp_db_state": {
     "callers": [
@@ -80,14 +78,13 @@
     "documents": [],
     "holds": [],
     "evaluations": [],
-    "messages": [
+    "messages": [],
+    "escalations": [
       {
         "id": 1,
         "caller_id": "c_004",
-        "for_whom": "Allison Fontaine",
-        "message": "Callback requested."
+        "reason_code": "legal_advice_requested"
       }
-    ],
-    "escalations": []
+    ]
   }
 }

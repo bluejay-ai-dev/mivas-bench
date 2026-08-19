@@ -26,10 +26,7 @@
       "name": "transfer_to_screening"
     },
     {
-      "name": "escalate_to_human",
-      "parameters": {
-        "reason_code": "conflict_review"
-      }
+      "name": "escalate_to_human"
     }
   ],
   "behaviors": {

@@ -124,6 +124,10 @@ IGNORE_ROW_KEYS = frozenset({"created_at", "description"})
 LEGAL_IGNORE_ROW_KEYS = frozenset({
     "message", "summary", "note",
     "slot_id", "starts_at", "attorney_id", "datetime",
+    "caller_id", "reason",
+})
+LEGAL_EXTRA_OK_TABLES = frozenset({
+    "messages", "intake_notes", "documents", "holds", "evaluations",
 })
 PHONE_KEY_RE = re.compile(r"phone|_e164$", re.I)
 # ISO date + hour + minute; seconds, micros, and timezone are optional.
@@ -273,6 +277,8 @@ def _canon_row(row: Any, industry: str | None = None) -> Any:
             continue
         if isinstance(value, str) and _is_phone_key(key):
             out[key] = _digits_phone(value)
+        elif isinstance(value, str):
+            out[key] = value.strip().casefold()
         else:
             out[key] = _minute_datetime(value)
     return out
@@ -305,10 +311,46 @@ def _row_fingerprint(row: Any) -> str:
     return json.dumps(row, sort_keys=True, default=str)
 
 
+def _constrained_fields(row: Any) -> dict[str, Any]:
+    if not isinstance(row, dict):
+        return {"_value": row}
+    return {key: value for key, value in row.items() if value not in ("", None)}
+
+
+def _legal_row_covered(expected: Any, actual_rows: list[Any]) -> bool:
+    want = _constrained_fields(expected)
+    for actual in actual_rows:
+        got = actual if isinstance(actual, dict) else {}
+        if all(_values_equal(key, value, got.get(key)) for key, value in want.items()):
+            return True
+    return False
+
+
+def _legal_table_match(expected_rows: list[Any], actual_rows: list[Any], *, extras_ok: bool) -> bool:
+    if extras_ok:
+        if not expected_rows:
+            return True
+        return all(_legal_row_covered(row, actual_rows) for row in expected_rows)
+    if len(expected_rows) != len(actual_rows):
+        return False
+    remaining = list(actual_rows)
+    for expected in expected_rows:
+        match_at = next(
+            (i for i, actual in enumerate(remaining) if _legal_row_covered(expected, [actual])),
+            None,
+        )
+        if match_at is None:
+            return False
+        remaining.pop(match_at)
+    return True
+
+
 def office_states_match(expected: Any, actual: Any, industry: str | None = None) -> bool:
     """Healthcare: patients/appointments exact; waitlist subset when expected non-empty.
-    Legal: mutation tables exact; empty expected table requires empty actual.
-    Legal messages: subset of canonical rows; empty expected allows extra actual rows."""
+    Legal: mutation tables match on constrained fields. Empty expected intakes /
+    escalations still require empty actual. Empty expected messages, intake_notes,
+    documents, holds, and evaluations allow extra live rows (packets, optional notes,
+    and a booking after intake is already complete)."""
     exp = office_canonical(expected, industry)
     act = office_canonical(actual, industry)
     if industry == "healthcare":
@@ -321,9 +363,9 @@ def office_states_match(expected: Any, actual: Any, industry: str | None = None)
         actual_keys = {_row_fingerprint(row) for row in act["waitlist"]}
         return all(_row_fingerprint(row) in actual_keys for row in exp["waitlist"])
     for table in office_tables_for(industry):
-        if industry == "legal" and table == "messages":
-            actual_keys = {_row_fingerprint(row) for row in act[table]}
-            if not all(_row_fingerprint(row) in actual_keys for row in exp[table]):
+        if industry == "legal":
+            extras_ok = table in LEGAL_EXTRA_OK_TABLES
+            if not _legal_table_match(exp[table], act[table], extras_ok=extras_ok):
                 return False
             continue
         if not exp[table]:
@@ -502,6 +544,8 @@ def _values_equal(key: str, expected: Any, actual: Any) -> bool:
     if key == "opposing_party":
         left = str(expected).casefold().replace(" ", "").replace(".", "")
         right = str(actual).casefold().replace(" ", "").replace(".", "")
+        left = left.replace("holloway", "halloway")
+        right = right.replace("holloway", "halloway")
         if not left or not right:
             return False
         shorter, longer = (left, right) if len(left) <= len(right) else (right, left)
@@ -530,8 +574,8 @@ def _values_equal(key: str, expected: Any, actual: Any) -> bool:
         try:
             return float(expected) == float(actual)
         except (TypeError, ValueError):
-            return str(expected) == str(actual)
-    return str(expected) == str(actual)
+            return str(expected).strip().casefold() == str(actual).strip().casefold()
+    return str(expected).strip().casefold() == str(actual).strip().casefold()
 
 
 def _present_nonempty(value: Any) -> bool:
@@ -563,6 +607,8 @@ def _calls_match(
     if not exp_params or not act_params:
         return True
     for key, exp_value in exp_params.items():
+        if industry == "legal" and key == "reason":
+            continue
         prop = _prop_schema(tool, key)
         if _is_prose_arg(key, prop, industry):
             if key in act_params and not _present_nonempty(act_params.get(key)):

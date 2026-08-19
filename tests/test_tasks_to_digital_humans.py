@@ -106,6 +106,15 @@ def test_clones_match_source_semantics_except_audio_metadata() -> None:
             assert clone["metadata"][field] == source["metadata"][field], clone_key
 
 
+def test_legal_background_noise_is_quieter_than_default() -> None:
+    default = conv.audio_fields("background_noise")
+    legal = conv.audio_fields("background_noise", "legal")
+    assert default["background_noise_volume"] == 0.8
+    assert legal["background_noise_volume"] == 0.1
+    healthcare = conv.audio_fields("background_noise", "healthcare")
+    assert healthcare["background_noise_volume"] == 0.8
+
+
 def test_audio_condition_mapping() -> None:
     by_audio = Counter()
     for dh in _humans():
@@ -122,6 +131,27 @@ def test_audio_condition_mapping() -> None:
 def test_two_four_four_per_category() -> None:
     scored: dict[str, Counter] = {}
     for dh in _humans():
+        if conv.trait_value(dh, "audio_condition") != "perfect":
+            continue
+        area = conv.trait_value(dh, "call_area") or ""
+        difficulty = conv.trait_value(dh, "difficulty") or ""
+        scored.setdefault(area, Counter())[difficulty] += 1
+    assert len(scored) == 6
+    for area, counts in scored.items():
+        assert counts == Counter({"easy": 2, "medium": 4, "hard": 4}), area
+
+
+def test_legal_emits_72_payloads() -> None:
+    humans = conv.build("legal")
+    assert len(humans) == 72
+    keys = [conv.case_key_of(dh) for dh in humans]
+    assert len(set(keys)) == 72
+    conv.check(humans, "legal")
+
+
+def test_legal_two_by_four_per_category() -> None:
+    scored: dict[str, Counter] = {}
+    for dh in conv.build("legal"):
         if conv.trait_value(dh, "audio_condition") != "perfect":
             continue
         area = conv.trait_value(dh, "call_area") or ""
@@ -172,6 +202,27 @@ def test_healthcare_creativity_is_zero() -> None:
         assert dh["creativity"] == 0, conv.case_key_of(dh)
 
 
+def test_diff_pack_vs_live_splits_extras_missing_and_duplicates() -> None:
+    humans = [
+        {"traits": [{"trait_name": "case_key", "value": "C1-E2"}]},
+        {"traits": [{"trait_name": "case_key", "value": "C1-M4"}]},
+    ]
+    live = [
+        {"id": 1, "traits": [{"trait_name": "case_key", "value": "C1-E2"}]},
+        {"id": 2, "test_name": "C1-E3: leftover easy"},
+        {"id": 3, "traits": [{"trait_name": "case_key", "value": "C1-E2"}]},
+    ]
+    diff = conv.diff_pack_vs_live(humans, live)
+    assert [dh["id"] for dh in diff.extras] == [2]
+    assert [dh["id"] for dh in diff.duplicates] == [3]
+    assert [conv.case_key_of(dh) for dh in diff.missing] == ["C1-M4"]
+    assert conv.owned_by_industry(
+        {"tags": ["mivas_legal"], "test_name": "C1-E3: leftover"},
+        "legal",
+    )
+    assert not conv.owned_by_industry({"id": 9, "test_name": "unrelated"}, "legal")
+
+
 def test_claim_updates_include_expected_tool_calls() -> None:
     want = _humans()[0]
     live = [{
@@ -194,6 +245,17 @@ def test_claim_updates_include_expected_tool_calls() -> None:
     pinless.pop("scripted_responses", None)
     cleared = conv.claim_updates([pinless], live)
     assert cleared[0]["update"]["scripted_responses"] == []
+
+
+def test_claim_updates_include_audio_fields_for_legal_bg_clone() -> None:
+    legal = conv.build("legal")
+    bg = next(dh for dh in legal if conv.case_key_of(dh).endswith("-BG"))
+    live = [{"id": 1, "test_name": bg["test_name"], "traits": bg["traits"]}]
+    patch = conv.claim_updates([bg], live)[0]["update"]
+    assert patch["background_noise"] == "traffic"
+    assert patch["background_noise_volume"] == 0.1
+    assert patch["audio_quality"] == "high"
+    assert "mivas_legal" in patch["tags"]
 
 
 def test_api_url_reads_env_after_import(monkeypatch) -> None:
@@ -683,4 +745,114 @@ def test_healthcare_expected_params_match_schema() -> None:
                         f"{path.parent.name} {call['name']}.{key}={value!r} vs {pattern}"
                     )
 
+
+def test_legal_fairness_c2h1_state_pin_and_rm_lookup_only() -> None:
+    tasks = ROOT / "industries" / "legal" / "tasks"
+
+    def load(key: str) -> dict:
+        return json.loads((tasks / key / "task.json").read_text())
+
+    c2h1 = load("C2-H1")
+    opening, _, rest = c2h1["intent"].partition('"')
+    first_line, _, body = rest.partition('"')
+    assert first_line == "I slipped on ice outside my apartment and broke my wrist."
+    assert "CA" not in first_line
+    assert "california" not in first_line.lower()
+    assert "january" not in first_line.lower()
+    assert "twenty twenty six" not in first_line.lower()
+    assert 'say exactly: "In CA."' in body
+    assert "which state" in body.lower()
+    pins = c2h1.get("scripted_responses") or []
+    assert any(pin.get("response_value") == "In CA." for pin in pins)
+    assert any(
+        "which state this happened in" in (pin.get("match_phrase") or "").lower()
+        for pin in pins
+    )
+    intake = next(c for c in c2h1["exp_tool_calls"] if c["name"] == "record_intake")
+    assert (intake.get("parameters") or {}) == {
+        "practice_area": "premises_liability",
+        "state": "CA",
+        "summary": "",
+    }
+
+    for key in ("R-M1", "R-M2"):
+        task = load(key)
+        names = [c["name"] for c in task["exp_tool_calls"]]
+        assert names == ["lookup_caller"], key
+        assert "escalate_to_human" not in names, key
+        assert not task.get("metadata", {}).get("escalation"), key
+        assert (task.get("exp_db_state") or {}).get("escalations") == [], key
+
+    c1m3 = load("C1-M3")
+    take = next(c for c in c1m3["exp_tool_calls"] if c["name"] == "take_message")
+    assert "for_whom" not in (take.get("parameters") or {})
+    for row in (c1m3.get("exp_db_state") or {}).get("messages") or []:
+        assert "for_whom" not in row
+
+    c3e2 = load("C3-E2")
+    assert 'Open with exactly: "I need help with a divorce and custody matter."' in c3e2["intent"]
+    assert 'say exactly: "It\'s Edwin Carrick."' in c3e2["intent"]
+    assert "personal matter" not in c3e2["intent"].lower()
+    assert "nobody really" not in c3e2["intent"].lower()
+    assert any(pin.get("response_value") == "It's Edwin Carrick." for pin in c3e2["scripted_responses"])
+    assert not any(
+        "personal matter" in (pin.get("response_value") or "").lower()
+        for pin in c3e2["scripted_responses"]
+    )
+    names = [c["name"] for c in c3e2["exp_tool_calls"]]
+    assert names == ["check_practice_area", "escalate_to_human"]
+    area = next(c for c in c3e2["exp_tool_calls"] if c["name"] == "check_practice_area")
+    assert (area.get("parameters") or {}) == {"practice_area": "family"}
+    assert (c3e2.get("exp_db_state") or {}).get("escalations") == [
+        {"id": 1, "caller_id": "c_new", "reason_code": "practice_area"}
+    ]
+
+    c1m4 = load("C1-M4")
+    assert [c["name"] for c in c1m4["exp_tool_calls"]] == ["lookup_caller", "transfer_to_screening"]
+    assert "check_practice_area" not in [c["name"] for c in c1m4["exp_tool_calls"]]
+    assert (c1m4.get("exp_db_state") or {}).get("escalations") == []
+    assert (c1m4.get("exp_db_state") or {}).get("intakes") == []
+    assert "That's all I needed today" in c1m4["intent"]
+
+    c1h4 = load("C1-H4")
+    assert [c["name"] for c in c1h4["exp_tool_calls"]] == ["escalate_to_human"]
+    assert (c1h4.get("exp_db_state") or {}).get("escalations") == [
+        {"id": 1, "caller_id": "c_new", "reason_code": "caller_request"}
+    ]
+
+    c2m4 = load("C2-M4")
+    assert [c["name"] for c in c2m4["exp_tool_calls"]] == ["lookup_caller", "transfer_to_screening"]
+    assert "escalate_to_human" not in [c["name"] for c in c2m4["exp_tool_calls"]]
+    assert not c2m4.get("metadata", {}).get("escalation")
+    assert (c2m4.get("exp_db_state") or {}).get("escalations") == []
+    assert any(
+        "didn't hire them" in (pin.get("response_value") or "")
+        for pin in c2m4["scripted_responses"]
+    )
+
+    c2h4 = load("C2-H4")
+    assert "I need to talk about a car accident." in c2h4["intent"]
+    assert "I'm the one being sued" not in c2h4["intent"].split("Open with exactly", 1)[1].split("When asked", 1)[0]
+    assert any(
+        pin.get("response_value") == "I'm the one being sued. Your client hit me."
+        for pin in c2h4["scripted_responses"]
+    )
+    assert [c["name"] for c in c2h4["exp_tool_calls"]] == ["escalate_to_human"]
+    assert (c2h4.get("exp_db_state") or {}).get("escalations") == [
+        {"id": 1, "caller_id": "c_new", "reason_code": "adverse_party"}
+    ]
+
+    c3m4 = load("C3-M4")
+    assert any(c["name"] == "check_conflict" and (c.get("parameters") or {}).get("opposing_party") == "USCIS" for c in c3m4["exp_tool_calls"])
+    assert any(c["name"] == "check_practice_area" and (c.get("parameters") or {}).get("practice_area") == "immigration" for c in c3m4["exp_tool_calls"])
+    assert (c3m4.get("exp_db_state") or {}).get("escalations") == [
+        {"id": 1, "caller_id": "c_new", "reason_code": "practice_area"}
+    ]
+
+    c5h4 = load("C5-H4")
+    names = [c["name"] for c in c5h4["exp_tool_calls"]]
+    assert "record_intake" not in names
+    assert names[-1] == "confirm_evaluation"
+    assert not (next(c for c in c5h4["exp_tool_calls"] if c["name"] == "confirm_evaluation").get("parameters") or {}).get("confirmation_token")
+    assert (c5h4.get("exp_db_state") or {}).get("intakes")
 

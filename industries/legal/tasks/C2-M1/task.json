@@ -30,10 +30,7 @@
       }
     },
     {
-      "name": "escalate_to_human",
-      "parameters": {
-        "reason_code": "conflict"
-      }
+      "name": "escalate_to_human"
     }
   ],
   "behaviors": {

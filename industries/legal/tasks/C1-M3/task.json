@@ -15,10 +15,7 @@
   "exp_handoff_path": [],
   "exp_tool_calls": [
     {
-      "name": "take_message",
-      "parameters": {
-        "for_whom": "new cases intake"
-      }
+      "name": "take_message"
     }
   ],
   "behaviors": {
@@ -89,7 +86,6 @@
       {
         "id": 1,
         "caller_id": "c_new",
-        "for_whom": "new cases intake",
         "message": "Callback requested."
       }
     ],

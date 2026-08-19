@@ -1,23 +1,23 @@
 {
-  "task_name": "C5-E1-SIG: Books first offered evaluation slot",
-  "customer_name": "Delphine Mercer",
-  "intent": "Open with exactly: \"A truck from Northstar Logistics sideswiped me on the freeway in California.\" When asked when, say exactly: \"It was July tenth, twenty twenty six.\" Take the first appointment time offered. When read back, say exactly: \"Yes, that's right, go ahead and book it.\" Do not ask for a staff member. Once told the appointment is booked, say exactly: \"Thank you, that's all I needed.\" and end the call.",
+  "task_name": "C5-H4: Premises evaluation booked in Texas",
+  "customer_name": "Hector Salinas",
+  "intent": "Open with exactly: \"I slipped on a wet floor at a store in Texas and broke my wrist.\" When asked who this would be against, say exactly: \"It's Rio Vista Market.\" When asked when, say exactly: \"It was July tenth, twenty twenty six.\" Take the first appointment time offered. When read back, say exactly: \"Yes, that's right, go ahead and book it.\" Do not ask for a staff member. Once told the appointment is booked, say exactly: \"Thank you, that's all I needed.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
-      "value": "Delphine Mercer"
+      "value": "Hector Salinas"
     },
     {
       "trait_name": "practice_area",
-      "value": "auto_accident"
+      "value": "premises_liability"
     },
     {
       "trait_name": "state",
-      "value": "CA"
+      "value": "TX"
     },
     {
       "trait_name": "opposing_party",
-      "value": "Northstar Logistics"
+      "value": "Rio Vista Market"
     },
     {
       "trait_name": "incident_date",
@@ -25,7 +25,7 @@
     },
     {
       "trait_name": "phone",
-      "value": "323-555-0144"
+      "value": "512-555-0194"
     }
   ],
   "exp_handoff_path": [
@@ -34,6 +34,47 @@
     "transfer_to_scheduling"
   ],
   "exp_tool_calls": [
+    {
+      "name": "transfer_to_screening"
+    },
+    {
+      "name": "check_conflict",
+      "parameters": {
+        "opposing_party": "Rio Vista Market"
+      }
+    },
+    {
+      "name": "check_practice_area",
+      "parameters": {
+        "practice_area": "premises_liability"
+      }
+    },
+    {
+      "name": "check_jurisdiction",
+      "parameters": {
+        "state": "TX",
+        "practice_area": "premises_liability"
+      }
+    },
+    {
+      "name": "transfer_to_intake"
+    },
+    {
+      "name": "transfer_to_scheduling"
+    },
+    {
+      "name": "find_evaluation_slots",
+      "parameters": {
+        "practice_area": "premises_liability",
+        "state": "TX"
+      }
+    },
+    {
+      "name": "hold_evaluation",
+      "parameters": {
+        "practice_area": "premises_liability"
+      }
+    },
     {
       "name": "confirm_evaluation"
     }
@@ -46,7 +87,7 @@
       "match_type": "context",
       "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
       "response_type": "phrase",
-      "response_value": "Delphine Mercer, 323-555-0144.",
+      "response_value": "Hector Salinas, 512-555-0194.",
       "occurrence_mode": "always"
     },
     {
@@ -60,14 +101,14 @@
       "match_type": "context",
       "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question.",
       "response_type": "phrase",
-      "response_value": "It's Northstar Logistics.",
+      "response_value": "It's Rio Vista Market.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
       "match_phrase": "The agent asks which state this happened in, or where it took place. NOT any other question.",
       "response_type": "phrase",
-      "response_value": "In California.",
+      "response_value": "In Texas.",
       "occurrence_mode": "always"
     },
     {
@@ -86,16 +127,16 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent has already held a slot and is reading back that held appointment's day, time, attorney and fee, asking whether to confirm it. NOT when first listing open times, and NOT when asking which slot to hold.",
+      "match_phrase": "The agent offers available appointment times or asks which slot to hold. NOT after a slot is already held and they are asking to confirm that booking.",
       "response_type": "phrase",
-      "response_value": "Yes, that's right, go ahead and book it.",
+      "response_value": "I'll take the first time you offered.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "offers an appointment time or asks which time you want",
+      "match_phrase": "The agent has already held a slot and is reading back that held appointment's day, time, attorney and fee, asking whether to confirm it. NOT when first listing open times, and NOT when asking which slot to hold.",
       "response_type": "phrase",
-      "response_value": "I'll take the first time you offered.",
+      "response_value": "Yes, that's right, go ahead and book it.",
       "occurrence_mode": "always"
     }
   ],
@@ -103,8 +144,8 @@
   "metadata": {
     "category": "C5",
     "category_slug": "fees-and-booking",
-    "difficulty": "easy",
-    "audio_condition": "bad_signal",
+    "difficulty": "hard",
+    "audio_condition": "perfect",
     "booking": true
   },
   "exp_db_state": {
@@ -136,18 +177,18 @@
       },
       {
         "id": "c_new",
-        "name": "Delphine Mercer",
-        "phone": "3235550144"
+        "name": "Hector Salinas",
+        "phone": "5125550194"
       }
     ],
     "intakes": [
       {
         "id": 1,
         "caller_id": "c_new",
-        "practice_area": "auto_accident",
-        "state": "CA",
+        "practice_area": "premises_liability",
+        "state": "TX",
         "incident_date": "2026-07-10",
-        "summary": "Truck sideswipe on the freeway."
+        "summary": "Slip on a wet store floor."
       }
     ],
     "intake_notes": [],
@@ -159,7 +200,7 @@
         "caller_id": "c_new",
         "slot_id": "s_110",
         "evaluation_id": null,
-        "practice_area": "auto_accident",
+        "practice_area": "premises_liability",
         "reason": null,
         "summary": "Tom Eckhart on 2026-08-11 at 09:00. The evaluation is free. If the firm takes the case there is no fee unless it wins: 33.33% of any recovery before a lawsuit is filed, 40% if a lawsuit is filed.",
         "consumed": 1
