@@ -148,6 +148,27 @@ def test_legal_emits_72_payloads() -> None:
     conv.check(humans, "legal")
 
 
+def test_customer_support_emits_72_payloads() -> None:
+    humans = conv.build("customer-support")
+    assert len(humans) == 72
+    keys = [conv.case_key_of(dh) for dh in humans]
+    assert len(set(keys)) == 72
+    conv.check(humans, "customer-support")
+
+
+def test_customer_support_two_by_four_per_category() -> None:
+    scored: dict[str, Counter] = {}
+    for dh in conv.build("customer-support"):
+        if conv.trait_value(dh, "audio_condition") != "perfect":
+            continue
+        area = conv.trait_value(dh, "call_area") or ""
+        difficulty = conv.trait_value(dh, "difficulty") or ""
+        scored.setdefault(area, Counter())[difficulty] += 1
+    assert len(scored) == 6
+    for area, counts in scored.items():
+        assert counts == Counter({"easy": 2, "medium": 4, "hard": 4}), area
+
+
 def test_legal_two_by_four_per_category() -> None:
     scored: dict[str, Counter] = {}
     for dh in conv.build("legal"):
