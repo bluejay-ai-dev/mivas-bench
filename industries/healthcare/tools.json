@@ -1141,7 +1141,7 @@
     },
     {
       "name": "request_rx_refill",
-      "description": "When to call this tool: immediately after identity verification for any named-medication refill or refill-related prior authorization, before policy talk, extra details, a clinical message, callback, or handoff. What it does: records and routes the refill. medication_name is the only input. Never approves. Follow the returned route. When another tool is better: create_clinical_message after this write if they also need a nurse callback; transfer to scheduling if the route says they need a visit first. This message never replaces this refill request.",
+      "description": "When to call this tool: immediately after identity verification for a named-medication refill that maps to a closed-formulary slug, or refill-related prior authorization, before policy talk, extra details, a clinical message, callback, or handoff. What it does: records and routes the refill. medication_name is the only input. Never approves. Follow the returned route. When another tool is better: create_clinical_message (rx_question) if the spoken name is not on the closed formulary — do not guess a slug; create_clinical_message after this write if they also need a nurse callback; transfer to scheduling if the route says they need a visit first. This message never replaces this refill request.",
       "inputSchema": {
         "type": "object",
         "properties": {

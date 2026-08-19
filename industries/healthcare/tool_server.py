@@ -570,7 +570,8 @@ def _d_find_slots(a: dict[str, Any]) -> dict[str, Any]:
             for i, start in enumerate(_SLOT_TIMES):
                 if window_start and _parse_local(start) < _parse_local(window_start):
                     continue
-                if window_end and _parse_local(start) > _parse_local(window_end):
+                slot_end = _iso_plus_minutes(start, 30)
+                if window_end and _parse_local(slot_end) > _parse_local(window_end):
                     continue
                 slots.append(
                     {
@@ -580,7 +581,7 @@ def _d_find_slots(a: dict[str, Any]) -> dict[str, Any]:
                         "provider_id": prov["id"],
                         "provider": f"{prov['name']}, {prov['credentials']}",
                         "start": start,
-                        "end": _iso_plus_minutes(start, 30),
+                        "end": slot_end,
                     }
                 )
     return {"slots": slots[:max_results], "count": min(len(slots), max_results)}

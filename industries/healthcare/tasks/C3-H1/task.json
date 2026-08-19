@@ -124,7 +124,7 @@
       "match_type": "context",
       "match_phrase": "asks for your full name and date of birth, or asks you to confirm who you are, or asks for the patient's name and date of birth. NOT when asking only for a member ID or insurance card, NOT when asking which office or location, NOT when asking for a phone or mobile number, NOT when asking about an appointment day or time, NOT when reading your name and date of birth back to you for confirmation.",
       "response_type": "phrase",
-      "response_value": "Simone Ardelle. My date of birth is November sixteenth, nineteen eighty-seven."
+      "response_value": "Simone Ardelle. My date of birth is November sixteenth, nineteen eighty-seven. I'm a new patient. My mobile is 212-555-0182."
     },
     {
       "match_type": "context",

@@ -165,10 +165,12 @@ the right priority and say the callback window out loud.
 - request_rx_refill — required: medication_name from the closed formulary
   (triamcinolone | isotretinoin | accutane | dupixent | humira | skyrizi |
   xanax | tramadol | adderall | oxycodone | codeine). Map spoken names to
-  those slugs. Routes the refill (routed_to_provider | isotretinoin_program |
-  controlled_substance | biologic_coordinator). Follow the route; never
-  approve a refill yourself. controlled_substance returns spoken_commitment
-  — say it out loud.
+  those slugs. If the spoken name is not on that list, do not guess a slug
+  and do not call this tool — create_clinical_message (rx_question) and say
+  the callback window. Routes the refill (routed_to_provider |
+  isotretinoin_program | controlled_substance | biologic_coordinator).
+  Follow the route; never approve a refill yourself. controlled_substance
+  returns spoken_commitment — say it out loud.
 - create_clinical_message — required: category (nurse_question |
   results_followup | rx_question | other). Optional priority (stat | urgent |
   routine); defaults to routine. Say the callback_window it returns out loud.
