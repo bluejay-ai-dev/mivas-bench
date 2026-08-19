@@ -167,9 +167,9 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before the booking is confirmed on the calendar, the weekday hours are answered, the train directions are answered, the street address, the floor, and the suite are spoken. NOT when all of those are complete.",
+      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before the booking is confirmed on the calendar, the weekday hours are answered, the train directions are answered, the Medicare question is answered, the street address, the floor, and the suite are spoken. NOT when all of those are complete.",
       "response_type": "phrase",
-      "response_value": "Before I go, I still need the booking confirmed on the calendar, the weekday hours, the train directions, the street address, the floor, and the suite."
+      "response_value": "Before I go, I still need the booking confirmed on the calendar, the weekday hours, the train directions, my Medicare question answered, the street address, the floor, and the suite."
     },
     {
       "match_type": "context",

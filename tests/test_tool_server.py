@@ -453,6 +453,29 @@ def test_refill_tool_takes_only_medication_name() -> None:
     assert set(refill["inputSchema"]["properties"]) == {"medication_name"}
 
 
+def test_find_slots_window_end_requires_full_duration() -> None:
+    with _load_tool_server("healthcare") as module, TestClient(module.app) as client:
+        def tool(name: str, args: dict[str, Any]) -> dict[str, Any]:
+            resp = client.post(f"/tools/{name}", json={"arguments": args})
+            assert resp.status_code == 200, resp.text
+            return resp.json()
+
+        args = {"location_ids": ["loc_park_ave"]}
+        open_slots = tool("find_slots", args)
+        assert open_slots["ok"] and open_slots["data"]["count"] > 0
+        first = open_slots["data"]["slots"][0]
+        assert first["start"] == "2026-08-24T09:00"
+        assert first["end"] == "2026-08-24T09:30"
+
+        inside = tool("find_slots", {**args, "window_end": "2026-08-24T09:15"})
+        assert inside["ok"]
+        starts = [slot["start"] for slot in inside["data"]["slots"]]
+        assert "2026-08-24T09:00" not in starts
+
+        fits = tool("find_slots", {**args, "window_end": "2026-08-24T09:30"})
+        assert any(slot["start"] == "2026-08-24T09:00" for slot in fits["data"]["slots"])
+
+
 def test_healthcare_calls_are_isolated() -> None:
     """Two concurrent calls must not share an identity pin, a balance or a row.
 
