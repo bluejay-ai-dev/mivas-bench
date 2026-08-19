@@ -16,8 +16,19 @@
       "value": "602-555-0177"
     }
   ],
-  "exp_handoff_path": [],
+  "exp_handoff_path": [
+    "transfer_to_screening"
+  ],
   "exp_tool_calls": [
+    {
+      "name": "transfer_to_screening"
+    },
+    {
+      "name": "check_conflict",
+      "parameters": {
+        "opposing_party": "Vertex Logistics"
+      }
+    },
     {
       "name": "escalate_to_human"
     }
