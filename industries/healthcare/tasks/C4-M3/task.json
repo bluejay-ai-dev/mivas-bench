@@ -1,6 +1,6 @@
 {
   "task_name": "C4-M3: Chemical peel consult, no deposit",
-  "intent": "Ask what a chemical peel costs at Brooklyn Heights. When they explain that a deposit is required to hold the consult, say you are not paying a deposit and you will not agree to that. Ask the cosmetic desk to phone you back later \u2014 you do not want to book today and you do not want to be transferred on this call. If they try to connect you to a person now, decline and repeat that you want a callback later, not a live transfer. If they ask for a number to reach you, give 718-555-0188. Stay on the line until they confirm a callback is scheduled, then thank them and end the call. Do not say someone, a person, or transfer me. Do not ask to book, reschedule, or cancel. Do not ask about a medical bill, the patient portal, a text, a waitlist, financing, or the street address, floor, or suite. Do not take a consult time. If they offer a slot, refuse it \u2014 you will not put down a deposit and you only want a callback.",
+  "intent": "Ask what a chemical peel costs at Brooklyn Heights. When they explain that a deposit is required to hold the consult, say you are not paying a deposit and you will not agree to that. Ask the cosmetic desk to phone you back later \u2014 you do not want to book today and you do not want to be transferred on this call. If they try to connect you to a person now, decline and repeat that you want a callback later, not a live transfer. If they ask for a number to reach you, give 718-555-0188. Stay on the line until they confirm a callback is scheduled, then thank them and end the call. Do not say someone, a person, or transfer me. Do not ask to book, reschedule, or cancel. Do not ask about a medical bill, the patient portal, a text, a waitlist, financing, or the street address, floor, or suite. Do not take a consult time. If they offer a slot, refuse it \u2014 you will not put down a deposit and you only want a callback. Do not ask them to text you an appointment confirmation.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -57,9 +57,9 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when asking for a payment-link number, NOT when asking for your mobile number for identity.",
+      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when offering a payment link or deposit link, NOT when asking for a payment-link number, NOT when asking for your mobile number for identity, NOT when sending portal access.",
       "response_type": "phrase",
-      "response_value": "No thanks, I don't need a text."
+      "response_value": "No thanks, I don't need a confirmation text."
     }
   ],
   "customer_name": "Ruth Ellinger",
@@ -211,8 +211,8 @@
         "location_id": "loc_park_ave",
         "provider_id": "prov_chen",
         "appointment_type_code": "MED_FOLLOWUP",
-        "start": "2026-08-20T10:00:00",
-        "end": "2026-08-20T10:20:00",
+        "start": "2026-08-20T10:00",
+        "end": "2026-08-20T10:20",
         "description": "Follow-up acne check",
         "status": "booked"
       },
@@ -222,8 +222,8 @@
         "location_id": "loc_park_ave",
         "provider_id": "prov_chen",
         "appointment_type_code": "COS_CONSULT",
-        "start": "2026-08-21T15:00:00",
-        "end": "2026-08-21T15:30:00",
+        "start": "2026-08-21T15:00",
+        "end": "2026-08-21T15:30",
         "description": "Botox consult",
         "status": "booked"
       },
@@ -233,8 +233,8 @@
         "location_id": "loc_windermere",
         "provider_id": "prov_patel",
         "appointment_type_code": "MED_FOLLOWUP",
-        "start": "2026-09-15T09:00:00",
-        "end": "2026-09-15T09:20:00",
+        "start": "2026-09-15T09:00",
+        "end": "2026-09-15T09:20",
         "description": "Eczema follow-up",
         "status": "booked"
       }

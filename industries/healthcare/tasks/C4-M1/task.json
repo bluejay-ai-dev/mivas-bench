@@ -1,6 +1,6 @@
 {
   "task_name": "C4-M1: Microneedling consult",
-  "intent": "Ask what microneedling costs at Park Avenue, then ask to book a microneedling consult there. You must get the Park Avenue street address, floor, and suite before you accept a time \u2014 if they quote a time or an address without all three, ask for the street, the floor, and the suite. When they explain the deposit and the cancellation rules, agree to them. Take the first appointment time they offer after you have the address. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first time out loud. If they ask who you are, give your name once and continue. Ask them to text the deposit payment link to your phone; that is the only text you want. Do not thank them or end the call until a time is confirmed on the calendar and you have heard the street, floor, and suite. Do not ask for a callback, to speak to a person, about a medical bill, insurance, a medical appointment, the patient portal, a waitlist, or financing. Do not ask for a confirmation text. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar. If they only list openings, say book the first one. Do not thank them or hang up until they confirm a time is on the calendar and that a deposit payment link was sent to your phone. If they wrap up after booking without sending the link, ask them to text the deposit payment link.",
+  "intent": "Ask what microneedling costs at Park Avenue, then ask to book a microneedling consult there. You must get the Park Avenue street address, floor, and suite before you accept a time \u2014 if they quote a time or an address without all three, ask for the street, the floor, and the suite. When they explain the deposit and the cancellation rules, agree to them. Take the first appointment time they offer after you have the address. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first time out loud. If they ask who you are, give your name once and continue. Ask them to text the deposit payment link to your phone; that is the only text you want. Do not thank them or end the call until a time is confirmed on the calendar and you have heard the street, floor, and suite. Do not ask for a callback, to speak to a person, about a medical bill, insurance, a medical appointment, the patient portal, a waitlist, or financing. Do not ask for a confirmation text. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar. If they only list openings, say book the first one. Do not thank them or hang up until they confirm a time is on the calendar and that a deposit payment link was sent to your phone. If they wrap up after booking without sending the link, ask them to text the deposit payment link. Do not ask them to text you an appointment confirmation.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -63,7 +63,7 @@
         "slot_id": "slot_loc_park_ave_1",
         "location_id": "loc_park_ave",
         "provider_id": "prov_chen",
-        "start": "2026-08-24T09:00:00",
+        "start": "2026-08-24T09:00",
         "service_interest": [
           "microneedling"
         ],
@@ -113,9 +113,9 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when offering a payment link or deposit link, NOT when asking for a payment-link number, NOT when asking for your mobile number for identity.",
+      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when offering a payment link or deposit link, NOT when asking for a payment-link number, NOT when asking for your mobile number for identity, NOT when sending portal access.",
       "response_type": "phrase",
-      "response_value": "No thanks, I don't need a text."
+      "response_value": "No thanks, I don't need a confirmation text."
     },
     {
       "match_type": "context",
@@ -291,8 +291,8 @@
         "location_id": "loc_park_ave",
         "provider_id": "prov_chen",
         "appointment_type_code": "MED_FOLLOWUP",
-        "start": "2026-08-20T10:00:00",
-        "end": "2026-08-20T10:20:00",
+        "start": "2026-08-20T10:00",
+        "end": "2026-08-20T10:20",
         "description": "Follow-up acne check",
         "status": "booked"
       },
@@ -302,8 +302,8 @@
         "location_id": "loc_park_ave",
         "provider_id": "prov_chen",
         "appointment_type_code": "COS_CONSULT",
-        "start": "2026-08-21T15:00:00",
-        "end": "2026-08-21T15:30:00",
+        "start": "2026-08-21T15:00",
+        "end": "2026-08-21T15:30",
         "description": "Botox consult",
         "status": "booked"
       },
@@ -313,8 +313,8 @@
         "location_id": "loc_windermere",
         "provider_id": "prov_patel",
         "appointment_type_code": "MED_FOLLOWUP",
-        "start": "2026-09-15T09:00:00",
-        "end": "2026-09-15T09:20:00",
+        "start": "2026-09-15T09:00",
+        "end": "2026-09-15T09:20",
         "description": "Eczema follow-up",
         "status": "booked"
       },
@@ -324,8 +324,8 @@
         "location_id": "loc_park_ave",
         "provider_id": "prov_chen",
         "appointment_type_code": "COS_CONSULT",
-        "start": "2026-08-24T09:00:00",
-        "end": "2026-08-24T09:30:00",
+        "start": "2026-08-24T09:00",
+        "end": "2026-08-24T09:30",
         "description": "Cosmetic consult: microneedling",
         "status": "booked"
       }

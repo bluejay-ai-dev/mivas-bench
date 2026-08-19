@@ -413,8 +413,26 @@ def test_send_sms_is_required_only_when_listed() -> None:
         [{"name": "book_appointment"}],
         booked,
         schemas=schemas,
+        industry="healthcare",
     )
     assert skip_ok["passed"] is True
+    extra_sms = vtr.tool_call_adherence(
+        [{"name": "book_appointment"}],
+        with_sms,
+        schemas=schemas,
+        industry="healthcare",
+    )
+    assert extra_sms["passed"] is False
+    assert extra_sms["extra"] == ["send_sms"]
+    extras_ok_elsewhere = vtr.tool_call_adherence(
+        [{"name": "book_appointment"}],
+        with_sms,
+        schemas=schemas,
+    )
+    assert extras_ok_elsewhere["passed"] is True
+    empty_sms = vtr.tool_call_adherence([], with_sms, schemas=schemas, industry="healthcare")
+    assert empty_sms["passed"] is False
+    assert empty_sms["extra"] == ["send_sms"]
 
 
 def test_clinical_message_allows_irrelevant_optional_parameters() -> None:

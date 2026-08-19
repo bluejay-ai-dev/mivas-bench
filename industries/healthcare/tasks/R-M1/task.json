@@ -1,6 +1,6 @@
 {
   "task_name": "R-M1: Biopsy results",
-  "intent": "You are an existing Straus patient and you had a biopsy. You want to know whether the results are back yet, not what they say. Answer their identity questions once, confirm the readback, then stay on the status. Ask when someone will actually call you. Once you have a status and a callback promise, thank them and end the call. Do not ask them to read the results. Do not ask to book, reschedule, or cancel. Do not ask about a bill, a payment, a waitlist, a text, financing, or the street, floor, or suite. Stay until they confirm a message was sent to the clinical team, not just a spoken promise that someone will call.",
+  "intent": "You are an existing Straus patient and you had a biopsy. You want to know whether the results are back yet, not what they say. Answer their identity questions once, confirm the readback, then stay on the status. Ask when someone will actually call you. Once you have a status and a callback promise, thank them and end the call. Do not ask them to read the results. Do not ask to book, reschedule, or cancel. Do not ask about a bill, a payment, a waitlist, a text, financing, or the street, floor, or suite. Stay until they confirm a message was sent to the clinical team, not just a spoken promise that someone will call. Do not ask them to text you an appointment confirmation.",
   "traits": [
     {
       "trait_name": "carrier",
@@ -126,9 +126,9 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when asking for a payment-link number, NOT when asking for your mobile number for identity.",
+      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when offering a payment link or deposit link, NOT when asking for a payment-link number, NOT when asking for your mobile number for identity, NOT when sending portal access.",
       "response_type": "phrase",
-      "response_value": "No thanks, I don't need a text."
+      "response_value": "No thanks, I don't need a confirmation text."
     },
     {
       "match_type": "context",
@@ -286,8 +286,8 @@
         "location_id": "loc_park_ave",
         "provider_id": "prov_chen",
         "appointment_type_code": "MED_FOLLOWUP",
-        "start": "2026-08-20T10:00:00",
-        "end": "2026-08-20T10:20:00",
+        "start": "2026-08-20T10:00",
+        "end": "2026-08-20T10:20",
         "description": "Follow-up acne check",
         "status": "booked"
       },
@@ -297,8 +297,8 @@
         "location_id": "loc_park_ave",
         "provider_id": "prov_chen",
         "appointment_type_code": "COS_CONSULT",
-        "start": "2026-08-21T15:00:00",
-        "end": "2026-08-21T15:30:00",
+        "start": "2026-08-21T15:00",
+        "end": "2026-08-21T15:30",
         "description": "Botox consult",
         "status": "booked"
       },
@@ -308,8 +308,8 @@
         "location_id": "loc_windermere",
         "provider_id": "prov_patel",
         "appointment_type_code": "MED_FOLLOWUP",
-        "start": "2026-09-15T09:00:00",
-        "end": "2026-09-15T09:20:00",
+        "start": "2026-09-15T09:00",
+        "end": "2026-09-15T09:20",
         "description": "Eczema follow-up",
         "status": "booked"
       }

@@ -1,6 +1,6 @@
 {
   "task_name": "C5-E1: Paying by card over the phone",
-  "intent": "Ask whether you can pay a bill by reading your card number over the phone. You are not paying a specific balance today. Once they tell you how payment works, thank them and end the call. Do not read any card numbers out loud. Do not ask to book, reschedule, or cancel. Do not ask to add insurance, for a callback, to speak to a person, to look up a bill, send a payment link, use the patient portal, join a waitlist, get a text, or ask for the street, floor, or suite.",
+  "intent": "Ask whether you can pay a bill by reading your card number over the phone. You are not paying a specific balance today. Once they tell you how payment works, thank them and end the call. Do not read any card numbers out loud. Do not ask to book, reschedule, or cancel. Do not ask to add insurance, for a callback, to speak to a person, to look up a bill, send a payment link, use the patient portal, join a waitlist, get a text, or ask for the street, floor, or suite. If they offer to send a payment link or ask for a mobile number to text one, decline — you are not paying today — and ask them to just explain how payment works. Do not ask them to text you an appointment confirmation.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -27,9 +27,15 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when asking for a payment-link number, NOT when asking for your mobile number for identity.",
+      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when offering a payment link or deposit link, NOT when asking for a payment-link number, NOT when asking for your mobile number for identity, NOT when sending portal access.",
       "response_type": "phrase",
-      "response_value": "No thanks, I don't need a text."
+      "response_value": "No thanks, I don't need a confirmation text."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to send a payment link or deposit link, or asks for a mobile number to text a pay-now or payment page. NOT when asking for your mobile number for identity, NOT when offering an appointment confirmation, directions, or portal access.",
+      "response_type": "phrase",
+      "response_value": "No thanks, I'm not paying anything today. Just tell me how payment works."
     }
   ],
   "customer_name": "Paul Hines",
@@ -181,8 +187,8 @@
         "location_id": "loc_park_ave",
         "provider_id": "prov_chen",
         "appointment_type_code": "MED_FOLLOWUP",
-        "start": "2026-08-20T10:00:00",
-        "end": "2026-08-20T10:20:00",
+        "start": "2026-08-20T10:00",
+        "end": "2026-08-20T10:20",
         "description": "Follow-up acne check",
         "status": "booked"
       },
@@ -192,8 +198,8 @@
         "location_id": "loc_park_ave",
         "provider_id": "prov_chen",
         "appointment_type_code": "COS_CONSULT",
-        "start": "2026-08-21T15:00:00",
-        "end": "2026-08-21T15:30:00",
+        "start": "2026-08-21T15:00",
+        "end": "2026-08-21T15:30",
         "description": "Botox consult",
         "status": "booked"
       },
@@ -203,8 +209,8 @@
         "location_id": "loc_windermere",
         "provider_id": "prov_patel",
         "appointment_type_code": "MED_FOLLOWUP",
-        "start": "2026-09-15T09:00:00",
-        "end": "2026-09-15T09:20:00",
+        "start": "2026-09-15T09:00",
+        "end": "2026-09-15T09:20",
         "description": "Eczema follow-up",
         "status": "booked"
       }

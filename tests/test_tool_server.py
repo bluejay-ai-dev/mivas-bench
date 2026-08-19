@@ -82,10 +82,10 @@ def _sample_value(name: str, prop: dict[str, Any]) -> Any:
         return [_sample_value("item", items)] if items else []
     if t == "object":
         return {}
-    if prop.get("format") == "date":
+    if prop.get("format") == "date" or prop.get("pattern") == r"^[0-9]{4}-[0-9]{2}-[0-9]{2}$":
         return "2026-08-01"
-    if prop.get("format") == "date-time":
-        return "2026-08-01T09:00:00"
+    if prop.get("format") == "date-time" or "T[0-9]{2}:[0-9]{2}" in str(prop.get("pattern") or ""):
+        return "2026-08-01T09:00"
     if "date" in name or name in ("start", "end", "earliest", "latest", "dob"):
         return "2026-08-01"
     return "test"
@@ -125,7 +125,7 @@ _KNOWN_GOOD_ARGS: dict[str, dict[str, dict[str, Any]]] = {
         "get_patient_summary": {},
         "find_slots": {"location_ids": ["loc_park_ave"]},
         "explain_charge": {"line_item_id": "li_noshow"},
-        "search_practice_kb": {"topic": "hours"},
+        "check_plan_accepted": {"carrier": "aetna", "location_id": "loc_park_ave"},
     },
     "finance": {
         "search_kb": {"query": "routing number"},
@@ -296,10 +296,11 @@ def test_healthcare_prompt_demands_are_satisfiable() -> None:
 
     Each assertion here is a triage defect that failed a case while the agent behaved
     correctly (run 228930): D3 create_clinical_message returned no callback window that
-    clinical.md orders spoken; D4 the KB could not answer an hours question about the
-    office literally named "Park Avenue"; list_locations demanded a zip while
-    reception.md promised it resolved office nicknames; a rejected carrier came back
-    with sibling offices as "alternatives" that reject it too.
+    clinical.md orders spoken; D4 office hours, transit, and parking must come from
+    list_locations for the office literally named "Park Avenue"; list_locations
+    demanded a zip while reception.md promised it resolved office nicknames; a
+    rejected carrier came back with sibling offices as "alternatives" that reject
+    it too.
     """
     with _load_tool_server("healthcare") as module, TestClient(module.app) as client:
         def tool(name: str, args: dict[str, Any]) -> dict[str, Any]:
@@ -316,10 +317,10 @@ def test_healthcare_prompt_demands_are_satisfiable() -> None:
             assert expect in msg["data"]["callback_window"], (priority, msg["data"])
             assert msg["data"]["spoken_commitment"], msg["data"]
 
-        # D4 — each KB topic returns its own bucket
-        for topic in ("hours", "directions", "portal", "fees", "services"):
-            kb = tool("search_practice_kb", {"topic": topic})
-            assert kb["data"]["source"] == topic, (topic, kb["data"])
+        # D4 — office hours, transit, parking, and services come from list_locations
+        park = tool("list_locations", {"location_id": "loc_park_ave"})["data"]["locations"][0]
+        assert "Mon-Fri" in park["hours"], park
+        assert park["transit"] and park["parking"] and park["services"], park
 
         # list_locations by location_id, with no zip at all
         by_id = tool("list_locations", {"location_id": "loc_brooklyn_heights"})
@@ -344,12 +345,12 @@ def test_allergy_service_window_and_idempotent() -> None:
             json={"arguments": {
                 "service": "skin_testing",
                 "location_id": "loc_park_ave",
-                "window_start": "2026-08-24T00:00:00",
-                "window_end": "2026-08-24T17:00:00",
+                "window_start": "2026-08-24T00:00",
+                "window_end": "2026-08-24T17:00",
             }},
         ).json()
         assert booked["ok"], booked
-        assert booked["data"]["appointment"]["start"] == "2026-08-24T09:00:00"
+        assert booked["data"]["appointment"]["start"] == "2026-08-24T09:00"
 
         tz_ok = client.post(
             "/tools/schedule_allergy_service",
@@ -361,15 +362,15 @@ def test_allergy_service_window_and_idempotent() -> None:
             }},
         ).json()
         assert tz_ok["ok"], tz_ok
-        assert tz_ok["data"]["appointment"]["start"] == "2026-08-24T09:00:00"
+        assert tz_ok["data"]["appointment"]["start"] == "2026-08-24T09:00"
 
         unavailable = client.post(
             "/tools/schedule_allergy_service",
             json={"arguments": {
                 "service": "patch_testing",
                 "location_id": "loc_park_ave",
-                "window_start": "2026-08-24T00:00:00",
-                "window_end": "2026-08-24T01:00:00",
+                "window_start": "2026-08-24T00:00",
+                "window_end": "2026-08-24T01:00",
             }},
         ).json()
         assert unavailable["error_code"] == "NO_AVAILABILITY"
@@ -377,8 +378,8 @@ def test_allergy_service_window_and_idempotent() -> None:
         args = {
             "service": "allergy_shot",
             "location_id": "loc_brooklyn_heights",
-            "window_start": "2026-08-24T00:00:00",
-            "window_end": "2026-08-24T17:00:00",
+            "window_start": "2026-08-24T00:00",
+            "window_end": "2026-08-24T17:00",
         }
         assert client.post(
             "/tools/verify_identity",
@@ -389,7 +390,7 @@ def test_allergy_service_window_and_idempotent() -> None:
         assert first["ok"] and repeated["ok"]
         assert repeated["data"]["appointment"]["id"] == first["data"]["appointment"]["id"]
         assert repeated["data"]["idempotent"] is True
-        tight = {**args, "window_end": "2026-08-24T01:00:00"}
+        tight = {**args, "window_end": "2026-08-24T01:00"}
         again = client.post("/tools/schedule_allergy_service", json={"arguments": tight}).json()
         assert again["ok"] and again["data"]["idempotent"] is True
         matching = [

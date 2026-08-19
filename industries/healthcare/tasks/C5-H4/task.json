@@ -1,30 +1,107 @@
 {
-  "task_name": "C1-E2: Park Avenue office hours",
-  "intent": "You are a new patient trying to figure out whether you can stop by the Park Avenue office after work. Ask what time that office opens and closes Monday through Friday, and whether they are open on Saturday. Once you have the weekday hours and the Saturday hours, thank them and end the call. Do not ask for the street address, floor, or suite. Do not ask to book, reschedule, or cancel. Do not ask to add insurance, for a callback, to speak to a person, a bill, a payment, the patient portal, a waitlist, a text, or financing.",
+  "task_name": "C5-H4: Windermere balance, visit charge, then CareCredit and a link",
+  "intent": "You are an existing Straus patient. You got a bill for a few hundred dollars from the Windermere office and you cannot pay the whole thing this month. Answer their identity questions once, confirm the readback, then stay on the bill. Ask what you owe and why the visit charge is there. After you hear the amount and the explanation, say you cannot pay it all at once and ask whether there is a payment plan. Accept the financing they offer and ask for the payment link to be texted to you. Then thank them and end the call. Do not ask to book, reschedule, or cancel. Do not ask for a callback or to speak to a person. Do not ask about a waitlist, the patient portal, insurance, or the street, floor, or suite. Do not ask for any text other than the payment link. Stay until they have explained the visit charge, looked up a payment plan or financing in their system, then texted the payment link. A spoken 'we have plans' without a lookup is not enough. Do not ask them to text you an appointment confirmation.",
   "traits": [
     {
-      "trait_name": "preferred_office",
-      "value": "Park Avenue"
-    },
-    {
       "trait_name": "full_name",
-      "value": "Marcy Feldman"
+      "value": "Alice Romano"
     },
     {
-      "trait_name": "patient_status",
-      "value": "new"
+      "trait_name": "date_of_birth",
+      "value": "1995-09-08"
+    },
+    {
+      "trait_name": "mobile",
+      "value": "407-555-0155"
     },
     {
       "trait_name": "zip",
-      "value": "10016"
+      "value": "34786"
+    },
+    {
+      "trait_name": "patient_status",
+      "value": "existing"
+    },
+    {
+      "trait_name": "preferred_office",
+      "value": "Windermere"
+    },
+    {
+      "trait_name": "carrier",
+      "value": "Oscar Health"
+    },
+    {
+      "trait_name": "member_id",
+      "value": "O778899001"
     }
   ],
-  "exp_handoff_path": [],
+  "exp_handoff_path": [
+    "transfer_to_identity",
+    "transfer_to_billing"
+  ],
   "exp_tool_calls": [
     {
-      "name": "search_practice_kb",
+      "name": "transfer_to_identity",
       "parameters": {
-        "topic": "hours"
+        "next_intent": "billing"
+      }
+    },
+    {
+      "name": "transfer_to_billing"
+    },
+    {
+      "name": "verify_identity",
+      "parameters": {
+        "full_name": "Alice Romano",
+        "dob": "1995-09-08"
+      },
+      "output": {
+        "ok": true,
+        "data": {
+          "verified": true
+        }
+      }
+    },
+    {
+      "name": "get_patient_summary",
+      "output": {
+        "ok": true
+      }
+    },
+    {
+      "name": "get_account_balance",
+      "output": {
+        "ok": true,
+        "data": {
+          "balance_cents": 32000
+        }
+      }
+    },
+    {
+      "name": "explain_charge",
+      "parameters": {
+        "line_item_id": "li_visit"
+      },
+      "output": {
+        "ok": true
+      }
+    },
+    {
+      "name": "offer_financing",
+      "output": {
+        "ok": true
+      }
+    },
+    {
+      "name": "send_payment_link",
+      "parameters": {
+        "mobile_e164": "+14075550155"
+      },
+      "output": {
+        "ok": true,
+        "data": {
+          "sent": true
+        }
       }
     }
   ],
@@ -32,6 +109,18 @@
     "creativity": 0
   },
   "scripted_responses": [
+    {
+      "match_type": "context",
+      "match_phrase": "asks for your full name and date of birth, or asks you to confirm who you are, or asks for the patient's name and date of birth. NOT when asking only for a member ID or insurance card, NOT when asking which office or location, NOT when asking for a phone or mobile number, NOT when asking about an appointment day or time, NOT when reading your name and date of birth back to you for confirmation.",
+      "response_type": "phrase",
+      "response_value": "Alice Romano. My date of birth is September eighth, nineteen ninety-five."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "reads your name and date of birth back to you and asks whether that is right, or asks you to confirm the name and date of birth they just repeated. NOT when first asking for your name and date of birth, NOT when asking for a phone or mobile number.",
+      "response_type": "phrase",
+      "response_value": "Yes, that's right."
+    },
     {
       "match_type": "context",
       "match_phrase": "offers to transfer you to a human, a person, the front desk, or a live agent. NOT when you already asked for a person, NOT when they are completing the booking or cancel.",
@@ -46,17 +135,35 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when asking for a payment-link number, NOT when asking for your mobile number for identity.",
+      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when offering a payment link or deposit link, NOT when asking for a payment-link number, NOT when asking for your mobile number for identity, NOT when sending portal access.",
       "response_type": "phrase",
-      "response_value": "No thanks, I don't need a text."
+      "response_value": "No thanks, I don't need a confirmation text."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "gives the total balance without explaining the visit charge. NOT when they have just explained the visit line.",
+      "response_type": "phrase",
+      "response_value": "What is the visit charge for? Please explain that line."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "explains the visit charge or gives the balance before looking up a way to spread the cost. NOT when they have just answered about CareCredit or a payment plan.",
+      "response_type": "phrase",
+      "response_value": "I cannot pay the whole thing this month. Can you look up whether CareCredit or a payment plan is available?"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before saying a payment link was sent. NOT when they have just said the payment link was sent.",
+      "response_type": "phrase",
+      "response_value": "Please text me the payment link before I go."
     }
   ],
-  "customer_name": "Marcy Feldman",
+  "customer_name": "Alice Romano",
   "customer_available_tools": {},
   "metadata": {
-    "category": "C1",
-    "category_slug": "new-patient-access",
-    "difficulty": "easy",
+    "category": "C5",
+    "category_slug": "billing-and-payments",
+    "difficulty": "hard",
     "audio_condition": "perfect"
   },
   "exp_db_state": {
@@ -200,8 +307,8 @@
         "location_id": "loc_park_ave",
         "provider_id": "prov_chen",
         "appointment_type_code": "MED_FOLLOWUP",
-        "start": "2026-08-20T10:00:00",
-        "end": "2026-08-20T10:20:00",
+        "start": "2026-08-20T10:00",
+        "end": "2026-08-20T10:20",
         "description": "Follow-up acne check",
         "status": "booked"
       },
@@ -211,8 +318,8 @@
         "location_id": "loc_park_ave",
         "provider_id": "prov_chen",
         "appointment_type_code": "COS_CONSULT",
-        "start": "2026-08-21T15:00:00",
-        "end": "2026-08-21T15:30:00",
+        "start": "2026-08-21T15:00",
+        "end": "2026-08-21T15:30",
         "description": "Botox consult",
         "status": "booked"
       },
@@ -222,13 +329,21 @@
         "location_id": "loc_windermere",
         "provider_id": "prov_patel",
         "appointment_type_code": "MED_FOLLOWUP",
-        "start": "2026-09-15T09:00:00",
-        "end": "2026-09-15T09:20:00",
+        "start": "2026-09-15T09:00",
+        "end": "2026-09-15T09:20",
         "description": "Eczema follow-up",
         "status": "booked"
       }
     ],
     "waitlist": [],
-    "tool_events": []
+    "tool_events": [
+      {
+        "id": 1,
+        "kind": "payment_link",
+        "payload": {
+          "mobile_e164": "+14075550155"
+        }
+      }
+    ]
   }
 }

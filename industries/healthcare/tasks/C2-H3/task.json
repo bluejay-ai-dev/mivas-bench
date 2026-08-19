@@ -1,6 +1,6 @@
 {
   "task_name": "C2-H3: Cancel Friday's cosmetic consult",
-  "intent": "You are an existing Straus patient. You have a cosmetic consult this Friday at Park Avenue and you have to cancel it because you will be out of town. Answer their identity questions once \u2014 full name and date of birth \u2014 then continue with the cancel. If they also ask for ZIP, give it once. Ask what happens to the deposit you already put down. After they explain a missed-visit fee or that the deposit is forfeited, that answers the deposit question \u2014 say you still want Friday cancelled. If they offer another consult time, refuse it. If they offer the waitlist, a later opening, or to add you to a list, decline \u2014 you only want Friday cancelled. Then thank them and end the call. Do not ask to book or reschedule a new visit. Do not ask to add insurance, for a callback, to speak to a person, a bill, a payment, the patient portal, or a text. If they offer a billing or coverage callback about the deposit, refuse it. Do not ask for the street, floor, suite, or financing. If they offer to transfer you to a person, a live agent, or the front desk, or say they are transferring you, refuse. Do not ask to talk to a person. Stay until they confirm Friday is cancelled. If they explain the missed-visit fee, say you accept it and still want Friday cancelled. Do not hang up for a transfer.",
+  "intent": "You are an existing Straus patient. You have a cosmetic consult this Friday at Park Avenue and you have to cancel it because you will be out of town, but first you want to know what you already owe and hear the visit charge explained. Answer their identity questions once \u2014 full name and date of birth \u2014 then continue. If they also ask for ZIP, give it once. Ask what the total balance is and why the visit charge is there. After you hear the amount and that explanation, go to the Friday cancel. Ask what happens to the deposit you already put down. After they explain a missed-visit fee or that the deposit is forfeited, that answers the deposit question \u2014 say you still want Friday cancelled. If they offer another consult time, refuse it. If they offer the waitlist, a later opening, or to add you to a list, decline \u2014 you only want Friday cancelled. Then thank them and end the call. Do not ask to book or reschedule a new visit. Do not ask to add insurance, for a callback, to speak to a person, the patient portal, or a text. If they offer a billing or coverage callback about the deposit, refuse it. Do not ask for the street, floor, suite, or financing. If they offer to transfer you to a person, a live agent, or the front desk, or say they are transferring you, refuse. Do not ask to talk to a person. Stay until they confirm Friday is cancelled. If they explain the missed-visit fee, say you accept it and still want Friday cancelled. Do not hang up for a transfer. Do not ask them to text you an appointment confirmation.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -33,23 +33,29 @@
   ],
   "exp_handoff_path": [
     "transfer_to_identity",
+    "transfer_to_billing",
     "transfer_to_scheduling"
   ],
   "exp_tool_calls": [
     {
       "name": "transfer_to_identity",
       "parameters": {
-        "next_intent": "scheduling"
+        "next_intent": "billing"
       }
     },
     {
-      "name": "transfer_to_scheduling"
+      "name": "identify_patient",
+      "parameters": {
+        "first_name": "Maria",
+        "last_name": "Alvarez",
+        "dob": "1972-06-30"
+      }
     },
     {
       "name": "verify_identity",
       "parameters": {
-        "dob": "1972-06-30",
-        "full_name": "Maria Alvarez"
+        "full_name": "Maria Alvarez",
+        "dob": "1972-06-30"
       },
       "output": {
         "ok": true,
@@ -63,6 +69,30 @@
       "output": {
         "ok": true
       }
+    },
+    {
+      "name": "transfer_to_billing"
+    },
+    {
+      "name": "get_account_balance",
+      "output": {
+        "ok": true,
+        "data": {
+          "balance_cents": 48000
+        }
+      }
+    },
+    {
+      "name": "explain_charge",
+      "parameters": {
+        "line_item_id": "li_visit"
+      },
+      "output": {
+        "ok": true
+      }
+    },
+    {
+      "name": "transfer_to_scheduling"
     },
     {
       "name": "cancel_appointment",
@@ -104,6 +134,18 @@
     },
     {
       "match_type": "context",
+      "match_phrase": "reads your name and date of birth back to you and asks whether that is right, or asks you to confirm the name and date of birth they just repeated. NOT when first asking for your name and date of birth, NOT when asking for a phone or mobile number.",
+      "response_type": "phrase",
+      "response_value": "Yes, that's right."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "has named the total balance or explained the visit charge. NOT when they have not yet looked up the bill, NOT when Friday is already cancelled.",
+      "response_type": "phrase",
+      "response_value": "Thanks. I still need Friday's Park Avenue consult cancelled. I accept the missed-visit fee."
+    },
+    {
+      "match_type": "context",
       "match_phrase": "offers another consult time, a different appointment, or to reschedule or move Friday instead of cancelling. NOT when offering the waitlist, NOT when asking whether you still want to cancel.",
       "response_type": "phrase",
       "response_value": "No, I cannot take another time. I still want Friday cancelled."
@@ -116,15 +158,9 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers a callback, a billing call-back, or to have billing or coverage call you about the deposit or the fee. NOT when confirming the cancellation or waitlist.",
+      "match_phrase": "offers a callback, a billing call-back, or to have billing or coverage call you about the deposit or the fee. NOT when confirming the cancellation.",
       "response_type": "phrase",
       "response_value": "No thanks, I do not need a callback. Please just finish the cancel."
-    },
-    {
-      "match_type": "context",
-      "match_phrase": "reads your name and date of birth back to you and asks whether that is right, or asks you to confirm the name and date of birth they just repeated. NOT when first asking for your name and date of birth, NOT when asking for a phone or mobile number.",
-      "response_type": "phrase",
-      "response_value": "Yes, that's right."
     },
     {
       "match_type": "context",
@@ -140,15 +176,9 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers the waitlist, a later opening, or to add you to a list. NOT when offering a specific appointment time to book now, NOT when asking for your name or date of birth.",
+      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when offering a payment link or deposit link, NOT when asking for a payment-link number, NOT when asking for your mobile number for identity, NOT when sending portal access.",
       "response_type": "phrase",
-      "response_value": "No waitlist. Please just finish what I asked."
-    },
-    {
-      "match_type": "context",
-      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when asking for a payment-link number, NOT when asking for your mobile number for identity.",
-      "response_type": "phrase",
-      "response_value": "No thanks, I don't need a text."
+      "response_value": "No thanks, I don't need a confirmation text."
     }
   ],
   "customer_name": "Maria Alvarez",
@@ -300,8 +330,8 @@
         "location_id": "loc_park_ave",
         "provider_id": "prov_chen",
         "appointment_type_code": "MED_FOLLOWUP",
-        "start": "2026-08-20T10:00:00",
-        "end": "2026-08-20T10:20:00",
+        "start": "2026-08-20T10:00",
+        "end": "2026-08-20T10:20",
         "description": "Follow-up acne check",
         "status": "booked"
       },
@@ -311,8 +341,8 @@
         "location_id": "loc_park_ave",
         "provider_id": "prov_chen",
         "appointment_type_code": "COS_CONSULT",
-        "start": "2026-08-21T15:00:00",
-        "end": "2026-08-21T15:30:00",
+        "start": "2026-08-21T15:00",
+        "end": "2026-08-21T15:30",
         "description": "Botox consult",
         "status": "cancelled"
       },
@@ -322,8 +352,8 @@
         "location_id": "loc_windermere",
         "provider_id": "prov_patel",
         "appointment_type_code": "MED_FOLLOWUP",
-        "start": "2026-09-15T09:00:00",
-        "end": "2026-09-15T09:20:00",
+        "start": "2026-09-15T09:00",
+        "end": "2026-09-15T09:20",
         "description": "Eczema follow-up",
         "status": "booked"
       }

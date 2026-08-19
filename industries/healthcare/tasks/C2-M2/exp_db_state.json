@@ -3,34 +3,34 @@
     {
       "appointment_type_code": "MED_FOLLOWUP",
       "description": "Follow-up acne check",
-      "end": "2026-08-20T10:20:00",
+      "end": "2026-08-20T10:20",
       "id": 1,
       "location_id": "loc_park_ave",
       "patient_id": "pat_jordan_lee",
       "provider_id": "prov_chen",
-      "start": "2026-08-20T10:00:00",
+      "start": "2026-08-20T10:00",
       "status": "booked"
     },
     {
       "appointment_type_code": "COS_CONSULT",
       "description": "Botox consult",
-      "end": "2026-08-21T15:30:00",
+      "end": "2026-08-21T15:30",
       "id": 2,
       "location_id": "loc_park_ave",
       "patient_id": "pat_maria_alvarez",
       "provider_id": "prov_chen",
-      "start": "2026-08-21T15:00:00",
+      "start": "2026-08-21T15:00",
       "status": "booked"
     },
     {
       "appointment_type_code": "MED_FOLLOWUP",
       "description": "Eczema follow-up",
-      "end": "2026-09-15T09:20:00",
+      "end": "2026-09-15T09:20",
       "id": 3,
       "location_id": "loc_windermere",
       "patient_id": "pat_alice_romano",
       "provider_id": "prov_patel",
-      "start": "2026-09-15T09:00:00",
+      "start": "2026-09-15T09:00",
       "status": "cancelled"
     }
   ],
