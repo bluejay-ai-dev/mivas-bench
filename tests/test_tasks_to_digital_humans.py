@@ -567,8 +567,25 @@ def test_healthcare_leftover_holes_are_closed() -> None:
     assert "i accept the missed-visit fee" in c2h3_blob
     assert "talk to a person" in c2h3_blob
     assert "friday is cancelled" in c2h3_blob
+    assert "do not open with the friday cancel" in c2h3["intent"].lower()
+    greeting = next(p for p in c2h3["scripted_responses"] if "greets you" in (p.get("match_phrase") or ""))
+    assert "total balance" in greeting["response_value"].lower()
+    assert "cancel" not in greeting["response_value"].lower()
     assert [c["name"] for c in c2h3["exp_tool_calls"]].count("cancel_appointment") == 2
     assert "transfer_to_human" not in [c["name"] for c in c2h3["exp_tool_calls"]]
+
+    c1e3 = load("C1-E3")
+    c1e3_blob = c1e3["intent"].lower() + " " + pin_blob(c1e3)
+    assert "do not have one yet" in c1e3_blob
+    assert "i don't want to give a zip" in c1e3_blob
+    assert "no callback" in c1e3_blob
+    assert [c["name"] for c in c1e3["exp_tool_calls"]] == [
+        "transfer_to_coverage",
+        "check_plan_accepted",
+    ]
+    medicaid = next(c for c in c1e3["exp_tool_calls"] if c["name"] == "check_plan_accepted")
+    assert medicaid["parameters"] == {"carrier": "medicaid", "location_id": "loc_park_ave"}
+    assert medicaid["output"]["data"]["accepted"] is False
 
     c4h1 = load("C4-H1")
     c4h1_blob = c4h1["intent"].lower() + " " + pin_blob(c4h1)
