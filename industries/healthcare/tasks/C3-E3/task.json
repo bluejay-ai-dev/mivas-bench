@@ -1,6 +1,6 @@
 {
   "task_name": "C3-E3: Referral requirement at Park Avenue",
-  "intent": "Ask whether you need a referral from a primary-care doctor before a visit at Park Avenue. If they ask which insurance, say Aetna. If they ask you to pick a clinician, say you do not have one yet and you only need the Park Avenue answer for Aetna. Once they have checked Aetna at that office and told you whether a referral is required, or told you they cannot confirm a referral from the check, thank them and end the call. Do not keep asking for a yes or no they already said they cannot give. If they ask your name, say Nadine Corliss once and continue with the referral question. Do not give a date of birth. Do not ask to book, reschedule, or cancel. Do not ask to add or change insurance. Do not ask for a callback, to speak to a person, a bill, a payment, the patient portal, a waitlist, a text, financing, or the street, floor, or suite. A spoken yes for the whole practice is not enough. A spoken yes or no that names the office is enough. Thank them and end once you have that office-level answer.",
+  "intent": "Ask whether you need a referral from a primary-care doctor before a visit at Park Avenue. If they ask which insurance, say Aetna. If they ask you to pick a clinician, say you do not have one yet and you only need the Park Avenue answer for Aetna. Once they have checked Aetna at that office and told you whether a referral is required, or told you they cannot confirm a referral from the check, thank them and end the call. Do not keep asking for a yes or no they already said they cannot give. If they ask your name, say Nadine Corliss once and continue with the referral question. Do not give a date of birth. Do not ask to book, reschedule, or cancel. Do not ask to add or change insurance. Do not ask for a callback, to speak to a person, a bill, a payment, the patient portal, a waitlist, a text, financing, or the street, floor, or suite. A spoken yes for the whole practice is not enough. A spoken yes or no that names the office is enough. Stay until they have looked up Aetna at Park Avenue in their system. If they quote yes or no without looking it up, ask them to check. If they say they cannot answer until you pick a clinician, say you still need the office-level answer and do not pick a clinician. Do not thank them, say goodbye, or hang up until they have given that office-level answer after a lookup.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -21,6 +21,13 @@
   "exp_tool_calls": [
     {
       "name": "transfer_to_coverage"
+    },
+    {
+      "name": "check_plan_accepted",
+      "parameters": {
+        "carrier": "aetna",
+        "location_id": "loc_park_ave"
+      }
     }
   ],
   "behaviors": {
@@ -50,6 +57,18 @@
       "match_phrase": "says they take the plan, accept the insurance, or that you are covered, without naming the office they just checked. NOT when they have just said they checked Park Avenue specifically.",
       "response_type": "phrase",
       "response_value": "Which office did you check? I need Park Avenue specifically, not the whole practice."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before they have given a yes or no for Aetna at Park Avenue after looking it up. NOT when they have just given that office-level answer from a check.",
+      "response_type": "phrase",
+      "response_value": "I still need a yes or no for Aetna at Park Avenue after you look it up, before I go."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "says acceptance depends on the provider, asks you to pick a clinician before they will answer, or tells you to call back once you have a provider. NOT when they have just given an office-level yes or no from a lookup.",
+      "response_type": "phrase",
+      "response_value": "I do not have a provider yet. I still need a yes or no for that office as a whole, not one doctor. Please check Park Avenue."
     }
   ],
   "customer_name": "Nadine Corliss",
