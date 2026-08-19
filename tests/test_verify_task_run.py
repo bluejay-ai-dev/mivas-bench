@@ -709,3 +709,18 @@ def test_legal_intake_note_without_packet_matches() -> None:
     expected["documents"] = [{"id": 1, "kind": "intake_packet", "target": "email"}]
     assert vtr.office_states_match(expected, actual, industry="legal") is False
 
+
+def test_legal_records_row_matches_when_packet_took_id_one() -> None:
+    expected = {
+        "documents": [
+            {"kind": "records_authorization", "target": "Northside Orthopedic"},
+        ],
+    }
+    actual = {
+        "documents": [
+            {"id": 1, "kind": "intake_packet", "target": "sms"},
+            {"id": 2, "kind": "records_authorization", "target": "Northside Orthopedic"},
+        ],
+    }
+    assert vtr.office_states_match(expected, actual, industry="legal") is True
+

@@ -1,7 +1,7 @@
 {
   "task_name": "C3-H3: Tight deadline but books intake",
   "customer_name": "Nadine Carlisle",
-  "intent": "Open with exactly: \"A car pulled out of a driveway and hit my passenger side.\" Accept packet by email if offered. Decline booking for now. Once finished, say exactly: \"Thank you, that's all I needed.\" and end the call.",
+  "intent": "Open with exactly: \"A car pulled out of a driveway and hit my passenger side.\" Accept packet by email if offered. If offered a free case evaluation or appointment, decline booking for now. Once the packet is handled and booking is declined, say exactly: \"Thank you, that's all I needed.\" and end the call. Once finished, say exactly: \"Thank you, that's all I needed.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -126,6 +126,13 @@
       "match_phrase": "offers the new client packet by email or text",
       "response_type": "phrase",
       "response_value": "Email is better, thanks.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether you want to book a free case evaluation or set up an evaluation appointment, before stating any percentage fee, dollar fee, or contingency number. NOT after a fee amount has already been read back.",
+      "response_type": "phrase",
+      "response_value": "No, not right now. Thank you, that's all I needed.",
       "occurrence_mode": "always"
     }
   ],
