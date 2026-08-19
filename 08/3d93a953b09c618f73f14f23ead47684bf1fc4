@@ -1,0 +1,44 @@
+tests/test_tool_server.py
+  s_34675135c3ff90::t_3b252956b8eb41 456-478
+industries/healthcare/system-prompts/clinical.md
+  s_34675135c3ff90::t_74fc324c19cbc5 168-173
+industries/healthcare/tasks/C4-H3/task.json
+  s_34675135c3ff90::t_a23f40f26c8823 46-52
+  s_34675135c3ff90::t_8ac6fe1eef0b05 45
+industries/healthcare/system-prompts/reception.md
+  s_34675135c3ff90::t_8b22c6315f4d7d 161-162
+  s_34675135c3ff90::t_8f1c8e18fa10dc 122-123
+industries/healthcare/system-prompts/scheduling.md
+  s_34675135c3ff90::t_f677f0096d6439 175-178
+scripts/healthcare_digital_humans.py
+  s_34675135c3ff90::t_87937ed3d5f4e7 1680
+industries/healthcare/system-prompts/cosmetic.md
+  s_34675135c3ff90::t_ca91cbd7ea6400 147-151
+industries/healthcare/tasks/C1-H2/task.json
+  s_34675135c3ff90::t_e0e31f22fe794e 170,172
+industries/healthcare/tool_server.py
+  s_34675135c3ff90::t_cadd93e397080c 584
+  s_34675135c3ff90::t_afbc64597b150e 573-574
+industries/healthcare/tasks/C1-H4/task.json
+  s_34675135c3ff90::t_d828a768dd3960 104-105
+industries/healthcare/tools.json
+  s_34675135c3ff90::t_10a192340730a4 1144
+industries/healthcare/tasks/C3-H1/task.json
+  s_34675135c3ff90::t_a0717e5f809645 127
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "083d93a953b09c618f73f14f23ead47684bf1fc4",
+  "prompts": {},
+  "sessions": {
+    "s_34675135c3ff90": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "93db147e-88f0-46a7-8477-5a54647ff5bb",
+        "model": "cursor-grok-4.6-high-fast"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
