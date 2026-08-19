@@ -551,6 +551,46 @@ def test_healthcare_leftover_holes_are_closed() -> None:
     assert book["parameters"]["slot_id"] == "slot_loc_park_ave_1"
 
 
+def test_healthcare_greeting_and_stay_pins_lock_path() -> None:
+    tasks = ROOT / "industries" / "healthcare" / "tasks"
+
+    def load(key: str) -> dict:
+        return json.loads((tasks / key / "task.json").read_text())
+
+    c1e3 = load("C1-E3")
+    stay = next(
+        p for p in c1e3["scripted_responses"]
+        if "before they have named Park Avenue" in (p.get("match_phrase") or "")
+    )
+    assert "yes or no for Medicaid at Park Avenue" in stay["response_value"]
+    assert not any(
+        "here is my zip" in (p.get("response_value") or "").lower()
+        for p in c1e3["scripted_responses"]
+    )
+
+    c4h3 = load("C4-H3")
+    greeting_h3 = next(p for p in c4h3["scripted_responses"] if "greets you" in (p.get("match_phrase") or ""))
+    assert "cheek filler" in greeting_h3["response_value"].lower()
+    assert "brooklyn heights" in greeting_h3["response_value"].lower()
+    wrap_h3 = [p for p in c4h3["scripted_responses"] if "wraps up" in (p.get("match_phrase") or "")]
+    assert wrap_h3
+    for pin in wrap_h3:
+        assert "NOT when greeting you" in (pin.get("match_phrase") or "")
+
+    c4m2 = load("C4-M2")
+    greeting_m2 = next(p for p in c4m2["scripted_responses"] if "greets you" in (p.get("match_phrase") or ""))
+    assert "cheek filler" in greeting_m2["response_value"].lower()
+    assert "park avenue" in greeting_m2["response_value"].lower()
+    wrap_m2 = [p for p in c4m2["scripted_responses"] if "wraps up" in (p.get("match_phrase") or "")]
+    assert wrap_m2
+    for pin in wrap_m2:
+        assert "NOT when greeting you" in (pin.get("match_phrase") or "")
+
+    for path in tasks.glob("*/task.json"):
+        phrases = [p["match_phrase"] for p in json.loads(path.read_text()).get("scripted_responses") or []]
+        assert len(phrases) == len(set(phrases)), path.parent.name
+
+
 def test_legal_fairness_c2h1_state_pin_and_rm_lookup_only() -> None:
     tasks = ROOT / "industries" / "legal" / "tasks"
 

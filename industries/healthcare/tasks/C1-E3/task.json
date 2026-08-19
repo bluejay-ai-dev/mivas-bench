@@ -54,6 +54,12 @@
       "match_phrase": "says they take the plan, accept the insurance, or that you are covered, without naming the office they just checked. NOT when they have just said they checked Park Avenue specifically.",
       "response_type": "phrase",
       "response_value": "Which office did you check? I need Park Avenue specifically, not the whole practice."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "thanks you, says goodbye, wraps up, or offers a callback after a question or a non-answer, before they have named Park Avenue and said whether Medicaid is accepted there. NOT when they have just named Park Avenue with a yes or no for Medicaid, NOT when asking for your name.",
+      "response_type": "phrase",
+      "response_value": "I still need a yes or no for Medicaid at Park Avenue. Please look it up on this call before I go."
     }
   ],
   "customer_name": "Terrell Baines",
