@@ -29,9 +29,13 @@
     }
   ],
   "exp_handoff_path": [
+    "transfer_to_screening",
     "transfer_to_intake"
   ],
   "exp_tool_calls": [
+    {
+      "name": "transfer_to_screening"
+    },
     {
       "name": "transfer_to_intake"
     },

@@ -108,6 +108,13 @@
       "response_type": "phrase",
       "response_value": "It was April fifth, twenty twenty six.",
       "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether to send the packet by email or text, or which channel to use. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "Email is fine.",
+      "occurrence_mode": "always"
     }
   ],
   "customer_available_tools": {},

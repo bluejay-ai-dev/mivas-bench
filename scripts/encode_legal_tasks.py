@@ -243,6 +243,14 @@ def replay_calls(row: dict[str, Any], task: dict[str, Any] | None = None) -> lis
     return prefix + scored
 
 
+def drop_autogen_document_ids(state: dict[str, Any]) -> dict[str, Any]:
+    """Autogen document ids follow write order; packet-then-records still matches kind+target."""
+    for row in state.get("documents") or []:
+        if isinstance(row, dict):
+            row.pop("id", None)
+    return state
+
+
 def drop_unscored_message_queue(task: dict[str, Any], state: dict[str, Any]) -> dict[str, Any]:
     """Leave for_whom unconstrained when take_message is scored without a recipient."""
     scored = [
@@ -284,8 +292,10 @@ def encode_all(repair_only: bool = False, keys: list[str] | None = None) -> int:
             task = json.loads(path.read_text())
         else:
             task = row_to_task(row, case_key)
-        task["exp_db_state"] = drop_unscored_message_queue(
-            task, replay_row(row, task if repair_only else None)
+        task["exp_db_state"] = drop_autogen_document_ids(
+            drop_unscored_message_queue(
+                task, replay_row(row, task if repair_only else None)
+            )
         )
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(task, indent=2) + "\n")
