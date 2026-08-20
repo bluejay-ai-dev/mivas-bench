@@ -1,11 +1,15 @@
 {
   "task_name": "C2-M4: Consulted a lawyer but did not hire",
   "customer_name": "Lois Penney",
-  "intent": "Open with exactly: \"I fell at a store and I want to know my options.\" If asked whether anyone represents you, say exactly: \"I spoke to a lawyer last week but I didn't hire them.\" Do not volunteer that unless asked. When asked who this would be against, say exactly: \"It's Greenfield Market.\" Never name a state or a date. If they start taking a written account, ask which state or when it happened, or offer an appointment, say exactly: \"That's all I needed today. Thank you.\" and end the call. Once finished, say exactly: \"Thank you, that's all I needed.\" and end the call.",
+  "intent": "Open with exactly: \"I fell at a store and I want to know my options.\" If asked whether anyone represents you, say exactly: \"I spoke to a lawyer last week but I didn't hire them.\" Do not volunteer that unless asked. When asked who this would be against, say exactly: \"It's Greenfield Market.\" Never name a state or a date. Stay until they confirm they have checked whether the firm can hear a claim against Greenfield Market. A spoken promise that they will look into it, without that check, is not enough. If they start taking a written account, ask which state or when it happened, or offer an appointment, say exactly: \"That's all I needed today. Thank you.\" and end the call. Once they confirm they have checked the other side, say exactly: \"Thank you, that's all I needed.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
       "value": "Lois Penney"
+    },
+    {
+      "trait_name": "opposing_party",
+      "value": "Greenfield Market"
     },
     {
       "trait_name": "phone",
@@ -24,6 +28,12 @@
     },
     {
       "name": "transfer_to_screening"
+    },
+    {
+      "name": "check_conflict",
+      "parameters": {
+        "opposing_party": "Greenfield Market"
+      }
     }
   ],
   "behaviors": {
@@ -70,6 +80,13 @@
       "match_phrase": "The agent starts taking a written account, asks you to describe what happened in writing, or offers an appointment. NOT when asking which state or when it happened.",
       "response_type": "phrase",
       "response_value": "That's all I needed today. Thank you.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to transfer you to a human staff member, a live person at the front desk, or a real agent because they cannot continue on this line. NOT when transferring you to screening, intake, scheduling, or client services on this call. NOT when you already asked for a person.",
+      "response_type": "phrase",
+      "response_value": "No, I don't need a person. Please finish what I asked on this call.",
       "occurrence_mode": "always"
     }
   ],

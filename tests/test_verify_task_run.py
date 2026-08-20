@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import sys
 from pathlib import Path
 
@@ -757,3 +758,81 @@ def test_legal_records_row_matches_when_packet_took_id_one() -> None:
     }
     assert vtr.office_states_match(expected, actual, industry="legal") is True
 
+
+
+def _named_tool_result(names: list[str]) -> dict:
+    return {
+        "tool_calls": [
+            {"name": name, "actual": [{"ok": True, "start_offset_ms": i * 1000}]}
+            for i, name in enumerate(names)
+        ],
+    }
+
+
+def test_legal_c5_e1_requires_screening_intake_scheduling_hops() -> None:
+    task = json.loads(
+        (ROOT / "industries" / "legal" / "tasks" / "C5-E1" / "task.json").read_text()
+    )
+    assert task["exp_handoff_path"] == [
+        "transfer_to_screening",
+        "transfer_to_intake",
+        "transfer_to_scheduling",
+    ]
+    actual_state = task["exp_db_state"]
+    result = _named_tool_result([
+        "lookup_caller",
+        "check_conflict",
+        "record_intake",
+        "find_evaluation_slots",
+        "hold_evaluation",
+        "confirm_evaluation",
+    ])
+    out = vtr.verify_result(result, task, actual_state, industry="legal")
+    assert out["handoff"]["passed"] is False
+    assert out["handoff"]["verdict"] == "incomplete"
+    assert out["call"]["passed"] is True
+    assert out["passed"] is False
+
+
+def test_legal_c5_hard_includes_handoff_tools() -> None:
+    task = json.loads(
+        (ROOT / "industries" / "legal" / "tasks" / "C5-H1" / "task.json").read_text()
+    )
+    hops = [c["name"] for c in task["exp_tool_calls"] if str(c["name"]).startswith("transfer_to_")]
+    assert hops == [
+        "transfer_to_screening",
+        "transfer_to_intake",
+        "transfer_to_scheduling",
+    ]
+    assert task["exp_handoff_path"] == hops
+    writes_only = [
+        c["name"] for c in task["exp_tool_calls"] if not str(c["name"]).startswith("transfer_to_")
+    ]
+    result = _named_tool_result(["lookup_caller", "record_intake", *writes_only])
+    out = vtr.verify_result(result, task, task["exp_db_state"], industry="legal")
+    assert out["handoff"]["passed"] is False
+    assert out["call"]["passed"] is False
+    assert out["passed"] is False
+
+
+def test_legal_c5_hard_skip_confirm_fails_tools() -> None:
+    task = json.loads(
+        (ROOT / "industries" / "legal" / "tasks" / "C5-H1" / "task.json").read_text()
+    )
+    names = [c["name"] for c in task["exp_tool_calls"] if c["name"] != "confirm_evaluation"]
+    result = _named_tool_result(["lookup_caller", "record_intake", *names])
+    out = vtr.verify_result(result, task, task["exp_db_state"], industry="legal")
+    assert out["call"]["passed"] is False
+    assert "confirm_evaluation" in out["call"]["missing"]
+    assert out["passed"] is False
+
+
+def test_legal_c4_still_requires_in_order_hops() -> None:
+    task = json.loads(
+        (ROOT / "industries" / "legal" / "tasks" / "C4-E1" / "task.json").read_text()
+    )
+    assert task["exp_handoff_path"] == ["transfer_to_screening", "transfer_to_intake"]
+    result = _named_tool_result(["record_intake"])
+    out = vtr.verify_result(result, task, None, industry="legal")
+    assert out["handoff"]["passed"] is False
+    assert out["handoff"]["verdict"] == "incomplete"

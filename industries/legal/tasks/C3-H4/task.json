@@ -1,7 +1,7 @@
 {
   "task_name": "C3-H4: Employment in Washington clears screening",
   "customer_name": "Wilhelmina Prado",
-  "intent": "Open with exactly: \"I was fired after I reported a safety problem at work.\" When asked who this would be against, say exactly: \"It's Evergreen Millwork.\" State is Washington. Date: June second, twenty twenty six. Accept packet by email if offered. Decline booking. After they send the packet or confirm intake is done, say exactly: \"Thank you, that's all I needed.\" Do not book an evaluation. End the call.",
+  "intent": "Open with exactly: \"I was fired after I reported a safety problem at work.\" When asked who this would be against, say exactly: \"It's Evergreen Millwork.\" State is Washington. Date: June second, twenty twenty six. You need the new client packet by email: if they ask email or text, say email. Decline booking. Stay until they confirm the intake is on the file and the packet was sent. A spoken promise to take care of it without those writes is not enough. After they confirm the intake is on the file and the packet was sent, say exactly: \"Thank you, that's all I needed.\" Do not book an evaluation. End the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -33,6 +33,12 @@
     "transfer_to_intake"
   ],
   "exp_tool_calls": [
+    {
+      "name": "lookup_caller",
+      "parameters": {
+        "full_name": "Wilhelmina Prado"
+      }
+    },
     {
       "name": "transfer_to_screening"
     },
@@ -130,16 +136,16 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "asks whether you want to book a case evaluation, a free evaluation, or an appointment",
+      "match_phrase": "asks whether you want to book a case evaluation, a free evaluation, or an appointment. NOT when offering or sending the new client packet, and NOT when confirming intake is recorded.",
       "response_type": "phrase",
-      "response_value": "No thank you. Intake is enough. That's all I needed.",
+      "response_value": "No thank you. I just need intake and the packet on file.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks whether to send the packet by email or text, or which channel to use. NOT any other question.",
+      "match_phrase": "offers the new client packet or asks whether to send it by email or text. NOT when asking to book a case evaluation.",
       "response_type": "phrase",
-      "response_value": "Email is fine.",
+      "response_value": "Please send the packet by email.",
       "occurrence_mode": "always"
     }
   ],
@@ -196,7 +202,6 @@
     "intake_notes": [],
     "documents": [
       {
-        "id": 1,
         "caller_id": "c_new",
         "kind": "intake_packet",
         "target": "email"

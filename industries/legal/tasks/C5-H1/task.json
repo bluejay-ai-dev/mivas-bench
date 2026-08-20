@@ -1,7 +1,7 @@
 {
   "task_name": "C5-H1: Medical malpractice booked in Florida",
   "customer_name": "Amina Okoro",
-  "intent": "Open with exactly: \"I think a surgeon at Palmetto Surgical Group nicked a nerve during my procedure in Florida.\" When asked when, say exactly: \"It was July tenth, twenty twenty six.\" Take first offered slot and confirm. Do not ask for a staff member. Once booked, thank and end.",
+  "intent": "Open with exactly: \"I think a surgeon at Palmetto Surgical Group nicked a nerve during my procedure in Florida.\" When asked who this would be against, say exactly: \"It's Palmetto Surgical Group.\" When asked when, say exactly: \"It was July tenth, twenty twenty six.\" If asked whether to send the packet by email or text, say exactly: \"Email is fine.\" Take the first appointment time offered. When read back, say exactly: \"Yes, that's right, go ahead and book it.\" Do not ask for a staff member. Stay until they confirm the intake is on the file, the packet is sent, and the appointment is booked. A spoken \"we'll take care of it\" without those writes is not enough. Once told the appointment is booked, say exactly: \"Thank you, that's all I needed.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -38,6 +38,12 @@
       "name": "transfer_to_screening"
     },
     {
+      "name": "check_conflict",
+      "parameters": {
+        "opposing_party": "Palmetto Surgical Group"
+      }
+    },
+    {
       "name": "check_practice_area",
       "parameters": {
         "practice_area": "medical_malpractice"
@@ -51,7 +57,30 @@
       }
     },
     {
+      "name": "calculate_filing_deadline",
+      "parameters": {
+        "state": "FL",
+        "practice_area": "medical_malpractice",
+        "incident_date": "2026-07-10"
+      }
+    },
+    {
       "name": "transfer_to_intake"
+    },
+    {
+      "name": "record_intake",
+      "parameters": {
+        "practice_area": "medical_malpractice",
+        "state": "FL",
+        "incident_date": "2026-07-10",
+        "summary": "Nerve injury after surgery."
+      }
+    },
+    {
+      "name": "send_intake_packet",
+      "parameters": {
+        "channel": "email"
+      }
     },
     {
       "name": "transfer_to_scheduling"
@@ -121,6 +150,20 @@
     },
     {
       "match_type": "context",
+      "match_phrase": "The agent asks whether to send the packet by email or text, or which channel to use. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "Email is fine.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent offers available appointment times or asks which slot to hold. NOT after a slot is already held and they are asking to confirm that booking.",
+      "response_type": "phrase",
+      "response_value": "I'll take the first time you offered.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
       "match_phrase": "The agent has already held a slot and is reading back that held appointment's day, time, attorney and fee, asking whether to confirm it. NOT when first listing open times, and NOT when asking which slot to hold.",
       "response_type": "phrase",
       "response_value": "Yes, that's right, go ahead and book it.",
@@ -179,7 +222,13 @@
       }
     ],
     "intake_notes": [],
-    "documents": [],
+    "documents": [
+      {
+        "caller_id": "c_new",
+        "kind": "intake_packet",
+        "target": "email"
+      }
+    ],
     "holds": [
       {
         "token": "HR-EVAL-3092",

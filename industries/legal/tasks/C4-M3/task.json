@@ -1,7 +1,7 @@
 {
   "task_name": "C4-M3: Packet by text message",
   "customer_name": "Priya Nair",
-  "intent": "Open with exactly: \"A debt collector keeps calling me at work.\" When asked who this would be against, say exactly: \"It's Apex Collections.\" If offered the packet, say exactly: \"Text is fine.\" Decline booking. Once finished, say exactly: \"Thank you, that's all I needed.\" and end the call.",
+  "intent": "Open with exactly: \"A debt collector keeps calling me at work.\" When asked who this would be against, say exactly: \"It's Apex Collections.\" California. February tenth, twenty twenty six. If they ask whether this is employment, workers' compensation, or a job claim, say exactly: \"No. It's a debt collector, not my employer.\" If offered the packet, say exactly: \"Text is fine.\" Decline booking. Stay until they confirm the intake is on the file and the packet was sent by text. A spoken promise without those writes is not enough. Once finished, say exactly: \"Thank you, that's all I needed.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -34,10 +34,31 @@
   ],
   "exp_tool_calls": [
     {
-      "name": "transfer_to_screening"
+      "name": "check_conflict",
+      "parameters": {
+        "opposing_party": "Apex Collections"
+      }
     },
     {
-      "name": "transfer_to_intake"
+      "name": "check_practice_area",
+      "parameters": {
+        "practice_area": "consumer"
+      }
+    },
+    {
+      "name": "check_jurisdiction",
+      "parameters": {
+        "state": "CA",
+        "practice_area": "consumer"
+      }
+    },
+    {
+      "name": "calculate_filing_deadline",
+      "parameters": {
+        "state": "CA",
+        "practice_area": "consumer",
+        "incident_date": "2026-02-10"
+      }
     },
     {
       "name": "record_intake",
@@ -96,9 +117,30 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers the new client packet by email or text",
+      "match_phrase": "The agent asks whether this is employment, workers' compensation, a job claim, or a workplace injury. NOT when asking who the claim would be against, which state, or when it happened.",
+      "response_type": "phrase",
+      "response_value": "No. It's a debt collector, not my employer.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether to send the packet by email or text, or which channel to use. NOT any other question.",
       "response_type": "phrase",
       "response_value": "Text is fine.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to transfer you to a human staff member, a live person at the front desk, or a real agent because they cannot continue on this line. NOT when transferring you to screening, intake, scheduling, or client services on this call. NOT when you already asked for a person.",
+      "response_type": "phrase",
+      "response_value": "No, I don't need a person. Please finish what I asked on this call.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers an appointment or evaluation time",
+      "response_type": "phrase",
+      "response_value": "Not yet, let me read the paperwork first.",
       "occurrence_mode": "always"
     }
   ],
@@ -155,7 +197,6 @@
     "intake_notes": [],
     "documents": [
       {
-        "id": 1,
         "caller_id": "c_new",
         "kind": "intake_packet",
         "target": "sms"

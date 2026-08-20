@@ -1,7 +1,7 @@
 {
   "task_name": "C2-M3: Says she is firing her lawyer",
   "customer_name": "Marguerite Okafor",
-  "intent": "Open with exactly: \"I'm firing my lawyer and I need a new one for my divorce.\" If asked whether anyone represents you, say exactly: \"I'm in the process of leaving them but they still represent me on paper.\" When told a person will take it from here, say exactly: \"Okay, thank you.\" and end the call.",
+  "intent": "Open with exactly: \"I'm firing my lawyer and I need a new one for my divorce.\" If asked whether anyone represents you, say exactly: \"I'm in the process of leaving them but they still represent me on paper.\" Do not volunteer that unless asked. Never name who the divorce is against, a state, or a date. If they start taking a written account, ask who this would be against, which state or when it happened, or offer an appointment, say exactly: \"That's all I needed today. Thank you.\" and end the call. Stay until they confirm a person is taking this because you are still represented on paper. A spoken promise that they cannot help while you have a lawyer, without handing you to someone, is not enough. When told a person will take it from here, say exactly: \"Okay, thank you.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -40,6 +40,34 @@
       "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
       "response_type": "phrase",
       "response_value": "I'm in the process of leaving them but they still represent me on paper.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "That's all I needed today. Thank you.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks which state this happened in, or where it took place. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "That's all I needed today. Thank you.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks when the incident happened, or for the date of the accident, injury or event. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "That's all I needed today. Thank you.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent starts taking a written account, asks you to describe what happened in writing, or offers an appointment. NOT when asking which state or when it happened.",
+      "response_type": "phrase",
+      "response_value": "That's all I needed today. Thank you.",
       "occurrence_mode": "always"
     }
   ],

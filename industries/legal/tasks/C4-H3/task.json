@@ -1,7 +1,7 @@
 {
-  "task_name": "C4-H3: Employment intake in Washington",
+  "task_name": "C4-H3: Employment intake in Washington with packet and note",
   "customer_name": "Clara Whitman",
-  "intent": "Open with exactly: \"I was fired after I reported safety violations.\" Give a short account when asked. Accept email packet. Once finished, say exactly: \"Thank you, that's all I needed.\" and end the call.",
+  "intent": "Open with exactly: \"I was fired after I reported safety violations.\" When asked who this would be against, say exactly: \"It's Harborline Industries.\" Washington. April fifth, twenty twenty six. Give a short account when asked. If they record intake, say exactly: \"Please add an intake note that I still have the email I sent to HR about the safety violations.\" If offered the packet, say exactly: \"Email is fine.\" Decline booking. Stay until they confirm the intake, the note, and the email packet are on the file. A spoken promise that they will take care of it, without those writes, is not enough. Once they confirm the intake, the note, and the email packet are on the file, say exactly: \"Thank you, that's all I needed.\" Do not book an evaluation. End the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -18,6 +18,10 @@
     {
       "trait_name": "incident_date",
       "value": "2026-04-05"
+    },
+    {
+      "trait_name": "opposing_party",
+      "value": "Harborline Industries"
     },
     {
       "trait_name": "phone",
@@ -52,6 +56,14 @@
       }
     },
     {
+      "name": "calculate_filing_deadline",
+      "parameters": {
+        "state": "WA",
+        "practice_area": "employment",
+        "incident_date": "2026-04-05"
+      }
+    },
+    {
       "name": "transfer_to_intake"
     },
     {
@@ -61,6 +73,12 @@
         "state": "WA",
         "incident_date": "2026-04-05",
         "summary": "Retaliation after safety report."
+      }
+    },
+    {
+      "name": "add_intake_note",
+      "parameters": {
+        "note": "Caller still has the HR email about the safety violations."
       }
     },
     {
@@ -115,6 +133,27 @@
       "response_type": "phrase",
       "response_value": "Email is fine.",
       "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "has recorded the intake or asks if there is anything else to add. NOT when asking to book a case evaluation or appointment.",
+      "response_type": "phrase",
+      "response_value": "Please add an intake note that I still have the email I sent to HR about the safety violations.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to transfer you to a human staff member, a live person at the front desk, or a real agent because they cannot continue on this line. NOT when transferring you to screening, intake, scheduling, or client services on this call. NOT when you already asked for a person.",
+      "response_type": "phrase",
+      "response_value": "No, I don't need a person. Please finish what I asked on this call.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks whether you want to book a case evaluation, a free evaluation, or an appointment. NOT when asking if there is anything else to add after intake, and NOT before the intake note has been spoken.",
+      "response_type": "phrase",
+      "response_value": "No thank you. Intake is enough.",
+      "occurrence_mode": "always"
     }
   ],
   "customer_available_tools": {},
@@ -167,10 +206,15 @@
         "summary": "Retaliation after safety report."
       }
     ],
-    "intake_notes": [],
-    "documents": [
+    "intake_notes": [
       {
         "id": 1,
+        "caller_id": "c_new",
+        "note": "Caller still has the HR email about the safety violations."
+      }
+    ],
+    "documents": [
+      {
         "caller_id": "c_new",
         "kind": "intake_packet",
         "target": "email"

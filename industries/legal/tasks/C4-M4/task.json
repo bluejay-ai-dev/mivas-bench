@@ -1,7 +1,7 @@
 {
   "task_name": "C4-M4: Auto accident intake with packet and records",
   "customer_name": "Chester Lang",
-  "intent": "Open with exactly: \"A van hit me and I went to the ER with a broken collarbone.\" Other side Pellham Transit. California. March twelfth, twenty twenty six. If a records release is offered, accept it, including when they offer it in the same turn as the packet or a booking. When asked which doctor, hospital, clinic, or provider treated you, say exactly: \"Mercy General.\" If offered the packet, say exactly: \"Email is fine.\" Decline booking. Once finished, say exactly: \"Thank you, that's all I needed.\" and end the call.",
+  "intent": "Open with exactly: \"A van hit me and I went to the ER with a broken collarbone.\" Other side Pellham Transit. California. March twelfth, twenty twenty six. Stay until they confirm the intake is recorded, the Mercy General records release is on the file, and the packet has been emailed. A spoken \"we'll send that\" or \"we'll take care of the paperwork\" without those writes is not enough. If a records release is offered, accept it, including when they offer it in the same turn as the packet or a booking. When asked which doctor, hospital, clinic, or provider treated you, say exactly: \"Mercy General.\" If offered the packet, say exactly: \"Email is fine.\" Decline booking. Do not ask for a person. Once they confirm the intake, the records release, and the emailed packet are on the file, say exactly: \"Thank you, that's all I needed.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -33,7 +33,23 @@
   ],
   "exp_tool_calls": [
     {
-      "name": "transfer_to_intake"
+      "name": "check_conflict",
+      "parameters": {
+        "opposing_party": "Pellham Transit"
+      }
+    },
+    {
+      "name": "check_practice_area",
+      "parameters": {
+        "practice_area": "auto_accident"
+      }
+    },
+    {
+      "name": "check_jurisdiction",
+      "parameters": {
+        "state": "CA",
+        "practice_area": "auto_accident"
+      }
     },
     {
       "name": "record_intake",
@@ -105,7 +121,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent offers to send a medical records release or authorization for signature, including when they also offer the packet or an evaluation. NOT when they are only asking which doctor, hospital, clinic, or provider treated you.",
+      "match_phrase": "offers to send a medical records release or authorization for signature, including when they also offer the packet or an evaluation. NOT when they are only asking which doctor, hospital, clinic, or provider treated you.",
       "response_type": "phrase",
       "response_value": "Yes, please send the records release. Mercy General.",
       "occurrence_mode": "always"
