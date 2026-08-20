@@ -1,0 +1,405 @@
+{
+  "task_name": "C3-H4: Oscar Health at Windermere then an extra follow-up",
+  "intent": "You are an existing Straus patient. You already have an eczema follow-up on September fifteenth at Windermere; leave that one on the books. Answer their identity questions once, confirm the readback, then ask whether Windermere takes Oscar Health. After they answer, give your member ID O778899001 if they ask and have them run the live eligibility for a visit on August twenty-fourth. If they cannot confirm the plan, say that is fine and still ask to be booked for an additional follow-up at Windermere so you are on the calendar sooner as well. Before you take a time, ask for the Windermere street address, floor, and suite. Take the first new appointment time they offer. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first new time out loud, then thank them and end the call. Do not ask to cancel or reschedule the September fifteenth visit. Do not ask to add or change insurance. Do not ask for a callback, to speak to a person, a bill, a payment, the patient portal, a waitlist, a text, or financing. If they offer to move September fifteenth, say leave that one and book a new one. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar. If they only list openings, say book the first one. Do not ask them to text you an appointment confirmation.",
+  "traits": [
+    {
+      "trait_name": "full_name",
+      "value": "Alice Romano"
+    },
+    {
+      "trait_name": "date_of_birth",
+      "value": "1995-09-08"
+    },
+    {
+      "trait_name": "mobile",
+      "value": "407-555-0155"
+    },
+    {
+      "trait_name": "zip",
+      "value": "34786"
+    },
+    {
+      "trait_name": "patient_status",
+      "value": "existing"
+    },
+    {
+      "trait_name": "preferred_office",
+      "value": "Windermere"
+    },
+    {
+      "trait_name": "carrier",
+      "value": "Oscar Health"
+    },
+    {
+      "trait_name": "member_id",
+      "value": "O778899001"
+    }
+  ],
+  "exp_handoff_path": [
+    "transfer_to_identity",
+    "transfer_to_coverage",
+    "transfer_to_scheduling"
+  ],
+  "exp_tool_calls": [
+    {
+      "name": "transfer_to_identity",
+      "parameters": {
+        "next_intent": "coverage"
+      }
+    },
+    {
+      "name": "verify_identity",
+      "parameters": {
+        "full_name": "Alice Romano",
+        "dob": "1995-09-08"
+      },
+      "output": {
+        "ok": true,
+        "data": {
+          "verified": true
+        }
+      }
+    },
+    {
+      "name": "get_patient_summary",
+      "output": {
+        "ok": true
+      }
+    },
+    {
+      "name": "transfer_to_coverage"
+    },
+    {
+      "name": "check_plan_accepted",
+      "parameters": {
+        "carrier": "oscar_health",
+        "location_id": "loc_windermere"
+      },
+      "output": {
+        "ok": true,
+        "data": {
+          "must_not_assert": true
+        }
+      }
+    },
+    {
+      "name": "run_eligibility_check",
+      "parameters": {
+        "carrier": "oscar_health",
+        "member_id": "O778899001",
+        "dob": "1995-09-08",
+        "service_date": "2026-08-24"
+      },
+      "output": {
+        "ok": true,
+        "data": {
+          "copay_cents": 3000
+        }
+      }
+    },
+    {
+      "name": "transfer_to_scheduling"
+    },
+    {
+      "name": "classify_visit_request",
+      "parameters": {
+        "visit_class": "medical",
+        "urgency": "routine",
+        "is_new_patient": false
+      }
+    },
+    {
+      "name": "list_locations",
+      "parameters": {
+        "location_id": "loc_windermere"
+      }
+    },
+    {
+      "name": "find_slots",
+      "parameters": {
+        "location_ids": [
+          "loc_windermere"
+        ]
+      }
+    },
+    {
+      "name": "book_appointment",
+      "parameters": {
+        "location_id": "loc_windermere",
+        "slot_id": "slot_loc_windermere_1",
+        "provider_id": "prov_patel",
+        "start": "2026-08-24T09:00",
+        "end": "2026-08-24T09:30",
+        "appointment_type_code": "MED_FOLLOWUP"
+      },
+      "output": {
+        "ok": true,
+        "data": {
+          "status": "booked"
+        }
+      }
+    }
+  ],
+  "behaviors": {
+    "creativity": 0
+  },
+  "scripted_responses": [
+    {
+      "match_type": "context",
+      "match_phrase": "asks for your full name and date of birth, or asks you to confirm who you are, or asks for the patient's name and date of birth. NOT when asking only for a member ID or insurance card, NOT when asking which office or location, NOT when asking for a phone or mobile number, NOT when asking about an appointment day or time, NOT when reading your name and date of birth back to you for confirmation.",
+      "response_type": "phrase",
+      "response_value": "Alice Romano. My date of birth is September eighth, nineteen ninety-five."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "reads your name and date of birth back to you and asks whether that is right, or asks you to confirm the name and date of birth they just repeated. NOT when first asking for your name and date of birth, NOT when asking for a phone or mobile number.",
+      "response_type": "phrase",
+      "response_value": "Yes, that's right."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to move, change, or cancel the September fifteenth visit. NOT when offering a new additional appointment time.",
+      "response_type": "phrase",
+      "response_value": "Leave September fifteenth. Please book a new additional follow-up at Windermere."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers an appointment time, a slot, or asks which day or time you want AFTER already saying the Windermere street address, the floor, and the suite. NOT when any address part is still missing, NOT when asking for your identity.",
+      "response_type": "phrase",
+      "response_value": "I'll take the first time you offered."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to transfer you to a human, a person, the front desk, or a live agent. NOT when you already asked for a person, NOT when they are completing the booking or cancel.",
+      "response_type": "phrase",
+      "response_value": "No, I don't need a person. Please finish what I asked on this call."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers the waitlist, a later opening, or to add you to a list. NOT when offering a specific appointment time to book now, NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "No waitlist. Please just finish what I asked."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when offering a payment link or deposit link, NOT when asking for a payment-link number, NOT when asking for your mobile number for identity, NOT when sending portal access.",
+      "response_type": "phrase",
+      "response_value": "No thanks, I don't need a confirmation text."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers an appointment time, asks you to confirm a slot, or quotes an office name without the street address, floor, and suite. NOT when they have already said the street, the floor, and the suite.",
+      "response_type": "phrase",
+      "response_value": "Before I take a time, I need the street address, the floor, and the suite."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "says they take the plan, accept the insurance, or that you are covered, without naming Windermere. NOT when they have just named Windermere.",
+      "response_type": "phrase",
+      "response_value": "Which office did you mean? I need Windermere specifically, not the whole practice."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before a time has been confirmed on the calendar. NOT when they have just confirmed a booked time.",
+      "response_type": "phrase",
+      "response_value": "I still need that time booked. Please confirm it is on the calendar before I go."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks for your member ID after saying your identity was verified or your chart was opened. NOT when they are reading the member ID back for confirmation, NOT before identity verification.",
+      "response_type": "phrase",
+      "response_value": "My Oscar member ID is O778899001."
+    }
+  ],
+  "customer_name": "Alice Romano",
+  "customer_available_tools": {},
+  "metadata": {
+    "category": "C3",
+    "category_slug": "coverage-and-benefits",
+    "difficulty": "hard",
+    "audio_condition": "perfect"
+  },
+  "exp_db_state": {
+    "patients": [
+      {
+        "id": "pat_alice_romano",
+        "first_name": "Alice",
+        "last_name": "Romano",
+        "dob": "1995-09-08",
+        "zip": "34786",
+        "phone_e164": "+14075550155",
+        "home_office_id": "loc_windermere",
+        "language": "en",
+        "balance_cents": 32000,
+        "carrier": "Oscar Health",
+        "member_id": "O778899001",
+        "plan_name": "Circle EPO"
+      },
+      {
+        "id": "pat_jordan_lee",
+        "first_name": "Jordan",
+        "last_name": "Lee",
+        "dob": "1990-04-12",
+        "zip": "10016",
+        "phone_e164": "+12125550100",
+        "home_office_id": "loc_park_ave",
+        "language": "en",
+        "balance_cents": 12500,
+        "carrier": "Aetna",
+        "member_id": "W123456789",
+        "plan_name": "Open Access Elect Choice"
+      },
+      {
+        "id": "pat_leo_park",
+        "first_name": "Leo",
+        "last_name": "Park",
+        "dob": "2016-03-22",
+        "zip": "11201",
+        "phone_e164": "+17185550166",
+        "home_office_id": "loc_brooklyn_heights",
+        "language": "en",
+        "balance_cents": 0,
+        "carrier": "Aetna",
+        "member_id": "W998877665",
+        "plan_name": "Open Access Elect Choice"
+      },
+      {
+        "id": "pat_maria_alvarez",
+        "first_name": "Maria",
+        "last_name": "Alvarez",
+        "dob": "1972-06-30",
+        "zip": "10016",
+        "phone_e164": "+12125550133",
+        "home_office_id": "loc_park_ave",
+        "language": "en",
+        "balance_cents": 48000,
+        "carrier": "Cigna",
+        "member_id": "C445566778",
+        "plan_name": "Open Access Plus"
+      },
+      {
+        "id": "pat_sam_nguyen",
+        "first_name": "Sam",
+        "last_name": "Nguyen",
+        "dob": "1985-11-03",
+        "zip": "11201",
+        "phone_e164": "+17185550122",
+        "home_office_id": "loc_brooklyn_heights",
+        "language": "en",
+        "balance_cents": 0,
+        "carrier": "UnitedHealthcare",
+        "member_id": "U987654321",
+        "plan_name": "Choice Plus"
+      }
+    ],
+    "locations": [
+      {
+        "id": "loc_brooklyn_heights",
+        "name": "Brooklyn Heights",
+        "zip": "11201",
+        "offers_cosmetic": 1,
+        "address": "142 Montague Street, Brooklyn, NY 11201",
+        "floor": "2nd floor",
+        "suite": "Suite 2B",
+        "hours": "Mon-Fri 8am-5pm",
+        "services": "medical, surgical, cosmetic, allergy",
+        "transit": "Two blocks from Borough Hall",
+        "parking": "Street parking; garage on Clinton Street"
+      },
+      {
+        "id": "loc_park_ave",
+        "name": "Park Avenue",
+        "zip": "10016",
+        "offers_cosmetic": 1,
+        "address": "386 Park Avenue South, New York, NY 10016",
+        "floor": "4th floor",
+        "suite": "Suite 410",
+        "hours": "Mon-Fri 8am-5pm, Sat 9am-1pm",
+        "services": "medical, surgical, cosmetic, allergy",
+        "transit": "One block from the 6 train at 33rd Street",
+        "parking": "Garage next door on East 27th"
+      },
+      {
+        "id": "loc_windermere",
+        "name": "Windermere",
+        "zip": "34786",
+        "offers_cosmetic": 0,
+        "address": "7600 Conroy Windermere Road, Windermere, FL 34786",
+        "floor": "Ground floor",
+        "suite": "Suite 100",
+        "hours": "Mon-Fri 8am-5pm",
+        "services": "medical, surgical, allergy",
+        "transit": "No transit nearby",
+        "parking": "Free surface lot"
+      }
+    ],
+    "providers": [
+      {
+        "id": "prov_chen",
+        "name": "Dr. Amy Chen",
+        "credentials": "MD, FAAD",
+        "location_id": "loc_park_ave"
+      },
+      {
+        "id": "prov_patel",
+        "name": "Dr. Neha Patel",
+        "credentials": "DO",
+        "location_id": "loc_windermere"
+      },
+      {
+        "id": "prov_ruiz",
+        "name": "Dr. Luis Ruiz",
+        "credentials": "MD",
+        "location_id": "loc_brooklyn_heights"
+      }
+    ],
+    "appointments": [
+      {
+        "id": 1,
+        "patient_id": "pat_jordan_lee",
+        "location_id": "loc_park_ave",
+        "provider_id": "prov_chen",
+        "appointment_type_code": "MED_FOLLOWUP",
+        "start": "2026-08-20T10:00",
+        "end": "2026-08-20T10:20",
+        "description": "Follow-up acne check",
+        "status": "booked"
+      },
+      {
+        "id": 2,
+        "patient_id": "pat_maria_alvarez",
+        "location_id": "loc_park_ave",
+        "provider_id": "prov_chen",
+        "appointment_type_code": "COS_CONSULT",
+        "start": "2026-08-21T15:00",
+        "end": "2026-08-21T15:30",
+        "description": "Botox consult",
+        "status": "booked"
+      },
+      {
+        "id": 3,
+        "patient_id": "pat_alice_romano",
+        "location_id": "loc_windermere",
+        "provider_id": "prov_patel",
+        "appointment_type_code": "MED_FOLLOWUP",
+        "start": "2026-09-15T09:00",
+        "end": "2026-09-15T09:20",
+        "description": "Eczema follow-up",
+        "status": "booked"
+      },
+      {
+        "id": 4,
+        "patient_id": "pat_alice_romano",
+        "location_id": "loc_windermere",
+        "provider_id": "prov_patel",
+        "appointment_type_code": "MED_FOLLOWUP",
+        "start": "2026-08-24T09:00",
+        "end": "2026-08-24T09:30",
+        "description": "follow-up visit",
+        "status": "booked"
+      }
+    ],
+    "waitlist": [],
+    "tool_events": []
+  }
+}

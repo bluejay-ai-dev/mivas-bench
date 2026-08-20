@@ -6,13 +6,16 @@ Prompts are written as real customer production prompts — not shortened for a 
 
 ## Agents
 
-1. `reception` — greet, AI disclosure once, intent, KB, route
+Handoffs are a directed acyclic graph: specialists never hand back to
+reception or identity, and `scheduling` / `cosmetic` are sinks.
+
+1. `reception` — greet, AI disclosure once, public office facts via `list_locations`, route
 2. `identity` — PHI gate (name + DOB); only path to `billing` and `clinical`
-3. `scheduling` — book / reschedule / cancel / waitlist / allergy
-4. `coverage` — carrier × plan × office × provider
-5. `cosmetic` — approved-table quotes, deposit + 72h policy before booking
-6. `billing` — balance, charge explainers, payment link / financing / fee waiver
-7. `clinical` — results status only, refills never approved, nurse messages, portal
+3. `scheduling` — medical / Mohs / allergy book, reschedule, cancel, waitlist (sink)
+4. `coverage` — carrier × plan × office acceptance and insurance capture; may hop to scheduling
+5. `cosmetic` — approved-table quotes, consults, deposit + 72h policy (sink)
+6. `billing` — balance, charge explainers, payment link / financing / fee waiver; may hop to scheduling
+7. `clinical` — results status only, refills never approved, nurse messages, portal; may hop to scheduling
 
 English only for this industry. There is **no safety agent**. Escalation is a
 single global tool, `transfer_to_human`. Handoffs between specialists are

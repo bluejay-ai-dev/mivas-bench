@@ -1,6 +1,6 @@
 {
   "task_name": "C1-M1: New-patient rash visit at Park Avenue",
-  "intent": "You are a new patient and you have an itchy rash on your forearm. You want a new-patient visit at Park Avenue \u2014 that office only. Answer their questions about who you are and how to reach you once, then proceed to booking. Take the first appointment time they offer. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first time out loud, then thank them and end the call. Do not ask to add or change insurance. Do not ask for a callback, to speak to a person, a bill, a payment, the patient portal, a waitlist, a text, financing, or the street, floor, or suite. A spoken yes for the whole practice is not enough. Stay until they have checked that specific office in their system. If they answer without naming the office they just checked, ask them to check Park Avenue. Do not thank them until you have that office-level answer from a check, not from memory. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar. If they only list openings, say book the first one.",
+  "intent": "You are a new patient and you have an itchy rash on your forearm. You want a new-patient visit at Park Avenue \u2014 that office only. Answer their questions about who you are and how to reach you once, then proceed to booking. Take the first appointment time they offer. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first time out loud. After they confirm a time is on the calendar, ask them to text you an appointment confirmation. That is the only text you want. Do not ask to add or change insurance. Do not ask for a callback, to speak to a person, a bill, a payment, the patient portal, a waitlist, financing, or the street, floor, or suite. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar and that the appointment confirmation was texted. If they only list openings, say book the first one. If they confirm the booking but have not texted the confirmation, ask them to text you the appointment confirmation.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -47,19 +47,6 @@
       }
     },
     {
-      "name": "check_plan_accepted",
-      "parameters": {
-        "carrier": "aetna",
-        "location_id": "loc_park_ave"
-      },
-      "output": {
-        "ok": true,
-        "data": {
-          "accepted": true
-        }
-      }
-    },
-    {
       "name": "find_slots",
       "parameters": {
         "location_ids": [
@@ -73,14 +60,27 @@
         "location_id": "loc_park_ave",
         "slot_id": "slot_loc_park_ave_1",
         "provider_id": "prov_chen",
-        "start": "2026-08-24T09:00:00",
-        "end": "2026-08-24T09:30:00",
+        "start": "2026-08-24T09:00",
+        "end": "2026-08-24T09:30",
         "appointment_type_code": "NP_MED"
       },
       "output": {
         "ok": true,
         "data": {
           "status": "booked"
+        }
+      }
+    },
+    {
+      "name": "send_sms",
+      "parameters": {
+        "mobile_e164": "+12125550194",
+        "template_id": "appointment_confirmation"
+      },
+      "output": {
+        "ok": true,
+        "data": {
+          "sent": true
         }
       }
     }
@@ -109,15 +109,27 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when asking for a payment-link number, NOT when asking for your mobile number for identity.",
-      "response_type": "phrase",
-      "response_value": "No thanks, I don't need a text."
-    },
-    {
-      "match_type": "context",
       "match_phrase": "says they take the plan, accept the insurance, or that you are covered, without naming the office they just checked. NOT when they have just said they checked Park Avenue specifically.",
       "response_type": "phrase",
       "response_value": "Which office did you check? I need Park Avenue specifically, not the whole practice."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks whether you want a confirmation text, an appointment SMS, or to be texted after the booking. NOT when offering a payment link or deposit link, NOT when asking for your mobile number for identity.",
+      "response_type": "phrase",
+      "response_value": "Yes, text me the appointment confirmation."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "thanks you, says goodbye, or starts wrapping up after the booking but before they confirm they sent the appointment confirmation text. NOT when they have just said the confirmation was texted.",
+      "response_type": "phrase",
+      "response_value": "Please text me the appointment confirmation before I go."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "thanks you, says goodbye, or asks if you need anything else after listing openings but before confirming a time is on the calendar. NOT when they have just confirmed the appointment is booked.",
+      "response_type": "phrase",
+      "response_value": "Please book the first time and confirm it is on the calendar before I go."
     }
   ],
   "customer_name": "Hal Brenner",
@@ -269,8 +281,8 @@
         "location_id": "loc_park_ave",
         "provider_id": "prov_chen",
         "appointment_type_code": "MED_FOLLOWUP",
-        "start": "2026-08-20T10:00:00",
-        "end": "2026-08-20T10:20:00",
+        "start": "2026-08-20T10:00",
+        "end": "2026-08-20T10:20",
         "description": "Follow-up acne check",
         "status": "booked"
       },
@@ -280,8 +292,8 @@
         "location_id": "loc_park_ave",
         "provider_id": "prov_chen",
         "appointment_type_code": "COS_CONSULT",
-        "start": "2026-08-21T15:00:00",
-        "end": "2026-08-21T15:30:00",
+        "start": "2026-08-21T15:00",
+        "end": "2026-08-21T15:30",
         "description": "Botox consult",
         "status": "booked"
       },
@@ -291,8 +303,8 @@
         "location_id": "loc_windermere",
         "provider_id": "prov_patel",
         "appointment_type_code": "MED_FOLLOWUP",
-        "start": "2026-09-15T09:00:00",
-        "end": "2026-09-15T09:20:00",
+        "start": "2026-09-15T09:00",
+        "end": "2026-09-15T09:20",
         "description": "Eczema follow-up",
         "status": "booked"
       },
@@ -302,13 +314,22 @@
         "location_id": "loc_park_ave",
         "provider_id": "prov_chen",
         "appointment_type_code": "NP_MED",
-        "start": "2026-08-24T09:00:00",
-        "end": "2026-08-24T09:30:00",
+        "start": "2026-08-24T09:00",
+        "end": "2026-08-24T09:30",
         "description": "new patient visit",
         "status": "booked"
       }
     ],
     "waitlist": [],
-    "tool_events": []
+    "tool_events": [
+      {
+        "id": 1,
+        "kind": "sms",
+        "payload": {
+          "mobile_e164": "+12125550194",
+          "template_id": "appointment_confirmation"
+        }
+      }
+    ]
   }
 }

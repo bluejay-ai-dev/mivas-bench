@@ -1,0 +1,431 @@
+{
+  "task_name": "C1-H4: Hours, parking, UnitedHealthcare, then a Brooklyn Heights booking",
+  "intent": "You are a new patient with no chart at Straus. In your first real answer, say that you are a new patient and ask what time the Brooklyn Heights office opens on a weekday and where you park. Stay until they have looked up weekday hours and told you the Brooklyn Heights street address, the floor, the suite, and the parking out loud. If they quote hours or parking without looking them up, ask them to check. Name the office as Brooklyn Heights; do not volunteer a ZIP. Do not ask them to text the address. Do not thank them or end the call after hours or parking \u2014 you still have more to do. When they ask who you are, give your name and date of birth once, confirm the readback, and say you are new. Right after they say the floor and the suite, say you have UnitedHealthcare and ask whether Brooklyn Heights takes it. Once they have answered that office-level coverage question, tell them the real reason you called: dry patches on your scalp that will not clear and you need a new-patient visit at Brooklyn Heights. Take the first appointment time they offer. After that time is on the calendar, ask to be waitlisted at Brooklyn Heights from August twenty-fourth through September thirtieth for anything earlier, then ask the front desk to call you the morning of the visit about garage hours \u2014 number 718-555-0198. Confirm that first time out loud, then thank them and end the call. Do not ask to add or change insurance. Do not ask to speak to a person, a bill, a payment, the patient portal, or financing. If they offer a human, the front desk as a live transfer, or the portal because they cannot find you, decline and ask them to book you as a new patient. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar, you are waitlisted, and the parking callback is set. If they only list openings, say book the first one. Do not ask them to text you an appointment confirmation.",
+  "traits": [
+    {
+      "trait_name": "full_name",
+      "value": "Marcus Bell"
+    },
+    {
+      "trait_name": "mobile",
+      "value": "718-555-0198"
+    },
+    {
+      "trait_name": "date_of_birth",
+      "value": "1964-08-21"
+    },
+    {
+      "trait_name": "zip",
+      "value": "11201"
+    },
+    {
+      "trait_name": "patient_status",
+      "value": "new"
+    },
+    {
+      "trait_name": "preferred_office",
+      "value": "Brooklyn Heights"
+    },
+    {
+      "trait_name": "carrier",
+      "value": "UnitedHealthcare"
+    }
+  ],
+  "exp_handoff_path": [
+    "transfer_to_coverage",
+    "transfer_to_scheduling"
+  ],
+  "exp_tool_calls": [
+    {
+      "name": "list_locations",
+      "parameters": {
+        "location_id": "loc_brooklyn_heights"
+      }
+    },
+    {
+      "name": "transfer_to_coverage"
+    },
+    {
+      "name": "check_plan_accepted",
+      "parameters": {
+        "carrier": "unitedhealthcare",
+        "location_id": "loc_brooklyn_heights"
+      },
+      "output": {
+        "ok": true,
+        "data": {
+          "accepted": true
+        }
+      }
+    },
+    {
+      "name": "transfer_to_scheduling"
+    },
+    {
+      "name": "classify_visit_request",
+      "parameters": {
+        "visit_class": "medical",
+        "urgency": "routine",
+        "is_new_patient": true
+      }
+    },
+    {
+      "name": "find_slots",
+      "parameters": {
+        "location_ids": [
+          "loc_brooklyn_heights"
+        ]
+      }
+    },
+    {
+      "name": "book_appointment",
+      "parameters": {
+        "location_id": "loc_brooklyn_heights",
+        "slot_id": "slot_loc_brooklyn_heights_1",
+        "provider_id": "prov_ruiz",
+        "start": "2026-08-24T09:00",
+        "end": "2026-08-24T09:30",
+        "appointment_type_code": "NP_MED"
+      },
+      "output": {
+        "ok": true,
+        "data": {
+          "status": "booked"
+        }
+      }
+    },
+    {
+      "name": "join_waitlist",
+      "parameters": {
+        "appointment_type_code": "NP_MED",
+        "location_ids": [
+          "loc_brooklyn_heights"
+        ],
+        "earliest": "2026-08-24",
+        "latest": "2026-09-30"
+      },
+      "output": {
+        "ok": true,
+        "data": {
+          "status": "added"
+        }
+      }
+    },
+    {
+      "name": "create_callback_task",
+      "parameters": {
+        "queue": "front_desk",
+        "callback_number": "+17185550198"
+      },
+      "output": {
+        "ok": true
+      }
+    }
+  ],
+  "behaviors": {
+    "creativity": 0
+  },
+  "scripted_responses": [
+    {
+      "match_type": "context",
+      "match_phrase": "gives the floor and the suite. NOT when they have only given hours or parking without the floor and suite, NOT when already booking a visit, NOT when asking for your name or date of birth, NOT when they have already answered the UnitedHealthcare question.",
+      "response_type": "phrase",
+      "response_value": "Thanks. I have UnitedHealthcare \u2014 do you take that at Brooklyn Heights?"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks for your full name and date of birth, or asks you to confirm who you are, or asks for the patient's name and date of birth. NOT when asking only for a member ID or insurance card, NOT when asking which office or location, NOT when asking for a phone or mobile number, NOT when asking about an appointment day or time, NOT when reading your name and date of birth back to you for confirmation.",
+      "response_type": "phrase",
+      "response_value": "Marcus Bell. My date of birth is August twenty-first, nineteen sixty-four."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "reads your name and date of birth back to you and asks whether that is right, or asks you to confirm the name and date of birth they just repeated. NOT when first asking for your name and date of birth, NOT when asking for a phone or mobile number.",
+      "response_type": "phrase",
+      "response_value": "Yes, that's right."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to transfer you to a human, the front desk, a person, or the patient portal because they cannot find your chart. NOT when booking is already proceeding.",
+      "response_type": "phrase",
+      "response_value": "No, I am a new patient. Please just book me the soonest visit at Brooklyn Heights."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers an appointment time, a slot, or asks which day or time you want AFTER already saying the street address, the floor, and the suite. NOT when they have not yet given all three, NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "I'll take the first time you offered."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers an appointment time, asks you to confirm a slot, or quotes an office name without the street address, floor, and suite. NOT when they have already said the street, the floor, and the suite.",
+      "response_type": "phrase",
+      "response_value": "Before I take a time, I need the street address, the floor, and the suite."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "quotes weekday hours, opening time, or parking without saying they looked it up or checked the hours. NOT when they have just said they checked the hours or parking.",
+      "response_type": "phrase",
+      "response_value": "Can you look up both the weekday hours and where I park at Brooklyn Heights? Then tell me the street address, the floor, and the suite."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "answers the weekday hours or gives the Brooklyn Heights address but has not answered where to park. NOT when parking has already been given.",
+      "response_type": "phrase",
+      "response_value": "I still need parking. Please look up where to park at Brooklyn Heights."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "says they take UnitedHealthcare, accept UnitedHealthcare, or answers whether Brooklyn Heights takes UnitedHealthcare. NOT when they have not yet given the street, floor, and suite, NOT when already booking a visit.",
+      "response_type": "phrase",
+      "response_value": "Thanks. I also have dry patches on my scalp that will not clear and I need a new-patient visit at Brooklyn Heights."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks whether you want the waitlist, offers to add you to a list for an earlier opening, or says they can list you if something sooner opens. NOT when asking for the date window, NOT when offering a specific appointment time to book now.",
+      "response_type": "phrase",
+      "response_value": "Yes, add me to the waitlist at Brooklyn Heights from August twenty-fourth through September thirtieth after you book the first time."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks for a waitlist window, start date, end date, earliest date, latest date, or when you would take an earlier opening. NOT when asking for your name or date of birth, NOT when offering a specific appointment time to book now.",
+      "response_type": "phrase",
+      "response_value": "From August twenty-fourth through September thirtieth, at Brooklyn Heights. Dates only \u2014 I don't have a clock time."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks which number the front desk should use for the morning-of parking callback. NOT when asking for your mobile number for identity.",
+      "response_type": "phrase",
+      "response_value": "718-555-0198 for the parking callback the morning of the visit."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before the booking is confirmed on the calendar, the weekday hours are answered, parking is answered, the street address, floor, and suite are spoken, you are waitlisted, and the parking callback is set. NOT when all of those are complete.",
+      "response_type": "phrase",
+      "response_value": "Before I go, I still need the booking on the calendar, weekday hours, parking, street, floor, suite, the waitlist, and the morning-of parking callback."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to transfer you to a human, a person, the front desk, or a live agent. NOT when you already asked for a person, NOT when they are completing the booking or cancel.",
+      "response_type": "phrase",
+      "response_value": "No, I don't need a person. Please finish what I asked on this call."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when offering a payment link or deposit link, NOT when asking for a payment-link number, NOT when asking for your mobile number for identity, NOT when sending portal access.",
+      "response_type": "phrase",
+      "response_value": "No thanks, I don't need a confirmation text."
+    }
+  ],
+  "customer_name": "Marcus Bell",
+  "customer_available_tools": {},
+  "metadata": {
+    "category": "C1",
+    "category_slug": "new-patient-access",
+    "difficulty": "hard",
+    "audio_condition": "perfect"
+  },
+  "exp_db_state": {
+    "patients": [
+      {
+        "id": "pat_alice_romano",
+        "first_name": "Alice",
+        "last_name": "Romano",
+        "dob": "1995-09-08",
+        "zip": "34786",
+        "phone_e164": "+14075550155",
+        "home_office_id": "loc_windermere",
+        "language": "en",
+        "balance_cents": 32000,
+        "carrier": "Oscar Health",
+        "member_id": "O778899001",
+        "plan_name": "Circle EPO"
+      },
+      {
+        "id": "pat_jordan_lee",
+        "first_name": "Jordan",
+        "last_name": "Lee",
+        "dob": "1990-04-12",
+        "zip": "10016",
+        "phone_e164": "+12125550100",
+        "home_office_id": "loc_park_ave",
+        "language": "en",
+        "balance_cents": 12500,
+        "carrier": "Aetna",
+        "member_id": "W123456789",
+        "plan_name": "Open Access Elect Choice"
+      },
+      {
+        "id": "pat_leo_park",
+        "first_name": "Leo",
+        "last_name": "Park",
+        "dob": "2016-03-22",
+        "zip": "11201",
+        "phone_e164": "+17185550166",
+        "home_office_id": "loc_brooklyn_heights",
+        "language": "en",
+        "balance_cents": 0,
+        "carrier": "Aetna",
+        "member_id": "W998877665",
+        "plan_name": "Open Access Elect Choice"
+      },
+      {
+        "id": "pat_maria_alvarez",
+        "first_name": "Maria",
+        "last_name": "Alvarez",
+        "dob": "1972-06-30",
+        "zip": "10016",
+        "phone_e164": "+12125550133",
+        "home_office_id": "loc_park_ave",
+        "language": "en",
+        "balance_cents": 48000,
+        "carrier": "Cigna",
+        "member_id": "C445566778",
+        "plan_name": "Open Access Plus"
+      },
+      {
+        "id": "pat_sam_nguyen",
+        "first_name": "Sam",
+        "last_name": "Nguyen",
+        "dob": "1985-11-03",
+        "zip": "11201",
+        "phone_e164": "+17185550122",
+        "home_office_id": "loc_brooklyn_heights",
+        "language": "en",
+        "balance_cents": 0,
+        "carrier": "UnitedHealthcare",
+        "member_id": "U987654321",
+        "plan_name": "Choice Plus"
+      }
+    ],
+    "locations": [
+      {
+        "id": "loc_brooklyn_heights",
+        "name": "Brooklyn Heights",
+        "zip": "11201",
+        "offers_cosmetic": 1,
+        "address": "142 Montague Street, Brooklyn, NY 11201",
+        "floor": "2nd floor",
+        "suite": "Suite 2B",
+        "hours": "Mon-Fri 8am-5pm",
+        "services": "medical, surgical, cosmetic, allergy",
+        "transit": "Two blocks from Borough Hall",
+        "parking": "Street parking; garage on Clinton Street"
+      },
+      {
+        "id": "loc_park_ave",
+        "name": "Park Avenue",
+        "zip": "10016",
+        "offers_cosmetic": 1,
+        "address": "386 Park Avenue South, New York, NY 10016",
+        "floor": "4th floor",
+        "suite": "Suite 410",
+        "hours": "Mon-Fri 8am-5pm, Sat 9am-1pm",
+        "services": "medical, surgical, cosmetic, allergy",
+        "transit": "One block from the 6 train at 33rd Street",
+        "parking": "Garage next door on East 27th"
+      },
+      {
+        "id": "loc_windermere",
+        "name": "Windermere",
+        "zip": "34786",
+        "offers_cosmetic": 0,
+        "address": "7600 Conroy Windermere Road, Windermere, FL 34786",
+        "floor": "Ground floor",
+        "suite": "Suite 100",
+        "hours": "Mon-Fri 8am-5pm",
+        "services": "medical, surgical, allergy",
+        "transit": "No transit nearby",
+        "parking": "Free surface lot"
+      }
+    ],
+    "providers": [
+      {
+        "id": "prov_chen",
+        "name": "Dr. Amy Chen",
+        "credentials": "MD, FAAD",
+        "location_id": "loc_park_ave"
+      },
+      {
+        "id": "prov_patel",
+        "name": "Dr. Neha Patel",
+        "credentials": "DO",
+        "location_id": "loc_windermere"
+      },
+      {
+        "id": "prov_ruiz",
+        "name": "Dr. Luis Ruiz",
+        "credentials": "MD",
+        "location_id": "loc_brooklyn_heights"
+      }
+    ],
+    "appointments": [
+      {
+        "id": 1,
+        "patient_id": "pat_jordan_lee",
+        "location_id": "loc_park_ave",
+        "provider_id": "prov_chen",
+        "appointment_type_code": "MED_FOLLOWUP",
+        "start": "2026-08-20T10:00",
+        "end": "2026-08-20T10:20",
+        "description": "Follow-up acne check",
+        "status": "booked"
+      },
+      {
+        "id": 2,
+        "patient_id": "pat_maria_alvarez",
+        "location_id": "loc_park_ave",
+        "provider_id": "prov_chen",
+        "appointment_type_code": "COS_CONSULT",
+        "start": "2026-08-21T15:00",
+        "end": "2026-08-21T15:30",
+        "description": "Botox consult",
+        "status": "booked"
+      },
+      {
+        "id": 3,
+        "patient_id": "pat_alice_romano",
+        "location_id": "loc_windermere",
+        "provider_id": "prov_patel",
+        "appointment_type_code": "MED_FOLLOWUP",
+        "start": "2026-09-15T09:00",
+        "end": "2026-09-15T09:20",
+        "description": "Eczema follow-up",
+        "status": "booked"
+      },
+      {
+        "id": 4,
+        "patient_id": null,
+        "location_id": "loc_brooklyn_heights",
+        "provider_id": "prov_ruiz",
+        "appointment_type_code": "NP_MED",
+        "start": "2026-08-24T09:00",
+        "end": "2026-08-24T09:30",
+        "description": "new patient visit",
+        "status": "booked"
+      }
+    ],
+    "waitlist": [
+      {
+        "id": 1,
+        "patient_id": null,
+        "appointment_type_code": "NP_MED",
+        "location_ids": [
+          "loc_brooklyn_heights"
+        ],
+        "earliest": "2026-08-24",
+        "latest": "2026-09-30"
+      }
+    ],
+    "tool_events": [
+      {
+        "id": 1,
+        "kind": "callback_task",
+        "payload": {
+          "queue": "front_desk",
+          "callback_number": "+17185550198"
+        }
+      }
+    ]
+  }
+}

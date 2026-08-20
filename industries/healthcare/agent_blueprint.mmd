@@ -12,17 +12,12 @@ flowchart TD
     identity -->|transfer_to_billing| billing["billing"]
     identity -->|transfer_to_clinical| clinical["clinical"]
 
-    scheduling -->|transfer_to_coverage| coverage
     coverage -->|transfer_to_scheduling| scheduling
-    scheduling -->|transfer_to_cosmetic| cosmetic
-    cosmetic -->|transfer_to_scheduling| scheduling
-    scheduling -->|transfer_to_identity| identity
-    coverage -->|transfer_to_identity| identity
-    cosmetic -->|transfer_to_identity| identity
     billing -->|transfer_to_scheduling| scheduling
-    billing -->|transfer_to_identity| identity
     clinical -->|transfer_to_scheduling| scheduling
-    clinical -->|transfer_to_identity| identity
+
+    scheduling --> DONE(["call ends"])
+    cosmetic --> DONE
 
     reception -.->|transfer_to_human| human["human"]
     identity -.->|transfer_to_human| human

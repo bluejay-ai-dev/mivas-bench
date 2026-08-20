@@ -18,6 +18,7 @@ import os
 import sqlite3
 import sys
 from contextlib import contextmanager
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -287,7 +288,7 @@ def join_waitlist(body: WaitlistCreate) -> dict[str, Any]:
 
 # Fixed "now" so cancellation-window math is deterministic across runs. The
 # seeded MED_FOLLOWUP on 2026-08-20T10:00 is inside the 24 h medical window.
-TODAY = "2026-08-19T12:00:00"
+TODAY = "2026-08-19T12:00"
 
 # Identity pin per call id (empty key = the shared/no-header session).
 _sessions: dict[str, dict[str, Any]] = {}
@@ -344,15 +345,36 @@ def _resolve_location(value: str) -> sqlite3.Row:
     raise ToolError("UNKNOWN_LOCATION", f"No office matches {value!r}.")
 
 
-def _iso_plus_minutes(start: str, minutes: int) -> str:
-    from datetime import datetime, timedelta
+def _parse_local(ts: str) -> datetime:
+    """Accept YYYY-MM-DD, YYYY-MM-DDTHH:MM, or YYYY-MM-DDTHH:MM:SS, optional tz."""
+    raw = str(ts or "").strip()
+    if not raw:
+        raise ToolError("INVALID_ARGUMENTS", "Empty date or datetime.")
+    if raw.endswith("Z"):
+        raw = raw[:-1] + "+00:00"
+    if len(raw) == 10:
+        raw += "T00:00"
+    return datetime.fromisoformat(raw).replace(tzinfo=None)
 
-    return (datetime.fromisoformat(start) + timedelta(minutes=minutes)).isoformat()
+
+def _iso_minute(value: datetime | str) -> str:
+    dt = value if isinstance(value, datetime) else _parse_local(str(value))
+    return dt.strftime("%Y-%m-%dT%H:%M")
+
+
+def _iso_date(value: datetime | str) -> str:
+    dt = value if isinstance(value, datetime) else _parse_local(str(value))
+    return dt.strftime("%Y-%m-%d")
+
+
+def _iso_plus_minutes(start: str, minutes: int) -> str:
+    return _iso_minute(_parse_local(start) + timedelta(minutes=minutes))
 
 
 def _naive_iso(ts: str) -> str:
-    ts = str(ts or "")
-    return ts.replace("Z", "+00:00")[:19] if ts else ts
+    if not str(ts or "").strip():
+        return ""
+    return _iso_minute(ts)
 
 
 # --- identity ----------------------------------------------------------------
@@ -449,14 +471,6 @@ def _d_get_patient_summary(a: dict[str, Any]) -> dict[str, Any]:
 # --- scheduling ---------------------------------------------------------------
 
 _VISIT_BY_CLASS = {
-    "cosmetic": {
-        "appointment_type_code": "COS_CONSULT",
-        "visit_class": "cosmetic",
-        "required_credential": "MD",
-        "duration_min": 30,
-        "urgency": "routine",
-        "constraints": ["cosmetic offices only", "deposit policy applies"],
-    },
     "mohs": {
         "appointment_type_code": "MOHS_CONSULT",
         "visit_class": "mohs",
@@ -527,7 +541,7 @@ def _d_list_locations(a: dict[str, Any]) -> dict[str, Any]:
     return {"locations": rows}
 
 
-_SLOT_TIMES = ("2026-08-24T09:00:00", "2026-08-25T11:30:00", "2026-08-26T14:00:00")
+_SLOT_TIMES = ("2026-08-24T09:00", "2026-08-25T11:30", "2026-08-26T14:00")
 
 
 def _d_find_slots(a: dict[str, Any]) -> dict[str, Any]:
@@ -554,9 +568,10 @@ def _d_find_slots(a: dict[str, Any]) -> dict[str, Any]:
             if prov is None:
                 continue
             for i, start in enumerate(_SLOT_TIMES):
-                if window_start and start < window_start:
+                if window_start and _parse_local(start) < _parse_local(window_start):
                     continue
-                if window_end and start > window_end:
+                slot_end = _iso_plus_minutes(start, 30)
+                if window_end and _parse_local(slot_end) > _parse_local(window_end):
                     continue
                 slots.append(
                     {
@@ -566,7 +581,7 @@ def _d_find_slots(a: dict[str, Any]) -> dict[str, Any]:
                         "provider_id": prov["id"],
                         "provider": f"{prov['name']}, {prov['credentials']}",
                         "start": start,
-                        "end": _iso_plus_minutes(start, 30),
+                        "end": slot_end,
                     }
                 )
     return {"slots": slots[:max_results], "count": min(len(slots), max_results)}
@@ -610,12 +625,17 @@ _BOOK_DESC = {
 def _d_book_appointment(a: dict[str, Any]) -> dict[str, Any]:
     _require(a, "slot_id", "appointment_type_code", "location_id", "provider_id",
              "start", "end")
+    if str(a["appointment_type_code"]) == "COS_CONSULT":
+        raise ToolError(
+            "USE_COSMETIC_BOOKING",
+            "Cosmetic consults are booked with book_cosmetic_consult, not book_appointment.",
+        )
     slot = _resolve_slot(str(a["slot_id"]))
     if (
         str(a["location_id"]) != slot["location_id"]
         or str(a["provider_id"]) != slot["provider_id"]
-        or str(a["start"]) != slot["start"]
-        or str(a["end"]) != slot["end"]
+        or _iso_minute(str(a["start"])) != slot["start"]
+        or _iso_minute(str(a["end"])) != slot["end"]
     ):
         raise ToolError(
             "SLOT_MISMATCH",
@@ -656,15 +676,17 @@ def _d_reschedule_appointment(a: dict[str, Any]) -> dict[str, Any]:
     _owned_appointment(appt_id)
     updated = update_appointment(
         appt_id,
-        AppointmentUpdate(start=a["new_start"], end=a["new_end"], status="booked"),
+        AppointmentUpdate(
+            start=_iso_minute(a["new_start"]),
+            end=_iso_minute(a["new_end"]),
+            status="booked",
+        ),
     )
     return {"appointment": updated, "status": "rescheduled", "fee_cents": 0,
             "note": "Rescheduling never costs anything — say so."}
 
 
 def _d_cancel_appointment(a: dict[str, Any]) -> dict[str, Any]:
-    from datetime import datetime
-
     _require(a, "appointment_id", "cancellation_reason_code")
     appt_id = int(a["appointment_id"])
     patient = _patient_row()
@@ -674,7 +696,7 @@ def _d_cancel_appointment(a: dict[str, Any]) -> dict[str, Any]:
                 "note": "Already cancelled — no fee charged again."}
     cosmetic = row["appointment_type_code"].startswith("COS")
     window_h, fee_cents = (72, 12500) if cosmetic else (24, 5000)
-    hours_out = (datetime.fromisoformat(row["start"]) - datetime.fromisoformat(TODAY)).total_seconds() / 3600
+    hours_out = (_parse_local(row["start"]) - _parse_local(TODAY)).total_seconds() / 3600
     inside_window = hours_out < window_h
     if inside_window and not a.get("fee_disclosed_and_accepted"):
         fee = fee_cents // 100
@@ -711,7 +733,7 @@ def _d_cancel_appointment(a: dict[str, Any]) -> dict[str, Any]:
 
 
 def _d_join_waitlist(a: dict[str, Any]) -> dict[str, Any]:
-    _require(a, "appointment_type_code", "location_ids", "earliest", "latest")
+    _require(a, "appointment_type_code", "location_ids", "earliest")
     location_ids = []
     for raw in a["location_ids"]:
         try:
@@ -723,8 +745,8 @@ def _d_join_waitlist(a: dict[str, Any]) -> dict[str, Any]:
             patient_id=_session_state().get("patient_id"),
             appointment_type_code=a["appointment_type_code"],
             location_ids=location_ids,
-            earliest=a.get("earliest"),
-            latest=a.get("latest"),
+            earliest=_iso_date(a["earliest"]),
+            latest=_iso_date(a["latest"]) if a.get("latest") else None,
         )
     )
     return {"waitlist_entry": entry, "status": "added"}
@@ -985,6 +1007,7 @@ def _line_items(balance_cents: int) -> list[dict[str, Any]]:
 
 def _d_get_account_balance(a: dict[str, Any]) -> dict[str, Any]:
     row = _patient_row()
+    _session_state()["last_amount_cents"] = row["balance_cents"]
     return {"balance_cents": row["balance_cents"], "line_items": _line_items(row["balance_cents"])}
 
 
@@ -1014,8 +1037,15 @@ def _d_send_payment_link(a: dict[str, Any]) -> dict[str, Any]:
 
 
 def _d_offer_financing(a: dict[str, Any]) -> dict[str, Any]:
-    _require(a, "amount_cents")
-    amount = int(a["amount_cents"])
+    raw = a.get("amount_cents")
+    if raw in (None, ""):
+        raw = _session_state().get("last_amount_cents")
+    if raw in (None, ""):
+        raise ToolError(
+            "INVALID_ARGUMENTS",
+            "I need the amount being financed — quote the service or look up the balance first.",
+        )
+    amount = int(raw)
     eligible = amount >= 25000
     return {"eligible": eligible, "provider": "CareCredit",
             "note": None if eligible else "CareCredit is offered for balances over $250."}
@@ -1023,6 +1053,11 @@ def _d_offer_financing(a: dict[str, Any]) -> dict[str, Any]:
 
 def _d_request_fee_waiver(a: dict[str, Any]) -> dict[str, Any]:
     _require(a, "fee_line_item_id")
+    if str(a["fee_line_item_id"]) != "li_noshow":
+        raise ToolError(
+            "INVALID_ARGUMENTS",
+            "Only the missed-visit fee line li_noshow can be sent for review.",
+        )
     _event("fee_waiver_request", dict(a))
     return {"review_opened": True, "sla": "two business days",
             "spoken_commitment": ("The billing team will review that fee and get back "
@@ -1051,6 +1086,7 @@ def _d_quote_cosmetic_service(a: dict[str, Any]) -> dict[str, Any]:
     service = str(a["service"]).strip().lower().replace(" ", "_")
     rng = _COSMETIC_QUOTES.get(service)
     if rng:
+        _session_state()["last_amount_cents"] = rng["low_cents"]
         return {"service": a["service"], "price_range": rng,
                 "note": "You may say this range and must add that the consult settles the number."}
     return {"service": a["service"], "price_range": None,
@@ -1093,10 +1129,21 @@ _RX_HARD_STOPS = (
 )
 
 
+_RX_FORMULARY = {
+    "triamcinolone", "isotretinoin", "accutane", "dupixent", "humira", "skyrizi",
+    "xanax", "tramadol", "adderall", "oxycodone", "codeine",
+}
+
+
 def _d_request_rx_refill(a: dict[str, Any]) -> dict[str, Any]:
     _require(a, "medication_name")
     patient = _patient_row()
     med = str(a["medication_name"]).strip().lower()
+    if med not in _RX_FORMULARY:
+        raise ToolError(
+            "UNKNOWN_MEDICATION",
+            f"medication_name must be one of {sorted(_RX_FORMULARY)}.",
+        )
     for keywords, route, note in _RX_HARD_STOPS:
         if any(k in med for k in keywords):
             _event("rx_refill_request", {"patient_id": patient["id"], **a, "route": route})
@@ -1132,55 +1179,22 @@ _CLINICAL_CALLBACK_WINDOW = {
 
 
 def _d_create_clinical_message(a: dict[str, Any]) -> dict[str, Any]:
-    _require(a, "category", "priority")
+    _require(a, "category")
     patient = _patient_row()
-    event_id = _event("clinical_message", {"patient_id": patient["id"], **a})
-    priority = str(a["priority"]).strip().lower()
-    window = _CLINICAL_CALLBACK_WINDOW.get(priority, _CLINICAL_CALLBACK_WINDOW["routine"])
+    priority = str(a.get("priority") or "routine").strip().lower()
+    if priority not in _CLINICAL_CALLBACK_WINDOW:
+        priority = "routine"
+    event_id = _event("clinical_message", {"patient_id": patient["id"], **a, "priority": priority})
+    window = _CLINICAL_CALLBACK_WINDOW[priority]
     return {"message_id": f"cm_{event_id}", "queued": True,
-            "priority": a["priority"], "category": a["category"],
+            "priority": priority, "category": a["category"],
             "callback_window": window,
             "spoken_commitment": f"Someone from the clinical team will call you back {window}."}
 
 
 # --- practice / plumbing ----------------------------------------------------------
 
-_KB = {
-    "hours": (
-        "Offices are open 8am to 5pm Monday through Friday, and Park Avenue is open "
-        "9am to 1pm on Saturdays."
-    ),
-    "directions": (
-        "Park Avenue is at 36th and Park, a block from the 6 train; there is a garage "
-        "next door. Brooklyn Heights is two blocks from Borough Hall."
-    ),
-    "portal": (
-        "The patient portal is portal.strausderm.example; activation links arrive by "
-        "text and expire after 72 hours."
-    ),
-    "fees": (
-        "Cancellations need 24 hours notice for medical visits and 72 for cosmetic; the "
-        "missed-visit fee is $50 medical and $125 cosmetic."
-    ),
-    "services": (
-        "Straus treats medical, surgical, and cosmetic dermatology plus allergy testing "
-        "and immunotherapy."
-    ),
-}
-
-
-def _d_search_practice_kb(a: dict[str, Any]) -> dict[str, Any]:
-    _require(a, "topic")
-    topic = str(a["topic"]).strip().lower()
-    answer = _KB.get(topic)
-    if not answer:
-        return {"source": None, "answer": None,
-                "note": "No grounded source — do not make one up."}
-    return {"source": topic, "answer": answer}
-
-
-_SMS_TEMPLATES = {"appointment_confirmation", "portal_activation", "payment_link",
-                  "insurance_card_upload", "directions", "cosmetic_deposit"}
+_SMS_TEMPLATES = {"appointment_confirmation"}
 
 
 def _d_send_sms(a: dict[str, Any]) -> dict[str, Any]:
@@ -1193,7 +1207,10 @@ def _d_send_sms(a: dict[str, Any]) -> dict[str, Any]:
 
 
 def _d_send_portal_activation(a: dict[str, Any]) -> dict[str, Any]:
-    channel = str(a.get("channel") or "sms")
+    _require(a, "channel")
+    channel = str(a["channel"]).strip().lower()
+    if channel not in ("sms", "email"):
+        raise ToolError("INVALID_ARGUMENTS", "channel must be sms or email.")
     _event("portal_activation", {"channel": channel})
     return {"sent": True, "channel": channel, "expires": "72 hours"}
 
@@ -1258,7 +1275,6 @@ DISPATCH = {
     "request_rx_refill": _d_request_rx_refill,
     "get_results_status": _d_get_results_status,
     "create_clinical_message": _d_create_clinical_message,
-    "search_practice_kb": _d_search_practice_kb,
     "send_sms": _d_send_sms,
     "send_portal_activation": _d_send_portal_activation,
     "create_callback_task": _d_create_callback_task,

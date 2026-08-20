@@ -6,15 +6,7 @@
       "system_prompt": "system-prompts/reception.md",
       "tools": [
         {
-          "name": "search_practice_kb",
-          "handoff": false
-        },
-        {
           "name": "create_callback_task",
-          "handoff": false
-        },
-        {
-          "name": "send_sms",
           "handoff": false
         },
         {
@@ -25,10 +17,6 @@
         {
           "name": "end_call",
           "session": true
-        },
-        {
-          "name": "classify_visit_request",
-          "handoff": false
         },
         {
           "name": "list_locations",
@@ -61,15 +49,7 @@
       "system_prompt": "system-prompts/identity.md",
       "tools": [
         {
-          "name": "search_practice_kb",
-          "handoff": false
-        },
-        {
           "name": "create_callback_task",
-          "handoff": false
-        },
-        {
-          "name": "send_sms",
           "handoff": false
         },
         {
@@ -125,10 +105,6 @@
       "system_prompt": "system-prompts/scheduling.md",
       "tools": [
         {
-          "name": "search_practice_kb",
-          "handoff": false
-        },
-        {
           "name": "create_callback_task",
           "handoff": false
         },
@@ -147,10 +123,6 @@
         },
         {
           "name": "classify_visit_request",
-          "handoff": false
-        },
-        {
-          "name": "check_plan_accepted",
           "handoff": false
         },
         {
@@ -180,21 +152,6 @@
         {
           "name": "schedule_allergy_service",
           "handoff": false
-        },
-        {
-          "name": "transfer_to_coverage",
-          "handoff": true,
-          "handoff_to": "coverage"
-        },
-        {
-          "name": "transfer_to_identity",
-          "handoff": true,
-          "handoff_to": "identity"
-        },
-        {
-          "name": "transfer_to_cosmetic",
-          "handoff": true,
-          "handoff_to": "cosmetic"
         }
       ]
     },
@@ -203,15 +160,7 @@
       "system_prompt": "system-prompts/coverage.md",
       "tools": [
         {
-          "name": "search_practice_kb",
-          "handoff": false
-        },
-        {
           "name": "create_callback_task",
-          "handoff": false
-        },
-        {
-          "name": "send_sms",
           "handoff": false
         },
         {
@@ -243,11 +192,6 @@
           "name": "transfer_to_scheduling",
           "handoff": true,
           "handoff_to": "scheduling"
-        },
-        {
-          "name": "transfer_to_identity",
-          "handoff": true,
-          "handoff_to": "identity"
         }
       ]
     },
@@ -256,15 +200,7 @@
       "system_prompt": "system-prompts/cosmetic.md",
       "tools": [
         {
-          "name": "search_practice_kb",
-          "handoff": false
-        },
-        {
           "name": "create_callback_task",
-          "handoff": false
-        },
-        {
-          "name": "send_sms",
           "handoff": false
         },
         {
@@ -299,16 +235,6 @@
         {
           "name": "offer_financing",
           "handoff": false
-        },
-        {
-          "name": "transfer_to_identity",
-          "handoff": true,
-          "handoff_to": "identity"
-        },
-        {
-          "name": "transfer_to_scheduling",
-          "handoff": true,
-          "handoff_to": "scheduling"
         }
       ]
     },
@@ -317,15 +243,7 @@
       "system_prompt": "system-prompts/billing.md",
       "tools": [
         {
-          "name": "search_practice_kb",
-          "handoff": false
-        },
-        {
           "name": "create_callback_task",
-          "handoff": false
-        },
-        {
-          "name": "send_sms",
           "handoff": false
         },
         {
@@ -361,11 +279,6 @@
           "name": "transfer_to_scheduling",
           "handoff": true,
           "handoff_to": "scheduling"
-        },
-        {
-          "name": "transfer_to_identity",
-          "handoff": true,
-          "handoff_to": "identity"
         }
       ]
     },
@@ -374,15 +287,7 @@
       "system_prompt": "system-prompts/clinical.md",
       "tools": [
         {
-          "name": "search_practice_kb",
-          "handoff": false
-        },
-        {
           "name": "create_callback_task",
-          "handoff": false
-        },
-        {
-          "name": "send_sms",
           "handoff": false
         },
         {
@@ -414,11 +319,6 @@
           "name": "transfer_to_scheduling",
           "handoff": true,
           "handoff_to": "scheduling"
-        },
-        {
-          "name": "transfer_to_identity",
-          "handoff": true,
-          "handoff_to": "identity"
         }
       ]
     }

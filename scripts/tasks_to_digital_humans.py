@@ -375,7 +375,7 @@ def case_key_of(dh: dict[str, Any]) -> str:
 
 
 def check(humans: list[dict[str, Any]], industry: str) -> None:
-    expected = {"healthcare": 66, "legal": 72, "customer-support": 72}.get(industry)
+    expected = {"healthcare": 72, "legal": 72, "customer-support": 72}.get(industry)
     if expected is not None and len(humans) != expected:
         raise SystemExit(f"expected {expected} {industry} digital humans, got {len(humans)}")
     keys = [case_key_of(dh) for dh in humans]

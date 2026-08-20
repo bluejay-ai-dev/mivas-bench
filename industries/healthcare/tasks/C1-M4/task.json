@@ -1,23 +1,73 @@
 {
-  "task_name": "C5-E2: Missed-visit fee amounts",
-  "intent": "Ask what the missed-visit fee is for a regular medical appointment, and what it is if the visit is cosmetic. Once you have both dollar amounts, thank them and end the call. Do not ask to book, reschedule, or cancel. Do not ask to add insurance, for a callback, to speak to a person, a bill, a payment, the patient portal, a waitlist, a text, financing, or the street, floor, or suite. Do not hang up until they have looked up the published fee schedule. If they quote a number without looking it up, ask them to check the fees.",
+  "task_name": "C1-M4: New-patient visit at Windermere",
+  "intent": "You are a new patient in Florida with an itchy scalp that will not clear. You want a new-patient visit at the Windermere office \u2014 that office only. Answer their questions about who you are and how to reach you once, then proceed to booking. Take the first appointment time they offer. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first time out loud, then thank them and end the call. Do not ask to add or change insurance. Do not ask for a callback, to speak to a person, a bill, a payment, the patient portal, a waitlist, a text, financing, or the street, floor, or suite. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar. If they only list openings, say book the first one. Do not ask them to text you an appointment confirmation.",
   "traits": [
     {
       "trait_name": "full_name",
-      "value": "Ida Bromley"
+      "value": "Helen Cho"
+    },
+    {
+      "trait_name": "mobile",
+      "value": "407-555-0199"
+    },
+    {
+      "trait_name": "date_of_birth",
+      "value": "1968-04-14"
+    },
+    {
+      "trait_name": "zip",
+      "value": "34786"
+    },
+    {
+      "trait_name": "patient_status",
+      "value": "new"
+    },
+    {
+      "trait_name": "preferred_office",
+      "value": "Windermere"
+    },
+    {
+      "trait_name": "carrier",
+      "value": "Medicare"
     }
   ],
-  "exp_handoff_path": [],
+  "exp_handoff_path": [
+    "transfer_to_scheduling"
+  ],
   "exp_tool_calls": [
     {
-      "name": "search_practice_kb",
+      "name": "transfer_to_scheduling"
+    },
+    {
+      "name": "classify_visit_request",
       "parameters": {
-        "topic": "fees"
+        "visit_class": "medical",
+        "urgency": "routine",
+        "is_new_patient": true
+      }
+    },
+    {
+      "name": "find_slots",
+      "parameters": {
+        "location_ids": [
+          "loc_windermere"
+        ]
+      }
+    },
+    {
+      "name": "book_appointment",
+      "parameters": {
+        "location_id": "loc_windermere",
+        "slot_id": "slot_loc_windermere_1",
+        "provider_id": "prov_patel",
+        "start": "2026-08-24T09:00",
+        "end": "2026-08-24T09:30",
+        "appointment_type_code": "NP_MED"
       },
       "output": {
         "ok": true,
         "data": {
-          "source": "fees"
+          "status": "booked"
         }
       }
     }
@@ -26,6 +76,12 @@
     "creativity": 0
   },
   "scripted_responses": [
+    {
+      "match_type": "context",
+      "match_phrase": "offers an appointment time, a slot, or asks which day or time you want. NOT when asking for your name or date of birth, NOT when they have not yet given the street, floor, and suite if you still need those.",
+      "response_type": "phrase",
+      "response_value": "I'll take the first time you offered."
+    },
     {
       "match_type": "context",
       "match_phrase": "offers to transfer you to a human, a person, the front desk, or a live agent. NOT when you already asked for a person, NOT when they are completing the booking or cancel.",
@@ -40,23 +96,23 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when asking for a payment-link number, NOT when asking for your mobile number for identity.",
+      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when offering a payment link or deposit link, NOT when asking for a payment-link number, NOT when asking for your mobile number for identity, NOT when sending portal access.",
       "response_type": "phrase",
-      "response_value": "No thanks, I don't need a text."
+      "response_value": "No thanks, I don't need a confirmation text."
     },
     {
       "match_type": "context",
-      "match_phrase": "quotes a missed-visit fee or no-show fee without saying they looked it up or checked the fee schedule. NOT when they have just said they checked the published fees.",
+      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before a time has been confirmed on the calendar. NOT when they have just confirmed a booked time.",
       "response_type": "phrase",
-      "response_value": "Can you check the published fee schedule for that? I need the official amounts."
+      "response_value": "I still need that time booked. Please confirm it is on the calendar before I go."
     }
   ],
-  "customer_name": "Ida Bromley",
+  "customer_name": "Helen Cho",
   "customer_available_tools": {},
   "metadata": {
-    "category": "C5",
-    "category_slug": "billing-and-payments",
-    "difficulty": "easy",
+    "category": "C1",
+    "category_slug": "new-patient-access",
+    "difficulty": "medium",
     "audio_condition": "perfect"
   },
   "exp_db_state": {
@@ -200,8 +256,8 @@
         "location_id": "loc_park_ave",
         "provider_id": "prov_chen",
         "appointment_type_code": "MED_FOLLOWUP",
-        "start": "2026-08-20T10:00:00",
-        "end": "2026-08-20T10:20:00",
+        "start": "2026-08-20T10:00",
+        "end": "2026-08-20T10:20",
         "description": "Follow-up acne check",
         "status": "booked"
       },
@@ -211,8 +267,8 @@
         "location_id": "loc_park_ave",
         "provider_id": "prov_chen",
         "appointment_type_code": "COS_CONSULT",
-        "start": "2026-08-21T15:00:00",
-        "end": "2026-08-21T15:30:00",
+        "start": "2026-08-21T15:00",
+        "end": "2026-08-21T15:30",
         "description": "Botox consult",
         "status": "booked"
       },
@@ -222,9 +278,20 @@
         "location_id": "loc_windermere",
         "provider_id": "prov_patel",
         "appointment_type_code": "MED_FOLLOWUP",
-        "start": "2026-09-15T09:00:00",
-        "end": "2026-09-15T09:20:00",
+        "start": "2026-09-15T09:00",
+        "end": "2026-09-15T09:20",
         "description": "Eczema follow-up",
+        "status": "booked"
+      },
+      {
+        "id": 4,
+        "patient_id": null,
+        "location_id": "loc_windermere",
+        "provider_id": "prov_patel",
+        "appointment_type_code": "NP_MED",
+        "start": "2026-08-24T09:00",
+        "end": "2026-08-24T09:30",
+        "description": "new patient visit",
         "status": "booked"
       }
     ],

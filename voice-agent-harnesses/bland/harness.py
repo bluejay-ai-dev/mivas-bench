@@ -235,9 +235,7 @@ def _webhook_node(
 # from the industry tool server if a later specialist node adds them.
 _SHARED_SKIP = frozenset(
     {
-        "search_practice_kb",
         "create_callback_task",
-        "send_sms",
     }
 )
 
@@ -293,13 +291,27 @@ def _take_path_when(clause: str) -> str:
     return f"Take this path when {clause}."
 
 
-def _tool_edge_description(spec: dict[str, Any]) -> str:
+def _tool_edge_description(
+    spec: dict[str, Any],
+    catalog_names: Iterable[str] = (),
+) -> str:
     name = spec["name"]
     if name in _HANDOFF_WHEN:
         return _take_path_when(_HANDOFF_WHEN[name])
     desc = (spec.get("description") or name).strip()
-    desc = re.sub(re.escape(name), "", desc, flags=re.I)
-    desc = desc.split(".")[0].strip(" -")
+    when = re.search(r"When to call this tool:\s*(.+?)(?:\.|$)", desc, re.I | re.S)
+    if when:
+        desc = when.group(1).strip()
+    else:
+        desc = re.sub(re.escape(name), "", desc, flags=re.I)
+        desc = desc.split(".")[0].strip(" -")
+    for other in sorted(set(catalog_names) | {name}, key=len, reverse=True):
+        desc = re.sub(
+            r"\b" + re.escape(other) + r"\b",
+            other.replace("_", " "),
+            desc,
+            flags=re.I,
+        )
     if re.match(r"invisible handoff", desc, re.I):
         found = re.search(r"\b(?:when|for)\s+(.+)", desc, re.I)
         desc = found.group(1) if found else desc
@@ -417,7 +429,7 @@ def _blueprint_pathway_graph(bp: dict[str, Any], public_url: str) -> dict[str, A
                     "source": name,
                     "target": webhook_id,
                     "label": f"{name} → {tname}",
-                    "description": _tool_edge_description(spec),
+                    "description": _tool_edge_description(spec, catalog),
                 }
             )
         # end_call last: Bland often picks the first matching edge, and "thank you"

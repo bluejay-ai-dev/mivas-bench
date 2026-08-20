@@ -230,6 +230,33 @@ def test_every_agent_reachable(industry: str) -> None:
     assert not unreachable, f"unreachable agents: {sorted(unreachable)}"
 
 
+@industry
+def test_handoff_graph_is_acyclic(industry: str) -> None:
+    """Healthcare (and any industry without a documented gap) must be a DAG."""
+    if industry != "healthcare":
+        pytest.skip("acyclic handoff graph is the healthcare invariant")
+    bp = _blueprint(industry)
+    graph = {
+        a["name"]: [t["handoff_to"] for t in a["tools"] if t.get("handoff")]
+        for a in bp["agents"]
+    }
+    visiting: set[str] = set()
+    seen: set[str] = set()
+
+    def visit(node: str) -> None:
+        if node in seen:
+            return
+        assert node not in visiting, f"cycle through {node}"
+        visiting.add(node)
+        for nxt in graph.get(node, []):
+            visit(nxt)
+        visiting.remove(node)
+        seen.add(node)
+
+    for name in graph:
+        visit(name)
+
+
 _EDGE = re.compile(r"^\s*(\w[\w-]*)\s*-->\s*\|(.+?)\|\s*(\w[\w-]*)")
 
 
@@ -252,6 +279,39 @@ def test_mermaid_matches_blueprint(industry: str) -> None:
     assert found == expected, (
         f"mmd/blueprint edge drift — only in mmd: {sorted(found - expected)}, "
         f"only in blueprint: {sorted(expected - found)}")
+
+
+def test_healthcare_input_strings_are_closed() -> None:
+    """Every healthcare string argument is an enum, a pattern, or a dated pattern.
+
+    Names, phones, member ids, and slot ids stay patterned identifiers. Categories
+    are enums. Dates are YYYY-MM-DD. Datetimes are YYYY-MM-DDTHH:MM — no seconds.
+    """
+    date_pat = r"^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+    minute_pat = r"^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}$"
+    datetime_keys = {
+        "start", "end", "new_start", "new_end", "window_start", "window_end",
+    }
+    date_keys = {"dob", "service_date", "earliest", "latest"}
+
+    def walk(tool: str, key: str, prop: dict) -> None:
+        if prop.get("type") == "array" and isinstance(prop.get("items"), dict):
+            walk(tool, f"{key}[]", prop["items"])
+            return
+        if prop.get("type") != "string":
+            return
+        loc = f"{tool}.{key}"
+        assert prop.get("enum") or prop.get("pattern"), f"{loc} has neither enum nor pattern"
+        if key in date_keys:
+            assert prop.get("pattern") == date_pat, loc
+        if key in datetime_keys:
+            assert prop.get("pattern") == minute_pat, loc
+            assert prop.get("format") != "date-time", loc
+
+    for tool in _tools("healthcare"):
+        schema = tool.get("inputSchema") or {}
+        for key, prop in (schema.get("properties") or {}).items():
+            walk(tool["name"], key, prop)
 
 
 @industry

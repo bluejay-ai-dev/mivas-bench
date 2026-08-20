@@ -1,6 +1,6 @@
 {
   "task_name": "C1-M3: Allergy skin testing at Park Avenue",
-  "intent": "You are a new patient and you have had hives on and off for about three weeks. A primary-care doctor told you to get allergy skin testing. Ask specifically for allergy skin testing at Park Avenue, not a regular rash visit. Ask what medicines you must stop beforehand. Confirm the first available Park Avenue skin-testing slot on August 24. If they offer a different day, ask for August 24. Do not confirm any other date. Confirm August 24 out loud, then thank them and end the call. Do not ask to add or change insurance. Do not ask for a callback, to speak to a person, a bill, a payment, the patient portal, a waitlist, a text, financing, or the street, floor, or suite. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar. If they only list openings, say book the first one. If they start to book a regular medical visit, stop them and say you need allergy skin testing, not a regular rash visit. Stay until the skin-testing service is scheduled.",
+  "intent": "You are a new patient and you have had hives on and off for about three weeks. A primary-care doctor told you to get allergy skin testing. Ask specifically for allergy skin testing at Park Avenue, not a regular rash visit. Ask what medicines you must stop beforehand. Confirm the first available Park Avenue skin-testing slot on August 24. If they offer a different day, ask for August 24. Do not confirm any other date. Confirm August 24 out loud, then thank them and end the call. Do not ask to add or change insurance. Do not ask for a callback, to speak to a person, a bill, a payment, the patient portal, a waitlist, a text, financing, or the street, floor, or suite. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar. If they only list openings, say book the first one. If they start to book a regular medical visit, stop them and say you need allergy skin testing, not a regular rash visit. Stay until the skin-testing service is scheduled. Do not ask them to text you an appointment confirmation.",
   "traits": [
     {
       "trait_name": "mobile",
@@ -74,9 +74,9 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when asking for a payment-link number, NOT when asking for your mobile number for identity.",
+      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when offering a payment link or deposit link, NOT when asking for a payment-link number, NOT when asking for your mobile number for identity, NOT when sending portal access.",
       "response_type": "phrase",
-      "response_value": "No thanks, I don't need a text."
+      "response_value": "No thanks, I don't need a confirmation text."
     },
     {
       "match_type": "context",
@@ -234,8 +234,8 @@
         "location_id": "loc_park_ave",
         "provider_id": "prov_chen",
         "appointment_type_code": "MED_FOLLOWUP",
-        "start": "2026-08-20T10:00:00",
-        "end": "2026-08-20T10:20:00",
+        "start": "2026-08-20T10:00",
+        "end": "2026-08-20T10:20",
         "description": "Follow-up acne check",
         "status": "booked"
       },
@@ -245,8 +245,8 @@
         "location_id": "loc_park_ave",
         "provider_id": "prov_chen",
         "appointment_type_code": "COS_CONSULT",
-        "start": "2026-08-21T15:00:00",
-        "end": "2026-08-21T15:30:00",
+        "start": "2026-08-21T15:00",
+        "end": "2026-08-21T15:30",
         "description": "Botox consult",
         "status": "booked"
       },
@@ -256,8 +256,8 @@
         "location_id": "loc_windermere",
         "provider_id": "prov_patel",
         "appointment_type_code": "MED_FOLLOWUP",
-        "start": "2026-09-15T09:00:00",
-        "end": "2026-09-15T09:20:00",
+        "start": "2026-09-15T09:00",
+        "end": "2026-09-15T09:20",
         "description": "Eczema follow-up",
         "status": "booked"
       },
@@ -267,8 +267,8 @@
         "location_id": "loc_park_ave",
         "provider_id": "prov_chen",
         "appointment_type_code": "ALLERGY_SKIN_TESTING",
-        "start": "2026-08-24T09:00:00",
-        "end": "2026-08-24T09:30:00",
+        "start": "2026-08-24T09:00",
+        "end": "2026-08-24T09:30",
         "description": "Allergy service: skin_testing",
         "status": "booked"
       }

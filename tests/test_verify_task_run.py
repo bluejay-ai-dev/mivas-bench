@@ -78,6 +78,21 @@ def test_office_waitlist_allows_extra_rows_when_expected_is_nonempty() -> None:
     assert vtr.office_states_match(expected, missing, industry="healthcare") is False
     empty_expected = {"patients": [], "appointments": [], "waitlist": []}
     assert vtr.office_states_match(empty_expected, actual, industry="healthcare") is False
+    # extra listing consumes id=1; the matching window is id=2
+    expected_with_id = {
+        "patients": [],
+        "appointments": [],
+        "waitlist": [{**expected_row, "id": 1}],
+    }
+    actual_id_shifted = {
+        "patients": [],
+        "appointments": [],
+        "waitlist": [
+            {**extra_row, "id": 1},
+            {**expected_row, "id": 2},
+        ],
+    }
+    assert vtr.office_states_match(expected_with_id, actual_id_shifted, industry="healthcare") is True
     assert vtr.office_states_match(empty_expected, {"patients": [], "appointments": [], "waitlist": []}, industry="healthcare") is True
 
 
@@ -411,8 +426,26 @@ def test_send_sms_is_required_only_when_listed() -> None:
         [{"name": "book_appointment"}],
         booked,
         schemas=schemas,
+        industry="healthcare",
     )
     assert skip_ok["passed"] is True
+    extra_sms = vtr.tool_call_adherence(
+        [{"name": "book_appointment"}],
+        with_sms,
+        schemas=schemas,
+        industry="healthcare",
+    )
+    assert extra_sms["passed"] is False
+    assert extra_sms["extra"] == ["send_sms"]
+    extras_ok_elsewhere = vtr.tool_call_adherence(
+        [{"name": "book_appointment"}],
+        with_sms,
+        schemas=schemas,
+    )
+    assert extras_ok_elsewhere["passed"] is True
+    empty_sms = vtr.tool_call_adherence([], with_sms, schemas=schemas, industry="healthcare")
+    assert empty_sms["passed"] is False
+    assert empty_sms["extra"] == ["send_sms"]
 
 
 def test_clinical_message_allows_irrelevant_optional_parameters() -> None:
