@@ -1,7 +1,7 @@
 {
   "task_name": "C3-M4: Immigration matter declined",
   "customer_name": "Rafael Osorio",
-  "intent": "Open with exactly: \"I need help with an immigration matter.\" When asked who this would be against, say exactly: \"It's USCIS.\" Accept if told the firm does not handle this. When told a person will take it from here, say exactly: \"Okay, thank you.\" and end the call.",
+  "intent": "Open with exactly: \"I need help with an immigration matter.\" When asked who this would be against, say exactly: \"It's USCIS.\" When asked what type of matter this is, say it is immigration. Stay until they confirm a person at the firm will take it from here. A spoken 'we do not handle immigration' without transferring you to a person is not enough. Do not book an evaluation. When told a person will take it from here, say exactly: \"Okay, thank you.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -24,6 +24,12 @@
     "transfer_to_screening"
   ],
   "exp_tool_calls": [
+    {
+      "name": "lookup_caller",
+      "parameters": {
+        "full_name": "Rafael Osorio"
+      }
+    },
     {
       "name": "transfer_to_screening"
     },
@@ -66,6 +72,20 @@
       "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question.",
       "response_type": "phrase",
       "response_value": "It's USCIS.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks what type of matter this is, whether it is immigration, visa, or citizenship, or how the case is classified. NOT when asking who this would be against or for a name and number.",
+      "response_type": "phrase",
+      "response_value": "It's an immigration matter.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks whether you want to book a case evaluation, a free evaluation, or an appointment. NOT when connecting you to a staff member or live person.",
+      "response_type": "phrase",
+      "response_value": "No thank you. I just needed to know if you handle this.",
       "occurrence_mode": "always"
     }
   ],

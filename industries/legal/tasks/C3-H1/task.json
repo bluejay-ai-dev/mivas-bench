@@ -1,7 +1,7 @@
 {
   "task_name": "C3-H1: Caller starts the story before conflict check",
   "customer_name": "Yvonne Pressley",
-  "intent": "Open with exactly: \"So I was driving home and this van clipped my bumper.\" If interrupted for the other side, say exactly: \"It's Ridgeline Courier.\" State California. Date May fifteenth, twenty twenty six. Once intake is recorded, say exactly: \"Thank you, that's all I needed.\" Do not book an evaluation. End the call.",
+  "intent": "Open with exactly: \"So I was driving home and this van clipped my bumper.\" If interrupted for the other side, say exactly: \"It's Ridgeline Courier.\" State California. Date May fifteenth, twenty twenty six. Accept the new client packet by email if offered. Decline a case evaluation. Stay until they confirm the intake is on the file and the packet has been sent. A spoken promise to take care of it without those writes is not enough. Once they confirm the intake is recorded and the packet was sent, say exactly: \"Thank you, that's all I needed.\" Do not book an evaluation. End the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -33,6 +33,12 @@
     "transfer_to_intake"
   ],
   "exp_tool_calls": [
+    {
+      "name": "lookup_caller",
+      "parameters": {
+        "full_name": "Yvonne Pressley"
+      }
+    },
     {
       "name": "transfer_to_screening"
     },
@@ -71,8 +77,13 @@
       "parameters": {
         "practice_area": "auto_accident",
         "state": "CA",
-        "incident_date": "2026-05-15",
-        "summary": "Rear-end collision on the freeway."
+        "incident_date": "2026-05-15"
+      }
+    },
+    {
+      "name": "send_intake_packet",
+      "parameters": {
+        "channel": "email"
       }
     }
   ],
@@ -124,9 +135,16 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "asks whether you want to book a case evaluation, a free evaluation, or an appointment",
+      "match_phrase": "The agent asks whether to send the packet by email or text, or which channel to use. NOT any other question.",
       "response_type": "phrase",
-      "response_value": "No thank you. Intake is enough. That's all I needed.",
+      "response_value": "Email is better, thanks.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether you want to book a free case evaluation or set up an evaluation appointment, before stating any percentage fee, dollar fee, or contingency number. NOT after a fee amount has already been read back.",
+      "response_type": "phrase",
+      "response_value": "No thank you. Intake and the packet are enough.",
       "occurrence_mode": "always"
     }
   ],
@@ -177,11 +195,17 @@
         "practice_area": "auto_accident",
         "state": "CA",
         "incident_date": "2026-05-15",
-        "summary": "Rear-end collision on the freeway."
+        "summary": "Intake summary."
       }
     ],
     "intake_notes": [],
-    "documents": [],
+    "documents": [
+      {
+        "caller_id": "c_new",
+        "kind": "intake_packet",
+        "target": "email"
+      }
+    ],
     "holds": [],
     "evaluations": [],
     "messages": [],

@@ -1,7 +1,7 @@
 {
-  "task_name": "C2-M1: Conflict hit with screening hop",
+  "task_name": "C2-M1: Conflict hit, Northgate Insurance",
   "customer_name": "Selma Ridgeway",
-  "intent": "Open with exactly: \"My insurance company denied my claim.\" When asked who this would be against, say exactly: \"It's Northgate Insurance.\" When told a person will take it from here, say exactly: \"Okay, thank you.\" and end the call.",
+  "intent": "Open with exactly: \"My insurance company denied my claim.\" When asked who this would be against, say exactly: \"It's Northgate Insurance.\" Do not volunteer a state, a date, or a story, and do not ask for a person. If they ask which state, when it happened, or to describe what happened, say exactly: \"I'd rather not get into that until you check whether you can take it.\" If they offer an appointment or to start a written account, say exactly: \"No, I don't want to book. I need you to check whether you can take this.\" Stay until they confirm a person will take it from here. A spoken 'we'll look into it' or that the firm cannot take the matter, without transferring you to someone, is not enough. When told a person will take it from here, say exactly: \"Okay, thank you.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -20,6 +20,12 @@
     "transfer_to_screening"
   ],
   "exp_tool_calls": [
+    {
+      "name": "lookup_caller",
+      "parameters": {
+        "full_name": "Selma Ridgeway"
+      }
+    },
     {
       "name": "transfer_to_screening"
     },
@@ -56,6 +62,27 @@
       "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question.",
       "response_type": "phrase",
       "response_value": "It's Northgate Insurance.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks which state this happened in, or where it took place. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "I'd rather not get into that until you check whether you can take it.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks when the incident happened, or for the date of the accident, injury or event. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "I'd rather not get into that until you check whether you can take it.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent starts taking a written account, asks you to describe what happened in writing, or offers an appointment. NOT when asking which state or when it happened.",
+      "response_type": "phrase",
+      "response_value": "No, I don't want to book. I need you to check whether you can take this.",
       "occurrence_mode": "always"
     }
   ],

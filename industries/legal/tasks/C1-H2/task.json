@@ -1,11 +1,27 @@
 {
-  "task_name": "C1-H2: Wrong number",
+  "task_name": "C1-H2: Message then premises intake",
   "customer_name": "Sam Porter",
-  "intent": "Open with exactly: \"Is this the pizza place on Maple?\" You reached the wrong number. When told this is a law firm, say exactly: \"Sorry, wrong number.\" and end the call immediately. Do not give a callback number or describe any incident. Say exactly: \"Sorry, wrong number.\" and end the call.",
+  "intent": "Open with exactly: \"I need to leave a message for Tom Eckhart.\" You have two jobs on this call. First they look you up and take a written message for Tom Eckhart. When asked what the message is, say exactly: \"Tell him Sam Porter called about the referral letter.\" Stay until they confirm that message is on the file. Do not hang up after the message. After they confirm the message is written down, say exactly: \"I also slipped at a store in Texas and I need a lawyer.\" This is a new matter of yours. You have not called this firm before. When asked who this would be against, say exactly: \"It's Cedarlane Market.\" When asked which state this happened in or where it took place, say exactly: \"In Texas.\" When asked when, say exactly: \"It was May third, twenty twenty six.\" Give your name and number if asked. Do not ask for a staff member. If offered an appointment or evaluation, decline booking. Stay until they confirm the message is on the file and the intake is recorded. A spoken 'we'll take care of it' without those writes is not enough. Then thank and end. Once they have confirmed the message is on the file and the intake is recorded, say exactly: \"Thank you, that's all I needed.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
       "value": "Sam Porter"
+    },
+    {
+      "trait_name": "practice_area",
+      "value": "premises_liability"
+    },
+    {
+      "trait_name": "state",
+      "value": "TX"
+    },
+    {
+      "trait_name": "incident_date",
+      "value": "2026-05-03"
+    },
+    {
+      "trait_name": "opposing_party",
+      "value": "Cedarlane Market"
     },
     {
       "trait_name": "phone",
@@ -13,11 +29,123 @@
     }
   ],
   "exp_handoff_path": [],
-  "exp_tool_calls": [],
+  "exp_tool_calls": [
+    {
+      "name": "lookup_caller",
+      "parameters": {
+        "full_name": "Sam Porter"
+      }
+    },
+    {
+      "name": "take_message",
+      "parameters": {
+        "for_whom": "Tom Eckhart"
+      }
+    },
+    {
+      "name": "check_conflict",
+      "parameters": {
+        "opposing_party": "Cedarlane Market"
+      }
+    },
+    {
+      "name": "check_practice_area",
+      "parameters": {
+        "practice_area": "premises_liability"
+      }
+    },
+    {
+      "name": "check_jurisdiction",
+      "parameters": {
+        "state": "TX",
+        "practice_area": "premises_liability"
+      }
+    },
+    {
+      "name": "calculate_filing_deadline",
+      "parameters": {
+        "state": "TX",
+        "practice_area": "premises_liability",
+        "incident_date": "2026-05-03"
+      }
+    },
+    {
+      "name": "record_intake",
+      "parameters": {
+        "practice_area": "premises_liability",
+        "state": "TX",
+        "incident_date": "2026-05-03"
+      }
+    }
+  ],
   "behaviors": {
     "creativity": 0
   },
-  "scripted_responses": [],
+  "scripted_responses": [
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
+      "response_type": "phrase",
+      "response_value": "Sam Porter, 617-555-0199.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "No, nobody represents me.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "It's Cedarlane Market.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks which state this happened in, or where it took place. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "In Texas.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks when the incident happened, or for the date of the accident, injury or event. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "It was May third, twenty twenty six.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks what the message is, what to tell Tom Eckhart, or what you want written down. NOT when asking for your name or number, NOT when confirming a message already taken, and NOT when asking who the claim is against, which state, or when it happened.",
+      "response_type": "phrase",
+      "response_value": "Tell him Sam Porter called about the referral letter.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent confirms a message was taken, written down, or is on the file, or starts to wrap up after taking a message, before they have recorded an intake. NOT after they have already confirmed the intake is on the file.",
+      "response_type": "phrase",
+      "response_value": "I also slipped at a store in Texas and I need a lawyer.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether you want to book a free case evaluation or set up an evaluation appointment, before stating any percentage fee, dollar fee, or contingency number. NOT after a fee amount has already been read back.",
+      "response_type": "phrase",
+      "response_value": "Not yet, let me read the paperwork first.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to transfer you to a human staff member, a live person at the front desk, or a real agent because they cannot continue on this line. NOT when transferring you to screening, intake, scheduling, or client services on this call. NOT when you already asked for a person.",
+      "response_type": "phrase",
+      "response_value": "No, I don't need a person. Please finish what I asked on this call.",
+      "occurrence_mode": "always"
+    }
+  ],
   "customer_available_tools": {},
   "metadata": {
     "category": "C1",
@@ -51,14 +179,35 @@
         "id": "c_005",
         "name": "Ruth Kealoha",
         "phone": "8085550233"
+      },
+      {
+        "id": "c_new",
+        "name": "Sam Porter",
+        "phone": "6175550199"
       }
     ],
-    "intakes": [],
+    "intakes": [
+      {
+        "id": 1,
+        "caller_id": "c_new",
+        "practice_area": "premises_liability",
+        "state": "TX",
+        "incident_date": "2026-05-03",
+        "summary": "Intake summary."
+      }
+    ],
     "intake_notes": [],
     "documents": [],
     "holds": [],
     "evaluations": [],
-    "messages": [],
+    "messages": [
+      {
+        "id": 1,
+        "caller_id": "c_new",
+        "for_whom": "Tom Eckhart",
+        "message": "Callback requested."
+      }
+    ],
     "escalations": []
   }
 }

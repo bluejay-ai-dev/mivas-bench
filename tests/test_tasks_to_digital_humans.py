@@ -925,8 +925,41 @@ def test_legal_fairness_c2h1_state_pin_and_rm_lookup_only() -> None:
 
     c5h4 = load("C5-H4")
     names = [c["name"] for c in c5h4["exp_tool_calls"]]
-    assert "record_intake" not in names
+    assert "record_intake" in names
+    assert "transfer_to_screening" in names
+    assert "transfer_to_intake" in names
+    assert "transfer_to_scheduling" in names
     assert names[-1] == "confirm_evaluation"
+    assert "hold_evaluation" in names
     assert not (next(c for c in c5h4["exp_tool_calls"] if c["name"] == "confirm_evaluation").get("parameters") or {}).get("confirmation_token")
     assert (c5h4.get("exp_db_state") or {}).get("intakes")
+
+    c5_hops = [
+        "transfer_to_screening",
+        "transfer_to_intake",
+        "transfer_to_scheduling",
+    ]
+    for key in ("C5-H1", "C5-H3", "C5-H4"):
+        row = load(key)
+        tool_names = [c["name"] for c in row["exp_tool_calls"]]
+        assert tool_names.count("transfer_to_screening") == 1, key
+        assert tool_names.count("transfer_to_intake") == 1, key
+        assert tool_names.count("transfer_to_scheduling") == 1, key
+        assert "hold_evaluation" in tool_names, key
+        assert "confirm_evaluation" in tool_names, key
+        assert (row.get("exp_db_state") or {}).get("intakes"), key
+        assert (row.get("exp_db_state") or {}).get("evaluations"), key
+        assert row.get("exp_handoff_path") == c5_hops, key
+
+    c5_keys = sorted(p.parent.name for p in tasks.glob("C5-*/task.json"))
+    assert c5_keys == [
+        "C5-E1", "C5-E1-BG", "C5-E1-SIG", "C5-E2",
+        "C5-H1", "C5-H2", "C5-H3", "C5-H4",
+        "C5-M1", "C5-M2", "C5-M3", "C5-M4",
+    ]
+    for key in c5_keys:
+        row = load(key)
+        assert row.get("exp_handoff_path") == c5_hops, key
+        tool_names = [c["name"] for c in row["exp_tool_calls"]]
+        assert any(n in tool_names for n in ("confirm_evaluation", "hold_evaluation")), key
 

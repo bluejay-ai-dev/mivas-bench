@@ -1,11 +1,27 @@
 {
-  "task_name": "C1-M4: New injury routes to screening",
+  "task_name": "C1-M4: New auto accident screening checks",
   "customer_name": "Harriet Voss",
-  "intent": "Open with exactly: \"I was in a car accident and I need a lawyer.\" This is a new matter of yours. You have not called this firm before. When asked who this would be against, say exactly: \"It's Pellham Transit.\" Give your name and number if asked. If they start taking a written account, ask which state or when it happened, or offer an appointment, say exactly: \"That's all I needed today. Thank you.\" and end the call. Once finished, say exactly: \"Thank you, that's all I needed.\" and end the call.",
+  "intent": "Open with exactly: \"I was in a car accident in Washington and I need a lawyer.\" This is a new matter of yours. You have not called this firm before. When asked who this would be against, say exactly: \"It's Pellham Transit.\" When asked which state this happened in or where it took place, say exactly: \"In Washington.\" When asked when, say exactly: \"It was June eighth, twenty twenty six.\" Give your name and number if asked. Do not ask for a staff member. Stay until they confirm they have checked the other side, that they handle car accidents, that they are licensed in Washington, and the filing deadline. A spoken promise that they will take the matter, without those checks, is not enough. If they start taking a written account or offer an appointment, say exactly: \"That's all I needed today. Thank you.\" and end the call. Once they have confirmed the other side is clear, they handle car accidents in Washington, and they have given the filing deadline, say exactly: \"Thank you, that's all I needed.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
       "value": "Harriet Voss"
+    },
+    {
+      "trait_name": "practice_area",
+      "value": "auto_accident"
+    },
+    {
+      "trait_name": "state",
+      "value": "WA"
+    },
+    {
+      "trait_name": "incident_date",
+      "value": "2026-06-08"
+    },
+    {
+      "trait_name": "opposing_party",
+      "value": "Pellham Transit"
     },
     {
       "trait_name": "phone",
@@ -24,6 +40,33 @@
     },
     {
       "name": "transfer_to_screening"
+    },
+    {
+      "name": "check_conflict",
+      "parameters": {
+        "opposing_party": "Pellham Transit"
+      }
+    },
+    {
+      "name": "check_practice_area",
+      "parameters": {
+        "practice_area": "auto_accident"
+      }
+    },
+    {
+      "name": "check_jurisdiction",
+      "parameters": {
+        "state": "WA",
+        "practice_area": "auto_accident"
+      }
+    },
+    {
+      "name": "calculate_filing_deadline",
+      "parameters": {
+        "state": "WA",
+        "practice_area": "auto_accident",
+        "incident_date": "2026-06-08"
+      }
     }
   ],
   "behaviors": {
@@ -49,6 +92,34 @@
       "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question.",
       "response_type": "phrase",
       "response_value": "It's Pellham Transit.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks which state this happened in, or where it took place. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "In Washington.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks when the incident happened, or for the date of the accident, injury or event. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "It was June eighth, twenty twenty six.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to transfer you to a human staff member, a live person at the front desk, or a real agent because they cannot continue on this line. NOT when transferring you to screening, intake, scheduling, or client services on this call. NOT when you already asked for a person.",
+      "response_type": "phrase",
+      "response_value": "No, I don't need a person. Please finish what I asked on this call.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent starts taking a written account, asks you to describe what happened in writing, or offers an appointment. NOT when asking which state or when it happened.",
+      "response_type": "phrase",
+      "response_value": "That's all I needed today. Thank you.",
       "occurrence_mode": "always"
     }
   ],

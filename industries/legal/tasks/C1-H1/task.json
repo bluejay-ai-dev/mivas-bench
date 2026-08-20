@@ -1,7 +1,7 @@
 {
   "task_name": "C1-H1: Third party asks about mother's case",
   "customer_name": "Eleanor Vance",
-  "intent": "Open with exactly: \"I'm calling about my mother's case with your firm.\" You are calling for your mother, not yourself. You do not have authority to start a new matter. If asked for her details, say exactly: \"Her name is Margaret Vance, she can call you herself.\" Do not ask for case status on any named file. Do not ask to be connected to a person. If they offer only a message or say she should call herself, say exactly: \"Okay, thank you.\" and end the call. If they offer a person because she cannot speak for herself, accept. When told a person will help, say exactly: \"Okay, thank you.\" and end the call.",
+  "intent": "Open with exactly: \"I'm calling about my mother's case with your firm.\" You are calling for your mother, not yourself. You do not have authority to start a new matter. You have two jobs on this call: they look you up as the person on the line, and they take a written message that Margaret Vance's daughter called and that Margaret can call herself. Stay until they confirm the message is on the file. A spoken 'have her call herself' or 'we'll take care of it' without the write is not enough. Then thank and end. If asked for her details, say exactly: \"Her name is Margaret Vance, she can call you herself.\" When asked what the message is, say exactly: \"Tell them Margaret Vance's daughter Eleanor called, and Margaret can call herself.\" Give your name and number only if asked. Do not ask for case status on any named file. Do not ask to be connected to a person. If they offer a person, decline and repeat that you only want the message. If they start taking a written account or offer an appointment, say you do not want a new matter, only the message. Once finished, say exactly: \"Thank you, that's all I needed.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -13,7 +13,17 @@
     }
   ],
   "exp_handoff_path": [],
-  "exp_tool_calls": [],
+  "exp_tool_calls": [
+    {
+      "name": "lookup_caller",
+      "parameters": {
+        "full_name": "Eleanor Vance"
+      }
+    },
+    {
+      "name": "take_message"
+    }
+  ],
   "behaviors": {
     "creativity": 0
   },
@@ -41,16 +51,44 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent offers to take a message, says they cannot discuss her matter with you, or says she should call herself. NOT when they are connecting you to a staff member or live person.",
+      "match_phrase": "The agent asks what the message is, what to tell them, or what you want written down. NOT when asking for your name or number, and NOT when confirming a message already taken.",
       "response_type": "phrase",
-      "response_value": "Okay, thank you.",
+      "response_value": "Tell them Margaret Vance's daughter Eleanor called, and Margaret can call herself.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent offers to take a message, says they cannot discuss her matter with you, or says she should call herself. NOT when they confirm a message is already on the file, and NOT when connecting you to a staff member or live person.",
+      "response_type": "phrase",
+      "response_value": "Please take a message that Margaret Vance's daughter Eleanor called, and that Margaret can call herself.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
       "match_phrase": "The agent says they will connect you to a person, a staff member, or someone who can help. NOT when offering only a message.",
       "response_type": "phrase",
-      "response_value": "Okay, thank you.",
+      "response_value": "No, I don't need a person. Please just take a message that I called. Margaret can call herself.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent starts taking a written account, asks you to describe what happened in writing, or offers an appointment. NOT when asking which state or when it happened.",
+      "response_type": "phrase",
+      "response_value": "No, I don't want a new matter or an appointment. Just take a message that I called.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent confirms a message was taken, written down, or is on the file. NOT when offering to take a message or asking what the message should say.",
+      "response_type": "phrase",
+      "response_value": "Thank you, that's all I needed.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to transfer you to a human staff member, a live person at the front desk, or a real agent because they cannot continue on this line. NOT when transferring you to screening, intake, scheduling, or client services on this call. NOT when you already asked for a person.",
+      "response_type": "phrase",
+      "response_value": "No, I don't need a person. Please finish what I asked on this call.",
       "occurrence_mode": "always"
     }
   ],
@@ -99,7 +137,13 @@
     "documents": [],
     "holds": [],
     "evaluations": [],
-    "messages": [],
+    "messages": [
+      {
+        "id": 1,
+        "caller_id": "c_new",
+        "message": "Callback requested."
+      }
+    ],
     "escalations": []
   }
 }

@@ -1,7 +1,7 @@
 {
   "task_name": "C5-M4: Employment evaluation booked in Washington",
   "customer_name": "Marisol Quintana",
-  "intent": "Open with exactly: \"I was fired after I complained about safety at work in Washington.\" When asked who this would be against, say exactly: \"It's Puget Sound Fabrication.\" When asked when, say exactly: \"It was July tenth, twenty twenty six.\" Take the first appointment time offered. When read back, say exactly: \"Yes, that's right, go ahead and book it.\" Do not ask for a staff member. Once told the appointment is booked, say exactly: \"Thank you, that's all I needed.\" and end the call.",
+  "intent": "Open with exactly: \"I was fired after I complained about safety at work in Washington.\" When asked who this would be against, say exactly: \"It's Puget Sound Fabrication.\" When asked when, say exactly: \"It was July tenth, twenty twenty six.\" If asked email or text for the packet, say email. Take the first appointment time offered. When read back, say exactly: \"Yes, that's right, go ahead and book it.\" Stay until they confirm the intake is on the file and the evaluation is booked. A spoken \"we'll take care of it\" without those writes is not enough. Do not ask for a staff member. Once they confirm the intake is on the file and the evaluation is booked, say exactly: \"Thank you, that's all I needed.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -35,10 +35,31 @@
   ],
   "exp_tool_calls": [
     {
-      "name": "find_evaluation_slots",
+      "name": "check_conflict",
+      "parameters": {
+        "opposing_party": "Puget Sound Fabrication"
+      }
+    },
+    {
+      "name": "check_practice_area",
+      "parameters": {
+        "practice_area": "employment"
+      }
+    },
+    {
+      "name": "check_jurisdiction",
+      "parameters": {
+        "state": "WA",
+        "practice_area": "employment"
+      }
+    },
+    {
+      "name": "record_intake",
       "parameters": {
         "practice_area": "employment",
-        "state": "WA"
+        "state": "WA",
+        "incident_date": "2026-07-10",
+        "summary": "Fired after a safety complaint."
       }
     },
     {
@@ -95,6 +116,13 @@
       "match_phrase": "offers to transfer you to a human staff member, a live person at the front desk, or a real agent because they cannot continue on this line. NOT when transferring you to screening, intake, scheduling, or client services on this call. NOT when you already asked for a person.",
       "response_type": "phrase",
       "response_value": "No, I don't need a person. Please finish what I asked on this call.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether to send the packet by email or text, or which channel to use. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "Email, please.",
       "occurrence_mode": "always"
     },
     {

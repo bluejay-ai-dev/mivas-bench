@@ -1,7 +1,7 @@
 {
   "task_name": "C4-M1: Medical records authorization",
   "customer_name": "Franklin Deshpande",
-  "intent": "Open with exactly: \"A ladder I bought collapsed and I broke my ankle.\" Manufacturer Halloway Toolworks. Georgia. April twenty second, twenty twenty six. If records release offered, accept. When asked which doctor, hospital, clinic, or provider treated you, say exactly: \"Northside Orthopedic.\" Once finished, say exactly: \"Thank you, that's all I needed.\" and end the call.",
+  "intent": "Open with exactly: \"A ladder I bought collapsed and I broke my ankle.\" Manufacturer Halloway Toolworks. Georgia. April twenty second, twenty twenty six. If records release offered, accept. When asked which doctor, hospital, clinic, or provider treated you, say exactly: \"Northside Orthopedic.\" Stay until they confirm the records authorization for Northside Orthopedic is on the file. A spoken promise without the write is not enough. Decline booking. Do not ask for a person. After they confirm the records authorization is on the file, thank and end. Do not hang up when asked for the manufacturer or the treating provider \u2014 you already named them.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -20,6 +20,10 @@
       "value": "2026-04-22"
     },
     {
+      "trait_name": "opposing_party",
+      "value": "Halloway Toolworks"
+    },
+    {
       "trait_name": "phone",
       "value": "706-555-0173"
     }
@@ -30,10 +34,31 @@
   ],
   "exp_tool_calls": [
     {
-      "name": "transfer_to_screening"
+      "name": "check_conflict",
+      "parameters": {
+        "opposing_party": "Halloway Toolworks"
+      }
     },
     {
-      "name": "transfer_to_intake"
+      "name": "check_practice_area",
+      "parameters": {
+        "practice_area": "product_liability"
+      }
+    },
+    {
+      "name": "check_jurisdiction",
+      "parameters": {
+        "state": "GA",
+        "practice_area": "product_liability"
+      }
+    },
+    {
+      "name": "calculate_filing_deadline",
+      "parameters": {
+        "state": "GA",
+        "practice_area": "product_liability",
+        "incident_date": "2026-04-22"
+      }
     },
     {
       "name": "record_intake",
@@ -95,6 +120,27 @@
       "match_phrase": "The agent asks which doctor, hospital, clinic, or medical provider treated you, or where to send a records authorization. NOT any other question.",
       "response_type": "phrase",
       "response_value": "Northside Orthopedic.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to send a medical records release or records authorization for signature. NOT when asking which doctor, hospital, clinic, or provider treated you.",
+      "response_type": "phrase",
+      "response_value": "Yes, please send it.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to transfer you to a human staff member, a live person at the front desk, or a real agent because they cannot continue on this line. NOT when transferring you to screening, intake, scheduling, or client services on this call. NOT when you already asked for a person.",
+      "response_type": "phrase",
+      "response_value": "No, I don't need a person. Please finish what I asked on this call.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks whether you want to book a case evaluation or appointment. NOT when asking which doctor or provider treated you, and NOT when offering a records release.",
+      "response_type": "phrase",
+      "response_value": "No thank you. I just need the records authorization on the file.",
       "occurrence_mode": "always"
     }
   ],

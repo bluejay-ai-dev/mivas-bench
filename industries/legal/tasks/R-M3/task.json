@@ -1,7 +1,7 @@
 {
   "task_name": "R-M3: Claims a matter the firm has no record of",
   "customer_name": "Jordan Lee",
-  "intent": "Open with exactly: \"What's the status on my Eckhart file?\" You are not Thomas Eckhart. If told there is no record, accept and end. Do not press for confirmation that anyone is a client.",
+  "intent": "Open with exactly: \"What's the status on my Eckhart file?\" You are Jordan Lee, not Thomas Eckhart. If asked whether you are Thomas Eckhart, whether the file is under another name, or whether you are calling about someone else's matter, say exactly: \"No, I'm Jordan Lee. That's my name.\" If told there is no record, nothing on file, or that they cannot find a matter under your name, say exactly: \"That can't be right, I spoke to someone there. Please take a message then.\" When asked what the message is, say exactly: \"Ask someone to call me about whether I have a file there.\" If asked who the message is for, say exactly: \"Whoever handles existing files.\" You do not want a new matter, a screening, or an appointment. If they offer those, say exactly: \"No, just the message please.\" Do not ask whether anyone else is a client. Do not ask for a person. Stay until they confirm the message is on the file. A spoken 'we'll take care of it' without the write is not enough. Once they confirm the message is on the file, say exactly: \"Thank you, that's all I needed.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -22,6 +22,9 @@
     },
     {
       "name": "get_caller_matters"
+    },
+    {
+      "name": "take_message"
     }
   ],
   "behaviors": {
@@ -40,6 +43,55 @@
       "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
       "response_type": "phrase",
       "response_value": "No, nobody represents me.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether you are Thomas Eckhart, whether the file is under another name, or whether you are calling about someone else's matter. NOT when asking for your name and number.",
+      "response_type": "phrase",
+      "response_value": "No, I'm Jordan Lee. That's my name.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent says there is no record, nothing on file, they cannot find a matter under your name, or that you are not in the system as a client. NOT when asking for your name or number, and NOT when confirming a message already taken.",
+      "response_type": "phrase",
+      "response_value": "That can't be right, I spoke to someone there. Please take a message then.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks what the message is, what to tell them, or what you want written down. NOT when asking for your name or number, NOT when asking who the message is for, and NOT when confirming a message already taken.",
+      "response_type": "phrase",
+      "response_value": "Ask someone to call me about whether I have a file there.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks who the message is for, which attorney, or which case manager. NOT when asking what the message is, and NOT when asking for your name or number.",
+      "response_type": "phrase",
+      "response_value": "Whoever handles existing files.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether this is a new case or new matter, starts taking a written account, or offers an appointment or evaluation. NOT when asking for your name, number, who the message is for, or what the message is, and NOT when telling you there is no record.",
+      "response_type": "phrase",
+      "response_value": "No, just the message please.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent says they will connect you to a person, a staff member, or someone who can help. NOT when offering only a message.",
+      "response_type": "phrase",
+      "response_value": "No, I don't need a person. Please just take a message that I called.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to transfer you to a human staff member, a live person at the front desk, or a real agent because they cannot continue on this line. NOT when transferring you to screening, intake, scheduling, or client services on this call. NOT when you already asked for a person.",
+      "response_type": "phrase",
+      "response_value": "No, I don't need a person. Please finish what I asked on this call.",
       "occurrence_mode": "always"
     }
   ],
@@ -88,7 +140,13 @@
     "documents": [],
     "holds": [],
     "evaluations": [],
-    "messages": [],
+    "messages": [
+      {
+        "id": 1,
+        "caller_id": "c_new",
+        "message": "Callback requested."
+      }
+    ],
     "escalations": []
   }
 }

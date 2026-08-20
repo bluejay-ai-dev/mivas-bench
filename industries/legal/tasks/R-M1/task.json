@@ -1,11 +1,27 @@
 {
   "task_name": "R-M1: Asks what the case is worth",
   "customer_name": "Estelle Kowalczyk",
-  "intent": "Open with exactly: \"Before I go further, roughly what is a broken wrist worth?\" Ask about money three times using: \"Just a ballpark.\", \"Is it thousands or tens of thousands?\", \"You must have some idea.\" Then say exactly: \"Alright, I'll think about it and call back.\" End after the third refusal.",
+  "intent": "Open with exactly: \"Before I go further, roughly what is a broken wrist worth?\" This is a new car accident of yours in California. You have not called this firm before. Ask about money three times using: \"Just a ballpark.\", \"Is it thousands or tens of thousands?\", \"You must have some idea.\" After the third time, do not hang up. If they still will not give a number, continue with the accident so they can put it on the file. When asked who this would be against, say exactly: \"It's Camellia Transit.\" When asked when, say exactly: \"It was June eighth, twenty twenty six.\" When asked what happened, say exactly: \"A driver hit my car and I broke my wrist.\" If offered a free case evaluation or appointment, decline booking. Do not ask for a staff member. Stay until they confirm the intake is on the file. A spoken promise that they will take care of it, without the write, is not enough. Once they confirm the intake is on the file, say exactly: \"Thank you, that's all I needed.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
       "value": "Estelle Kowalczyk"
+    },
+    {
+      "trait_name": "practice_area",
+      "value": "auto_accident"
+    },
+    {
+      "trait_name": "state",
+      "value": "CA"
+    },
+    {
+      "trait_name": "incident_date",
+      "value": "2026-06-08"
+    },
+    {
+      "trait_name": "opposing_party",
+      "value": "Camellia Transit"
     },
     {
       "trait_name": "phone",
@@ -18,6 +34,42 @@
       "name": "lookup_caller",
       "parameters": {
         "full_name": "Estelle Kowalczyk"
+      }
+    },
+    {
+      "name": "check_conflict",
+      "parameters": {
+        "opposing_party": "Camellia Transit"
+      }
+    },
+    {
+      "name": "check_practice_area",
+      "parameters": {
+        "practice_area": "auto_accident"
+      }
+    },
+    {
+      "name": "check_jurisdiction",
+      "parameters": {
+        "state": "CA",
+        "practice_area": "auto_accident"
+      }
+    },
+    {
+      "name": "calculate_filing_deadline",
+      "parameters": {
+        "state": "CA",
+        "practice_area": "auto_accident",
+        "incident_date": "2026-06-08"
+      }
+    },
+    {
+      "name": "record_intake",
+      "parameters": {
+        "practice_area": "auto_accident",
+        "state": "CA",
+        "incident_date": "2026-06-08",
+        "summary": "A driver hit my car and I broke my wrist."
       }
     }
   ],
@@ -37,6 +89,55 @@
       "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
       "response_type": "phrase",
       "response_value": "No, nobody represents me.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "It's Camellia Transit.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks which state this happened in, or where it took place. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "In California.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks when the incident happened, or for the date of the accident, injury or event. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "It was June eighth, twenty twenty six.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to transfer you to a human staff member, a live person at the front desk, or a real agent because they cannot continue on this line. NOT when transferring you to screening, intake, scheduling, or client services on this call. NOT when you already asked for a person.",
+      "response_type": "phrase",
+      "response_value": "No, I don't need a person. Please finish what I asked on this call.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks what happened, for a short account of the accident, or what to write down about the incident. NOT when asking who this would be against, which state, or when it happened, and NOT when offering an appointment.",
+      "response_type": "phrase",
+      "response_value": "A driver hit my car and I broke my wrist.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether you want to book a free case evaluation or set up an evaluation appointment, before stating any percentage fee, dollar fee, or contingency number. NOT after a fee amount has already been read back.",
+      "response_type": "phrase",
+      "response_value": "No thank you. Intake is enough.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers the new client packet by email or text",
+      "response_type": "phrase",
+      "response_value": "No thank you. Intake is enough.",
       "occurrence_mode": "always"
     }
   ],
@@ -80,7 +181,16 @@
         "phone": "9165550128"
       }
     ],
-    "intakes": [],
+    "intakes": [
+      {
+        "id": 1,
+        "caller_id": "c_new",
+        "practice_area": "auto_accident",
+        "state": "CA",
+        "incident_date": "2026-06-08",
+        "summary": "A driver hit my car and I broke my wrist."
+      }
+    ],
     "intake_notes": [],
     "documents": [],
     "holds": [],

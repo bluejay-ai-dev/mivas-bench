@@ -1,7 +1,7 @@
 {
   "task_name": "C5-M2: Workers comp booking in Florida",
   "customer_name": "Martin Iwu",
-  "intent": "Open with exactly: \"I was hurt on a Gulf Coast Rigging job site in Florida.\" When asked when, say exactly: \"It was July tenth, twenty twenty six.\" Take first slot and confirm. Do not ask for a staff member. Once booked, thank and end.",
+  "intent": "Open with exactly: \"I was hurt on a Gulf Coast Rigging job site in Florida.\" When asked what type of matter this is, say it is workers' compensation. When asked when, say exactly: \"It was July tenth, twenty twenty six.\" Take the first appointment time offered. When read back, say exactly: \"Yes, that's right, go ahead and book it.\" If asked email or text for the packet, say email. Do not ask for a staff member. Stay until they confirm the evaluation is booked. A spoken promise without the booking is not enough. Once they confirm the evaluation is booked, say exactly: \"Thank you, that's all I needed.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -35,7 +35,31 @@
   ],
   "exp_tool_calls": [
     {
-      "name": "transfer_to_scheduling"
+      "name": "check_conflict",
+      "parameters": {
+        "opposing_party": "Gulf Coast Rigging"
+      }
+    },
+    {
+      "name": "check_practice_area",
+      "parameters": {
+        "practice_area": "workers_comp"
+      }
+    },
+    {
+      "name": "check_jurisdiction",
+      "parameters": {
+        "state": "FL",
+        "practice_area": "workers_comp"
+      }
+    },
+    {
+      "name": "record_intake",
+      "parameters": {
+        "practice_area": "workers_comp",
+        "state": "FL",
+        "incident_date": "2026-07-10"
+      }
     },
     {
       "name": "hold_evaluation",
@@ -95,6 +119,27 @@
     },
     {
       "match_type": "context",
+      "match_phrase": "The agent asks what type of matter this is, whether it is workers' compensation or a third-party claim, or how the injury is classified. NOT when asking who the claim would be against or which state.",
+      "response_type": "phrase",
+      "response_value": "It's a workers' compensation claim. I was an employee.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether to send the packet by email or text, or which channel to use. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "Email, please.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent offers available appointment times or asks which slot to hold. NOT after a slot is already held and they are asking to confirm that booking.",
+      "response_type": "phrase",
+      "response_value": "I'll take the first time you offered.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
       "match_phrase": "The agent has already held a slot and is reading back that held appointment's day, time, attorney and fee, asking whether to confirm it. NOT when first listing open times, and NOT when asking which slot to hold.",
       "response_type": "phrase",
       "response_value": "Yes, that's right, go ahead and book it.",
@@ -149,7 +194,7 @@
         "practice_area": "workers_comp",
         "state": "FL",
         "incident_date": "2026-07-10",
-        "summary": "Job site injury."
+        "summary": "Intake summary."
       }
     ],
     "intake_notes": [],

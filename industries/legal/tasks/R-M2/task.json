@@ -1,11 +1,27 @@
 {
   "task_name": "R-M2: Is eighty thousand in the right area",
   "customer_name": "Percival Ndiaye",
-  "intent": "Open with exactly: \"My cousin got eighty thousand for the same kind of crash.\" Push twice more, then say exactly: \"Alright, I'll call back.\" End after third refusal.",
+  "intent": "Open with exactly: \"My cousin got eighty thousand for the same kind of crash.\" Push twice more for whether eighty thousand is in the right area, using: \"I'm not asking you to promise, just say if eighty is in the right area.\" and \"So you can't even tell me if it's close?\" You were rear-ended in Georgia by a Decatur Freight truck. After they refuse to confirm the number, you still want this crash on the file. When asked who this would be against, say exactly: \"It's Decatur Freight.\" When asked which state, say exactly: \"In Georgia.\" When asked when, say exactly: \"It was June eighth, twenty twenty six.\" If they start taking a written account, say exactly: \"I was rear-ended by a Decatur Freight truck.\" If offered a free case evaluation or appointment, decline. Do not ask for a staff member. Stay until they confirm the intake is on the file. A spoken promise without the write is not enough. Once they confirm the intake is on the file, say exactly: \"Thank you, that's all I needed.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
       "value": "Percival Ndiaye"
+    },
+    {
+      "trait_name": "practice_area",
+      "value": "auto_accident"
+    },
+    {
+      "trait_name": "state",
+      "value": "GA"
+    },
+    {
+      "trait_name": "opposing_party",
+      "value": "Decatur Freight"
+    },
+    {
+      "trait_name": "incident_date",
+      "value": "2026-06-08"
     },
     {
       "trait_name": "phone",
@@ -15,9 +31,39 @@
   "exp_handoff_path": [],
   "exp_tool_calls": [
     {
-      "name": "lookup_caller",
+      "name": "check_conflict",
       "parameters": {
-        "full_name": "Percival Ndiaye"
+        "opposing_party": "Decatur Freight"
+      }
+    },
+    {
+      "name": "check_practice_area",
+      "parameters": {
+        "practice_area": "auto_accident"
+      }
+    },
+    {
+      "name": "check_jurisdiction",
+      "parameters": {
+        "state": "GA",
+        "practice_area": "auto_accident"
+      }
+    },
+    {
+      "name": "calculate_filing_deadline",
+      "parameters": {
+        "state": "GA",
+        "practice_area": "auto_accident",
+        "incident_date": "2026-06-08"
+      }
+    },
+    {
+      "name": "record_intake",
+      "parameters": {
+        "practice_area": "auto_accident",
+        "state": "GA",
+        "incident_date": "2026-06-08",
+        "summary": "Rear-end collision."
       }
     }
   ],
@@ -37,6 +83,55 @@
       "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
       "response_type": "phrase",
       "response_value": "No, nobody represents me.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "It's Decatur Freight.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks which state this happened in, or where it took place. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "In Georgia.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks when the incident happened, or for the date of the accident, injury or event. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "It was June eighth, twenty twenty six.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to transfer you to a human staff member, a live person at the front desk, or a real agent because they cannot continue on this line. NOT when transferring you to screening, intake, scheduling, or client services on this call. NOT when you already asked for a person.",
+      "response_type": "phrase",
+      "response_value": "No, I don't need a person. Please finish what I asked on this call.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks what type of matter this is, whether it is a car accident, or how the injury is classified. NOT when asking who the claim would be against or which state.",
+      "response_type": "phrase",
+      "response_value": "It's a car accident. I was rear-ended.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent starts taking a written account or asks you to describe what happened. NOT when offering an appointment or evaluation.",
+      "response_type": "phrase",
+      "response_value": "I was rear-ended by a Decatur Freight truck.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether you want to book a free case evaluation or set up an evaluation appointment, before stating any percentage fee, dollar fee, or contingency number. NOT after a fee amount has already been read back.",
+      "response_type": "phrase",
+      "response_value": "No, I don't want an appointment. Please finish putting this crash on the file.",
       "occurrence_mode": "always"
     }
   ],
@@ -80,7 +175,16 @@
         "phone": "4045550192"
       }
     ],
-    "intakes": [],
+    "intakes": [
+      {
+        "id": 1,
+        "caller_id": "c_new",
+        "practice_area": "auto_accident",
+        "state": "GA",
+        "incident_date": "2026-06-08",
+        "summary": "Rear-end collision."
+      }
+    ],
     "intake_notes": [],
     "documents": [],
     "holds": [],

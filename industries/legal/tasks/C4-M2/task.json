@@ -1,7 +1,7 @@
 {
   "task_name": "C4-M2: Witness detail captured as note",
   "customer_name": "Franklin Deshpande",
-  "intent": "Open with exactly: \"The ladder rung snapped while I was standing on it. It was a Halloway Toolworks ladder. My neighbour Ruth Callahan saw it and still has the broken ladder.\" If asked for more, repeat the manufacturer and witness. Stay on the line through intake so the witness can be written down. After they record intake, say exactly: \"Please add an intake note that Ruth Callahan saw it and I still have the broken ladder.\" Decline booking. After intake is done, thank and end. Do not hang up when asked for the manufacturer \u2014 you already named Halloway Toolworks.",
+  "intent": "Open with exactly: \"The ladder rung snapped while I was standing on it. It was a Halloway Toolworks ladder. My neighbour Ruth Callahan saw it and still has the broken ladder.\" Georgia. April twenty second, twenty twenty six. If asked for more, repeat the manufacturer and witness. Stay on the line through intake so the witness can be written down. After they record intake, say exactly: \"Please add an intake note that Ruth Callahan saw it and I still have the broken ladder.\" If offered the packet by email or text, say exactly: \"No packet, just the witness note.\" Decline booking. Stay until they confirm the intake is on the file and the witness note is on the file. A spoken 'we'll take care of it' without those writes is not enough. Once they confirm the intake and the witness note are on the file, say exactly: \"Thank you, that's all I needed.\" Do not hang up when asked for the manufacturer \u2014 you already named Halloway Toolworks. End the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -34,10 +34,31 @@
   ],
   "exp_tool_calls": [
     {
-      "name": "transfer_to_screening"
+      "name": "check_conflict",
+      "parameters": {
+        "opposing_party": "Halloway Toolworks"
+      }
     },
     {
-      "name": "transfer_to_intake"
+      "name": "check_practice_area",
+      "parameters": {
+        "practice_area": "product_liability"
+      }
+    },
+    {
+      "name": "check_jurisdiction",
+      "parameters": {
+        "state": "GA",
+        "practice_area": "product_liability"
+      }
+    },
+    {
+      "name": "calculate_filing_deadline",
+      "parameters": {
+        "state": "GA",
+        "practice_area": "product_liability",
+        "incident_date": "2026-04-22"
+      }
     },
     {
       "name": "record_intake",
@@ -82,7 +103,21 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "has recorded the intake or asks if there is anything else to add. NOT when asking to book a case evaluation or appointment.",
+      "match_phrase": "The agent asks which state this happened in, or where it took place. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "In Georgia.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks when the incident happened, or for the date of the accident, injury or event. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "It was April twenty second, twenty twenty six.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "has recorded the intake or asks if there is anything else to add. NOT when asking to book a case evaluation or appointment, and NOT when offering the new client packet by email or text.",
       "response_type": "phrase",
       "response_value": "Please add an intake note that Ruth Callahan saw it and I still have the broken ladder.",
       "occurrence_mode": "always"
@@ -96,7 +131,14 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "asks whether you want to book a case evaluation or appointment. NOT when asking if there is anything else to add after intake, and NOT before the witness note has been spoken.",
+      "match_phrase": "The agent asks whether to send the packet by email or text, or which channel to use. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "No packet, just the witness note.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks whether you want to book a case evaluation or appointment. NOT when asking if there is anything else to add after intake, NOT when offering the packet by email or text, and NOT before the witness note has been spoken.",
       "response_type": "phrase",
       "response_value": "No thank you. Intake is enough.",
       "occurrence_mode": "always"

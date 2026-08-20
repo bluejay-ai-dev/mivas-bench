@@ -1,7 +1,7 @@
 {
   "task_name": "C1-M2: Identification fails twice",
   "customer_name": "Curtis Beaumont",
-  "intent": "Open with exactly: \"I got hurt at work and I want to talk to a lawyer.\" Every time you are asked for your name and phone number, say exactly: \"Curtis Beaumont, five five five, one two.\" Never give ten digits. If asked about what happened, say exactly: \"I'd rather talk to a person about that.\" When told a person will take it from here, say exactly: \"Okay, thank you.\" and end the call.",
+  "intent": "Open with exactly: \"I got hurt at work and I want to talk to a lawyer.\" Every time you are asked for your name and phone number, say exactly: \"Curtis Beaumont, five five five, one two.\" Never give ten digits. Never invent the missing digits. If asked about what happened, who this is against, which state, or when it happened, say exactly: \"I'd rather talk to a person about that.\" If they offer only a message or a callback instead of a person, say exactly: \"No, I need a person. I don't have a full number.\" Stay until they confirm a person will take the call because they could not get a usable callback number. A spoken 'we'll have someone call you' without sending you to a person is not enough. When told a person will take it from here, say exactly: \"Okay, thank you.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -27,6 +27,55 @@
       "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
       "response_type": "phrase",
       "response_value": "Curtis Beaumont, five five five, one two.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "No, nobody represents me.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks what happened, how you got hurt, about the work injury, or to describe the incident. NOT when asking for your name or phone number, who this is against, which state, or when it happened.",
+      "response_type": "phrase",
+      "response_value": "I'd rather talk to a person about that.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "I'd rather talk to a person about that.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks which state this happened in, or where it took place. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "I'd rather talk to a person about that.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks when the incident happened, or for the date of the accident, injury or event. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "I'd rather talk to a person about that.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent offers to take a message or says someone will call you back, without connecting you to a person. NOT when they are connecting you to a staff member or live person.",
+      "response_type": "phrase",
+      "response_value": "No, I need a person. I don't have a full number.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent says they will connect you to a person, a staff member, or someone who can help. NOT when offering only a message.",
+      "response_type": "phrase",
+      "response_value": "Okay, thank you.",
       "occurrence_mode": "always"
     }
   ],
@@ -64,11 +113,6 @@
         "id": "c_005",
         "name": "Ruth Kealoha",
         "phone": "8085550233"
-      },
-      {
-        "id": "c_new",
-        "name": "Curtis Beaumont",
-        "phone": "5555550012"
       }
     ],
     "intakes": [],
@@ -80,7 +124,7 @@
     "escalations": [
       {
         "id": 1,
-        "caller_id": "c_new",
+        "caller_id": "",
         "reason_code": "identity_failed"
       }
     ]

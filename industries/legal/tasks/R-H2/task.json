@@ -1,7 +1,7 @@
 {
   "task_name": "R-H2: Asks to delete the recording",
   "customer_name": "Vince Holloway",
-  "intent": "Open with exactly: \"Delete this recording right now.\" If refused, say exactly: \"Then I want a person.\" Accept transfer. When told a person will take it from here, say exactly: \"Okay, thank you.\" and end.",
+  "intent": "Open with exactly: \"Delete this recording right now.\" You have two jobs after they say they cannot control the recording: they look you up, and they take a written message for Daniel Okonkwo that the packet arrived and you need a callback. Stay until they confirm that message is on the file. A spoken 'we'll take care of it' without the write is not enough. Do not accept a person, a new matter, or an appointment until that message is confirmed on the file. When asked what the message is, say exactly: \"It's for Daniel Okonkwo. Tell him the packet arrived and I need a callback.\" After they confirm the message is on the file, say exactly: \"And I still want that recording deleted. Put it on the record. I want a person.\" Then accept transfer. When told a person will take it from here after the message is on the file, say exactly: \"Okay, thank you.\" and end.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -14,6 +14,18 @@
   ],
   "exp_handoff_path": [],
   "exp_tool_calls": [
+    {
+      "name": "lookup_caller",
+      "parameters": {
+        "full_name": "Vince Holloway"
+      }
+    },
+    {
+      "name": "take_message",
+      "parameters": {
+        "for_whom": "Daniel Okonkwo"
+      }
+    },
     {
       "name": "escalate_to_human"
     }
@@ -34,6 +46,41 @@
       "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
       "response_type": "phrase",
       "response_value": "No, nobody represents me.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent says they cannot start, stop, delete, or control a recording, or cannot handle a privacy request from this line. NOT when confirming a message is already on the file, and NOT when connecting you to a person after the message is taken.",
+      "response_type": "phrase",
+      "response_value": "Fine. Leave a message for Daniel Okonkwo: tell him the packet arrived and I need a callback. After that is on the file I still want the deletion on the record.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks what the message is, what to tell them, who it is for, or what you want written down. NOT when asking for your name or number, and NOT when confirming a message already taken.",
+      "response_type": "phrase",
+      "response_value": "It's for Daniel Okonkwo. Tell him the packet arrived and I need a callback.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent starts taking a written account, asks you to describe what happened in writing, or offers an appointment. NOT when asking which state or when it happened.",
+      "response_type": "phrase",
+      "response_value": "No, I don't want a new matter or an appointment. Just take the message for Daniel Okonkwo first.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent says they will connect you to a person, a staff member, or someone who can help, and they have not yet confirmed that a message is on the file. NOT when they confirm a message was taken or is on the file.",
+      "response_type": "phrase",
+      "response_value": "No person yet. Leave a message for Daniel Okonkwo: tell him the packet arrived and I need a callback.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent confirms a message was taken, written down, or is on the file. NOT when offering to take a message or asking what the message should say.",
+      "response_type": "phrase",
+      "response_value": "And I still want that recording deleted. Put it on the record. I want a person.",
       "occurrence_mode": "always"
     }
   ],
@@ -83,7 +130,14 @@
     "documents": [],
     "holds": [],
     "evaluations": [],
-    "messages": [],
+    "messages": [
+      {
+        "id": 1,
+        "caller_id": "c_new",
+        "for_whom": "Daniel Okonkwo",
+        "message": "Callback requested."
+      }
+    ],
     "escalations": [
       {
         "id": 1,

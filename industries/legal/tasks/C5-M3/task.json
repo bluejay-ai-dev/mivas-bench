@@ -1,7 +1,7 @@
 {
   "task_name": "C5-M3: Hourly consumer consultation",
   "customer_name": "Estelle Kowalczyk",
-  "intent": "Open with exactly: \"I need a lawyer about a defective Halloway Toolworks product. Nobody was hurt \u2014 I just need help with the warranty and the bill.\" If asked whether you were injured or if this is a personal-injury claim, say exactly: \"No. Nobody was injured. It's a warranty and billing problem, not a personal-injury claim.\" When asked when, say exactly: \"It was July tenth, twenty twenty six.\" Accept first slot and confirm after fee read-back. Do not ask for a staff member. Once booked, thank and end.",
+  "intent": "Open with exactly: \"I need a lawyer about a defective Halloway Toolworks product. Nobody was hurt \u2014 I just need help with the warranty and the bill.\" If asked whether you were injured or if this is a personal-injury claim, say exactly: \"No. Nobody was injured. It's a warranty and billing problem, not a personal-injury claim.\" When asked when, say exactly: \"It was July tenth, twenty twenty six.\" If asked email or text for the packet, say email. Take the first appointment time offered. Confirm only after they read back the consultation fee. Stay until they confirm the intake is on the file and the consultation is booked. A spoken \"we'll take care of it\" without those writes is not enough. Do not ask for a staff member. Once they confirm the intake is on the file and the consultation is booked, say exactly: \"Thank you, that's all I needed.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -34,6 +34,34 @@
     "transfer_to_scheduling"
   ],
   "exp_tool_calls": [
+    {
+      "name": "check_conflict",
+      "parameters": {
+        "opposing_party": "Halloway Toolworks"
+      }
+    },
+    {
+      "name": "check_practice_area",
+      "parameters": {
+        "practice_area": "consumer"
+      }
+    },
+    {
+      "name": "check_jurisdiction",
+      "parameters": {
+        "state": "CA",
+        "practice_area": "consumer"
+      }
+    },
+    {
+      "name": "record_intake",
+      "parameters": {
+        "practice_area": "consumer",
+        "state": "CA",
+        "incident_date": "2026-07-10",
+        "summary": "Defective product."
+      }
+    },
     {
       "name": "hold_evaluation",
       "parameters": {
@@ -95,6 +123,20 @@
       "match_phrase": "The agent asks whether you were injured, whether the product caused an injury or loss, or whether this is a personal-injury claim. NOT any other question.",
       "response_type": "phrase",
       "response_value": "No. Nobody was injured. It's a warranty and billing problem, not a personal-injury claim.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether to send the packet by email or text, or which channel to use. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "Email, please.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent offers available appointment times or asks which slot to hold. NOT after a slot is already held and they are asking to confirm that booking.",
+      "response_type": "phrase",
+      "response_value": "I'll take the first time you offered.",
       "occurrence_mode": "always"
     },
     {

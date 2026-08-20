@@ -1,7 +1,7 @@
 {
   "task_name": "C5-H4: Premises evaluation booked in Texas",
   "customer_name": "Hector Salinas",
-  "intent": "Open with exactly: \"I slipped on a wet floor at a store in Texas and broke my wrist.\" When asked who this would be against, say exactly: \"It's Rio Vista Market.\" When asked when, say exactly: \"It was July tenth, twenty twenty six.\" Take the first appointment time offered. When read back, say exactly: \"Yes, that's right, go ahead and book it.\" Do not ask for a staff member. Once told the appointment is booked, say exactly: \"Thank you, that's all I needed.\" and end the call.",
+  "intent": "Open with exactly: \"I slipped on a wet floor at a store in Texas and broke my wrist.\" When asked who this would be against, say exactly: \"It's Rio Vista Market.\" When asked when, say exactly: \"It was July tenth, twenty twenty six.\" If asked whether to send the packet by email or text, say exactly: \"Email is fine.\" Take the first appointment time offered. When read back, say exactly: \"Yes, that's right, go ahead and book it.\" Stay until they confirm the evaluation is booked and the packet is on the file. A spoken promise that they will take care of it, without those writes, is not enough. Do not ask for a staff member. Once they confirm the appointment is booked and the packet is on the file, say exactly: \"Thank you, that's all I needed.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -57,7 +57,30 @@
       }
     },
     {
+      "name": "calculate_filing_deadline",
+      "parameters": {
+        "state": "TX",
+        "practice_area": "premises_liability",
+        "incident_date": "2026-07-10"
+      }
+    },
+    {
       "name": "transfer_to_intake"
+    },
+    {
+      "name": "record_intake",
+      "parameters": {
+        "practice_area": "premises_liability",
+        "state": "TX",
+        "incident_date": "2026-07-10",
+        "summary": "Slip on a wet store floor."
+      }
+    },
+    {
+      "name": "send_intake_packet",
+      "parameters": {
+        "channel": "email"
+      }
     },
     {
       "name": "transfer_to_scheduling"
@@ -127,6 +150,13 @@
     },
     {
       "match_type": "context",
+      "match_phrase": "The agent asks whether to send the packet by email or text, or which channel to use. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "Email is fine.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
       "match_phrase": "The agent offers available appointment times or asks which slot to hold. NOT after a slot is already held and they are asking to confirm that booking.",
       "response_type": "phrase",
       "response_value": "I'll take the first time you offered.",
@@ -192,7 +222,13 @@
       }
     ],
     "intake_notes": [],
-    "documents": [],
+    "documents": [
+      {
+        "caller_id": "c_new",
+        "kind": "intake_packet",
+        "target": "email"
+      }
+    ],
     "holds": [
       {
         "token": "HR-EVAL-3092",

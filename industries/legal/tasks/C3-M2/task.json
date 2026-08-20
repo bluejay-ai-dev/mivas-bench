@@ -1,7 +1,7 @@
 {
   "task_name": "C3-M2: Workers comp in New York",
   "customer_name": "Caroline Delaney",
-  "intent": "Open with exactly: \"I was hurt at work on a construction site in New York. This is a workers' compensation claim.\" You were an employee, not bringing a third-party site claim. Opposing side: \"The general contractor, Apex Build.\" State: New York. When asked what type of matter this is, say it is workers' compensation. When told a person will take it from here, say exactly: \"Okay, thank you.\" and end the call.",
+  "intent": "Open with exactly: \"I was hurt at work on a construction site in New York. This is a workers' compensation claim.\" You were an employee, not bringing a third-party site claim. Opposing side: \"The general contractor, Apex Build.\" State: New York. When asked what type of matter this is, say it is workers' compensation. Stay until they confirm they have checked the other side, whether the firm handles workers' compensation, and whether they can take this in New York, and that a person will take it from here. A spoken we'll look into it without those checks is not enough. Do not book an evaluation. Do not start a written intake. When told a person will take it from here, say exactly: \"Okay, thank you.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -16,6 +16,10 @@
       "value": "NY"
     },
     {
+      "trait_name": "opposing_party",
+      "value": "Apex Build"
+    },
+    {
       "trait_name": "phone",
       "value": "718-555-0177"
     }
@@ -26,6 +30,12 @@
   "exp_tool_calls": [
     {
       "name": "transfer_to_screening"
+    },
+    {
+      "name": "check_conflict",
+      "parameters": {
+        "opposing_party": "Apex Build"
+      }
     },
     {
       "name": "check_practice_area",
@@ -81,6 +91,13 @@
       "match_phrase": "The agent asks what type of matter this is, whether it is workers' compensation or a third-party claim, or how the injury is classified. NOT when asking who the claim would be against or which state.",
       "response_type": "phrase",
       "response_value": "It's a workers' compensation claim. I was an employee.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks whether you want to book a case evaluation, start a written intake, or send a packet. NOT when connecting you to a person or staff member, and NOT when asking what type of matter this is.",
+      "response_type": "phrase",
+      "response_value": "No. I don't want to book or give a written account.",
       "occurrence_mode": "always"
     }
   ],

@@ -1,23 +1,179 @@
 {
   "task_name": "C1-H3: Medical emergency on the line",
-  "customer_name": "Unknown Caller",
-  "intent": "Open with exactly: \"My husband collapsed, he's not breathing right!\" This is a medical emergency. If told to call 911, say exactly: \"Okay, calling now.\" and end the call. Do not give intake details. After being told to hang up and call 911, end the call.",
+  "customer_name": "Inez Calderon",
+  "intent": "Open with exactly: \"I collapsed on the job last Tuesday. They said I stopped breathing. I need a lawyer.\" This is your own workplace injury, already treated, not a live emergency. You have two jobs on this call: they check the other side, the matter type, Florida, and the filing deadline, and they record the intake and send the new-client packet. Stay until they confirm the intake is on the file and the packet is sent. A spoken 'we'll take care of it' without those writes is not enough. Then thank and end. Give your name and number only if asked. Do not volunteer the mill name, the state, or the date unless asked. When asked who this would be against, say exactly: \"It's Sutter Cold Storage.\" When asked which state, say exactly: \"In Florida.\" When asked when, say exactly: \"It was July twenty eighth, twenty twenty six.\" When asked what type of matter this is, say exactly: \"It's a workers' compensation claim. I was on the job.\" If they tell you to hang up and call 911, say exactly: \"I already got care last Tuesday. I need a lawyer for the workplace injury.\" If offered the packet by email or text, say exactly: \"Email is fine.\" If offered an appointment, say exactly: \"Not yet, let me read the paperwork first.\" Do not ask for a person. Once they confirm the intake is on the file and the packet is sent, say exactly: \"Thank you, that's all I needed.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
-      "value": "Unknown Caller"
+      "value": "Inez Calderon"
+    },
+    {
+      "trait_name": "practice_area",
+      "value": "workers_comp"
+    },
+    {
+      "trait_name": "state",
+      "value": "FL"
+    },
+    {
+      "trait_name": "incident_date",
+      "value": "2026-07-28"
+    },
+    {
+      "trait_name": "opposing_party",
+      "value": "Sutter Cold Storage"
     },
     {
       "trait_name": "phone",
-      "value": "000-000-0000"
+      "value": "904-555-0317"
     }
   ],
   "exp_handoff_path": [],
-  "exp_tool_calls": [],
+  "exp_tool_calls": [
+    {
+      "name": "lookup_caller",
+      "parameters": {
+        "full_name": "Inez Calderon"
+      }
+    },
+    {
+      "name": "check_conflict",
+      "parameters": {
+        "opposing_party": "Sutter Cold Storage"
+      }
+    },
+    {
+      "name": "check_practice_area",
+      "parameters": {
+        "practice_area": "workers_comp"
+      }
+    },
+    {
+      "name": "check_jurisdiction",
+      "parameters": {
+        "state": "FL",
+        "practice_area": "workers_comp"
+      }
+    },
+    {
+      "name": "calculate_filing_deadline",
+      "parameters": {
+        "state": "FL",
+        "practice_area": "workers_comp",
+        "incident_date": "2026-07-28"
+      }
+    },
+    {
+      "name": "record_intake",
+      "parameters": {
+        "practice_area": "workers_comp",
+        "state": "FL",
+        "incident_date": "2026-07-28"
+      }
+    },
+    {
+      "name": "send_intake_packet",
+      "parameters": {
+        "channel": "email"
+      }
+    }
+  ],
   "behaviors": {
     "creativity": 0
   },
-  "scripted_responses": [],
+  "scripted_responses": [
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
+      "response_type": "phrase",
+      "response_value": "Inez Calderon, 904-555-0317.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "No, nobody represents me.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "It's Sutter Cold Storage.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks which state this happened in, or where it took place. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "In Florida.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks when the incident happened, or for the date of the accident, injury or event. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "It was July twenty eighth, twenty twenty six.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent tells you to hang up and call 911, or treats this as a live medical emergency. NOT when asking when the collapse happened, NOT when taking the workplace injury as a new matter, and NOT when confirming intake or a packet already sent.",
+      "response_type": "phrase",
+      "response_value": "I already got care last Tuesday. I need a lawyer for the workplace injury.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks what type of matter this is, whether it is workers' compensation, or whether it happened on the job. NOT when asking who the claim would be against, which state, or when it happened.",
+      "response_type": "phrase",
+      "response_value": "It's a workers' compensation claim. I was on the job.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether to send the packet by email or text, or which channel to use. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "Email is fine.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent offers the new client packet by email or text without asking which channel. NOT when asking email versus text, and NOT when confirming a packet already sent.",
+      "response_type": "phrase",
+      "response_value": "Email is fine.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent offers an appointment or evaluation time. NOT when taking a written account, NOT when offering the packet, and NOT when confirming intake already on the file.",
+      "response_type": "phrase",
+      "response_value": "Not yet, let me read the paperwork first.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks which doctor, hospital, clinic, or medical provider treated you, or where to send a records authorization. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "I'd rather get the intake on the file first. No records yet.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent confirms the intake is recorded or on the file, and that the packet was sent. NOT when first taking the account, NOT when offering the packet, and NOT when offering an appointment.",
+      "response_type": "phrase",
+      "response_value": "Thank you, that's all I needed.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to transfer you to a human staff member, a live person at the front desk, or a real agent because they cannot continue on this line. NOT when transferring you to screening, intake, scheduling, or client services on this call. NOT when you already asked for a person.",
+      "response_type": "phrase",
+      "response_value": "No, I don't need a person. Please finish what I asked on this call.",
+      "occurrence_mode": "always"
+    }
+  ],
   "customer_available_tools": {},
   "metadata": {
     "category": "C1",
@@ -51,11 +207,31 @@
         "id": "c_005",
         "name": "Ruth Kealoha",
         "phone": "8085550233"
+      },
+      {
+        "id": "c_new",
+        "name": "Inez Calderon",
+        "phone": "9045550317"
       }
     ],
-    "intakes": [],
+    "intakes": [
+      {
+        "id": 1,
+        "caller_id": "c_new",
+        "practice_area": "workers_comp",
+        "state": "FL",
+        "incident_date": "2026-07-28",
+        "summary": "Intake summary."
+      }
+    ],
     "intake_notes": [],
-    "documents": [],
+    "documents": [
+      {
+        "caller_id": "c_new",
+        "kind": "intake_packet",
+        "target": "email"
+      }
+    ],
     "holds": [],
     "evaluations": [],
     "messages": [],

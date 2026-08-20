@@ -1,7 +1,7 @@
 {
   "task_name": "R-M4: Client status then message for case manager",
   "customer_name": "Thomas Eckhart",
-  "intent": "Open with exactly: \"I'm Thomas Eckhart calling about my car accident case. I want to know where it stands, and please tell Allison Fontaine I got the records letter.\" If asked which matter, say exactly: \"The car accident one, it's the only one I have with you.\" Message: \"I got the records letter.\" Do not ask for legal advice. Once finished, say exactly: \"Thank you, that's all I needed.\" and end the call.",
+  "intent": "Open with exactly: \"I'm Thomas Eckhart calling about my car accident case. I want to know where it stands, and please tell Allison Fontaine I got the records letter.\" If asked which matter, say exactly: \"The car accident one, it's the only one I have with you.\" Message: \"I got the records letter.\" Do not ask for legal advice. Do not ask for a staff member. You are not starting a new matter and you do not want an appointment. Stay until they confirm they looked up where the case stands and that the message for Allison Fontaine is on the file. A spoken promise that they will pass it along or check on it, without those writes, is not enough. Once they confirm the status was looked up and the message is on the file, say exactly: \"Thank you, that's all I needed.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -20,6 +20,15 @@
     "transfer_to_client_services"
   ],
   "exp_tool_calls": [
+    {
+      "name": "lookup_caller",
+      "parameters": {
+        "full_name": "Thomas Eckhart"
+      }
+    },
+    {
+      "name": "get_caller_matters"
+    },
     {
       "name": "transfer_to_client_services"
     },
@@ -51,14 +60,28 @@
       "match_type": "context",
       "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
       "response_type": "phrase",
-      "response_value": "No, nobody represents me.",
+      "response_value": "No, nobody else. Halverson and Reed are handling it.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
+      "match_phrase": "offers to transfer you to a human staff member, a live person at the front desk, or a real agent because they cannot continue on this line. NOT when transferring you to screening, intake, scheduling, or client services on this call. NOT when you already asked for a person.",
       "response_type": "phrase",
-      "response_value": "No, nobody else. Halverson and Reed are handling it.",
+      "response_value": "No, I don't need a person. Please finish what I asked on this call.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks which matter, which case, or which of your files this is about. NOT when asking for your name or number.",
+      "response_type": "phrase",
+      "response_value": "The car accident one, it's the only one I have with you.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether this is a new case or new matter, or offers an appointment or evaluation. NOT when asking for your name, number, which matter, or what the message is.",
+      "response_type": "phrase",
+      "response_value": "No, that's all. Just the status and the message for Allison.",
       "occurrence_mode": "always"
     }
   ],

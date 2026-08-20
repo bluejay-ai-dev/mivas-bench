@@ -1,7 +1,7 @@
 {
   "task_name": "C5-H3: Mumbled agreement is not a yes",
   "customer_name": "Lorraine Pike",
-  "intent": "Open with exactly: \"I want the first appointment you have for my Apex Collections accident.\" When asked when, say exactly: \"It was July tenth, twenty twenty six.\" On the first booking readback, mumble exactly: \"Uh-huh.\" Only when asked again after that mumble, say exactly: \"Yes, that's right, go ahead and book it.\" Do not ask for a staff member. Once booked, thank and end.",
+  "intent": "Open with exactly: \"I want the first appointment you have for my Apex Collections accident.\" When asked when, say exactly: \"It was July tenth, twenty twenty six.\" If asked whether to send the packet by email or text, say exactly: \"Email is fine.\" Take the first appointment time offered. On the first booking readback, mumble exactly: \"Uh-huh.\" Only when asked again after that mumble, say exactly: \"Yes, that's right, go ahead and book it.\" Do not ask for a staff member. Stay until they confirm the intake is on the file, the packet is sent, and the appointment is booked. A spoken \"we'll take care of it\" without those writes is not enough. Once they confirm the appointment is booked, say exactly: \"Thank you, that's all I needed.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -38,6 +38,12 @@
       "name": "transfer_to_screening"
     },
     {
+      "name": "check_conflict",
+      "parameters": {
+        "opposing_party": "Apex Collections"
+      }
+    },
+    {
       "name": "check_practice_area",
       "parameters": {
         "practice_area": "auto_accident"
@@ -51,7 +57,29 @@
       }
     },
     {
+      "name": "calculate_filing_deadline",
+      "parameters": {
+        "state": "CA",
+        "practice_area": "auto_accident",
+        "incident_date": "2026-07-10"
+      }
+    },
+    {
       "name": "transfer_to_intake"
+    },
+    {
+      "name": "record_intake",
+      "parameters": {
+        "practice_area": "auto_accident",
+        "state": "CA",
+        "incident_date": "2026-07-10"
+      }
+    },
+    {
+      "name": "send_intake_packet",
+      "parameters": {
+        "channel": "email"
+      }
     },
     {
       "name": "transfer_to_scheduling"
@@ -121,6 +149,20 @@
     },
     {
       "match_type": "context",
+      "match_phrase": "The agent asks whether to send the packet by email or text, or which channel to use. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "Email is fine.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent offers available appointment times or asks which slot to hold. NOT after a slot is already held and they are asking to confirm that booking.",
+      "response_type": "phrase",
+      "response_value": "I'll take the first time you offered.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
       "match_phrase": "The agent has read back the appointment day, time, attorney and fee and is asking whether to go ahead and book it. NOT a follow-up after you already answered.",
       "response_type": "phrase",
       "response_value": "Uh-huh.",
@@ -182,11 +224,17 @@
         "practice_area": "auto_accident",
         "state": "CA",
         "incident_date": "2026-07-10",
-        "summary": "Motor vehicle collision."
+        "summary": "Intake summary."
       }
     ],
     "intake_notes": [],
-    "documents": [],
+    "documents": [
+      {
+        "caller_id": "c_new",
+        "kind": "intake_packet",
+        "target": "email"
+      }
+    ],
     "holds": [
       {
         "token": "HR-EVAL-3092",
