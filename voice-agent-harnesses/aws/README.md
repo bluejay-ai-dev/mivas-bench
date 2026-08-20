@@ -16,6 +16,7 @@ Shared builder: `harness.py`. Tracing: `report.py` (`BLUEJAY_SERVICE_NAME=mivas-
 - Barge-in: provider interrupted event (never mute on CHIRP VAD alone)
 - Clock: `Today is …` injected into every session instructions
 - Tracing → LangSmith-shaped Bluejay OTel `realtime_session → turn → {user_message, model, execute_tool}`; the `model` span carries Nova's `usageEvent` token breakdown (speech/text, per-turn delta) + time-to-first-token. Chirp stamps `X-Simulation-Result-Id`
+- Concurrency: the CHIRP parent accepts TCP and starts one Python process per call. Amazon's Bedrock streaming library shares state across a whole process, so two calls in one interpreter cancel each other. One container still takes many calls; CPU and memory bound the count.
 
 Nova will not speak from silence alone (the stream stays up but only emits usage events). The keepalive is the same constraint as hosted VoiceChat duplex — zero-PCM keeps the input channel alive; the opening nudge is interactive text, not a kick WAV.
 
