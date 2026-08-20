@@ -1,7 +1,7 @@
 {
   "task_name": "C4-H4: Medical malpractice Florida intake with records",
   "customer_name": "Aisha Rahman",
-  "intent": "Open with exactly: \"A clinic in Florida left a sponge in after surgery and I had to go back.\" When asked who this would be against, say exactly: \"It's Gulfshore Clinic.\" Florida. May twentieth, twenty twenty six. If records release offered, accept. When asked which doctor, hospital, clinic, or provider treated you, say exactly: \"Jackson Memorial.\" Accept email packet. Decline booking. Once finished, say exactly: \"Thank you, that's all I needed.\" and end the call.",
+  "intent": "Open with exactly: \"A clinic in Florida left a sponge in after surgery and I had to go back.\" When asked who this would be against, say exactly: \"It's Gulfshore Clinic.\" Florida. May twentieth, twenty twenty six. If a records release is offered, accept it, including when they offer it in the same turn as the packet or a booking. When asked which doctor, hospital, clinic, or provider treated you, say exactly: \"Jackson Memorial.\" Accept email packet. Decline booking. Once finished, say exactly: \"Thank you, that's all I needed.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -128,6 +128,13 @@
     },
     {
       "match_type": "context",
+      "match_phrase": "The agent offers to send a medical records release or authorization for signature, including when they also offer the packet or an evaluation. NOT when they are only asking which doctor, hospital, clinic, or provider treated you.",
+      "response_type": "phrase",
+      "response_value": "Yes, please send the records release. Jackson Memorial.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
       "match_phrase": "The agent asks whether to send the packet by email or text, or which channel to use. NOT any other question.",
       "response_type": "phrase",
       "response_value": "Email is fine.",
@@ -142,7 +149,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers an appointment or evaluation time",
+      "match_phrase": "offers an appointment or evaluation time. NOT when they are offering a medical records release or authorization in the same turn.",
       "response_type": "phrase",
       "response_value": "Not yet, let me read the paperwork first.",
       "occurrence_mode": "always"
@@ -201,13 +208,11 @@
     "intake_notes": [],
     "documents": [
       {
-        "id": 1,
         "caller_id": "c_new",
         "kind": "records_authorization",
         "target": "Jackson Memorial"
       },
       {
-        "id": 2,
         "caller_id": "c_new",
         "kind": "intake_packet",
         "target": "email"

@@ -91,6 +91,12 @@
       "match_phrase": "offers to book, schedule, pick an appointment, or check coverage once you are on the calendar. NOT when giving a yes or no for Park Avenue, NOT when asking for your name or date of birth.",
       "response_type": "phrase",
       "response_value": "I don't want to book. I just need a yes or no for Medicaid at Park Avenue."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "thanks you, says goodbye, wraps up, or offers a callback after a question or a non-answer, before they have named Park Avenue and said whether Medicaid is accepted there. NOT when they have just named Park Avenue with a yes or no for Medicaid, NOT when asking for your name.",
+      "response_type": "phrase",
+      "response_value": "I still need a yes or no for Medicaid at Park Avenue. Please look it up on this call before I go."
     }
   ],
   "customer_name": "Terrell Baines",

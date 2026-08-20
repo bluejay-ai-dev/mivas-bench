@@ -1,7 +1,7 @@
 """Locked matrix for the legal 72-case MIVAS grid (60 base + 12 audio clones).
 
 Each row defines customer-visible expected tools (including handoffs), handoff path,
-identity traits, and intent scaffolding. Band sizes: E 0–2, M 3–6, H 7+ expected tools.
+identity traits, and intent scaffolding. Band sizes: E 0–3, M 3–6, H 7+ expected tools.
 
     uv run python scripts/legal_task_spec.py          # self-check counts
 """
@@ -98,6 +98,24 @@ ASK_WHO_ATTORNEY = (
 ASK_REPRESENTED = (
     "The agent asks whether another lawyer or law firm currently represents the caller, "
     "or whether the caller has already hired or signed with anyone. NOT any other question."
+)
+ASK_MOTHER_DETAILS = (
+    "The agent asks for the mother's name, whether she can speak or call herself, "
+    "or for her details. NOT when asking for your own name or number."
+)
+OFFER_MESSAGE_NOT_PERSON = (
+    "The agent offers to take a message, says they cannot discuss her matter with you, "
+    "or says she should call herself. NOT when they are connecting you to a staff member "
+    "or live person."
+)
+OFFER_PERSON_NOT_MESSAGE = (
+    "The agent says they will connect you to a person, a staff member, or someone who "
+    "can help. NOT when offering only a message."
+)
+WRAP_TODAY = "That's all I needed today. Thank you."
+ASK_ACCOUNT_OR_APPT = (
+    "The agent starts taking a written account, asks you to describe what happened "
+    "in writing, or offers an appointment. NOT when asking which state or when it happened."
 )
 ASK_PROVIDER = (
     "The agent asks which doctor, hospital, clinic, or medical provider treated you, "
@@ -286,7 +304,7 @@ def all_cases() -> list[dict[str, Any]]:
         ),
         "tools": [t("take_message")],
         "handoffs": [],
-        "pins": ident_pins("Wendell Marsh", "206-555-0384"),
+        "pins": [pin(ASK_REPRESENTED, "No, nobody represents me.")],
         "replay_prefix": [lookup("Wendell Marsh")],
     })
     add({
@@ -323,14 +341,24 @@ def all_cases() -> list[dict[str, Any]]:
             "You are calling for your mother, not yourself. You do not have authority to "
             "start a new matter. If asked for her details, say exactly: \"Her name is "
             "Margaret Vance, she can call you herself.\" Do not ask for case status on "
-            "any named file. If offered a person, accept.",
+            "any named file. Do not ask to be connected to a person. If they offer only "
+            "a message or say she should call herself, say exactly: \"Okay, thank you.\" "
+            "and end the call. If they offer a person because she cannot speak for herself, "
+            "accept.",
             exit_line=(
                 'When told a person will help, say exactly: "Okay, thank you." and end the call.'
             ),
         ),
         "tools": [],
         "handoffs": [],
-        "pins": ident_pins("Eleanor Vance", "503-555-0144"),
+        "pins": ident_pins("Eleanor Vance", "503-555-0144") + [
+            pin(
+                ASK_MOTHER_DETAILS,
+                "Her name is Margaret Vance, she can call you herself.",
+            ),
+            pin(OFFER_MESSAGE_NOT_PERSON, "Okay, thank you."),
+            pin(OFFER_PERSON_NOT_MESSAGE, "Okay, thank you."),
+        ],
         "empty_writes": True,
         "replay_prefix": [lookup("Eleanor Vance")],
     })
@@ -409,8 +437,12 @@ def all_cases() -> list[dict[str, Any]]:
                 "and end the call."
             ),
         ),
-        "tools": [esc("conflict")],
-        "handoffs": [],
+        "tools": [
+            h("transfer_to_screening"),
+            t("check_conflict", opposing_party="Vertex Logistics"),
+            esc("conflict"),
+        ],
+        "handoffs": ["transfer_to_screening"],
         "pins": ident_pins("Howard Fairchild", "602-555-0177") + matter_pins(opposing="Vertex Logistics"),
         "escalation": True,
         "replay_prefix": [
@@ -425,7 +457,7 @@ def all_cases() -> list[dict[str, Any]]:
         "phone": "415-555-0188",
         "traits": [],
         "intent": base_intent(
-            'Open with exactly: "I want to talk to somebody about my case."',
+            'Open with exactly: "I have a case I need to discuss." Do not ask for a person.',
             "If asked whether another lawyer represents you, say exactly: \"Yes, Croft and "
             "Blake have been handling it.\" Do not volunteer that unless asked.",
             exit_line=(
@@ -435,7 +467,7 @@ def all_cases() -> list[dict[str, Any]]:
         ),
         "tools": [esc("represented_party")],
         "handoffs": [],
-        "pins": ident_pins("Marcus Oyelaran", "415-555-0188") + [
+        "pins": ident_pins("Marcus Oyelaran", "415-555-0188", represented=False) + [
             pin(ASK_REPRESENTED, "Yes, Croft and Blake have been handling it."),
         ],
         "escalation": True,
@@ -532,9 +564,9 @@ def all_cases() -> list[dict[str, Any]]:
             "If asked whether anyone represents you, say exactly: \"I spoke to a lawyer "
             "last week but I didn't hire them.\" Do not volunteer that unless asked. "
             "When asked who this would be against, say exactly: \"It's Greenfield Market.\" "
-            "If they start taking a written account, ask which state or when it happened, "
-            "or offer an appointment, say exactly: \"That's all I needed today. Thank you.\" "
-            "and end the call.",
+            "Never name a state or a date. If they start taking a written account, "
+            "ask which state or when it happened, or offer an appointment, say exactly: "
+            f'"{WRAP_TODAY}" and end the call.',
         ),
         "tools": [
             lookup("Lois Penney"),
@@ -544,6 +576,9 @@ def all_cases() -> list[dict[str, Any]]:
         "pins": ident_pins("Lois Penney", "414-555-0196", represented=False) + [
             pin(ASK_REPRESENTED, "I spoke to a lawyer last week but I didn't hire them."),
             pin(ASK_OPPOSING, "It's Greenfield Market."),
+            pin(ASK_STATE, WRAP_TODAY),
+            pin(ASK_WHEN, WRAP_TODAY),
+            pin(ASK_ACCOUNT_OR_APPT, WRAP_TODAY),
         ],
     })
     add({
@@ -660,8 +695,11 @@ def all_cases() -> list[dict[str, Any]]:
                 "and end the call."
             ),
         ),
-        "tools": [esc("adverse_party")],
-        "handoffs": [],
+        "tools": [
+            h("transfer_to_screening"),
+            esc("adverse_party"),
+        ],
+        "handoffs": ["transfer_to_screening"],
         "pins": ident_pins("Wade Killian", "469-555-0288") + [
             pin(ASK_OPPOSING, "I'm the one being sued. Your client hit me."),
             pin(ASK_STATE, "I'm the other driver. I don't want to start a claim."),
@@ -768,8 +806,10 @@ def all_cases() -> list[dict[str, Any]]:
             {"trait_name": "state", "value": "NY"},
         ],
         "intent": base_intent(
-            'Open with exactly: "I was hurt on a construction site in New York."',
-            "Opposing side: \"The general contractor, Apex Build.\" State: New York.",
+            'Open with exactly: "I was hurt at work on a construction site in New York. This is a workers\' compensation claim."',
+            "You were an employee, not bringing a third-party site claim. "
+            "Opposing side: \"The general contractor, Apex Build.\" State: New York. "
+            "When asked what type of matter this is, say it is workers' compensation.",
             exit_line=(
                 'When told a person will take it from here, say exactly: "Okay, thank you." '
                 "and end the call."
@@ -784,7 +824,12 @@ def all_cases() -> list[dict[str, Any]]:
         "handoffs": ["transfer_to_screening"],
         "pins": ident_pins("Caroline Delaney", "718-555-0177") + matter_pins(
             opposing="Apex Build", state="New York"
-        ),
+        ) + [pin(
+            "The agent asks what type of matter this is, whether it is workers' compensation "
+            "or a third-party claim, or how the injury is classified. NOT when asking who "
+            "the claim would be against or which state.",
+            "It's a workers' compensation claim. I was an employee.",
+        )],
         "escalation": True,
         "replay_prefix": [lookup("Caroline Delaney")],
     })
@@ -942,7 +987,9 @@ def all_cases() -> list[dict[str, Any]]:
         ],
         "intent": base_intent(
             'Open with exactly: "A car pulled out of a driveway and hit my passenger side."',
-            "Accept packet by email if offered. Decline booking for now.",
+            "Accept packet by email if offered. If offered a free case evaluation or "
+            "appointment, decline booking for now. Once the packet is handled and booking "
+            "is declined, say exactly: \"Thank you, that's all I needed.\" and end the call.",
         ),
         "tools": [
             h("transfer_to_screening"),
@@ -964,6 +1011,9 @@ def all_cases() -> list[dict[str, Any]]:
         ) + [pin(
             "offers the new client packet by email or text",
             "Email is better, thanks.",
+        ), pin(
+            ASK_OFFER_EVAL,
+            "No, not right now. Thank you, that's all I needed.",
         )],
         "replay_prefix": [lookup("Nadine Carlisle")],
     })
@@ -1034,11 +1084,12 @@ def all_cases() -> list[dict[str, Any]]:
             "he pulled out without looking. Decline booking.",
         ),
         "tools": [
+            h("transfer_to_screening"),
             h("transfer_to_intake"),
             t("record_intake", practice_area="auto_accident", state="CA",
               incident_date="2026-03-15", summary="Driveway pull-out collision."),
         ],
-        "handoffs": ["transfer_to_intake"],
+        "handoffs": ["transfer_to_screening", "transfer_to_intake"],
         "pins": ident_pins("Nadine Carlisle", "805-555-0167") + matter_pins(
             opposing="Wesley Trombley", state="California",
             when_spoken="March fifteenth, twenty twenty six",
@@ -1061,10 +1112,12 @@ def all_cases() -> list[dict[str, Any]]:
             "Other driver Landry Vance. May second, twenty twenty six.",
         ),
         "tools": [
+            h("transfer_to_screening"),
+            h("transfer_to_intake"),
             t("record_intake", practice_area="auto_accident", state="FL",
               incident_date="2026-05-02", summary="Run off the road by another driver."),
         ],
-        "handoffs": ["transfer_to_intake"],
+        "handoffs": ["transfer_to_screening", "transfer_to_intake"],
         "pins": ident_pins("Martin Iwu", "727-555-0311") + matter_pins(
             opposing="Landry Vance", state="Florida", when_spoken="May second, twenty twenty six"
         ),
@@ -1087,12 +1140,13 @@ def all_cases() -> list[dict[str, Any]]:
             'or provider treated you, say exactly: "Northside Orthopedic."',
         ),
         "tools": [
+            h("transfer_to_screening"),
             h("transfer_to_intake"),
             t("record_intake", practice_area="product_liability", state="GA",
               incident_date="2026-04-22", summary="Ladder collapse injury."),
             t("request_records_authorization", provider="Northside Orthopedic"),
         ],
-        "handoffs": ["transfer_to_intake"],
+        "handoffs": ["transfer_to_screening", "transfer_to_intake"],
         "pins": ident_pins("Franklin Deshpande", "706-555-0173") + matter_pins(
             opposing="Halloway Toolworks", state="Georgia",
             when_spoken="April twenty second, twenty twenty six",
@@ -1122,22 +1176,26 @@ def all_cases() -> list[dict[str, Any]]:
             ),
         ),
         "tools": [
+            h("transfer_to_screening"),
             h("transfer_to_intake"),
             t("record_intake", practice_area="product_liability", state="GA",
               incident_date="2026-04-22", summary="Ladder collapse injury."),
             t("add_intake_note", note="Witness Ruth Callahan saw the fall; ladder preserved."),
         ],
-        "handoffs": ["transfer_to_intake"],
+        "handoffs": ["transfer_to_screening", "transfer_to_intake"],
         "pins": ident_pins("Franklin Deshpande", "706-555-0173") + matter_pins(
             opposing="Halloway Toolworks",
         ) + [
             pin(
-                "has recorded the intake or asks if there is anything else to add",
+                "has recorded the intake or asks if there is anything else to add. "
+                "NOT when asking to book a case evaluation or appointment.",
                 "Please add an intake note that Ruth Callahan saw it and I still have the broken ladder.",
             ),
             DECLINE_HUMAN,
             pin(
-                "asks whether you want to book a case evaluation or appointment",
+                "asks whether you want to book a case evaluation or appointment. "
+                "NOT when asking if there is anything else to add after intake, "
+                "and NOT before the witness note has been spoken.",
                 "No thank you. Intake is enough.",
             ),
         ],
@@ -1163,12 +1221,13 @@ def all_cases() -> list[dict[str, Any]]:
             "If offered the packet, say exactly: \"Text is fine.\" Decline booking.",
         ),
         "tools": [
+            h("transfer_to_screening"),
             h("transfer_to_intake"),
             t("record_intake", practice_area="consumer", state="CA",
               incident_date="2026-02-10", summary="Debt collector harassment at work."),
             t("send_intake_packet", channel="sms"),
         ],
-        "handoffs": ["transfer_to_intake"],
+        "handoffs": ["transfer_to_screening", "transfer_to_intake"],
         "pins": ident_pins("Priya Nair", "408-555-0199") + matter_pins(
             opposing="Apex Collections", state="California",
             when_spoken="February tenth, twenty twenty six",
@@ -1330,7 +1389,7 @@ def all_cases() -> list[dict[str, Any]]:
         "pins": ident_pins("Clara Whitman", "206-555-0220") + matter_pins(
             opposing="Harborline Industries", state="Washington",
             when_spoken="April fifth, twenty twenty six",
-        ),
+        ) + [pin(ASK_PACKET_CHANNEL, "Email is fine.")],
         "replay_prefix": [lookup("Clara Whitman")],
     })
     add({
@@ -1840,8 +1899,11 @@ def all_cases() -> list[dict[str, Any]]:
                 'When told a person will follow up, say exactly: "Okay, thank you." and end.'
             ),
         ),
-        "tools": [esc("legal_advice_requested")],
-        "handoffs": [],
+        "tools": [
+            h("transfer_to_client_services"),
+            esc("legal_advice_requested"),
+        ],
+        "handoffs": ["transfer_to_client_services"],
         "pins": ident_pins("Thomas Eckhart", "312-555-0277"),
         "escalation": True,
         "replay_prefix": [lookup("Thomas Eckhart")],
@@ -2031,7 +2093,7 @@ def validate_cases(cases: list[dict[str, Any]]) -> None:
         n = expected_tool_count(row)
         band = band_for(key)
         cat = category_of(key)
-        if band == "easy" and n > 2:
+        if band == "easy" and n > 3:
             raise ValueError(f"{key}: easy has {n} expected tools")
         if band == "medium":
             lo = 1 if cat in ("C1", "C2", "C5", "R") else 3

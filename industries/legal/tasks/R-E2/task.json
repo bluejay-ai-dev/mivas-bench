@@ -12,8 +12,13 @@
       "value": "312-555-0277"
     }
   ],
-  "exp_handoff_path": [],
+  "exp_handoff_path": [
+    "transfer_to_client_services"
+  ],
   "exp_tool_calls": [
+    {
+      "name": "transfer_to_client_services"
+    },
     {
       "name": "escalate_to_human"
     }

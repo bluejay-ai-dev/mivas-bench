@@ -127,6 +127,12 @@
   "scripted_responses": [
     {
       "match_type": "context",
+      "match_phrase": "greets you, asks how they can help, asks what you need, or says they are listening, before you have asked about filler or a consult. NOT when they have just confirmed a booked time, NOT when quoting filler, NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "How much does cheek filler cost? I'd like to come in for a filler consult at Brooklyn Heights."
+    },
+    {
+      "match_type": "context",
       "match_phrase": "offers one or more concrete appointment dates or times after saying the Brooklyn Heights street address, floor, and suite, asks which day or time you want after giving that full address, or asks you to choose among concrete consult slots after giving that full address. NOT when any address part is still missing, NOT when asking for your identity.",
       "response_type": "phrase",
       "response_value": "Book the first time you offered."
@@ -157,7 +163,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before a consult time has been confirmed on the calendar. NOT when they have just confirmed a booked time.",
+      "match_phrase": "thanks you, says goodbye, or wraps up after you have asked for a filler consult, before a consult time has been confirmed on the calendar. NOT when greeting you or asking how they can help at the start of the call, NOT when they have just confirmed a booked time, NOT when asking for your name or date of birth.",
       "response_type": "phrase",
       "response_value": "I still need the consult booked. Please confirm a time on the calendar before I go."
     },

@@ -29,9 +29,13 @@
     }
   ],
   "exp_handoff_path": [
+    "transfer_to_screening",
     "transfer_to_intake"
   ],
   "exp_tool_calls": [
+    {
+      "name": "transfer_to_screening"
+    },
     {
       "name": "transfer_to_intake"
     },
@@ -78,7 +82,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "has recorded the intake or asks if there is anything else to add",
+      "match_phrase": "has recorded the intake or asks if there is anything else to add. NOT when asking to book a case evaluation or appointment.",
       "response_type": "phrase",
       "response_value": "Please add an intake note that Ruth Callahan saw it and I still have the broken ladder.",
       "occurrence_mode": "always"
@@ -92,7 +96,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "asks whether you want to book a case evaluation or appointment",
+      "match_phrase": "asks whether you want to book a case evaluation or appointment. NOT when asking if there is anything else to add after intake, and NOT before the witness note has been spoken.",
       "response_type": "phrase",
       "response_value": "No thank you. Intake is enough.",
       "occurrence_mode": "always"

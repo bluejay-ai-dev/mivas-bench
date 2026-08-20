@@ -109,8 +109,8 @@ def test_office_datetimes_match_at_minute_precision() -> None:
     }
     expected = {"patients": [], "appointments": [], "waitlist": [expected_row]}
     actual = {"patients": [], "appointments": [], "waitlist": [actual_row]}
-    assert vtr.office_canonical(expected)["waitlist"][0]["latest"] == "2026-09-30T23:59"
-    assert vtr.office_canonical(actual)["waitlist"][0]["latest"] == "2026-09-30T23:59"
+    assert vtr.office_canonical(expected)["waitlist"][0]["latest"] == "2026-09-30t23:59"
+    assert vtr.office_canonical(actual)["waitlist"][0]["latest"] == "2026-09-30t23:59"
     assert vtr.office_states_match(expected, actual, industry="healthcare") is True
     minute_off = {
         "patients": [],
@@ -129,6 +129,19 @@ def test_office_datetimes_match_at_minute_precision() -> None:
         "waitlist": [],
     }
     assert vtr.office_states_match(expected_apt, actual_apt) is True
+    omitted_seconds = {
+        "patients": [],
+        "appointments": [{"id": 2, "end": "2026-08-21T15:30"}],
+        "waitlist": [],
+    }
+    with_seconds = {
+        "patients": [],
+        "appointments": [{"id": 2, "end": "2026-08-21T15:30:00"}],
+        "waitlist": [],
+    }
+    assert vtr.office_canonical(omitted_seconds)["appointments"][0]["end"] == "2026-08-21t15:30"
+    assert vtr.office_canonical(with_seconds)["appointments"][0]["end"] == "2026-08-21t15:30"
+    assert vtr.office_states_match(omitted_seconds, with_seconds, industry="healthcare") is True
 
 
 def test_verify_result_ignores_tool_events_in_state() -> None:
@@ -728,4 +741,19 @@ def test_legal_intake_note_without_packet_matches() -> None:
     assert vtr.office_states_match(expected, actual, industry="legal") is True
     expected["documents"] = [{"id": 1, "kind": "intake_packet", "target": "email"}]
     assert vtr.office_states_match(expected, actual, industry="legal") is False
+
+
+def test_legal_records_row_matches_when_packet_took_id_one() -> None:
+    expected = {
+        "documents": [
+            {"kind": "records_authorization", "target": "Northside Orthopedic"},
+        ],
+    }
+    actual = {
+        "documents": [
+            {"id": 1, "kind": "intake_packet", "target": "sms"},
+            {"id": 2, "kind": "records_authorization", "target": "Northside Orthopedic"},
+        ],
+    }
+    assert vtr.office_states_match(expected, actual, industry="legal") is True
 
