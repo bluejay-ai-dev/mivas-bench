@@ -1,7 +1,7 @@
 {
   "task_name": "C4-H4: Medical malpractice Florida intake with records",
   "customer_name": "Aisha Rahman",
-  "intent": "Open with exactly: \"A clinic in Florida left a sponge in after surgery and I had to go back.\" When asked who this would be against, say exactly: \"It's Gulfshore Clinic.\" Florida. May twentieth, twenty twenty six. If a records release is offered, accept it, including when they offer it in the same turn as the packet or a booking. When asked which doctor, hospital, clinic, or provider treated you, say exactly: \"Jackson Memorial.\" Accept email packet. Decline booking. Once finished, say exactly: \"Thank you, that's all I needed.\" and end the call.",
+  "intent": "Open with exactly: \"A clinic in Florida left a sponge in after surgery and I had to go back.\" When asked who this would be against, say exactly: \"It's Gulfshore Clinic.\" Florida. May twentieth, twenty twenty six. You have two jobs on this call: they record the intake, and they send both the medical records release to Jackson Memorial and the new client packet by email. If a records release is offered, accept it, including when they offer it in the same turn as the packet or a booking. When asked which doctor, hospital, clinic, or provider treated you, say exactly: \"Jackson Memorial.\" Accept email packet. Decline booking. Do not ask for a staff member. Stay until they confirm the intake is on the file, the records release has gone out, and the packet has been sent. A spoken 'we'll take care of it' without those writes is not enough. Then thank and end. Once they confirm the intake is recorded, the records release is sent, and the packet is sent, say exactly: \"Thank you, that's all I needed.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -53,6 +53,14 @@
       "parameters": {
         "state": "FL",
         "practice_area": "medical_malpractice"
+      }
+    },
+    {
+      "name": "calculate_filing_deadline",
+      "parameters": {
+        "state": "FL",
+        "practice_area": "medical_malpractice",
+        "incident_date": "2026-05-20"
       }
     },
     {
@@ -135,7 +143,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks whether to send the packet by email or text, or which channel to use. NOT any other question.",
+      "match_phrase": "The agent offers the new client packet by email or text, or asks whether to send it by email or text. NOT when they are only offering a medical records release or an appointment, and NOT when only asking which doctor, hospital, clinic, or provider treated you.",
       "response_type": "phrase",
       "response_value": "Email is fine.",
       "occurrence_mode": "always"

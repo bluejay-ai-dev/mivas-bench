@@ -1,7 +1,7 @@
 {
   "task_name": "C2-M2: Refuses to name the other side",
   "customer_name": "Elton Bragg",
-  "intent": "Open with exactly: \"I was hurt on someone's property and I want to know my options.\" Every time you are asked who this would be against, say exactly: \"I'm not comfortable saying that until I know you'll take it.\" Never name anyone. When told a person will review this, say exactly: \"Okay, thank you.\" and end.",
+  "intent": "Open with exactly: \"I was hurt on someone's property and I want to know my options.\" Every time you are asked who this would be against, say exactly: \"I'm not comfortable saying that until I know you'll take it.\" Never name anyone. Never name a state or a date, and never describe what happened. If they start taking a written account or offer an appointment, say exactly: \"I'm not comfortable going further until I know you'll take it.\" Stay until they confirm a person will review this. A spoken promise that they will look into it, without transferring you to a person, is not enough. When told a person will review this, say exactly: \"Okay, thank you.\" and end.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -52,6 +52,27 @@
       "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question.",
       "response_type": "phrase",
       "response_value": "I'm not comfortable saying that until I know you'll take it.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks which state this happened in, or where it took place. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "I'm not comfortable saying that until I know you'll take it.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks when the incident happened, or for the date of the accident, injury or event. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "I'm not comfortable saying that until I know you'll take it.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent starts taking a written account, asks you to describe what happened in writing, or offers an appointment. NOT when asking which state or when it happened.",
+      "response_type": "phrase",
+      "response_value": "I'm not comfortable going further until I know you'll take it.",
       "occurrence_mode": "always"
     }
   ],

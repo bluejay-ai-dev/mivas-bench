@@ -1,7 +1,7 @@
 {
   "task_name": "C4-H2: Consumer intake, declines booking",
   "customer_name": "Estelle Kowalczyk",
-  "intent": "Open with exactly: \"A store sold me a defective space heater.\" When asked who this would be against, say exactly: \"It's Midtown Appliance.\" Accept email packet. If offered an appointment, say exactly: \"Not yet, let me read the paperwork first.\" Once finished, say exactly: \"Thank you, that's all I needed.\" and end the call.",
+  "intent": "Open with exactly: \"A store sold me a defective space heater.\" When asked who this would be against, say exactly: \"It's Midtown Appliance.\" California. January fifth, twenty twenty six. If offered the packet, say exactly: \"Email is fine.\" If offered an appointment, say exactly: \"Not yet, let me read the paperwork first.\" Stay until they confirm the intake is on the file and the packet has been emailed. A spoken promise to send it without those writes is not enough. Once both are confirmed on the file, say exactly: \"Thank you, that's all I needed.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -52,6 +52,21 @@
       "name": "check_practice_area",
       "parameters": {
         "practice_area": "consumer"
+      }
+    },
+    {
+      "name": "check_jurisdiction",
+      "parameters": {
+        "state": "CA",
+        "practice_area": "consumer"
+      }
+    },
+    {
+      "name": "calculate_filing_deadline",
+      "parameters": {
+        "state": "CA",
+        "practice_area": "consumer",
+        "incident_date": "2026-01-05"
       }
     },
     {
@@ -114,14 +129,21 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers the new client packet by email or text",
+      "match_phrase": "The agent asks whether to send the packet by email or text, or which channel to use. NOT any other question.",
       "response_type": "phrase",
-      "response_value": "Email is better, thanks.",
+      "response_value": "Email is fine.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "offers an appointment or evaluation time",
+      "match_phrase": "offers to transfer you to a human staff member, a live person at the front desk, or a real agent because they cannot continue on this line. NOT when transferring you to screening, intake, scheduling, or client services on this call. NOT when you already asked for a person.",
+      "response_type": "phrase",
+      "response_value": "No, I don't need a person. Please finish what I asked on this call.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers an appointment or evaluation time. NOT when asking whether to send the packet by email or text.",
       "response_type": "phrase",
       "response_value": "Not yet, let me read the paperwork first.",
       "occurrence_mode": "always"
@@ -180,7 +202,6 @@
     "intake_notes": [],
     "documents": [
       {
-        "id": 1,
         "caller_id": "c_new",
         "kind": "intake_packet",
         "target": "email"

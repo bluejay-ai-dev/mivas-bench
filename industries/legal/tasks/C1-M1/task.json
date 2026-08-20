@@ -1,7 +1,7 @@
 {
   "task_name": "C1-M1: Returning caller message with lookup",
   "customer_name": "Dana Whitfield",
-  "intent": "Open with exactly: \"I'd like to leave a message for Allison Fontaine.\" When asked what the message is, say exactly: \"Ask her to call me back about the letter I got last week.\" Once finished, say exactly: \"Thank you, that's all I needed.\" and end the call.",
+  "intent": "Open with exactly: \"I'd like to leave a message for Allison Fontaine.\" You have called this firm before. You are not starting a new matter and you do not want an appointment. When asked what the message is, say exactly: \"Ask her to call me back about the letter I got last week.\" If asked about a new matter, an appointment, or anything else going on, say exactly: \"No, that's all, just the message.\" Stay until they confirm the message for Allison Fontaine is on the file. A spoken promise that they will pass it along, without the write, is not enough. Once they confirm the message is on the file, say exactly: \"Thank you, that's all I needed.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -46,6 +46,20 @@
       "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
       "response_type": "phrase",
       "response_value": "No, nobody represents me.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to transfer you to a human staff member, a live person at the front desk, or a real agent because they cannot continue on this line. NOT when transferring you to screening, intake, scheduling, or client services on this call. NOT when you already asked for a person.",
+      "response_type": "phrase",
+      "response_value": "No, I don't need a person. Please finish what I asked on this call.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether this is a new case or new matter, whether anything else is going on, or offers an appointment or evaluation. NOT when asking for your name, number, who the message is for, or what the message is.",
+      "response_type": "phrase",
+      "response_value": "No, that's all, just the message.",
       "occurrence_mode": "always"
     }
   ],

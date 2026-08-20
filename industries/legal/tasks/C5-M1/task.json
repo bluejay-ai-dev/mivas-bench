@@ -1,7 +1,7 @@
 {
   "task_name": "C5-M1: Contingency fee hold and confirm",
   "customer_name": "Delphine Mercer",
-  "intent": "Open with exactly: \"I need to book a case evaluation for my Northstar Logistics accident in California.\" When asked when, say exactly: \"It was July tenth, twenty twenty six.\" If asked email or text for the packet, say email. Confirm when read back. Do not ask for a staff member. Once booked, thank and end.",
+  "intent": "Open with exactly: \"I need to book a case evaluation for my Northstar Logistics accident in California.\" When asked when, say exactly: \"It was July tenth, twenty twenty six.\" You need the new client packet by email: if they ask email or text, say email. Take the first appointment time offered. When read back, say exactly: \"Yes, that's right, go ahead and book it.\" Stay until they confirm the evaluation is booked and the packet is on the file. A spoken 'we'll take care of it' without those writes is not enough. Do not ask for a staff member. Once they confirm the appointment is booked and the packet is on the file, say exactly: \"Thank you, that's all I needed.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -35,7 +35,32 @@
   ],
   "exp_tool_calls": [
     {
-      "name": "transfer_to_scheduling"
+      "name": "check_conflict",
+      "parameters": {
+        "opposing_party": "Northstar Logistics"
+      }
+    },
+    {
+      "name": "record_intake",
+      "parameters": {
+        "practice_area": "auto_accident",
+        "state": "CA",
+        "incident_date": "2026-07-10",
+        "summary": "Northstar Logistics accident."
+      }
+    },
+    {
+      "name": "send_intake_packet",
+      "parameters": {
+        "channel": "email"
+      }
+    },
+    {
+      "name": "find_evaluation_slots",
+      "parameters": {
+        "practice_area": "auto_accident",
+        "state": "CA"
+      }
     },
     {
       "name": "hold_evaluation",
@@ -102,6 +127,13 @@
     },
     {
       "match_type": "context",
+      "match_phrase": "The agent offers available appointment times or asks which slot to hold. NOT after a slot is already held and they are asking to confirm that booking.",
+      "response_type": "phrase",
+      "response_value": "I'll take the first time you offered.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
       "match_phrase": "The agent has already held a slot and is reading back that held appointment's day, time, attorney and fee, asking whether to confirm it. NOT when first listing open times, and NOT when asking which slot to hold.",
       "response_type": "phrase",
       "response_value": "Yes, that's right, go ahead and book it.",
@@ -156,11 +188,17 @@
         "practice_area": "auto_accident",
         "state": "CA",
         "incident_date": "2026-07-10",
-        "summary": "Freeway accident."
+        "summary": "Northstar Logistics accident."
       }
     ],
     "intake_notes": [],
-    "documents": [],
+    "documents": [
+      {
+        "caller_id": "c_new",
+        "kind": "intake_packet",
+        "target": "email"
+      }
+    ],
     "holds": [
       {
         "token": "HR-EVAL-3092",

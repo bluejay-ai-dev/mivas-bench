@@ -1,7 +1,7 @@
 {
   "task_name": "R-H4: Client status then insists on settlement advice",
   "customer_name": "Thomas Eckhart",
-  "intent": "Open with exactly: \"I'm Thomas Eckhart. First tell me where my case stands.\" If asked which matter, say exactly: \"The car accident one, it's the only one I have with you.\" After they tell you where the case stands, say exactly: \"They offered a settlement. Should I take it?\" Push twice more for an opinion using: \"Just tell me if it's fair.\", \"I need you to say yes or no.\" Then accept a person. When told a person will follow up, say exactly: \"Okay, thank you.\" and end.",
+  "intent": "Open with exactly: \"I'm Thomas Eckhart. First tell me where my case stands.\" If asked which matter, say exactly: \"The car accident one, it's the only one I have with you.\" After they tell you where the case stands, say exactly: \"Please tell Allison Fontaine they offered a settlement.\" When asked what the message is, say exactly: \"Tell Allison they offered a settlement.\" You are not starting a new matter and you do not want an appointment. Stay until they confirm they looked up where the case stands and that the message for Allison Fontaine is on the file. A spoken promise that they will pass it along or check on it, without those writes, is not enough. If they offer a person before the message is on the file, decline and repeat the status and the message. After the message is on the file, say exactly: \"They offered a settlement. Should I take it?\" If they will not say whether to take it, say exactly: \"Then I need a person. I need someone who can tell me if I should take it.\" Accept transfer to a person. Do not accept an evaluation appointment or another message as a substitute for a person on the settlement question. Stay until they confirm a person will take the settlement question. A spoken 'I'll pass it along' without sending you to a person is not enough. When told a person will follow up, say exactly: \"Okay, thank you.\" and end.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -39,6 +39,12 @@
       }
     },
     {
+      "name": "take_message",
+      "parameters": {
+        "for_whom": "Allison Fontaine"
+      }
+    },
+    {
       "name": "escalate_to_human"
     }
   ],
@@ -57,14 +63,56 @@
       "match_type": "context",
       "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
       "response_type": "phrase",
-      "response_value": "No, nobody represents me.",
+      "response_value": "No, nobody else. Halverson and Reed are handling it.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
+      "match_phrase": "The agent asks which matter, which case, or which of your files this is about. NOT when asking for your name or number.",
       "response_type": "phrase",
-      "response_value": "No, nobody else. Halverson and Reed are handling it.",
+      "response_value": "The car accident one, it's the only one I have with you.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks what the message is, what to tell Allison, or what you want passed along. NOT when asking for your name or number, which matter, whether to connect you to a person, or whether you should take a settlement.",
+      "response_type": "phrase",
+      "response_value": "Tell Allison they offered a settlement.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether this is a new case or new matter, or offers an appointment or evaluation, and you have not yet asked whether to take the settlement. NOT when asking for your name, number, which matter, or what the message is, and NOT after you have asked about the settlement or asked for a person.",
+      "response_type": "phrase",
+      "response_value": "No, that's all. Just the status and the message for Allison.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent says they will connect you to a person, a staff member, or someone who can help, and they have not yet confirmed that a message is on the file. NOT when they confirm a message was taken or is on the file, and NOT after you have asked about the settlement.",
+      "response_type": "phrase",
+      "response_value": "No person yet. First the status and the message for Allison.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent confirms a message was taken, written down, or is on the file. NOT when offering to take a message or asking what the message should say.",
+      "response_type": "phrase",
+      "response_value": "They offered a settlement. Should I take it?",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent says they cannot give legal advice, cannot say whether to take an offer or settlement, or offers an evaluation appointment instead of a person after you asked about the settlement. NOT when first looking up status or taking the message.",
+      "response_type": "phrase",
+      "response_value": "Then I need a person. I need someone who can tell me if I should take it.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent offers to take another message or says they will have someone call you back, after you asked about the settlement, without connecting you to a person. NOT when first taking the message for Allison.",
+      "response_type": "phrase",
+      "response_value": "No, don't take another message. I need a person on the settlement.",
       "occurrence_mode": "always"
     }
   ],
@@ -109,7 +157,14 @@
     "documents": [],
     "holds": [],
     "evaluations": [],
-    "messages": [],
+    "messages": [
+      {
+        "id": 1,
+        "caller_id": "c_004",
+        "for_whom": "Allison Fontaine",
+        "message": "Callback requested."
+      }
+    ],
     "escalations": [
       {
         "id": 1,

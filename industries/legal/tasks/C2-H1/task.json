@@ -1,7 +1,7 @@
 {
   "task_name": "C2-H1: Conflict unclear, Harlow Properties",
   "customer_name": "Bernice Tolliver",
-  "intent": "Open with exactly: \"I slipped on ice outside my apartment and broke my wrist.\" When asked who this would be against, say exactly: \"It's Harlow Properties.\" When asked which state this happened in or where it took place, say exactly: \"In CA.\" When asked when, say exactly: \"It was January eighteenth, twenty twenty six.\" If asked to describe details, say exactly: \"I'd rather go through that with the lawyer.\" When told a person will review the conflict, say exactly: \"Okay, thank you.\" and end the call.",
+  "intent": "Open with exactly: \"I slipped on ice outside my apartment and broke my wrist.\" When asked who this would be against, say exactly: \"It's Harlow Properties.\" When asked which state this happened in or where it took place, say exactly: \"In CA.\" When asked when, say exactly: \"It was January eighteenth, twenty twenty six.\" If asked to describe details or to give a written account of the incident, say exactly: \"I'd rather go through that with the lawyer.\" Do not volunteer the other side, the state, or the date unless asked. If they offer a packet, an appointment, or a person before confirming your contact details are on the file, decline and ask them to finish. Stay until they confirm your contact details are on the file and that a person will review the conflict. A spoken 'we'll take care of it' or sending you to a person without the contact write is not enough. After they confirm your contact details are on the file and a person will review the conflict, say exactly: \"Okay, thank you.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -29,6 +29,12 @@
     "transfer_to_intake"
   ],
   "exp_tool_calls": [
+    {
+      "name": "lookup_caller",
+      "parameters": {
+        "full_name": "Bernice Tolliver"
+      }
+    },
     {
       "name": "transfer_to_screening"
     },
@@ -90,6 +96,41 @@
       "match_phrase": "The agent asks when the incident happened, or for the date of the accident, injury or event. NOT any other question.",
       "response_type": "phrase",
       "response_value": "It was January eighteenth, twenty twenty six.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "starts taking a written account of the incident, or asks you to describe what happened in writing. NOT when asking which state or when it happened, NOT when asking who this is against, and NOT when offering an appointment.",
+      "response_type": "phrase",
+      "response_value": "I'd rather go through that with the lawyer.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers the new client packet or asks whether to send it by email or text. NOT when confirming contact details are on the file, and NOT when connecting you to a person because the conflict needs review.",
+      "response_type": "phrase",
+      "response_value": "No packet. Just get my contact details on the file.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks whether you want to book a case evaluation, a free evaluation, or an appointment. NOT when confirming contact details are on the file, and NOT when connecting you to a person because the conflict needs review.",
+      "response_type": "phrase",
+      "response_value": "No thank you. I don't want an appointment.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "says they will connect you to a person, a staff member, or someone who will review the conflict, without confirming that your contact details are on the file. NOT when they have already confirmed the contact details are recorded, NOT when asking who this is against, which state, or when it happened, and NOT when taking a written account.",
+      "response_type": "phrase",
+      "response_value": "Please confirm my contact details are on the file first.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "confirms your contact details are recorded or on the file, and that a person will review the conflict. NOT when they only offer a person without confirming the file, and NOT when asking who this is against.",
+      "response_type": "phrase",
+      "response_value": "Okay, thank you.",
       "occurrence_mode": "always"
     }
   ],

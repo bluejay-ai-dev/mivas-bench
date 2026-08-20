@@ -1,7 +1,7 @@
 {
   "task_name": "C3-M3: Auto accident in Arizona",
   "customer_name": "Rita Chen",
-  "intent": "Open with exactly: \"Another driver hit me in Phoenix last month.\" Opposing driver: \"Landry Vance.\" State: Arizona. When told a person will take it from here, say exactly: \"Okay, thank you.\" and end the call.",
+  "intent": "Open with exactly: \"Another driver hit me in Phoenix last month.\" Opposing driver: \"Landry Vance.\" State: Arizona. Stay until they confirm they have checked the other side, whether the firm handles this kind of crash, and whether they can take this in Arizona, and that a person will take it from here. A spoken we'll look into it without those checks is not enough. Do not book an evaluation. Do not start a written intake. When told a person will take it from here, say exactly: \"Okay, thank you.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -16,6 +16,10 @@
       "value": "AZ"
     },
     {
+      "trait_name": "opposing_party",
+      "value": "Landry Vance"
+    },
+    {
       "trait_name": "phone",
       "value": "480-555-0120"
     }
@@ -25,7 +29,19 @@
   ],
   "exp_tool_calls": [
     {
+      "name": "lookup_caller",
+      "parameters": {
+        "full_name": "Rita Chen"
+      }
+    },
+    {
       "name": "transfer_to_screening"
+    },
+    {
+      "name": "check_conflict",
+      "parameters": {
+        "opposing_party": "Landry Vance"
+      }
     },
     {
       "name": "check_practice_area",
@@ -74,6 +90,20 @@
       "match_phrase": "The agent asks which state this happened in, or where it took place. NOT any other question.",
       "response_type": "phrase",
       "response_value": "In Arizona.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether you want to book a free case evaluation or set up an evaluation appointment, before stating any percentage fee, dollar fee, or contingency number. NOT after a fee amount has already been read back.",
+      "response_type": "phrase",
+      "response_value": "No thank you. I just need to know if you can take this in Arizona.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent starts taking a written account, asks you to describe what happened in writing, or offers an appointment. NOT when asking which state or when it happened.",
+      "response_type": "phrase",
+      "response_value": "I don't want to book or give a written account. Please check Arizona first.",
       "occurrence_mode": "always"
     }
   ],

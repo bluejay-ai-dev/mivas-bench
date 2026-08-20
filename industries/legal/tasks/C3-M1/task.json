@@ -1,7 +1,7 @@
 {
   "task_name": "C3-M1: Medical malpractice in California",
   "customer_name": "Yvonne Pressley",
-  "intent": "Open with exactly: \"A surgeon left a sponge inside me after surgery in California.\" When asked who this would be against, say exactly: \"Ridgeline Surgical Center.\" State is California. When told a person will take it from here, say exactly: \"Okay, thank you.\" and end the call.",
+  "intent": "Open with exactly: \"A surgeon left a sponge inside me after surgery in California.\" When asked who this would be against, say exactly: \"Ridgeline Surgical Center.\" State is California. Stay until they confirm a person will take it from here. A spoken note that the firm cannot take California medical malpractice, without transferring you to a person, is not enough. Do not start intake and do not book. When told a person will take it from here, say exactly: \"Okay, thank you.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -16,6 +16,10 @@
       "value": "CA"
     },
     {
+      "trait_name": "opposing_party",
+      "value": "Ridgeline Surgical Center"
+    },
+    {
       "trait_name": "phone",
       "value": "818-555-0133"
     }
@@ -26,6 +30,12 @@
   "exp_tool_calls": [
     {
       "name": "transfer_to_screening"
+    },
+    {
+      "name": "check_conflict",
+      "parameters": {
+        "opposing_party": "Ridgeline Surgical Center"
+      }
     },
     {
       "name": "check_practice_area",
@@ -74,6 +84,13 @@
       "match_phrase": "The agent asks which state this happened in, or where it took place. NOT any other question.",
       "response_type": "phrase",
       "response_value": "In California.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks whether you want to book a case evaluation, start a written intake, or send a packet. NOT when connecting you to a person or staff member.",
+      "response_type": "phrase",
+      "response_value": "No. I need a person to take it from here.",
       "occurrence_mode": "always"
     }
   ],
