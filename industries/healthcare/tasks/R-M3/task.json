@@ -1,6 +1,6 @@
 {
   "task_name": "R-M3: Xanax refill",
-  "intent": "You are Alice Romano, an existing Straus patient, and you are almost out of Xanax. This call is only about getting that refill sent to your pharmacy. Answer their identity questions once, then ask for the Xanax refill. If they say it cannot be refilled by phone, ask once whether they can make an exception this time. After they refuse that exception, thank them and hang up. If they offer to schedule a visit, a follow-up, or any other appointment, decline and end the call. Do not ask to schedule a visit, a follow-up, or any other appointment. Do not accept a booking. Do not ask to reschedule or cancel anything already on the calendar. Do not ask for a callback, a bill, a payment, the patient portal, a text, a waitlist, financing, or the street, floor, or suite.",
+  "intent": "You are Alice Romano, an existing Straus patient, and you are almost out of Xanax. This call is only about getting that refill sent to your pharmacy. Answer their identity questions once, then ask for the Xanax refill. If they say it cannot be refilled by phone, ask once whether they can make an exception this time. After they refuse that exception, thank them and hang up. If they offer to schedule a visit, a follow-up, or any other appointment, decline and end the call. Do not ask to schedule a visit, a follow-up, or any other appointment. Do not accept a booking. Do not ask to reschedule or cancel anything already on the calendar. Do not ask for a callback, a bill, a payment, the patient portal, a text, a waitlist, financing, or the street, floor, or suite. Do not ask them to text you an appointment confirmation.",
   "traits": [
     {
       "trait_name": "mobile",
@@ -65,7 +65,7 @@
     {
       "name": "request_rx_refill",
       "parameters": {
-        "medication_name": "Xanax"
+        "medication_name": "xanax"
       },
       "output": {
         "ok": true
@@ -108,9 +108,9 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when asking for a payment-link number, NOT when asking for your mobile number for identity.",
+      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when offering a payment link or deposit link, NOT when asking for a payment-link number, NOT when asking for your mobile number for identity, NOT when sending portal access.",
       "response_type": "phrase",
-      "response_value": "No thanks, I don't need a text."
+      "response_value": "No thanks, I don't need a confirmation text."
     }
   ],
   "customer_name": "Alice Romano",
@@ -262,8 +262,8 @@
         "location_id": "loc_park_ave",
         "provider_id": "prov_chen",
         "appointment_type_code": "MED_FOLLOWUP",
-        "start": "2026-08-20T10:00:00",
-        "end": "2026-08-20T10:20:00",
+        "start": "2026-08-20T10:00",
+        "end": "2026-08-20T10:20",
         "description": "Follow-up acne check",
         "status": "booked"
       },
@@ -273,8 +273,8 @@
         "location_id": "loc_park_ave",
         "provider_id": "prov_chen",
         "appointment_type_code": "COS_CONSULT",
-        "start": "2026-08-21T15:00:00",
-        "end": "2026-08-21T15:30:00",
+        "start": "2026-08-21T15:00",
+        "end": "2026-08-21T15:30",
         "description": "Botox consult",
         "status": "booked"
       },
@@ -284,8 +284,8 @@
         "location_id": "loc_windermere",
         "provider_id": "prov_patel",
         "appointment_type_code": "MED_FOLLOWUP",
-        "start": "2026-09-15T09:00:00",
-        "end": "2026-09-15T09:20:00",
+        "start": "2026-09-15T09:00",
+        "end": "2026-09-15T09:20",
         "description": "Eczema follow-up",
         "status": "booked"
       }
@@ -297,7 +297,7 @@
         "kind": "rx_refill_request",
         "payload": {
           "patient_id": "pat_alice_romano",
-          "medication_name": "Xanax",
+          "medication_name": "xanax",
           "route": "controlled_substance"
         }
       }

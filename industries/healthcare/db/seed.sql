@@ -65,16 +65,16 @@ INSERT INTO appointments (
 ) VALUES
   (
     'pat_jordan_lee', 'loc_park_ave', 'prov_chen', 'MED_FOLLOWUP',
-    '2026-08-20T10:00:00', '2026-08-20T10:20:00',
+    '2026-08-20T10:00', '2026-08-20T10:20',
     'Follow-up acne check', 'booked'
   ),
   (
     'pat_maria_alvarez', 'loc_park_ave', 'prov_chen', 'COS_CONSULT',
-    '2026-08-21T15:00:00', '2026-08-21T15:30:00',
+    '2026-08-21T15:00', '2026-08-21T15:30',
     'Botox consult', 'booked'
   ),
   (
     'pat_alice_romano', 'loc_windermere', 'prov_patel', 'MED_FOLLOWUP',
-    '2026-09-15T09:00:00', '2026-09-15T09:20:00',
+    '2026-09-15T09:00', '2026-09-15T09:20',
     'Eczema follow-up', 'booked'
   );

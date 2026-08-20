@@ -1,78 +1,123 @@
 {
-  "task_name": "C4-H3: Mole removal",
-  "intent": "You are a new patient with Aetna. Open by saying you want a mole on your cheek removed because you do not like how it looks, as a cosmetic thing, and ask to be seen at Park Avenue. If they tell you a mole has to be looked at as a medical visit first, agree and ask to book that medical visit at Park Avenue. If they never say that, still ask them to book you at Park Avenue for the mole. Stay on the line until an appointment time is confirmed. A transfer to another team is not done. If they start to wrap up or say goodbye before a time is booked, say you still need the visit booked today. Answer their identity questions once with your name, date of birth, phone, zip, and Aetna, then proceed. Take the first appointment time they offer. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first time out loud, then thank them and end the call. Do not ask for the street address, floor, or suite. Do not ask to add or change insurance. Do not ask for a callback, to speak to a person, a bill, a payment, the patient portal, a waitlist, a text, or financing. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar. If they only list openings, say book the first one. If they send you back to cosmetic after you already agreed this is medical, repeat that the mole needs a medical visit booked today, not a cosmetic consult.",
+  "task_name": "C4-H3: Filler consult for an existing patient",
+  "intent": "You are an existing Straus patient. Answer identity questions once with your name and date of birth, confirm if they read it back, then get to why you called. Ask how much cheek filler costs, then ask to come in for a filler consult at Brooklyn Heights. You need the Brooklyn Heights street address, the floor, and the suite before you will take any time \u2014 if they skip any of those, ask again. When they explain the deposit and cancellation rules, agree. Ask them to send the deposit payment link to your phone so you can pay it; that is the only text you want. After you have the address, take the first appointment time they offer. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first time out loud, then thank them and end the call. Do not ask to reschedule or cancel any visit you already have. Do not ask for a callback, to speak to a person, about a medical bill, the patient portal, a waitlist, financing, or a confirmation text. Never ask to speak to a person, a live agent, or the cosmetic team. If they offer a human transfer, refuse and insist this agent quote filler and book the Brooklyn Heights consult. Do not book anything except this Brooklyn Heights filler consult. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar and that a deposit payment link was sent to your phone. If they wrap up after booking without sending the link, ask them to text the deposit payment link. Do not ask them to text you an appointment confirmation.",
   "traits": [
     {
-      "trait_name": "mobile",
-      "value": "212-555-0185"
-    },
-    {
-      "trait_name": "preferred_office",
-      "value": "Park Avenue"
-    },
-    {
       "trait_name": "full_name",
-      "value": "Yvette Marchetti"
+      "value": "Sam Nguyen"
     },
     {
       "trait_name": "date_of_birth",
-      "value": "1974-03-15"
-    },
-    {
-      "trait_name": "carrier",
-      "value": "Aetna"
-    },
-    {
-      "trait_name": "patient_status",
-      "value": "new"
+      "value": "1985-11-03"
     },
     {
       "trait_name": "zip",
-      "value": "10016"
+      "value": "11201"
+    },
+    {
+      "trait_name": "mobile",
+      "value": "718-555-0122"
+    },
+    {
+      "trait_name": "preferred_office",
+      "value": "Brooklyn Heights"
+    },
+    {
+      "trait_name": "patient_status",
+      "value": "existing"
+    },
+    {
+      "trait_name": "carrier",
+      "value": "UnitedHealthcare"
     }
   ],
   "exp_handoff_path": [
-    "transfer_to_cosmetic",
-    "transfer_to_scheduling"
+    "transfer_to_identity",
+    "transfer_to_cosmetic"
   ],
   "exp_tool_calls": [
+    {
+      "name": "transfer_to_identity",
+      "parameters": {
+        "next_intent": "cosmetic"
+      }
+    },
+    {
+      "name": "identify_patient",
+      "parameters": {
+        "first_name": "Sam",
+        "last_name": "Nguyen",
+        "dob": "1985-11-03"
+      }
+    },
+    {
+      "name": "verify_identity",
+      "parameters": {
+        "full_name": "Sam Nguyen",
+        "dob": "1985-11-03"
+      },
+      "output": {
+        "ok": true,
+        "data": {
+          "verified": true
+        }
+      }
+    },
+    {
+      "name": "get_patient_summary"
+    },
     {
       "name": "transfer_to_cosmetic"
     },
     {
-      "name": "transfer_to_scheduling"
+      "name": "quote_cosmetic_service",
+      "parameters": {
+        "service": "filler"
+      }
     },
     {
-      "name": "classify_visit_request",
+      "name": "list_locations",
       "parameters": {
-        "visit_class": "medical",
-        "urgency": "routine",
-        "is_new_patient": true
+        "location_id": "loc_brooklyn_heights"
       }
     },
     {
       "name": "find_slots",
       "parameters": {
         "location_ids": [
-          "loc_park_ave"
+          "loc_brooklyn_heights"
         ]
       }
     },
     {
-      "name": "book_appointment",
-      "parameters": {
-        "location_id": "loc_park_ave",
-        "slot_id": "slot_loc_park_ave_1",
-        "provider_id": "prov_chen",
-        "start": "2026-08-24T09:00:00",
-        "end": "2026-08-24T09:30:00",
-        "appointment_type_code": "NP_MED"
-      },
+      "name": "book_cosmetic_consult",
       "output": {
         "ok": true,
         "data": {
           "status": "booked"
         }
+      },
+      "parameters": {
+        "slot_id": "slot_loc_brooklyn_heights_1",
+        "location_id": "loc_brooklyn_heights",
+        "provider_id": "prov_ruiz",
+        "start": "2026-08-24T09:00",
+        "service_interest": [
+          "filler"
+        ],
+        "policy_acknowledged": true
+      }
+    },
+    {
+      "name": "send_payment_link",
+      "output": {
+        "ok": true,
+        "data": {
+          "sent": true
+        }
+      },
+      "parameters": {
+        "mobile_e164": "+17185550122"
       }
     }
   ],
@@ -88,15 +133,15 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers an appointment time, a slot, or asks which day or time you want. NOT when asking for your name or date of birth, NOT when they have not yet given the street, floor, and suite if you still need those.",
+      "match_phrase": "offers one or more concrete appointment dates or times after saying the Brooklyn Heights street address, floor, and suite, asks which day or time you want after giving that full address, or asks you to choose among concrete consult slots after giving that full address. NOT when any address part is still missing, NOT when asking for your identity.",
       "response_type": "phrase",
-      "response_value": "I'll take the first time you offered."
+      "response_value": "Book the first time you offered."
     },
     {
       "match_type": "context",
-      "match_phrase": "offers to transfer you to a human, a person, the front desk, or a live agent. NOT when you already asked for a person, NOT when they are completing the booking or cancel.",
+      "match_phrase": "offers to transfer you to a human, a person, the cosmetic team, a live agent, or the front desk, or asks if you want to talk to someone. NOT when they are quoting filler or booking the Brooklyn Heights consult.",
       "response_type": "phrase",
-      "response_value": "No, I don't need a person. Please finish what I asked on this call."
+      "response_value": "No, I don't want a person or the cosmetic team. Quote filler and book the Brooklyn Heights consult on this call."
     },
     {
       "match_type": "context",
@@ -106,18 +151,36 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when asking for a payment-link number, NOT when asking for your mobile number for identity.",
+      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when offering a payment link or deposit link, NOT when asking for a payment-link number, NOT when asking for your mobile number for identity, NOT when sending portal access.",
       "response_type": "phrase",
-      "response_value": "No thanks, I don't need a text."
+      "response_value": "No thanks, I don't need a confirmation text."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers an appointment time, asks you to confirm a slot, or quotes an office name without the street address, floor, and suite. NOT when they have already said the street, the floor, and the suite.",
+      "response_type": "phrase",
+      "response_value": "Before I take a time, I need the street address, the floor, and the suite."
     },
     {
       "match_type": "context",
       "match_phrase": "thanks you, says goodbye, or wraps up after you have asked for a filler consult, before a consult time has been confirmed on the calendar. NOT when greeting you or asking how they can help at the start of the call, NOT when they have just confirmed a booked time, NOT when asking for your name or date of birth.",
       "response_type": "phrase",
-      "response_value": "I still need that time booked. Please confirm it is on the calendar before I go."
+      "response_value": "I still need the consult booked. Please confirm a time on the calendar before I go."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "thanks you, says goodbye, confirms a consult time, or asks if you need anything else before saying a deposit payment link was sent. NOT when they have just said the payment link or deposit link was sent.",
+      "response_type": "phrase",
+      "response_value": "Please text me the deposit payment link before I go."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "reads the cosmetic deposit and cancellation policy, asks whether you agree to it, or says they need a clear yes before booking. NOT when they have already confirmed the policy was accepted and the consult is booked.",
+      "response_type": "phrase",
+      "response_value": "Yes. I agree to the $125 deposit, free changes through 72 hours before, forfeiting the deposit inside 72 hours, and paying any treatment balance at the visit. Please book the first time."
     }
   ],
-  "customer_name": "Yvette Marchetti",
+  "customer_name": "Sam Nguyen",
   "customer_available_tools": {},
   "metadata": {
     "category": "C4",
@@ -266,8 +329,8 @@
         "location_id": "loc_park_ave",
         "provider_id": "prov_chen",
         "appointment_type_code": "MED_FOLLOWUP",
-        "start": "2026-08-20T10:00:00",
-        "end": "2026-08-20T10:20:00",
+        "start": "2026-08-20T10:00",
+        "end": "2026-08-20T10:20",
         "description": "Follow-up acne check",
         "status": "booked"
       },
@@ -277,8 +340,8 @@
         "location_id": "loc_park_ave",
         "provider_id": "prov_chen",
         "appointment_type_code": "COS_CONSULT",
-        "start": "2026-08-21T15:00:00",
-        "end": "2026-08-21T15:30:00",
+        "start": "2026-08-21T15:00",
+        "end": "2026-08-21T15:30",
         "description": "Botox consult",
         "status": "booked"
       },
@@ -288,24 +351,32 @@
         "location_id": "loc_windermere",
         "provider_id": "prov_patel",
         "appointment_type_code": "MED_FOLLOWUP",
-        "start": "2026-09-15T09:00:00",
-        "end": "2026-09-15T09:20:00",
+        "start": "2026-09-15T09:00",
+        "end": "2026-09-15T09:20",
         "description": "Eczema follow-up",
         "status": "booked"
       },
       {
         "id": 4,
-        "patient_id": null,
-        "location_id": "loc_park_ave",
-        "provider_id": "prov_chen",
-        "appointment_type_code": "NP_MED",
-        "start": "2026-08-24T09:00:00",
-        "end": "2026-08-24T09:30:00",
-        "description": "new patient visit",
+        "patient_id": "pat_sam_nguyen",
+        "location_id": "loc_brooklyn_heights",
+        "provider_id": "prov_ruiz",
+        "appointment_type_code": "COS_CONSULT",
+        "start": "2026-08-24T09:00",
+        "end": "2026-08-24T09:30",
+        "description": "Cosmetic consult: filler",
         "status": "booked"
       }
     ],
     "waitlist": [],
-    "tool_events": []
+    "tool_events": [
+      {
+        "id": 1,
+        "kind": "payment_link",
+        "payload": {
+          "mobile_e164": "+17185550122"
+        }
+      }
+    ]
   }
 }

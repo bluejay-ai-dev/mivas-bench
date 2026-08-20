@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import re
 import sys
 from collections import Counter
 from pathlib import Path
@@ -24,11 +25,11 @@ def _humans() -> list[dict]:
     return conv.build("healthcare")
 
 
-def test_healthcare_emits_66_payloads() -> None:
+def test_healthcare_emits_72_payloads() -> None:
     humans = _humans()
-    assert len(humans) == 66
+    assert len(humans) == 72
     keys = [conv.case_key_of(dh) for dh in humans]
-    assert len(set(keys)) == 66
+    assert len(set(keys)) == 72
     conv.check(humans, "healthcare")
 
 
@@ -122,12 +123,12 @@ def test_audio_condition_mapping() -> None:
         mapped = conv.audio_fields(audio)
         for field, want in mapped.items():
             assert dh[field] == want
-    assert by_audio["perfect"] == 54
+    assert by_audio["perfect"] == 60
     assert by_audio["background_noise"] == 6
     assert by_audio["bad_signal"] == 6
 
 
-def test_three_by_three_per_category() -> None:
+def test_two_four_four_per_category() -> None:
     scored: dict[str, Counter] = {}
     for dh in _humans():
         if conv.trait_value(dh, "audio_condition") != "perfect":
@@ -137,7 +138,7 @@ def test_three_by_three_per_category() -> None:
         scored.setdefault(area, Counter())[difficulty] += 1
     assert len(scored) == 6
     for area, counts in scored.items():
-        assert counts == Counter({"easy": 3, "medium": 3, "hard": 3}), area
+        assert counts == Counter({"easy": 2, "medium": 4, "hard": 4}), area
 
 
 def test_legal_emits_72_payloads() -> None:
@@ -287,7 +288,7 @@ def test_json_emits_raw_digital_humans(capsys) -> None:
     conv.main(["--industry", "healthcare", "--json"])
     body = json.loads(capsys.readouterr().out)
     humans = body["digital_humans"]
-    assert len(humans) == 66
+    assert len(humans) == 72
     assert "digital_human" not in humans[0]
     assert "expected_tool_calls" in humans[0]
     assert "test_name" in humans[0]
@@ -348,6 +349,22 @@ def test_encoder_drops_courtesy_send_sms() -> None:
     state = enc.drop_courtesy_sms_events({**courtesy, "exp_tool_calls": dropped})
     assert state["tool_events"] == []
 
+    wants_confirmation = {
+        "intent": (
+            "After they confirm a time is on the calendar, ask them to text you "
+            "an appointment confirmation."
+        ),
+        "scripted_responses": [
+            {"response_value": "Yes, text me the appointment confirmation."},
+        ],
+        "exp_tool_calls": [
+            {"name": "send_sms", "parameters": {"template_id": "appointment_confirmation"}},
+            {"name": "book_appointment"},
+        ],
+    }
+    kept = [call["name"] for call in enc.drop_unneeded_send_sms(wants_confirmation)]
+    assert kept == ["send_sms", "book_appointment"]
+
     wants_address = {
         "intent": "Ask them to text you the address so you have it.",
         "scripted_responses": [
@@ -358,8 +375,21 @@ def test_encoder_drops_courtesy_send_sms() -> None:
             {"name": "book_appointment"},
         ],
     }
-    kept = [call["name"] for call in enc.drop_unneeded_send_sms(wants_address)]
-    assert kept == ["send_sms", "book_appointment"]
+    assert [call["name"] for call in enc.drop_unneeded_send_sms(wants_address)] == [
+        "book_appointment",
+    ]
+
+    forbidden = {
+        "intent": "Do not ask them to text you an appointment confirmation.",
+        "scripted_responses": [],
+        "exp_tool_calls": [
+            {"name": "send_sms", "parameters": {"template_id": "appointment_confirmation"}},
+            {"name": "book_appointment"},
+        ],
+    }
+    assert [call["name"] for call in enc.drop_unneeded_send_sms(forbidden)] == [
+        "book_appointment",
+    ]
 
     deposit = {
         "intent": "Ask them to text you the deposit link so you can pay it.",
@@ -395,16 +425,32 @@ def test_encoder_stamps_creativity_zero() -> None:
 
 def test_healthcare_send_sms_only_when_caller_wants_text() -> None:
     enc = _encoder()
+    yes = {"C1-M1", "C2-M1"}
     keep: list[str] = []
     for path in sorted((ROOT / "industries" / "healthcare" / "tasks").glob("*/task.json")):
         task = json.loads(path.read_text())
         names = [call.get("name") for call in task.get("exp_tool_calls") or []]
-        if "send_sms" not in names:
-            continue
-        keep.append(path.parent.name)
-        assert enc.caller_requests_sms(task), path.parent.name
-        for call in task["exp_tool_calls"]:
-            assert enc.keep_send_sms_call(task, call, names)
+        has_sms = "send_sms" in names
+        wants = enc.caller_requests_sms(task)
+        parent = path.parent.name
+        is_yes = parent in yes
+        assert has_sms == wants == is_yes, parent
+        pins = [p.get("response_value") for p in task.get("scripted_responses") or []]
+        intent = task.get("intent") or ""
+        if is_yes:
+            keep.append(parent)
+            assert "Yes, text me the appointment confirmation." in pins, parent
+            assert "No thanks, I don't need a confirmation text." not in pins, parent
+            assert "No thanks, I don't need a text." not in pins, parent
+            for call in task["exp_tool_calls"]:
+                assert enc.keep_send_sms_call(task, call, names)
+            sms = next(c for c in task["exp_tool_calls"] if c["name"] == "send_sms")
+            assert (sms.get("parameters") or {}).get("template_id") == "appointment_confirmation"
+        else:
+            assert "Yes, text me the appointment confirmation." not in pins, parent
+            assert "Do not ask them to text you an appointment confirmation." in intent, parent
+            assert "No thanks, I don't need a confirmation text." in pins, parent
+    assert set(keep) == yes
 def test_encoder_omits_waitlist_latest_and_location_zip() -> None:
     enc = _encoder()
     waitlisted = enc.complete_call(
@@ -422,7 +468,7 @@ def test_encoder_omits_waitlist_latest_and_location_zip() -> None:
     )
     params = waitlisted.get("parameters") or {}
     assert "latest" not in params
-    assert params.get("earliest") == "2026-08-24T00:00:00"
+    assert params.get("earliest") == "2026-08-24"
     replayed = enc.replay_arguments(waitlisted)
     assert replayed["parameters"]["latest"] == enc.JOIN_WAITLIST_REPLAY_LATEST
 
@@ -462,7 +508,9 @@ def test_healthcare_leftover_holes_are_closed() -> None:
     c2h1 = load("C2-H1")
     wait = next(c for c in c2h1["exp_tool_calls"] if c["name"] == "join_waitlist")
     assert "latest" not in (wait.get("parameters") or {})
-    assert "23:59:59" not in json.dumps(wait)
+    assert (wait.get("parameters") or {}).get("earliest") == "2026-08-24"
+    assert "T" not in str((wait.get("parameters") or {}).get("earliest"))
+    assert "23:59" not in json.dumps(wait)
 
     c1h2 = load("C1-H2")
     loc = next(c for c in c1h2["exp_tool_calls"] if c["name"] == "list_locations")
@@ -505,17 +553,35 @@ def test_healthcare_leftover_holes_are_closed() -> None:
     captured = next(c for c in load("C3-M2")["exp_tool_calls"] if c["name"] == "capture_insurance_update")
     assert "group_number" not in (captured.get("parameters") or {})
 
+    for key, loc, carrier in (
+        ("C3-E1", "loc_brooklyn_heights", "unitedhealthcare"),
+        ("C3-E1-BG", "loc_brooklyn_heights", "unitedhealthcare"),
+        ("C3-E1-SIG", "loc_brooklyn_heights", "unitedhealthcare"),
+        ("C3-E3", "loc_park_ave", "aetna"),
+    ):
+        names = [c["name"] for c in load(key)["exp_tool_calls"]]
+        assert names == ["transfer_to_coverage", "check_plan_accepted"], key
+        check = next(c for c in load(key)["exp_tool_calls"] if c["name"] == "check_plan_accepted")
+        assert (check.get("parameters") or {}) == {"carrier": carrier, "location_id": loc}, key
+
+    for key in ("C5-E1", "C5-E1-BG", "C5-E1-SIG"):
+        pins = [p.get("response_value") for p in load(key).get("scripted_responses") or []]
+        assert "No thanks, I'm not paying anything today. Just tell me how payment works." in pins, key
+        assert "payment link" in load(key)["intent"].lower(), key
+
     assert "w123456789" in pin_blob(load("C3-M1")), "C3-M1"
     assert "11201" in pin_blob(load("C5-M3")), "C5-M3"
     assert "transfer is not the appointment" in pin_blob(load("C1-H1")), "C1-H1"
     for key in ("C4-E1", "C4-E1-BG", "C4-E1-SIG"):
-        assert "No thanks, I don't need a text." not in [
-            pin.get("response_value") for pin in load(key).get("scripted_responses") or []
-        ], key
+        pins = [pin.get("response_value") for pin in load(key).get("scripted_responses") or []]
+        assert "No thanks, I don't need a text." not in pins, key
+        assert "No thanks, I don't need a confirmation text." in pins, key
 
     c4h2 = load("C4-H2")
-    assert "verify_identity" not in [c["name"] for c in c4h2["exp_tool_calls"]]
-    assert "transfer_to_identity" not in c4h2["exp_handoff_path"]
+    c4h2_names = [c["name"] for c in c4h2["exp_tool_calls"]]
+    assert "transfer_to_identity" in c4h2["exp_handoff_path"]
+    assert "verify_identity" in c4h2_names
+    assert "identify_patient" in c4h2_names
 
     rh1 = load("R-H1")
     message = next(c for c in rh1["exp_tool_calls"] if c["name"] == "create_clinical_message")
@@ -523,7 +589,7 @@ def test_healthcare_leftover_holes_are_closed() -> None:
 
     rh2 = load("R-H2")
     rh2_blob = rh2["intent"].lower() + " " + pin_blob(rh2)
-    assert next(c for c in rh2["exp_tool_calls"] if c["name"] == "request_rx_refill").get("parameters", {}).get("medication_name") == "Accutane", "R-H2"
+    assert next(c for c in rh2["exp_tool_calls"] if c["name"] == "request_rx_refill").get("parameters", {}).get("medication_name") == "accutane", "R-H2"
     assert "do not reschedule the august twentieth acne check" in rh2_blob, "R-H2"
     assert "weekday morning" in rh2_blob, "R-H2"
     assert "reschedule_appointment" not in [c["name"] for c in rh2["exp_tool_calls"]], "R-H2"
@@ -539,27 +605,32 @@ def test_healthcare_leftover_holes_are_closed() -> None:
 
     c5h1 = load("C5-H1")
     assert "212-555-0133" in pin_blob(c5h1), "C5-H1"
-    assert "No thanks, I don't need a text." not in [
-        pin.get("response_value") for pin in c5h1.get("scripted_responses") or []
-    ], "C5-H1"
+    c5h1_pins = [pin.get("response_value") for pin in c5h1.get("scripted_responses") or []]
+    assert "No thanks, I don't need a text." not in c5h1_pins, "C5-H1"
+    assert "No thanks, I don't need a confirmation text." in c5h1_pins, "C5-H1"
+    assert "Yes, please text the payment link to 212-555-0133." in c5h1_pins, "C5-H1"
     c5h2 = load("C5-H2")
     greeting = next(p for p in c5h2["scripted_responses"] if "greets you" in (p.get("match_phrase") or ""))
     assert "move" not in greeting["response_value"].lower(), "C5-H2"
     assert "no payment or dispute" in pin_blob(c5h2), "C5-H2"
+
+    for key in ("C1-M1", "C2-M1"):
+        task = load(key)
+        names = [c["name"] for c in task["exp_tool_calls"]]
+        assert "send_sms" in names, key
+        assert "yes, text me the appointment confirmation." in pin_blob(task), key
+        assert "ask them to text you an appointment confirmation" in task["intent"], key
 
     for path in tasks.glob("*/task.json"):
         phrases = [p["match_phrase"] for p in json.loads(path.read_text()).get("scripted_responses") or []]
         assert len(phrases) == len(set(phrases)), path.parent.name
 
     c1h2 = load("C1-H2")
-    kb_topics = [
-        call.get("parameters", {}).get("topic")
-        for call in c1h2["exp_tool_calls"]
-        if call["name"] == "search_practice_kb"
-    ]
-    assert kb_topics == ["hours"]
+    c1h2_names = [call["name"] for call in c1h2["exp_tool_calls"]]
+    assert "search_practice_kb" not in c1h2_names
+    assert "list_locations" in c1h2_names
     c1m2_find = next(call for call in load("C1-M2")["exp_tool_calls"] if call["name"] == "find_slots")
-    assert not c1m2_find.get("parameters")
+    assert (c1m2_find.get("parameters") or {}).get("location_ids") == ["loc_brooklyn_heights"]
 
     by_key = {conv.case_key_of(dh): dh for dh in _humans()}
     for case_key in ("C1-M3", "C2-H2"):
@@ -567,9 +638,133 @@ def test_healthcare_leftover_holes_are_closed() -> None:
         params = allergy.get("parameters") or {}
         assert "window_start" not in params
         assert "window_end" not in params
+
+    c2h2 = load("C2-H2")
+    c2h2_blob = c2h2["intent"].lower() + " " + pin_blob(c2h2)
+    assert "first available" in c2h2_blob
+    assert "not yes" in c2h2_blob
+    assert "no callback" in c2h2_blob
+    assert "allergy shot scheduled" in c2h2_blob
+    assert [c["name"] for c in c2h2["exp_tool_calls"]].count("schedule_allergy_service") == 1
+
+    c3m3 = load("C3-M3")
+    c3m3_blob = c3m3["intent"].lower() + " " + pin_blob(c3m3)
+    assert "no callback" in c3m3_blob
+    assert "searched openings" in c3m3_blob
+    assert "windermere" in c3m3_blob
+    assert [c["name"] for c in c3m3["exp_tool_calls"]] == [
+        "transfer_to_coverage",
+        "check_plan_accepted",
+        "transfer_to_scheduling",
+        "classify_visit_request",
+        "find_slots",
+        "book_appointment",
+    ]
+
+    c2h3_blob = c2h3["intent"].lower() + " " + pin_blob(c2h3)
+    assert "do not transfer me to a person" in c2h3_blob
+    assert "i accept the missed-visit fee" in c2h3_blob
+    assert "talk to a person" in c2h3_blob
+    assert "friday is cancelled" in c2h3_blob
+    assert "do not open with the friday cancel" in c2h3["intent"].lower()
+    greeting = next(p for p in c2h3["scripted_responses"] if "greets you" in (p.get("match_phrase") or ""))
+    assert "total balance" in greeting["response_value"].lower()
+    assert "cancel" not in greeting["response_value"].lower()
+    assert [c["name"] for c in c2h3["exp_tool_calls"]].count("cancel_appointment") == 2
+    assert "transfer_to_human" not in [c["name"] for c in c2h3["exp_tool_calls"]]
+
+    c1e3 = load("C1-E3")
+    c1e3_blob = c1e3["intent"].lower() + " " + pin_blob(c1e3)
+    assert "do not have one yet" in c1e3_blob
+    assert "i don't want to give a zip" in c1e3_blob
+    assert "no callback" in c1e3_blob
+    assert [c["name"] for c in c1e3["exp_tool_calls"]] == [
+        "transfer_to_coverage",
+        "check_plan_accepted",
+    ]
+    medicaid = next(c for c in c1e3["exp_tool_calls"] if c["name"] == "check_plan_accepted")
+    assert medicaid["parameters"] == {"carrier": "medicaid", "location_id": "loc_park_ave"}
+    assert medicaid["output"]["data"]["accepted"] is False
+
+    c4h1 = load("C4-H1")
+    c4h1_blob = c4h1["intent"].lower() + " " + pin_blob(c4h1)
+    assert "cosmetic team" in c4h1_blob
+    assert "quote botox" in c4h1_blob
+    assert "don't want a person" in c4h1_blob or "do not want a person" in c4h1_blob
+    names = [c["name"] for c in c4h1["exp_tool_calls"]]
+    assert names == [
+        "transfer_to_identity",
+        "identify_patient",
+        "transfer_to_cosmetic",
+        "quote_cosmetic_service",
+        "quote_cosmetic_service",
+        "list_locations",
+        "find_slots",
+        "book_cosmetic_consult",
+        "offer_financing",
+        "send_payment_link",
+    ]
+    assert "transfer_to_human" not in names
+    assert names.count("quote_cosmetic_service") == 2
     rh2_dh = by_key["R-H2"]
     book = next(c for c in rh2_dh["expected_tool_calls"] if c["name"] == "book_appointment")
     assert book["parameters"]["slot_id"] == "slot_loc_park_ave_1"
+
+
+def test_healthcare_hard_tool_counts_span_7_to_12() -> None:
+    """Hard band is 7–12 including handoffs. Spread the band; do not require a flat histogram."""
+    hist: Counter = Counter()
+    below: list[str] = []
+    above: list[str] = []
+    for cat in ("C1", "C2", "C3", "C4", "C5", "R"):
+        for n in range(1, 5):
+            key = f"{cat}-H{n}"
+            task = json.loads((ROOT / "industries" / "healthcare" / "tasks" / key / "task.json").read_text())
+            count = len(task.get("exp_tool_calls") or [])
+            names = [call.get("name") for call in task.get("exp_tool_calls") or []]
+            assert "send_sms" not in names, key
+            hist[count] += 1
+            if count < 7:
+                below.append(f"{key}={count}")
+            if count > 12:
+                above.append(f"{key}={count}")
+    assert not below, f"hard tasks below 7: {below}"
+    assert not above, f"hard tasks above 12: {above}"
+    assert sum(hist[n] for n in range(7, 13)) == 24
+    assert hist[11] + hist[12] >= 4
+    assert len([n for n in range(7, 13) if hist[n]]) >= 4
+
+
+def test_healthcare_expected_params_match_schema() -> None:
+    tools = {
+        spec["name"]: spec.get("inputSchema") or {}
+        for spec in json.loads(
+            (ROOT / "industries" / "healthcare" / "tools.json").read_text()
+        )["tools"]
+    }
+    for path in sorted((ROOT / "industries" / "healthcare" / "tasks").glob("*/task.json")):
+        task = json.loads(path.read_text())
+        for call in task.get("exp_tool_calls") or []:
+            schema = tools.get(call["name"])
+            if not schema:
+                continue
+            params = call.get("parameters") or {}
+            props = schema.get("properties") or {}
+            extra = set(params) - set(props)
+            assert not extra, f"{path.parent.name} {call['name']} extra {sorted(extra)}"
+            for key, value in params.items():
+                prop = props[key]
+                items = prop.get("items") if isinstance(prop.get("items"), dict) else {}
+                if prop.get("enum") is not None:
+                    assert value in prop["enum"], f"{path.parent.name} {call['name']}.{key}={value!r}"
+                if items.get("enum") is not None:
+                    for item in value:
+                        assert item in items["enum"], f"{path.parent.name} {call['name']}.{key}={item!r}"
+                pattern = prop.get("pattern")
+                if pattern and isinstance(value, str):
+                    assert re.fullmatch(pattern, value), (
+                        f"{path.parent.name} {call['name']}.{key}={value!r} vs {pattern}"
+                    )
 
 
 def test_healthcare_greeting_and_stay_pins_lock_path() -> None:
