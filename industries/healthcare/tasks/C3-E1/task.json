@@ -1,6 +1,6 @@
 {
   "task_name": "C3-E1: UnitedHealthcare at Brooklyn Heights",
-  "intent": "Ask whether Straus takes UnitedHealthcare at the Brooklyn Heights office, that location specifically, not a yes for the whole practice. If they ask which carrier or plan, say UnitedHealthcare. You need a yes or no for UnitedHealthcare at Brooklyn Heights. If they say acceptance depends on the provider, tell them you do not have a provider yet and you still need that office-level yes or no; do not pick a provider and do not agree to wait until you book. Once they have given you a yes or no for that office, thank them and end the call. Do not ask to book, reschedule, or cancel. Do not ask to add or change insurance. Do not ask for a callback, to speak to a person, a bill, a payment, the patient portal, a waitlist, a text, financing, or the street, floor, or suite. A spoken yes for the whole practice is not enough. A spoken yes or no that names the office is enough. Thank them and end once you have that office-level answer.",
+  "intent": "Ask whether Straus takes UnitedHealthcare at the Brooklyn Heights office, that location specifically, not a yes for the whole practice. If they ask which carrier or plan, say UnitedHealthcare. You need a yes or no for UnitedHealthcare at Brooklyn Heights. Stay until they have looked that up for Brooklyn Heights; a guess without a lookup is not enough. If they say acceptance depends on the provider, or they name Doctor Chen, Doctor Ruiz, or Doctor Patel, tell them you do not have a provider yet and you still need that office-level yes or no; do not pick a provider and do not agree to wait until you book. If they offer to schedule, check it during booking, set a callback, or say they cannot confirm the plan on this call, decline and stay on that office question. Once they have given you a yes or no for that office, thank them and end the call. Do not ask to book, reschedule, or cancel. Do not ask to add or change insurance. Do not ask for a callback, to speak to a person, a bill, a payment, the patient portal, a waitlist, a text, financing, or the street, floor, or suite. A spoken yes for the whole practice is not enough. A spoken yes or no that names the office is enough. Thank them and end once you have that office-level answer. Do not ask them to text you an appointment confirmation.",
   "traits": [
     {
       "trait_name": "carrier",
@@ -21,6 +21,19 @@
   "exp_tool_calls": [
     {
       "name": "transfer_to_coverage"
+    },
+    {
+      "name": "check_plan_accepted",
+      "parameters": {
+        "carrier": "unitedhealthcare",
+        "location_id": "loc_brooklyn_heights"
+      },
+      "output": {
+        "ok": true,
+        "data": {
+          "accepted": true
+        }
+      }
     }
   ],
   "behaviors": {
@@ -41,15 +54,33 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when asking for a payment-link number, NOT when asking for your mobile number for identity.",
+      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when offering a payment link or deposit link, NOT when asking for a payment-link number, NOT when asking for your mobile number for identity, NOT when sending portal access.",
       "response_type": "phrase",
-      "response_value": "No thanks, I don't need a text."
+      "response_value": "No thanks, I don't need a confirmation text."
     },
     {
       "match_type": "context",
       "match_phrase": "says they take the plan, accept the insurance, or that you are covered, without naming the office they just checked. NOT when they have just said they checked Brooklyn Heights specifically.",
       "response_type": "phrase",
       "response_value": "Which office did you check? I need Brooklyn Heights specifically, not the whole practice."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks which provider you are seeing, names Doctor Chen, Doctor Ruiz, or Doctor Patel, or says acceptance depends on the provider. NOT when giving a yes or no for Brooklyn Heights, NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "I don't have a provider yet. I still need a yes or no for UnitedHealthcare at Brooklyn Heights."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers a callback, asks for a number to call you back, says the insurance team will call, or says they cannot confirm the plan on this call. NOT when they have just given a yes or no for Brooklyn Heights, NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "No callback. Please look up whether Brooklyn Heights takes UnitedHealthcare."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to book, schedule, pick an appointment, or check coverage once you are on the calendar. NOT when giving a yes or no for Brooklyn Heights, NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "I don't want to book. I just need a yes or no for UnitedHealthcare at Brooklyn Heights."
     }
   ],
   "customer_name": "Ellen Sturgis",
@@ -201,8 +232,8 @@
         "location_id": "loc_park_ave",
         "provider_id": "prov_chen",
         "appointment_type_code": "MED_FOLLOWUP",
-        "start": "2026-08-20T10:00:00",
-        "end": "2026-08-20T10:20:00",
+        "start": "2026-08-20T10:00",
+        "end": "2026-08-20T10:20",
         "description": "Follow-up acne check",
         "status": "booked"
       },
@@ -212,8 +243,8 @@
         "location_id": "loc_park_ave",
         "provider_id": "prov_chen",
         "appointment_type_code": "COS_CONSULT",
-        "start": "2026-08-21T15:00:00",
-        "end": "2026-08-21T15:30:00",
+        "start": "2026-08-21T15:00",
+        "end": "2026-08-21T15:30",
         "description": "Botox consult",
         "status": "booked"
       },
@@ -223,8 +254,8 @@
         "location_id": "loc_windermere",
         "provider_id": "prov_patel",
         "appointment_type_code": "MED_FOLLOWUP",
-        "start": "2026-09-15T09:00:00",
-        "end": "2026-09-15T09:20:00",
+        "start": "2026-09-15T09:00",
+        "end": "2026-09-15T09:20",
         "description": "Eczema follow-up",
         "status": "booked"
       }

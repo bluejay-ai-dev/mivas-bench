@@ -1,6 +1,6 @@
 {
   "task_name": "C1-E1-SIG: Aetna coverage at Park Avenue",
-  "intent": "You are a new patient calling Straus for the first time. You do not have a provider picked, and you are not booking today. Ask whether they take Aetna at the Park Avenue office specifically \u2014 that Manhattan office, not a yes for the whole practice. If they ask which plan, name your carrier: Aetna. If they ask for a provider name, say you do not have one yet and you still need a yes or no for Aetna at Park Avenue itself. If they offer to schedule, check it during booking, handle coverage later, put you on a waitlist, text you, or transfer you to a person, decline and stay on that office question. Do not thank them and end until you hear a clear yes or no for Park Avenue. Do not ask to book, reschedule, or cancel. Do not ask to add insurance, for a callback, a bill, a payment, the patient portal, the street, floor, suite, or financing. A spoken yes for the whole practice is not enough. A spoken yes or no that names the office is enough. Thank them and end once you have that office-level answer.",
+  "intent": "You are a new patient calling Straus for the first time. You do not have a provider picked, and you are not booking today. Ask whether they take Aetna at the Park Avenue office specifically \u2014 that Manhattan office, not a yes for the whole practice. If they ask which plan, name your carrier: Aetna. If they ask for a provider name, say you do not have one yet and you still need a yes or no for Aetna at Park Avenue itself. If they offer to schedule, check it during booking, handle coverage later, put you on a waitlist, text you, or transfer you to a person, decline and stay on that office question. Do not thank them and end until you hear a clear yes or no for Park Avenue. Do not ask to book, reschedule, or cancel. Do not ask to add insurance, for a callback, a bill, a payment, the patient portal, the street, floor, suite, or financing. A spoken yes for the whole practice is not enough. A spoken yes or no that names the office is enough. Thank them and end once you have that office-level answer. Do not ask them to text you an appointment confirmation.",
   "traits": [
     {
       "trait_name": "carrier",
@@ -29,6 +29,19 @@
   "exp_tool_calls": [
     {
       "name": "transfer_to_coverage"
+    },
+    {
+      "name": "check_plan_accepted",
+      "parameters": {
+        "carrier": "aetna",
+        "location_id": "loc_park_ave"
+      },
+      "output": {
+        "ok": true,
+        "data": {
+          "accepted": true
+        }
+      }
     }
   ],
   "behaviors": {
@@ -49,15 +62,33 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when asking for a payment-link number, NOT when asking for your mobile number for identity.",
+      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when offering a payment link or deposit link, NOT when asking for a payment-link number, NOT when asking for your mobile number for identity, NOT when sending portal access.",
       "response_type": "phrase",
-      "response_value": "No thanks, I don't need a text."
+      "response_value": "No thanks, I don't need a confirmation text."
     },
     {
       "match_type": "context",
       "match_phrase": "says they take the plan, accept the insurance, or that you are covered, without naming the office they just checked. NOT when they have just said they checked Park Avenue specifically.",
       "response_type": "phrase",
       "response_value": "Which office did you check? I need Park Avenue specifically, not the whole practice."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks which provider you are seeing, names Doctor Chen, Doctor Ruiz, or Doctor Patel, or says acceptance depends on the provider. NOT when giving a yes or no for Park Avenue, NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "I don't have a provider yet. I still need a yes or no for Aetna at Park Avenue."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers a callback, asks for a number to call you back, says the insurance team will call, or says they cannot confirm the plan on this call. NOT when they have just given a yes or no for Park Avenue, NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "No callback. Please look up whether Park Avenue takes Aetna."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to book, schedule, pick an appointment, or check coverage once you are on the calendar. NOT when giving a yes or no for Park Avenue, NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "I don't want to book. I just need a yes or no for Aetna at Park Avenue."
     }
   ],
   "customer_name": "Dana Whitfield",
@@ -209,8 +240,8 @@
         "location_id": "loc_park_ave",
         "provider_id": "prov_chen",
         "appointment_type_code": "MED_FOLLOWUP",
-        "start": "2026-08-20T10:00:00",
-        "end": "2026-08-20T10:20:00",
+        "start": "2026-08-20T10:00",
+        "end": "2026-08-20T10:20",
         "description": "Follow-up acne check",
         "status": "booked"
       },
@@ -220,8 +251,8 @@
         "location_id": "loc_park_ave",
         "provider_id": "prov_chen",
         "appointment_type_code": "COS_CONSULT",
-        "start": "2026-08-21T15:00:00",
-        "end": "2026-08-21T15:30:00",
+        "start": "2026-08-21T15:00",
+        "end": "2026-08-21T15:30",
         "description": "Botox consult",
         "status": "booked"
       },
@@ -231,8 +262,8 @@
         "location_id": "loc_windermere",
         "provider_id": "prov_patel",
         "appointment_type_code": "MED_FOLLOWUP",
-        "start": "2026-09-15T09:00:00",
-        "end": "2026-09-15T09:20:00",
+        "start": "2026-09-15T09:00",
+        "end": "2026-09-15T09:20",
         "description": "Eczema follow-up",
         "status": "booked"
       }

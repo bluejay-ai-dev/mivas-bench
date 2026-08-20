@@ -1,6 +1,6 @@
 {
   "task_name": "C1-H3: Oscar Health coverage then a new-patient booking",
-  "intent": "You are a new patient and you noticed a mole on your back that you want checked. First ask whether they take Oscar Health at Park Avenue, and name that carrier if they ask. If they cannot confirm the plan, say that is fine and ask to be booked anyway so you are on the calendar. Take the first appointment time they offer. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first time out loud, then thank them and end the call. Do not ask to add or change insurance. Do not ask for a callback, to speak to a person, a bill, a payment, the patient portal, a waitlist, a text, financing, or the street, floor, or suite.",
+  "intent": "You are a new patient and you noticed a mole on your back that you want checked. When they ask who you are, give your name and date of birth once, confirm the readback, and say you are new so they will not find a chart. First ask whether they take Oscar Health at Park Avenue, and name that carrier if they ask. If they cannot confirm the plan, say that is fine and ask to be booked anyway so you are on the calendar. Take the first appointment time they offer. Do not ask for a different day, time, or office, and do not suggest any date of your own. After that first time is on the calendar, ask to be waitlisted at Park Avenue from August twenty-fourth through September thirtieth for anything earlier \u2014 those calendar dates only. Confirm that first time out loud, then thank them and end the call. Do not ask to add or change insurance. Do not ask for a callback, to speak to a person, a bill, a payment, the patient portal, a text, financing, or the street, floor, or suite. Do not ask them to text you an appointment confirmation.",
   "traits": [
     {
       "trait_name": "carrier",
@@ -40,9 +40,6 @@
       "name": "transfer_to_coverage"
     },
     {
-      "name": "transfer_to_scheduling"
-    },
-    {
       "name": "check_plan_accepted",
       "parameters": {
         "carrier": "oscar_health",
@@ -56,11 +53,20 @@
       }
     },
     {
+      "name": "transfer_to_scheduling"
+    },
+    {
       "name": "classify_visit_request",
       "parameters": {
         "visit_class": "medical",
         "urgency": "routine",
         "is_new_patient": true
+      }
+    },
+    {
+      "name": "list_locations",
+      "parameters": {
+        "location_id": "loc_park_ave"
       }
     },
     {
@@ -77,14 +83,31 @@
         "location_id": "loc_park_ave",
         "slot_id": "slot_loc_park_ave_1",
         "provider_id": "prov_chen",
-        "start": "2026-08-24T09:00:00",
-        "end": "2026-08-24T09:30:00",
+        "start": "2026-08-24T09:00",
+        "end": "2026-08-24T09:30",
         "appointment_type_code": "NP_MED"
       },
       "output": {
         "ok": true,
         "data": {
           "status": "booked"
+        }
+      }
+    },
+    {
+      "name": "join_waitlist",
+      "parameters": {
+        "appointment_type_code": "NP_MED",
+        "location_ids": [
+          "loc_park_ave"
+        ],
+        "earliest": "2026-08-24",
+        "latest": "2026-09-30"
+      },
+      "output": {
+        "ok": true,
+        "data": {
+          "status": "added"
         }
       }
     }
@@ -95,15 +118,45 @@
   "scripted_responses": [
     {
       "match_type": "context",
+      "match_phrase": "asks for your full name and date of birth, or asks you to confirm who you are, or asks for the patient's name and date of birth. NOT when asking only for a member ID or insurance card, NOT when asking which office or location, NOT when asking for a phone or mobile number, NOT when asking about an appointment day or time, NOT when reading your name and date of birth back to you for confirmation.",
+      "response_type": "phrase",
+      "response_value": "Gwen Okoro. My date of birth is October eleventh, nineteen eighty-four."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "reads your name and date of birth back to you and asks whether that is right, or asks you to confirm the name and date of birth they just repeated. NOT when first asking for your name and date of birth, NOT when asking for a phone or mobile number.",
+      "response_type": "phrase",
+      "response_value": "Yes, that's right."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks what insurance you have, your carrier, or your plan. NOT when asking for a member ID.",
+      "response_type": "phrase",
+      "response_value": "Oscar Health at Park Avenue."
+    },
+    {
+      "match_type": "context",
       "match_phrase": "offers one or more concrete appointment dates or times, or asks you to choose among concrete slots. NOT when asking for your name, date of birth, mobile number, or ZIP code.",
       "response_type": "phrase",
       "response_value": "I'll take the first time you offered."
     },
     {
       "match_type": "context",
+      "match_phrase": "asks whether you want the waitlist, offers to add you to a list for an earlier opening, or says they can list you if something sooner opens. NOT when asking for the date window, NOT when offering a specific appointment time to book now.",
+      "response_type": "phrase",
+      "response_value": "Yes, add me to the waitlist at Park Avenue from August twenty-fourth through September thirtieth after you book the first time."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks for a waitlist window, start date, end date, earliest date, latest date, or when you would take an earlier opening. NOT when asking for your name or date of birth, NOT when offering a specific appointment time to book now.",
+      "response_type": "phrase",
+      "response_value": "From August twenty-fourth through September thirtieth, at Park Avenue. Dates only \u2014 I don't have a clock time."
+    },
+    {
+      "match_type": "context",
       "match_phrase": "thanks you, says goodbye, or asks if you need anything else after offering a time but before confirming it is booked on the calendar. NOT when they have just confirmed the booking.",
       "response_type": "phrase",
-      "response_value": "Please book the first time you offered and confirm it is on the calendar before I go."
+      "response_value": "Please book the first time you offered, confirm it is on the calendar, then add me to the waitlist from August twenty-fourth through September thirtieth."
     },
     {
       "match_type": "context",
@@ -113,15 +166,9 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers the waitlist, a later opening, or to add you to a list. NOT when offering a specific appointment time to book now, NOT when asking for your name or date of birth.",
+      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when offering a payment link or deposit link, NOT when asking for a payment-link number, NOT when asking for your mobile number for identity, NOT when sending portal access.",
       "response_type": "phrase",
-      "response_value": "No waitlist. Please just finish what I asked."
-    },
-    {
-      "match_type": "context",
-      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when asking for a payment-link number, NOT when asking for your mobile number for identity.",
-      "response_type": "phrase",
-      "response_value": "No thanks, I don't need a text."
+      "response_value": "No thanks, I don't need a confirmation text."
     }
   ],
   "customer_name": "Gwen Okoro",
@@ -273,8 +320,8 @@
         "location_id": "loc_park_ave",
         "provider_id": "prov_chen",
         "appointment_type_code": "MED_FOLLOWUP",
-        "start": "2026-08-20T10:00:00",
-        "end": "2026-08-20T10:20:00",
+        "start": "2026-08-20T10:00",
+        "end": "2026-08-20T10:20",
         "description": "Follow-up acne check",
         "status": "booked"
       },
@@ -284,8 +331,8 @@
         "location_id": "loc_park_ave",
         "provider_id": "prov_chen",
         "appointment_type_code": "COS_CONSULT",
-        "start": "2026-08-21T15:00:00",
-        "end": "2026-08-21T15:30:00",
+        "start": "2026-08-21T15:00",
+        "end": "2026-08-21T15:30",
         "description": "Botox consult",
         "status": "booked"
       },
@@ -295,8 +342,8 @@
         "location_id": "loc_windermere",
         "provider_id": "prov_patel",
         "appointment_type_code": "MED_FOLLOWUP",
-        "start": "2026-09-15T09:00:00",
-        "end": "2026-09-15T09:20:00",
+        "start": "2026-09-15T09:00",
+        "end": "2026-09-15T09:20",
         "description": "Eczema follow-up",
         "status": "booked"
       },
@@ -306,13 +353,24 @@
         "location_id": "loc_park_ave",
         "provider_id": "prov_chen",
         "appointment_type_code": "NP_MED",
-        "start": "2026-08-24T09:00:00",
-        "end": "2026-08-24T09:30:00",
+        "start": "2026-08-24T09:00",
+        "end": "2026-08-24T09:30",
         "description": "new patient visit",
         "status": "booked"
       }
     ],
-    "waitlist": [],
+    "waitlist": [
+      {
+        "id": 1,
+        "patient_id": null,
+        "appointment_type_code": "NP_MED",
+        "location_ids": [
+          "loc_park_ave"
+        ],
+        "earliest": "2026-08-24",
+        "latest": "2026-09-30"
+      }
+    ],
     "tool_events": []
   }
 }

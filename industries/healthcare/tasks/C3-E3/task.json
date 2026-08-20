@@ -1,6 +1,6 @@
 {
   "task_name": "C3-E3: Referral requirement at Park Avenue",
-  "intent": "Ask whether you need a referral from a primary-care doctor before a visit at Park Avenue. If they ask which insurance, say Aetna. If they ask you to pick a clinician, say you do not have one yet and you only need the Park Avenue answer for Aetna. Once they have checked Aetna at that office and told you whether a referral is required, or told you they cannot confirm a referral from the check, thank them and end the call. Do not keep asking for a yes or no they already said they cannot give. If they ask your name, say Nadine Corliss once and continue with the referral question. Do not give a date of birth. Do not ask to book, reschedule, or cancel. Do not ask to add or change insurance. Do not ask for a callback, to speak to a person, a bill, a payment, the patient portal, a waitlist, a text, financing, or the street, floor, or suite. A spoken yes for the whole practice is not enough. A spoken yes or no that names the office is enough. Thank them and end once you have that office-level answer.",
+  "intent": "Ask whether you need a referral from a primary-care doctor before a visit at Park Avenue. If they ask which insurance, say Aetna. If they ask you to pick a clinician, say you do not have one yet and you only need the Park Avenue answer for Aetna; do not pick a clinician and do not agree to wait until you book. If they ask for a ZIP, say you only need Park Avenue. Stay until they have checked Aetna at Park Avenue and either told you whether a referral is required or told you they cannot confirm a referral from that check. A spoken yes that they take Aetna is not enough. Do not hang up only because they named the office. Do not keep asking for a yes or no they already said they cannot give from the check. Then thank them and end the call. If they ask your name, say Nadine Corliss once and continue with the referral question. Do not give a date of birth. Do not ask to book, reschedule, or cancel. Do not ask to add or change insurance. Do not ask for a callback, to speak to a person, a bill, a payment, the patient portal, a waitlist, a text, financing, or the street, floor, or suite. Do not ask them to text you an appointment confirmation.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -21,6 +21,19 @@
   "exp_tool_calls": [
     {
       "name": "transfer_to_coverage"
+    },
+    {
+      "name": "check_plan_accepted",
+      "parameters": {
+        "carrier": "aetna",
+        "location_id": "loc_park_ave"
+      },
+      "output": {
+        "ok": true,
+        "data": {
+          "accepted": true
+        }
+      }
     }
   ],
   "behaviors": {
@@ -41,15 +54,21 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when asking for a payment-link number, NOT when asking for your mobile number for identity.",
+      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when offering a payment link or deposit link, NOT when asking for a payment-link number, NOT when asking for your mobile number for identity, NOT when sending portal access.",
       "response_type": "phrase",
-      "response_value": "No thanks, I don't need a text."
+      "response_value": "No thanks, I don't need a confirmation text."
     },
     {
       "match_type": "context",
       "match_phrase": "says they take the plan, accept the insurance, or that you are covered, without naming the office they just checked. NOT when they have just said they checked Park Avenue specifically.",
       "response_type": "phrase",
       "response_value": "Which office did you check? I need Park Avenue specifically, not the whole practice."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks you to pick a clinician, provider, or doctor before they will check Park Avenue, or says they cannot check without a named clinician. NOT when they have already said whether a referral is required at Park Avenue, NOT when they have said they cannot confirm a referral from the Aetna check at that office.",
+      "response_type": "phrase",
+      "response_value": "I don't have a clinician yet. I only need the Park Avenue answer for Aetna."
     }
   ],
   "customer_name": "Nadine Corliss",
@@ -201,8 +220,8 @@
         "location_id": "loc_park_ave",
         "provider_id": "prov_chen",
         "appointment_type_code": "MED_FOLLOWUP",
-        "start": "2026-08-20T10:00:00",
-        "end": "2026-08-20T10:20:00",
+        "start": "2026-08-20T10:00",
+        "end": "2026-08-20T10:20",
         "description": "Follow-up acne check",
         "status": "booked"
       },
@@ -212,8 +231,8 @@
         "location_id": "loc_park_ave",
         "provider_id": "prov_chen",
         "appointment_type_code": "COS_CONSULT",
-        "start": "2026-08-21T15:00:00",
-        "end": "2026-08-21T15:30:00",
+        "start": "2026-08-21T15:00",
+        "end": "2026-08-21T15:30",
         "description": "Botox consult",
         "status": "booked"
       },
@@ -223,8 +242,8 @@
         "location_id": "loc_windermere",
         "provider_id": "prov_patel",
         "appointment_type_code": "MED_FOLLOWUP",
-        "start": "2026-09-15T09:00:00",
-        "end": "2026-09-15T09:20:00",
+        "start": "2026-09-15T09:00",
+        "end": "2026-09-15T09:20",
         "description": "Eczema follow-up",
         "status": "booked"
       }

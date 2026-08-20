@@ -1,6 +1,6 @@
 {
   "task_name": "C2-M3: Book a follow-up for eczema",
-  "intent": "You are an existing Straus patient and you do not have anything on the calendar right now. The eczema on your hands is flaring and you want a follow-up at Brooklyn Heights. Answer their identity questions once, confirm the readback, then proceed. Take the first appointment time they offer. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first time out loud, then thank them and end the call. Do not ask to add or change insurance. Do not ask for a callback, to speak to a person, a bill, a payment, the patient portal, a waitlist, a text, financing, or the street, floor, or suite. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar. If they only list openings, say book the first one.",
+  "intent": "You are an existing Straus patient and you do not have anything on the calendar right now. The eczema on your hands is flaring and you want a follow-up at Brooklyn Heights. Answer their identity questions once, confirm the readback, then proceed. Take the first appointment time they offer. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first time out loud, then thank them and end the call. Do not ask to add or change insurance. Do not ask for a callback, to speak to a person, a bill, a payment, the patient portal, a waitlist, a text, financing, or the street, floor, or suite. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar. If they only list openings, say book the first one. Do not ask them to text you an appointment confirmation.",
   "traits": [
     {
       "trait_name": "preferred_office",
@@ -72,8 +72,8 @@
         "location_id": "loc_brooklyn_heights",
         "slot_id": "slot_loc_brooklyn_heights_1",
         "provider_id": "prov_ruiz",
-        "start": "2026-08-24T09:00:00",
-        "end": "2026-08-24T09:30:00",
+        "start": "2026-08-24T09:00",
+        "end": "2026-08-24T09:30",
         "appointment_type_code": "MED_FOLLOWUP"
       },
       "output": {
@@ -120,9 +120,9 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when asking for a payment-link number, NOT when asking for your mobile number for identity.",
+      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when offering a payment link or deposit link, NOT when asking for a payment-link number, NOT when asking for your mobile number for identity, NOT when sending portal access.",
       "response_type": "phrase",
-      "response_value": "No thanks, I don't need a text."
+      "response_value": "No thanks, I don't need a confirmation text."
     }
   ],
   "customer_name": "Sam Nguyen",
@@ -274,8 +274,8 @@
         "location_id": "loc_park_ave",
         "provider_id": "prov_chen",
         "appointment_type_code": "MED_FOLLOWUP",
-        "start": "2026-08-20T10:00:00",
-        "end": "2026-08-20T10:20:00",
+        "start": "2026-08-20T10:00",
+        "end": "2026-08-20T10:20",
         "description": "Follow-up acne check",
         "status": "booked"
       },
@@ -285,8 +285,8 @@
         "location_id": "loc_park_ave",
         "provider_id": "prov_chen",
         "appointment_type_code": "COS_CONSULT",
-        "start": "2026-08-21T15:00:00",
-        "end": "2026-08-21T15:30:00",
+        "start": "2026-08-21T15:00",
+        "end": "2026-08-21T15:30",
         "description": "Botox consult",
         "status": "booked"
       },
@@ -296,8 +296,8 @@
         "location_id": "loc_windermere",
         "provider_id": "prov_patel",
         "appointment_type_code": "MED_FOLLOWUP",
-        "start": "2026-09-15T09:00:00",
-        "end": "2026-09-15T09:20:00",
+        "start": "2026-09-15T09:00",
+        "end": "2026-09-15T09:20",
         "description": "Eczema follow-up",
         "status": "booked"
       },
@@ -307,8 +307,8 @@
         "location_id": "loc_brooklyn_heights",
         "provider_id": "prov_ruiz",
         "appointment_type_code": "MED_FOLLOWUP",
-        "start": "2026-08-24T09:00:00",
-        "end": "2026-08-24T09:30:00",
+        "start": "2026-08-24T09:00",
+        "end": "2026-08-24T09:30",
         "description": "follow-up visit",
         "status": "booked"
       }
