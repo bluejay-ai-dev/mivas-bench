@@ -794,7 +794,13 @@ def _fetch_result(result_id: str) -> dict[str, Any]:
 
 
 def _digital_humans_by_sim(sim_id: str) -> dict[str, dict[str, Any]]:
-    body = verify_run._get(f"digital-humans-by-simulation/{sim_id}")
+    # sim 30915 (customer-support) 500s this list endpoint; each result still
+    # carries digital_human, so scoring can continue without the bulk lookup.
+    try:
+        body = verify_run._get(f"digital-humans-by-simulation/{sim_id}")
+    except SystemExit as exc:
+        print(f"digital-humans-by-simulation/{sim_id} failed ({exc}); using per-result DHs", file=sys.stderr)
+        return {}
     out: dict[str, dict[str, Any]] = {}
     for dh in body.get("digital_humans") or []:
         if dh.get("id") is not None:
