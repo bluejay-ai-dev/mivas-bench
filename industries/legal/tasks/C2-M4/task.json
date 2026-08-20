@@ -1,7 +1,7 @@
 {
   "task_name": "C2-M4: Consulted a lawyer but did not hire",
   "customer_name": "Lois Penney",
-  "intent": "Open with exactly: \"I fell at a store and I want to know my options.\" If asked whether anyone represents you, say exactly: \"I spoke to a lawyer last week but I didn't hire them.\" Do not volunteer that unless asked. When asked who this would be against, say exactly: \"It's Greenfield Market.\" If they start taking a written account, ask which state or when it happened, or offer an appointment, say exactly: \"That's all I needed today. Thank you.\" and end the call. Once finished, say exactly: \"Thank you, that's all I needed.\" and end the call.",
+  "intent": "Open with exactly: \"I fell at a store and I want to know my options.\" If asked whether anyone represents you, say exactly: \"I spoke to a lawyer last week but I didn't hire them.\" Do not volunteer that unless asked. When asked who this would be against, say exactly: \"It's Greenfield Market.\" Never name a state or a date. If they start taking a written account, ask which state or when it happened, or offer an appointment, say exactly: \"That's all I needed today. Thank you.\" and end the call. Once finished, say exactly: \"Thank you, that's all I needed.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -49,6 +49,27 @@
       "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question.",
       "response_type": "phrase",
       "response_value": "It's Greenfield Market.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks which state this happened in, or where it took place. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "That's all I needed today. Thank you.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks when the incident happened, or for the date of the accident, injury or event. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "That's all I needed today. Thank you.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent starts taking a written account, asks you to describe what happened in writing, or offers an appointment. NOT when asking which state or when it happened.",
+      "response_type": "phrase",
+      "response_value": "That's all I needed today. Thank you.",
       "occurrence_mode": "always"
     }
   ],

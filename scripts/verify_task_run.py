@@ -54,6 +54,11 @@ INDUSTRY_HANDOFF_TOOLS: dict[str, frozenset[str]] = {
         "transfer_to_screening", "transfer_to_intake",
         "transfer_to_scheduling", "transfer_to_client_services",
     }),
+    "customer-support": frozenset({
+        "transfer_to_verification", "transfer_to_orders",
+        "transfer_to_returns", "transfer_to_service",
+        "transfer_to_membership", "transfer_to_fraud",
+    }),
 }
 
 OFFICE_TABLES = ("patients", "appointments", "waitlist")
@@ -63,6 +68,13 @@ INDUSTRY_OFFICE_TABLES: dict[str, tuple[str, ...]] = {
     "legal": (
         "intakes", "intake_notes", "documents", "holds",
         "evaluations", "messages", "escalations",
+    ),
+    "customer-support": (
+        "customers", "orders", "order_items", "order_cancellations",
+        "delivery_changes", "membership_changes", "holds",
+        "refunds", "rmas", "return_labels", "price_matches",
+        "protection_plans", "service_appointments", "escalations",
+        "scam_reports",
     ),
 }
 
@@ -82,6 +94,10 @@ FACT_ARG_KEYS = frozenset({
 INDUSTRY_PROSE_ARG_KEYS: dict[str, frozenset[str]] = {
     "healthcare": PROSE_ARG_KEYS,
     "legal": frozenset({"summary", "note", "message", "handoff_summary", "full_name"}),
+    "customer-support": frozenset({
+        "topic", "fee", "query", "issue", "full_name", "phone",
+        "reason",
+    }),
 }
 
 INDUSTRY_FACT_ARG_KEYS: dict[str, frozenset[str]] = {
@@ -91,6 +107,13 @@ INDUSTRY_FACT_ARG_KEYS: dict[str, frozenset[str]] = {
         "reason_code", "slot_id", "confirmation_token", "matter_id",
         "channel", "for_whom", "provider", "evaluation_id", "attorney_id",
         "phone", "earliest_date", "reason",
+    }),
+    "customer-support": frozenset({
+        "order_number", "postal_code", "card_last4", "reason_code",
+        "rma_number", "sku", "competitor", "competitor_price",
+        "in_stock", "opened", "service_type",
+        "fee_disclosed_acknowledged", "proration_acknowledged",
+        "confirmation_token",
     }),
 }
 
@@ -278,7 +301,10 @@ def _canon_row(row: Any, industry: str | None = None) -> Any:
         if isinstance(value, str) and _is_phone_key(key):
             out[key] = _digits_phone(value)
         elif isinstance(value, str):
-            out[key] = value.strip().casefold()
+            # collapse T15:30 vs T15:30:00 first; casefold after so dump seconds
+            # cannot disagree with a minute-precision seed.
+            collapsed = _minute_datetime(value)
+            out[key] = collapsed.strip().casefold() if isinstance(collapsed, str) else collapsed
         else:
             out[key] = _minute_datetime(value)
     return out
@@ -799,7 +825,13 @@ def _fetch_result(result_id: str) -> dict[str, Any]:
 
 
 def _digital_humans_by_sim(sim_id: str) -> dict[str, dict[str, Any]]:
-    body = verify_run._get(f"digital-humans-by-simulation/{sim_id}")
+    # sim 30915 (customer-support) 500s this list endpoint; each result still
+    # carries digital_human, so scoring can continue without the bulk lookup.
+    try:
+        body = verify_run._get(f"digital-humans-by-simulation/{sim_id}")
+    except SystemExit as exc:
+        print(f"digital-humans-by-simulation/{sim_id} failed ({exc}); using per-result DHs", file=sys.stderr)
+        return {}
     out: dict[str, dict[str, Any]] = {}
     for dh in body.get("digital_humans") or []:
         if dh.get("id") is not None:

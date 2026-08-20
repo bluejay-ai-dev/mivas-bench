@@ -24,13 +24,6 @@
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
-      "response_type": "phrase",
-      "response_value": "Wendell Marsh, 206-555-0384.",
-      "occurrence_mode": "always"
-    },
-    {
-      "match_type": "context",
       "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
       "response_type": "phrase",
       "response_value": "No, nobody represents me.",
