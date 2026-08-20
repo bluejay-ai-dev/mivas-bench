@@ -802,6 +802,15 @@ def test_healthcare_greeting_and_stay_pins_lock_path() -> None:
     for pin in wrap_m2:
         assert "NOT when greeting you" in (pin.get("match_phrase") or "")
 
+    c4h4 = load("C4-H4")
+    greeting_h4 = next(p for p in c4h4["scripted_responses"] if "greets you" in (p.get("match_phrase") or ""))
+    assert "botox" in greeting_h4["response_value"].lower()
+    assert "windermere" in greeting_h4["response_value"].lower()
+    wrap_h4 = [p for p in c4h4["scripted_responses"] if "wraps up" in (p.get("match_phrase") or "")]
+    assert wrap_h4
+    for pin in wrap_h4:
+        assert "NOT when greeting you" in (pin.get("match_phrase") or "")
+
     for path in tasks.glob("*/task.json"):
         phrases = [p["match_phrase"] for p in json.loads(path.read_text()).get("scripted_responses") or []]
         assert len(phrases) == len(set(phrases)), path.parent.name

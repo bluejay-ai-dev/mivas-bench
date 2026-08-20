@@ -1,6 +1,6 @@
 {
   "task_name": "C4-H4: Existing patient Botox after Windermere cannot do cosmetic",
-  "intent": "You are an existing Straus patient in Florida. Answer identity questions once with your name and date of birth, confirm if they read it back, then get to why you called. Ask how much Botox costs, then ask them to look up whether Windermere does cosmetic work. When they say Windermere does not do cosmetic work, ask for a consult at Park Avenue instead. You need the Park Avenue street address, the floor, and the suite before you will take any time \u2014 if they skip any of those, ask again. After you hear the Botox price, say that is more than you can pay all at once and ask whether there is a way to spread the treatment cost out. When they explain the deposit and cancellation rules, agree. Ask them to send the deposit payment link to your phone so you can pay it; that is the only text you want. After you have the address, take the first appointment time they offer. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first time out loud, then thank them and end the call. Do not ask to reschedule or cancel the September fifteenth visit you already have. Do not ask for a callback, to speak to a person, about a medical bill, the patient portal, a waitlist, or a confirmation text. Never ask to speak to a person, a live agent, or the cosmetic team. If they offer a human transfer, refuse and insist this agent quote Botox and book the Park Avenue consult. Do not book anything except this Park Avenue Botox consult. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar, they have looked up financing, and a deposit payment link was sent to your phone. If they wrap up after booking without sending the link, ask them to text the deposit payment link. Do not ask them to text you an appointment confirmation.",
+  "intent": "You are an existing Straus patient in Florida. Answer identity questions once with your name and date of birth, confirm if they read it back, then get to why you called. After they greet you or ask how they can help, your first spoken request is how much Botox costs and whether Windermere does cosmetic work — do not open by saying you still need a consult booked. Ask how much Botox costs, then ask them to look up whether Windermere does cosmetic work. When they say Windermere does not do cosmetic work, ask for a consult at Park Avenue instead. You need the Park Avenue street address, the floor, and the suite before you will take any time \u2014 if they skip any of those, ask again. After you hear the Botox price, say that is more than you can pay all at once and ask whether there is a way to spread the treatment cost out. When they explain the deposit and cancellation rules, agree. Ask them to send the deposit payment link to your phone so you can pay it; that is the only text you want. After you have the address, take the first appointment time they offer. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first time out loud, then thank them and end the call. Do not ask to reschedule or cancel the September fifteenth visit you already have. Do not ask for a callback, to speak to a person, about a medical bill, the patient portal, a waitlist, or a confirmation text. Never ask to speak to a person, a live agent, or the cosmetic team. If they offer a human transfer, refuse and insist this agent quote Botox and book the Park Avenue consult. Do not book anything except this Park Avenue Botox consult. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar, they have looked up financing, and a deposit payment link was sent to your phone. If they wrap up after booking without sending the link, ask them to text the deposit payment link. Do not ask them to text you an appointment confirmation.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -136,6 +136,12 @@
   "scripted_responses": [
     {
       "match_type": "context",
+      "match_phrase": "greets you, asks how they can help, asks what you need, or says they are listening, before you have asked about Botox or Windermere. NOT when they have just confirmed a booked time, NOT when quoting Botox, NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "How much does Botox cost? Can you look up whether Windermere does cosmetic work?"
+    },
+    {
+      "match_type": "context",
       "match_phrase": "asks for your full name and date of birth, or asks you to confirm who you are, or asks for the patient's name and date of birth. NOT when asking only for a member ID or insurance card, NOT when asking which office or location, NOT when asking for a phone or mobile number, NOT when asking about an appointment day or time, NOT when reading your name and date of birth back to you for confirmation.",
       "response_type": "phrase",
       "response_value": "Alice Romano. My date of birth is September eighth, nineteen ninety-five."
@@ -196,7 +202,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before a consult time has been confirmed on the calendar. NOT when they have just confirmed a booked time.",
+      "match_phrase": "thanks you, says goodbye, or wraps up after you have asked for a Botox consult or a Windermere lookup, before a consult time has been confirmed on the calendar. NOT when greeting you or asking how they can help at the start of the call, NOT when they have just confirmed a booked time, NOT when asking for your name or date of birth.",
       "response_type": "phrase",
       "response_value": "I still need the consult booked. Please confirm a time on the calendar before I go."
     },
