@@ -117,7 +117,7 @@ INSERT INTO orders (order_number, customer_id, order_date, status, fulfillment, 
 ('KE-4431775', 'cust_rosalind', '2026-06-02', 'delivered', 'kestrel',     '',                    'OR', '2026-06-05', '',           '',         0, 0),
 -- marketplace: Kestrel took the order, the seller owns the policy
 ('KE-4479002', 'cust_tomas',    '2026-07-24', 'delivered', 'marketplace', 'Northwind Supply Co', 'CA', '2026-07-27', '',           '',         0, 0),
--- recalled AND hazmat: no shipping label, no bench appointment
+-- hazmat only (not recalled): prepaid-label refuse, then product_safety escalate
 ('KE-4483316', 'cust_amina',    '2026-07-26', 'delivered', 'kestrel',     '',                    'WA', '2026-07-29', '',           '',         0, 0),
 -- recalled, not hazmat: isolates RECALLED_NO_SERVICE
 ('KE-4490224', 'cust_victor',   '2026-05-30', 'delivered', 'kestrel',     '',                    'OH', '2026-06-03', '',           '',         0, 0),
@@ -142,7 +142,7 @@ INSERT INTO order_items (id, order_number, sku, name, category, price_cents, ope
 ('it_05', 'KE-4455031', 'SKU-MOB-7702', 'Solstice X5 Smartphone',                      'mobile',      109999, 1, 1, 'activatable', 'new',                 0, 0),
 ('it_06', 'KE-4431775', 'SKU-BWM-0450', 'Bellwether Ease 4 Phone',                     'mobile',       14999, 1, 1, 'activatable', 'new',                 0, 0),
 ('it_07', 'KE-4479002', 'SKU-AUD-3390', 'Corva Studio Headphones',                     'audio',        24999, 1, 0, 'none',        'new',                 0, 0),
-('it_08', 'KE-4483316', 'SKU-PWR-5510', 'Voltbank 20K Power Bank',                     'accessories',   7999, 1, 0, 'none',        'new',                 1, 1),
+('it_08', 'KE-4483316', 'SKU-PWR-5510', 'Voltbank 20K Power Bank',                     'accessories',   7999, 1, 0, 'none',        'new',                 0, 1),
 ('it_09', 'KE-4490224', 'SKU-HOM-6120', 'Emberline Ceramic Space Heater',              'home',         14999, 1, 0, 'none',        'new',                 1, 0),
 ('it_10', 'KE-4498870', 'SKU-AUD-3350', 'Corva Mini Bluetooth Speaker',                'audio',        18999, 0, 0, 'none',        'new',                 0, 0),
 ('it_11', 'KE-4487740', 'SKU-DRN-4400', 'Skyward Vireo 3 Drone',                       'drone',        99999, 1, 0, 'percent_15',  'new',                 0, 0),
