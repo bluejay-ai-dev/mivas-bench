@@ -29,18 +29,17 @@ ENV HARNESS=gemini/2.5-flash-native-audio \
     UV_SYSTEM_PYTHON=1 \
     UV_COMPILE_BYTECODE=1 \
     BLUEJAY_SERVICE_NAME=mivas-gemini \
+    LIVEKIT_URL="" \
+    LIVEKIT_API_KEY="" \
+    LIVEKIT_API_SECRET="" \
     GOOGLE_API_KEY="" \
     GEMINI_API_KEY="" \
-    GEMINI_LIVE_MODEL="" \
-    CHIRP_PORT=8765 \
-    CHIRP_USER="" \
-    CHIRP_PASS="" \
     BLUEJAY_API_KEY="" \
     BLUEJAY_API_URL="" \
     BLUEJAY_OTLP_ENDPOINT=""
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends curl \
+    && apt-get install -y --no-install-recommends curl libgomp1 \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app

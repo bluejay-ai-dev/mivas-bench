@@ -28,7 +28,7 @@ HOOK_SITES = {
     "cartesia": ["adapters/chirp.py"],
     "deepgram": ["adapters/chirp.py"],
     "elevenlabs": ["adapters/chirp.py"],
-    "gemini": ["adapters/chirp.py"],
+    "gemini": ["harness.py"],
     "grok": ["voice/adapters/chirp.py"],
     "livekit": ["harness.py"],
     "nvidia": ["bot.py"],

@@ -1,19 +1,25 @@
 # gemini
 
-Gemini Live harnesses via the `google-genai` SDK. Each subfolder is one model runtime; industry tools go through the state API (`TOOL_SERVER_URL`).
+Gemini Live over LiveKit SIP. Each subfolder is one model. Industry tools go
+to `TOOL_SERVER_URL`. Bluejay reaches the worker with `connection_type=SIP`.
 
 | Folder | Model |
 |---|---|
-| `flash-live-3.1/` | [`gemini-3.1-flash-live-preview`](https://ai.google.dev/gemini-api/docs/models/gemini-3.1-flash-live-preview) |
-| `2.5-flash-native-audio/` | `gemini-2.5-flash-native-audio-preview-12-2025` |
+| `flash-live-3.1/` | `gemini-3.1-flash-live-preview` |
+| `2.5-flash-native-audio/` | `gemini-2.5-flash-native-audio` |
 
-Shared: `harness.py`. Tracing: `report.py` (GenAI-native OTel → Bluejay OTLP; `gen_ai.provider.name=gcp.gemini`). Run a runtime with `agent.py` (text turns on stdin). Optional pcm websocket bridge under `adapters/` if an external evaluator needs one.
+Audio is Gemini's. 3.1 cannot change instructions or tools mid-session, so a
+handoff opens a new Live socket for the target agent. 2.5 can
+`generate_reply`; it still uses one Live socket per agent because Gemini Live
+tools are fixed at connect.
+
+One Live call per worker process. Extra rooms go to other replicas.
 
 ```bash
-uv sync
 export GOOGLE_API_KEY=...
-# optional Bluejay traces: BLUEJAY_API_KEY (+ BLUEJAY_SERVICE_NAME=mivas-gemini)
+export LIVEKIT_URL=... LIVEKIT_API_KEY=... LIVEKIT_API_SECRET=...
 uv run python industries/control-industry/tool_server.py
-uv run python voice-agent-harnesses/gemini/flash-live-3.1/agent.py control-industry
-# optional: adapters/chirp.py (16 kHz in, 24→16 kHz out; links X-Simulation-Result-Id)
+.venv/bin/python voice-agent-harnesses/gemini/flash-live-3.1/agent.py start
 ```
+
+`--check` loads the blueprint without LiveKit.

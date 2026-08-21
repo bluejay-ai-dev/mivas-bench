@@ -14,6 +14,7 @@ if str(ROOT) not in sys.path:
 from run import (  # noqa: E402
     dispatcher_host,
     image_ref,
+    livekit_secret_name,
     pair_host,
     pair_public_url,
     pair_resources,
@@ -276,11 +277,33 @@ def test_render_snapshot_bucket(monkeypatch: pytest.MonkeyPatch) -> None:
     assert "__SNAPSHOT_BUCKET__" not in yaml_text
 
 
+def test_livekit_cascaded_sip_secret_is_per_runtime_not_industry(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("LIVEKIT_SIP_SECRET_NAME", raising=False)
+    assert livekit_secret_name("livekit/cascaded", "healthcare") == "mivas-livekit-sip"
+    assert livekit_secret_name("livekit/cascaded", "legal") == "mivas-livekit-sip"
+    assert livekit_secret_name("livekit/gemini-flash-live-3.1", "legal") == "mivas-livekit-sip"
+    assert livekit_secret_name("gemini/flash-live-3.1", "legal") == "mivas-livekit-sip"
+    assert livekit_secret_name("gemini/2.5-flash-native-audio", "legal") == "mivas-livekit-sip"
+    assert livekit_secret_name("livekit/openai-realtime-2.1", "healthcare") == "mivas-secrets"
+    yaml_text = render_agents_yaml([("livekit/cascaded", "legal")], "ClusterIP")
+    assert yaml_text.count("name: mivas-livekit-sip") >= 3
+    assert "name: mivas-livekit-cascaded-legal" in yaml_text
+    gemini_yaml = render_agents_yaml([("gemini/flash-live-3.1", "legal")], "ClusterIP")
+    assert gemini_yaml.count("name: mivas-livekit-sip") >= 3
+    assert 'value: "agent"' in gemini_yaml
+    assert "name: mivas-gemini-flash-live-3-1-legal" in gemini_yaml
+
+
 def test_cascaded_nemotron_gets_heavier_pod() -> None:
     assert pair_resources("nvidia/nemotron") == ("1000m", "1Gi", "3Gi")
     assert pair_resources("livekit/cascaded") == ("1000m", "1Gi", "3Gi")
     assert pair_resources("pipecat/cascaded") == ("1000m", "1Gi", "3Gi")
+    assert pair_resources("gemini/flash-live-3.1") == ("1000m", "1Gi", "3Gi")
+    assert pair_resources("gemini/2.5-flash-native-audio") == ("1000m", "1Gi", "3Gi")
     assert pair_resources("livekit/openai-realtime-2.1") == ("250m", "384Mi", "1536Mi")
+    assert pair_resources("livekit/gemini-flash-live-3.1") == ("250m", "384Mi", "1536Mi")
     assert pair_resources("pipecat/openai-realtime-2.1") == ("250m", "384Mi", "1536Mi")
     assert pair_resources("nvidia/nemotron-voicechat") == ("250m", "384Mi", "1536Mi")
     assert pair_resources("openai/realtime-2.1") == ("250m", "384Mi", "1536Mi")

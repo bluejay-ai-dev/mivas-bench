@@ -90,7 +90,7 @@ start_harness() {
 
   HARNESS_FAMILY="${HARNESS_FAMILY:-${HARNESS%%/*}}"
 
-  if [[ "${HARNESS_FAMILY}" == "livekit" ]]; then
+  if [[ "${HARNESS_FAMILY}" == "livekit" || "${HARNESS_FAMILY}" == "gemini" ]]; then
     echo "starting LiveKit SIP worker (${HARNESS})"
     exec python "${HARNESS_DIR}/agent.py" start
   fi

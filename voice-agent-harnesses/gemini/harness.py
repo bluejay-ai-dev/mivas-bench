@@ -1,21 +1,36 @@
-"""Blueprint → Gemini Live session helpers (google-genai SDK).
+"""Gemini Live over LiveKit SIP.
 
-Industry tools map to the industry state API. Handoff is soft (Live config is
-fixed at connect). Session tools (end_call) end the live session.
+Bluejay dials this project's SIP host. An inbound trunk plus dispatch rule
+create the room and dispatch `agent_name`. Audio is LiveKit's SIP mix.
+
+Each blueprint agent gets its own Gemini Live session (prompt + that agent's
+tools only). Gemini Live cannot swap tools on an open socket.
 """
 
 from __future__ import annotations
 
 import asyncio
+import datetime as _dt
 import json
+import logging
 import os
+import re
 import sys
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 import httpx
-import google.genai as genai
-from google.genai import types
+from google.genai import types as genai_types
+from livekit.agents import (
+    Agent,
+    AgentServer,
+    AgentSession,
+    JobContext,
+    JobExecutorType,
+    RunContext,
+    cli,
+    function_tool,
+)
 
 for _root in (Path("/app"), *Path(__file__).resolve().parents):
     _runtime = _root / "runtime"
@@ -23,10 +38,30 @@ for _root in (Path("/app"), *Path(__file__).resolve().parents):
         if str(_runtime) not in sys.path:
             sys.path.insert(0, str(_runtime))
         break
-from call_id import call_session, headers as tool_headers, set_call_id  # noqa: E402
+from call_id import begin_session, end_session, headers as tool_headers, set_call_id  # noqa: E402
+
+import report  # noqa: E402
+
+logger = logging.getLogger("mivas.gemini")
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 TOOL_SERVER_URL = os.environ.get("TOOL_SERVER_URL", "http://127.0.0.1:8000").rstrip("/")
+_OPENER = re.compile(r'(?:^|\n)\s*1\.\s*(?:Ask|Say):\s*"([^"]+)"', re.IGNORECASE)
+_SCHEMA_KEYS = {"type", "description", "enum", "items", "properties", "required"}
+
+
+def _prop(prop: dict[str, Any]) -> dict[str, Any]:
+    """Keep the JSON Schema keys Gemini Live accepts, including array `items`."""
+    out = {k: v for k, v in prop.items() if k in _SCHEMA_KEYS}
+    if isinstance(out.get("items"), dict):
+        out["items"] = _prop(out["items"]) or {"type": "string"}
+    if isinstance(out.get("properties"), dict):
+        out["properties"] = {
+            k: _prop(v) for k, v in out["properties"].items() if isinstance(v, dict)
+        }
+    if out.get("type") == "array" and not out.get("items"):
+        out["items"] = {"type": "string"}
+    return out
 
 
 def industry_path(name: str | Path) -> Path:
@@ -39,8 +74,8 @@ def industry_path(name: str | Path) -> Path:
     return (REPO_ROOT / "industries" / name).resolve()
 
 
-def load_blueprint(industry_dir: str | Path) -> dict[str, Any]:
-    industry_dir = industry_path(industry_dir)
+def load_blueprint(industry_dir: str | Path | None = None) -> dict[str, Any]:
+    industry_dir = industry_path(industry_dir or os.environ.get("INDUSTRY", "control-industry"))
     blueprint = json.loads((industry_dir / "agent_blueprint.json").read_text())
     catalog = {t["name"]: t for t in json.loads((industry_dir / "tools.json").read_text())["tools"]}
     agents = {}
@@ -53,130 +88,94 @@ def load_blueprint(industry_dir: str | Path) -> dict[str, Any]:
     return {
         "industry_dir": industry_dir,
         "start": blueprint["agents"][0]["name"],
+        "greeting": (blueprint.get("greeting") or "").strip(),
         "agents": agents,
         "catalog": catalog,
     }
 
 
-def _multiagent_note(bp: dict[str, Any]) -> str:
-    """Soft-handoff note: the Live config's tool list is fixed at connect, so every
-    agent's tools are visible — the prompt has to hold the role boundary."""
-    handoffs = sorted(
-        {t["name"] for a in bp["agents"].values() for t in a["tools"] if t.get("handoff")}
-    )
-    if not handoffs:
-        return ""
-    return (
-        "\n\n# Multi-agent note\n"
-        f"Start as the {bp['start']} agent. Tools belonging to other agents are "
-        f"visible to you; only use another agent's tools after the matching handoff "
-        f"tool ({', '.join(handoffs)}) has succeeded and you have adopted that "
-        "agent's role."
-    )
+def build_agents(industry_dir: str | Path) -> tuple[str, list[str]]:
+    bp = load_blueprint(industry_dir)
+    return bp["start"], list(bp["agents"])
 
 
-_SCHEMA_KEYS = {"type", "description", "enum", "items", "properties", "required"}
+def with_clock(instructions: str) -> str:
+    today = _dt.date.today()
+    return instructions.rstrip() + f"\n\nToday is {today:%A, %B} {today.day}, {today.year}."
 
 
-def _prop(prop: dict[str, Any]) -> dict[str, Any]:
-    """One tools.json property → the subset of JSON Schema Gemini Live accepts.
-
-    `items` has to survive: Live rejects the whole setup with
-    `properties[<name>].items: missing field` for a bare array (that killed every
-    healthcare call, since find_slots takes location_ids). Nested objects and
-    arrays-of-objects recurse for the same reason.
-    """
-    out = {k: v for k, v in prop.items() if k in _SCHEMA_KEYS}
-    if isinstance(out.get("items"), dict):
-        out["items"] = _prop(out["items"]) or {"type": "string"}
-    if isinstance(out.get("properties"), dict):
-        out["properties"] = {k: _prop(v) for k, v in out["properties"].items() if isinstance(v, dict)}
-    if out.get("type") == "array" and not out.get("items"):
-        out["items"] = {"type": "string"}
-    return out
+def greeting(bp: dict[str, Any]) -> str:
+    if bp.get("greeting"):
+        return str(bp["greeting"])
+    return os.environ.get("TWILIO_WELCOME_GREETING", "").strip() or "Hello."
 
 
-def _decl(spec: dict) -> types.FunctionDeclaration:
-    # Gemini Live rejects JSON-Schema keys like additionalProperties.
-    raw = dict(spec.get("inputSchema") or {})
-    raw.pop("additionalProperties", None)
-    props = {}
-    for key, prop in (raw.get("properties") or {}).items():
-        props[key] = _prop(dict(prop))
-    schema: dict[str, Any] = {"type": "object", "properties": props}
-    if raw.get("required"):
-        schema["required"] = list(raw["required"])
-    return types.FunctionDeclaration(
-        name=spec["name"],
-        description=spec.get("description", spec["name"]),
-        parameters=schema,
-    )
+def speak_first(instructions: str, line: str) -> str:
+    return instructions.rstrip() + f'\n\nThe call just connected. Speak first. Greet the caller with: "{line}"'
 
 
-def live_config(
-    bp: dict[str, Any], *, voice: str = "Puck", resume: str | None = None
-) -> types.LiveConnectConfig:
-    """All blueprint tools are declared up front (Live config is fixed at connect)."""
-    decls = []
-    seen: set[str] = set()
-    for agent in bp["agents"].values():
-        for t in agent["tools"]:
-            name = t["name"]
-            if name in seen or name not in bp["catalog"]:
-                continue
-            seen.add(name)
-            decls.append(_decl(bp["catalog"][name]))
-
-    start = bp["agents"][bp["start"]]
-    # note soft-handoff: other agents' tools are visible; prompt still starts as bp["start"]
-    instruction = start["instructions"] + _multiagent_note(bp)
-    return types.LiveConnectConfig(
-        response_modalities=[types.Modality.AUDIO],
-        speech_config=types.SpeechConfig(
-            voice_config=types.VoiceConfig(
-                prebuilt_voice_config=types.PrebuiltVoiceConfig(voice_name=voice)
-            )
-        ),
-        system_instruction=types.Content(parts=[types.Part(text=instruction)]),
-        tools=[types.Tool(function_declarations=decls)] if decls else None,
-        # Transcripts drive the trace's user_message / model output text (no
-        # bearing on what the agent says).
-        input_audio_transcription=types.AudioTranscriptionConfig(),
-        output_audio_transcription=types.AudioTranscriptionConfig(),
-        # Always on, so the server hands out resumption handles: Live drops a
-        # session mid-call (the native-audio preview closes with 1007
-        # CONTENT_TYPE_AUDIO), and a handle is what lets the bridge reconnect
-        # with the conversation intact instead of dropping the caller.
-        session_resumption=types.SessionResumptionConfig(handle=resume),
-    )
+def kick(session: AgentSession, line: str | None = None) -> None:
+    """3.1 treats client_content as history only (initial_history_in_client_content),
+    so completed turns never generate. Realtime text input does."""
+    activity = getattr(session, "_activity", None)
+    rt = getattr(activity, "_rt_session", None)
+    send = getattr(rt, "_send_client_event", None)
+    if send is None:
+        logger.warning("kick: no gemini session")
+        return
+    text = f'Speak to the caller now: "{line}"' if line else "Speak to the caller now."
+    send(genai_types.LiveClientRealtimeInput(text=text))
+    logger.info("kicked gemini speak-first")
 
 
-def _tool_entry(bp: dict[str, Any], agent: str, name: str,
-                *, local_only: bool = False) -> dict[str, Any] | None:
-    """The blueprint entry for a tool.
+def opener(instructions: str) -> str | None:
+    m = _OPENER.search(instructions)
+    return m.group(1).strip() if m else None
 
-    When *local_only* is True the search is restricted to *agent*'s own tool
-    list — this is the correct scope for handoff and session tools, which must
-    never resolve against a different agent.  Industry (dispatchable) tools may
-    fall back across all agents because the Gemini Live tool list is fixed at
-    connect time and every agent's tools are visible.
-    """
-    for t in bp["agents"][agent]["tools"]:
-        if t["name"] == name:
-            return t
-    if local_only:
+
+def agent_name(default: str) -> str:
+    explicit = os.environ.get("LIVEKIT_AGENT_NAME", "").strip()
+    if explicit:
+        return explicit
+    slug = os.environ.get("MIVAS_SLUG", "").strip()
+    return f"mivas-{slug}" if slug else default
+
+
+def job_count_load(max_jobs: int) -> Callable[[Any], float]:
+    cap = max(max_jobs, 1)
+
+    def _load(server: Any) -> float:
+        n = len(getattr(server, "active_jobs", None) or [])
+        return min(n / cap, 1.0)
+
+    return _load
+
+
+def sim_id(ctx: JobContext, participant: Any) -> str | None:
+    attrs = dict(getattr(participant, "attributes", None) or {})
+    for key, val in attrs.items():
+        if "simulation-result-id" in str(key).lower().replace("_", "-"):
+            if val and str(val).strip():
+                return str(val).strip()
+    meta = getattr(ctx.job, "metadata", None)
+    if not meta:
         return None
-    for owner in bp["agents"]:
-        if owner == agent:
-            continue
-        for t in bp["agents"][owner]["tools"]:
-            if t["name"] == name:
-                return t
+    raw = meta if isinstance(meta, dict) else None
+    if raw is None:
+        try:
+            raw = json.loads(str(meta))
+        except Exception:
+            return None
+    if not isinstance(raw, dict):
+        return None
+    for key in ("X-Simulation-Result-Id", "x-simulation-result-id", "simulation_result_id"):
+        val = raw.get(key)
+        if val and str(val).strip():
+            return str(val).strip()
     return None
 
 
 async def _dispatch(name: str, args: dict[str, Any]) -> dict[str, Any]:
-    """Generic dispatch: POST /tools/{name}; the server's envelope is the result."""
     async with httpx.AsyncClient(timeout=30.0) as client:
         resp = await client.post(
             f"{TOOL_SERVER_URL}/tools/{name}",
@@ -186,117 +185,204 @@ async def _dispatch(name: str, args: dict[str, Any]) -> dict[str, Any]:
         return resp.json()
 
 
-async def _execute_tool(
-    name: str,
-    args: dict[str, Any],
+def _tools(
     bp: dict[str, Any],
-    state: dict[str, Any],
-) -> tuple[dict[str, Any], bool]:
-    """Execute a tool. Returns (result, should_end_call). Handoff and session
-    tools are harness-native; every other tool dispatches to the tool server."""
-
-    # Handoff / session tools must belong to the *current* agent — never fall
-    # back to another agent's tool table, otherwise a post-handoff agent could
-    # re-trigger the previous agent's handoff.
-    local = _tool_entry(bp, state["agent"], name, local_only=True)
-    if local is not None and local.get("handoff"):
-        target = local.get("handoff_to")
-        if not target or target not in bp["agents"]:
-            return {"success": False, "error": "unknown handoff target"}, False
-        state["agent"] = target
-        agent = bp["agents"][target]
-        return {
-            "success": True,
-            "role": target,
-            "instructions": agent["instructions"],
-            "note": f"You are now the {target} agent. Follow the instructions field exactly.",
-        }, False
-
-    if local is not None and local.get("session"):
-        if name == "end_call":
-            return {"success": True}, True
-        return await _dispatch(name, args), True
-
-    # A handoff/session tool still visible from a *previous* agent (Gemini can
-    # keep offering it post-handoff) must stay harness-native and fail here,
-    # not fall through to the tool server — it isn't a dispatchable tool and a
-    # 404 there would wrongly read as a successful call in the trace.
-    visible = _tool_entry(bp, state["agent"], name)
-    if local is None and visible is not None and (visible.get("handoff") or visible.get("session")):
-        return {"success": False, "error": "tool unavailable for current agent"}, False
-
-    # Industry (dispatchable) tools: fall back across all agents so shared
-    # tools remain reachable regardless of which agent is currently active.
-    return await _dispatch(name, args), False
-
-
-async def run_tool(
     name: str,
-    args: dict[str, Any],
-    bp: dict[str, Any],
-    state: dict[str, Any],
+    hangup: asyncio.Event,
+    make_llm: Callable[[str], Any],
+    scripted: bool,
+) -> list[Any]:
+    out: list[Any] = []
+    for spec in bp["agents"][name]["tools"]:
+        catalog = bp["catalog"][spec["name"]]
+        raw = dict(catalog.get("inputSchema") or {})
+        raw.pop("additionalProperties", None)
+        props = {
+            k: _prop(dict(v))
+            for k, v in (raw.get("properties") or {}).items()
+            if isinstance(v, dict)
+        }
+        params: dict[str, Any] = {"type": "object", "properties": props}
+        if raw.get("required"):
+            params["required"] = list(raw["required"])
+        schema = {
+            "name": spec["name"],
+            "description": catalog.get("description") or spec["name"],
+            "parameters": params,
+        }
+        if spec.get("handoff"):
+            target = spec["handoff_to"]
+
+            async def _handoff(
+                raw_arguments: dict[str, Any],
+                context: RunContext,
+                *,
+                _target: str = target,
+            ) -> dict[str, Any]:
+                # new Gemini socket starts blank; carry the turns over so the next
+                # stage hears the conversation (3.1 injects them as initial history)
+                prior = context.session.current_agent.chat_ctx.copy(exclude_instructions=True)
+                stage = Stage(
+                    bp, _target, hangup, make_llm, scripted,
+                    entered_by_handoff=True, chat_ctx=prior,
+                )
+                # swap explicitly instead of returning the Stage: Gemini cancels
+                # in-flight tool calls on barge-in, and a swap riding that
+                # generation pipeline dies with it, muting the call
+                context.session.update_agent(stage)
+                return {"ok": True, "transferred_to": _target}
+
+            out.append(function_tool(_handoff, raw_schema=schema))
+            continue
+
+        async def _run(
+            raw_arguments: dict[str, Any],
+            *,
+            _n: str = spec["name"],
+            _stop: bool = spec["name"] == "end_call" or bool(spec.get("session")),
+        ) -> dict[str, Any]:
+            result = {"ok": True, "tool": _n}
+            if _n != "end_call":
+                result = await _dispatch(_n, dict(raw_arguments))
+            if _stop:
+                hangup.set()
+            return result
+
+        out.append(function_tool(_run, raw_schema=schema))
+    return out
+
+
+class Stage(Agent):
+    def __init__(
+        self,
+        bp: dict[str, Any],
+        name: str,
+        hangup: asyncio.Event,
+        make_llm: Callable[[str], Any],
+        scripted: bool,
+        *,
+        entered_by_handoff: bool = False,
+        chat_ctx: Any = None,
+    ):
+        instructions = with_clock(bp["agents"][name]["instructions"])
+        kwargs: dict[str, Any] = {}
+        if chat_ctx is not None:
+            kwargs["chat_ctx"] = chat_ctx
+        super().__init__(
+            instructions=instructions,
+            llm=make_llm(name),
+            tools=_tools(bp, name, hangup, make_llm, scripted),
+            **kwargs,
+        )
+        self._opener = opener(instructions) if scripted else None
+        # 3.1 (scripted) cannot generate_reply; every handoff entry needs a kick
+        self._kick = scripted
+        self._entered_by_handoff = entered_by_handoff
+
+    async def on_enter(self) -> None:
+        if not self._entered_by_handoff:
+            return
+        if self._kick:
+            kick(self.session, self._opener)
+        else:
+            self.session.generate_reply()
+
+
+async def run_call(
+    ctx: JobContext,
     *,
-    call_id: str | None = None,
-) -> tuple[dict[str, Any], bool]:
-    """Execute a tool under a GenAI execute_tool span when a traced_run is active."""
-    from report import finish_tool_span, tool_span
-    with tool_span(name, args, call_id=call_id) as span:
-        result, stop = await _execute_tool(name, args, bp, state)
-        ok = bool(result.get("ok", result.get("success", True)))
-        finish_tool_span(span, result, ok=ok)
-        return result, stop
+    build_session: Callable[[dict[str, Any]], AgentSession],
+    make_llm: Callable[[str], Any],
+    scripted: bool,
+    greet: str,
+    model: str,
+) -> None:
+    participant = None
+    try:
+        participant = await ctx.wait_for_participant()
+    except Exception as e:
+        logger.warning("wait_for_participant: %s", e)
+    sid = sim_id(ctx, participant)
+    logger.info("job start room=%s sim=%s model=%s", ctx.room.name, sid, model)
+    set_call_id(sid)
+    session_key = getattr(ctx.room, "name", None) or "job"
+    begin_session(sid, session_key=session_key)
+    ctx.add_shutdown_callback(lambda *_: asyncio.to_thread(end_session, session_key))
+
+    bp = load_blueprint()
+    hangup = asyncio.Event()
+    disconnected = asyncio.Event()
+
+    @ctx.room.on("disconnected")
+    def _gone(*_: Any) -> None:
+        disconnected.set()
+
+    session = build_session(bp)
+    text = greeting(bp)
+    await session.start(room=ctx.room, agent=Stage(bp, bp["start"], hangup, make_llm, scripted))
+    tid = report.capture_trace()
+    ctx.add_shutdown_callback(lambda *_: report.link(sid, tid))
+    if greet == "kick":
+        kick(session, text)
+    else:
+        session.generate_reply(instructions=f'Greet the caller with: "{text}"')
+
+    wait = [asyncio.create_task(hangup.wait()), asyncio.create_task(disconnected.wait())]
+    await asyncio.wait(wait, return_when=asyncio.FIRST_COMPLETED)
+    for t in wait:
+        t.cancel()
+    if hangup.is_set() and not disconnected.is_set():
+        # end_call fires mid-farewell; let the playout finish before hanging up
+        try:
+            async with asyncio.timeout(15):
+                while True:
+                    speech = session.current_speech
+                    if speech is not None and not speech.done():
+                        await speech.wait_for_playout()
+                        continue
+                    # farewell can start after the end_call tool result lands
+                    await asyncio.sleep(1.0)
+                    if session.current_speech is None:
+                        break
+        except Exception:
+            pass
+        try:
+            await ctx.delete_room()
+        except Exception as e:
+            logger.warning("delete_room: %s", e)
+    logger.info("call finished room=%s hangup=%s", ctx.room.name, hangup.is_set())
 
 
-def build_agents(industry_dir: str | Path) -> tuple[str, list[str]]:
-    bp = load_blueprint(industry_dir)
-    return bp["start"], list(bp["agents"])
+def serve(
+    default_name: str,
+    *,
+    build_session: Callable[[dict[str, Any]], AgentSession],
+    make_llm: Callable[[str], Any],
+    model: str,
+    greet: str,
+    scripted: bool,
+) -> None:
+    name = agent_name(default_name)
+    logger.info("registering livekit agent_name=%s", name)
+    report.setup_otel()
 
+    async def entrypoint(ctx: JobContext) -> None:
+        await run_call(
+            ctx,
+            build_session=build_session,
+            make_llm=make_llm,
+            scripted=scripted,
+            greet=greet,
+            model=model,
+        )
 
-async def run_live(industry_dir: str | Path, model: str) -> None:
-    """open a Live session; stdin text turns in, event types on stdout."""
-    from report import traced_run
-
-    key = os.environ.get("GOOGLE_API_KEY") or os.environ.get("GEMINI_API_KEY")
-    if not key:
-        raise SystemExit("need GOOGLE_API_KEY")
-    bp = load_blueprint(industry_dir)
-    state = {"agent": bp["start"]}
-    client = genai.Client(api_key=key)
-    name = Path(industry_path(industry_dir)).name
-    async with traced_run(f"mivas-{name}-{model}", model=model):
-        async with client.aio.live.connect(model=model, config=live_config(bp)) as session:
-            prompt = "Hello"
-            while True:
-                await session.send_realtime_input(text=prompt)
-                async for response in session.receive():
-                    if response.data:
-                        print(f"audio {len(response.data)}", flush=True)
-                    if response.tool_call:
-                        replies = []
-                        should_end = False
-                        for fc in response.tool_call.function_calls or []:
-                            result, stop = await run_tool(
-                                fc.name,
-                                dict(fc.args or {}),
-                                bp,
-                                state,
-                                call_id=getattr(fc, "id", None),
-                            )
-                            should_end = should_end or stop
-                            print(f"tool {fc.name}", flush=True)
-                            replies.append(
-                                types.FunctionResponse(
-                                    id=fc.id, name=fc.name, response=result
-                                )
-                            )
-                        if replies:
-                            await session.send_tool_response(function_responses=replies)
-                        if should_end:
-                            return
-                    sc = response.server_content
-                    if sc is not None and getattr(sc, "turn_complete", False):
-                        print("turn_complete", flush=True)
-                line = await asyncio.to_thread(sys.stdin.readline)
-                if not line:
-                    return
-                prompt = line.strip() or "Hello"
+    # One Gemini Live socket (+ a second on handoff) per process. CPU load is
+    # idle at assign time, so count jobs instead of CPU or three rooms stack
+    # on one replica and two stay silent.
+    server = AgentServer(job_executor_type=JobExecutorType.THREAD, load_threshold=0.5)
+    server.load_fnc = job_count_load(1)
+    server.rtc_session(agent_name=name)(entrypoint)
+    logging.getLogger("urllib3").setLevel(logging.WARNING)
+    logging.getLogger("httpx").setLevel(logging.WARNING)
+    logger.setLevel(logging.INFO)
+    cli.run_app(server)
