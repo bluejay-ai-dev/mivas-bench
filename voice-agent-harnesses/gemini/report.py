@@ -27,11 +27,16 @@ _provider: trace_sdk.TracerProvider | None = None
 
 
 def setup_otel() -> trace_sdk.TracerProvider | None:
-    """Route livekit-agents' spans to Bluejay. No-op without BLUEJAY_API_KEY."""
+    """Route livekit-agents' spans to Bluejay. No-op without BLUEJAY_API_KEY.
+
+    Call at every job start: livekit shuts the active tracer provider down at
+    job end (_shutdown_telemetry), so a shared provider exports nothing after
+    the pod's first call ("Exporter already shutdown, ignoring batch").
+    """
     global _provider
     key = os.getenv("BLUEJAY_API_KEY")
-    if not key or _provider is not None:
-        return _provider
+    if not key:
+        return None
 
     provider = trace_sdk.TracerProvider(
         resource=Resource.create(
@@ -50,7 +55,9 @@ def setup_otel() -> trace_sdk.TracerProvider | None:
     from livekit.agents.telemetry import set_tracer_provider
 
     set_tracer_provider(provider)
-    otel_trace.set_tracer_provider(provider)
+    if _provider is None:
+        # global provider is set-once in OTel; livekit's tracer is re-settable
+        otel_trace.set_tracer_provider(provider)
     _provider = provider
     logger.info("livekit telemetry → bluejay otlp")
     return provider

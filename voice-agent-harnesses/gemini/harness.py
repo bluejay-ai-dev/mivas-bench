@@ -114,7 +114,7 @@ def speak_first(instructions: str, line: str) -> str:
     return instructions.rstrip() + f'\n\nThe call just connected. Speak first. Greet the caller with: "{line}"'
 
 
-def kick(session: AgentSession, line: str | None = None) -> None:
+def kick(session: AgentSession, text: str) -> None:
     """3.1 treats client_content as history only (initial_history_in_client_content),
     so completed turns never generate. Realtime text input does."""
     activity = getattr(session, "_activity", None)
@@ -123,7 +123,6 @@ def kick(session: AgentSession, line: str | None = None) -> None:
     if send is None:
         logger.warning("kick: no gemini session")
         return
-    text = f'Speak to the caller now: "{line}"' if line else "Speak to the caller now."
     send(genai_types.LiveClientRealtimeInput(text=text))
     logger.info("kicked gemini speak-first")
 
@@ -283,7 +282,12 @@ class Stage(Agent):
         if not self._entered_by_handoff:
             return
         if self._kick:
-            kick(self.session, self._opener)
+            text = (
+                f'Speak to the caller now: "{self._opener}"'
+                if self._opener
+                else "Speak to the caller now."
+            )
+            kick(self.session, text)
         else:
             self.session.generate_reply()
 
@@ -297,6 +301,7 @@ async def run_call(
     greet: str,
     model: str,
 ) -> None:
+    report.setup_otel()  # per job: livekit shuts the provider down at job end
     participant = None
     try:
         participant = await ctx.wait_for_participant()
@@ -323,7 +328,10 @@ async def run_call(
     tid = report.capture_trace()
     ctx.add_shutdown_callback(lambda *_: report.link(sid, tid))
     if greet == "kick":
-        kick(session, text)
+        # the greeting is pinned in the connect-time instructions (speak_first);
+        # quoting it here reads as the other party's line and the model answers
+        # it instead of speaking it (role inversion)
+        kick(session, ".")
     else:
         session.generate_reply(instructions=f'Greet the caller with: "{text}"')
 
