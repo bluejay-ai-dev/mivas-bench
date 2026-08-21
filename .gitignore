@@ -29,6 +29,11 @@ uv.toml
 # downloaded hangup dumps (slug/run/dh/result)
 actual-final-state/
 
+# local Bluejay CSV exports (not tracked)
+/eval_outputs/
+/.mivas-monitor/
+/healthcare-*.csv
+
 # cached provider-side agent IDs (e.g. ElevenLabs ensure_agents)
 **/.agents.json
 
