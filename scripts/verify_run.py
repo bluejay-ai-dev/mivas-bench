@@ -77,9 +77,9 @@ def latest_run_for_sim(sim_id: str) -> str:
     return str(newest.get("id") or newest.get("simulation_run_id"))
 
 
-def classify(result_id: str) -> dict:
-    body = _get(f"retrieve-simulation-result/{result_id}")
-    d = body.get("simulation_result") or {}
+def classify_detail(d: dict, result_id: str | None = None) -> dict:
+    """VOID / pending / pairing verdict from an already-fetched result body."""
+    rid = str(result_id or d.get("id") or "")
     evals = d.get("evaluations") or []
     ev = evals[0] if isinstance(evals, list) and evals else (evals if isinstance(evals, dict) else {})
     groups = d.get("tool_calls") or []
@@ -90,7 +90,7 @@ def classify(result_id: str) -> dict:
     void_reason = None
     if status in NOT_FINAL:
         return {
-            "id": result_id, "status": status, "goal": ev.get("goal_success"),
+            "id": rid, "status": status, "goal": ev.get("goal_success"),
             "expected": expected, "fired": fired, "hits": [], "missing": [],
             "void_reason": None, "pending": True,
         }
@@ -102,7 +102,7 @@ def classify(result_id: str) -> dict:
         void_reason = "tool list empty while tools were expected — extraction did not land"
 
     return {
-        "id": result_id,
+        "id": rid,
         "status": status,
         "goal": ev.get("goal_success"),
         "expected": expected,
@@ -121,6 +121,12 @@ def classify(result_id: str) -> dict:
         # is the race above, so the pairing overrides it.
         "verdict": _verdict(ev.get("goal_success"), groups),
     }
+
+
+def classify(result_id: str) -> dict:
+    body = _get(f"retrieve-simulation-result/{result_id}")
+    d = body.get("simulation_result") or {}
+    return classify_detail(d, result_id)
 
 
 def _verdict(judge_goal, groups) -> str:

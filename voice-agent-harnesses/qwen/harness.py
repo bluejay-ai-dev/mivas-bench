@@ -3,7 +3,9 @@
 Qwen-Audio Realtime (DashScope / Model Studio) is a raw WebSocket, not the
 OpenAI Agents SDK. Industry tools POST to `{TOOL_SERVER_URL}/tools/{name}`.
 Handoff tools (`handoff: true`) soft-switch the active blueprint agent on the
-same socket via `session.update`. Session tools (`session: true`) hang up.
+same socket via `session.update`. `end_call` is harness-local; other session
+tools (`escalate_to_human`, `transfer_to_human`) POST so the industry records
+the row, then the socket closes.
 
 Docs: https://help.aliyun.com/en/model-studio/qwen-audio-realtime-user-guides
 """
@@ -312,7 +314,7 @@ async def _execute_tool(
         state["agent"] = target
         return {"success": True, "role": target}, False
 
-    if name == "end_call" or is_session_tool(bp, state["agent"], name):
+    if name == "end_call":
         return {"success": True}, True
 
     async with httpx.AsyncClient(timeout=30.0) as client:
@@ -322,7 +324,9 @@ async def _execute_tool(
             headers=tool_headers(),
         )
         result = resp.json()
-        if name == "transfer_to_human":
+        # Human-transfer session tools POST (so hangup GET /state has the row)
+        # then hang up — there is no human to join.
+        if is_session_tool(bp, state["agent"], name):
             return result, True
         return result, False
 
