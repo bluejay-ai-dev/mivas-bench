@@ -31,6 +31,7 @@ import json
 import os
 import re
 import sys
+import time
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -819,8 +820,25 @@ def handoff_adherence(expected: list[str], actual: list[str]) -> dict[str, Any]:
     }
 
 
+def _get_with_retry(path: str, attempts: int = 6) -> dict[str, Any]:
+    delay = 2.0
+    last: SystemExit | None = None
+    for i in range(attempts):
+        try:
+            return verify_run._get(path)
+        except SystemExit as exc:
+            last = exc
+            msg = str(exc)
+            retryable = any(code in msg for code in ("401", "429", "500", "502", "503"))
+            if i == attempts - 1 or not retryable:
+                raise
+            time.sleep(delay)
+            delay = min(delay * 2, 30)
+    raise last or SystemExit(f"GET {path} failed")
+
+
 def _fetch_result(result_id: str) -> dict[str, Any]:
-    body = verify_run._get(f"retrieve-simulation-result/{result_id}")
+    body = _get_with_retry(f"retrieve-simulation-result/{result_id}")
     return body.get("simulation_result") or body
 
 
@@ -905,6 +923,103 @@ def verify_result(
     }
 
 
+def collect_scored_results(
+    run_id: str,
+    industry: str,
+    *,
+    actuals_dir: Path | None = None,
+    harness: str = "openai/realtime-2.1",
+    slug: str | None = None,
+    sim_hint: str | None = None,
+) -> dict[str, Any]:
+    """Score every conversation in a run. Used by verify CLI and CSV export."""
+    slug = slug or pull.pair_slug(harness, industry)
+    schemas = load_tool_schemas(industry)
+    run_body = _get_with_retry(f"retrieve-simulation-results/{run_id}")
+    run = run_body.get("simulation_run") or {}
+    results = run_body.get("simulation_results") or run_body.get("results") or []
+    sim_id = str(run.get("simulation_id") or sim_hint or "")
+    dh_by_id = _digital_humans_by_sim(sim_id) if sim_id else {}
+
+    state_skip_note = None
+    pulled: dict[str, Any] | None = None
+    if actuals_dir is None:
+        if os.environ.get("MIVAS_SNAPSHOT_BUCKET", "").strip():
+            dest = ROOT / "actual-final-state"
+            try:
+                pulled = _pull_actuals(str(run_id), slug, dest)
+                actuals_dir = dest / slug / str(pulled.get("run_id") or run_id)
+            except SystemExit as e:
+                state_skip_note = f"S3 pull failed: {e}"
+        else:
+            state_skip_note = "MIVAS_SNAPSHOT_BUCKET not set; state compare skipped"
+    actual_by_result = _actual_by_result(actuals_dir)
+
+    rows: list[dict[str, Any]] = []
+    for summary in results:
+        result_id = str(summary.get("id") or "")
+        if not result_id:
+            continue
+        detail = _fetch_result(result_id)
+        classified = verify_run.classify_detail(detail, result_id)
+        dh = detail.get("digital_human") or dh_by_id.get(str(detail.get("digital_human_id"))) or {}
+        case_key = case_key_from_dh(dh)
+        task = load_task(industry, case_key) if case_key else None
+
+        actual_state = None
+        note = state_skip_note
+        dump = actual_by_result.get(result_id)
+        if dump and dump.get("path"):
+            actual_state = json.loads(Path(dump["path"]).read_text())
+            note = None
+        elif dump is None and actuals_dir is not None and state_skip_note is None:
+            note = "no hangup dump for this result"
+
+        check = verify_result(
+            detail, task, actual_state, state_note=note, schemas=schemas,
+            industry=industry,
+        )
+        if classified.get("pending"):
+            mark = "wait"
+        elif classified.get("void_reason"):
+            mark = "VOID"
+        elif not task:
+            mark = "MISS"
+        elif check["passed"]:
+            mark = "pass"
+        else:
+            mark = "FAIL"
+
+        lines = result_transcript_lines(detail)
+        row = {
+            "result_id": result_id,
+            "case_key": case_key,
+            "digital_human_id": detail.get("digital_human_id"),
+            "status": classified.get("status") or detail.get("status"),
+            "pending": classified.get("pending"),
+            "void_reason": classified.get("void_reason"),
+            "mark": mark,
+            "detail": detail,
+            "task": task,
+            "digital_human": dh,
+            "transcript_lines": lines,
+            "actual_state": actual_state,
+            "actual_tool_calls": actual_tool_calls(detail),
+            **check,
+        }
+        rows.append(row)
+
+    return {
+        "run_id": str(run_id),
+        "industry": industry,
+        "run": run,
+        "simulation_id": sim_id,
+        "results": rows,
+        "actuals_dir": str(actuals_dir) if actuals_dir else None,
+        "state_skip_note": state_skip_note,
+    }
+
+
 def main(argv: list[str] | None = None) -> int:
     load_dotenv()
     parser = argparse.ArgumentParser(description=__doc__)
@@ -925,93 +1040,36 @@ def main(argv: list[str] | None = None) -> int:
     if not run_id:
         parser.error("give a run id or --sim")
 
-    slug = args.slug or pull.pair_slug(args.harness, args.industry)
-    schemas = load_tool_schemas(args.industry)
-    run_body = verify_run._get(f"retrieve-simulation-results/{run_id}")
-    run = run_body.get("simulation_run") or {}
-    results = run_body.get("simulation_results") or run_body.get("results") or []
-    sim_id = str(run.get("simulation_id") or args.sim or "")
-    dh_by_id = _digital_humans_by_sim(sim_id) if sim_id else {}
-
-    actuals_dir = args.actuals_dir
-    state_skip_note = None
-    pulled: dict[str, Any] | None = None
-    if actuals_dir is None:
-        if os.environ.get("MIVAS_SNAPSHOT_BUCKET", "").strip():
-            dest = ROOT / "actual-final-state"
-            try:
-                pulled = _pull_actuals(str(run_id), slug, dest)
-                actuals_dir = dest / slug / str(pulled.get("run_id") or run_id)
-            except SystemExit as e:
-                state_skip_note = f"S3 pull failed: {e}"
-        else:
-            state_skip_note = "MIVAS_SNAPSHOT_BUCKET not set; state compare skipped"
-    actual_by_result = _actual_by_result(actuals_dir)
-
-    rows: list[dict[str, Any]] = []
-    for summary in results:
-        result_id = str(summary.get("id") or "")
-        if not result_id:
-            continue
-        classified = verify_run.classify(result_id)
-        detail = _fetch_result(result_id)
-        dh = detail.get("digital_human") or dh_by_id.get(str(detail.get("digital_human_id"))) or {}
-        case_key = case_key_from_dh(dh)
-        task = load_task(args.industry, case_key) if case_key else None
-
-        actual_state = None
-        note = state_skip_note
-        dump = actual_by_result.get(result_id)
-        if dump and dump.get("path"):
-            actual_state = json.loads(Path(dump["path"]).read_text())
-            note = None
-        elif dump is None and actuals_dir is not None and state_skip_note is None:
-            note = "no hangup dump for this result"
-
-        check = verify_result(
-            detail, task, actual_state, state_note=note, schemas=schemas,
-            industry=args.industry,
-        )
-        if classified.get("pending"):
-            mark = "wait"
-        elif classified.get("void_reason"):
-            mark = "VOID"
-        elif not task:
-            mark = "MISS"
-        elif check["passed"]:
-            mark = "pass"
-        else:
-            mark = "FAIL"
-
-        row = {
-            "result_id": result_id,
-            "case_key": case_key,
-            "digital_human_id": detail.get("digital_human_id"),
-            "status": classified.get("status"),
-            "pending": classified.get("pending"),
-            "void_reason": classified.get("void_reason"),
-            "mark": mark,
-            **check,
-        }
-        rows.append(row)
-
+    scored = collect_scored_results(
+        str(run_id),
+        args.industry,
+        actuals_dir=args.actuals_dir,
+        harness=args.harness,
+        slug=args.slug,
+        sim_hint=args.sim,
+    )
+    rows = scored["results"]
+    for row in rows:
         extra = ""
         if row["void_reason"]:
             extra = f"  ↳ {row['void_reason']}"
-        elif not task:
+        elif not row.get("task"):
             extra = "  ↳ no task.json for this digital human"
-        elif not check["call"]["passed"]:
-            extra = f"  ↳ missing tools: {check['call']['missing']}"
-        elif not check["handoff"]["passed"]:
+        elif not row["call"]["passed"]:
+            extra = f"  ↳ missing tools: {row['call']['missing']}"
+        elif not row["handoff"]["passed"]:
             extra = (
-                f"  ↳ handoff {check['handoff']['verdict']}: "
-                f"want {check['handoff']['expected']} got {check['handoff']['actual']}"
+                f"  ↳ handoff {row['handoff']['verdict']}: "
+                f"want {row['handoff']['expected']} got {row['handoff']['actual']}"
             )
-        elif check["state"].get("skipped"):
-            extra = f"  ↳ state skipped: {check['state'].get('note')}"
-        elif check["state"].get("passed") is False:
+        elif row["state"].get("skipped"):
+            extra = f"  ↳ state skipped: {row['state'].get('note')}"
+        elif row["state"].get("passed") is False:
             extra = "  ↳ exp_db_state mismatch"
-        print(f"{mark:<5} {result_id} {case_key or '?':<12} {classified.get('status') or ''}")
+        print(
+            f"{row['mark']:<5} {row['result_id']} "
+            f"{row.get('case_key') or '?':<12} {row.get('status') or ''}"
+        )
         if extra:
             print(extra)
 
@@ -1026,7 +1084,11 @@ def main(argv: list[str] | None = None) -> int:
         f"{len(skipped_state)} state-skipped"
     )
     if args.json:
-        json.dump({"run_id": run_id, "industry": args.industry, "results": rows}, sys.stdout, indent=2)
+        slim = []
+        skip = {"detail", "task", "digital_human", "transcript_lines", "actual_state", "actual_tool_calls"}
+        for row in rows:
+            slim.append({k: v for k, v in row.items() if k not in skip})
+        json.dump({"run_id": run_id, "industry": args.industry, "results": slim}, sys.stdout, indent=2)
         sys.stdout.write("\n")
 
     if pending:
