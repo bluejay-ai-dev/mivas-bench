@@ -109,7 +109,7 @@ def harness_paths(harness: str) -> tuple[Path, Path]:
 # LiveKit pods register with LiveKit Cloud and take Bluejay SIP inbound.
 # Pipecat pods run the bot locally; Daily pinless SIP hits the dispatcher,
 # which forwards to an idle replica.
-LIVEKIT_WORKER_FAMILIES = frozenset({"livekit"})
+LIVEKIT_WORKER_FAMILIES = frozenset({"livekit", "gemini"})
 PIPECAT_WORKER_FAMILIES = frozenset({"pipecat"})
 WORKER_FAMILIES = LIVEKIT_WORKER_FAMILIES | PIPECAT_WORKER_FAMILIES
 SIP_WORKER_FAMILIES = LIVEKIT_WORKER_FAMILIES
@@ -323,8 +323,9 @@ def _render(template_name: str, harness: str, industry: str, image: str, service
 
 
 def livekit_secret_name(harness: str, industry: str) -> str:
-    """SIP healthcare worker uses a dedicated LiveKit Cloud project secret."""
-    if slug(harness, industry) == "livekit-cascaded-healthcare":
+    """SIP LiveKit workers register with the dedicated LiveKit Cloud project."""
+    family, runtime = split_harness(harness)
+    if family == "gemini" or (family == "livekit" and runtime in {"cascaded", "gemini-flash-live-3.1"}):
         return os.environ.get("LIVEKIT_SIP_SECRET_NAME", "mivas-livekit-sip").strip() or "mivas-livekit-sip"
     return "mivas-secrets"
 
@@ -337,6 +338,7 @@ def pair_resources(harness: str) -> tuple[str, str, str]:
     """
     family, runtime = split_harness(harness)
     if (family == "nvidia" and runtime == "nemotron") \
+            or family == "gemini" \
             or (family in LIVEKIT_WORKER_FAMILIES | PIPECAT_WORKER_FAMILIES and runtime == "cascaded"):
         return "1000m", "1Gi", "3Gi"
     return "250m", "384Mi", "1536Mi"
