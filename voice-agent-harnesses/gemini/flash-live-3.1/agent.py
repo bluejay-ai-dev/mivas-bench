@@ -1,31 +1,70 @@
-"""Gemini 3.1 Flash Live harness — cross with any industry agent_blueprint.json."""
+"""Gemini 3.1 Flash Live — LiveKit SIP worker.
+
+3.1 ignores LiveKit generate_reply and treats client_content as history
+only. Greeting is in the connect-time instructions; a realtime text input
+kick makes Gemini speak first.
+"""
 
 from __future__ import annotations
 
-import asyncio
 import os
 import sys
 from pathlib import Path
+from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from harness import TOOL_SERVER_URL, build_agents, industry_path, run_live  # noqa: E402
+
+from dotenv import load_dotenv
+
+load_dotenv(Path(__file__).resolve().parents[3] / ".env")
+load_dotenv(Path(__file__).resolve().parents[1] / ".env", override=True)
+
+from google.genai import types as genai_types  # noqa: E402
+from livekit.agents import AgentSession  # noqa: E402
+from livekit.plugins import google as lk_google  # noqa: E402
+
+import harness  # noqa: E402
 
 MODEL = "gemini-3.1-flash-live-preview"
+AGENT_NAME = "mivas-gemini-flash-live"
 
 
-async def run(industry: str = "control-industry") -> None:
-    industry_dir = os.environ.get("INDUSTRY_DIR") or str(industry_path(industry))
-    await run_live(industry_dir, MODEL)
+def _llm(instructions: str) -> Any:
+    return lk_google.realtime.RealtimeModel(
+        model=MODEL,
+        voice="Puck",
+        language="en-US",
+        instructions=instructions,
+        # default WHEN_IDLE stalls on a continuous SIP stream: 3.1 holds the
+        # tool response until barge-in "idles" it
+        tool_response_scheduling=genai_types.FunctionResponseScheduling.INTERRUPT,
+    )
+
+
+def build_session(_bp: dict[str, Any]) -> AgentSession:
+    return AgentSession(max_tool_steps=16)
 
 
 if __name__ == "__main__":
-    industry = next((a for a in sys.argv[1:] if not a.startswith("-")), "control-industry")
-    industry_dir = Path(os.environ.get("INDUSTRY_DIR", str(industry_path(industry))))
     if "--check" in sys.argv:
-        start, agents = build_agents(industry_dir)
-        print(
-            f"ok {industry_dir.name} × {MODEL} start={start} "
-            f"agents={agents} tool_server={TOOL_SERVER_URL}"
-        )
+        industry = next((a for a in sys.argv[1:] if not a.startswith("-")), "control-industry")
+        start, agents = harness.build_agents(os.environ.get("INDUSTRY_DIR") or industry)
+        print(f"ok {MODEL} start={start} agents={agents}")
     else:
-        asyncio.run(run(industry))
+        bp = harness.load_blueprint()
+        greet_text = harness.greeting(bp)
+
+        def make_llm(name: str) -> Any:
+            inst = harness.with_clock(bp["agents"][name]["instructions"])
+            if name == bp["start"]:
+                inst = harness.speak_first(inst, greet_text)
+            return _llm(inst)
+
+        harness.serve(
+            AGENT_NAME,
+            build_session=build_session,
+            make_llm=make_llm,
+            model=MODEL,
+            greet="kick",
+            scripted=True,
+        )
