@@ -38,6 +38,18 @@ def _llm(instructions: str) -> Any:
         # default WHEN_IDLE stalls on a continuous SIP stream: 3.1 holds the
         # tool response until barge-in "idles" it
         tool_response_scheduling=genai_types.FunctionResponseScheduling.INTERRUPT,
+        # default end-of-turn VAD misses short confirmations on telephone
+        # audio: model sits silent until the caller speaks again (30-60s)
+        realtime_input_config=genai_types.RealtimeInputConfig(
+            automatic_activity_detection=genai_types.AutomaticActivityDetection(
+                # quiet telephone-band onsets miss START detection entirely:
+                # the turn never opens, the model never replies, and only a
+                # louder re-ask ("are you still there?") revives it
+                start_of_speech_sensitivity=genai_types.StartSensitivity.START_SENSITIVITY_HIGH,
+                end_of_speech_sensitivity=genai_types.EndSensitivity.END_SENSITIVITY_HIGH,
+                silence_duration_ms=500,
+            )
+        ),
     )
 
 

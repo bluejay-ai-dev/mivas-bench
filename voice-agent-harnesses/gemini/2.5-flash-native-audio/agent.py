@@ -24,7 +24,7 @@ from livekit.plugins import google as lk_google  # noqa: E402
 
 import harness  # noqa: E402
 
-MODEL = "gemini-2.5-flash-native-audio"
+MODEL = "gemini-2.5-flash-native-audio-preview-12-2025"
 AGENT_NAME = "mivas-gemini-2-5-flash-native-audio"
 
 
@@ -36,6 +36,20 @@ def _llm(instructions: str) -> Any:
         instructions=instructions,
         # default WHEN_IDLE stalls on a continuous SIP stream (see 3.1 agent)
         tool_response_scheduling=genai_types.FunctionResponseScheduling.INTERRUPT,
+        # default end-of-turn VAD misses short confirmations on telephone
+        # audio: model sits silent until the caller speaks again (30-60s).
+        # the 1007 session kills initially blamed on this occur without it
+        # too and are handled by the text-only chat sync patch in harness.py
+        realtime_input_config=genai_types.RealtimeInputConfig(
+            automatic_activity_detection=genai_types.AutomaticActivityDetection(
+                # quiet telephone-band onsets miss START detection entirely:
+                # the turn never opens, the model never replies, and only a
+                # louder re-ask ("are you still there?") revives it
+                start_of_speech_sensitivity=genai_types.StartSensitivity.START_SENSITIVITY_HIGH,
+                end_of_speech_sensitivity=genai_types.EndSensitivity.END_SENSITIVITY_HIGH,
+                silence_duration_ms=500,
+            )
+        ),
     )
 
 
@@ -50,9 +64,13 @@ if __name__ == "__main__":
         print(f"ok {MODEL} start={start} agents={agents}")
     else:
         bp = harness.load_blueprint()
+        greet_text = harness.greeting(bp)
 
         def make_llm(name: str) -> Any:
-            return _llm(harness.with_clock(bp["agents"][name]["instructions"]))
+            inst = harness.with_clock(bp["agents"][name]["instructions"])
+            if name == bp["start"]:
+                inst = harness.speak_first(inst, greet_text)
+            return _llm(inst)
 
         harness.serve(
             AGENT_NAME,
