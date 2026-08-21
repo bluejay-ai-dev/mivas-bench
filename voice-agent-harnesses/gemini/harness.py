@@ -44,6 +44,34 @@ import report  # noqa: E402
 
 logger = logging.getLogger("mivas.gemini")
 
+# Gemini kills the session (1007 CONTENT_TYPE_AUDIO not supported) whenever the
+# plugin replays chat history containing audio items via client_content. The
+# sync runs inside livekit after every tool call, so filter at the source.
+from livekit.plugins.google.realtime import realtime_api as _grt  # noqa: E402
+
+_orig_update_chat_ctx = _grt.RealtimeSession.update_chat_ctx
+
+
+async def _text_only_update_chat_ctx(self: Any, chat_ctx: Any) -> None:
+    ctx = chat_ctx.copy()  # incoming ctx may be read-only
+    stripped = 0
+    kept_items = []
+    for item in ctx.items:
+        if getattr(item, "type", "") == "message":
+            kept = [c for c in item.content if isinstance(c, str)]
+            stripped += len(item.content) - len(kept)
+            if not kept:
+                continue
+            item.content = kept
+        kept_items.append(item)
+    ctx.items[:] = kept_items
+    if stripped:
+        logger.info("stripped %d non-text content parts from chat ctx", stripped)
+    await _orig_update_chat_ctx(self, ctx)
+
+
+_grt.RealtimeSession.update_chat_ctx = _text_only_update_chat_ctx
+
 REPO_ROOT = Path(__file__).resolve().parents[2]
 TOOL_SERVER_URL = os.environ.get("TOOL_SERVER_URL", "http://127.0.0.1:8000").rstrip("/")
 _OPENER = re.compile(r'(?:^|\n)\s*1\.\s*(?:Ask|Say):\s*"([^"]+)"', re.IGNORECASE)
@@ -220,7 +248,10 @@ def _tools(
             ) -> dict[str, Any]:
                 # new Gemini socket starts blank; carry the turns over so the next
                 # stage hears the conversation (3.1 injects them as initial history)
-                prior = context.session.current_agent.chat_ctx.copy(exclude_instructions=True)
+                # audio items are stripped by the update_chat_ctx patch above
+                prior = context.session.current_agent.chat_ctx.copy(
+                    exclude_instructions=True, exclude_function_call=True
+                )
                 stage = Stage(
                     bp, _target, hangup, make_llm, scripted,
                     entered_by_handoff=True, chat_ctx=prior,
@@ -262,8 +293,13 @@ class Stage(Agent):
         *,
         entered_by_handoff: bool = False,
         chat_ctx: Any = None,
+        speak_first_line: str | None = None,
     ):
         instructions = with_clock(bp["agents"][name]["instructions"])
+        if speak_first_line:
+            # must live on the Agent, not the RealtimeModel: livekit overrides
+            # the model's instructions with the Agent's at activity start
+            instructions = speak_first(instructions, speak_first_line)
         kwargs: dict[str, Any] = {}
         if chat_ctx is not None:
             kwargs["chat_ctx"] = chat_ctx
@@ -323,8 +359,20 @@ async def run_call(
         disconnected.set()
 
     session = build_session(bp)
-    text = greeting(bp)
-    await session.start(room=ctx.room, agent=Stage(bp, bp["start"], hangup, make_llm, scripted))
+
+    @session.on("close")
+    def _session_closed(ev: Any) -> None:
+        # unrecoverable model error (e.g. Gemini 1007) otherwise leaves the
+        # caller in dead air until their own hangup timer
+        err = getattr(ev, "error", None)
+        if err is not None:
+            logger.error("session closed with error, ending call: %s", err)
+            hangup.set()
+
+    start = Stage(
+        bp, bp["start"], hangup, make_llm, scripted, speak_first_line=greeting(bp)
+    )
+    await session.start(room=ctx.room, agent=start)
     tid = report.capture_trace()
     ctx.add_shutdown_callback(lambda *_: report.link(sid, tid))
     if greet == "kick":
@@ -333,7 +381,8 @@ async def run_call(
         # it instead of speaking it (role inversion)
         kick(session, ".")
     else:
-        session.generate_reply(instructions=f'Greet the caller with: "{text}"')
+        # greeting is pinned in the start agent's system prompt (speak_first)
+        session.generate_reply()
 
     wait = [asyncio.create_task(hangup.wait()), asyncio.create_task(disconnected.wait())]
     await asyncio.wait(wait, return_when=asyncio.FIRST_COMPLETED)
@@ -393,4 +442,7 @@ def serve(
     logging.getLogger("urllib3").setLevel(logging.WARNING)
     logging.getLogger("httpx").setLevel(logging.WARNING)
     logger.setLevel(logging.INFO)
+    if os.environ.get("LK_GOOGLE_DEBUG"):
+        # the plugin's frame dumps log at DEBUG; INFO root swallows them
+        logging.getLogger("livekit.plugins.google").setLevel(logging.DEBUG)
     cli.run_app(server)
