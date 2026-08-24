@@ -1,0 +1,55 @@
+scripts/bluejay_run_to_csv.py
+  s_67570d8fda4680::t_7475f5e3529f8f 612-615
+  s_67570d8fda4680::t_2db4de4155b8a1 50
+  s_67570d8fda4680::t_e98b34b105bff5 11-13
+  s_67570d8fda4680::t_1d292bbb111fa2 652-662
+  s_67570d8fda4680::t_d77dfe4d820d93 75-78
+  s_67570d8fda4680::t_2d84c758bd4d50 554-556
+  s_67570d8fda4680::t_3673080a2a7e6b 738-739
+voice-agent-harnesses/s2s-model-pricing.json
+  s_67570d8fda4680::t_758593d54c09e7 26-28
+tests/test_bluejay_run_to_csv.py
+  s_67570d8fda4680::t_fdb40e3118ee89 136-137
+  s_67570d8fda4680::t_d9785ec1a4e378 340-380
+.gitignore
+  s_67570d8fda4680::t_17e4cbbe5c5c0f 34
+scripts/eval_costs.py
+  s_67570d8fda4680::t_7e2fc1211b2635 43-46
+  s_67570d8fda4680::t_6436ad7d75eb2f 193,292,364,395,453-498,515
+  s_67570d8fda4680::t_b7134dd69be4a9 32
+  s_67570d8fda4680::t_6d0a56e06070bd 84-107,291,330,375,397
+  s_67570d8fda4680::t_29440f14a749b1 166-173
+  s_67570d8fda4680::t_43bc6aa2217dbf 544
+  s_67570d8fda4680::t_337a1bde29760f 10-14
+  s_4f98cc54347dec::t_8b4fc3f6c84f25 1-9,15-31,33-42,47-83,108-165,174-192,194-290,293-329,331-363,365-374,376-394,396,398-452,499-514,516-543,545-568
+scripts/annotate_eval_costs.py
+  s_67570d8fda4680::t_ad4d07b66774bf 34,36-46
+  s_67570d8fda4680::t_1b5efa1a61dca4 26-33
+  s_67570d8fda4680::t_a276c53452a9d0 128-137
+  s_67570d8fda4680::t_9cd62c2c161b21 139-142
+  s_4f98cc54347dec::t_dcd3c9cab5096b 1-25,35,47-127,138,143-147
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "e062954c102e07214957fe098a9c7b908e5ac704",
+  "prompts": {},
+  "sessions": {
+    "s_4f98cc54347dec": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "b6c105bb-040e-4554-b857-9266aedea298",
+        "model": "grok-4.6"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    },
+    "s_67570d8fda4680": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "0e8731aa-7c81-4d1a-bec1-af10efd08a47",
+        "model": "grok-4.6"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
