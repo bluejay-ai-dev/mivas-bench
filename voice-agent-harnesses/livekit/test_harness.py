@@ -161,6 +161,49 @@ def test_await_farewell() -> None:
     assert 0.5 < asyncio.run(elapsed("speaking", [], max_wait=0.6)) < 1.0
 
 
+def test_usage_stamped_on_root() -> None:
+    """LLM tokens + STT/TTS seconds accumulate per call and land on voice.call."""
+    import report
+
+    attrs: dict[str, object] = {}
+    root = SimpleNamespace(
+        get_span_context=lambda: SimpleNamespace(is_valid=True, span_id=42),
+        set_attribute=lambda k, v: attrs.__setitem__(k, v),
+    )
+    # dispatch is by class name, exactly as livekit-agents names these types
+    def metric(cls_name: str, **fields: float) -> object:
+        return type(cls_name, (), fields)()
+
+    report._active_root = root
+    try:
+        report.record_usage(
+            metric("LLMMetrics", prompt_tokens=1200, completion_tokens=80, prompt_cached_tokens=1024)
+        )
+        report.record_usage(
+            metric("LLMMetrics", prompt_tokens=1500, completion_tokens=40, prompt_cached_tokens=0)
+        )
+        report.record_usage(metric("STTMetrics", audio_duration=12.5))
+        report.record_usage(metric("TTSMetrics", audio_duration=7.25, characters_count=310))
+        # EOU latency is not usage and must not create attributes
+        report.record_usage(metric("EOUMetrics", end_of_utterance_delay=0.4))
+
+        report._stamp_usage(root)
+    finally:
+        report._active_root = None
+
+    assert attrs["gen_ai.usage.input_tokens"] == 2700, attrs
+    assert attrs["gen_ai.usage.input_tokens_text"] == 2700
+    assert attrs["gen_ai.usage.output_tokens"] == 120
+    assert attrs["gen_ai.usage.cached_tokens"] == 1024
+    assert attrs["gen_ai.usage.total_tokens"] == 2820
+    assert attrs["mivas.stt.audio_duration_s"] == 12.5
+    assert attrs["mivas.tts.audio_duration_s"] == 7.25
+    assert attrs["mivas.tts.characters"] == 310
+    assert "mivas.audio.duration_s" in attrs
+    # the bucket is dropped with the call, so a second call cannot inherit it
+    assert 42 not in report._usage
+
+
 if __name__ == "__main__":
     test_sim_result_id()
     test_blueprint()
@@ -168,4 +211,5 @@ if __name__ == "__main__":
     test_generic_industries()
     test_pack_greeting_and_agent_name()
     test_await_farewell()
+    test_usage_stamped_on_root()
     print("ok")

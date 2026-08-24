@@ -95,6 +95,17 @@ def _derive_opener(instructions: str) -> str:
     return match.group(1) if match else GENERIC_OPENER
 
 
+# Seconds to hold before speaking the greeting. The greeting is the first audio on the
+# call, and the far end does not capture for ~3 s after our job starts, while the agent
+# used to start talking at ~1.5 s — so the opener arrived head-clipped ("Thank you for
+# calling Straus Dermatology. This is Robin…" landing as "Dermatology. This is Robin…",
+# once as bare "AI assistant."). Waiting on the inbound track does not help: it is
+# already subscribed at 0.00 s while the caller's leg is still not recording.
+#
+# ponytail: a calibration knob, not a model of the far end — SIP setup latency is not
+# observable from here. Raise it if a head clip returns; lower it if callers hear
+# silence before the greeting.
+GREETING_DELAY_S = float(os.environ.get("MIVAS_GREETING_DELAY_S", "1.5"))
 # Seconds of *silence* the agent must reach after `end_call` before we tear the room
 # down. This was a flat sleep, which deleted the room mid-farewell on gpt-realtime-2.1
 # (see README "Hanging up waits for silence"). Same env knobs as the pipecat harness.
@@ -472,6 +483,14 @@ def wire_speech_spans(session: AgentSession) -> None:
         toggle("customer", False)
 
 
+def wire_usage(session: AgentSession) -> None:
+    """LLM tokens + STT/TTS audio seconds onto the voice.call root (see report)."""
+
+    @session.on("metrics_collected")
+    def _metrics(ev: Any) -> None:
+        report.record_usage(getattr(ev, "metrics", ev))
+
+
 async def run_call(
     ctx: JobContext,
     *,
@@ -522,7 +541,10 @@ async def run_call(
 
         session = build_session(bp)
         wire_speech_spans(session)
+        wire_usage(session)
         await session.start(room=ctx.room, agent=build_agent(bp, hangup))
+
+        await asyncio.sleep(GREETING_DELAY_S)
 
         greeting = pack_greeting(bp)
         if greet == "say":

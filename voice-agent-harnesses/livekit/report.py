@@ -255,6 +255,84 @@ def end_speech_span(span: Span | None) -> None:
     span.end()
 
 
+# ── usage (livekit-agents metrics → gen_ai.usage.* on voice.call) ────────────
+#
+# The cascade bills on three meters, none of which livekit-agents puts on a span:
+# gpt-4.1 text tokens, Deepgram STT audio seconds, ElevenLabs TTS audio seconds.
+# `metrics_collected` carries all three (LLMMetrics / STTMetrics / TTSMetrics), so
+# we accumulate per call and stamp the totals on the root the trace already has.
+# Keyed by root span id, not a module global: one worker process can hold several
+# jobs, and a global would bill every concurrent call to whichever ended last.
+
+_usage: dict[int, dict[str, float]] = {}
+_usage_lock = threading.Lock()
+
+
+def record_usage(metrics: Any) -> None:
+    """Accumulate one livekit-agents metrics event onto the active call."""
+    parent = _parent_span()
+    if parent is None:
+        return
+    ctx = parent.get_span_context()
+    if not ctx.is_valid:
+        return
+
+    kind = type(metrics).__name__
+    fields: tuple[tuple[str, str], ...]
+    if kind.startswith("LLM"):
+        fields = (
+            ("input_tokens", "prompt_tokens"),
+            ("cached_tokens", "prompt_cached_tokens"),
+            ("output_tokens", "completion_tokens"),
+        )
+    elif kind.startswith("STT"):
+        fields = (("stt_audio_s", "audio_duration"),)
+    elif kind.startswith("TTS"):
+        fields = (("tts_audio_s", "audio_duration"), ("tts_characters", "characters_count"))
+    else:
+        return  # EOU / VAD carry latency, not usage
+
+    with _usage_lock:
+        bucket = _usage.setdefault(ctx.span_id, {})
+        for key, attr in fields:
+            try:
+                val = float(getattr(metrics, attr, 0) or 0)
+            except (TypeError, ValueError):
+                continue
+            if val:
+                bucket[key] = bucket.get(key, 0.0) + val
+
+
+def _stamp_usage(root: Span) -> None:
+    """Move this call's accumulated meters onto the root span, then drop them."""
+    ctx = root.get_span_context()
+    with _usage_lock:
+        bucket = _usage.pop(ctx.span_id, None) if ctx.is_valid else None
+
+    root.set_attribute("mivas.audio.duration_s", round(call_offset_ms() / 1000.0, 3))
+    if not bucket:
+        return
+    for key in ("input_tokens", "output_tokens", "cached_tokens"):
+        if key in bucket:
+            n = int(bucket[key])
+            root.set_attribute(f"gen_ai.usage.{key}", n)
+            # cascade LLM is text-only; the text lane is what the pricer reads
+            if key in ("input_tokens", "output_tokens"):
+                root.set_attribute(f"gen_ai.usage.{key}_text", n)
+    total = int(bucket.get("input_tokens", 0) + bucket.get("output_tokens", 0))
+    if total:
+        root.set_attribute("gen_ai.usage.total_tokens", total)
+    for key, attr in (
+        ("stt_audio_s", "mivas.stt.audio_duration_s"),
+        ("tts_audio_s", "mivas.tts.audio_duration_s"),
+    ):
+        if key in bucket:
+            root.set_attribute(attr, round(bucket[key], 3))
+    if "tts_characters" in bucket:
+        root.set_attribute("mivas.tts.characters", int(bucket["tts_characters"]))
+    logger.info("usage %s", bucket)
+
+
 async def _await_terminal_upsert(
     client: httpx.AsyncClient, simulation_result_id: str, timeout: float = 600.0
 ) -> str | None:
@@ -441,6 +519,9 @@ async def traced_run(
                     root.set_status(Status(StatusCode.OK))
                 else:
                     raise
+            finally:
+                # inside the `with`: attributes set after the span ends are dropped
+                _stamp_usage(root)
     finally:
         _active_root = prev_active
         _active_t0 = prev_t0

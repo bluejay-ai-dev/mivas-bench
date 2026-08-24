@@ -161,11 +161,25 @@ def build_agents(industry_dir: str | Path) -> tuple[RealtimeAgent, dict[str, Rea
     blueprint = json.loads((industry_dir / "agent_blueprint.json").read_text())
     catalog = _tool_catalog(industry_dir)
 
+    start_name = blueprint["agents"][0]["name"]
+    # Stage prompts assume the opening line was already spoken; nothing else says
+    # it, so the starting agent has to. Without this the model improvises a bare
+    # "What can I help you with?" with no brand and no AI disclosure.
+    greeting = str(blueprint.get("greeting") or "").strip()
+
     agents: dict[str, RealtimeAgent] = {}
     for entry in blueprint["agents"]:
+        instructions = (industry_dir / entry["system_prompt"]).read_text()
+        if greeting and entry["name"] == start_name:
+            instructions = (
+                instructions.rstrip()
+                + "\n\nThe call just connected and the caller has said nothing yet. "
+                + f'Speak first. Your first words are exactly: "{greeting}" '
+                + "Say it once, then wait for the caller."
+            )
         agents[entry["name"]] = RealtimeAgent(
             name=entry["name"],
-            instructions=(industry_dir / entry["system_prompt"]).read_text(),
+            instructions=instructions,
             tools=[
                 _fn_tool(catalog[t["name"]], session_tool=bool(t.get("session")))
                 for t in entry["tools"]
@@ -293,6 +307,16 @@ if __name__ == "__main__":
         start, agents = build_agents("control-industry")
         assert any(t.name == "end_call" for t in start.tools)
         assert any(t.name == "schedule_appointment" for t in agents["scheduler"].tools)
+
+        # the blueprint greeting must reach the starting agent only
+        hc_start, hc_agents = build_agents("healthcare")
+        line = json.loads(
+            (industry_path("healthcare") / "agent_blueprint.json").read_text()
+        )["greeting"]
+        assert line in hc_start.instructions, "starting agent lost the greeting"
+        assert all(
+            line not in a.instructions for n, a in hc_agents.items() if n != hc_start.name
+        ), "greeting leaked into a downstream stage"
 
         # every shipped industry builds without per-tool harness handlers
         for industry in ("healthcare", "legal", "travel"):

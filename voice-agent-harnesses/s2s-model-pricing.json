@@ -17,19 +17,47 @@
 
     "gemini-2.5-flash-native-audio": { "inputText": 0.5,  "inputAudio": 3.0,  "cachedText": null, "cachedAudio": null, "outputText": 2.0, "outputAudio": 12.0 },
     "gemini-3.1-flash-live-preview": { "inputText": 0.75, "inputAudio": 3.0,  "cachedText": null, "cachedAudio": null, "outputText": 4.5, "outputAudio": 12.0 },
+    "_note_gemini-live-2.5-flash-preview": "Unused, and this id no longer appears on https://ai.google.dev/gemini-api/docs/pricing (checked 2026-08-22). Vertex still lists a 'Gemini 2.5 Flash Live API' row at 0.50 / 3.00 / 2.00 / 12.00 — the rates below are stale. Do not price against this row.",
     "gemini-live-2.5-flash-preview": { "inputText": 0.35, "inputAudio": 2.1,  "cachedText": null, "cachedAudio": null, "outputText": 1.5, "outputAudio": 8.5 },
 
     "amazon.nova-2-sonic-v1:0":      { "inputText": 0.33, "inputAudio": 3.0,  "cachedText": null, "cachedAudio": null, "outputText": 2.75, "outputAudio": 12.0 },
     "amazon.nova-sonic-v1:0":        { "inputText": 0.06, "inputAudio": 3.4,  "cachedText": null, "cachedAudio": null, "outputText": 0.24, "outputAudio": 13.6 },
 
-    "qwen3-omni-flash-realtime":     { "inputText": 0.52, "inputAudio": 4.57, "cachedText": null, "cachedAudio": null, "outputText": 1.99, "outputAudio": 3.67 },
-    "qwen-omni-turbo-realtime":      { "inputText": 0.27, "inputAudio": 4.44, "cachedText": null, "cachedAudio": null, "outputText": 1.07, "outputAudio": 2.52 },
-
-    "gpt-4.1":                       { "inputText": 2.0,  "inputAudio": null, "cachedText": 0.5,  "cachedAudio": null, "outputText": 8.0,  "outputAudio": null }
+    "_note_qwen-omni-output-audio": "outputAudio for the two rows below was read off the 文本（多模态输入）column, ~5x low; corrected 2026-08-22 from the 文本+音频（仅音频计费）column on https://help.aliyun.com/zh/model-studio/model-pricing (Singapore/international CNY ÷ 7.34).",
+    "qwen3-omni-flash-realtime":     { "inputText": 0.52, "inputAudio": 4.57, "cachedText": null, "cachedAudio": null, "outputText": 1.99, "outputAudio": 18.13 },
+    "qwen-omni-turbo-realtime":      { "inputText": 0.27, "inputAudio": 4.44, "cachedText": null, "cachedAudio": null, "outputText": 1.07, "outputAudio": 8.89 },
+    "qwen3.5-omni-plus-realtime":    { "inputText": 2.10, "inputAudio": 16.50, "cachedText": null, "cachedAudio": null, "outputText": 12.40, "outputAudio": 62.00 },
+    "qwen3.5-omni-flash-realtime":   { "inputText": 0.55, "inputAudio": 4.50, "cachedText": null, "cachedAudio": null, "outputText": 3.30, "outputAudio": 17.70 },
+    "_note_qwen-audio-3.0-realtime-plus": "NO LONGER A PROXY (corrected 2026-08-22). The id is absent from the English pricing page but IS listed on https://help.aliyun.com/zh/model-studio/model-pricing — Singapore/国际 row 5.995 / 47.963 / 47.963 / 179.861 CNY per 1M tokens, ÷ 7.4938 (the rate Alibaba itself implies where both currencies are printed) = 0.80 / 6.40 / 6.40 / 24.00 USD. The old rates were proxied from qwen3.5-omni-plus-realtime and ran ~2.6x too high. Realtime usage carries no cached_tokens lane.",
+    "qwen-audio-3.0-realtime-plus":  { "inputText": 0.80, "inputAudio": 6.40, "cachedText": null, "cachedAudio": null, "outputText": 6.40, "outputAudio": 24.00 },
+    "_note_gpt-4.1": "Text-only LLM leg of the livekit/cascaded pair (Deepgram Flux + gpt-4.1 + ElevenLabs Flash v2.5); see component_pricing for the other two legs. Verified 2026-08-22 on https://developers.openai.com/api/docs/pricing.",
+    "gpt-4.1":                       { "inputText": 2.00, "inputAudio": null, "cachedText": 0.50, "cachedAudio": null, "outputText": 8.00, "outputAudio": null }
   },
+  "_note_verified": "Every row in active benchmark use was re-verified against the vendor's official page on 2026-08-22: gpt-realtime-2.1 and -mini and gpt-4.1 on https://developers.openai.com/api/docs/pricing; both gemini live rows on https://ai.google.dev/gemini-api/docs/pricing; amazon.nova-2-sonic-v1:0 and amazon.nova-sonic-v1:0 against the AWS price map https://b0.p.awsstatic.com/pricing/2.0/meteredUnitMaps/bedrock/USD/current/bedrock.json (us-east-1, stored per-1K x 1000); grok-voice-latest on https://docs.x.ai/docs/models. Only the qwen rows were wrong.",
+  "_note_cached_semantics": "cachedText/cachedAudio are the DISCOUNTED rate for tokens that are already inside the input lane, not an extra lane. Bill (input - cached) at the input rate + cached at the cached rate. Confirmed for OpenAI (input_token_details.cached_tokens sits inside input_tokens) and Gemini (promptTokenCount 'includes the number of tokens in the cached content'). Bedrock is the exception — it reports cacheReadInputTokens ALONGSIDE inputTokens — but neither Nova Sonic id supports prompt caching, so no cached tokens ever appear.",
+  "_note_gemini_undercount": "Gemini traces show ~40% of agent_turn spans with no gen_ai.usage.*, but MOST of those are not missing tokens. Verified on the wire (LK_GOOGLE_DEBUG frame capture, run 254007, 3.1 legal): Gemini sends ONE usage_metadata per server turn, at turn_complete, and it AGGREGATES every model invocation in that turn — a turn with a tool call bills ~2x the per-invocation prompt, a turn with two bills ~3x. livekit opens a separate _ResponseGeneration (hence a separate agent_turn span) for each invocation, so spans outnumber usage packets ~2:1. The plugin drops nothing: 22 generations, 9 usage packets, 9 turn_completes, zero 'no active generation' warnings. The only REAL loss is a turn whose socket we close before turn_complete — the handoff transfer call at the end of each stage, plus the final end_call turn — 4 such turns on that call, each one invocation. Sized from the per-invocation prompt of the neighbouring reported turn: 18,770 of 93,816 input tokens, i.e. a correction of x1.25, not x1.5. Unfixable client-side without letting the old stage reply after the transfer (permanent-mute risk); the possible upstream route is livekit-plugins-google >=1.7.0 NON_BLOCKING tools with silent scheduling, untested. The CSVs are NOT inflated by this factor — apply ~x1.25 when quoting gemini cost.",
+  "_note_grok_text_input": "xAI also charges $0.004 per text input on top of the audio minute (https://docs.x.ai/docs/models). Not modelled — the grok harness emits no text-input count. Understates grok by a few tenths of a cent per call.",
   "per_minute_pricing": {
+    "_note_": "grok-voice-latest is an alias of grok-voice-think-fast-2.0 (verified 2026-08-22, https://docs.x.ai/docs/models: '$0.08 / min ($4.80 / hr) audio'). xAI meters the speech-to-speech model as ONE per-minute charge, not as separate STT/LLM/TTS legs — grok-stt ($0.10/hr REST, $0.20/hr streaming) and grok-tts ($15.00/1M chars) are separate products that a cascaded pipeline would pay for instead. Duration minutes are the right billing basis. Add $0.01/min if xAI PSTN telephony is used (we use CHIRP, so no).",
     "grok-voice-latest":             0.08,
     "grok-voice-think-fast-2.0":     0.08,
     "grok-voice-think-fast-1.0":     0.05
+  },
+  "component_pricing": {
+    "_comment": "Non-LLM legs of the livekit/cascaded pair, priced from the mivas.stt.audio_duration_s / mivas.tts.characters attrs on the voice.call root. cost_usd = cost_llm_usd + cost_stt_usd + cost_tts_usd.",
+    "stt": {
+      "vendor": "deepgram",
+      "model": "flux-general-en",
+      "unit": "USD per minute of streamed audio",
+      "usd_per_minute": 0.0077,
+      "_note_": "https://deepgram.com/pricing 2026-08-22: Flux English streaming pay-as-you-go shows 'Current price $0.0065/min' under a 'Limited-time promotional rates on streaming' banner, 'Regular price $0.0077/min'. The regular rate is used so the benchmark is not pegged to a promo. (Nova-3 monolingual streaming is the same $0.0077/min regular.)"
+    },
+    "tts": {
+      "vendor": "elevenlabs",
+      "model": "eleven_flash_v2_5",
+      "unit": "USD per 1000 characters",
+      "usd_per_1k_characters": 0.0825,
+      "_note_": "ElevenLabs publishes no $/char; derived 2026-08-22 from https://elevenlabs.io/pricing — Flash/Turbo v2.5 bill 0.5 credits per character for API generations, and Pro/Business tiers work out to $0.000165/credit ($99/600k, $990/6M). 1000 chars = 500 credits = $0.0825. Starter tier would be $0.10/1k chars."
+    }
   }
 }

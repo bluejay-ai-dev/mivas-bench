@@ -32,6 +32,8 @@ _SOCK_FD_ENV = "MIVAS_CHIRP_SOCK_FD"
 # Handoff closes one Bedrock stream and opens another in this process. Serialize
 # that close+open so the new stream is not still being cancelled.
 _STREAM_LOCK = asyncio.Lock()
+HANDOFF_CLOSE_TIMEOUT_S = float(os.environ.get("MIVAS_HANDOFF_CLOSE_TIMEOUT_S", "5"))
+HANDOFF_OPEN_TIMEOUT_S = float(os.environ.get("MIVAS_HANDOFF_OPEN_TIMEOUT_S", "20"))
 
 
 def _merge_user_asr(prev: str, text: str) -> str:
@@ -81,6 +83,8 @@ async def _nudge_until_open(session, opened: asyncio.Event, end: asyncio.Event) 
             await session.nudge_speak_first()
         with contextlib.suppress(asyncio.TimeoutError):
             await asyncio.wait_for(opened.wait(), timeout=NUDGE_RETRY_DELAY_S)
+    if not (opened.is_set() or end.is_set()):
+        print(f"nudge gave up: stream open but silent (active={session.is_active})", flush=True)
 
 
 async def _bridge(ws, model: str, industry: str) -> None:
@@ -190,11 +194,25 @@ async def _bridge(ws, model: str, industry: str) -> None:
                 )
                 async with _STREAM_LOCK:
                     if old is not None:
+                        # CRT can wedge on teardown of a stream that just errored;
+                        # an unbounded close/open here strands the call in silence.
                         with contextlib.suppress(Exception):
-                            await old.close()
+                            await asyncio.wait_for(old.close(), timeout=HANDOFF_CLOSE_TIMEOUT_S)
                         await asyncio.sleep(0.2)
-                    new = await open_session(role, bp, model=model, generation=gen["v"])
+                    try:
+                        new = await asyncio.wait_for(
+                            open_session(role, bp, model=model, generation=gen["v"]),
+                            timeout=HANDOFF_OPEN_TIMEOUT_S,
+                        )
+                    except Exception as e:
+                        print(
+                            f"handoff open failed → {role}: {type(e).__name__}: {e}",
+                            flush=True,
+                        )
+                        end.set()
+                        return
                 holder["s"] = new
+                print(f"handoff stream open → {role} gen={gen['v']}", flush=True)
                 opened.clear()
                 await flush_pending(new)
                 await new.seed_handoff(

@@ -29,6 +29,9 @@ uv.toml
 # downloaded hangup dumps (slug/run/dh/result)
 actual-final-state/
 
+# local audio/verify eval dumps
+verify-out/
+
 # local Bluejay CSV exports (not tracked)
 /eval_outputs/
 /.cache/

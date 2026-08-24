@@ -68,6 +68,7 @@ W, R_GROK, R_CHIRP = 2, SAMPLE_RATE, 16_000
 ECHO_SUPPRESS_S = float(os.environ.get("GROK_ECHO_SUPPRESS_S", "1.25"))
 # Inbound PCM must clear this RMS to count as a real barge-in (with CHIRP VAD).
 USER_RMS_ON = int(os.environ.get("GROK_USER_RMS_ON", "350"))
+GREETING_MEDIA_WAIT_S = float(os.environ.get("GROK_GREETING_MEDIA_WAIT_S", "3.0"))
 USER_LIVE_S = float(os.environ.get("GROK_USER_LIVE_S", "0.35"))
 # Agent utterance ended under this duration after a mute → logged as CHOP.
 CHOP_WARN_MS = int(os.environ.get("GROK_CHOP_WARN_MS", "400"))
@@ -278,6 +279,7 @@ async def _bridge(ws, industry: str, model: str) -> None:
     bp = load_blueprint(industry)
     state = {"agent": bp["start"]}
     end = asyncio.Event()
+    media_live = asyncio.Event()  # first inbound CHIRP frame = media path is up
     industry_dir = industry_path(industry)
     workflow = f"mivas-{Path(industry_dir).name}-{model}"
     sim_id = _simulation_result_id(ws)
@@ -417,6 +419,7 @@ async def _bridge(ws, industry: str, model: str) -> None:
                         if end.is_set():
                             break
                         if isinstance(msg, bytes) and msg:
+                            media_live.set()
                             rms = audioop.rms(msg, W) if len(msg) >= W else 0
                             stats.note_in(len(msg), rms)
                             echo = _agent_echo_risk()
@@ -773,12 +776,22 @@ async def _bridge(ws, industry: str, model: str) -> None:
                     await turns.end_agent(why="outbound_exit")
                     end.set()
 
-            await grok.send(json.dumps(nudge_greeting()))
-            _log(f"grok nudge_greeting → {bp['start']}")
-
             async def _greeting_watchdog() -> None:
-                # first TTS used to be inaudible ("You with."). re-nudge
-                # only if no agent PCM actually hit CHIRP.
+                # Speaking before CHIRP has sent a single frame loses the head of
+                # the greeting — Bluejay's media path is not carrying audio yet
+                # (that is what turned the opening into "You with.").
+                with contextlib.suppress(asyncio.TimeoutError):
+                    await asyncio.wait_for(
+                        media_live.wait(), timeout=GREETING_MEDIA_WAIT_S
+                    )
+                if end.is_set():
+                    return
+                await grok.send(json.dumps(nudge_greeting()))
+                _log(
+                    f"grok nudge_greeting → {bp['start']} "
+                    f"media_live={media_live.is_set()}"
+                )
+                # re-nudge only if no agent PCM actually hit CHIRP.
                 await asyncio.sleep(3.0)
                 if end.is_set():
                     return
