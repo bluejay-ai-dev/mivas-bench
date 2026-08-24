@@ -285,7 +285,9 @@ def _batch_buildspec(pairs: list[tuple[str, str]]) -> str:
 
 
 def _upload_source(s3, bucket: str, pairs: list[tuple[str, str]]) -> str:
-    key = f"src/{int(time.time())}.zip"
+    # pid + ns: concurrent fleet callers collided on a whole-second key and
+    # silently built each other's pairs (S3 last-write-wins).
+    key = f"src/{time.time_ns()}-{os.getpid()}.zip"
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
         raw = _zip_repo()
