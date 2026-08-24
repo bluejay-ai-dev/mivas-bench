@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" role="img" aria-labelledby="title">
+  <title id="title">Capability partially supported</title>
+  <path d="M8 3.5a4.5 4.5 0 0 0 0 9Z" fill="#B26A00"/>
+  <circle cx="8" cy="8" r="4.5" fill="none" stroke="#B26A00" stroke-width="2"/>
+</svg>
