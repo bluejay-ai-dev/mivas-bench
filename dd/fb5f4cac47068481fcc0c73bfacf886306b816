@@ -1,0 +1,57 @@
+industries/customer-support/system-prompts/service.md
+  s_7c1c242de9c6f6::t_510464fa19fa5a 96-105,137-138
+industries/customer-support/system-prompts/reception.md
+  s_7c1c242de9c6f6::t_510464fa19fa5a 96-105,137-138,165-171,202-204
+industries/customer-support/tasks/R-H4/task.json
+  s_7c1c242de9c6f6::t_10c62199ff4ced 161
+  s_7c1c242de9c6f6::t_e15312fd785afe 168
+  s_7c1c242de9c6f6::t_04f59634e5aaaf 147
+  s_7c1c242de9c6f6::t_488c8b367e7eae 4
+codebuild/fleet.py
+  s_4544e608accab4::t_acd89456d31f49 288-290
+industries/customer-support/system-prompts/verification.md
+  s_7c1c242de9c6f6::t_510464fa19fa5a 97-106,138-139
+industries/customer-support/system-prompts/orders.md
+  s_7c1c242de9c6f6::t_510464fa19fa5a 96-105,137-138
+industries/customer-support/system-prompts/returns.md
+  s_7c1c242de9c6f6::t_510464fa19fa5a 97-106,138-139
+industries/customer-support/tasks/R-H2/task.json
+  s_7c1c242de9c6f6::t_0335685bd1a6f5 94
+  s_7c1c242de9c6f6::t_85e957fe08309b 101
+  s_7c1c242de9c6f6::t_ca3349405a1a0a 4
+  s_7c1c242de9c6f6::t_5ac71da9ac354c 108
+industries/customer-support/system-prompts/fraud.md
+  s_7c1c242de9c6f6::t_510464fa19fa5a 98-107,139-140,143,152-153,156-159,163-164,169-172,178-181,187-190,193-197,199-200,202,218-219
+industries/customer-support/tasks/R-M4/task.json
+  s_7c1c242de9c6f6::t_f982471110d4c6 88
+  s_7c1c242de9c6f6::t_491dd430b8d8c0 102
+  s_7c1c242de9c6f6::t_c09fea23d8bf4c 4
+scripts/tasks_to_digital_humans.py
+  s_4544e608accab4::t_e3c89d2fc8182b 615-623
+industries/customer-support/system-prompts/membership.md
+  s_7c1c242de9c6f6::t_510464fa19fa5a 97-106,138-139,165-170,172-175,191-193
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "ddfb5f4cac47068481fcc0c73bfacf886306b816",
+  "prompts": {},
+  "sessions": {
+    "s_4544e608accab4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "234aab04-bf24-4282-8375-9078f57074fe",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    },
+    "s_7c1c242de9c6f6": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "ef42e001-b1b1-4658-ac9d-9f1e4ba77d17",
+        "model": "grok-4.6"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}
