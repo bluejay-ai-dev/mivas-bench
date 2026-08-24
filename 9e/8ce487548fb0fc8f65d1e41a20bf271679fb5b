@@ -1,40 +1,172 @@
 .gitignore
   s_4f98cc54347dec::t_0cbb13c45b9ba5 32-34
+  s_24dc4b4678d145::t_17042966cb25f0 32-34
 run.py
   s_4f98cc54347dec::t_14ca338d51e1bb 366
+  s_58ec3d7ea41818::t_188a3c82c18ba9 366
 scripts/bluejay_run_to_csv.py
   s_4f98cc54347dec::t_7e3fb3d7e343a3 1,15-25,30-32,42,45-46,52-53,68,179-196,261-283,285,535-566,570-577,637-1083,1096-1097,1114-1116,1140,1193-1203,1221-1222,1256-1470,1474-1478,1481-1484,1488-1510,1513-1514,1516-1529,1535-1536,1540-1545,1549,1556-1558,1563,1565-1568
+  s_ca355d9f3fc6a7::t_fe1f583acc633a 1,15-25,30-32
+  s_1cb9a0689f7f64::t_7fd84ab266de55 975-977,979,987,996-1002
+  s_1cb9a0689f7f64::t_c42c549516fa65 849-893
+  s_1cb9a0689f7f64::t_c75a2c39cb29c3 988-995
+  s_1cb9a0689f7f64::t_c7bd08145a7ac5 1080-1081
+  s_ca355d9f3fc6a7::t_5e0e45f2b16e41 1193,1197-1203,1221-1222
+  s_31e45220543b81::t_a46cbcf52972b0 1140
+  s_ca355d9f3fc6a7::t_17d37d4e0a2b36 1256-1291,1297-1339,1341-1394,1397-1404,1406-1416,1427,1429-1436,1443-1444,1448,1455-1456
+  s_ca355d9f3fc6a7::t_6bed87c895285c 1405
+  s_ca355d9f3fc6a7::t_9f8ef5f803bb52 261-283,285
+  s_1cb9a0689f7f64::t_9859f4457a03a5 1056-1058
+  s_1cb9a0689f7f64::t_36ef55466cc0e6 1194-1196
+  s_1cb9a0689f7f64::t_a37c0e77de1bcb 942-945,948-951
+  s_ca355d9f3fc6a7::t_6fcd4a134084e6 1468
+  s_31e45220543b81::t_36e9e04fdb7a7b 535-565,570-577
+  s_1cb9a0689f7f64::t_e325fb5476a924 966,968
+  s_ca355d9f3fc6a7::t_e3f2883f124aee 1506-1510
+  s_1cb9a0689f7f64::t_8796c3c19c7a24 983
+  s_1cb9a0689f7f64::t_5da51bffff4324 971-974
+  s_1cb9a0689f7f64::t_8886b159cc4829 1059-1061
+  s_1cb9a0689f7f64::t_db2cab61602fec 1071-1072
+  s_ca355d9f3fc6a7::t_78d799d45fd41d 637-653,670-674,677-688
+  s_ca355d9f3fc6a7::t_2a0a37d6639007 180,184-190
+  s_31e45220543b81::t_2bb0feb210272d 566
+  s_ca355d9f3fc6a7::t_976147bdbea5e8 1340
+  s_31e45220543b81::t_321c600e24a3fc 1114-1116
+  s_ca355d9f3fc6a7::t_6ac188f69bd0d6 1417-1426,1428,1437-1442,1445-1447,1449-1454,1457-1467,1469-1470,1474-1478,1488-1505,1513-1514,1516-1529,1535,1540-1545,1549,1557-1558,1563,1565-1568
+  s_ca355d9f3fc6a7::t_4fcdd43a49e5a0 689-700,702,709-710,714-715,717-719,722-810,923,932-936,938-941,946-947,952-965,967,969-970,978,980-982,984-986,1003-1055,1062-1070,1073-1079,1082-1083
+  s_ca355d9f3fc6a7::t_afa9002e7578f5 1096-1097
+  s_1cb9a0689f7f64::t_3b35e45d562c8c 811-848
+  s_ca355d9f3fc6a7::t_f7c4eeec678e42 68
+  s_1cb9a0689f7f64::t_626397ed0e6279 1292-1296
+  s_1cb9a0689f7f64::t_34dd6ba2b11e12 179,181-183
+  s_ca355d9f3fc6a7::t_0fe18a637fe38c 1536
+  s_ca355d9f3fc6a7::t_690d99829a0f9b 42,45-46,52-53
+  s_1cb9a0689f7f64::t_c9f0f1eeb85afc 191-196
+  s_ca355d9f3fc6a7::t_dd48fad6b4757e 701,703-708,711-713,716,720-721
+  s_1cb9a0689f7f64::t_f7cbc60967ded3 654-669,675-676
+  s_ca355d9f3fc6a7::t_e5ba3e23cd9f64 1395-1396
+  s_1cb9a0689f7f64::t_3f22bdd29edc43 894-922,924-931,937
+  s_ca355d9f3fc6a7::t_3b12fa43a13405 1481-1484
+  s_14c8d7cd78cf86::t_406a0999543787 1556
 tests/test_bluejay_run_to_csv.py
   s_4f98cc54347dec::t_f1558227a3801d 138-139,247-327,415-452,502-810
+  s_1cb9a0689f7f64::t_c3f994527c420a 621
+  s_1cb9a0689f7f64::t_ffe4bd57b4efcc 751-794
+  s_31e45220543b81::t_69aa58f06f3b85 415-452
+  s_1cb9a0689f7f64::t_b2082fb76d60c8 735-740
+  s_1cb9a0689f7f64::t_0b3461c1a422a1 656-657,659-660,664-666,669-671
+  s_ca355d9f3fc6a7::t_4abca38f6da643 504-526
+  s_1cb9a0689f7f64::t_45435c03d0914d 676-711,716-734,743-750,795-801
+  s_1cb9a0689f7f64::t_967806f9f9b793 712-715
+  s_ca355d9f3fc6a7::t_e69ccf70aa3d4e 527-566,580-620,622-655,658,661-663,667-668,672-675,802-805,807-810
+  s_1cb9a0689f7f64::t_787cfebafe7ad9 247-327
+  s_14c8d7cd78cf86::t_eb6c30799f3619 502-503
+  s_1cb9a0689f7f64::t_596b0bfcf88062 741-742
+  s_ca355d9f3fc6a7::t_dd692fda23b9a6 806
+  s_ca355d9f3fc6a7::t_500c638d422492 138-139
+  s_ca355d9f3fc6a7::t_abd1daeac2d917 567-579
 voice-agent-harnesses/aws/adapters/chirp_call.py
   s_4f98cc54347dec::t_ac11c640dbff0c 35-36,86-87,197-198,200,202-213,215
+  s_1cb9a0689f7f64::t_43f64594aeea0d 86-87
+  s_1cb9a0689f7f64::t_0fc76a019e4a79 197-198,200,202-213,215
+  s_1cb9a0689f7f64::t_4320846494854e 35-36
 voice-agent-harnesses/grok/harness.py
   s_4f98cc54347dec::t_96e95ba7708514 120,271-279,281,331-340,504-511,528-532
+  s_1cb9a0689f7f64::t_1c42782354982b 271-279,281
+  s_1cb9a0689f7f64::t_9225887adf5086 120
+  s_1cb9a0689f7f64::t_51e40a6530fd50 331-340
+  s_1cb9a0689f7f64::t_4be40544ff3ca2 504-511
+  s_1cb9a0689f7f64::t_0bb064292071cb 528-532
 voice-agent-harnesses/grok/report.py
   s_4f98cc54347dec::t_e9002382442ad2 768-772
+  s_1cb9a0689f7f64::t_c6842fafba73e2 768-772
 voice-agent-harnesses/grok/voice/adapters/chirp.py
   s_4f98cc54347dec::t_a7e22eb2d6b711 71,282,422,780-794
+  s_1cb9a0689f7f64::t_989a85e2508627 71
+  s_1cb9a0689f7f64::t_d00d933d0e0473 780-794
+  s_1cb9a0689f7f64::t_ce6f01a76baa6c 422
+  s_1cb9a0689f7f64::t_06f0a92f6ac540 282
 voice-agent-harnesses/livekit/harness.py
   s_4f98cc54347dec::t_8519354a8032ba 98-108,486-493,544,547-548
+  s_1cb9a0689f7f64::t_b05f7aad54a6e7 544
+  s_1cb9a0689f7f64::t_31fb26fa594b5e 486-493
+  s_1cb9a0689f7f64::t_c63df1859f9c0d 548
+  s_1cb9a0689f7f64::t_2712d14306c4e8 547
+  s_1cb9a0689f7f64::t_e05c996292ea19 98-108
 voice-agent-harnesses/livekit/report.py
   s_4f98cc54347dec::t_3cb7266c1c566a 258-335,522-524
+  s_1cb9a0689f7f64::t_dcb713e6173bd3 258-335
+  s_1cb9a0689f7f64::t_e7b4f147b5bcc7 522-524
 voice-agent-harnesses/livekit/test_harness.py
   s_4f98cc54347dec::t_7efa8d4d2da3b6 164-206,214
+  s_1cb9a0689f7f64::t_4284e891268b7b 173-176,179-186,188
+  s_1cb9a0689f7f64::t_a6e7535fc21303 214
+  s_1cb9a0689f7f64::t_1faacedf12bb8f 164-172,177-178,187,189-206
 voice-agent-harnesses/openai/adapters/chirp.py
   s_4f98cc54347dec::t_f6bf88e8a0555a 70-73,76,78-79,123,150,181
+  s_1cb9a0689f7f64::t_f359d12b2c9c7f 70-73,76,78-79
+  s_1cb9a0689f7f64::t_42b81d4302c2c5 181
+  s_1cb9a0689f7f64::t_03acd134bfb680 150
+  s_1cb9a0689f7f64::t_9e8ed196fc6b07 123
 voice-agent-harnesses/openai/harness.py
   s_4f98cc54347dec::t_cbcd92a62749eb 164-169,172-179,182,311-320
+  s_1cb9a0689f7f64::t_f43b4ce63a3c7b 164-169,172-179,182
+  s_1cb9a0689f7f64::t_8d2ffce5a57ce8 311-320
 voice-agent-harnesses/openai/test_nudge_retry.py
   s_4f98cc54347dec::t_949328a3f4dcbe 51-52,57-62,65-67,71,80-91,93-98,106
+  s_1cb9a0689f7f64::t_10997d164bee2f 51-52,57-62,65-67,71,80-91,93-98,106
 voice-agent-harnesses/s2s-model-pricing.json
   s_4f98cc54347dec::t_607d9d7ce31f78 20,26-34,36-39,41,45-61
+  s_1cb9a0689f7f64::t_0373846dd6fc2d 31-33,36-37,39,41,45-61
+  s_1cb9a0689f7f64::t_8422673858cfbe 34
+  s_1cb9a0689f7f64::t_f588eb9184e638 20
+  s_1cb9a0689f7f64::t_234931d85d81be 38
+  s_1cb9a0689f7f64::t_9390a8ab544b4b 26-28
+  s_1cb9a0689f7f64::t_2f68721a9f110d 29-30
 ---
 {
   "schema_version": "authorship/3.0.0",
   "git_ai_version": "1.6.24",
   "base_commit_sha": "9e8ce487548fb0fc8f65d1e41a20bf271679fb5b",
   "prompts": {},
+  "humans": {
+    "h_f787e3fe1ad713": {
+      "author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  },
   "sessions": {
+    "s_14c8d7cd78cf86": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "172c60de-99d2-45c6-9fe5-14ba8fc4e407",
+        "model": "grok-4.6"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    },
+    "s_1cb9a0689f7f64": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9db2f26b-93c7-45ee-a25b-887b8a2e808a",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    },
+    "s_24dc4b4678d145": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "d399f283-d1a2-4d77-804a-3e48e23de9fb",
+        "model": "grok-4.6"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    },
+    "s_31e45220543b81": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "e35a4415-eeae-41e4-987e-0008b8855a91",
+        "model": "grok-4.6"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    },
     "s_4f98cc54347dec": {
       "agent_id": {
         "tool": "cursor",
@@ -42,6 +174,22 @@ voice-agent-harnesses/s2s-model-pricing.json
         "model": "grok-4.6"
       },
       "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    },
+    "s_58ec3d7ea41818": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ca6d7050-3f9f-4ece-a82b-136d331d6664",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    },
+    "s_ca355d9f3fc6a7": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "404113cf-411a-4088-a6de-82cc14101054",
+        "model": "grok-4.6"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
     }
   }
 }
