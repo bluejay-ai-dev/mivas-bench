@@ -612,7 +612,15 @@ def _norm_traits(traits: Any) -> list[dict[str, Any]]:
 
 def _norm_claim_field(field: str, value: Any) -> Any:
     if field == "expected_tool_calls":
-        return expected_tool_calls(value)
+        # The API returns this list in unstable storage order after updates;
+        # scoring reads task.json, so compare order-insensitively like traits.
+        return sorted(
+            expected_tool_calls(value),
+            key=lambda row: (
+                str(row.get("name") or ""),
+                json.dumps(row.get("parameters"), sort_keys=True, default=str),
+            ),
+        )
     if field == "scripted_responses":
         rows = scripted_responses(value)
         return sorted(

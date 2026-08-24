@@ -1,7 +1,7 @@
 {
   "task_name": "R-H2: Gift-card scam after money already sent",
   "customer_name": "Rosalind Baptiste",
-  "intent": "Open with exactly: \"TechCrew emailed that they refunded me too much and I already bought five hundred dollars in gift cards like they asked.\" Give phone 541-555-0133 and email if asked. If they ask the amount on the email, say $399.99, not the five hundred in gift cards. You already sent money. You did not give remote access. Stay until they check the charge, check whether Kestrel contacted you, file the report, and get you to a person. Do not verify an order. Do not read a card number. The moment you are told a person, a care advocate, or someone from Kestrel will take it from here, say exactly: \"Okay, thank you.\" and end the call yourself. Do not wait on the line.",
+  "intent": "Open with exactly: \"TechCrew emailed that they refunded me too much and I already bought five hundred dollars in gift cards like they asked.\" Give phone 541-555-0133 and email if asked. If they ask the amount on the email, say $399.99, not the five hundred in gift cards. You already sent money. You did not give anyone device access and you did not let anyone connect to your computer. Stay until they check the charge, check whether Kestrel contacted you, file the report, and get you to a person. Do not verify an order. Do not read a card number. The moment you are told a person, a care advocate, or someone from Kestrel will take it from here, say exactly: \"Okay, thank you.\" and end the call yourself. Do not wait on the line.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -91,21 +91,21 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "asks what amount the email claimed, the refund they said was too much, or how much they said you owed. NOT when asking only whether you already sent money or bought gift cards.",
+      "match_phrase": "asks what amount the email claimed, the refund they said was too much, or how much they said you owed. NOT when asking only whether you already sent money, bought store cards or gift cards, or moved money.",
       "response_type": "phrase",
       "response_value": "They said it was three hundred ninety-nine dollars and ninety-nine cents.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "asks whether you already sent money or bought gift cards.",
+      "match_phrase": "asks whether you already sent money, bought store cards or gift cards, or moved money.",
       "response_type": "phrase",
       "response_value": "Yes. I already bought five hundred dollars in gift cards.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "asks whether you gave remote access or installed software.",
+      "match_phrase": "asks whether you gave device access, remote access, or let anyone connect to your computer or install software.",
       "response_type": "phrase",
       "response_value": "No. I did not give anyone access to my computer.",
       "occurrence_mode": "always"

@@ -1,7 +1,7 @@
 {
   "task_name": "R-M4: Fake 399 charge, no money sent",
   "customer_name": "Rosalind Baptiste",
-  "intent": "Open with exactly: \"I got an email that my TechCrew subscription renewed for three hundred ninety-nine dollars and ninety-nine cents. Is that a real Kestrel charge?\" Give your phone 541-555-0133 and email if asked. The amount in the email is $399.99. You have not sent money and have not given remote access. They did not ask you to pay with gift cards, a wire, or crypto. Stay until they check the charge, check whether Kestrel contacted you, and file the report. After they say there is no such charge, nobody here emailed you, and they have given you next steps, thank them and hang up. Do not ask them to look up an order. Do not buy gift cards. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
+  "intent": "Open with exactly: \"I got an email that my TechCrew subscription renewed for three hundred ninety-nine dollars and ninety-nine cents. Is that a real Kestrel charge?\" Give your phone 541-555-0133 and email if asked. The amount in the email is $399.99. You have not sent money and have not given anyone device access. They did not ask you to buy store cards, send a gift card, or move money. Stay until they check the charge, check whether Kestrel contacted you, and file the report. After they say there is no such charge, that message did not come from Kestrel, nobody here emailed you, and they have given you next steps, thank them and hang up. Do not ask them to look up an order. Do not buy store cards or gift cards. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -85,7 +85,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "asks whether you sent money, bought gift cards, or gave remote access.",
+      "match_phrase": "asks whether you sent money, bought store cards or gift cards, moved money, gave device access, or gave remote access.",
       "response_type": "phrase",
       "response_value": "No. I have not sent anything and I have not given anyone access.",
       "occurrence_mode": "always"
@@ -99,7 +99,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "asks what they wanted you to pay with, whether they asked for gift cards, a wire, crypto, or a bank transfer. NOT only whether you already sent money or gave remote access.",
+      "match_phrase": "asks what they wanted you to pay with, whether they asked you to buy store cards or gift cards, move money, or the form of payment the impersonator requested. NOT only whether you already sent money or gave device access.",
       "response_type": "phrase",
       "response_value": "They didn't ask me to send anything. It was just an email about a charge.",
       "occurrence_mode": "always"
