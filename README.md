@@ -18,6 +18,7 @@ MIVAS is an open-source, open-data, reproducible benchmark. This repository cont
 
 ## Contents
 
+- [Benchmark comparison](#benchmark-comparison)
 - [Why MIVAS](#why-mivas)
 - [What the benchmark measures](#what-the-benchmark-measures)
 - [Benchmark methodology](#benchmark-methodology)
@@ -35,6 +36,27 @@ MIVAS is an open-source, open-data, reproducible benchmark. This repository cont
 - [Current scope and limitations](#current-scope-and-limitations)
 - [Contributing](#contributing)
 - [Citation](#citation)
+
+
+
+## Benchmark comparison
+
+Voice benchmarks answer different questions. This comparison focuses narrowly on the capabilities needed to evaluate production-like, stateful, multi-agent voice-agent systems. It describes benchmark design and implemented repository support, not the breadth or maturity of published results.
+
+| Benchmark | Live adaptive voice | Native S2S | Multi-industry tasks | Production-style multi-agent topology | Executed tools | Mutable isolated state | Deterministic final-state verification | Explicit handoff verification | Explicit tool-adherence verification | Repeated-run reliability | Coverage |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | ---: |
+| [MIVAS Bench](https://github.com/bluejay-ai-dev/mivas-bench) | Yes | Yes | Partial | Yes | Yes | Yes | Partial | Yes | Partial | Partial | 8.0/10 |
+| [EVA](https://github.com/ServiceNow/eva) | Yes | Yes | Yes | No | Yes | Yes | Yes | No | Partial | Yes | 7.5/10 |
+| [τ-Voice](https://arxiv.org/abs/2603.13686) | Yes | Yes | Yes | No | Yes | Yes | Yes | No | No | Partial | 6.5/10 |
+| [VAmoS Bench](https://arxiv.org/abs/2607.27453) | Yes | Yes | No | No | Yes | Yes | No | No | Partial | Yes | 5.5/10 |
+| [Full-Duplex-Bench v3](https://arxiv.org/abs/2604.04847) | No | Yes | Partial | No | Yes | No | No | No | Yes | No | 3.5/10 |
+| [VoiceAgentBench](https://github.com/ola-krutrim/VoiceAgentBench) | No | No | Partial | No | No | No | No | No | Partial | No | 1.0/10 |
+
+**Coverage scoring:** Yes = 1, Partial = 0.5, No = 0. `Partial` means that support is indirect, narrower than the dimension, or implemented with material gaps. Complete coverage means 10/10 across these selected production-system dimensions, not universal benchmark superiority.
+
+MIVAS has the broadest combined coverage of this specific target: live native-S2S evaluation, industry workflows, specialist-agent topology, executed tools, isolated mutable state, and distinct state, handoff, and tool verifiers. It is not yet release-complete. Local task suites and strict verifier mappings do not cover every represented industry; missing state can be permissive in the core verifier; tool order is not enforced; and repeated runs are supported but neither mandatory nor published. Specialized benchmarks remain stronger in other areas: EVA in validated experience metrics and five-trial reporting, τ-Voice in controlled full-duplex acoustic simulation, VoiceAgentBench in multilingual spoken tool understanding, and Full-Duplex-Bench v3 in human-recorded disfluency tests.
+
+Evidence: official sources for [MIVAS](https://github.com/bluejay-ai-dev/mivas-bench), [EVA](https://arxiv.org/abs/2605.13841), [τ-Voice](https://github.com/sierra-research/tau2-bench), [VAmoS](https://github.com/veris-ai/riley-agent), [Full-Duplex-Bench v3](https://github.com/DanielLin94144/Full-Duplex-Bench/tree/main/v3), and [VoiceAgentBench](https://arxiv.org/abs/2510.07978). VAmoS records real database-backed tool execution but grades assertions from traces rather than an explicit final-state query. Full-Duplex-Bench v3 executes deterministic mock tools against fixed human recordings, while VoiceAgentBench scores predicted textual tool calls without executing them.
 
 
 
