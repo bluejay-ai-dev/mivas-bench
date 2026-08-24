@@ -1,12 +1,12 @@
 # MIVAS Bench: A Benchmark for Evaluating Voice AI Models in Multi-Agent Environments Across Industries
 
-![MIVAS Bench process overview](assets/mivas-benchmark-overview.png)
+![MIVAS Bench process overview](assets/mivas-benchmark-overview.svg)
 
 ## Multi-Industry Voice Agent Simulation Bench
 
 *Measuring how speech-to-speech (S2S) models perform inside the multi-agent architectures industries use to deploy voice AI today.*
 
-[Technical Blog](#benchmark-methodology) | [Industries](#industries) | [Leaderboard](#leaderboard) | [Dataset](#dataset) | [Demo](#demo)
+[![Technical Blog](https://img.shields.io/badge/Technical_Blog-Methodology-2563EB?style=flat&logo=readme&logoColor=white)](#benchmark-methodology) [![Industries](https://img.shields.io/badge/Industries-Explore-0F766E?style=flat)](#industries) [![Leaderboard](https://img.shields.io/badge/Leaderboard-Results-D97706?style=flat)](#leaderboard) [![Dataset](https://img.shields.io/badge/Dataset-Coming_Soon-FFD21E?style=flat&logo=huggingface&logoColor=000)](#dataset) [![Demo](https://img.shields.io/badge/Demo-Coming_Soon-7C3AED?style=flat)](#demo)
 
 MIVAS Bench evaluates speech-to-speech (S2S) models as they are deployed: inside stateful, multi-agent systems that conduct conversations, follow policy, use tools, preserve state, and route work across specialists. Cascaded speech-to-text, language-model, and text-to-speech systems serve as baselines.
 
@@ -337,9 +337,9 @@ New harnesses should first pass the control industry. New industry cases should 
 If you use MIVAS Bench in published work, cite the repository and the benchmark release used for the evaluation.
 
 ```bibtex
-@misc{bluejay2026mivasbench,
+@misc{siddiqi2026mivasbench,
       title={MIVAS Bench: Multi-Industry Voice Agent Simulation Bench},
-      author={{Bluejay}},
+      author={Faraz Siddiqi and Yash Savalia},
       year={2026},
       url={https://github.com/bluejay-ai-dev/mivas-bench},
 }

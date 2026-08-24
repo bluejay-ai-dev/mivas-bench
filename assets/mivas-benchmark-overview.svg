@@ -1,0 +1,371 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000" role="img" aria-labelledby="title desc">
+  <title id="title">MIVAS Bench evaluation process</title>
+  <desc id="desc">A Digital Human speaks with a multi-agent voice architecture. Agent-specific tools, database state, handoffs, and tool calls are verified deterministically.</desc>
+
+  <defs>
+    <style>
+      text { font-family: Arial, Helvetica, sans-serif; fill: #252a32; }
+      .panel { fill: #ffffff; stroke: #383e48; stroke-width: 2.2; }
+      .stage-title { font-size: 26px; font-weight: 700; letter-spacing: .2px; }
+      .section-title { font-size: 20px; font-weight: 700; }
+      .label { font-size: 17px; font-weight: 700; }
+      .body { font-size: 16px; font-weight: 400; }
+      .small { font-size: 13px; font-weight: 400; fill: #5f6877; }
+      .tiny { font-size: 11px; font-weight: 400; fill: #687180; }
+      .fail-text { fill: #d84d4d; }
+      .center { text-anchor: middle; }
+      .line { fill: none; stroke: #353b45; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+      .coral { fill: #ef725f; }
+      .coral-soft { fill: #fff0ed; stroke: #ef725f; stroke-width: 1.6; }
+      .blue { fill: #4f95c8; }
+      .blue-soft { fill: #eef7fd; stroke: #4f95c8; stroke-width: 1.6; }
+      .green { fill: #71a865; }
+      .green-soft { fill: #f0f8ed; stroke: #71a865; stroke-width: 1.6; }
+      .orange { fill: #f3a333; }
+      .orange-soft { fill: #fff7e9; stroke: #e4a044; stroke-width: 1.6; }
+      .teal { fill: #349b9b; }
+      .teal-soft { fill: #edf9f8; stroke: #349b9b; stroke-width: 1.6; }
+      .purple { fill: #7a66ad; }
+      .purple-soft { fill: #f4f0fb; stroke: #7a66ad; stroke-width: 1.6; }
+      .red { fill: #d84d4d; }
+      .red-soft { fill: #fff0f0; stroke: #d84d4d; stroke-width: 1.6; }
+      .gray-soft { fill: #f6f7f9; stroke: #b7bdc7; stroke-width: 1.6; }
+    </style>
+
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#353b45"/>
+    </marker>
+    <marker id="arrow-coral" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#ef725f"/>
+    </marker>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#4f95c8"/>
+    </marker>
+
+    <g id="person">
+      <circle cx="0" cy="-9" r="8" fill="currentColor"/>
+      <path d="M-13 14 C-13 0 13 0 13 14 Z" fill="currentColor"/>
+      <circle cx="0" cy="0" r="20" fill="none" stroke="currentColor" stroke-width="3"/>
+    </g>
+    <g id="robot">
+      <rect x="-16" y="-16" width="32" height="28" rx="7" fill="none" stroke="currentColor" stroke-width="3"/>
+      <circle cx="-6" cy="-4" r="2.5" fill="currentColor"/>
+      <circle cx="6" cy="-4" r="2.5" fill="currentColor"/>
+      <path d="M-7 5 Q0 10 7 5 M0-16 V-24 M-4-24 H4 M-22-6 H-16 M16-6 H22" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+    </g>
+    <g id="wrench">
+      <path d="M-19-17 C-10-21-2-14-6-6 L15 15 L7 23 L-14 2 C-23 6-29-3-25-12 L-16-4 L-9-11 Z" fill="currentColor"/>
+    </g>
+    <g id="database">
+      <ellipse cx="0" cy="-17" rx="23" ry="9" fill="currentColor"/>
+      <path d="M-23-17 V17 C-23 28 23 28 23 17 V-17" fill="currentColor"/>
+      <ellipse cx="0" cy="0" rx="23" ry="9" fill="none" stroke="#fff" stroke-width="2" opacity=".75"/>
+      <ellipse cx="0" cy="17" rx="23" ry="9" fill="none" stroke="#fff" stroke-width="2" opacity=".75"/>
+    </g>
+    <g id="handoff">
+      <circle cx="-17" cy="-9" r="8" fill="currentColor"/>
+      <path d="M-28 13 C-28 0-6 0-6 13" fill="currentColor"/>
+      <circle cx="17" cy="-9" r="8" fill="currentColor"/>
+      <path d="M6 13 C6 0 28 0 28 13" fill="currentColor"/>
+      <path d="M-6-16 H7 M3-20 L9-16 L3-12 M6 18 H-7 M-3 14 L-9 18 L-3 22" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+    </g>
+    <g id="agent-handoff">
+      <rect x="-30" y="-10" width="20" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="2.5"/>
+      <circle cx="-24" cy="-3" r="2" fill="currentColor"/>
+      <circle cx="-16" cy="-3" r="2" fill="currentColor"/>
+      <path d="M-20-10 V-15 M-23-15 H-17" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+      <rect x="10" y="-10" width="20" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="2.5"/>
+      <circle cx="16" cy="-3" r="2" fill="currentColor"/>
+      <circle cx="24" cy="-3" r="2" fill="currentColor"/>
+      <path d="M20-10 V-15 M17-15 H23" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M-6-13 H7 M3-17 L9-13 L3-9 M6 15 H-7 M-3 11 L-9 15 L-3 19" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+    </g>
+    <g id="check">
+      <circle cx="0" cy="0" r="25" fill="currentColor"/>
+      <path d="M-12 0 L-4 9 L14-12" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+    <g id="cross">
+      <circle cx="0" cy="0" r="25" fill="currentColor"/>
+      <path d="M-10-10 L10 10 M10-10 L-10 10" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round"/>
+    </g>
+
+    <!-- Twenty smooth half-periods. The final short segment keeps arrowheads clean. -->
+    <path id="audio-wave" d="M0 0 q6-7 12 0 t12 0 t12 0 t12 0 t12 0 t12 0 t12 0 t12 0 t12 0 t12 0 t12 0 t12 0 t12 0 t12 0 t12 0 t12 0 t12 0 t12 0 t12 0 L240 0" fill="none" stroke-width="2.2" stroke-linecap="round"/>
+  </defs>
+
+  <rect width="1600" height="1000" fill="#fff"/>
+  <text x="800" y="42" text-anchor="middle" font-size="31" font-weight="700">Mivas Task Execution</text>
+
+  <g transform="translate(0 60)">
+  <!-- Main panels -->
+  <rect class="panel" x="14" y="14" width="406" height="912" rx="10"/>
+  <rect class="panel" x="444" y="14" width="700" height="912" rx="10"/>
+  <rect class="panel" x="1168" y="14" width="418" height="912" rx="10"/>
+  <path class="line" d="M420 470 H444" marker-end="url(#arrow)"/>
+  <path class="line" d="M1144 470 H1168" marker-end="url(#arrow)"/>
+
+  <!-- ============================================================= -->
+  <!-- Stage 1: chat conversation                                     -->
+  <!-- ============================================================= -->
+  <circle class="coral" cx="52" cy="54" r="25"/>
+  <text x="52" y="63" font-size="25" font-weight="700" fill="#fff" text-anchor="middle">1</text>
+  <text class="stage-title" x="92" y="47">SIMULATED</text>
+  <text class="stage-title" x="92" y="76">CONVERSATION</text>
+
+  <!-- Participant legend with labels directly beneath icons -->
+  <g transform="translate(110 123) scale(.9)" style="color:#ef725f"><use href="#person"/></g>
+  <text class="label center" x="110" y="160" fill="#ef725f">Digital Human</text>
+  <g transform="translate(326 123) scale(.9)" style="color:#4f95c8"><use href="#robot"/></g>
+  <text class="label center" x="326" y="160" fill="#4f95c8">Voice Agent</text>
+
+  <!-- Human message 1 -->
+  <g transform="translate(48 207) scale(.72)" style="color:#ef725f"><use href="#person"/></g>
+  <rect class="coral-soft" x="82" y="180" width="250" height="54" rx="9"/>
+  <text class="body center" x="207" y="202">I need to reschedule</text>
+  <text class="body center" x="207" y="222">my appointment.</text>
+  <use href="#audio-wave" transform="translate(82 253)" stroke="#ef725f"/>
+  <path d="M322 253 H333" fill="none" stroke="#ef725f" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M344 253 L332 246 L332 260 Z" fill="#ef725f"/>
+  <text class="small center" x="202" y="278" fill="#ef725f">Live audio</text>
+
+  <!-- Agent message 1 -->
+  <rect class="blue-soft" x="94" y="292" width="250" height="54" rx="9"/>
+  <text class="body center" x="219" y="314">First, I need to</text>
+  <text class="body center" x="219" y="334">verify your identity.</text>
+  <g transform="translate(370 319) scale(.72)" style="color:#4f95c8"><use href="#robot"/></g>
+  <use href="#audio-wave" transform="translate(332 365) scale(-1 1)" stroke="#4f95c8"/>
+  <path d="M92 365 H81" fill="none" stroke="#4f95c8" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M70 365 L82 358 L82 372 Z" fill="#4f95c8"/>
+  <text class="small center" x="212" y="390" fill="#4f95c8">Live audio</text>
+
+  <!-- Human message 2 -->
+  <g transform="translate(48 431) scale(.72)" style="color:#ef725f"><use href="#person"/></g>
+  <rect class="coral-soft" x="82" y="404" width="250" height="54" rx="9"/>
+  <text class="body center" x="207" y="426">Jordan Lee,</text>
+  <text class="body center" x="207" y="446">August 12, 1989.</text>
+  <use href="#audio-wave" transform="translate(82 477)" stroke="#ef725f"/>
+  <path d="M322 477 H333" fill="none" stroke="#ef725f" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M344 477 L332 470 L332 484 Z" fill="#ef725f"/>
+  <text class="small center" x="202" y="502" fill="#ef725f">Live audio</text>
+
+  <!-- Agent message 2 -->
+  <rect class="blue-soft" x="94" y="516" width="250" height="54" rx="9"/>
+  <text class="body center" x="219" y="549">What day works best?</text>
+  <g transform="translate(370 543) scale(.72)" style="color:#4f95c8"><use href="#robot"/></g>
+  <use href="#audio-wave" transform="translate(332 589) scale(-1 1)" stroke="#4f95c8"/>
+  <path d="M92 589 H81" fill="none" stroke="#4f95c8" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M70 589 L82 582 L82 596 Z" fill="#4f95c8"/>
+  <text class="small center" x="212" y="614" fill="#4f95c8">Live audio</text>
+
+  <!-- Human message 3 -->
+  <g transform="translate(48 655) scale(.72)" style="color:#ef725f"><use href="#person"/></g>
+  <rect class="coral-soft" x="82" y="628" width="250" height="54" rx="9"/>
+  <text class="body center" x="207" y="650">Next Tuesday</text>
+  <text class="body center" x="207" y="670">morning.</text>
+  <use href="#audio-wave" transform="translate(82 701)" stroke="#ef725f"/>
+  <path d="M322 701 H333" fill="none" stroke="#ef725f" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M344 701 L332 694 L332 708 Z" fill="#ef725f"/>
+  <text class="small center" x="202" y="726" fill="#ef725f">Live audio</text>
+
+  <!-- Agent message 3 -->
+  <rect class="blue-soft" x="94" y="740" width="250" height="54" rx="9"/>
+  <text class="body center" x="219" y="762">Your appointment</text>
+  <text class="body center" x="219" y="782">is rescheduled.</text>
+  <g transform="translate(370 767) scale(.72)" style="color:#4f95c8"><use href="#robot"/></g>
+  <use href="#audio-wave" transform="translate(332 813) scale(-1 1)" stroke="#4f95c8"/>
+  <path d="M92 813 H81" fill="none" stroke="#4f95c8" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M70 813 L82 806 L82 820 Z" fill="#4f95c8"/>
+  <text class="small center" x="212" y="838" fill="#4f95c8">Live audio</text>
+
+  <!-- ============================================================= -->
+  <!-- Stage 2: generic multi-agent voice architecture                -->
+  <!-- ============================================================= -->
+  <circle class="orange" cx="482" cy="54" r="25"/>
+  <text x="482" y="63" font-size="25" font-weight="700" fill="#fff" text-anchor="middle">2</text>
+  <text class="stage-title" x="522" y="47">MULTI-AGENT VOICE</text>
+  <text class="stage-title" x="522" y="76">ARCHITECTURE</text>
+
+  <!-- Graph section -->
+  <rect class="blue-soft" x="474" y="104" width="640" height="332" rx="9"/>
+  <text class="section-title" x="494" y="136">1. Sample multi-agent DAG</text>
+  <text class="small" x="1094" y="136" text-anchor="end">Directed acyclic graph; topology varies by industry</text>
+
+  <g transform="translate(-25 0)">
+  <!-- Directed handoffs form a DAG and terminate at card boundaries -->
+  <path class="line" d="M794 216 L642 270"/>
+  <path d="M642 270 L651 260 L655 272 Z" fill="#353b45"/>
+  <path class="line" d="M844 216 L972 270"/>
+  <path d="M972 270 L959 271 L963 260 Z" fill="#353b45"/>
+  <path class="line" d="M690 310 H940"/>
+  <path d="M940 310 L928 303 L928 317 Z" fill="#353b45"/>
+  <path class="line" d="M646 344 L766 371"/>
+  <path d="M766 371 L753 374 L756 363 Z" fill="#353b45"/>
+  <path class="line" d="M1008 344 L872 371"/>
+  <path d="M872 371 L883 363 L885 375 Z" fill="#353b45"/>
+
+  <rect class="coral-soft" x="724" y="158" width="190" height="58" rx="9"/>
+  <g transform="translate(753 187) scale(.58)" style="color:#ef725f"><use href="#robot"/></g>
+  <text class="label center" x="835" y="184">Agent A</text>
+  <text class="small center" x="835" y="204">Entry node</text>
+
+  <rect class="green-soft" x="526" y="276" width="164" height="68" rx="9"/>
+  <g transform="translate(552 310) scale(.55)" style="color:#71a865"><use href="#robot"/></g>
+  <text class="label center" x="618" y="304">Agent B</text>
+  <text class="small center" x="618" y="326">Specialist</text>
+
+  <rect class="teal-soft" x="948" y="276" width="164" height="68" rx="9"/>
+  <g transform="translate(974 310) scale(.55)" style="color:#349b9b"><use href="#robot"/></g>
+  <text class="label center" x="1040" y="304">Agent C</text>
+  <text class="small center" x="1040" y="326">Specialist</text>
+
+  <rect class="purple-soft" x="724" y="378" width="190" height="48" rx="9"/>
+  <g transform="translate(753 402) scale(.5)" style="color:#7a66ad"><use href="#robot"/></g>
+  <text class="label center" x="835" y="397">Agent D</text>
+  <text class="small center" x="835" y="416">Specialist</text>
+  </g>
+
+  <!-- Agent-scoped tool section -->
+  <rect class="orange-soft" x="474" y="458" width="640" height="326" rx="9"/>
+  <text class="section-title" x="494" y="491">2. Agent-scoped tool access</text>
+  <text class="small" x="1094" y="491" text-anchor="end">Each node exposes a separate toolset</text>
+
+  <!-- Agent headers -->
+  <rect class="coral-soft" x="494" y="518" width="140" height="42" rx="7"/>
+  <g transform="translate(515 539) scale(.4)" style="color:#ef725f"><use href="#robot"/></g>
+  <text class="label center" x="574" y="545">Agent A</text>
+
+  <rect class="green-soft" x="648" y="518" width="140" height="42" rx="7"/>
+  <g transform="translate(669 539) scale(.4)" style="color:#71a865"><use href="#robot"/></g>
+  <text class="label center" x="728" y="545">Agent B</text>
+
+  <rect class="teal-soft" x="802" y="518" width="140" height="42" rx="7"/>
+  <g transform="translate(823 539) scale(.4)" style="color:#349b9b"><use href="#robot"/></g>
+  <text class="label center" x="882" y="545">Agent C</text>
+
+  <rect class="purple-soft" x="956" y="518" width="140" height="42" rx="7"/>
+  <g transform="translate(977 539) scale(.4)" style="color:#7a66ad"><use href="#robot"/></g>
+  <text class="label center" x="1036" y="545">Agent D</text>
+
+  <!-- Tool A -->
+  <rect class="gray-soft" x="494" y="582" width="140" height="48" rx="7"/>
+  <g transform="translate(514 606) scale(.34)" style="color:#ef725f"><use href="#wrench"/></g>
+  <text class="label center" x="574" y="602">Tool A1</text>
+  <text class="tiny center" x="574" y="620">read context</text>
+  <path class="line" d="M564 630 V644" marker-end="url(#arrow)"/>
+  <rect class="gray-soft" x="494" y="644" width="140" height="48" rx="7"/>
+  <g transform="translate(514 668) scale(.34)" style="color:#ef725f"><use href="#wrench"/></g>
+  <text class="label center" x="574" y="664">Tool A2</text>
+  <text class="tiny center" x="574" y="682">route request</text>
+
+  <!-- Tool B -->
+  <rect class="gray-soft" x="648" y="582" width="140" height="48" rx="7"/>
+  <g transform="translate(668 606) scale(.34)" style="color:#71a865"><use href="#wrench"/></g>
+  <text class="label center" x="728" y="602">Tool B1</text>
+  <text class="tiny center" x="728" y="620">lookup</text>
+  <path class="line" d="M718 630 V644" marker-end="url(#arrow)"/>
+  <rect class="gray-soft" x="648" y="644" width="140" height="48" rx="7"/>
+  <g transform="translate(668 668) scale(.34)" style="color:#71a865"><use href="#wrench"/></g>
+  <text class="label center" x="728" y="664">Tool B2</text>
+  <text class="tiny center" x="728" y="682">update</text>
+  <path class="line" d="M718 692 V706" marker-end="url(#arrow)"/>
+  <rect class="gray-soft" x="648" y="706" width="140" height="48" rx="7"/>
+  <g transform="translate(668 730) scale(.34)" style="color:#71a865"><use href="#wrench"/></g>
+  <text class="label center" x="728" y="726">Tool B3</text>
+  <text class="tiny center" x="728" y="744">notify</text>
+
+  <!-- Tool C -->
+  <rect class="gray-soft" x="802" y="582" width="140" height="48" rx="7"/>
+  <g transform="translate(822 606) scale(.34)" style="color:#349b9b"><use href="#wrench"/></g>
+  <text class="label center" x="882" y="602">Tool C1</text>
+  <text class="tiny center" x="882" y="620">retrieve</text>
+  <path class="line" d="M872 630 V644" marker-end="url(#arrow)"/>
+  <rect class="gray-soft" x="802" y="644" width="140" height="48" rx="7"/>
+  <g transform="translate(822 668) scale(.34)" style="color:#349b9b"><use href="#wrench"/></g>
+  <text class="label center" x="882" y="664">Tool C2</text>
+  <text class="tiny center" x="882" y="682">create</text>
+
+  <!-- Tool D -->
+  <rect class="gray-soft" x="956" y="582" width="140" height="48" rx="7"/>
+  <g transform="translate(976 606) scale(.34)" style="color:#7a66ad"><use href="#wrench"/></g>
+  <text class="label center" x="1036" y="602">Tool D1</text>
+  <text class="tiny center" x="1036" y="620">validate</text>
+  <path class="line" d="M1026 630 V644" marker-end="url(#arrow)"/>
+  <rect class="gray-soft" x="956" y="644" width="140" height="48" rx="7"/>
+  <g transform="translate(976 668) scale(.34)" style="color:#7a66ad"><use href="#wrench"/></g>
+  <text class="label center" x="1036" y="664">Tool D2</text>
+  <text class="tiny center" x="1036" y="682">execute</text>
+  <path class="line" d="M1026 692 V706" marker-end="url(#arrow)"/>
+  <rect class="gray-soft" x="956" y="706" width="140" height="48" rx="7"/>
+  <g transform="translate(976 730) scale(.34)" style="color:#7a66ad"><use href="#wrench"/></g>
+  <text class="label center" x="1036" y="726">Tool D3</text>
+  <text class="tiny center" x="1036" y="744">complete</text>
+
+  <rect class="orange-soft" x="520" y="795" width="548" height="40" rx="8"/>
+  <g transform="translate(550 815) scale(.36)" style="color:#e4a044"><use href="#wrench"/></g>
+  <text class="body center" x="805" y="821">Tools perform distinct reads, writes, and external actions</text>
+
+  <rect class="purple-soft" x="550" y="845" width="488" height="42" rx="8"/>
+  <text class="label center" x="794" y="863">Shared session tools</text>
+  <text class="small center" x="794" y="880">End Call  |  Transfer  |  Escalate</text>
+  <text class="small center" x="794" y="909">Example industries: Healthcare, Legal, and Customer Support</text>
+
+  <!-- ============================================================= -->
+  <!-- Stage 3: deterministic verification                            -->
+  <!-- ============================================================= -->
+  <circle class="purple" cx="1206" cy="54" r="25"/>
+  <text x="1206" y="63" font-size="25" font-weight="700" fill="#fff" text-anchor="middle">3</text>
+  <text class="stage-title" x="1246" y="47">DETERMINISTIC</text>
+  <text class="stage-title" x="1246" y="76">VERIFICATION</text>
+
+  <rect class="purple-soft" x="1252" y="130" width="250" height="56" rx="9"/>
+  <text class="label center" x="1377" y="165">Conversation ends</text>
+  <path class="line" d="M1377 186 V220" marker-end="url(#arrow)"/>
+  <rect class="purple-soft" x="1252" y="220" width="250" height="56" rx="9"/>
+  <text class="label center" x="1377" y="255">Evidence captured</text>
+
+  <!-- Split routed entirely above cards -->
+  <path class="line" d="M1377 276 V316"/>
+  <path class="line" d="M1239 316 H1515"/>
+  <path class="line" d="M1239 316 V346" marker-end="url(#arrow)"/>
+  <path class="line" d="M1377 316 V346" marker-end="url(#arrow)"/>
+  <path class="line" d="M1515 316 V346" marker-end="url(#arrow)"/>
+
+  <rect class="green-soft" x="1185" y="346" width="108" height="274" rx="9"/>
+  <text class="label center" x="1239" y="382">DB State</text>
+  <text class="label center" x="1239" y="406">Adherence</text>
+  <g transform="translate(1239 487)" style="color:#71a865"><use href="#database"/></g>
+  <text class="small center" x="1239" y="566">Final state</text>
+  <text class="small center" x="1239" y="586">matches</text>
+
+  <rect class="blue-soft" x="1323" y="346" width="108" height="274" rx="9"/>
+  <text class="label center" x="1377" y="382">Handoff</text>
+  <text class="label center" x="1377" y="406">Adherence</text>
+  <g transform="translate(1377 487)" style="color:#4f95c8"><use href="#agent-handoff"/></g>
+  <text class="small center" x="1377" y="566">Transfers</text>
+  <text class="small center" x="1377" y="586">do not match</text>
+
+  <rect class="orange-soft" x="1461" y="346" width="108" height="274" rx="9"/>
+  <text class="label center" x="1515" y="382">Tool</text>
+  <text class="label center" x="1515" y="406">Adherence</text>
+  <g transform="translate(1515 487)" style="color:#e4a044"><use href="#wrench"/></g>
+  <text class="small center" x="1515" y="566">Tool calls</text>
+  <text class="small center" x="1515" y="586">match</text>
+
+  <!-- Merge routed entirely below cards -->
+  <path class="line" d="M1239 620 V658 H1377"/>
+  <path class="line" d="M1377 620 V658"/>
+  <path class="line" d="M1515 620 V658 H1377"/>
+  <!-- Verifier outcomes sit directly on their output edges before the AND gate. -->
+  <g transform="translate(1239 639) scale(.5)" style="color:#71a865"><use href="#check"/></g>
+  <g transform="translate(1377 639) scale(.5)" style="color:#d84d4d"><use href="#cross"/></g>
+  <g transform="translate(1515 639) scale(.5)" style="color:#71a865"><use href="#check"/></g>
+  <path class="line" d="M1377 658 V686" marker-end="url(#arrow)"/>
+  <circle class="purple-soft" cx="1377" cy="726" r="40"/>
+  <text class="label center" x="1377" y="733">AND</text>
+  <path class="line" d="M1377 766 V800" marker-end="url(#arrow)"/>
+
+  <rect class="red-soft" x="1252" y="800" width="250" height="92" rx="10"/>
+  <text class="section-title center fail-text" x="1345" y="851">TASK FAIL</text>
+  <g transform="translate(1462 846) scale(.72)" style="color:#d84d4d"><use href="#cross"/></g>
+  </g>
+</svg>
