@@ -133,6 +133,8 @@ def _row(scored: dict | None = None, **kwargs):
         "agent_id": "34182",
         "industry": "healthcare",
         "transcript_lines": ["AGENT: Park Avenue accepts Aetna.", "USER: That's all."],
+        "harness": "openai/realtime-2.1",
+        "fetch_costs": False,
     }
     defaults.update(kwargs)
     return exp.result_row(scored or _scored_result(), **defaults)
@@ -335,3 +337,44 @@ def test_assign_conversation_indexes_are_one_based_per_case() -> None:
     ]
     exp.assign_conversation_indexes(rows)
     assert [row["conversation_index"] for row in rows] == [1, 2, 1]
+
+
+def test_cost_columns_estimated_without_trace() -> None:
+    row = _row()
+    for name in exp.eval_costs.COST_COLUMNS:
+        assert name in exp.HEADERS
+        assert name in row
+    assert row["llm_cost_source"] == "estimated"
+    assert float(row["llm_cost_usd"]) > 0
+    assert float(row["llm_cost_per_hour_usd"]) > 0
+    utterances = json.loads(row["utterance_costs_json"])
+    assert utterances[0]["role"] == "agent"
+    assert utterances[0]["cost_usd"] is not None
+    assert utterances[1]["role"] == "caller"
+    assert utterances[1]["cost_usd"] is None
+
+
+def test_cost_columns_grok_per_minute() -> None:
+    row = _row(harness="grok/voice")
+    assert row["llm_cost_source"] == "per_minute"
+    assert float(row["llm_cost_usd"]) == 0.042667
+    assert float(row["llm_cost_per_hour_usd"]) == 4.8
+
+
+def test_cost_columns_from_token_spans() -> None:
+    spans = [
+        {
+            "name": "model",
+            "attributes": {
+                "gen_ai.usage.input_audio_tokens": 1000,
+                "gen_ai.usage.output_audio_tokens": 500,
+                "mivas.transcript": "Park Avenue accepts Aetna.",
+            },
+        }
+    ]
+    row = _row(harness="openai/realtime-2.1", cost_spans=spans)
+    assert row["llm_cost_source"] == "tokens"
+    # 1000 * 32 / 1e6 + 500 * 64 / 1e6
+    assert float(row["llm_cost_usd"]) == 0.064
+    utterances = json.loads(row["utterance_costs_json"])
+    assert utterances[0]["cost_usd"] == 0.064

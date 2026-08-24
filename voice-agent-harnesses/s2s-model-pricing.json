@@ -23,7 +23,9 @@
     "amazon.nova-sonic-v1:0":        { "inputText": 0.06, "inputAudio": 3.4,  "cachedText": null, "cachedAudio": null, "outputText": 0.24, "outputAudio": 13.6 },
 
     "qwen3-omni-flash-realtime":     { "inputText": 0.52, "inputAudio": 4.57, "cachedText": null, "cachedAudio": null, "outputText": 1.99, "outputAudio": 3.67 },
-    "qwen-omni-turbo-realtime":      { "inputText": 0.27, "inputAudio": 4.44, "cachedText": null, "cachedAudio": null, "outputText": 1.07, "outputAudio": 2.52 }
+    "qwen-omni-turbo-realtime":      { "inputText": 0.27, "inputAudio": 4.44, "cachedText": null, "cachedAudio": null, "outputText": 1.07, "outputAudio": 2.52 },
+
+    "gpt-4.1":                       { "inputText": 2.0,  "inputAudio": null, "cachedText": 0.5,  "cachedAudio": null, "outputText": 8.0,  "outputAudio": null }
   },
   "per_minute_pricing": {
     "grok-voice-latest":             0.08,
