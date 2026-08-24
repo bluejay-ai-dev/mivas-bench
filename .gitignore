@@ -31,6 +31,7 @@ actual-final-state/
 
 # local Bluejay CSV exports (not tracked)
 /eval_outputs/
+/.cache/
 /.mivas-monitor/
 /healthcare-*.csv
 

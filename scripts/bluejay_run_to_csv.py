@@ -8,8 +8,9 @@ always/mixed/never bands. It is not a rollup of those conversations.
 
 This CSV is the dashboard source of record for a full simulation — task
 link, tool/handoff/hangup evals (args + DB diffs), custom-metric values
-and reasoning, builtin quality metrics, and transcript — so a later
-dashboard can visualize the run without going back to Bluejay.
+and reasoning, builtin quality metrics, transcript, and LLM cost
+(conversation + per-utterance) — so a later dashboard can visualize the
+run without going back to Bluejay.
 
 Scoring is our verifier (tools ∧ handoff ∧ hangup DB), not Bluejay's goal
 judge. `goal_success`, `goal_reasoning`, and platform `tests_passed` are
@@ -46,6 +47,7 @@ def _load(name: str, path: Path):
 
 verify_task_run = _load("verify_task_run", SCRIPTS / "verify_task_run.py")
 verify_run = verify_task_run.verify_run
+eval_costs = _load("eval_costs", SCRIPTS / "eval_costs.py")
 
 # stable header. extra custom metrics (if any) append after these.
 HEADERS = [
@@ -70,6 +72,10 @@ HEADERS = [
     "pending",
     "void_reason",
     "duration_s",
+    "llm_cost_usd",
+    "llm_cost_source",
+    "llm_cost_per_hour_usd",
+    "utterance_costs_json",
     "start_time",
     "end_time",
     # combined + component pass (ours, not Bluejay goal)
@@ -545,6 +551,9 @@ def result_row(
     industry: str = "",
     conversation_index: int | str | None = None,
     transcript_lines: list[str] | None = None,
+    harness: str = "openai/realtime-2.1",
+    fetch_costs: bool = False,
+    cost_spans: list[dict[str, Any]] | None = None,
 ) -> dict[str, str]:
     """One CSV row for one Bluejay simulation result / conversation."""
     detail = scored.get("detail") or {}
@@ -600,6 +609,10 @@ def result_row(
         "pending": _bool_cell(scored.get("pending")),
         "void_reason": scored.get("void_reason") or "",
         "duration_s": duration_s(detail),
+        "llm_cost_usd": "",
+        "llm_cost_source": "",
+        "llm_cost_per_hour_usd": "",
+        "utterance_costs_json": "",
         "start_time": str(detail.get("start_time") or ""),
         "end_time": str(detail.get("end_time") or ""),
         "combined_pass": combined,
@@ -636,6 +649,17 @@ def result_row(
         "agent_chars": "" if scored.get("agent_chars") is None else str(scored["agent_chars"]),
         "num_turns": num_turns(detail),
     }
+    hinted_ids = detail.get("trace_ids") or scored.get("trace_ids") or []
+    row.update(
+        eval_costs.cost_conversation(
+            row,
+            harness,
+            spans=cost_spans,
+            fetch=fetch_costs,
+            transcript_lines=transcript_lines,
+            trace_ids=[str(item) for item in hinted_ids if item],
+        )
+    )
     skip_metric_keys = set(CANONICAL_METRICS) | set(CANONICAL_REASONING) | EXCLUDED_COLUMNS
     for key, value in metrics.items():
         if key in skip_metric_keys or _excluded_metric(key) or key in row:
@@ -711,6 +735,8 @@ def main(argv: list[str] | None = None) -> int:
             industry=args.industry,
             conversation_index=row.get("conversation_index"),
             transcript_lines=row.get("transcript_lines"),
+            harness=args.harness,
+            fetch_costs=True,
         )
         for row in scored["results"]
     ]
