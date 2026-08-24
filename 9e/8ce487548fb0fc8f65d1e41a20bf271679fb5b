@@ -1,0 +1,47 @@
+.gitignore
+  s_4f98cc54347dec::t_0cbb13c45b9ba5 32-34
+run.py
+  s_4f98cc54347dec::t_14ca338d51e1bb 366
+scripts/bluejay_run_to_csv.py
+  s_4f98cc54347dec::t_7e3fb3d7e343a3 1,15-25,30-32,42,45-46,52-53,68,179-196,261-283,285,535-566,570-577,637-1083,1096-1097,1114-1116,1140,1193-1203,1221-1222,1256-1470,1474-1478,1481-1484,1488-1510,1513-1514,1516-1529,1535-1536,1540-1545,1549,1556-1558,1563,1565-1568
+tests/test_bluejay_run_to_csv.py
+  s_4f98cc54347dec::t_f1558227a3801d 138-139,247-327,415-452,502-810
+voice-agent-harnesses/aws/adapters/chirp_call.py
+  s_4f98cc54347dec::t_ac11c640dbff0c 35-36,86-87,197-198,200,202-213,215
+voice-agent-harnesses/grok/harness.py
+  s_4f98cc54347dec::t_96e95ba7708514 120,271-279,281,331-340,504-511,528-532
+voice-agent-harnesses/grok/report.py
+  s_4f98cc54347dec::t_e9002382442ad2 768-772
+voice-agent-harnesses/grok/voice/adapters/chirp.py
+  s_4f98cc54347dec::t_a7e22eb2d6b711 71,282,422,780-794
+voice-agent-harnesses/livekit/harness.py
+  s_4f98cc54347dec::t_8519354a8032ba 98-108,486-493,544,547-548
+voice-agent-harnesses/livekit/report.py
+  s_4f98cc54347dec::t_3cb7266c1c566a 258-335,522-524
+voice-agent-harnesses/livekit/test_harness.py
+  s_4f98cc54347dec::t_7efa8d4d2da3b6 164-206,214
+voice-agent-harnesses/openai/adapters/chirp.py
+  s_4f98cc54347dec::t_f6bf88e8a0555a 70-73,76,78-79,123,150,181
+voice-agent-harnesses/openai/harness.py
+  s_4f98cc54347dec::t_cbcd92a62749eb 164-169,172-179,182,311-320
+voice-agent-harnesses/openai/test_nudge_retry.py
+  s_4f98cc54347dec::t_949328a3f4dcbe 51-52,57-62,65-67,71,80-91,93-98,106
+voice-agent-harnesses/s2s-model-pricing.json
+  s_4f98cc54347dec::t_607d9d7ce31f78 20,26-34,36-39,41,45-61
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "9e8ce487548fb0fc8f65d1e41a20bf271679fb5b",
+  "prompts": {},
+  "sessions": {
+    "s_4f98cc54347dec": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "b6c105bb-040e-4554-b857-9266aedea298",
+        "model": "grok-4.6"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
