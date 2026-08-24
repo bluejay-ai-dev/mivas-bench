@@ -765,6 +765,11 @@ async def traced_run(
                 else:
                     raise
             finally:
+                # Grok Voice returns no usage counts, so cost is priced from
+                # audio minutes (s2s-model-pricing per_minute_pricing).
+                secs = time.monotonic() - t0
+                root.set_attribute("mivas.audio.duration_s", round(secs, 3))
+                root.set_attribute("mivas.audio.duration_minutes", round(secs / 60.0, 6))
                 event_tracer.close()
     finally:
         _active_root = prev_active

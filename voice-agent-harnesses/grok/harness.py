@@ -117,6 +117,7 @@ def load_blueprint(industry_dir: str | Path) -> dict[str, Any]:
     return {
         "industry_dir": industry_dir,
         "start": blueprint["agents"][0]["name"],
+        "greeting": str(blueprint.get("greeting") or "").strip(),
         "agents": agents,
         "catalog": catalog,
     }
@@ -267,8 +268,17 @@ def session_update_for_agent(
     if agent not in bp["agents"]:
         raise KeyError(f"unknown agent {agent!r}")
     tools = [_tool_decl(bp["catalog"][name]) for name in tool_names(bp, agent)]
+    instructions = with_today_context(bp["agents"][agent]["instructions"])
+    # The reception prompt assumes the branded greeting was already spoken, so a
+    # bare response.create opens with "What can I help you with?" — no brand, no
+    # AI disclosure. Only the pack's own greeting string fills that in.
+    if not mid_call and bp.get("greeting"):
+        instructions += (
+            "\n\nThe call just connected and nothing has been said yet. "
+            f'Speak first, with exactly: "{bp["greeting"]}"'
+        )
     session: dict[str, Any] = {
-        "instructions": with_today_context(bp["agents"][agent]["instructions"]),
+        "instructions": instructions,
         "tools": tools,
     }
     if not mid_call:
@@ -318,6 +328,16 @@ async def _execute_tool(
     name: str, args: dict[str, Any], bp: dict[str, Any], state: dict[str, Any]
 ) -> tuple[dict[str, Any], bool]:
     """Run a blueprint tool. Returns (result, should_end_call)."""
+    # A session.update swaps the advertised tools but not what is already in
+    # Grok's context, so it re-calls the stage it just left (transfer_to_identity
+    # while in identity). Executing those hits the tool server off-stage and
+    # writes phantom actuals, so refuse anything outside the active stage.
+    if name not in tool_names(bp, state["agent"]):
+        return {
+            "success": False,
+            "error": f"{name} is not available to {state['agent']}",
+        }, False
+
     target = handoff_target(bp, state["agent"], name)
     if target:
         state["agent"] = target
@@ -481,6 +501,14 @@ def demo() -> None:
     mid = session_update_for_agent(bp, start, mid_call=True)["session"]
     assert "turn_detection" not in mid and "voice" not in mid
     assert "instructions" in mid and "tools" in mid
+    # greeting only on the opening session.update, never on a handoff
+    hc = load_blueprint("healthcare")
+    assert hc["greeting"], "healthcare pack lost its greeting string"
+    open_i = session_update_for_agent(hc, hc["start"])["session"]["instructions"]
+    mid_i = session_update_for_agent(hc, hc["start"], mid_call=True)["session"][
+        "instructions"
+    ]
+    assert hc["greeting"] in open_i and hc["greeting"] not in mid_i
     if len(bp["agents"]) > 1 and all_names - set(start_tools):
         assert set(start_tools) != all_names
     state = {"agent": start}
@@ -497,6 +525,11 @@ def demo() -> None:
         res, stop = asyncio.run(run_tool(handoff_name, {}, bp, state))
         assert res.get("success") and res.get("role") == target and not stop
         assert state["agent"] == target
+        # re-calling the tool it just left is off-stage now → refused, no re-handoff
+        if handoff_name not in tool_names(bp, target):
+            again, stop2 = asyncio.run(run_tool(handoff_name, {}, bp, state))
+            assert not again.get("success") and not stop2, again
+            assert state["agent"] == target
     print(
         f"grok self-check ok start={start} tools={start_tools} "
         f"agents={list(bp['agents'])} model={MODEL} ws={ws_url()}"

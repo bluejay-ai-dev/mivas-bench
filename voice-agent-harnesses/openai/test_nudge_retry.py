@@ -48,17 +48,27 @@ async def _case_agent_opens_late() -> None:
     import adapters.chirp as chirp
 
     chirp.NUDGE_RETRY_DELAY_S = 0.1
-    await asyncio.gather(_nudge_until_open(s, opened), open_after())
+    chirp.NUDGE_INITIAL_DELAY_S = 0
+    await asyncio.gather(_nudge_until_open(s, opened, _drained()), open_after())
     assert s.model.sent >= 2, f"gave up too early: {s.model.sent}"
     assert s.model.sent <= chirp.NUDGE_MAX_ATTEMPTS, s.model.sent
 
 
+def _drained() -> asyncio.Event:
+    e = asyncio.Event()
+    e.set()
+    return e
+
+
 async def _case_first_nudge_lands() -> None:
     """Agent opens immediately: exactly one nudge, no spam."""
+    import adapters.chirp as chirp
+
+    chirp.NUDGE_INITIAL_DELAY_S = 0
     s = _Session(accept_after=1)
     opened = asyncio.Event()
     opened.set()
-    await _nudge_until_open(s, opened)
+    await _nudge_until_open(s, opened, _drained())
     assert s.model.sent == 0, f"nudged an already-open call: {s.model.sent}"
 
 
@@ -67,8 +77,25 @@ async def _case_bounded() -> None:
     import adapters.chirp as chirp
 
     chirp.NUDGE_RETRY_DELAY_S = 0.01
+    chirp.NUDGE_INITIAL_DELAY_S = 0
     s = _Session(accept_after=1)
-    await asyncio.wait_for(_nudge_until_open(s, asyncio.Event()), timeout=5)
+    await asyncio.wait_for(_nudge_until_open(s, asyncio.Event(), _drained()), timeout=5)
+    assert s.model.sent == chirp.NUDGE_MAX_ATTEMPTS, s.model.sent
+
+
+async def _case_waits_for_drain() -> None:
+    """No nudge goes out until outbound() is draining — that loses the greeting head."""
+    import adapters.chirp as chirp
+
+    chirp.NUDGE_RETRY_DELAY_S = 0.01
+    chirp.NUDGE_INITIAL_DELAY_S = 0
+    s = _Session(accept_after=1)
+    draining = asyncio.Event()
+    task = asyncio.create_task(_nudge_until_open(s, asyncio.Event(), draining))
+    await asyncio.sleep(0.1)
+    assert s.model.sent == 0, f"nudged before outbound drained: {s.model.sent}"
+    draining.set()
+    await asyncio.wait_for(task, timeout=5)
     assert s.model.sent == chirp.NUDGE_MAX_ATTEMPTS, s.model.sent
 
 
@@ -76,6 +103,7 @@ def main() -> None:
     asyncio.run(_case_agent_opens_late())
     asyncio.run(_case_first_nudge_lands())
     asyncio.run(_case_bounded())
+    asyncio.run(_case_waits_for_drain())
     print("ok — nudge retries until the agent opens, stops when it does, stays bounded")
 
 

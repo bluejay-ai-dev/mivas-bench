@@ -67,10 +67,16 @@ NUDGE_GREETING = RealtimeModelSendRawMessage(message={"type": "response.create"}
 # 31 calls in run 230926. Re-nudge until the agent actually produces audio.
 NUDGE_RETRY_DELAY_S = float(os.environ.get("MIVAS_NUDGE_RETRY_DELAY_S", "3"))
 NUDGE_MAX_ATTEMPTS = int(os.environ.get("MIVAS_NUDGE_MAX_ATTEMPTS", "5"))
+# Audio the model emits before `outbound()` is draining the event stream is lost,
+# so nudging too early truncates the greeting's head — run 244543 opened calls on
+# "With." / "You with.". Wait for the consumer, then let the media path settle.
+NUDGE_INITIAL_DELAY_S = float(os.environ.get("MIVAS_NUDGE_INITIAL_DELAY_S", "1.0"))
 
 
-async def _nudge_until_open(session, opened: asyncio.Event) -> None:
+async def _nudge_until_open(session, opened: asyncio.Event, draining: asyncio.Event) -> None:
     """Re-send the opening nudge until the agent speaks (or attempts run out)."""
+    await draining.wait()
+    await asyncio.sleep(NUDGE_INITIAL_DELAY_S)
     for _ in range(NUDGE_MAX_ATTEMPTS):
         if opened.is_set() or getattr(session, "_closed", False):
             return
@@ -114,7 +120,7 @@ async def _bridge(ws, model: str, industry: str) -> None:
             ctx["session"] = session
             events = tracer.wrap(session) if tracer is not None else session
             opened = asyncio.Event()
-            nudge_task = asyncio.create_task(_nudge_until_open(session, opened))
+            draining = asyncio.Event()
 
             async def inbound() -> None:
                 nonlocal up
@@ -141,6 +147,7 @@ async def _bridge(ws, model: str, industry: str) -> None:
 
             async def outbound() -> None:
                 nonlocal down, utt
+                draining.set()
                 try:
                     async for event in events:
                         if event.type == "audio":
@@ -171,6 +178,7 @@ async def _bridge(ws, model: str, industry: str) -> None:
                         await ws.close(1000)
 
             tasks = [asyncio.create_task(inbound()), asyncio.create_task(outbound())]
+            nudge_task = asyncio.create_task(_nudge_until_open(session, opened, draining))
             done, pending = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
             opened.set()  # release the nudge watchdog before teardown
             nudge_task.cancel()

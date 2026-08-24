@@ -363,6 +363,7 @@ def _twilio_welcome(industry: str) -> str:
         "finance": "Thank you for calling Copperline Credit Union.",
         "legal": "Thank you for calling Halverson and Reed.",
         "travel": "Thanks for calling Juniper Airlines.",
+        "customer-support": "Thanks for calling Kestrel Electronics. You're speaking with an AI assistant on a recorded line.",
     }.get(industry, "Hello.")
 
 
