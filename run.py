@@ -325,7 +325,7 @@ def _render(template_name: str, harness: str, industry: str, image: str, service
 def livekit_secret_name(harness: str, industry: str) -> str:
     """SIP LiveKit workers register with the dedicated LiveKit Cloud project."""
     family, runtime = split_harness(harness)
-    if family == "gemini" or (family == "livekit" and runtime in {"cascaded", "gemini-flash-live-3.1"}):
+    if family == "gemini" or (family == "livekit" and runtime == "cascaded"):
         return os.environ.get("LIVEKIT_SIP_SECRET_NAME", "mivas-livekit-sip").strip() or "mivas-livekit-sip"
     return "mivas-secrets"
 
