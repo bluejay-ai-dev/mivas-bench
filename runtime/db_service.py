@@ -81,7 +81,13 @@ class DBService:
             if path.exists():
                 return path
             self.calls_dir.mkdir(parents=True, exist_ok=True)
-            _write_fixture_db(path, self.schema_path, self.seed_path)
+            # Build to a tmp then os.replace: sqlite creates the file before the
+            # schema script runs, so an in-place build lets the un-locked fast
+            # path above (and other processes) read a half-built DB.
+            tmp = path.with_name(f"{path.name}.{os.getpid()}.tmp")
+            _unlink_db(tmp)
+            _write_fixture_db(tmp, self.schema_path, self.seed_path)
+            os.replace(tmp, path)
         return path
 
     def _recreate(self, path: Path) -> Path:
