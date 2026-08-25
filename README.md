@@ -90,6 +90,118 @@ The three scored industries are Healthcare, Legal, and Customer Support. Control
 
 Each industry pack includes an agent blueprint, production-style prompts, tool schemas, deterministic seed data, a FastAPI tool service, and a handoff graph. Scored industries also include cases, Digital Humans, expected final state, and verification artifacts.
 
+## Industry architectures
+
+Each initial-release scored industry uses specialist agents. Arrows below are permitted handoffs declared in the current industry blueprint.
+
+<details>
+<summary><strong>Healthcare: Straus Dermatology</strong></summary>
+
+Straus Dermatology routes callers through public reception, identity-gated patient work, and focused scheduling, coverage, cosmetic, billing, and clinical specialists.
+
+- `reception`: answers public office questions and routes the initial request.
+- `identity`: identifies and verifies patients before protected chart work.
+- `scheduling`: classifies visits and books, changes, cancels, or waitlists appointments.
+- `coverage`: checks plan acceptance and eligibility, and captures insurance updates.
+- `cosmetic`: quotes approved services and books cosmetic consultations.
+- `billing`: handles balances, charges, payment links, financing, and fee-waiver requests.
+- `clinical`: handles results status, refill requests, nurse messages, and portal activation.
+
+```mermaid
+flowchart LR
+  R["reception: Routing"]
+  I["identity: Verification"]
+  S["scheduling: Access"]
+  COV["coverage: Benefits"]
+  COS["cosmetic: Concierge"]
+  B["billing: Payments"]
+  CL["clinical: Liaison"]
+  R -->|transfer_to_identity| I
+  R -->|transfer_to_scheduling| S
+  R -->|transfer_to_coverage| COV
+  R -->|transfer_to_cosmetic| COS
+  I -->|transfer_to_scheduling| S
+  I -->|transfer_to_billing| B
+  I -->|transfer_to_clinical| CL
+  I -->|transfer_to_coverage| COV
+  I -->|transfer_to_cosmetic| COS
+  COV -->|transfer_to_scheduling| S
+  B -->|transfer_to_scheduling| S
+  CL -->|transfer_to_scheduling| S
+```
+
+</details>
+
+<details>
+<summary><strong>Legal: Halverson &amp; Reed</strong></summary>
+
+Halverson & Reed separates caller routing, ordered conflict and eligibility screening, intake, evaluation scheduling, and service for existing clients.
+
+- `reception`: identifies callers, classifies requests, takes messages, and routes eligible calls.
+- `screening`: checks conflicts, practice area, jurisdiction, and filing deadlines in order.
+- `intake`: records the matter and sends intake and records-authorization documents.
+- `scheduling`: discloses tool-provided fees and manages evaluation bookings and cancellations.
+- `client_services`: provides status on firm matters and records messages or notes.
+
+```mermaid
+flowchart LR
+  R["reception: Routing"]
+  SC["screening: Conflict and eligibility"]
+  I["intake: Matter intake"]
+  S["scheduling: Evaluations"]
+  CS["client_services: Existing clients"]
+  R -->|transfer_to_screening| SC
+  R -->|transfer_to_client_services| CS
+  SC -->|transfer_to_intake| I
+  I -->|transfer_to_scheduling| S
+```
+
+</details>
+
+<details>
+<summary><strong>Customer Support: Kestrel Electronics</strong></summary>
+
+Kestrel Electronics places order-bound work behind verification while allowing reception to route suspected impersonation directly to a separate fraud specialist.
+
+- `reception`: answers public store, policy, fee, and knowledge-base questions and routes calls.
+- `verification`: identifies customers and verifies order ZIP and card last four.
+- `orders`: handles order status, delivery changes, cancellations, and price matches.
+- `returns`: checks eligibility and fees, starts returns, creates labels, and tracks refunds.
+- `service`: checks coverage and manages TechCrew service appointments and safety refusals.
+- `membership`: handles membership status, upgrades, and cancellations.
+- `fraud`: checks suspicious charges and contacts, files scam reports, and gives urgent guidance.
+
+```mermaid
+flowchart TD
+  R["reception: Routing"]
+  V["verification: Identity gate"]
+  O["orders: Orders and delivery"]
+  RT["returns: Returns and refunds"]
+  S["service: TechCrew"]
+  M["membership: Plans"]
+  F["fraud: Impersonation"]
+  R -->|transfer_to_verification| V
+  R -->|transfer_to_fraud| F
+  V -->|transfer_to_orders| O
+  V -->|transfer_to_returns| RT
+  V -->|transfer_to_service| S
+  V -->|transfer_to_membership| M
+  O -->|transfer_to_returns| RT
+  O -->|transfer_to_service| S
+  O -->|transfer_to_fraud| F
+  RT -->|transfer_to_orders| O
+  RT -->|transfer_to_service| S
+  RT -->|transfer_to_fraud| F
+  S -->|transfer_to_returns| RT
+  S -->|transfer_to_membership| M
+  S -->|transfer_to_fraud| F
+  M -->|transfer_to_service| S
+  M -->|transfer_to_fraud| F
+  F -->|transfer_to_verification| V
+```
+
+</details>
+
 ## Voice agent harnesses
 
 Harnesses translate the MIVAS blueprint into provider-specific runtimes. Native S2S models are the primary systems under evaluation; cascaded systems provide baselines.
