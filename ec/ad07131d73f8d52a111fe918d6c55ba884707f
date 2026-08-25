@@ -1,0 +1,22 @@
+scripts/annotate_eval_costs.py
+  s_9007490be0cf47::t_d8c795a576e124 5
+  s_9007490be0cf47::t_18ec684439e5e6 47-63
+  s_9007490be0cf47::t_6fdfc994bb4a7b 75
+  s_9007490be0cf47::t_c6941185998ef1 146-150,155-160
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "ecad07131d73f8d52a111fe918d6c55ba884707f",
+  "prompts": {},
+  "sessions": {
+    "s_9007490be0cf47": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "805bd9ea-c225-48c2-a085-8f9a805bfd0f",
+        "model": "cursor-grok-4.6-high-fast"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
