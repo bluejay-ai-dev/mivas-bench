@@ -12,7 +12,6 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from run import (  # noqa: E402
-    dispatcher_host,
     image_ref,
     livekit_secret_name,
     pair_host,
@@ -21,7 +20,6 @@ from run import (  # noqa: E402
     pair_websocket_url,
     parse_agents,
     render_agents_yaml,
-    render_dispatcher_yaml,
     replica_count,
     slug,
 )
@@ -37,9 +35,9 @@ def test_parse_agents_basic() -> None:
 
 
 def test_parse_agents_strips_whitespace() -> None:
-    assert parse_agents("  openai/realtime-2.1:legal , nvidia/nemotron:travel ") == [
+    assert parse_agents("  openai/realtime-2.1:legal , nvidia/nemotron:healthcare ") == [
         ("openai/realtime-2.1", "legal"),
-        ("nvidia/nemotron", "travel"),
+        ("nvidia/nemotron", "healthcare"),
     ]
 
 
@@ -135,71 +133,30 @@ def test_worker_families_skip_ingress(monkeypatch: pytest.MonkeyPatch) -> None:
         [
             ("openai/realtime-2.1", "control-industry"),
             ("livekit/cascaded", "control-industry"),
-            ("pipecat/openai-realtime-2.1", "control-industry"),
         ],
         "ClusterIP",
     )
     # CHIRP pair: one Ingress `/`. Workers: tools-only Ingress `/tools`.
-    assert yaml_text.count("\nkind: Ingress\n") == 3
-    assert yaml_text.count("kind: Deployment") == 3
+    assert yaml_text.count("\nkind: Ingress\n") == 2
+    assert yaml_text.count("kind: Deployment") == 2
     assert "host: openai-realtime-2-1-control-industry.benchmarks.example.com" in yaml_text
     assert "host: livekit-cascaded-control-industry.benchmarks.example.com" in yaml_text
-    assert "host: pipecat-openai-realtime-2-1-control-industry.benchmarks.example.com" in yaml_text
-    assert yaml_text.count("path: /tools") == 2
-    assert "name: mivas-pipecat-openai-realtime-2-1-control-industry-pods" in yaml_text
-    assert "clusterIP: None" in yaml_text
-    assert "name: mivas-livekit-cascaded-control-industry-pods" not in yaml_text
+    assert yaml_text.count("path: /tools") == 1
     assert 'name: MIVAS_MODE\n              value: "chirp"' in yaml_text
     assert 'name: MIVAS_MODE\n              value: "agent"' in yaml_text
     from run import pair_host, pair_mivas_mode, pair_needs_ingress
 
     assert pair_needs_ingress("openai/realtime-2.1")
     assert not pair_needs_ingress("livekit/cascaded")
-    assert not pair_needs_ingress("pipecat/cascaded")
     assert pair_mivas_mode("livekit/cascaded") == "agent"
-    assert pair_mivas_mode("pipecat/cascaded") == "agent"
     assert pair_mivas_mode("openai/realtime-2.1") == "chirp"
     assert pair_host("livekit/cascaded", "control-industry") is None
-    from run import pair_dns_host, pair_public_url
+    from run import pair_dns_host
 
     assert (
         pair_dns_host("livekit/cascaded", "control-industry")
         == "livekit-cascaded-control-industry.benchmarks.example.com"
     )
-    assert pair_public_url("pipecat/cascaded", "control-industry") == (
-        "https://pipecat-cascaded-control-industry.benchmarks.example.com"
-    )
-
-
-def test_render_dispatcher_yaml(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("MIVAS_BASE_DOMAIN", "benchmarks.example.com")
-    monkeypatch.delenv("PIPECAT_WORKER_URL_TEMPLATE", raising=False)
-    assert dispatcher_host() == "pipecat-dialin.benchmarks.example.com"
-    yaml_text = render_dispatcher_yaml(
-        "mivas-bench:pipecat-cascaded-healthcare",
-        "healthcare",
-    )
-    assert "name: mivas-pipecat-dispatcher" in yaml_text
-    assert 'value: "dispatcher"' in yaml_text
-    assert "host: pipecat-dialin.benchmarks.example.com" in yaml_text
-    assert "path: /dialin" in yaml_text
-    assert "http://mivas-{slug}:8080/dialin" in yaml_text
-    assert "mivas-{slug}-pods" in yaml_text
-    assert "__HOST__" not in yaml_text
-    assert "__WORKER_URL_TEMPLATE__" not in yaml_text
-    assert "__WORKER_PODS_TEMPLATE__" not in yaml_text
-    assert "karpenter.sh/do-not-disrupt" in yaml_text
-
-
-def test_twilio_ingress_is_conversationrelay() -> None:
-    from run import ingress_adapter, pair_mivas_mode
-
-    harness = "twilio/conversationrelay-gpt4.1"
-    assert pair_mivas_mode(harness) == "conversationrelay"
-    assert ingress_adapter(harness).name == "conversationrelay.py"
-    yaml_text = render_agents_yaml([(harness, "control-industry")], "LoadBalancer")
-    assert 'name: MIVAS_MODE\n              value: "conversationrelay"' in yaml_text
-    assert 'name: MIVAS_MODE\n              value: "chirp"' not in yaml_text
 
 
 def test_image_ref_registry(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -297,10 +254,8 @@ def test_livekit_cascaded_sip_secret_is_per_runtime_not_industry(
 def test_cascaded_nemotron_gets_heavier_pod() -> None:
     assert pair_resources("nvidia/nemotron") == ("1000m", "1Gi", "3Gi")
     assert pair_resources("livekit/cascaded") == ("1000m", "1Gi", "3Gi")
-    assert pair_resources("pipecat/cascaded") == ("1000m", "1Gi", "3Gi")
     assert pair_resources("gemini/flash-live-3.1") == ("1000m", "1Gi", "3Gi")
     assert pair_resources("gemini/2.5-flash-native-audio") == ("1000m", "1Gi", "3Gi")
-    assert pair_resources("pipecat/openai-realtime-2.1") == ("250m", "384Mi", "1536Mi")
     assert pair_resources("nvidia/nemotron-voicechat") == ("250m", "384Mi", "1536Mi")
     assert pair_resources("openai/realtime-2.1") == ("250m", "384Mi", "1536Mi")
     yaml_text = render_agents_yaml(

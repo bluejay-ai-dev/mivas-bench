@@ -16,8 +16,10 @@ ROOT = Path(__file__).resolve().parents[1]
 PROJECT = "mivas-bench-image"
 BUCKET = "mivas-bench-codebuild"
 REGION = "us-west-1"
-SERVICE_ROLE = "codebuild-mivas-bench-service"
-BATCH_ROLE = "codebuild-mivas-bench-batch"
+SERVICE_ROLE = os.environ.get(
+    "MIVAS_CODEBUILD_SERVICE_ROLE", "codebuild-mivas-bench-service"
+)
+BATCH_ROLE = os.environ.get("MIVAS_CODEBUILD_BATCH_ROLE", "codebuild-mivas-bench-batch")
 EXCLUDE_DIRS = {
     ".git",
     ".venv",
