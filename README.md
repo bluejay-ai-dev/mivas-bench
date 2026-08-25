@@ -1,8 +1,6 @@
 # MIVAS Bench: A Benchmark for Evaluating Voice AI Models in Multi-Agent Environments Across Industries
 
-<p align="center">
-  <img src="assets/mivas-benchmark-overview.svg" alt="MIVAS Bench evaluation process overview" width="1200">
-</p>
+
 
 ## Multi-Industry Voice Agent Simulation Bench
 
@@ -14,16 +12,16 @@ MIVAS Bench evaluates S2S models inside stateful, multi-agent systems that follo
 
 ## Benchmark comparison
 
+
 | Benchmark            | **Multi-agent topology** | **Handoff verification** | **Conjunctive verification** | Live adaptive voice | Native S2S | Multi-industry coverage | Stateful tool execution | Deterministic final-state verifier | Tool-adherence verification | Repeated-run reliability support |
 | -------------------- | ------------------------ | ------------------------ | ---------------------------- | ------------------- | ---------- | ----------------------- | ----------------------- | ---------------------------------- | --------------------------- | -------------------------------- |
-| MIVAS Bench          | <div align="center"><img src="assets/benchmark-yes.svg" alt="Yes" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-yes.svg" alt="Yes" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-yes.svg" alt="Yes" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-yes.svg" alt="Yes" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-yes.svg" alt="Yes" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-yes.svg" alt="Yes" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-yes.svg" alt="Yes" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-yes.svg" alt="Yes" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-yes.svg" alt="Yes" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-yes.svg" alt="Yes" width="16" height="16"></div> |
-| EVA                  | <div align="center"><img src="assets/benchmark-no.svg" alt="No" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-no.svg" alt="No" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-no.svg" alt="No" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-yes.svg" alt="Yes" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-yes.svg" alt="Yes" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-yes.svg" alt="Yes" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-yes.svg" alt="Yes" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-yes.svg" alt="Yes" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-partial.svg" alt="Partial" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-yes.svg" alt="Yes" width="16" height="16"></div> |
-| τ-Voice              | <div align="center"><img src="assets/benchmark-no.svg" alt="No" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-no.svg" alt="No" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-no.svg" alt="No" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-yes.svg" alt="Yes" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-yes.svg" alt="Yes" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-yes.svg" alt="Yes" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-yes.svg" alt="Yes" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-yes.svg" alt="Yes" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-no.svg" alt="No" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-partial.svg" alt="Partial" width="16" height="16"></div> |
-| VAmoS Bench          | <div align="center"><img src="assets/benchmark-no.svg" alt="No" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-no.svg" alt="No" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-no.svg" alt="No" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-yes.svg" alt="Yes" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-yes.svg" alt="Yes" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-no.svg" alt="No" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-yes.svg" alt="Yes" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-no.svg" alt="No" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-partial.svg" alt="Partial" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-yes.svg" alt="Yes" width="16" height="16"></div> |
-| Full-Duplex-Bench v3 | <div align="center"><img src="assets/benchmark-no.svg" alt="No" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-no.svg" alt="No" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-no.svg" alt="No" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-no.svg" alt="No" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-yes.svg" alt="Yes" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-partial.svg" alt="Partial" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-partial.svg" alt="Partial" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-no.svg" alt="No" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-yes.svg" alt="Yes" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-no.svg" alt="No" width="16" height="16"></div> |
-| VoiceAgentBench      | <div align="center"><img src="assets/benchmark-no.svg" alt="No" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-no.svg" alt="No" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-no.svg" alt="No" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-no.svg" alt="No" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-no.svg" alt="No" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-partial.svg" alt="Partial" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-no.svg" alt="No" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-no.svg" alt="No" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-partial.svg" alt="Partial" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-no.svg" alt="No" width="16" height="16"></div> |
+| MIVAS Bench          |                          |                          |                              |                     |            |                         |                         |                                    |                             |                                  |
+| EVA                  |                          |                          |                              |                     |            |                         |                         |                                    |                             |                                  |
+| τ-Voice              |                          |                          |                              |                     |            |                         |                         |                                    |                             |                                  |
+| VAmoS Bench          |                          |                          |                              |                     |            |                         |                         |                                    |                             |                                  |
+| Full-Duplex-Bench v3 |                          |                          |                              |                     |            |                         |                         |                                    |                             |                                  |
+| VoiceAgentBench      |                          |                          |                              |                     |            |                         |                         |                                    |                             |                                  |
 
-**Legend:** <img src="assets/benchmark-yes.svg" alt="Yes" width="16" height="16"> Yes · <img src="assets/benchmark-partial.svg" alt="Partial" width="16" height="16"> Partial · <img src="assets/benchmark-no.svg" alt="No" width="16" height="16"> No
 
 ## Methodology
 
@@ -43,17 +41,19 @@ The industry's `agent_blueprint.json` tells the harness how to compose prompts, 
 
 MIVAS evaluates complete interactions across these dimensions:
 
-| Dimension              | What is evaluated                                                     |
-| ---------------------- | --------------------------------------------------------------------- |
-| Task completion        | Whether the caller's legitimate objective was achieved                |
-| Tool use               | Tool selection, arguments, and required ordering                      |
-| State accuracy         | Whether final state matches the authorized outcome                    |
-| Policy adherence       | Identity, disclosure, safety, privacy, and domain rules               |
-| Handoff integrity      | Correct specialist routing with preserved context                     |
-| Refusal and escalation | Safe handling of unauthorized or unsupported requests                 |
-| Conversation quality   | Intelligibility, responsiveness, pacing, and completeness             |
-| Reliability            | Consistency across repeated runs                                      |
-| Cost and latency       | Resources and response times required to complete the interaction     |
+
+| Dimension              | What is evaluated                                                 |
+| ---------------------- | ----------------------------------------------------------------- |
+| Task completion        | Whether the caller's legitimate objective was achieved            |
+| Tool use               | Tool selection, arguments, and required ordering                  |
+| State accuracy         | Whether final state matches the authorized outcome                |
+| Policy adherence       | Identity, disclosure, safety, privacy, and domain rules           |
+| Handoff integrity      | Correct specialist routing with preserved context                 |
+| Refusal and escalation | Safe handling of unauthorized or unsupported requests             |
+| Conversation quality   | Intelligibility, responsiveness, pacing, and completeness         |
+| Reliability            | Consistency across repeated runs                                  |
+| Cost and latency       | Resources and response times required to complete the interaction |
+
 
 Task correctness is conjunctive:
 
@@ -89,6 +89,7 @@ Each industry pack includes an agent blueprint, production-style prompts, tool s
 ## Voice agent harnesses
 
 Harnesses translate the MIVAS blueprint into provider-specific runtimes. Native S2S models are the primary systems under evaluation; cascaded systems provide baselines.
+
 
 | Category                   | Harness families                                                                                                                                                                                                                              |
 | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -221,6 +222,8 @@ If you use MIVAS Bench in published work, cite the repository and the benchmark 
       url={https://github.com/bluejay-ai-dev/mivas-bench},
 }
 ```
+
+
 
 ## License
 
