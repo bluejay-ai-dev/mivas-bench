@@ -1,6 +1,6 @@
 # LiveKit Agents harness
 
-Three LiveKit Agents runtimes over the shared `control-industry` blueprint, reached
+A LiveKit Agents runtime over the shared `control-industry` blueprint, reached
 by **Bluejay `connection_type=SIP`**. Bluejay dials this project's LiveKit SIP
 host; an inbound trunk plus dispatch rule create the room and dispatch our
 `agent_name`. Audio is the stock LiveKit SIP mix — no CHIRP bridge, no RoomIO
@@ -9,8 +9,6 @@ patching, no tool webhook.
 | runtime | stack | LiveKit `agent_name` |
 | --- | --- | --- |
 | `cascaded/` | Deepgram Flux `flux-general-en` STT + OpenAI `gpt-4.1` + ElevenLabs `eleven_flash_v2_5` | `mivas-livekit-cascaded` |
-| `openai-realtime-2.1/` | OpenAI Realtime `gpt-realtime-2.1` (S2S) | `mivas-livekit-openai-realtime` |
-| `gemini-flash-live-3.1/` | Google `gemini-3.1-flash-live-preview` (S2S) | `mivas-livekit-gemini-live` |
 
 `cascaded` is STT/LLM/TTS-matched to the Vapi and Cartesia cascaded harnesses, so
 the framework is the only variable.
@@ -57,10 +55,8 @@ cp .env.example .env      # LIVEKIT_* + LIVEKIT_SIP_HOST / LIVEKIT_SIP_NUMBER
 # terminal A — shared industry tool server (do not restart if another harness is using it)
 uv run python industries/control-industry/tool_server.py
 
-# terminal B/C/D — one worker per runtime
+# terminal B — the worker
 .venv/bin/python cascaded/agent.py dev
-.venv/bin/python openai-realtime-2.1/agent.py dev
-.venv/bin/python gemini-flash-live-3.1/agent.py dev
 ```
 
 Then queue a Bluejay run against the SIP agent. Do not set `connection_type=LIVEKIT`.
