@@ -10,7 +10,7 @@
 
 [![Leaderboard](https://img.shields.io/badge/Leaderboard-Results-15803D?style=flat&logo=googleanalytics&logoColor=white)](https://research.getbluejay.ai/leaderboard) [![Technical Blog](https://img.shields.io/badge/Technical%20Blog-Methodology-2563EB?style=flat&logo=readme&logoColor=white)](https://research.getbluejay.ai/methodology) [![Dataset](https://img.shields.io/badge/Dataset-Hugging%20Face-FFD21E?style=flat&logo=huggingface&logoColor=000)](https://huggingface.co/datasets/bluejay-labs/mivas-bench) [![Industries](https://img.shields.io/badge/Industries-Explore-0F766E?style=flat)](https://research.getbluejay.ai/industries)
 
-MIVAS Bench evaluates S2S models inside stateful, multi-agent systems that follow policy, use tools, preserve state, and route work across specialists. Cascaded speech-to-text, language-model, and text-to-speech systems serve as baselines. This repository contains industry environments, production-style prompts, multi-agent blueprints, provider harnesses, evaluation cases, deterministic verifiers, and run artifacts.
+MIVAS Bench is an indicator of speech-to-speech (S2S) voice AI performance across economic sectors. It evaluates models through high-specificity tasks and deterministic verifiers that produce granular, component-level evaluation rewards in production-style, multi-agent voice environments for healthcare, legal services, and customer support. Each task places a provider harness inside an industry-specific agent DAG with production-length prompts, provider-native handoffs, tool access, and isolated state. Tool use, handoff path, and final database state are scored conjunctively: Pass<sup>1</sup> measures single-run capability, while Pass<sup>5</sup> measures whether that capability survives five independent trials. Native S2S models are the primary systems under evaluation; cascaded speech-to-text, language-model, and text-to-speech systems serve as baselines.
 
 ## Benchmark comparison
 
@@ -29,66 +29,82 @@ MIVAS Bench evaluates S2S models inside stateful, multi-agent systems that follo
 
 ## Methodology
 
-MIVAS models each industry as a network of specialists. Reception classifies requests, identity establishes authorization, and domain agents perform the work. Handoffs are scored behavior. Prompts resemble production prompts and are not shortened for a particular model.
+### Multi-agent industry environments
 
-Each case starts from known SQLite state. Industry tools access an isolated per-call database through FastAPI. Evaluation uses the transcript, tool sequence, provider-native handoff trace, and final state. Consequential actions must appear in final state.
+MIVAS represents each industry as a directed graph of specialist agents, following the architecture patterns used by companies deploying voice AI in production. Each agent has a bounded operational role and the prompt, tools, policies, and context required to resolve the customer intents within that role. An agent can complete the work itself, hand the caller forward to the next stage of a workflow, or transfer the caller to a specialist better suited to the request.
 
-A **harness** adapts a model or platform to the benchmark contract. An **industry pack** supplies agents, prompts, tools, policies, fixtures, and cases:
+Handoffs are first-class benchmark behavior. They determine whether the system selected the correct specialist, observed authorization and workflow gates, and preserved the intended route through a long, multi-step interaction. The prompts are production-length operating specifications rather than shortened benchmark instructions.
+
+### Harness and industry composition
+
+The repository separates model execution from industry behavior:
 
 ```text
 voice agent harness + industry pack = benchmark runtime
 ```
 
-The industry's `agent_blueprint.json` tells the harness how to compose prompts, tools, and handoffs. The runtime packages the harness, industry, database, and state service. Bluejay executes simulations and returns evaluation data; a public standalone invocation is not yet defined.
+- A **voice agent harness** contains the provider-specific runtime architecture. It connects the model to the Digital Human, carries bidirectional audio, instantiates the agents declared by the blueprint, performs provider-native handoffs and session operations, and dispatches industry tool calls.
+- An **industry pack** contains the multi-agent blueprint, production-style system prompts, tool definitions, database schema and seed state, per-call state service, and scored task suite.
 
-### Evaluation and verification
+The industry's `agent_blueprint.json` is the interface between the two. Pairing a harness with an industry instantiates one voice agent system, which makes it possible to evaluate the same model runtime across industries or the same industry against multiple model providers without coupling either side to the other.
 
-MIVAS evaluates complete interactions across these dimensions:
+Bluejay Digital Humans conduct live, adaptive voice calls against the composed runtime. Each simulation result identifier becomes the call identifier used by every tool request, giving the conversation an isolated SQLite database initialized from the industry's schema and seed data. At hangup, MIVAS preserves the transcript, execution trace, final state, and database snapshot used for verification.
 
+### Task suites
 
-| Dimension              | What is evaluated                                                 |
-| ---------------------- | ----------------------------------------------------------------- |
-| Task completion        | Whether the caller's legitimate objective was achieved            |
-| Tool use               | Tool selection, arguments, and required ordering                  |
-| State accuracy         | Whether final state matches the authorized outcome                |
-| Policy adherence       | Identity, disclosure, safety, privacy, and domain rules           |
-| Handoff integrity      | Correct specialist routing with preserved context                 |
-| Refusal and escalation | Safe handling of unauthorized or unsupported requests             |
-| Conversation quality   | Intelligibility, responsiveness, pacing, and completeness         |
-| Reliability            | Consistency across repeated runs                                  |
-| Cost and latency       | Resources and response times required to complete the interaction |
+Each scored industry contains 72 locked cases: 60 base tasks and 12 audio-condition variants that repeat selected cases under background noise or degraded signal. The suites are balanced across easy, medium, and hard tasks. Every case begins from known state and defines:
 
+- the caller's identity, objective, traits, and behavioral constraints;
+- scripted facts or responses needed to keep the task well-specified;
+- the expected specialist handoff path;
+- required tool calls and constrained arguments;
+- the exact final database state produced by a correct interaction.
+
+The released tasks were written, reviewed, and manually exercised by humans, then checked through contract tests and deterministic replay against fresh seeded state. Constrained simulator responses reduce avoidable variance while preserving live voice interaction.
+
+Five categories in each suite cover the industry's principal operational workflows. A sixth `R` category tests the boundaries around regulation, policy, refusal, escalation, impersonation, and adversarial requests. The identifiers reflect the underlying task data: Healthcare and Legal use `C1` through `C5` plus `R`, while Customer Support uses `T1` through `T5` plus `R`. The precise `R` label is industry-specific rather than uniform:
+
+| Industry | Domain categories | `R` category |
+| -------- | ----------------- | ------------ |
+| Healthcare | New-patient access, appointment management, coverage and benefits, cosmetic concierge, billing and payments | Regulatory adherence |
+| Legal | Reception and routing, conflicts and barred matters, eligibility gates, intake and documents, fees and booking | Clients and refusals |
+| Customer Support | Orders and delivery, returns and refunds, service, membership, price matching | Regulatory adherence |
+
+### Conjunctive deterministic verification
 
 Task correctness is conjunctive:
 
 ```text
-database-state adherence AND handoff adherence AND tool adherence
+tool adherence AND handoff adherence AND database-state adherence
 ```
 
-- **Database-state adherence** compares final state with the expected outcome.
-- **Handoff adherence** checks provider-native transfers that may produce no API call or database mutation.
-- **Tool adherence** checks required industry calls, including read-only calls that final state cannot reveal.
+- **Tool adherence** verifies that required industry calls occurred with the constrained arguments defined by the task. This captures reads and other consequential calls that final state alone cannot reveal.
+- **Handoff adherence** verifies that the expected provider-native transfers occurred in order. A handoff is a session-level operation, not an external API call, and may leave no database mutation.
+- **Database-state adherence** compares the persisted state at hangup with the expected state produced from the same seed data and authorized tool sequence.
 
-Every applicable verifier must pass. Transcript, audio, latency, quality, and cost remain diagnostic evidence rather than substitutes for deterministic verification.
+All three applicable verifiers must pass. A successful database write cannot conceal an incorrect route, and a correct handoff cannot conceal a missing tool call. This separation also produces component-level feedback for multi-step tasks, exposing whether a failure arose from action selection, agent routing, or state mutation rather than collapsing the interaction into a single opaque judgment.
 
-Digital Humans define caller identities, goals, constraints, and failure conditions. Cases cover ordinary and multi-step work, policy boundaries, refusals, escalation, ambiguity, and adversarial pressure. Repeated trials remain separate so reliability can be measured without hiding run-level failures.
+The verifier matches expected tools by name and constrained arguments, checks the expected handoffs as an ordered path, and compares final state over the industry's write-bearing tables. Transcript quality, audio behavior, latency, and cost remain diagnostic evidence. They do not substitute for deterministic task correctness.
 
-Exports keep one conversation per row with task identity, component passes, state differences, transcript and trace data, latency, metrics, and estimated cost. Task correctness comes from the MIVAS verifier rather than Bluejay's general goal judge.
+### Pass<sup>1</sup> and Pass<sup>5</sup>
+
+Pass<sup>1</sup> records whether one conversation satisfies the full conjunctive criterion. Pass<sup>5</sup> is stricter: a task receives a Pass<sup>5</sup> only when all five independent conversations pass. Repetition distinguishes a system that can complete a task from one that can do so reliably.
+
+The released evaluation matrix contains five conversations per case for eight completed runtimes across all three scored industries. Exports retain one row per conversation, including task identity, component passes, state differences, transcript and trace data, latency, metrics, and estimated cost. This preserves run-level failures and allows Pass<sup>1</sup>, Pass<sup>5</sup>, and component scores to be recomputed from the underlying evidence.
 
 ## Industries
 
 
 | Industry                                         | Hypothetical organization | Principal challenge                                                            |
 | ------------------------------------------------ | ------------------------- | ------------------------------------------------------------------------------ |
-| [Control](industries/control-industry/)          | Bluejay's Repair Services | Minimal end-to-end wiring and appointment state                                |
 | [Healthcare](industries/healthcare/)             | Straus Dermatology        | Identity, scheduling, coverage, billing, and bounded clinical support          |
 | [Legal](industries/legal/)                       | Halverson & Reed          | Conflict screening, intake discipline, legal-advice boundaries, and scheduling |
 | [Customer support](industries/customer-support/) | Kestrel Electronics       | Orders, returns, service, membership, fraud, and product safety                |
 
 
-The three scored industries are Healthcare, Legal, and Customer Support. Control is setup-only: it verifies that a harness can receive a call, hand off, invoke a tool, and write expected state. New harnesses should pass Control before running a scored industry.
+The initial release concentrates on Healthcare, Legal, and Customer Support, sectors where voice AI is already being deployed across complex, consequential workflows. The hypothetical organizations make the environments reproducible while retaining the authorization gates, policies, specialist boundaries, tools, and state transitions that shape production systems.
 
-Each industry pack includes an agent blueprint, production-style prompts, tool schemas, deterministic seed data, a FastAPI tool service, and a handoff graph. Scored industries also include cases, Digital Humans, expected final state, and verification artifacts.
+Each industry pack includes an agent blueprint, production-style prompts, tool schemas, deterministic seed data, a FastAPI state service, a handoff graph, Digital Human cases, expected outcomes, and verification artifacts.
 
 ## Industry architectures
 
@@ -233,18 +249,15 @@ flowchart TD
 
 Harnesses translate the MIVAS blueprint into provider-specific runtimes. Native S2S models are the primary systems under evaluation; cascaded systems provide baselines.
 
+| Status | Runtime |
+| ------ | ------- |
+| Native S2S | [OpenAI Realtime 2.1 and 2.1 Mini](voice-agent-harnesses/openai/), [Gemini Flash Live 3.1 and 2.5 Flash Native Audio](voice-agent-harnesses/gemini/), [Amazon Nova Sonic 2](voice-agent-harnesses/aws/), [Grok Voice](voice-agent-harnesses/grok/), [Qwen Audio Realtime](voice-agent-harnesses/qwen/) |
+| Cascaded baseline | [LiveKit Cascaded](voice-agent-harnesses/livekit/) with Deepgram Flux, GPT-4.1, and ElevenLabs |
+| In progress | [NVIDIA Nemotron and Nemotron VoiceChat](voice-agent-harnesses/nvidia/) |
 
-| Category                 | Harness families                                                                                                                                                                                                                              |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Realtime model APIs      | [OpenAI](voice-agent-harnesses/openai/), [Gemini](voice-agent-harnesses/gemini/), [xAI](voice-agent-harnesses/grok/), [Amazon Nova](voice-agent-harnesses/aws/), [Qwen](voice-agent-harnesses/qwen/), [NVIDIA](voice-agent-harnesses/nvidia/) |
-| Orchestration frameworks | [LiveKit](voice-agent-harnesses/livekit/)                                                                                                                                                                                                     |
-
-
-Support varies by runtime and industry; a listed family has an implemented runtime, but not every model or deployment mode has completed every suite. See the [harness contract](voice-agent-harnesses/README.md) for runtime requirements.
+The completed runtimes above account for the eight-runtime Pass<sup>5</sup> matrix. NVIDIA runtimes remain in progress and are not included in that result set. See the [harness contract](voice-agent-harnesses/README.md) for the provider adapter, tool dispatch, handoff, and session requirements.
 
 ## Quick start
-
-
 
 ### Requirements
 
@@ -272,15 +285,15 @@ INDUSTRY=control-industry
 OPENAI_API_KEY=
 ```
 
+### Validate with `control-industry`
 
-
-### Validate the composition
+`control-industry` is a minimal receptionist-to-scheduler smoke environment with no scored task suite. It exists to confirm that a harness can receive a call, construct the declared agents, complete a provider-native handoff, invoke an industry tool, and persist appointment state. It is a setup fixture and is excluded from MIVAS industry results.
 
 ```bash
 uv run python run.py --check
 ```
 
-This validates blueprint composition, not an official benchmark run.
+This checks blueprint composition. It does not place a call or produce an official benchmark result.
 
 ### Speak to the agent
 
@@ -288,7 +301,7 @@ This validates blueprint composition, not an official benchmark run.
 uv run python tests/converse.py
 ```
 
-Begin with `control-industry`, ask to schedule a repair, and confirm the handoff and appointment state.
+Ask to schedule a repair, then confirm the scheduler handoff and resulting appointment state.
 
 To run the selected tool server and agent directly:
 
@@ -343,7 +356,7 @@ Comparisons should identify the repository revision, harness, industry suite, mo
 
 ## Limitations
 
-Not every harness has completed every industry, and provider telemetry varies. Simulated callers and hypothetical organizations support reproducibility but do not represent every property of human speech or a sector's full operational surface. Do not compare scores across task, prompt, verifier, or runtime revisions without qualification.
+Not every implemented harness has completed every industry, and provider telemetry varies. Simulated callers and hypothetical organizations support reproducibility but do not represent every property of human speech or a sector's full operational surface. Component scores are evaluation outputs, not an RL training interface. Do not compare scores across task, prompt, verifier, or runtime revisions without qualification.
 
 ## Contributing
 
