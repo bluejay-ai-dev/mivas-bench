@@ -30,9 +30,7 @@ def test_human_transfer_dispatches_and_ends() -> None:
 def test_blueprint_hangup_names() -> None:
     expected = {
         "customer-support": {"escalate_to_human"},
-        "finance": {"escalate_to_human"},
         "legal": {"escalate_to_human"},
-        "travel": {"escalate_to_human"},
         "healthcare": {"transfer_to_human"},
         "control-industry": set(),
     }

@@ -86,7 +86,7 @@ for `schedule_appointment` when the model speaks the confirmation without a FC e
 export NVIDIA_API_KEY=nvapi-...
 # optional overrides:
 # export VOICECHAT_WS_URL=wss://grpc.nvcf.nvidia.com/v1/realtime
-# export VOICECHAT_FUNCTION_ID=42c86b5f-545a-4b2f-a83b-90fd71da9912
+# export VOICECHAT_FUNCTION_ID=<your NVCF function id>   # required for hosted NVCF
 # export VOICECHAT_SPEAKS_FIRST=true   # agent opens (needed when DH speaks_first=false)
 
 uv run python industries/control-industry/tool_server.py
@@ -120,7 +120,7 @@ Wire format is 24 kHz PCM both ways (server resamples internally); CHIRP stays 1
 | `NEMOTRON_USE_SSL` | `true`/`false`. Unset: TLS if the ASR host is NVCF or `:443` |
 | `NEMOTRON_ASR_FUNCTION_ID` | NVCF function id. Empty / omitted on a local NIM |
 | `VOICECHAT_WS_URL` | VoiceChat Realtime WS (default `wss://grpc.nvcf.nvidia.com/v1/realtime`) |
-| `VOICECHAT_FUNCTION_ID` | NVCF function id (default `42c86b5f-545a-4b2f-a83b-90fd71da9912`) |
+| `VOICECHAT_FUNCTION_ID` | NVCF function id (required for hosted NVCF; omit on a local NIM) |
 | `VOICECHAT_SPEAKS_FIRST` | `true`/`false` (default `true`) — speech-kick at call open only |
 | `VOICECHAT_SPEAK_FIRST_KICK_WAV` | optional override path for the speak-first kick (mono pcm16) |
 | `VOICECHAT_AGENT_RMS_ON` | RMS gate for `agent.speech` (default `500`) |

@@ -86,14 +86,21 @@ def load_dotenv() -> None:
         os.environ.setdefault(key.strip(), value.strip().strip("'").strip('"'))
 
 
+# English voice catalog (accent, gender), rotated per-DH by index.
+VOICES = [
+    ("american", "female"),
+    ("american", "male"),
+    ("american2", "female"),
+    ("mature", "male"),
+    ("southern", "female"),
+    ("mature", "female"),
+    ("american2", "female"),
+    ("southern", "male"),
+]
+
+
 def voices() -> list[tuple[str, str]]:
-    """Reuse the English catalog from scripts/healthcare_digital_humans.py."""
-    path = ROOT / "scripts" / "healthcare_digital_humans.py"
-    spec = importlib.util.spec_from_file_location("healthcare_dh_voices", path)
-    assert spec is not None and spec.loader is not None
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return list(module.VOICES)
+    return list(VOICES)
 
 
 def api_url() -> str:
@@ -612,7 +619,15 @@ def _norm_traits(traits: Any) -> list[dict[str, Any]]:
 
 def _norm_claim_field(field: str, value: Any) -> Any:
     if field == "expected_tool_calls":
-        return expected_tool_calls(value)
+        # The API returns this list in unstable storage order after updates;
+        # scoring reads task.json, so compare order-insensitively like traits.
+        return sorted(
+            expected_tool_calls(value),
+            key=lambda row: (
+                str(row.get("name") or ""),
+                json.dumps(row.get("parameters"), sort_keys=True, default=str),
+            ),
+        )
     if field == "scripted_responses":
         rows = scripted_responses(value)
         return sorted(

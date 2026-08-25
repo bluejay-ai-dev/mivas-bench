@@ -345,7 +345,8 @@ async def run_tool(
     with tool_span(name, args, call_id=call_id, parent=parent) as span:
         try:
             result, stop = await _execute_tool(name, args, bp, state)
-            ok = bool(result.get("success"))
+            # tool servers answer {"ok": true}; only transfer_*/end_call use "success"
+            ok = bool(result.get("ok") or result.get("success"))
         except Exception as e:  # noqa: BLE001
             result, stop, ok = (
                 {"success": False, "error": f"{type(e).__name__}: {e}"},
