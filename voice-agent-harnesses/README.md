@@ -22,9 +22,8 @@ control-industry uses `{"success": ..., ...}`). An unknown tool name is a 404.
 
 Every industry tool call is namespaced to **one Bluejay simulation result id**
 (the same value Bluejay already puts on the CHIRP WebSocket upgrade as
-`X-Simulation-Result-Id`, or on the SIP INVITE for LiveKit/Pipecat workers).
-That id is the conversation key for SQLite, traces, and evals — not a provider
-call id (Vapi `call.id`, Retell `call_id`, …).
+`X-Simulation-Result-Id`, or on the SIP INVITE for LiveKit/Gemini workers).
+That id is the conversation key for SQLite, traces, and evals.
 
 1. CHIRP (or the LiveKit worker) reads `X-Simulation-Result-Id`. If Bluejay
    omitted it, the harness mints `call_{uuid}` and logs; it never sends an
@@ -41,17 +40,11 @@ call id (Vapi `call.id`, Retell `call_id`, …).
    single debug DB.
 6. Session / handoff tools still never hit the tool server.
 
-Platform harnesses (vapi/retell/bland/cartesia) receive tools as a webhook on
-`{PUBLIC_URL}/tool/{name}`. That request does not inherit the CHIRP
-connection: the adapter must map the provider call id back to the Bluejay
-simulation result id and send **that** as `X-Mivas-Call-Id`.
-
 Tool kinds, from the blueprint entry's flags:
 
 - **industry** (default): dispatched to `POST /tools/{name}` as above. No
   per-tool handler code in any harness.
-- **handoff** (`handoff: true`): harness/provider-native (LiveKit agent switch,
-  Vapi squad handoff, Retell state edge, ElevenLabs `transfer_to_agent`, soft
+- **handoff** (`handoff: true`): harness-native (LiveKit agent switch, soft
   prompt handoff on fixed-config sessions). Never hits the tool server.
 - **session** (`session: true`, e.g. `end_call`): harness-native; ends the
   session with the harness's delayed-close/farewell behavior. Never hits the
@@ -66,10 +59,4 @@ Do not `GET` the public hostname for `/state` or `/snapshot`.
 Concurrency on EKS is `max_concurrent ≈ MIVAS_REPLICAS × in_process_ws_limit`
 (default replicas `1`; start `in_process_ws_limit` at 2–4). Raising replicas
 is how overlapping Bluejay calls stay on isolated SQLite files without sharing
-one process. Do not set `MIVAS_REPLICAS>1` on vapi/retell/bland/cartesia —
-those webhooks hit a random replica. See
-[docs/per-call-db-and-replicas.md](../docs/per-call-db-and-replicas.md).
-
-Platform harnesses (vapi/retell/bland/cartesia) receive tool invocations as
-provider webhooks on `{PUBLIC_URL}/tool/{name}` and forward them to
-`POST {TOOL_SERVER_URL}/tools/{name}` unchanged.
+one process.

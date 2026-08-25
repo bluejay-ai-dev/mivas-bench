@@ -30,7 +30,7 @@ if str(RUNTIME) not in sys.path:
 
 from call_id import set_call_id  # noqa: E402
 
-INDUSTRIES = ("control-industry", "healthcare", "finance", "legal", "travel")
+INDUSTRIES = ("control-industry", "healthcare", "legal")
 
 
 def _health_ok(url: str) -> bool:
@@ -212,9 +212,6 @@ def _write(industry: str, url: str, call_id: str) -> dict[str, Any]:
             {"full_name": "Jordan Lee", "dob": "1990-04-12"},
             call_id,
         )
-    if industry == "finance":
-        reason = "caller_request" if call_id == "675" else "business_services"
-        return _post(url, "escalate_to_human", {"reason_code": reason}, call_id)
     if industry == "legal":
         if call_id == "675":
             _post(
@@ -241,9 +238,6 @@ def _write(industry: str, url: str, call_id: str) -> dict[str, Any]:
             {"for_whom": "reception", "message": "please call back B"},
             call_id,
         )
-    if industry == "travel":
-        reason = "caller_request" if call_id == "675" else "irrops"
-        return _post(url, "escalate_to_human", {"reason_code": reason}, call_id)
     raise AssertionError(industry)
 
 
@@ -277,22 +271,12 @@ def _assert_industry_isolation(
         assert b_status[3] == "booked"
         assert seed_status[3] == "booked"
         return
-    if industry == "finance":
-        assert [r["reason_code"] for r in a.get("escalations") or []] == ["caller_request"]
-        assert [r["reason_code"] for r in b.get("escalations") or []] == ["business_services"]
-        assert (unused.get("escalations") or []) == []
-        return
     if industry == "legal":
         a_msgs = [r.get("message") for r in a.get("messages") or []]
         b_msgs = [r.get("message") for r in b.get("messages") or []]
         assert a_msgs == ["please call back A"]
         assert b_msgs == ["please call back B"]
         assert (unused.get("messages") or []) == []
-        return
-    if industry == "travel":
-        assert [r["reason_code"] for r in a.get("escalations") or []] == ["caller_request"]
-        assert [r["reason_code"] for r in b.get("escalations") or []] == ["irrops"]
-        assert (unused.get("escalations") or []) == []
         return
     assert a != seed
     assert b != a
@@ -306,14 +290,6 @@ def _summary(industry: str, state: dict[str, Any]) -> Any:
             "appt_status": {r["id"]: r["status"] for r in state.get("appointments") or []},
             "tool_events": len(state.get("tool_events") or []),
         }
-    if industry == "finance":
-        return {
-            "escalations": [
-                {k: r.get(k) for k in ("id", "reason_code", "member_id") if k in r or True}
-                for r in (state.get("escalations") or [])
-            ],
-            "tool_events": len(state.get("tool_events") or []),
-        }
     if industry == "legal":
         return {
             "messages": [
@@ -323,20 +299,12 @@ def _summary(industry: str, state: dict[str, Any]) -> Any:
             "escalations": len(state.get("escalations") or []),
             "tool_events": len(state.get("tool_events") or []),
         }
-    if industry == "travel":
-        return {
-            "escalations": [
-                {k: r.get(k) for k in ("id", "reason_code", "confirmation_code")}
-                for r in (state.get("escalations") or [])
-            ],
-            "tool_events": len(state.get("tool_events") or []),
-        }
     keys = sorted(state)
     return {k: (len(state[k]) if isinstance(state[k], list) else type(state[k]).__name__) for k in keys}
 
 
 def test_harness_dispatch_hits_per_call_files(tmp_path: Path) -> None:
-    """OpenAI / Grok / Twilio dispatch against a live control-industry server."""
+    """OpenAI / Grok dispatch against a live control-industry server."""
     data_dir = tmp_path / "control"
     data_dir.mkdir()
     port = 18200
@@ -347,17 +315,15 @@ def test_harness_dispatch_hits_per_call_files(tmp_path: Path) -> None:
         seed = _state(url, "unused")
         _dispatch_openai(url, "675", "08/15/2026")
         _dispatch_grok(url, "676", "08/16/2026")
-        _dispatch_twilio(url, "678", "08/18/2026")
-        a, b, c = _state(url, "675"), _state(url, "676"), _state(url, "678")
+        a, b = _state(url, "675"), _state(url, "676")
         unused = _state(url, "unused")
         assert [r["date"] for r in a["appointments"]] == ["08/15/2026"]
         assert [r["date"] for r in b["appointments"]] == ["08/16/2026"]
-        assert [r["date"] for r in c["appointments"]] == ["08/18/2026"]
         assert unused == seed
         names = {p.name for p in _db_files(data_dir)}
-        assert {"675.db", "676.db", "678.db", "unused.db"} <= names
-        inodes = {p.stat().st_ino for p in _db_files(data_dir) if p.stem in {"675", "676", "678"}}
-        assert len(inodes) == 3
+        assert {"675.db", "676.db", "unused.db"} <= names
+        inodes = {p.stat().st_ino for p in _db_files(data_dir) if p.stem in {"675", "676"}}
+        assert len(inodes) == 2
     finally:
         _stop(proc)
 
@@ -399,22 +365,3 @@ def _dispatch_grok(url: str, call_id: str, date: str) -> None:
     assert result.get("success") is True, result
 
 
-def _dispatch_twilio(url: str, call_id: str, date: str) -> None:
-    family = ROOT / "voice-agent-harnesses" / "twilio"
-    import importlib
-
-    spec = importlib.util.spec_from_file_location("mivas_twilio_harness", family / "harness.py")
-    assert spec and spec.loader
-    twilio = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(twilio)
-    set_call_id(call_id)
-    import asyncio
-
-    # twilio reads TOOL_SERVER_URL at import — patch the helper
-    orig = twilio.tool_server_url
-    twilio.tool_server_url = lambda: url  # type: ignore[assignment]
-    try:
-        result = asyncio.run(twilio.dispatch_industry_tool("schedule_appointment", {"date": date}))
-    finally:
-        twilio.tool_server_url = orig
-    assert result.get("success") is True, result
