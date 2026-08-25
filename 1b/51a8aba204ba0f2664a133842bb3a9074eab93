@@ -1,0 +1,53 @@
+.gitignore
+  s_1cb9a0689f7f64::t_c0d2a1802809ff 68
+voice-agent-harnesses/README.md
+  s_1cb9a0689f7f64::t_e8779d51ef115d 62
+  s_1cb9a0689f7f64::t_e23345512ba90e 26
+  s_1cb9a0689f7f64::t_09e87914a97160 47
+  s_1cb9a0689f7f64::t_f13b0fc983c33a 25
+tests/test_agents.py
+  s_1cb9a0689f7f64::t_f492b25a6aa832 38,40,140-141,144,154
+tests/test_a5_smoke.py
+  s_1cb9a0689f7f64::t_a59cffc9714dfe 33
+  s_1cb9a0689f7f64::t_98489b4acf54d4 307,318,324-326
+voice-agent-harnesses/nvidia/voicechat.py
+  s_1cb9a0689f7f64::t_1da6b858e8d589 45
+  s_1cb9a0689f7f64::t_5072067f4dbb4b 88-89
+tests/test_harness_tool_headers.py
+  s_1cb9a0689f7f64::t_e6d8e368fabc54 23
+tests/test_tool_server.py
+  s_1cb9a0689f7f64::t_98eebb73bb9191 24
+tests/test_dockerfiles.py
+  s_1cb9a0689f7f64::t_99513cae50b4c5 15-16
+tests/test_expected_final_state.py
+  s_1cb9a0689f7f64::t_024f37f0ddc792 151
+codebuild/fleet.py
+  s_1cb9a0689f7f64::t_6a6bf6d1ca3969 19-22
+.env.example
+  s_1cb9a0689f7f64::t_7a21d075e82eef 34,52,93,103-105,108-109
+  s_1cb9a0689f7f64::t_ad9404447acc2a 98-102
+voice-agent-harnesses/nvidia/README.md
+  s_1cb9a0689f7f64::t_4016eeb57b85e0 89
+  s_1cb9a0689f7f64::t_6663d809737e50 123
+run.py
+  s_1cb9a0689f7f64::t_27bee5deea3bed 111,336
+voice-agent-harnesses/livekit/test_harness.py
+  s_1cb9a0689f7f64::t_6dee219dffc3be 96
+  s_1cb9a0689f7f64::t_59bea2b365c36f 129,131
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "1b51a8aba204ba0f2664a133842bb3a9074eab93",
+  "prompts": {},
+  "sessions": {
+    "s_1cb9a0689f7f64": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9db2f26b-93c7-45ee-a25b-887b8a2e808a",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}
