@@ -86,14 +86,21 @@ def load_dotenv() -> None:
         os.environ.setdefault(key.strip(), value.strip().strip("'").strip('"'))
 
 
+# English voice catalog (accent, gender), rotated per-DH by index.
+VOICES = [
+    ("american", "female"),
+    ("american", "male"),
+    ("american2", "female"),
+    ("mature", "male"),
+    ("southern", "female"),
+    ("mature", "female"),
+    ("american2", "female"),
+    ("southern", "male"),
+]
+
+
 def voices() -> list[tuple[str, str]]:
-    """Reuse the English catalog from scripts/healthcare_digital_humans.py."""
-    path = ROOT / "scripts" / "healthcare_digital_humans.py"
-    spec = importlib.util.spec_from_file_location("healthcare_dh_voices", path)
-    assert spec is not None and spec.loader is not None
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return list(module.VOICES)
+    return list(VOICES)
 
 
 def api_url() -> str:
