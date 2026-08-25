@@ -2,7 +2,7 @@
 """Backfill conversation and utterance LLM costs onto existing eval CSVs.
 
 New exports get these columns from bluejay_run_to_csv via eval_costs.
-This script stamps the same fields onto already-written healthcare CSVs.
+This script stamps the same fields onto already-written eval CSVs.
 
     uv run python scripts/annotate_eval_costs.py
 """
@@ -44,6 +44,23 @@ LEGAL_CSVS = {
     "livekit-cascaded": "legal-livekit-cascaded-254130.csv",
 }
 
+CUSTOMER_SUPPORT_CSVS = {
+    "openai-realtime-2.1": "customer-support-openai-realtime-2.1-257175.csv",
+    "openai-realtime-2.1-mini": "customer-support-openai-realtime-2.1-mini-257177.csv",
+    "grok-voice": "customer-support-grok-voice-257188.csv",
+    "aws-nova-sonic-2": "customer-support-aws-nova-sonic-2-257179.csv",
+    "gemini-flash-live-3.1": "customer-support-gemini-flash-live-3.1-257174.csv",
+    "gemini-2.5-flash-native-audio": "customer-support-gemini-2.5-flash-native-audio-257187.csv",
+    "qwen-audio-realtime": "customer-support-qwen-audio-realtime-257215.csv",
+    "livekit-cascaded": "customer-support-livekit-cascaded-257156.csv",
+}
+
+INDUSTRY_CSVS = {
+    "healthcare": HEALTHCARE_CSVS,
+    "legal": LEGAL_CSVS,
+    "customer-support": CUSTOMER_SUPPORT_CSVS,
+}
+
 
 def _load(name: str, path: Path):
     spec = importlib.util.spec_from_file_location(name, path)
@@ -55,6 +72,7 @@ def _load(name: str, path: Path):
 
 
 eval_costs = _load("eval_costs", SCRIPTS / "eval_costs.py")
+csv.field_size_limit(sys.maxsize)
 
 
 def annotate_row(row: dict, slug: str, pricing: dict) -> dict:
@@ -125,16 +143,21 @@ def annotate_csv(slug: str, filename: str, pricing: dict, workers: int) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--slug", help="annotate only this harness slug")
-    parser.add_argument("--industry", choices=("healthcare", "legal"), help="annotate only this pack")
+    parser.add_argument(
+        "--industry",
+        choices=tuple(INDUSTRY_CSVS),
+        help="annotate only this pack",
+    )
     args = parser.parse_args()
     pricing = eval_costs.load_pricing()
     workers = min(12, os.cpu_count() or 8)
     eval_costs.CACHE.mkdir(parents=True, exist_ok=True)
-    jobs = []
-    if args.industry != "legal":
-        jobs.extend(HEALTHCARE_CSVS.items())
-    if args.industry != "healthcare":
-        jobs.extend(LEGAL_CSVS.items())
+    packs = [args.industry] if args.industry else list(INDUSTRY_CSVS)
+    jobs = [
+        (slug, filename)
+        for pack in packs
+        for slug, filename in INDUSTRY_CSVS[pack].items()
+    ]
     if args.slug:
         jobs = [(slug, filename) for slug, filename in jobs if slug == args.slug]
         if not jobs:
