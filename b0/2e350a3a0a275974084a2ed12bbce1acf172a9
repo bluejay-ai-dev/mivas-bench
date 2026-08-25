@@ -1,0 +1,14 @@
+README.md
+  h_bbe1a3ca680b9f 3,15,18-23,44-56,93,226-227,230
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "b02e350a3a0a275974084a2ed12bbce1acf172a9",
+  "prompts": {},
+  "humans": {
+    "h_bbe1a3ca680b9f": {
+      "author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
