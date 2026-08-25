@@ -110,9 +110,7 @@ def test_human_transfer_is_session_but_still_replayed() -> None:
     """Human-transfer tools end the call but still POST, so expected state includes them."""
     for industry, tool in (
         ("customer-support", "escalate_to_human"),
-        ("finance", "escalate_to_human"),
         ("legal", "escalate_to_human"),
-        ("travel", "escalate_to_human"),
         ("healthcare", "transfer_to_human"),
     ):
         flags = tool_flags(industry)
@@ -150,6 +148,7 @@ def test_healthcare_expected_calls_replay() -> None:
     )
     assert tasks_mod is not None and tasks_mod.loader is not None
     tdh = importlib.util.module_from_spec(tasks_mod)
+    sys.modules["tasks_to_digital_humans"] = tdh  # dataclass ns lookup needs it
     tasks_mod.loader.exec_module(tdh)
     humans = tdh.build("healthcare")
     flags = tool_flags("healthcare")

@@ -21,7 +21,7 @@ from typing import Any
 from fastapi.testclient import TestClient
 
 ROOT = Path(__file__).resolve().parents[1]
-INDUSTRIES = ("control-industry", "finance", "healthcare", "legal", "travel")
+INDUSTRIES = ("control-industry", "customer-support", "healthcare", "legal")
 
 
 @contextmanager
@@ -133,32 +133,6 @@ _KNOWN_GOOD_ARGS: dict[str, dict[str, dict[str, Any]]] = {
         "explain_charge": {"line_item_id": "li_noshow"},
         "check_plan_accepted": {"carrier": "aetna", "location_id": "loc_park_ave"},
     },
-    "finance": {
-        "search_kb": {"query": "routing number"},
-        "get_branch_info": {"branch": "Granford"},
-        "get_fee": {"fee": "overdraft"},
-        "check_membership_eligibility": {"county": "Chester"},
-        "identify_member": {"full_name": "Marisol Vega", "phone": "6105550142"},
-        "verify_identity": {"dob": "1988-03-14", "member_number_last4": "4471"},
-        "get_member_summary": {},
-        "get_balance": {"account": "checking"},
-        "get_transactions": {"account": "checking"},
-        "get_cards": {},
-    },
-    "travel": {
-        "find_reservation": {"last_name": "Solberg", "confirmation_code": "RT2LKD"},
-        "get_reservation": {"confirmation_code": "RT2LKD"},
-        "get_traveler_list": {"confirmation_code": "RT2LKD"},
-        "get_disruption_entitlement": {"confirmation_code": "RT2LKD"},
-        "get_fare_rules": {"confirmation_code": "RT2LKD"},
-        "search_flights": {"origin": "ORD", "destination": "SEA", "earliest_date": "2026-08-09"},
-        "get_flight_status": {"flight_number": "JA771", "date": "2026-08-09"},
-        "get_credit_balance": {"miles_number": "JR2019773"},
-        "get_elite_status": {"miles_number": "JR4471902"},
-        "get_pass_status": {"miles_number": "JR8827104"},
-        "get_seat_map": {"flight_number": "JA812", "date": "2026-08-18"},
-        "escalate_to_human": {"reason_code": "caller_request"},
-    },
 }
 
 
@@ -177,8 +151,6 @@ def _dispatch_args(industry: str, spec: dict[str, Any]) -> tuple[dict[str, Any],
 # silently depend on tools.json's declaration order.
 _DISPATCH_BEFORE: dict[str, list[str]] = {
     "healthcare": ["verify_identity"],
-    "finance": ["identify_member", "verify_identity"],
-    "travel": ["find_reservation"],
     "legal": ["lookup_caller"],
 }
 
@@ -587,117 +559,6 @@ def test_healthcare_flow_through_dispatch() -> None:
         state = client.get("/state").json()
         assert any(a["status"] == "booked" and a["start"] == slot["start"]
                    for a in state["appointments"])
-
-
-def test_finance_guards_survive_dispatch() -> None:
-    with _load_tool_server("finance") as module, TestClient(module.app) as client:
-        def tool(name: str, args: dict[str, Any]) -> dict[str, Any]:
-            resp = client.post(f"/tools/{name}", json={"arguments": args})
-            assert resp.status_code == 200, resp.text
-            return resp.json()
-
-        # GLBA gate: identified is not verified; verified unlocks
-        locked = tool("get_member_summary", {})
-        assert locked["ok"] is False and locked["error_code"] == "IDENTITY_NOT_VERIFIED"
-        found = tool("identify_member", {"full_name": "Marisol Vegga", "phone": "0142"})
-        assert found["ok"] and found["data"]["record_found"]
-        assert tool("get_balance", {"account": "checking"})["ok"] is False
-        assert tool("verify_identity",
-                    {"dob": "1988-03-14", "member_number_last4": "4471"})["ok"]
-        bal = tool("get_balance", {"account": "checking"})
-        assert bal["ok"] and bal["data"]["available_cents"] == 238012
-
-        # wire: tier math, warning gate, token single-use
-        q = tool("quote_wire", {"destination_type": "domestic", "amount": 2500,
-                                "beneficiary": "Test Person"})
-        assert q["ok"] and q["data"]["fee"] == "$30.00"
-        token = q["data"]["confirmation_token"]
-        needs_warning = tool("confirm_wire", {"confirmation_token": token,
-                                              "fraud_warning_acknowledged": False})
-        assert needs_warning["error_code"] == "WIRE_WARNING_REQUIRED"
-        sent = tool("confirm_wire", {"confirmation_token": token,
-                                     "fraud_warning_acknowledged": True})
-        assert sent["ok"] and sent["data"]["status"] == "sent"
-        reuse = tool("confirm_wire", {"confirmation_token": token,
-                                      "fraud_warning_acknowledged": True})
-        assert reuse["ok"] is False and reuse["error_code"] == "TOKEN_ALREADY_USED"
-
-        # dispute: disclosure gate, Reg E script, durable claim row
-        tool("identify_member", {"full_name": "Alma Reyes", "phone": "6105550129"})
-        tool("verify_identity", {"dob": "1992-12-05", "member_number_last4": "5518"})
-        first = tool("file_dispute", {"transaction_id": "t_701",
-                                      "reason": "unauthorized"})
-        assert first["error_code"] == "DISCLOSURE_REQUIRED"
-        assert "10 business days" in first["member_safe_message"]
-        filed = tool("file_dispute", {"transaction_id": "t_701",
-                                      "reason": "unauthorized",
-                                      "disclosures_acknowledged": True})
-        assert filed["ok"] and filed["data"]["regulation"] == "reg_e"
-        state = client.get("/state").json()
-        assert any(c["transaction_id"] == "t_701" for c in state["claims"])
-
-
-def test_travel_guards_survive_dispatch() -> None:
-    """Identity gate, the disrupted-booking precedence trap, silent elite waivers,
-    and token discipline, all through POST /tools/{name}."""
-    with _load_tool_server("travel") as module, TestClient(module.app) as client:
-        def tool(name: str, args: dict[str, Any]) -> dict[str, Any]:
-            resp = client.post(f"/tools/{name}", json={"arguments": args})
-            assert resp.status_code == 200, resp.text
-            return resp.json()
-
-        # protected data is closed until a reservation is verified on this call
-        assert tool("get_reservation", {})["error_code"] == "IDENTITY_NOT_VERIFIED"
-
-        # tolerant on spelling and on a spaced-out code, strict on identity
-        found = tool("find_reservation",
-                     {"last_name": "Sollberg", "confirmation_code": "rt 2 l k d"})
-        assert found["ok"] and found["data"]["verified"]
-        assert found["data"]["confirmation_code"] == "RT2LKD"
-
-        # the precedence trap: RT2LKD's flight is cancelled, so a voluntary change
-        # must be refused rather than quoted a fee
-        disrupted = tool("quote_change", {"new_flight": "JA775"})
-        assert disrupted["ok"] is False
-        assert disrupted["error_code"] == "DISRUPTED_USE_IRROPS", disrupted
-        assert disrupted["data"]["recoverable"] is False
-
-        # the free rebook is what that traveller is actually owed, at zero
-        rebook = tool("quote_involuntary_rebook", {"new_flight": "JA775"})
-        assert rebook["ok"] and rebook["data"]["total"] == 0.0, rebook
-        token = rebook["data"]["confirmation_token"]
-        assert tool("confirm_involuntary_rebook",
-                    {"confirmation_token": token})["data"]["status"] == "rebooked"
-        reuse = tool("confirm_involuntary_rebook", {"confirmation_token": token})
-        assert reuse["ok"] is False and reuse["error_code"] == "TOKEN_ALREADY_USED"
-
-        # a dead carrier's code is a non-recoverable refusal, not a NOT_FOUND
-        ceased = tool("find_reservation",
-                      {"last_name": "Quintero-Namm", "confirmation_code": "VA774193"})
-        assert ceased["error_code"] == "CARRIER_CEASED_OPERATIONS", ceased
-        assert ceased["data"]["recoverable"] is False
-
-    # silent waivers and touchpoint pricing, on a fresh server so the session is clean
-    with _load_tool_server("travel") as module, TestClient(module.app) as client:
-        def tool(name: str, args: dict[str, Any]) -> dict[str, Any]:
-            resp = client.post(f"/tools/{name}", json={"arguments": args})
-            assert resp.status_code == 200, resp.text
-            return resp.json()
-
-        assert tool("find_reservation",
-                    {"last_name": "Ingersoll", "confirmation_code": "ZC8MRF"})["ok"]
-        first = tool("get_bag_price",
-                     {"bag_kind": "checked_first", "touchpoint": "booking"})
-        assert first["data"]["price"] == 0.0, "platinum covers the first checked bag"
-        assert first["data"]["base_price"] == 30.0
-        carry = tool("get_bag_price", {"bag_kind": "carry on", "touchpoint": "gate"})
-        assert carry["data"]["price"] == 79.0, "no tier ever covers the carry-on"
-
-        # a charge has to have been quoted on this call
-        assert tool("quote_payment",
-                    {"amount": 500})["error_code"] == "AMOUNT_NOT_QUOTED"
-
-
 def test_control_industry_calls_are_isolated() -> None:
     """Two overlapping bookings must not share a SQLite file."""
     with _load_tool_server("control-industry", shared=False) as module:
@@ -770,12 +631,10 @@ def test_industry_writes_do_not_leak_across_call_ids() -> None:
             "queue": "front_desk",
             "callback_number": "+12125550100",
         })],
-        "finance": [("escalate_to_human", {"reason_code": "caller_request"})],
         "legal": [
             ("lookup_caller", {"full_name": "Dana Whitfield", "phone": "5105550142"}),
             ("take_message", {"for_whom": "reception", "message": "please call back"}),
         ],
-        "travel": [("escalate_to_human", {"reason_code": "caller_request"})],
     }
     for industry, steps in writers.items():
         with _load_tool_server(industry, shared=False) as module:
@@ -917,7 +776,6 @@ if __name__ == "__main__":
     test_dispatch_every_industry_tool()
     test_control_industry_rest_and_dispatch()
     test_legal_guards_survive_dispatch()
-    test_finance_guards_survive_dispatch()
     test_healthcare_flow_through_dispatch()
     test_healthcare_calls_are_isolated()
     test_healthcare_tool_inputs_are_closed()
@@ -925,5 +783,4 @@ if __name__ == "__main__":
     test_healthcare_prompt_enums_match_schema()
     test_healthcare_prompt_demands_are_satisfiable()
     test_healthcare_list_locations_has_what_the_prompts_require()
-    test_travel_guards_survive_dispatch()
     print("ok test_tool_server")

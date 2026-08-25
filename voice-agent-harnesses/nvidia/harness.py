@@ -50,9 +50,7 @@ LLM_BASE_URL = os.environ.get(
     "NEMOTRON_LLM_BASE_URL", "https://integrate.api.nvidia.com/v1"
 )
 ASR_SERVER = os.environ.get("NEMOTRON_ASR_SERVER", "grpc.nvcf.nvidia.com:443")
-ASR_FUNCTION_ID = os.environ.get(
-    "NEMOTRON_ASR_FUNCTION_ID", "bb0837de-8c7b-481f-9ec8-ef5663e9c1fa"
-)
+ASR_FUNCTION_ID = os.environ.get("NEMOTRON_ASR_FUNCTION_ID", "")
 ASR_MODEL = os.environ.get("NEMOTRON_ASR_MODEL", "nemotron-asr-streaming")
 TTS_SERVER = os.environ.get("NEMOTRON_TTS_SERVER", "grpc.nvcf.nvidia.com:443")
 TTS_VOICE = os.environ.get(
@@ -220,6 +218,8 @@ def asr_model_function_map() -> dict[str, str]:
         if explicit and explicit.strip():
             out["function_id"] = explicit.strip()
         return out
+    if not ASR_FUNCTION_ID:
+        raise SystemExit("need NEMOTRON_ASR_FUNCTION_ID (NVCF function id) for hosted ASR")
     out["function_id"] = ASR_FUNCTION_ID
     return out
 
@@ -263,7 +263,8 @@ async def run_tool(
     with tool_span(name, args, call_id=call_id, parent=parent) as span:
         try:
             result, stop = await _execute_tool(name, args, bp, state)
-            ok = bool(result.get("success"))
+            # tool servers answer {"ok": true}; only transfer_*/end_call use "success"
+            ok = bool(result.get("ok") or result.get("success"))
         except Exception as e:  # noqa: BLE001 — dead tool must not kill the call
             result, stop, ok = (
                 {"success": False, "error": f"{type(e).__name__}: {e}"},

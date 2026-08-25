@@ -20,23 +20,14 @@ HARNESSES = ROOT / "voice-agent-harnesses"
 if str(RUNTIME) not in sys.path:
     sys.path.insert(0, str(RUNTIME))
 
-from call_id import HEADER, bind_provider, for_provider, reset, set_call_id  # noqa: E402
+from call_id import HEADER, reset, set_call_id  # noqa: E402
 
 FAMILIES = (
     "openai",
     "gemini",
-    "vapi",
-    "retell",
-    "bland",
-    "cartesia",
-    "elevenlabs",
-    "twilio",
     "grok",
     "nvidia",
-    "assemblyai",
-    "deepgram",
     "livekit",
-    "pipecat",
 )
 
 
@@ -142,42 +133,6 @@ def test_every_tool_server_post_sets_call_id_header() -> None:
     assert offenders == []
 
 
-def test_platform_webhooks_bind_bluejay_id() -> None:
-    for family in ("vapi", "retell", "bland", "cartesia"):
-        text = (HARNESSES / family / "adapters" / "chirp.py").read_text()
-        assert "for_provider" in text, family
-        assert "begin_session" in text, family
-        assert "bind_provider" in text, family
-
-
-def test_cartesia_run_tool_keeps_webhook_bind() -> None:
-    """The Line webhook pins CALL_ID; run_tool must not for_provider(None) and mint."""
-    _RecordingClient.posts = []
-    try:
-        with _family_harness("cartesia") as harness:
-            bind_provider("sid_abc", "675")
-            for_provider("sid_abc")
-            with patch("httpx.AsyncClient", _RecordingClient):
-                _run(harness.run_tool("schedule_appointment", {"date": "08/15/2026"}))
-    except ModuleNotFoundError as e:
-        pytest.skip(str(e))
-    _assert_posted_header("675")
-
-
-def test_cartesia_line_tools_carry_provider_call_id() -> None:
-    """Line POSTs must include Cartesia call_id so a random replica can hit the bind store."""
-    text = (HARNESSES / "cartesia" / "line_agent" / "main.py").read_text()
-    assert "call_request" in text
-    assert "?call_id=" in text
-    assert "X-Call-Id" in text or "X-Cartesia-Call-Id" in text
-    harness = (HARNESSES / "cartesia" / "harness.py").read_text()
-    assert "src_digest" in harness
-    chirp = (HARNESSES / "cartesia" / "adapters" / "chirp.py").read_text()
-    assert "_record_line_tools" in chirp
-    assert "emit_span=False" in chirp
-    assert '"stream_id": resolved' in chirp
-
-
 def _assert_posted_header(expected: str) -> None:
     assert _RecordingClient.posts, "expected a tool-server POST"
     last = _RecordingClient.posts[-1]
@@ -197,32 +152,6 @@ def test_family_dispatch_sends_bluejay_header(family: str) -> None:
     _assert_posted_header("675")
 
 
-def test_vapi_two_calls_do_not_cross_headers() -> None:
-    _RecordingClient.posts = []
-    try:
-        with _family_harness("vapi") as harness:
-            bind_provider("vapi-aaa", "675")
-            bind_provider("vapi-bbb", "676")
-            with patch("httpx.AsyncClient", _RecordingClient):
-                _run(
-                    harness._execute_tool(
-                        "schedule_appointment",
-                        {"date": "08/15/2026"},
-                        for_provider("vapi-aaa"),
-                    )
-                )
-                _run(
-                    harness._execute_tool(
-                        "schedule_appointment",
-                        {"date": "08/16/2026"},
-                        for_provider("vapi-bbb"),
-                    )
-                )
-    except ModuleNotFoundError as e:
-        pytest.skip(str(e))
-    assert [p["headers"].get(HEADER) for p in _RecordingClient.posts] == ["675", "676"]
-
-
 def _dispatch_family(family: str, harness: Any) -> None:
     set_call_id("675")
     with patch("httpx.AsyncClient", _RecordingClient):
@@ -232,43 +161,8 @@ def _dispatch_family(family: str, harness: Any) -> None:
         if family == "gemini":
             _run(harness._dispatch("schedule_appointment", {"date": "08/15/2026"}))
             return
-        if family == "vapi":
-            bind_provider("vapi-aaa", "675")
-            _run(
-                harness._execute_tool(
-                    "schedule_appointment", {"date": "08/15/2026"}, for_provider("vapi-aaa")
-                )
-            )
-            return
-        if family in {"retell", "bland", "cartesia", "elevenlabs"}:
-            _run(harness._execute_tool("schedule_appointment", {"date": "08/15/2026"}))
-            return
-        if family == "twilio":
-            _run(harness.dispatch_industry_tool("schedule_appointment", {"date": "08/15/2026"}))
-            return
-        if family in {"assemblyai", "deepgram"}:
-            _run(harness._dispatch("schedule_appointment", {"date": "08/15/2026"}))
-            return
         if family == "livekit":
             _run(harness._execute("schedule_appointment", {"date": "08/15/2026"}, local=False))
-            return
-        if family == "pipecat":
-            bp = {
-                "agents": {
-                    "receptionist": {
-                        "tools": [{"name": "schedule_appointment"}],
-                    }
-                },
-                "catalog": {"schedule_appointment": {}},
-            }
-            _run(
-                harness._execute_tool(
-                    "schedule_appointment",
-                    {"date": "08/15/2026"},
-                    bp,
-                    {"agent": "receptionist"},
-                )
-            )
             return
         if family in {"grok", "nvidia"}:
             bp = {

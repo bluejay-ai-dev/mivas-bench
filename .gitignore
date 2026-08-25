@@ -65,3 +65,4 @@ Thumbs.db
 # call areas and one-pager under docs/<industry>/, and none of it is tracked.
 docs/
 graphify-out/
+.claude/
