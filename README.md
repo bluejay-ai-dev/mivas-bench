@@ -8,7 +8,7 @@
 
 *Measuring how speech-to-speech (S2S) voice AI models perform inside the multi-agent architectures industries use to deploy voice AI today.*
 
-[Technical Blog](#benchmark-methodology) [Industries](#industries) [Leaderboard](#leaderboard) [Dataset](https://huggingface.co/datasets/bluejay-labs/mivas-bench) [Demo](#demo)
+[Technical Blog](#benchmark-methodology) [Industries](#industries) [Leaderboard](#leaderboard) [Dataset](https://huggingface.co/datasets/bluejay-labs/mivas-bench) [Methodology](#demo)
 
 MIVAS Bench evaluates speech-to-speech (S2S) models as they are deployed in real-world environments: inside stateful, multi-agent systems that conduct conversations, follow policy, use tools, preserve state, and route work across specialists. Cascaded speech-to-text, language-model, and text-to-speech systems serve as baselines.
 
@@ -56,7 +56,7 @@ MIVAS is an open-source, open-data, reproducible benchmark. This repository cont
 
 ## Why MIVAS
 
-Most benchmarks isolate a model, prompt, audio sample, or pipeline component. Production voice systems instead divide responsibility among specialists, protect sensitive information, retrieve state, call tools, and transfer control during a live exchange. MIVAS treats this complete system as the unit of evaluation. To our knowledge, it is the first multi-industry voice benchmark built expressly around multi-agent production architectures.
+Most benchmarks evaluate single-prompt agents and their ability to achieve production tasks. This is unrealistic as users build multi-agent systems with models to handle their production workloads, and significant, as verifiers gain the ability to provide granular rewards in a multi-agent environment. Production voice systems divide responsibility among specialists, protect sensitive information, retrieve state, call tools, and transfer control during a live exchange. MIVAS places novel S2S voice models in these complex production systems to truly evaluate model performance. To our knowledge, **it is the first multi-industry voice benchmark built expressly around multi-agent production architectures.**
 
 > Can a voice agent complete real work across industries without violating the policies, boundaries, and procedural obligations that make the work trustworthy?
 
