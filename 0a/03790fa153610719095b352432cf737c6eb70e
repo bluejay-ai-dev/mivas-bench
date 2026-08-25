@@ -1,0 +1,50 @@
+scripts/annotate_eval_costs.py
+  s_9007490be0cf47::t_d8c795a576e124 5
+  s_9007490be0cf47::t_18ec684439e5e6 47-63
+  s_9007490be0cf47::t_6fdfc994bb4a7b 75
+  s_9007490be0cf47::t_c6941185998ef1 146-150,155-160
+.env.example
+  s_1cb9a0689f7f64::t_40794f3147fbf2 103-107
+  s_c972c3c1d3e9c4::t_a29bdbf798eecc 99
+scripts/expected_final_state.py
+  s_c972c3c1d3e9c4::t_97eef79965491a 63-74
+  s_c972c3c1d3e9c4::t_b81217951c65ad 544-547
+scripts/tasks_to_digital_humans.py
+  s_1cb9a0689f7f64::t_b4e5592dd816f4 103-106
+  s_1cb9a0689f7f64::t_ea5f318f89ee23 835-838,842-845
+  s_1cb9a0689f7f64::t_a691f98d859402 931
+  s_1cb9a0689f7f64::t_3bdc93bd9580a0 915
+  s_1cb9a0689f7f64::t_5a10616f43c72e 870-873
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "0a03790fa153610719095b352432cf737c6eb70e",
+  "prompts": {},
+  "sessions": {
+    "s_1cb9a0689f7f64": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9db2f26b-93c7-45ee-a25b-887b8a2e808a",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    },
+    "s_9007490be0cf47": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "805bd9ea-c225-48c2-a085-8f9a805bfd0f",
+        "model": "cursor-grok-4.6-high-fast"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    },
+    "s_c972c3c1d3e9c4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1e6f5967-a3df-4af8-80d1-bbf1c82d8c88",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}
