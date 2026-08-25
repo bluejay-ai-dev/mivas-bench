@@ -1,0 +1,19 @@
+README.md
+  s_d97e2d8db9aaf0::t_85aa161a2d7ce8 11
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "cb3755410f356197570838203a3175874486efac",
+  "prompts": {},
+  "sessions": {
+    "s_d97e2d8db9aaf0": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "82a5a69e-da55-4195-96ca-68cce266d7e8",
+        "model": "grok-4.6"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
