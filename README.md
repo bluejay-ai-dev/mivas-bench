@@ -370,4 +370,6 @@ If you use MIVAS Bench in published work, cite the repository and the benchmark 
 
 ## License
 
-No license has been specified for this repository.
+The [MIT License](LICENSE) applies only to the code, data, and other materials
+explicitly included in this repository. It does not grant rights to externally
+hosted datasets or artifacts.
