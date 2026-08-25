@@ -1,6 +1,6 @@
 """Conversation and utterance LLM costs from the S2S price table.
 
-Used by bluejay_run_to_csv (live export) and annotate_eval_costs (backfill).
+Used by bluejay_run_to_csv (live export).
 Token models use gen_ai.usage.* on model / agent_turn spans. Grok is
 $0.08 per audio minute. Missing usage falls back to 25 audio tokens/s.
 """

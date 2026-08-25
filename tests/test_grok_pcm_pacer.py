@@ -148,7 +148,10 @@ def test_chirp_echo_wins_over_inbound_rms() -> None:
 
 
 def test_transfer_to_human_hangs_up_after_http() -> None:
-    bp = {"agents": {"reception": {"tools": [{"name": "transfer_to_human", "session": True}]}}}
+    bp = {
+        "agents": {"reception": {"tools": [{"name": "transfer_to_human", "session": True}]}},
+        "catalog": {"transfer_to_human": {"session": True}},
+    }
     state = {"agent": "reception"}
     payload = {"ok": True, "data": {"transferred": True}}
 

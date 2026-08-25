@@ -25,9 +25,9 @@ its own DB proved the booking happened; 719103 failed the same way.
 A result with zero recorded tools is therefore not a pass and not a failure — it is
 a measurement error, and it must not enter a score.
 
-    uv run python scripts/verify_run.py 228854            # one run
-    uv run python scripts/verify_run.py 228854 228860 ...  # several
-    uv run python scripts/verify_run.py --sim 30315        # the sim's latest run
+    uv run python verifiers/verify_run.py 228854            # one run
+    uv run python verifiers/verify_run.py 228854 228860 ...  # several
+    uv run python verifiers/verify_run.py --sim 30315        # the sim's latest run
 
 Exit code 0 = every result is scorable. 1 = at least one is void (re-run those).
 """

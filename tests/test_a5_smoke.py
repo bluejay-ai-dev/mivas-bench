@@ -329,10 +329,25 @@ def test_harness_dispatch_hits_per_call_files(tmp_path: Path) -> None:
 
 
 def _dispatch_openai(url: str, call_id: str, date: str) -> None:
+    import importlib.util
+
     family = ROOT / "voice-agent-harnesses" / "openai"
-    if str(family) not in sys.path:
-        sys.path.insert(0, str(family))
-    import harness as openai_harness
+    # unique module name + scoped sys.path: a bare `import harness` would cache
+    # openai's harness as sys.modules["harness"] and poison later family tests
+    saved = {n: sys.modules.pop(n) for n in ("harness", "report") if n in sys.modules}
+    sys.path.insert(0, str(family))
+    try:
+        spec = importlib.util.spec_from_file_location(
+            "mivas_openai_harness", family / "harness.py"
+        )
+        assert spec is not None and spec.loader is not None
+        openai_harness = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(openai_harness)
+    finally:
+        sys.path.remove(str(family))
+        sys.modules.pop("harness", None)
+        sys.modules.pop("report", None)
+        sys.modules.update(saved)
 
     openai_harness.TOOL_SERVER_URL = url
     set_call_id(call_id)

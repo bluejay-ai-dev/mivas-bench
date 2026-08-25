@@ -4,8 +4,8 @@ Each simulation result id is the S3 object name and the conversation key.
 That result also carries digital_human_id, which joins back to an expected
 case. k=3 means three result folders under one digital-human folder.
 
-    uv run python scripts/pull_actual_final_state.py RUN_ID --slug openai-realtime-2-1-customer-support
-    uv run python scripts/pull_actual_final_state.py RUN_ID --harness openai/realtime-2.1 --industry customer-support
+    uv run python verifiers/pull_actual_final_state.py RUN_ID --slug openai-realtime-2-1-customer-support
+    uv run python verifiers/pull_actual_final_state.py RUN_ID --harness openai/realtime-2.1 --industry customer-support
 
 Writes:
 

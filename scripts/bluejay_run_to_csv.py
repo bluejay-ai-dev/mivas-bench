@@ -49,6 +49,7 @@ from typing import Any, Iterable, TextIO
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPTS = ROOT / "scripts"
+VERIFIERS = ROOT / "verifiers"
 DEFAULT_AUDIO_EVAL = ROOT / "verify-out" / "audio_eval"
 DEFAULT_PRICING = ROOT / "voice-agent-harnesses" / "s2s-model-pricing.json"
 
@@ -62,10 +63,9 @@ def _load(name: str, path: Path):
     return module
 
 
-verify_task_run = _load("verify_task_run", SCRIPTS / "verify_task_run.py")
+verify_task_run = _load("verify_task_run", VERIFIERS / "verify_task_run.py")
 verify_run = verify_task_run.verify_run
 eval_costs = _load("eval_costs", SCRIPTS / "eval_costs.py")
-verify_runs_bulk = _load("verify_runs_bulk", SCRIPTS / "verify_runs_bulk.py")
 
 # stable header. extra custom metrics (if any) append after these.
 HEADERS = [
@@ -694,6 +694,29 @@ def parse_run_spec(spec: str) -> tuple[str, list[str]]:
     return parts[0], parts[1:]
 
 
+def _fill_holes(
+    primary: list[dict[str, Any]],
+    retries: list[list[dict[str, Any]]],
+    *,
+    is_hole: Any,
+    usable: Any,
+) -> list[dict[str, Any]]:
+    """Replace hole slots with same-digital-human retry rows, in run order."""
+    pool: dict[str, list[dict[str, Any]]] = {}
+    for pack in retries:
+        for row in pack:
+            if usable(row):
+                pool.setdefault(str(row.get("digital_human_id")), []).append(row)
+    out: list[dict[str, Any]] = []
+    for slot in primary:
+        candidates = pool.get(str(slot.get("digital_human_id")))
+        if is_hole(slot) and candidates:
+            out.append(candidates.pop(0))
+        else:
+            out.append(slot)
+    return out
+
+
 def fill_connection_holes(
     primary: list[dict[str, Any]],
     retries: list[list[dict[str, Any]]],
@@ -703,22 +726,28 @@ def fill_connection_holes(
     A later COMPLETED retry is usable even when its tool list is empty —
     that conversation still replaces NO_ANSWER.
     """
-    orig_hole = verify_runs_bulk._slot_is_hole
-    orig_retry = verify_runs_bulk._retry_usable
+    return _fill_holes(
+        primary,
+        retries,
+        is_hole=lambda s: str(s.get("status") or "") in CONNECTION_HOLES,
+        usable=lambda r: str(r.get("status") or "") == "COMPLETED" and not r.get("pending"),
+    )
 
-    def _connection_hole(slot: dict[str, Any]) -> bool:
-        return str(slot.get("status") or "") in CONNECTION_HOLES
 
-    def _completed_retry(row: dict[str, Any]) -> bool:
-        return str(row.get("status") or "") == "COMPLETED" and not row.get("pending")
-
-    verify_runs_bulk._slot_is_hole = _connection_hole
-    verify_runs_bulk._retry_usable = _completed_retry
-    try:
-        return verify_runs_bulk.fill_holes(primary, retries)
-    finally:
-        verify_runs_bulk._slot_is_hole = orig_hole
-        verify_runs_bulk._retry_usable = orig_retry
+def fill_void_holes(
+    primary: list[dict[str, Any]],
+    retries: list[list[dict[str, Any]]],
+) -> list[dict[str, Any]]:
+    """--fill-voids: also replace connected-but-VOID rows, with non-void retries."""
+    return _fill_holes(
+        primary,
+        retries,
+        is_hole=lambda s: str(s.get("status") or "") in CONNECTION_HOLES
+        or bool(s.get("void_reason")),
+        usable=lambda r: str(r.get("status") or "") == "COMPLETED"
+        and not r.get("pending")
+        and not r.get("void_reason"),
+    )
 
 
 def load_audio_eval(result_id: str, directory: Path | None) -> dict[str, Any] | None:
@@ -1427,12 +1456,9 @@ def collect_filled_results(
     fetch_details: bool = False,
 ) -> dict[str, Any]:
     """Score primary, then replace unanswered slots from later runs."""
+    # ponytail: the Postgres bulk-listing fast path left with verify_runs_bulk.py;
+    # every run now lists through the Bluejay API.
     pg_by_run: dict[str, list[dict[str, Any]]] = {}
-    if not fetch_details:
-        try:
-            pg_by_run = verify_runs_bulk.fetch_runs_from_postgres([primary, *retries])
-        except SystemExit:
-            pg_by_run = {}
     scored = collect_from_listing(
         primary,
         industry,
@@ -1458,7 +1484,7 @@ def collect_filled_results(
         retry_packs.append(extra["results"])
     if retry_packs:
         if include_void_holes:
-            scored["results"] = verify_runs_bulk.fill_holes(scored["results"], retry_packs)
+            scored["results"] = fill_void_holes(scored["results"], retry_packs)
         else:
             scored["results"] = fill_connection_holes(scored["results"], retry_packs)
     return scored
