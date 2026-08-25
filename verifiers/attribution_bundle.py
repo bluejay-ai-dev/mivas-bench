@@ -4,8 +4,8 @@ The judge's reasoning is the thing most often wrong (it asserts a tool was not c
 the result records it), so a bundle carries the transcript, the digital human's intent and
 criteria, the expected-vs-actual tool pairing and the trace's own tool sequence next to it.
 
-    uv run python scripts/attribution_bundle.py 230087 -o docs/finance/bundles
-    uv run python scripts/attribution_bundle.py 230087 --only F17 F31
+    uv run python verifiers/attribution_bundle.py 230087 -o docs/finance/bundles
+    uv run python verifiers/attribution_bundle.py 230087 --only F17 F31
 """
 
 from __future__ import annotations

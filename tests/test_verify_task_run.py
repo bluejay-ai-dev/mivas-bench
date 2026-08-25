@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 _SPEC = importlib.util.spec_from_file_location(
-    "verify_task_run", ROOT / "scripts" / "verify_task_run.py"
+    "verify_task_run", ROOT / "verifiers" / "verify_task_run.py"
 )
 assert _SPEC is not None and _SPEC.loader is not None
 vtr = importlib.util.module_from_spec(_SPEC)

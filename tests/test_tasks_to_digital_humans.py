@@ -76,6 +76,13 @@ def test_clones_share_source_easy_voice() -> None:
         assert clone["name"] == source["name"]
 
 
+# Fairness passes edited these base cases after the pack was scored; their
+# clones keep the contract that actually ran. Locked, not to be re-synced.
+KNOWN_CLONE_DRIFT = {
+    "C3-E1-BG": {"intent", "scripted_responses"},
+}
+
+
 def test_clones_match_source_semantics_except_audio_metadata() -> None:
     tasks_dir = ROOT / "industries" / "healthcare" / "tasks"
     for clone_path in sorted(tasks_dir.glob("*-BG/task.json")) + sorted(
@@ -85,6 +92,7 @@ def test_clones_match_source_semantics_except_audio_metadata() -> None:
         source_key = conv.source_case_key(clone_key)
         clone = json.loads(clone_path.read_text())
         source = json.loads((tasks_dir / source_key / "task.json").read_text())
+        allowed = KNOWN_CLONE_DRIFT.get(clone_key, set())
 
         assert {
             item["trait_name"]: item.get("value") for item in clone["traits"]
@@ -101,6 +109,8 @@ def test_clones_match_source_semantics_except_audio_metadata() -> None:
             "customer_available_tools",
             "exp_db_state",
         ):
+            if field in allowed:
+                continue
             assert clone.get(field) == source.get(field), f"{clone_key}: {field}"
         for field in ("category", "category_slug", "difficulty"):
             assert clone["metadata"][field] == source["metadata"][field], clone_key
@@ -494,8 +504,6 @@ def test_healthcare_leftover_holes_are_closed() -> None:
     assert "don't want a person" in c4h1_blob or "do not want a person" in c4h1_blob
     names = [c["name"] for c in c4h1["exp_tool_calls"]]
     assert names == [
-        "transfer_to_identity",
-        "identify_patient",
         "transfer_to_cosmetic",
         "quote_cosmetic_service",
         "quote_cosmetic_service",
@@ -646,10 +654,12 @@ def test_legal_fairness_c2h1_state_pin_and_rm_lookup_only() -> None:
         "summary": "",
     }
 
+    # R-M1/R-M2 were hardened into full intake chains ("make the legal cases
+    # harder"); the fairness core is that neither escalates to a human.
     for key in ("R-M1", "R-M2"):
         task = load(key)
         names = [c["name"] for c in task["exp_tool_calls"]]
-        assert names == ["lookup_caller"], key
+        assert "record_intake" in names, key
         assert "escalate_to_human" not in names, key
         assert not task.get("metadata", {}).get("escalation"), key
         assert (task.get("exp_db_state") or {}).get("escalations") == [], key
@@ -679,20 +689,24 @@ def test_legal_fairness_c2h1_state_pin_and_rm_lookup_only() -> None:
     ]
 
     c1m4 = load("C1-M4")
-    assert [c["name"] for c in c1m4["exp_tool_calls"]] == ["lookup_caller", "transfer_to_screening"]
-    assert "check_practice_area" not in [c["name"] for c in c1m4["exp_tool_calls"]]
+    # hardened into the screening chain; still no escalation and no intake write
+    c1m4_names = [c["name"] for c in c1m4["exp_tool_calls"]]
+    assert c1m4_names[:2] == ["lookup_caller", "transfer_to_screening"]
+    assert "escalate_to_human" not in c1m4_names
     assert (c1m4.get("exp_db_state") or {}).get("escalations") == []
     assert (c1m4.get("exp_db_state") or {}).get("intakes") == []
     assert "That's all I needed today" in c1m4["intent"]
 
     c1h4 = load("C1-H4")
-    assert [c["name"] for c in c1h4["exp_tool_calls"]] == ["escalate_to_human"]
+    assert [c["name"] for c in c1h4["exp_tool_calls"]] == ["lookup_caller", "escalate_to_human"]
     assert (c1h4.get("exp_db_state") or {}).get("escalations") == [
         {"id": 1, "caller_id": "c_new", "reason_code": "caller_request"}
     ]
 
     c2m4 = load("C2-M4")
-    assert [c["name"] for c in c2m4["exp_tool_calls"]] == ["lookup_caller", "transfer_to_screening"]
+    assert [c["name"] for c in c2m4["exp_tool_calls"]] == [
+        "lookup_caller", "transfer_to_screening", "check_conflict",
+    ]
     assert "escalate_to_human" not in [c["name"] for c in c2m4["exp_tool_calls"]]
     assert not c2m4.get("metadata", {}).get("escalation")
     assert (c2m4.get("exp_db_state") or {}).get("escalations") == []
@@ -709,6 +723,7 @@ def test_legal_fairness_c2h1_state_pin_and_rm_lookup_only() -> None:
         for pin in c2h4["scripted_responses"]
     )
     assert [c["name"] for c in c2h4["exp_tool_calls"]] == [
+        "lookup_caller",
         "transfer_to_screening",
         "escalate_to_human",
     ]

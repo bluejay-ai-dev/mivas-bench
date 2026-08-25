@@ -11,7 +11,7 @@ from fastapi.testclient import TestClient
 
 ROOT = Path(__file__).resolve().parents[1]
 _SPEC = importlib.util.spec_from_file_location(
-    "expected_final_state", ROOT / "scripts" / "expected_final_state.py"
+    "expected_final_state", ROOT / "verifiers" / "expected_final_state.py"
 )
 assert _SPEC is not None and _SPEC.loader is not None
 efs = importlib.util.module_from_spec(_SPEC)

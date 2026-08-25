@@ -19,8 +19,8 @@ def _load(name: str, path: Path):
     return module
 
 
-pull = _load("pull_actual_final_state", ROOT / "scripts" / "pull_actual_final_state.py")
-efs = _load("expected_final_state", ROOT / "scripts" / "expected_final_state.py")
+pull = _load("pull_actual_final_state", ROOT / "verifiers" / "pull_actual_final_state.py")
+efs = _load("expected_final_state", ROOT / "verifiers" / "expected_final_state.py")
 
 
 def test_pair_slug_and_s3_key() -> None:

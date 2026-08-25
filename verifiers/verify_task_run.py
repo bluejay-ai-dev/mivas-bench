@@ -18,9 +18,9 @@ Join result → task by the DH `case_key` trait or the `test_name` prefix
 Missing S3 dumps skip state with a note; `--actuals-dir` compares local
 files without S3.
 
-    uv run python scripts/verify_task_run.py RUN_ID --industry healthcare
-    uv run python scripts/verify_task_run.py --sim SIM_ID --industry healthcare
-    uv run python scripts/verify_task_run.py RUN_ID --industry healthcare --actuals-dir actual-final-state/...
+    uv run python verifiers/verify_task_run.py RUN_ID --industry healthcare
+    uv run python verifiers/verify_task_run.py --sim SIM_ID --industry healthcare
+    uv run python verifiers/verify_task_run.py RUN_ID --industry healthcare --actuals-dir actual-final-state/...
 """
 
 from __future__ import annotations
@@ -38,7 +38,7 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 INDUSTRY_ROOT = ROOT / "industries"
-SCRIPTS = ROOT / "scripts"
+VERIFIERS = Path(__file__).resolve().parent
 
 CASE_KEY_RE = re.compile(r"^[A-Z]+\d*-[A-Z0-9]+(?:-[A-Z0-9]+)*$")
 AGENT_ROLES = frozenset({"AGENT", "ASSISTANT"})
@@ -173,10 +173,10 @@ def _load(name: str, path: Path):
     return module
 
 
-verify_run = _load("verify_run", SCRIPTS / "verify_run.py")
-attribution = _load("attribution_bundle", SCRIPTS / "attribution_bundle.py")
-pull = _load("pull_actual_final_state", SCRIPTS / "pull_actual_final_state.py")
-efs = _load("expected_final_state", SCRIPTS / "expected_final_state.py")
+verify_run = _load("verify_run", VERIFIERS / "verify_run.py")
+attribution = _load("attribution_bundle", VERIFIERS / "attribution_bundle.py")
+pull = _load("pull_actual_final_state", VERIFIERS / "pull_actual_final_state.py")
+efs = _load("expected_final_state", VERIFIERS / "expected_final_state.py")
 
 canonical_state = efs.canonical_state
 states_match = efs.states_match

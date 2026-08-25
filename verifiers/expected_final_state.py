@@ -5,12 +5,12 @@ matching expected dump: copy schema+seed, POST /tools/{name} in declared order
 (skipping harness-native handoff tools and `end_call`), then write GET /state.
 Human-transfer session tools still POST so escalations land in the dump.
 
-    uv run python scripts/expected_final_state.py                  # all v2 packs
-    uv run python scripts/expected_final_state.py --industry customer-support
-    uv run python scripts/expected_final_state.py --from-json path.json --industry legal
-    uv run python scripts/expected_final_state.py --compare expected.json actual.json
-    uv run python scripts/expected_final_state.py --compare-dir expected-final-state/customer-support ./actuals
-    uv run python scripts/expected_final_state.py --compare-actuals actual-final-state/openai-realtime-2-1-customer-support/RUN_ID --industry customer-support
+    uv run python verifiers/expected_final_state.py                  # all v2 packs
+    uv run python verifiers/expected_final_state.py --industry customer-support
+    uv run python verifiers/expected_final_state.py --from-json path.json --industry legal
+    uv run python verifiers/expected_final_state.py --compare expected.json actual.json
+    uv run python verifiers/expected_final_state.py --compare-dir expected-final-state/customer-support ./actuals
+    uv run python verifiers/expected_final_state.py --compare-actuals actual-final-state/openai-realtime-2-1-customer-support/RUN_ID --industry customer-support
 """
 
 from __future__ import annotations
