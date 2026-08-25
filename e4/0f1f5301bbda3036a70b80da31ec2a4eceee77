@@ -1,0 +1,25 @@
+README.md
+  s_361435e1e97211::t_bce256fd040a3b 44,46-56,72
+  s_361435e1e97211::t_cb9a83b3447ee0 9,11,13
+  s_361435e1e97211::t_ff26d8d3f2c586 85,87,101
+  s_361435e1e97211::t_cda6e88d11d86f 224-227
+  s_361435e1e97211::t_c1761094769cfe 70
+  s_361435e1e97211::t_4170ba994ba1fe 187,202,204
+  s_361435e1e97211::t_c8ed7ebd9da85d 28,30,32,34,36-38,40,42,58,60-62,64-66,68
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "e40f1f5301bbda3036a70b80da31ec2a4eceee77",
+  "prompts": {},
+  "sessions": {
+    "s_361435e1e97211": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "9a3006ee-bbe8-4f91-a2c8-078f2a699d19",
+        "model": "gpt-5.6-sol-medium-fast"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
