@@ -1,0 +1,54 @@
+tests/test_grok_pcm_pacer.py
+  s_c972c3c1d3e9c4::t_57ac037b22f892 151-154
+scripts/bluejay_run_to_csv.py
+  s_c972c3c1d3e9c4::t_6e342b4f1f6282 1459-1460
+  s_c972c3c1d3e9c4::t_dc9a518b26d069 52,66
+  s_c972c3c1d3e9c4::t_2bacb246895d94 1487
+  s_c972c3c1d3e9c4::t_3186b60df3fb66 697-719,729-734,737-750
+tests/test_a5_smoke.py
+  s_c972c3c1d3e9c4::t_fc729b9cf68ea9 332-333
+  s_c972c3c1d3e9c4::t_81090f65d1ddee 335-350
+verifiers/expected_final_state.py
+  s_c972c3c1d3e9c4::t_dc9a518b26d069 1-564
+verifiers/pull_actual_final_state.py
+  s_c972c3c1d3e9c4::t_dc9a518b26d069 1-233
+verifiers/verify_task_run.py
+  s_c972c3c1d3e9c4::t_dc9a518b26d069 1-1102
+verifiers/verify_run.py
+  s_c972c3c1d3e9c4::t_dc9a518b26d069 1-210
+tests/test_tasks_to_digital_humans.py
+  s_c972c3c1d3e9c4::t_ec0167cd11206a 726
+  s_c972c3c1d3e9c4::t_6ffdd768fd102e 657-658,662
+  s_c972c3c1d3e9c4::t_393ec571b2a45c 701
+  s_c972c3c1d3e9c4::t_8232b2335ba273 707-709
+  s_c972c3c1d3e9c4::t_3df94e771da470 692-695
+  s_c972c3c1d3e9c4::t_e0c75484524f5e 79-85,95,112-113
+.env.example
+  s_c972c3c1d3e9c4::t_dc9a518b26d069 99
+tests/test_pull_actual_final_state.py
+  s_c972c3c1d3e9c4::t_dc9a518b26d069 22-23
+tests/test_expected_final_state.py
+  s_c972c3c1d3e9c4::t_dc9a518b26d069 14
+tests/test_verify_task_run.py
+  s_c972c3c1d3e9c4::t_dc9a518b26d069 12
+verifiers/attribution_bundle.py
+  s_c972c3c1d3e9c4::t_dc9a518b26d069 1-135
+scripts/eval_costs.py
+  s_c972c3c1d3e9c4::t_8ab9f651018161 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "e118cd940a3b3a60b99f6dc3bb75cdc406cb1eb7",
+  "prompts": {},
+  "sessions": {
+    "s_c972c3c1d3e9c4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1e6f5967-a3df-4af8-80d1-bbf1c82d8c88",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}
