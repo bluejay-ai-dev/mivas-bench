@@ -94,7 +94,7 @@ Each industry pack includes an agent blueprint, production-style prompts, tool s
 
 Each initial-release scored industry uses specialist agents. Arrows below are permitted handoffs declared in the current industry blueprint.
 
-<details>
+<details open>
 <summary><strong>Healthcare: Straus Dermatology</strong></summary>
 
 Straus Dermatology routes callers through public reception, identity-gated patient work, and focused scheduling, coverage, cosmetic, billing, and clinical specialists.
@@ -132,7 +132,7 @@ flowchart LR
 
 </details>
 
-<details>
+<details open>
 <summary><strong>Legal: Halverson &amp; Reed</strong></summary>
 
 Halverson & Reed separates caller routing, ordered conflict and eligibility screening, intake, evaluation scheduling, and service for existing clients.
@@ -158,7 +158,7 @@ flowchart LR
 
 </details>
 
-<details>
+<details open>
 <summary><strong>Customer Support: Kestrel Electronics</strong></summary>
 
 Kestrel Electronics places order-bound work behind verification while allowing reception to route suspected impersonation directly to a separate fraud specialist.
