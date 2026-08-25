@@ -1,0 +1,37 @@
+.env.example
+  s_1cb9a0689f7f64::t_40794f3147fbf2 103-107
+  s_c972c3c1d3e9c4::t_a29bdbf798eecc 99
+scripts/expected_final_state.py
+  s_c972c3c1d3e9c4::t_97eef79965491a 63-74
+  s_c972c3c1d3e9c4::t_b81217951c65ad 544-547
+scripts/tasks_to_digital_humans.py
+  s_1cb9a0689f7f64::t_b4e5592dd816f4 103-106
+  s_1cb9a0689f7f64::t_ea5f318f89ee23 835-838,842-845
+  s_1cb9a0689f7f64::t_a691f98d859402 931
+  s_1cb9a0689f7f64::t_3bdc93bd9580a0 915
+  s_1cb9a0689f7f64::t_5a10616f43c72e 870-873
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "1ed1769b781051404bbff4211c3b7206e1000d2e",
+  "prompts": {},
+  "sessions": {
+    "s_1cb9a0689f7f64": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9db2f26b-93c7-45ee-a25b-887b8a2e808a",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    },
+    "s_c972c3c1d3e9c4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1e6f5967-a3df-4af8-80d1-bbf1c82d8c88",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}
