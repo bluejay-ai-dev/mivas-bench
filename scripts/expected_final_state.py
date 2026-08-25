@@ -36,15 +36,6 @@ INDUSTRY_ROOT = ROOT / "industries"
 DEFAULT_OUT = ROOT / "expected-final-state"
 API = os.environ.get("BLUEJAY_API_URL", "https://api.getbluejay.ai/v1").rstrip("/")
 
-# Live v2 communities (one 66-case pack per scored industry).
-V2_COMMUNITIES = {
-    "healthcare": "6932c5b5-baba-4ce9-885c-2594aa8a98c8",
-    "finance": "aec64c79-5da2-403a-b33e-6ba00134d62b",
-    "legal": "e18f7c9e-d51c-4f3b-be88-b032edcb7d17",
-    "customer-support": "4d6de8c5-5b3e-4a36-a031-df2f73bb1c33",
-    "travel": "8fbf3bc4-2d2a-4428-af7d-45f3da4b3504",
-}
-
 # sqlite DEFAULT (datetime('now')) and equivalent write-time clocks.
 VOLATILE_KEYS = frozenset({"created_at"})
 
@@ -67,6 +58,18 @@ def load_dotenv() -> None:
             continue
         key, _, value = line.partition("=")
         os.environ.setdefault(key.strip(), value.strip().strip("'").strip('"'))
+
+
+load_dotenv()
+
+# Default community per industry, from env: MIVAS_COMMUNITY_HEALTHCARE,
+# MIVAS_COMMUNITY_LEGAL, MIVAS_COMMUNITY_CUSTOMER_SUPPORT (UUIDs from your
+# Bluejay tenant). Unset industries need an explicit --community.
+V2_COMMUNITIES = {
+    ind: cid
+    for ind in ("healthcare", "legal", "customer-support")
+    if (cid := os.environ.get(f"MIVAS_COMMUNITY_{ind.upper().replace('-', '_')}", "").strip())
+}
 
 
 def _api_key() -> str:
@@ -538,6 +541,10 @@ def main(argv: list[str] | None = None) -> int:
         return 1 if report["mismatched"] or report["unknown_digital_humans"] else 0
 
     industries = args.industries or list(V2_COMMUNITIES)
+    if not industries:
+        raise SystemExit(
+            "no industries: pass --industry, or set MIVAS_COMMUNITY_* env vars"
+        )
     if args.from_json and len(industries) != 1:
         raise SystemExit("--from-json requires exactly one --industry")
     if args.community and len(industries) != 1:

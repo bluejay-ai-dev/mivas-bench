@@ -14,7 +14,6 @@ here and never written back onto the task.
 from __future__ import annotations
 
 import argparse
-import importlib.util
 import json
 import os
 import re
@@ -30,12 +29,6 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 INDUSTRY_ROOT = ROOT / "industries"
 DEFAULT_API = "https://api.getbluejay.ai/v1"
-
-DEFAULT_AGENTS = {
-    "healthcare": 32161,  # mivas healthcare · openai realtime-2.1 (not the k8s twin)
-    "legal": 34170,
-    "customer-support": 36693,  # k8s · customer-support · openai realtime-2.1
-}
 
 ESCALATION_SILENCE_TIMEOUT_S = 30
 
@@ -105,6 +98,10 @@ def voices() -> list[tuple[str, str]]:
 
 def api_url() -> str:
     return os.environ.get("BLUEJAY_API_URL", DEFAULT_API).rstrip("/")
+
+
+def app_url() -> str:
+    return os.environ.get("BLUEJAY_APP_URL", "https://app.getbluejay.ai").rstrip("/")
 
 
 def _api_key() -> str:
@@ -835,14 +832,17 @@ def claim_test_names(humans: list[dict[str, Any]], live: list[dict[str, Any]]) -
 
 
 def default_agent_id(industry: str) -> int:
-    env = (
-        os.environ.get("BLUEJAY_HEALTHCARE_AGENT_ID")
-        if industry == "healthcare"
-        else None
+    """Agent id from env: MIVAS_AGENT_ID_<INDUSTRY> (e.g. MIVAS_AGENT_ID_HEALTHCARE),
+    falling back to MIVAS_AGENT_ID. No baked-in ids."""
+    env = os.environ.get(
+        f"MIVAS_AGENT_ID_{industry.upper().replace('-', '_')}"
     ) or os.environ.get("MIVAS_AGENT_ID")
     if env:
         return int(env)
-    return DEFAULT_AGENTS.get(industry, DEFAULT_AGENTS["healthcare"])
+    raise SystemExit(
+        f"no agent id for {industry}: pass --agent-id or set "
+        f"MIVAS_AGENT_ID_{industry.upper().replace('-', '_')}"
+    )
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -867,7 +867,10 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="With --simulation-id: check live DHs match generated pack; do not push",
     )
-    parser.add_argument("--agent-id", type=int, help="Bluejay agent id (healthcare default: 32161)")
+    parser.add_argument(
+        "--agent-id", type=int,
+        help="Bluejay agent id (default: MIVAS_AGENT_ID_<INDUSTRY> / MIVAS_AGENT_ID env)",
+    )
     parser.add_argument("--name", help="Simulation name")
     args = parser.parse_args(argv)
 
@@ -909,7 +912,7 @@ def main(argv: list[str] | None = None) -> int:
                 f"{len(mismatches)} fields still mismatched — not safe to run"
             )
         print(f"verified {len(humans)} digital humans")
-        print(f"https://app.getbluejay.ai/simulations/{args.simulation_id}")
+        print(f"{app_url()}/simulations/{args.simulation_id}")
         return 0
 
     if args.push:
@@ -925,7 +928,7 @@ def main(argv: list[str] | None = None) -> int:
         if patched:
             print(f"claimed test_name on {patched} digital humans", flush=True)
             live = list_simulation_humans(sim_id)
-        url = f"https://app.getbluejay.ai/simulations/{sim_id}"
+        url = f"{app_url()}/simulations/{sim_id}"
         print(f"{len(live)} digital humans · not queued")
         print(url)
         if len(live) != len(humans):
