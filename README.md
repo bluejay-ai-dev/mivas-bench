@@ -108,26 +108,34 @@ Straus Dermatology routes callers through public reception, identity-gated patie
 - `clinical`: handles results status, refill requests, nurse messages, and portal activation.
 
 ```mermaid
-flowchart LR
-  R["reception: Routing"]
-  I["identity: Verification"]
-  S["scheduling: Access"]
-  COV["coverage: Benefits"]
-  COS["cosmetic: Concierge"]
-  B["billing: Payments"]
-  CL["clinical: Liaison"]
-  R -->|transfer_to_identity| I
-  R -->|transfer_to_scheduling| S
-  R -->|transfer_to_coverage| COV
-  R -->|transfer_to_cosmetic| COS
-  I -->|transfer_to_scheduling| S
-  I -->|transfer_to_billing| B
-  I -->|transfer_to_clinical| CL
-  I -->|transfer_to_coverage| COV
-  I -->|transfer_to_cosmetic| COS
-  COV -->|transfer_to_scheduling| S
-  B -->|transfer_to_scheduling| S
-  CL -->|transfer_to_scheduling| S
+flowchart TD
+    START(["Inbound call"]) --> reception["reception"]
+
+    reception -->|transfer_to_identity| identity["identity"]
+    reception -->|transfer_to_scheduling| scheduling["scheduling"]
+    reception -->|transfer_to_coverage| coverage["coverage"]
+    reception -->|transfer_to_cosmetic| cosmetic["cosmetic"]
+
+    identity -->|transfer_to_scheduling| scheduling
+    identity -->|transfer_to_coverage| coverage
+    identity -->|transfer_to_cosmetic| cosmetic
+    identity -->|transfer_to_billing| billing["billing"]
+    identity -->|transfer_to_clinical| clinical["clinical"]
+
+    coverage -->|transfer_to_scheduling| scheduling
+    billing -->|transfer_to_scheduling| scheduling
+    clinical -->|transfer_to_scheduling| scheduling
+
+    scheduling --> DONE(["call ends"])
+    cosmetic --> DONE
+
+    reception -.->|transfer_to_human| human["human"]
+    identity -.->|transfer_to_human| human
+    scheduling -.->|transfer_to_human| human
+    coverage -.->|transfer_to_human| human
+    cosmetic -.->|transfer_to_human| human
+    billing -.->|transfer_to_human| human
+    clinical -.->|transfer_to_human| human
 ```
 
 </details>
@@ -144,16 +152,24 @@ Halverson & Reed separates caller routing, ordered conflict and eligibility scre
 - `client_services`: provides status on firm matters and records messages or notes.
 
 ```mermaid
-flowchart LR
-  R["reception: Routing"]
-  SC["screening: Conflict and eligibility"]
-  I["intake: Matter intake"]
-  S["scheduling: Evaluations"]
-  CS["client_services: Existing clients"]
-  R -->|transfer_to_screening| SC
-  R -->|transfer_to_client_services| CS
-  SC -->|transfer_to_intake| I
-  I -->|transfer_to_scheduling| S
+flowchart TD
+    START(["Inbound call"]) --> reception["reception"]
+
+    reception -->|transfer_to_screening| screening["screening"]
+    reception -->|transfer_to_client_services| client_services["client_services"]
+    screening -->|"transfer_to_intake(contact_details_only)"| intake["intake"]
+    intake -->|transfer_to_scheduling| scheduling["scheduling"]
+
+    scheduling --> DONE(["call ends"])
+    client_services --> DONE
+
+    reception -.->|"identity_failed · represented_party · adverse_party"| staff
+    screening -.->|"conflict · practice_area · jurisdiction · deadline_review · conflict_review"| staff
+    intake -.->|conflict_review| staff
+    scheduling -.->|caller_request| staff
+    client_services -.->|"legal_advice_requested · caller_request"| staff
+
+    staff["staff (via escalate_to_human)"]
 ```
 
 </details>
@@ -173,31 +189,42 @@ Kestrel Electronics places order-bound work behind verification while allowing r
 
 ```mermaid
 flowchart TD
-  R["reception: Routing"]
-  V["verification: Identity gate"]
-  O["orders: Orders and delivery"]
-  RT["returns: Returns and refunds"]
-  S["service: TechCrew"]
-  M["membership: Plans"]
-  F["fraud: Impersonation"]
-  R -->|transfer_to_verification| V
-  R -->|transfer_to_fraud| F
-  V -->|transfer_to_orders| O
-  V -->|transfer_to_returns| RT
-  V -->|transfer_to_service| S
-  V -->|transfer_to_membership| M
-  O -->|transfer_to_returns| RT
-  O -->|transfer_to_service| S
-  O -->|transfer_to_fraud| F
-  RT -->|transfer_to_orders| O
-  RT -->|transfer_to_service| S
-  RT -->|transfer_to_fraud| F
-  S -->|transfer_to_returns| RT
-  S -->|transfer_to_membership| M
-  S -->|transfer_to_fraud| F
-  M -->|transfer_to_service| S
-  M -->|transfer_to_fraud| F
-  F -->|transfer_to_verification| V
+    START(["Inbound call"]) --> reception["reception"]
+
+    reception -->|transfer_to_verification| verification["verification"]
+    reception -->|transfer_to_fraud| fraud["fraud"]
+    verification -->|transfer_to_orders| orders["orders"]
+    verification -->|transfer_to_returns| returns["returns"]
+    verification -->|transfer_to_service| service["service"]
+    verification -->|transfer_to_membership| membership["membership"]
+    orders -->|transfer_to_returns| returns
+    orders -->|transfer_to_service| service
+    orders -->|transfer_to_fraud| fraud
+    returns -->|transfer_to_orders| orders
+    returns -->|transfer_to_service| service
+    returns -->|transfer_to_fraud| fraud
+    service -->|transfer_to_returns| returns
+    service -->|transfer_to_membership| membership
+    service -->|transfer_to_fraud| fraud
+    membership -->|transfer_to_service| service
+    membership -->|transfer_to_fraud| fraud
+    fraud -->|transfer_to_verification| verification
+
+    orders --> DONE(["call ends"])
+    returns --> DONE
+    service --> DONE
+    membership --> DONE
+    fraud --> DONE
+
+    reception -.->|escalate_to_human| human
+    verification -.->|escalate_to_human| human
+    orders -.->|escalate_to_human| human
+    returns -.->|escalate_to_human| human
+    service -.->|escalate_to_human| human
+    membership -.->|escalate_to_human| human
+    fraud -.->|escalate_to_human| human
+
+    human["Kestrel care advocate (via escalate_to_human)"]
 ```
 
 </details>
