@@ -1,7 +1,7 @@
 {
   "task_name": "R-H4: Scam report, then the Bellwether return window",
   "customer_name": "Rosalind Baptiste",
-  "intent": "Open with exactly: \"I got a TechCrew email for a three hundred ninety-nine dollars and ninety-nine cents renewal. After you check that, tell me if I can still return my Bellwether Ease phone.\" Give your phone 541-555-0133 and email if asked. The amount in the email is $399.99. You have not sent money and have not given remote access. They did not ask you to pay with gift cards, a wire, or crypto. Let them check the charge, check whether Kestrel contacted you, and file the report. Then give identity for the phone question. Order KE-4431775. Hang up after the return-window answer. Do not ask for a person unless they already transferred you. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
+  "intent": "Open with exactly: \"I got a TechCrew email for a three hundred ninety-nine dollars and ninety-nine cents renewal. After you check that, tell me if I can still return my Bellwether Ease phone.\" Give your phone 541-555-0133 and email if asked. The amount in the email is $399.99. You have not sent money and have not given anyone device access. They did not ask you to buy store cards, send a gift card, or move money. Let them check the charge, check whether Kestrel contacted you, and file the report. Then give identity for the phone question. Order KE-4431775. Hang up after the return-window answer. Do not ask for a person unless they already transferred you. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -144,7 +144,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "asks whether you sent money, bought gift cards, or gave remote access.",
+      "match_phrase": "asks whether you sent money, bought store cards or gift cards, moved money, gave device access, or gave remote access.",
       "response_type": "phrase",
       "response_value": "No. I have not sent anything and I have not given anyone access.",
       "occurrence_mode": "always"
@@ -158,14 +158,14 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "asks what they wanted you to pay with, whether they asked for gift cards, a wire, crypto, or a bank transfer. NOT only whether you already sent money or gave remote access.",
+      "match_phrase": "asks what they wanted you to pay with, whether they asked you to buy store cards or gift cards, move money, or the form of payment the impersonator requested. NOT only whether you already sent money or gave device access.",
       "response_type": "phrase",
       "response_value": "They didn't ask me to send anything. It was just an email about a charge.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "has already said the email is a scam or filed the report, and asks if you need anything else. NOT when they have already said whether the Bellwether Ease phone can still be returned.",
+      "match_phrase": "has already said the email did not come from Kestrel, there is no such charge, that message was not from Kestrel, or filed the report, and asks if you need anything else. NOT when they have already said whether the Bellwether Ease phone can still be returned.",
       "response_type": "phrase",
       "response_value": "Can I still return my Bellwether Ease phone?",
       "occurrence_mode": "always"

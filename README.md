@@ -234,12 +234,10 @@ flowchart TD
 Harnesses translate the MIVAS blueprint into provider-specific runtimes. Native S2S models are the primary systems under evaluation; cascaded systems provide baselines.
 
 
-| Category                   | Harness families                                                                                                                                                                                                                              |
-| -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Realtime model APIs        | [OpenAI](voice-agent-harnesses/openai/), [Gemini](voice-agent-harnesses/gemini/), [xAI](voice-agent-harnesses/grok/), [Amazon Nova](voice-agent-harnesses/aws/), [Qwen](voice-agent-harnesses/qwen/), [NVIDIA](voice-agent-harnesses/nvidia/) |
-| Voice model and agent APIs | [AssemblyAI](voice-agent-harnesses/assemblyai/), [Deepgram](voice-agent-harnesses/deepgram/), [ElevenLabs](voice-agent-harnesses/elevenlabs/)                                                                                                 |
-| Voice platforms            | [Vapi](voice-agent-harnesses/vapi/), [Retell](voice-agent-harnesses/retell/), [Bland](voice-agent-harnesses/bland/), [Cartesia](voice-agent-harnesses/cartesia/), [Twilio](voice-agent-harnesses/twilio/)                                     |
-| Orchestration frameworks   | [LiveKit](voice-agent-harnesses/livekit/), [Pipecat](voice-agent-harnesses/pipecat/)                                                                                                                                                          |
+| Category                 | Harness families                                                                                                                                                                                                                              |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Realtime model APIs      | [OpenAI](voice-agent-harnesses/openai/), [Gemini](voice-agent-harnesses/gemini/), [xAI](voice-agent-harnesses/grok/), [Amazon Nova](voice-agent-harnesses/aws/), [Qwen](voice-agent-harnesses/qwen/), [NVIDIA](voice-agent-harnesses/nvidia/) |
+| Orchestration frameworks | [LiveKit](voice-agent-harnesses/livekit/)                                                                                                                                                                                                     |
 
 
 Support varies by runtime and industry; a listed family has an implemented runtime, but not every model or deployment mode has completed every suite. See the [harness contract](voice-agent-harnesses/README.md) for runtime requirements.

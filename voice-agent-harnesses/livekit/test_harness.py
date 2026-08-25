@@ -93,7 +93,7 @@ def test_real_handoff() -> None:
 def test_generic_industries() -> None:
     """Every shipped industry builds without per-tool harness handlers, and each
     agent only carries its own blueprint tools."""
-    for industry in ("healthcare", "legal", "travel"):
+    for industry in ("healthcare", "legal", "customer-support"):
         bp = load_blueprint(industry)
         hangup = asyncio.Event()
         start = BlueprintAgent(bp, bp["start"], hangup)
@@ -126,9 +126,9 @@ def test_pack_greeting_and_agent_name() -> None:
     )
     try:
         assert sip_uri() is None
-        os.environ["LIVEKIT_SIP_HOST"] = "65197ejfbqv.sip.livekit.cloud"
+        os.environ["LIVEKIT_SIP_HOST"] = "example-project.sip.livekit.cloud"
         os.environ["LIVEKIT_SIP_NUMBER"] = "+15551230000"
-        assert sip_uri() == "sip:+15551230000@65197ejfbqv.sip.livekit.cloud"
+        assert sip_uri() == "sip:+15551230000@example-project.sip.livekit.cloud"
     finally:
         os.environ.pop("LIVEKIT_SIP_HOST", None)
         os.environ.pop("LIVEKIT_SIP_NUMBER", None)

@@ -42,7 +42,7 @@ MODEL = "nvidia/nemotron-voicechat"
 # Hosted NVCF Realtime (ai-nemotron-voicechat). Override VOICECHAT_WS_URL for a
 # local NIM (ws://127.0.0.1:9000/v1/realtime) or other remote.
 DEFAULT_WS_URL = "wss://grpc.nvcf.nvidia.com/v1/realtime"
-DEFAULT_FUNCTION_ID = "42c86b5f-545a-4b2f-a83b-90fd71da9912"
+DEFAULT_FUNCTION_ID = ""  # hosted NVCF requires VOICECHAT_FUNCTION_ID
 SAMPLE_RATE = 24_000  # wire format both ways; server resamples to 16k / 22.05k
 
 # Bare native tool declaration — no behavioural coaching. A local NIM injects an
@@ -85,6 +85,8 @@ def ws_headers() -> dict[str, str]:
     if not key:
         raise RuntimeError("NVIDIA_API_KEY required for hosted VoiceChat (wss://…nvcf…)")
     fid = (os.environ.get("VOICECHAT_FUNCTION_ID") or DEFAULT_FUNCTION_ID).strip()
+    if not fid:
+        raise RuntimeError("VOICECHAT_FUNCTION_ID required for hosted VoiceChat (wss://…nvcf…)")
     headers = {
         "Authorization": f"Bearer {key}",
         # NVCF gateway accepts this casing; NVCF-FUNCTION-ID alone is flaky.

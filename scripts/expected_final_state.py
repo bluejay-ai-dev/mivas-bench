@@ -7,7 +7,6 @@ Human-transfer session tools still POST so escalations land in the dump.
 
     uv run python scripts/expected_final_state.py                  # all v2 packs
     uv run python scripts/expected_final_state.py --industry customer-support
-    uv run python scripts/expected_final_state.py --from-spec --industry finance
     uv run python scripts/expected_final_state.py --from-json path.json --industry legal
     uv run python scripts/expected_final_state.py --compare expected.json actual.json
     uv run python scripts/expected_final_state.py --compare-dir expected-final-state/customer-support ./actuals
@@ -44,12 +43,6 @@ V2_COMMUNITIES = {
     "legal": "e18f7c9e-d51c-4f3b-be88-b032edcb7d17",
     "customer-support": "4d6de8c5-5b3e-4a36-a031-df2f73bb1c33",
     "travel": "8fbf3bc4-2d2a-4428-af7d-45f3da4b3504",
-}
-
-LOCAL_SPECS = {
-    "healthcare": ROOT / "scripts" / "healthcare_digital_humans.py",
-    "finance": ROOT / "scripts" / "finance_digital_humans.py",
-    "legal": ROOT / "scripts" / "legal_digital_humans.py",
 }
 
 # sqlite DEFAULT (datetime('now')) and equivalent write-time clocks.
@@ -276,19 +269,6 @@ def replay_case(
     }
 
 
-def load_from_spec(industry: str) -> list[dict[str, Any]]:
-    path = LOCAL_SPECS.get(industry)
-    if path is None or not path.is_file():
-        raise SystemExit(f"no local spec for {industry}")
-    name = f"expected_spec_{industry.replace('-', '_')}"
-    spec = importlib.util.spec_from_file_location(name, path)
-    assert spec is not None and spec.loader is not None
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[name] = module
-    spec.loader.exec_module(module)
-    return [unwrap_dh(item) for item in module.build()]
-
-
 def load_from_json(path: Path) -> list[dict[str, Any]]:
     raw = json.loads(path.read_text())
     if isinstance(raw, dict) and isinstance(raw.get("digital_humans"), list):
@@ -509,12 +489,10 @@ def compare_dirs(expected_dir: Path, actual_dir: Path) -> int:
 def _humans_for(industry: str, args: argparse.Namespace) -> list[dict[str, Any]]:
     if args.from_json:
         return load_from_json(Path(args.from_json))
-    if args.from_spec:
-        return load_from_spec(industry)
     community = args.community or V2_COMMUNITIES.get(industry)
     if not community:
         raise SystemExit(
-            f"{industry} has no default community; pass --community, --from-spec, or --from-json"
+            f"{industry} has no default community; pass --community or --from-json"
         )
     return load_from_community(community)
 
@@ -525,8 +503,6 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--industry", action="append", dest="industries",
                         help="Industry slug. Repeatable. Default: every v2 pack.")
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
-    parser.add_argument("--from-spec", action="store_true",
-                        help="Load expected_tool_calls from scripts/*_digital_humans.py")
     parser.add_argument("--from-json", type=Path,
                         help="Load digital humans from a local JSON list")
     parser.add_argument("--community", help="Override the v2 community id")

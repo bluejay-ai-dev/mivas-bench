@@ -16,8 +16,10 @@ ROOT = Path(__file__).resolve().parents[1]
 PROJECT = "mivas-bench-image"
 BUCKET = "mivas-bench-codebuild"
 REGION = "us-west-1"
-SERVICE_ROLE = "codebuild-mivas-bench-service"
-BATCH_ROLE = "codebuild-mivas-bench-batch"
+SERVICE_ROLE = os.environ.get(
+    "MIVAS_CODEBUILD_SERVICE_ROLE", "codebuild-mivas-bench-service"
+)
+BATCH_ROLE = os.environ.get("MIVAS_CODEBUILD_BATCH_ROLE", "codebuild-mivas-bench-batch")
 EXCLUDE_DIRS = {
     ".git",
     ".venv",
@@ -285,7 +287,9 @@ def _batch_buildspec(pairs: list[tuple[str, str]]) -> str:
 
 
 def _upload_source(s3, bucket: str, pairs: list[tuple[str, str]]) -> str:
-    key = f"src/{int(time.time())}.zip"
+    # pid + ns: concurrent fleet callers collided on a whole-second key and
+    # silently built each other's pairs (S3 last-write-wins).
+    key = f"src/{time.time_ns()}-{os.getpid()}.zip"
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
         raw = _zip_repo()
