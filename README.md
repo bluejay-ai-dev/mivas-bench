@@ -16,14 +16,14 @@ MIVAS Bench is an indicator of speech-to-speech (S2S) voice AI performance acros
 
 | Benchmark            | **Multi-agent topology** | **Handoff verification** | **Conjunctive verification** | Live adaptive voice | Native S2S | Multi-industry coverage | Stateful tool execution | Deterministic final-state verifier | Tool-adherence verification | Repeated-run reliability support |
 | -------------------- | :----------------------: | :----------------------: | :--------------------------: | :-----------------: | :--------: | :---------------------: | :---------------------: | :--------------------------------: | :-------------------------: | :------------------------------: |
-| MIVAS Bench          | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| EVA                  | ✕ | ✕ | ✕ | ✓ | ✓ | ✓ | ✓ | ✓ | ◐ | ✓ |
-| τ-Voice              | ✕ | ✕ | ✕ | ✓ | ✓ | ✓ | ✓ | ✓ | ✕ | ◐ |
-| VAmoS Bench          | ✕ | ✕ | ✕ | ✓ | ✓ | ✕ | ✓ | ✕ | ◐ | ✓ |
-| Full-Duplex-Bench v3 | ✕ | ✕ | ✕ | ✕ | ✓ | ◐ | ◐ | ✕ | ✓ | ✕ |
-| VoiceAgentBench      | ✕ | ✕ | ✕ | ✕ | ✕ | ◐ | ✕ | ✕ | ◐ | ✕ |
+| MIVAS Bench          | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| EVA                  | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | 🟡 | ✅ |
+| τ-Voice              | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | 🟡 |
+| VAmoS Bench          | ❌ | ❌ | ❌ | ✅ | ✅ | ❌ | ✅ | ❌ | 🟡 | ✅ |
+| Full-Duplex-Bench v3 | ❌ | ❌ | ❌ | ❌ | ✅ | 🟡 | 🟡 | ❌ | ✅ | ❌ |
+| VoiceAgentBench      | ❌ | ❌ | ❌ | ❌ | ❌ | 🟡 | ❌ | ❌ | 🟡 | ❌ |
 
-**Legend:** ✓ Yes · ◐ Partial · ✕ No
+**Legend:** ✅ Yes · 🟡 Partial · ❌ No
 
 ## Methodology
 
