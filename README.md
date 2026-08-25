@@ -1,6 +1,8 @@
 # MIVAS Bench: A Benchmark for Evaluating Voice AI Models in Multi-Agent Environments Across Industries
 
-MIVAS Bench process overview
+<p align="center">
+  <img src="assets/mivas-benchmark-overview.svg" alt="MIVAS Bench evaluation process overview" width="1200">
+</p>
 
 ## Multi-Industry Voice Agent Simulation Bench
 
@@ -41,9 +43,6 @@ MIVAS is an open-source, open-data, reproducible benchmark. This repository cont
 
 ## Benchmark comparison
 
-Voice benchmarks answer different questions. This table reports **capability coverage** for evaluating production-like, stateful, multi-agent voice systems. **Conjunctive verification** requires database-state adherence, tool adherence, and handoff adherence to all pass.
-
-
 | Benchmark            | **Multi-agent topology** | **Handoff verification** | **Conjunctive verification** | Live adaptive voice | Native S2S | Multi-industry coverage | Stateful tool execution | Deterministic final-state verifier | Tool-adherence verification | Repeated-run reliability support |
 | -------------------- | ------------------------ | ------------------------ | ---------------------------- | ------------------- | ---------- | ----------------------- | ----------------------- | ---------------------------------- | --------------------------- | -------------------------------- |
 | MIVAS Bench          | <div align="center"><img src="assets/benchmark-yes.svg" alt="Yes" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-yes.svg" alt="Yes" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-yes.svg" alt="Yes" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-yes.svg" alt="Yes" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-yes.svg" alt="Yes" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-yes.svg" alt="Yes" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-yes.svg" alt="Yes" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-yes.svg" alt="Yes" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-yes.svg" alt="Yes" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-yes.svg" alt="Yes" width="16" height="16"></div> |
@@ -53,10 +52,7 @@ Voice benchmarks answer different questions. This table reports **capability cov
 | Full-Duplex-Bench v3 | <div align="center"><img src="assets/benchmark-no.svg" alt="No" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-no.svg" alt="No" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-no.svg" alt="No" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-no.svg" alt="No" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-yes.svg" alt="Yes" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-partial.svg" alt="Partial" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-partial.svg" alt="Partial" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-no.svg" alt="No" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-yes.svg" alt="Yes" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-no.svg" alt="No" width="16" height="16"></div> |
 | VoiceAgentBench      | <div align="center"><img src="assets/benchmark-no.svg" alt="No" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-no.svg" alt="No" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-no.svg" alt="No" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-no.svg" alt="No" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-no.svg" alt="No" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-partial.svg" alt="Partial" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-no.svg" alt="No" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-no.svg" alt="No" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-partial.svg" alt="Partial" width="16" height="16"></div> | <div align="center"><img src="assets/benchmark-no.svg" alt="No" width="16" height="16"></div> |
 
-
-**Legend:** <img src="assets/benchmark-yes.svg" alt="Yes" width="16" height="16"> means the repository or framework implements the capability; <img src="assets/benchmark-partial.svg" alt="Partial" width="16" height="16"> means it implements only a constrained form; <img src="assets/benchmark-no.svg" alt="No" width="16" height="16"> means the capability is outside the documented benchmark protocol. Coverage is not benchmark maturity, metric quality, released-results completeness, or universal superiority.
-
-MIVAS alone combines production-style specialist-agent topology, explicit handoff verification, and conjunctive state, tool, and handoff verification. This records explicit combined verifier design and support, not uniform strictness across every evidence path: the current local verifier can skip missing state snapshots, tool order is not enforced, and repeated runs are supported but not mandatory. Specialized strengths remain important: EVA emphasizes experience metrics and repeated trials; τ-Voice emphasizes full-duplex acoustic simulation; VoiceAgentBench emphasizes multilingual spoken tool understanding; Full-Duplex-Bench v3 emphasizes human-recorded disfluency; and VAmoS emphasizes deployment-stack comparison.
+**Legend:** <img src="assets/benchmark-yes.svg" alt="Yes" width="16" height="16"> Yes · <img src="assets/benchmark-partial.svg" alt="Partial" width="16" height="16"> Partial · <img src="assets/benchmark-no.svg" alt="No" width="16" height="16"> No
 
 ## Why MIVAS
 
