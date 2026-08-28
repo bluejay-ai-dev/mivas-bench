@@ -37,7 +37,11 @@
       "name": "transfer_to_verification"
     },
     {
-      "name": "identify_customer"
+      "name": "identify_customer",
+      "parameters": {
+        "full_name": "Nadia Grant",
+        "phone": "541-555-0196"
+      }
     },
     {
       "name": "verify_identity",

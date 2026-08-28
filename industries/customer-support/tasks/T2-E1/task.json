@@ -11,7 +11,10 @@
   "exp_handoff_path": [],
   "exp_tool_calls": [
     {
-      "name": "get_policy"
+      "name": "get_policy",
+      "parameters": {
+        "topic": "returns"
+      }
     }
   ],
   "behaviors": {

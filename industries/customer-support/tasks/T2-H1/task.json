@@ -37,7 +37,11 @@
       "name": "transfer_to_verification"
     },
     {
-      "name": "identify_customer"
+      "name": "identify_customer",
+      "parameters": {
+        "full_name": "Priya Raman",
+        "phone": "541-555-0119"
+      }
     },
     {
       "name": "verify_identity",
@@ -68,7 +72,8 @@
     {
       "name": "confirm_return",
       "parameters": {
-        "fee_disclosed_acknowledged": true
+        "fee_disclosed_acknowledged": true,
+        "confirmation_token": "KE-RTN-4417"
       }
     },
     {
@@ -781,9 +786,37 @@
         "method": "Visa ending 8802"
       }
     ],
-    "holds": [],
-    "rmas": [],
-    "return_labels": [],
+    "holds": [
+      {
+        "token": "KE-RTN-4417",
+        "kind": "return",
+        "customer_id": "cust_priya",
+        "payload": "{\"order_number\": \"KE-4462884\", \"sku\": \"SKU-MOB-7702\", \"reason\": \"\", \"refund_cents\": 105499, \"restock_fee_cents\": 4500, \"hazmat\": 0}",
+        "summary": "Returning the Solstice X5 Smartphone, $1,099.99. There's a $45.00 restocking fee: activatable devices carry a $45.00 fee once opened, so the refund is $1,054.99. It goes back to the card ending 3361.",
+        "consumed": 1
+      }
+    ],
+    "rmas": [
+      {
+        "rma_number": "RMA-7792859",
+        "customer_id": "cust_priya",
+        "order_number": "KE-4462884",
+        "sku": "SKU-MOB-7702",
+        "reason": "",
+        "refund_cents": 105499,
+        "restock_fee_cents": 4500,
+        "method": "back to the card ending 3361",
+        "status": "open"
+      }
+    ],
+    "return_labels": [
+      {
+        "id": 1,
+        "rma_number": "RMA-7792859",
+        "sent_to": "priya.raman@example.test",
+        "label_id": "KL-171752"
+      }
+    ],
     "price_matches": [],
     "delivery_changes": [],
     "order_cancellations": [],

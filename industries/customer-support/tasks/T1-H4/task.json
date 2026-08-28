@@ -38,7 +38,11 @@
       "name": "transfer_to_verification"
     },
     {
-      "name": "identify_customer"
+      "name": "identify_customer",
+      "parameters": {
+        "full_name": "Marcus Iyer",
+        "phone": "541-555-0104"
+      }
     },
     {
       "name": "verify_identity",

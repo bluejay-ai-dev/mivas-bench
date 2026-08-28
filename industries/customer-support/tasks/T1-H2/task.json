@@ -37,7 +37,11 @@
       "name": "transfer_to_verification"
     },
     {
-      "name": "identify_customer"
+      "name": "identify_customer",
+      "parameters": {
+        "full_name": "Nadia Grant",
+        "phone": "541-555-0196"
+      }
     },
     {
       "name": "verify_identity",
@@ -53,12 +57,16 @@
       "name": "transfer_to_orders"
     },
     {
-      "name": "get_order"
+      "name": "get_order",
+      "parameters": {
+        "order_number": "KE-4500001"
+      }
     },
     {
       "name": "quote_delivery_change",
       "parameters": {
-        "order_number": "KE-4500001"
+        "order_number": "KE-4500001",
+        "new_date": "2026-08-06"
       }
     },
     {
@@ -484,7 +492,7 @@
         "seller_name": "",
         "purchase_state": "WA",
         "delivered_date": "",
-        "delivery_date": "2026-08-03",
+        "delivery_date": "2026-08-06",
         "delivery_window": "8am-12pm",
         "install": 1,
         "haul_away": 1
@@ -764,11 +772,29 @@
         "method": "Visa ending 8802"
       }
     ],
-    "holds": [],
+    "holds": [
+      {
+        "token": "KE-DLV-3390",
+        "kind": "delivery_change",
+        "customer_id": "cust_nadia",
+        "payload": "{\"order_number\": \"KE-4500001\", \"old_date\": \"2026-08-03\", \"new_date\": \"2026-08-06\", \"window\": \"8am-12pm\", \"fee_cents\": 2999}",
+        "summary": "Moving delivery of KE-4500001 from 2026-08-03 to 2026-08-06, 8am-12pm. Because the current delivery is inside 48 hours, there's a $29.99 change fee.",
+        "consumed": 1
+      }
+    ],
     "rmas": [],
     "return_labels": [],
     "price_matches": [],
-    "delivery_changes": [],
+    "delivery_changes": [
+      {
+        "id": 1,
+        "order_number": "KE-4500001",
+        "old_date": "2026-08-03",
+        "new_date": "2026-08-06",
+        "time_window": "8am-12pm",
+        "fee_cents": 2999
+      }
+    ],
     "order_cancellations": [],
     "service_appointments": [],
     "membership_changes": [],

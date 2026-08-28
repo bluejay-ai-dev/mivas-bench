@@ -37,7 +37,11 @@
       "name": "transfer_to_verification"
     },
     {
-      "name": "identify_customer"
+      "name": "identify_customer",
+      "parameters": {
+        "full_name": "Selina Cortez",
+        "phone": "541-555-0171"
+      }
     },
     {
       "name": "verify_identity",
@@ -228,10 +232,10 @@
         "email": "selina.cortez@example.test",
         "postal_code": "97035",
         "card_last4": "1156",
-        "tier": "plus",
-        "membership_start": "2026-02-15",
-        "membership_paid_cents": 2999,
-        "auto_renew": 1
+        "tier": "standard",
+        "membership_start": "",
+        "membership_paid_cents": 0,
+        "auto_renew": 0
       },
       {
         "id": "cust_owen",
@@ -768,14 +772,33 @@
         "method": "Visa ending 8802"
       }
     ],
-    "holds": [],
+    "holds": [
+      {
+        "token": "KE-CXL-7708",
+        "kind": "cancel",
+        "customer_id": "cust_selina",
+        "payload": "{\"tier\": \"plus\", \"refund_cents\": 1499, \"months\": 6}",
+        "summary": "Cancelling Kestrel Plus refunds $14.99 back to the card ending 1156, which is the 6 unused whole months of the $29.99 paid. It ends today, and they'd lose 60-day returns, member pricing, free two-day shipping and 1% back.",
+        "consumed": 1
+      }
+    ],
     "rmas": [],
     "return_labels": [],
     "price_matches": [],
     "delivery_changes": [],
     "order_cancellations": [],
     "service_appointments": [],
-    "membership_changes": [],
+    "membership_changes": [
+      {
+        "id": 1,
+        "customer_id": "cust_selina",
+        "action": "cancel",
+        "from_tier": "plus",
+        "to_tier": "standard",
+        "amount_cents": 1499,
+        "effective_date": "2026-08-01"
+      }
+    ],
     "scam_reports": [],
     "escalations": []
   }
