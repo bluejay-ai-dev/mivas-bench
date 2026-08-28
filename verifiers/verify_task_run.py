@@ -153,6 +153,9 @@ LEGAL_IGNORE_ROW_KEYS = frozenset({
 LEGAL_EXTRA_OK_TABLES = frozenset({
     "messages", "intake_notes", "documents", "holds", "evaluations",
 })
+# free-text the agent invents (caller never states a return reason);
+# lives as an rmas/holds column and nested inside holds.payload JSON.
+CS_IGNORE_ROW_KEYS = frozenset({"reason"})
 PHONE_KEY_RE = re.compile(r"phone|_e164$", re.I)
 # ISO date + hour + minute; seconds, micros, and timezone are optional.
 _DATETIME_RE = re.compile(
@@ -274,6 +277,8 @@ def _is_phone_key(key: str) -> bool:
 def _ignore_row_keys(industry: str | None) -> frozenset[str]:
     if industry == "legal":
         return IGNORE_ROW_KEYS | LEGAL_IGNORE_ROW_KEYS
+    if industry == "customer-support":
+        return IGNORE_ROW_KEYS | CS_IGNORE_ROW_KEYS
     return IGNORE_ROW_KEYS
 
 
@@ -299,6 +304,18 @@ def _canon_row(row: Any, industry: str | None = None) -> Any:
     for key, value in row.items():
         if key in ignore:
             continue
+        if key == "payload" and isinstance(value, str):
+            # holds.payload is a JSON blob; ignored free-text keys hide inside it.
+            try:
+                parsed = json.loads(value)
+            except ValueError:
+                parsed = None
+            if isinstance(parsed, dict):
+                out[key] = json.dumps(
+                    {k: v for k, v in parsed.items() if k not in ignore},
+                    sort_keys=True,
+                )
+                continue
         if isinstance(value, str) and _is_phone_key(key):
             out[key] = _digits_phone(value)
         elif isinstance(value, str):

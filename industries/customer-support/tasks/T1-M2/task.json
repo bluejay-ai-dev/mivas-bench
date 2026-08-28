@@ -37,7 +37,11 @@
       "name": "transfer_to_verification"
     },
     {
-      "name": "identify_customer"
+      "name": "identify_customer",
+      "parameters": {
+        "full_name": "Selina Cortez",
+        "phone": "541-555-0171"
+      }
     },
     {
       "name": "verify_identity",
@@ -396,7 +400,7 @@
         "order_number": "KE-4498870",
         "customer_id": "cust_selina",
         "order_date": "2026-07-30",
-        "status": "processing",
+        "status": "cancelled",
         "fulfillment": "kestrel",
         "seller_name": "",
         "purchase_state": "OR",
@@ -756,7 +760,14 @@
     "return_labels": [],
     "price_matches": [],
     "delivery_changes": [],
-    "order_cancellations": [],
+    "order_cancellations": [
+      {
+        "id": 1,
+        "order_number": "KE-4498870",
+        "refund_cents": 18999,
+        "status": "cancelled"
+      }
+    ],
     "service_appointments": [],
     "membership_changes": [],
     "scam_reports": [],

@@ -37,7 +37,11 @@
       "name": "transfer_to_verification"
     },
     {
-      "name": "identify_customer"
+      "name": "identify_customer",
+      "parameters": {
+        "full_name": "Grace Okonkwo",
+        "phone": "541-555-0112"
+      }
     },
     {
       "name": "verify_identity",

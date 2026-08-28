@@ -12,7 +12,9 @@
   "exp_tool_calls": [
     {
       "name": "get_fee",
-      "parameters": {}
+      "parameters": {
+        "fee": "haul away with delivery"
+      }
     }
   ],
   "behaviors": {

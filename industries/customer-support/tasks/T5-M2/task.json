@@ -1,7 +1,7 @@
 {
   "task_name": "T5-M2: Price match at an unqualified retailer",
   "customer_name": "Felix Moreau",
-  "intent": "Open with exactly: \"Price match the Aurelian Halo soundbar. Grimwald's has it for seventy dollars less.\" Give identity when asked. Order KE-4495108, the Halo soundbar. If they ask for Grimwald's price in dollars, repeat that it is seventy dollars less than you paid. Do not invent a dollar amount. If they only recite the published price-match policy, that is not done \u2014 stay on the line. Stay until they refuse Grimwald's and read the qualified-competitor list. Do not name a second retailer. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
+  "intent": "Open with exactly: \"Price match the Aurelian Halo soundbar. Grimwald's has it for seventy dollars less.\" Give identity when asked. Order KE-4495108, the Halo soundbar. If they ask for Grimwald's price in dollars, repeat that it is seventy dollars less than you paid. Do not invent a dollar amount. If they only recite the published price-match policy, that is not done — stay on the line. Stay until they refuse Grimwald's and read the qualified-competitor list. Do not name a second retailer. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -37,7 +37,11 @@
       "name": "transfer_to_verification"
     },
     {
-      "name": "identify_customer"
+      "name": "identify_customer",
+      "parameters": {
+        "full_name": "Felix Moreau",
+        "phone": "541-555-0108"
+      }
     },
     {
       "name": "verify_identity",
@@ -56,8 +60,7 @@
       "name": "quote_price_match",
       "parameters": {
         "order_number": "KE-4495108",
-        "competitor": "Grimwald's",
-        "competitor_price": 479.99
+        "competitor": "Grimwald's"
       }
     }
   ],

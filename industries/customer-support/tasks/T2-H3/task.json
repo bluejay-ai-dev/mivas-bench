@@ -37,7 +37,11 @@
       "name": "transfer_to_verification"
     },
     {
-      "name": "identify_customer"
+      "name": "identify_customer",
+      "parameters": {
+        "full_name": "Tomas Ferreira",
+        "phone": "541-555-0146"
+      }
     },
     {
       "name": "verify_identity",
@@ -797,7 +801,7 @@
     "escalations": [
       {
         "id": 1,
-        "customer_id": "",
+        "customer_id": "cust_tomas",
         "reason_code": "marketplace_seller"
       }
     ]
