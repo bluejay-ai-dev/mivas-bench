@@ -60,8 +60,7 @@
       "name": "quote_price_match",
       "parameters": {
         "order_number": "KE-4495108",
-        "competitor": "Grimwald's",
-        "sku": "SKU-AUD-7720"
+        "competitor": "Grimwald's"
       }
     }
   ],

@@ -61,8 +61,7 @@
       "parameters": {
         "order_number": "KE-4495108",
         "competitor": "Rivertide",
-        "in_stock": false,
-        "sku": "SKU-AUD-7720"
+        "in_stock": false
       }
     }
   ],
