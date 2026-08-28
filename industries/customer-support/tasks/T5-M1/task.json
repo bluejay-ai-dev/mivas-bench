@@ -60,8 +60,7 @@
       "name": "quote_price_match",
       "parameters": {
         "order_number": "KE-4495108",
-        "competitor": "Rivertide",
-        "sku": "SKU-TV-4410"
+        "competitor": "Rivertide"
       }
     }
   ],
