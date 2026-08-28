@@ -37,7 +37,11 @@
       "name": "transfer_to_verification"
     },
     {
-      "name": "identify_customer"
+      "name": "identify_customer",
+      "parameters": {
+        "full_name": "Glen Aldridge",
+        "phone": "541-555-0127"
+      }
     },
     {
       "name": "verify_identity",

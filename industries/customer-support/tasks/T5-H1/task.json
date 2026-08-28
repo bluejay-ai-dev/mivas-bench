@@ -37,7 +37,11 @@
       "name": "transfer_to_verification"
     },
     {
-      "name": "identify_customer"
+      "name": "identify_customer",
+      "parameters": {
+        "full_name": "Felix Moreau",
+        "phone": "541-555-0108"
+      }
     },
     {
       "name": "verify_identity",
@@ -57,7 +61,8 @@
       "parameters": {
         "order_number": "KE-4495108",
         "competitor": "Rivertide",
-        "competitor_price": 479.99
+        "competitor_price": 479.99,
+        "sku": "SKU-AUD-7720"
       }
     },
     {
@@ -763,10 +768,31 @@
         "method": "Visa ending 8802"
       }
     ],
-    "holds": [],
+    "holds": [
+      {
+        "token": "KE-PM-2286",
+        "kind": "price_match",
+        "customer_id": "cust_felix",
+        "payload": "{\"order_number\": \"KE-4495108\", \"sku\": \"SKU-AUD-7720\", \"competitor\": \"Rivertide\", \"competitor_price_cents\": 47999, \"difference_cents\": 7000}",
+        "summary": "Aurelian Halo Soundbar was $549.99 and Rivertide has it at $479.99. That's $70.00 back to the card ending 3390.",
+        "consumed": 1
+      }
+    ],
     "rmas": [],
     "return_labels": [],
-    "price_matches": [],
+    "price_matches": [
+      {
+        "id": 1,
+        "customer_id": "cust_felix",
+        "order_number": "KE-4495108",
+        "sku": "SKU-AUD-7720",
+        "competitor": "Rivertide",
+        "competitor_price_cents": 47999,
+        "difference_cents": 7000,
+        "method": "back to the card ending 3390",
+        "status": "approved"
+      }
+    ],
     "delivery_changes": [],
     "order_cancellations": [],
     "service_appointments": [],

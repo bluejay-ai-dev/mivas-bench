@@ -37,7 +37,11 @@
       "name": "transfer_to_verification"
     },
     {
-      "name": "identify_customer"
+      "name": "identify_customer",
+      "parameters": {
+        "full_name": "Felix Moreau",
+        "phone": "541-555-0108"
+      }
     },
     {
       "name": "verify_identity",
@@ -770,10 +774,31 @@
         "method": "Visa ending 8802"
       }
     ],
-    "holds": [],
+    "holds": [
+      {
+        "token": "KE-PM-2286",
+        "kind": "price_match",
+        "customer_id": "cust_felix",
+        "payload": "{\"order_number\": \"KE-4495108\", \"sku\": \"SKU-AUD-8820\", \"competitor\": \"Crestline Audio\", \"competitor_price_cents\": 39999, \"difference_cents\": 5000}",
+        "summary": "Aurelian Soundbar Mini was $449.99 and Crestline Audio has it at $399.99. That's $50.00 back to the card ending 3390.",
+        "consumed": 1
+      }
+    ],
     "rmas": [],
     "return_labels": [],
-    "price_matches": [],
+    "price_matches": [
+      {
+        "id": 1,
+        "customer_id": "cust_felix",
+        "order_number": "KE-4495108",
+        "sku": "SKU-AUD-8820",
+        "competitor": "Crestline Audio",
+        "competitor_price_cents": 39999,
+        "difference_cents": 5000,
+        "method": "back to the card ending 3390",
+        "status": "approved"
+      }
+    ],
     "delivery_changes": [],
     "order_cancellations": [],
     "service_appointments": [],
