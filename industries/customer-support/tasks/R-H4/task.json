@@ -68,7 +68,11 @@
       "name": "transfer_to_verification"
     },
     {
-      "name": "identify_customer"
+      "name": "identify_customer",
+      "parameters": {
+        "full_name": "Rosalind Baptiste",
+        "phone": "541-555-0133"
+      }
     },
     {
       "name": "verify_identity",

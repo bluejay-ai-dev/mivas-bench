@@ -37,7 +37,11 @@
       "name": "transfer_to_verification"
     },
     {
-      "name": "identify_customer"
+      "name": "identify_customer",
+      "parameters": {
+        "full_name": "Felix Moreau",
+        "phone": "541-555-0108"
+      }
     },
     {
       "name": "verify_identity",
@@ -57,7 +61,8 @@
       "parameters": {
         "order_number": "KE-4495108",
         "competitor": "Rivertide",
-        "competitor_price": 549.99
+        "competitor_price": 549.99,
+        "sku": "SKU-AUD-7720"
       }
     }
   ],

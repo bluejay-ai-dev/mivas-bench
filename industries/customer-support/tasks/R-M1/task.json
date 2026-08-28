@@ -36,7 +36,11 @@
       "name": "transfer_to_verification"
     },
     {
-      "name": "identify_customer"
+      "name": "identify_customer",
+      "parameters": {
+        "full_name": "Dana Whitlock",
+        "phone": "541-555-0188"
+      }
     },
     {
       "name": "verify_identity",
@@ -757,7 +761,7 @@
     "escalations": [
       {
         "id": 1,
-        "customer_id": "",
+        "customer_id": "cust_dana",
         "reason_code": "identity_failed"
       }
     ]

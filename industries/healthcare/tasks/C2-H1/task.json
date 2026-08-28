@@ -1,6 +1,6 @@
 {
   "task_name": "C2-H1: Cancel tomorrow's follow-up",
-  "intent": "You are an existing Straus patient. You have a follow-up tomorrow at Park Avenue and you need it cancelled outright because you are travelling. Answer their identity questions once with your name and date of birth, confirm if they read it back, then go straight to the cancellation. You will not rebook. If they offer another time, refuse it and say you only want this visit cancelled. After they explain a missed-visit fee, say you accept it and still want tomorrow cancelled. After it is cancelled, if they offer the waitlist for a later opening, say yes and ask to be listed from August twenty-fourth through September thirtieth at Park Avenue \u2014 those calendar dates only. Do not name a clock time, and if they ask for a latest time of day say end of September thirtieth is fine. Then thank them and end the call. Do not ask to book or reschedule a new visit. Do not ask to add insurance, for a callback, to speak to a person, a bill, a payment, the patient portal, or a text. Do not ask for the street, floor, suite, or office id. Do not volunteer a ZIP. Give the waitlist window once. If they ask again, say you already gave August twenty-fourth through September thirtieth \u2014 do not agree to a second listing. Do not ask them to text you an appointment confirmation.",
+  "intent": "You are an existing Straus patient. You have a follow-up tomorrow at Park Avenue and you need it cancelled outright because you are travelling. Answer their identity questions once with your name and date of birth, confirm if they read it back, then go straight to the cancellation. You will not rebook. If they offer another time, refuse it and say you only want this visit cancelled. After they explain a missed-visit fee, say you accept it and still want tomorrow cancelled. After it is cancelled, if they offer the waitlist for a later opening, say yes and ask to be listed from August twenty-fourth through September thirtieth at Park Avenue — those calendar dates only. Do not name a clock time, and if they ask for a latest time of day say end of September thirtieth is fine. Then thank them and end the call. Do not ask to book or reschedule a new visit. Do not ask to add insurance, for a callback, to speak to a person, a bill, a payment, the patient portal, or a text. Do not ask for the street, floor, suite, or office id. Do not volunteer a ZIP. Give the waitlist window once. If they ask again, say you already gave August twenty-fourth through September thirtieth — do not agree to a second listing. Do not ask them to text you an appointment confirmation.",
   "traits": [
     {
       "trait_name": "zip",
@@ -138,7 +138,7 @@
       "match_type": "context",
       "match_phrase": "asks for a waitlist window, start date, end date, earliest date, latest date, or when you would take an opening. NOT when asking for your name or date of birth, NOT when offering a specific appointment time to book now, NOT when asking whether you want the waitlist at all, NOT when you already gave August twenty-fourth through September thirtieth.",
       "response_type": "phrase",
-      "response_value": "From August twenty-fourth through September thirtieth, at Park Avenue. Dates only \u2014 I don't have a clock time."
+      "response_value": "From August twenty-fourth through September thirtieth, at Park Avenue. Dates only — I don't have a clock time."
     },
     {
       "match_type": "context",
@@ -174,7 +174,7 @@
       "match_type": "context",
       "match_phrase": "asks again for a waitlist window, start date, end date, or to add you a second time after you already gave August twenty-fourth through September thirtieth. NOT the first time they ask for the waitlist window.",
       "response_type": "phrase",
-      "response_value": "I already gave that \u2014 August twenty-fourth through September thirtieth at Park Avenue. Please don't add me twice."
+      "response_value": "I already gave that — August twenty-fourth through September thirtieth at Park Avenue. Please don't add me twice."
     },
     {
       "match_type": "context",
@@ -369,7 +369,7 @@
           "loc_park_ave"
         ],
         "earliest": "2026-08-24",
-        "latest": "2026-09-30"
+        "latest": null
       }
     ],
     "tool_events": [

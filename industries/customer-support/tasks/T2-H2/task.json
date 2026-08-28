@@ -37,7 +37,11 @@
       "name": "transfer_to_verification"
     },
     {
-      "name": "identify_customer"
+      "name": "identify_customer",
+      "parameters": {
+        "full_name": "Owen Tsai",
+        "phone": "541-555-0183"
+      }
     },
     {
       "name": "verify_identity",
@@ -73,7 +77,10 @@
       }
     },
     {
-      "name": "confirm_return"
+      "name": "confirm_return",
+      "parameters": {
+        "confirmation_token": "KE-RTN-4417"
+      }
     }
   ],
   "behaviors": {
@@ -782,8 +789,29 @@
         "method": "Visa ending 8802"
       }
     ],
-    "holds": [],
-    "rmas": [],
+    "holds": [
+      {
+        "token": "KE-RTN-4417",
+        "kind": "return",
+        "customer_id": "cust_owen",
+        "payload": "{\"order_number\": \"KE-4487740\", \"sku\": \"SKU-DRN-4400\", \"reason\": \"\", \"refund_cents\": 99999, \"restock_fee_cents\": 0, \"hazmat\": 0}",
+        "summary": "Returning the Skyward Vireo 3 Drone, $999.99. There's no restocking fee, so the full $999.99 comes back. It goes back to the card ending 4482.",
+        "consumed": 1
+      }
+    ],
+    "rmas": [
+      {
+        "rma_number": "RMA-7798555",
+        "customer_id": "cust_owen",
+        "order_number": "KE-4487740",
+        "sku": "SKU-DRN-4400",
+        "reason": "",
+        "refund_cents": 99999,
+        "restock_fee_cents": 0,
+        "method": "back to the card ending 4482",
+        "status": "open"
+      }
+    ],
     "return_labels": [],
     "price_matches": [],
     "delivery_changes": [],

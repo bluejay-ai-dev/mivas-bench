@@ -37,7 +37,11 @@
       "name": "transfer_to_verification"
     },
     {
-      "name": "identify_customer"
+      "name": "identify_customer",
+      "parameters": {
+        "full_name": "Selina Cortez",
+        "phone": "541-555-0171"
+      }
     },
     {
       "name": "verify_identity",
@@ -755,7 +759,16 @@
         "method": "Visa ending 8802"
       }
     ],
-    "holds": [],
+    "holds": [
+      {
+        "token": "KE-UPG-5512",
+        "kind": "upgrade",
+        "customer_id": "cust_selina",
+        "payload": "{\"from_tier\": \"plus\", \"amount_cents\": 8500, \"months\": 6}",
+        "summary": "Upgrading to Kestrel Total is $85.00 today, the difference between Plus and Total, prorated over the 6 months left on the current year. It charges to the card ending 1156.",
+        "consumed": 0
+      }
+    ],
     "rmas": [],
     "return_labels": [],
     "price_matches": [],

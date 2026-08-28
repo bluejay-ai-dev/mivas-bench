@@ -37,7 +37,11 @@
       "name": "transfer_to_verification"
     },
     {
-      "name": "identify_customer"
+      "name": "identify_customer",
+      "parameters": {
+        "full_name": "Dana Whitlock",
+        "phone": "541-555-0188"
+      }
     },
     {
       "name": "verify_identity",
@@ -132,10 +136,10 @@
         "email": "dana.whitlock@example.test",
         "postal_code": "97330",
         "card_last4": "4417",
-        "tier": "total",
-        "membership_start": "2026-03-01",
-        "membership_paid_cents": 19999,
-        "auto_renew": 1
+        "tier": "standard",
+        "membership_start": "",
+        "membership_paid_cents": 0,
+        "auto_renew": 0
       },
       {
         "id": "cust_marcus",
@@ -768,14 +772,33 @@
         "method": "Visa ending 8802"
       }
     ],
-    "holds": [],
+    "holds": [
+      {
+        "token": "KE-CXL-7708",
+        "kind": "cancel",
+        "customer_id": "cust_dana",
+        "payload": "{\"tier\": \"total\", \"refund_cents\": 11666, \"months\": 7}",
+        "summary": "Cancelling Kestrel Total refunds $116.66 back to the card ending 4417, which is the 7 unused whole months of the $199.99 paid. It ends today, and they'd lose 60-day returns, TechCrew Protect on purchases made while it's active, and 24/7 TechCrew support.",
+        "consumed": 1
+      }
+    ],
     "rmas": [],
     "return_labels": [],
     "price_matches": [],
     "delivery_changes": [],
     "order_cancellations": [],
     "service_appointments": [],
-    "membership_changes": [],
+    "membership_changes": [
+      {
+        "id": 1,
+        "customer_id": "cust_dana",
+        "action": "cancel",
+        "from_tier": "total",
+        "to_tier": "standard",
+        "amount_cents": 11666,
+        "effective_date": "2026-08-01"
+      }
+    ],
     "scam_reports": [],
     "escalations": []
   }

@@ -37,7 +37,11 @@
       "name": "transfer_to_verification"
     },
     {
-      "name": "identify_customer"
+      "name": "identify_customer",
+      "parameters": {
+        "full_name": "Dana Whitlock",
+        "phone": "541-555-0188"
+      }
     },
     {
       "name": "verify_identity",
@@ -55,7 +59,8 @@
     {
       "name": "quote_delivery_change",
       "parameters": {
-        "order_number": "KE-4471209"
+        "order_number": "KE-4471209",
+        "new_date": "2026-08-18"
       }
     }
   ],
@@ -758,7 +763,16 @@
         "method": "Visa ending 8802"
       }
     ],
-    "holds": [],
+    "holds": [
+      {
+        "token": "KE-DLV-3390",
+        "kind": "delivery_change",
+        "customer_id": "cust_dana",
+        "payload": "{\"order_number\": \"KE-4471209\", \"old_date\": \"2026-08-14\", \"new_date\": \"2026-08-18\", \"window\": \"8am-12pm\", \"fee_cents\": 0}",
+        "summary": "Moving delivery of KE-4471209 from 2026-08-14 to 2026-08-18, 8am-12pm. There's no charge for this change.",
+        "consumed": 0
+      }
+    ],
     "rmas": [],
     "return_labels": [],
     "price_matches": [],

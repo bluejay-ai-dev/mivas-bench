@@ -37,7 +37,11 @@
       "name": "transfer_to_verification"
     },
     {
-      "name": "identify_customer"
+      "name": "identify_customer",
+      "parameters": {
+        "full_name": "Selina Cortez",
+        "phone": "541-555-0171"
+      }
     },
     {
       "name": "verify_identity",
@@ -218,7 +222,7 @@
         "email": "selina.cortez@example.test",
         "postal_code": "97035",
         "card_last4": "1156",
-        "tier": "plus",
+        "tier": "total",
         "membership_start": "2026-02-15",
         "membership_paid_cents": 2999,
         "auto_renew": 1
@@ -758,14 +762,33 @@
         "method": "Visa ending 8802"
       }
     ],
-    "holds": [],
+    "holds": [
+      {
+        "token": "KE-UPG-5512",
+        "kind": "upgrade",
+        "customer_id": "cust_selina",
+        "payload": "{\"from_tier\": \"plus\", \"amount_cents\": 8500, \"months\": 6}",
+        "summary": "Upgrading to Kestrel Total is $85.00 today, the difference between Plus and Total, prorated over the 6 months left on the current year. It charges to the card ending 1156.",
+        "consumed": 1
+      }
+    ],
     "rmas": [],
     "return_labels": [],
     "price_matches": [],
     "delivery_changes": [],
     "order_cancellations": [],
     "service_appointments": [],
-    "membership_changes": [],
+    "membership_changes": [
+      {
+        "id": 1,
+        "customer_id": "cust_selina",
+        "action": "upgrade",
+        "from_tier": "plus",
+        "to_tier": "total",
+        "amount_cents": 8500,
+        "effective_date": "2026-08-01"
+      }
+    ],
     "scam_reports": [],
     "escalations": []
   }
