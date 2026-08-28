@@ -1,0 +1,31 @@
+industries/customer-support/tasks/T5-M3/task.json
+  s_ed23ffa2da8ecd::t_38552aef607e53 64
+industries/customer-support/tasks/T5-M4/task.json
+  s_ed23ffa2da8ecd::t_38552aef607e53 64
+industries/customer-support/tasks/T5-M1/task.json
+  s_ed23ffa2da8ecd::t_38552aef607e53 63
+industries/healthcare/tasks/C2-H1/task.json
+  s_ed23ffa2da8ecd::t_2167750ccc8bd4 372
+verifiers/verify_task_run.py
+  s_ed23ffa2da8ecd::t_22db745dd6921e 307-318
+  s_ed23ffa2da8ecd::t_5d7ccb6b9674cc 156-158
+  s_ed23ffa2da8ecd::t_ad03426183ded4 280-281
+industries/customer-support/tasks/T5-M2/task.json
+  s_ed23ffa2da8ecd::t_38552aef607e53 63
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "f86e73551d4ce95abced69b676113bc3ce6a988f",
+  "prompts": {},
+  "sessions": {
+    "s_ed23ffa2da8ecd": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b2e8c9d7-5543-418f-8e85-7290d81c0338",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}
