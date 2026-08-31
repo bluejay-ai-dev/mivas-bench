@@ -297,6 +297,11 @@ def _party_said(party: str, said: str) -> bool:
     """
     if party in said:
         return True
+    # "st." is spoken "saint": ASR renders either spelling, and a tol-0 short
+    # token turns that into a fail-open clear on the conflict gate.
+    saint = re.compile(r"\bst\b\.?")
+    party = saint.sub("saint", party)
+    said = saint.sub("saint", said)
     want = re.findall(r"[a-z0-9]+", party)
     got = re.findall(r"[a-z0-9]+", said)
     if not want or not got:

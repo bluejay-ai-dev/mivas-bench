@@ -482,7 +482,12 @@ def test_for_whom_matches_casefold() -> None:
     assert vtr._values_equal("for_whom", "Daniel Okonkwo", "daniel okonkwo") is True
     assert vtr._values_equal("for_whom", "Allison Fontaine", " allison fontaine ") is True
     assert vtr._values_equal("for_whom", "new cases intake", "New cases intake") is True
-    assert vtr._values_equal("for_whom", "new cases intake", "New case intake") is False
+    # audio cannot carry a plural: "case"/"cases" are the same spoken label
+    assert vtr._values_equal("for_whom", "new cases intake", "New case intake") is True
+    # a truncated label is a different destination and still fails
+    assert vtr._values_equal("for_whom", "new cases intake", "New cases") is False
+    # ASR-faithful renderings of a spoken name must match
+    assert vtr._values_equal("for_whom", "Daniel Okonkwo", "Daniel Oconquo") is True
     assert vtr._values_equal("for_whom", "Daniel Okonkwo", "Allison Fontaine") is False
     expected = {"name": "take_message", "parameters": {"for_whom": "Daniel Okonkwo"}}
     actual = {"name": "take_message", "parameters": {"for_whom": "daniel okonkwo"}}

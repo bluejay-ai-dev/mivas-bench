@@ -578,22 +578,74 @@ def _industry_params(params: dict[str, Any], tool: dict[str, Any] | None) -> dic
     return out
 
 
+def _lev(a: str, b: str) -> int:
+    if a == b:
+        return 0
+    prev = list(range(len(b) + 1))
+    for i, ca in enumerate(a, 1):
+        cur = [i]
+        for j, cb in enumerate(b, 1):
+            cur.append(min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (ca != cb)))
+        prev = cur
+    return prev[-1]
+
+
+_SAINT_RE = re.compile(r"\bst\b\.?")
+# ASR spells speech, not orthography: c/k/q and w/u render the same sounds
+# ("Okonkwo" vs "Oconquo"), so fold them before comparing spoken names.
+_PHONETIC_FOLD = str.maketrans({"c": "k", "q": "k", "w": "u"})
+
+
+def _party_tokens(value: Any) -> list[str]:
+    text = _SAINT_RE.sub("saint", str(value).casefold())
+    return [tok.translate(_PHONETIC_FOLD) for tok in re.findall(r"[a-z0-9]+", text)]
+
+
+def _fuzzy_in(needle: str, hay: str, tol: int) -> bool:
+    if tol == 0:
+        return needle in hay
+    n = len(needle)
+    if n - tol > len(hay):
+        return False
+    for size in range(max(1, n - tol), min(len(hay), n + tol) + 1):
+        for start in range(len(hay) - size + 1):
+            if _lev(needle, hay[start:start + size]) <= tol:
+                return True
+    return False
+
+
+def _party_match(expected: Any, actual: Any, *, require_all_expected: bool = False) -> bool:
+    """At least as tolerant as tool_server._party_said: the verifier must never
+    score a call as missing when the gate it grades accepted that spelling.
+    Tokens are matched as fuzzy substrings of the other side's joined name, so
+    ASR token splits ("Tool Works") and small slips ("Hallowell") both hit.
+    require_all_expected: every expected token must appear (rejects truncations
+    like "New cases" for "new cases intake") while ASR slips still match."""
+    want, got = _party_tokens(expected), _party_tokens(actual)
+    if not want or not got:
+        return False
+    tol = lambda s: 0 if len(s) <= 3 else 1 if len(s) <= 6 else 2  # noqa: E731
+    joined_want, joined_got = "".join(want), "".join(got)
+    if require_all_expected:
+        return all(_fuzzy_in(w, joined_got, tol(w)) for w in want)
+    if joined_want in joined_got or joined_got in joined_want:
+        return True
+    if all(_fuzzy_in(w, joined_got, tol(w)) for w in want):
+        return True
+    return all(_fuzzy_in(g, joined_want, tol(g)) for g in got)
+
+
 def _values_equal(key: str, expected: Any, actual: Any) -> bool:
     if expected == actual:
         return True
+    if isinstance(expected, dict) and "any_of" in expected:
+        return any(_values_equal(key, option, actual) for option in expected["any_of"])
     if expected is None or actual is None:
         return False
     if key == "for_whom":
-        return str(expected).strip().casefold() == str(actual).strip().casefold()
+        return _party_match(expected, actual, require_all_expected=True)
     if key == "opposing_party":
-        left = str(expected).casefold().replace(" ", "").replace(".", "")
-        right = str(actual).casefold().replace(" ", "").replace(".", "")
-        left = left.replace("holloway", "halloway")
-        right = right.replace("holloway", "halloway")
-        if not left or not right:
-            return False
-        shorter, longer = (left, right) if len(left) <= len(right) else (right, left)
-        return shorter in longer
+        return _party_match(expected, actual)
     if key == "location_id" or key.endswith("location_id"):
         return _same_location(expected, actual)
     if key == "carrier":

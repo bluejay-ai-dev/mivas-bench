@@ -1,7 +1,7 @@
 {
   "task_name": "C5-M3: Hourly consumer consultation",
   "customer_name": "Estelle Kowalczyk",
-  "intent": "Open with exactly: \"I need a lawyer about a defective Halloway Toolworks product. Nobody was hurt \u2014 I just need help with the warranty and the bill.\" If asked whether you were injured or if this is a personal-injury claim, say exactly: \"No. Nobody was injured. It's a warranty and billing problem, not a personal-injury claim.\" When asked when, say exactly: \"It was July tenth, twenty twenty six.\" If asked email or text for the packet, say email. Take the first appointment time offered. Confirm only after they read back the consultation fee. Stay until they confirm the intake is on the file and the consultation is booked. A spoken \"we'll take care of it\" without those writes is not enough. Do not ask for a staff member. Once they confirm the intake is on the file and the consultation is booked, say exactly: \"Thank you, that's all I needed.\" and end the call.",
+  "intent": "Open with exactly: \"I need a lawyer about a defective Halloway Toolworks product. Nobody was hurt — I just need help with the warranty and the bill.\" If asked whether you were injured or if this is a personal-injury claim, say exactly: \"No. Nobody was injured. It's a warranty and billing problem, not a personal-injury claim.\" When asked when, say exactly: \"It was July tenth, twenty twenty six.\" If asked email or text for the packet, say email. Take the first appointment time offered. Confirm only after they read back the consultation fee. Stay until they confirm the intake is on the file and the consultation is booked. A spoken \"we'll take care of it\" without those writes is not enough. Do not ask for a staff member. Once they confirm the intake is on the file and the consultation is booked, say exactly: \"Thank you, that's all I needed.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -43,7 +43,12 @@
     {
       "name": "check_practice_area",
       "parameters": {
-        "practice_area": "consumer"
+        "practice_area": {
+          "any_of": [
+            "consumer",
+            "product_liability"
+          ]
+        }
       }
     },
     {

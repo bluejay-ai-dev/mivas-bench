@@ -51,21 +51,36 @@
     {
       "name": "check_practice_area",
       "parameters": {
-        "practice_area": "consumer"
+        "practice_area": {
+          "any_of": [
+            "consumer",
+            "product_liability"
+          ]
+        }
       }
     },
     {
       "name": "check_jurisdiction",
       "parameters": {
         "state": "CA",
-        "practice_area": "consumer"
+        "practice_area": {
+          "any_of": [
+            "consumer",
+            "product_liability"
+          ]
+        }
       }
     },
     {
       "name": "calculate_filing_deadline",
       "parameters": {
         "state": "CA",
-        "practice_area": "consumer",
+        "practice_area": {
+          "any_of": [
+            "consumer",
+            "product_liability"
+          ]
+        },
         "incident_date": "2026-01-05"
       }
     },
@@ -75,7 +90,12 @@
     {
       "name": "record_intake",
       "parameters": {
-        "practice_area": "consumer",
+        "practice_area": {
+          "any_of": [
+            "consumer",
+            "product_liability"
+          ]
+        },
         "state": "CA",
         "incident_date": "2026-01-05",
         "summary": "Defective space heater."
@@ -193,7 +213,12 @@
       {
         "id": 1,
         "caller_id": "c_new",
-        "practice_area": "consumer",
+        "practice_area": {
+          "any_of": [
+            "consumer",
+            "product_liability"
+          ]
+        },
         "state": "CA",
         "incident_date": "2026-01-05",
         "summary": "Defective space heater."
