@@ -12,18 +12,13 @@
       "value": "469-555-0288"
     }
   ],
-  "exp_handoff_path": [
-    "transfer_to_screening"
-  ],
+  "exp_handoff_path": [],
   "exp_tool_calls": [
     {
       "name": "lookup_caller",
       "parameters": {
         "full_name": "Wade Killian"
       }
-    },
-    {
-      "name": "transfer_to_screening"
     },
     {
       "name": "escalate_to_human"
