@@ -39,6 +39,7 @@ for _root in (Path("/app"), *Path(__file__).resolve().parents):
             sys.path.insert(0, str(_runtime))
         break
 from call_id import headers as tool_headers, log_ws_accept, set_call_id  # noqa: E402
+from pack_clock import today_clock_line, with_pack_clock  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 TOOL_SERVER_URL = os.environ.get("TOOL_SERVER_URL", "http://127.0.0.1:8000").rstrip("/")
@@ -169,7 +170,9 @@ def build_agents(industry_dir: str | Path) -> tuple[RealtimeAgent, dict[str, Rea
 
     agents: dict[str, RealtimeAgent] = {}
     for entry in blueprint["agents"]:
-        instructions = (industry_dir / entry["system_prompt"]).read_text()
+        instructions = with_pack_clock(
+            (industry_dir / entry["system_prompt"]).read_text(), industry_dir
+        )
         if greeting and entry["name"] == start_name:
             instructions = (
                 instructions.rstrip()
@@ -317,6 +320,12 @@ if __name__ == "__main__":
         assert all(
             line not in a.instructions for n, a in hc_agents.items() if n != hc_start.name
         ), "greeting leaked into a downstream stage"
+        clock = today_clock_line("healthcare")
+        assert clock in hc_start.instructions, "starting agent lost the pack clock"
+        assert all(clock in a.instructions for a in hc_agents.values()), (
+            "downstream agent lost the pack clock"
+        )
+        assert "August 19, 2026" in clock
 
         # every shipped industry builds without per-tool harness handlers
         for industry in ("healthcare", "legal", "travel"):

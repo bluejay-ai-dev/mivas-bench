@@ -67,7 +67,7 @@ if __name__ == "__main__":
         greet_text = harness.greeting(bp)
 
         def make_llm(name: str) -> Any:
-            inst = harness.with_clock(bp["agents"][name]["instructions"])
+            inst = harness.with_clock(bp["agents"][name]["instructions"], bp.get("industry_dir"))
             if name == bp["start"]:
                 inst = harness.speak_first(inst, greet_text)
             return _llm(inst)
