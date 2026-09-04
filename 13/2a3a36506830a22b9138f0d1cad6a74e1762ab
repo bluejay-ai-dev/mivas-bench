@@ -1,0 +1,77 @@
+voice-agent-harnesses/aws/harness.py
+  s_76f95fe6a64ca8::t_91912f6e6b30ca 166-169,172-177
+  s_76f95fe6a64ca8::t_4fe269383735a4 869,874
+  s_76f95fe6a64ca8::t_2c5f2811fe8c0f 792-795
+  s_76f95fe6a64ca8::t_d654ac6dd5c527 40
+voice-agent-harnesses/gemini/2.5-flash-native-audio/agent.py
+  s_76f95fe6a64ca8::t_96a21ed97524a0 70
+voice-agent-harnesses/nvidia/voicechat.py
+  s_76f95fe6a64ca8::t_cc2c9782df963d 166,168
+  s_76f95fe6a64ca8::t_7312a0fa1038c1 39
+voice-agent-harnesses/openai/README.md
+  s_76f95fe6a64ca8::t_08b1c3b5e2107d 14
+voice-agent-harnesses/nvidia/README.md
+  s_76f95fe6a64ca8::t_31291249afa3e6 11
+voice-agent-harnesses/gemini/test_harness.py
+  s_76f95fe6a64ca8::t_b38c1f51898e10 32-33
+runtime/pack_clock.py
+  s_76f95fe6a64ca8::t_0cedb672fc6cc5 1-72,77-80,82-84,86-107
+  s_76f95fe6a64ca8::t_e0d370e69085d4 73-76,81,85
+voice-agent-harnesses/gemini/flash-live-3.1/agent.py
+  s_76f95fe6a64ca8::t_861fb5c66bcc6f 70
+tests/test_pack_clock.py
+  s_76f95fe6a64ca8::t_5638b247c0ba51 1-41,43-49,51-58
+  s_76f95fe6a64ca8::t_2439c12ca48571 50
+  s_76f95fe6a64ca8::t_6a324a7ef2239e 42
+voice-agent-harnesses/openai/harness.py
+  s_76f95fe6a64ca8::t_b8f779706ce35c 323-328
+  s_76f95fe6a64ca8::t_ba6d27865bc9da 173-175
+  s_76f95fe6a64ca8::t_4764d12f49d0ca 42
+voice-agent-harnesses/nvidia/harness.py
+  s_76f95fe6a64ca8::t_cd14bdd1f10522 169
+  s_76f95fe6a64ca8::t_87cc158005f577 41
+voice-agent-harnesses/aws/README.md
+  s_76f95fe6a64ca8::t_e6d83190f9b712 17
+voice-agent-harnesses/qwen/harness.py
+  s_76f95fe6a64ca8::t_9c2b2d501bd68d 272-274
+  s_76f95fe6a64ca8::t_24e6b0ef29c78d 465
+  s_76f95fe6a64ca8::t_4bf7e45c08ed99 33
+  s_76f95fe6a64ca8::t_3d454559737f7c 210-213,216-221
+voice-agent-harnesses/livekit/test_harness.py
+  s_76f95fe6a64ca8::t_1bccc39d7bcc58 83
+  s_76f95fe6a64ca8::t_7807305afc665d 102-104
+  s_76f95fe6a64ca8::t_123fed0ed15291 75
+voice-agent-harnesses/grok/README.md
+  s_76f95fe6a64ca8::t_70932e110c3c57 15
+voice-agent-harnesses/qwen/README.md
+  s_76f95fe6a64ca8::t_8aea4d746a082e 17
+voice-agent-harnesses/gemini/harness.py
+  s_76f95fe6a64ca8::t_7ef7db3c23905d 298
+  s_76f95fe6a64ca8::t_f0c623507717b4 41
+  s_76f95fe6a64ca8::t_befc65d3f9107c 130-132
+voice-agent-harnesses/grok/harness.py
+  s_76f95fe6a64ca8::t_4c41a96d4a4f63 33
+  s_76f95fe6a64ca8::t_99a80d2f641c7d 202-204,206,209-214
+  s_76f95fe6a64ca8::t_c71ebb51cc7c84 273-275
+  s_76f95fe6a64ca8::t_9ad1059a1257c3 483
+voice-agent-harnesses/livekit/harness.py
+  s_76f95fe6a64ca8::t_efda28f0c4b138 59
+  s_76f95fe6a64ca8::t_43205edb59d553 160-161,164-170
+  s_76f95fe6a64ca8::t_66f5ad9db55788 336
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "132a3a36506830a22b9138f0d1cad6a74e1762ab",
+  "prompts": {},
+  "sessions": {
+    "s_76f95fe6a64ca8": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "de9b1047-8325-44b6-8405-c51fc7708cee",
+        "model": "grok-4.6"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
