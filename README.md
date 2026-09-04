@@ -361,6 +361,8 @@ Contributions may add harnesses, industries, policy cases, deterministic checks,
 
 New harnesses should first pass the control industry. New industry cases should state the initial fixture, caller goal, required conduct, prohibited conduct, expected tools, expected final state, and the evidence used for scoring.
 
+Keep pull requests narrow and name the affected harness, industry, and verifier behavior. Changes to a task, tool schema, prompt, seed data, or verification rule should include the corresponding deterministic check or explain why no check applies.
+
 ## Citation
 
 If you use MIVAS Bench in published work, cite the repository and the benchmark release used for the evaluation.
