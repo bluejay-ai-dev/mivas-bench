@@ -8,7 +8,7 @@ Two NVIDIA runtimes over industry `agent_blueprint.json` packs, same MIVAS inter
 | `nemotron/` | Cascaded: Nemotron ASR → `nemotron-3-nano-30b-a3b` → Magpie TTS ([voice-agent blueprint](https://github.com/NVIDIA-AI-Blueprints/nemotron-voice-agent)) | Pipecat Flows (hard handoff) |
 | `nemotron-voicechat/` | Full-duplex S2S: [`nvidia/nemotron-voicechat`](https://build.nvidia.com/nvidia/nemotron-voicechat) / [HF 11B](https://huggingface.co/nvidia/NVIDIA-NemotronLabs-VoiceChat-11B) | One WS for the call; handoff = `session.update` (keeps history) |
 
-Shared: `harness.py` (blueprint + industry tools), `report.py` (OTel → Bluejay).
+Shared: `harness.py` (blueprint + industry tools), `report.py` (OTel → Bluejay). Pack `TODAY` (not the wall clock) is injected as `Today is …` on every agent.
 
 ## nemotron (cascaded)
 

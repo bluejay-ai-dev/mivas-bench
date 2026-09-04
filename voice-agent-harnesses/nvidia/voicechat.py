@@ -36,6 +36,7 @@ from harness import (
     tool_names,
 )
 from nvidia_fc import parse_toolcalls
+from pack_clock import with_pack_clock
 
 RUNTIME = "nemotron-voicechat"
 MODEL = "nvidia/nemotron-voicechat"
@@ -162,9 +163,9 @@ def session_update_for_agent(bp: dict[str, Any], agent: str) -> dict[str, Any]:
     for name in tool_names(bp, agent):
         tools.append(_tool_decl(bp["catalog"][name]))
     pack = _ascii(bp["agents"][agent]["instructions"])
-    instructions = pack
+    instructions = with_pack_clock(pack, bp.get("industry_dir"))
     if tools:
-        instructions = pack + _TOOLS_DECL.format(tools=_available_tools_json(tools))
+        instructions = instructions + _TOOLS_DECL.format(tools=_available_tools_json(tools))
     return {
         "type": "session.update",
         "event_id": _event_id(),
