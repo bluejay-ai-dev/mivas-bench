@@ -10,7 +10,6 @@ tools only). Gemini Live cannot swap tools on an open socket.
 from __future__ import annotations
 
 import asyncio
-import datetime as _dt
 import json
 import logging
 import os
@@ -39,6 +38,7 @@ for _root in (Path("/app"), *Path(__file__).resolve().parents):
             sys.path.insert(0, str(_runtime))
         break
 from call_id import begin_session, end_session, headers as tool_headers, set_call_id  # noqa: E402
+from pack_clock import with_pack_clock  # noqa: E402
 
 import report  # noqa: E402
 
@@ -127,9 +127,9 @@ def build_agents(industry_dir: str | Path) -> tuple[str, list[str]]:
     return bp["start"], list(bp["agents"])
 
 
-def with_clock(instructions: str) -> str:
-    today = _dt.date.today()
-    return instructions.rstrip() + f"\n\nToday is {today:%A, %B} {today.day}, {today.year}."
+def with_clock(instructions: str, industry_dir: str | Path | None = None) -> str:
+    """Tell the model the pack's TODAY, not the wall clock."""
+    return with_pack_clock(instructions, industry_dir)
 
 
 def greeting(bp: dict[str, Any]) -> str:
@@ -295,7 +295,7 @@ class Stage(Agent):
         chat_ctx: Any = None,
         speak_first_line: str | None = None,
     ):
-        instructions = with_clock(bp["agents"][name]["instructions"])
+        instructions = with_clock(bp["agents"][name]["instructions"], bp.get("industry_dir"))
         if speak_first_line:
             # must live on the Agent, not the RealtimeModel: livekit overrides
             # the model's instructions with the Agent's at activity start

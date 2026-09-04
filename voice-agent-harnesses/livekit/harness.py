@@ -26,7 +26,6 @@ the new agent's prompt and only the new agent's tools.
 from __future__ import annotations
 
 import asyncio
-import datetime as _dt
 import json
 import logging
 import os
@@ -57,6 +56,7 @@ for _root in (Path("/app"), *Path(__file__).resolve().parents):
             sys.path.insert(0, str(_runtime))
         break
 from call_id import begin_session, end_session, headers as tool_headers, set_call_id  # noqa: E402
+from pack_clock import today_clock_line, with_pack_clock  # noqa: E402
 
 logger = logging.getLogger("mivas.livekit")
 
@@ -157,17 +157,17 @@ def pack_greeting(bp: dict[str, Any] | None = None) -> str:
     return GREETING
 
 
-def today_clock() -> str:
-    d = _dt.date.today()
-    return f"Today is {d.strftime('%A')}, {d.strftime('%B')} {d.day}, {d.year}."
+def today_clock(industry_dir: str | Path | None = None) -> str:
+    return today_clock_line(industry_dir)
 
 
-def with_clock(instructions: str) -> str:
-    """gpt-4.1 (and the S2S models) have no 'today'; relative dates invent years."""
-    clock = today_clock()
-    if clock in instructions:
-        return instructions
-    return f"{instructions.rstrip()}\n\n{clock}"
+def with_clock(instructions: str, industry_dir: str | Path | None = None) -> str:
+    """gpt-4.1 (and the S2S models) have no 'today'; relative dates invent years.
+
+    Use the pack pin, not the wall clock — August slots are still open on
+    TODAY=2026-08-01 even when the real calendar has moved on.
+    """
+    return with_pack_clock(instructions, industry_dir)
 
 
 def resolve_agent_name(default: str) -> str:
@@ -333,7 +333,7 @@ class BlueprintAgent(Agent):
         scripted_opener: bool = False,
         entered_by_handoff: bool = False,
     ):
-        instructions = with_clock(bp["agents"][name]["instructions"])
+        instructions = with_clock(bp["agents"][name]["instructions"], bp.get("industry_dir"))
         llm: NotGivenOr[Any] = llm_factory(name) if llm_factory else NOT_GIVEN
         super().__init__(
             instructions=instructions,

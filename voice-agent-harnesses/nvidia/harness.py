@@ -38,6 +38,7 @@ for _root in (Path("/app"), *Path(__file__).resolve().parents):
             sys.path.insert(0, str(_runtime))
         break
 from call_id import begin_session, end_session, headers as tool_headers, set_call_id  # noqa: E402
+from pack_clock import with_pack_clock  # noqa: E402
 
 HARNESS_DIR = Path(__file__).resolve().parent
 REPO_ROOT = HARNESS_DIR.parents[1] if len(HARNESS_DIR.parents) > 1 else HARNESS_DIR
@@ -165,7 +166,7 @@ def agent_order(bp: dict[str, Any]) -> list[str]:
 
 
 def instructions(bp: dict[str, Any], agent: str) -> str:
-    return bp["agents"][agent]["instructions"]
+    return with_pack_clock(bp["agents"][agent]["instructions"], bp.get("industry_dir"))
 
 
 def tool_names(bp: dict[str, Any], agent: str) -> list[str]:
