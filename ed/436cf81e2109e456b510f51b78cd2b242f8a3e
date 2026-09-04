@@ -1,0 +1,19 @@
+README.md
+  s_d6a70dfb34e55f::t_def2fcdb064e61 364-365
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "ed436cf81e2109e456b510f51b78cd2b242f8a3e",
+  "prompts": {},
+  "sessions": {
+    "s_d6a70dfb34e55f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a069b3-19ab-72b1-bec5-97b5fe29cbd4",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}
