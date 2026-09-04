@@ -30,6 +30,7 @@ for _root in (Path("/app"), *Path(__file__).resolve().parents):
             sys.path.insert(0, str(_runtime))
         break
 from call_id import call_session, headers as tool_headers, set_call_id  # noqa: E402
+from pack_clock import today_clock_line, with_pack_clock  # noqa: E402
 
 # Verbal booking confirm without a function-call event (same failure mode as
 # hosted VoiceChat). Recover schedule_appointment for tool-server + OTel.
@@ -198,18 +199,19 @@ def _tool_decl(spec: dict) -> dict[str, Any]:
     }
 
 
-def today_context_line(today: _dt.date | None = None) -> str:
+def today_context_line(
+    today: _dt.date | None = None, industry_dir: str | Path | None = None
+) -> str:
     """Clock fact for relative dates — Grok Voice has no built-in 'today'."""
-    d = today or _dt.date.today()
-    return f"Today is {d.strftime('%A')}, {d.strftime('%B')} {d.day}, {d.year}."
+    return today_clock_line(industry_dir, today=today)
 
 
-def with_today_context(instructions: str, today: _dt.date | None = None) -> str:
-    line = today_context_line(today)
-    text = (instructions or "").rstrip()
-    if line in text:
-        return text
-    return f"{text}\n\n{line}"
+def with_today_context(
+    instructions: str,
+    today: _dt.date | None = None,
+    industry_dir: str | Path | None = None,
+) -> str:
+    return with_pack_clock(instructions, industry_dir, today=today)
 
 
 def extract_appointment_date(text: str, *, default_year: int | None = None) -> str | None:
@@ -268,7 +270,9 @@ def session_update_for_agent(
     if agent not in bp["agents"]:
         raise KeyError(f"unknown agent {agent!r}")
     tools = [_tool_decl(bp["catalog"][name]) for name in tool_names(bp, agent)]
-    instructions = with_today_context(bp["agents"][agent]["instructions"])
+    instructions = with_today_context(
+        bp["agents"][agent]["instructions"], industry_dir=bp.get("industry_dir")
+    )
     # The reception prompt assumes the branded greeting was already spoken, so a
     # bare response.create opens with "What can I help you with?" — no brand, no
     # AI disclosure. Only the pack's own greeting string fills that in.
@@ -476,7 +480,7 @@ def demo() -> None:
     start_tools = advertised_tools("control-industry", start)
     assert tool_names(bp, start) == start_tools
     all_names = {n for a in bp["agents"] for n in tool_names(bp, a)}
-    today_line = today_context_line()
+    today_line = today_context_line(industry_dir=bp["industry_dir"])
     for agent, names in ((a, tool_names(bp, a)) for a in bp["agents"]):
         update = session_update_for_agent(bp, agent)
         session = update["session"]

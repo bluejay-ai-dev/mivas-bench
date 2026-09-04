@@ -72,7 +72,7 @@ def test_real_handoff() -> None:
     )
     assert _tool_names(receptionist) == {"handoff_to_scheduler", "end_call"}
     assert bp["agents"]["receptionist"]["instructions"] in receptionist.instructions
-    assert harness.today_clock() in receptionist.instructions
+    assert harness.today_clock(bp["industry_dir"]) in receptionist.instructions
 
     handoff = lk_llm.ToolContext(receptionist.tools).get_function_tool("handoff_to_scheduler")
     scheduler = asyncio.run(handoff(raw_arguments={}))
@@ -80,7 +80,7 @@ def test_real_handoff() -> None:
     assert scheduler.agent_name == "scheduler"
     assert _tool_names(scheduler) == {"schedule_appointment", "end_call"}
     assert bp["agents"]["scheduler"]["instructions"] in scheduler.instructions
-    assert harness.today_clock() in scheduler.instructions
+    assert harness.today_clock(bp["industry_dir"]) in scheduler.instructions
     # scripted_opener propagates as a capability flag, but the actual spoken line is
     # derived from the *target's own* prompt, not inherited verbatim from the caller.
     assert scheduler._opener == "Hey, when do you want to schedule your repair appointment?"
@@ -99,6 +99,9 @@ def test_generic_industries() -> None:
         start = BlueprintAgent(bp, bp["start"], hangup)
         expected = {t["name"] for t in bp["agents"][bp["start"]]["tools"]}
         assert _tool_names(start) == expected, (industry, _tool_names(start) ^ expected)
+        clock = harness.today_clock(bp["industry_dir"])
+        assert clock in start.instructions
+        assert "August" in clock and "2026" in clock
 
 
 def test_pack_greeting_and_agent_name() -> None:

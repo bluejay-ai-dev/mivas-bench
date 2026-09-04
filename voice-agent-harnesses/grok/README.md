@@ -12,6 +12,7 @@ Shared builder: `harness.py`. Tracing/reporting: `report.py` (`BLUEJAY_SERVICE_N
 - Session tools (`session: true`, e.g. `end_call`) → harness-local + close
 - Handoffs → soft `session.update` on the same WebSocket (history stays)
 - Speak-first: bare `response.create` after `session.updated` (pack owns greeting text)
+- Clock: pack `TODAY` (not the wall clock) injected as `Today is …` on every session
 - Audio: Grok PCM 24 kHz ↔ CHIRP 16 kHz `pcm_s16le` + `speech.started` / `speech.completed`
 - Tracing → Bluejay OTel `voice.call` (`agent.speech` / `customer.speech` / `execute_tool`); Chirp stamps `X-Simulation-Result-Id` and POSTs `{trace_ids}`
 

@@ -37,6 +37,7 @@ for _root in (Path("/app"), *Path(__file__).resolve().parents):
             sys.path.insert(0, str(_runtime))
         break
 from call_id import headers as tool_headers, log_ws_accept, set_call_id  # noqa: E402
+from pack_clock import today_clock_line, with_pack_clock  # noqa: E402
 
 _BOOKING_CONFIRM_RE = re.compile(
     r"(?:booking\s+confirmed|appointment\s+(?:is\s+)?scheduled|"
@@ -162,17 +163,18 @@ def handoff_role(result: dict[str, Any], bp: dict[str, Any]) -> str | None:
     return role if isinstance(role, str) and role in bp["agents"] else None
 
 
-def today_context_line(today: _dt.date | None = None) -> str:
-    d = today or _dt.date.today()
-    return f"Today is {d.strftime('%A')}, {d.strftime('%B')} {d.day}, {d.year}."
+def today_context_line(
+    today: _dt.date | None = None, industry_dir: str | Path | None = None
+) -> str:
+    return today_clock_line(industry_dir, today=today)
 
 
-def with_today_context(instructions: str, today: _dt.date | None = None) -> str:
-    line = today_context_line(today)
-    text = (instructions or "").rstrip()
-    if line in text:
-        return text
-    return f"{text}\n\n{line}"
+def with_today_context(
+    instructions: str,
+    today: _dt.date | None = None,
+    industry_dir: str | Path | None = None,
+) -> str:
+    return with_pack_clock(instructions, industry_dir, today=today)
 
 
 def extract_appointment_date(text: str, *, default_year: int | None = None) -> str | None:
@@ -787,7 +789,10 @@ class SonicSession:
 
         tools = tools_for_agent(self.bp, self.agent)
         sys_id = str(uuid.uuid4())
-        instructions = with_today_context(self.bp["agents"][self.agent]["instructions"])
+        instructions = with_today_context(
+            self.bp["agents"][self.agent]["instructions"],
+            industry_dir=self.bp.get("industry_dir"),
+        )
         for payload in (
             session_start_event(),
             prompt_start_event(self.prompt_name, tools, voice=self.voice),
@@ -861,12 +866,12 @@ def demo() -> None:
     start_tools = advertised_tools("control-industry", start)
     assert tool_names(bp, start) == start_tools
     all_names = {n for a in bp["agents"] for n in tool_names(bp, a)}
-    today_line = today_context_line()
+    today_line = today_context_line(industry_dir=bp["industry_dir"])
     for agent in bp["agents"]:
         names = tool_names(bp, agent)
         specs = tools_for_agent(bp, agent)
         pack = bp["agents"][agent]["instructions"]
-        instructions = with_today_context(pack)
+        instructions = with_today_context(pack, industry_dir=bp["industry_dir"])
         assert instructions.startswith(pack.rstrip())
         assert today_line in instructions
         assert [t["toolSpec"]["name"] for t in specs] == names

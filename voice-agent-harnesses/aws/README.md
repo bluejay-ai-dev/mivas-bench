@@ -14,7 +14,7 @@ Shared builder: `harness.py`. Tracing: `report.py` (`BLUEJAY_SERVICE_NAME=mivas-
 - Speak-first: open USER audio stream, feed silent PCM keepalive, then interactive USER text (pack owns greeting text)
 - Audio: Nova PCM 16 kHz in / 24 kHz out ↔ CHIRP 16 kHz `pcm_s16le`
 - Barge-in: provider interrupted event (never mute on CHIRP VAD alone)
-- Clock: `Today is …` injected into every session instructions
+- Clock: pack `TODAY` (not the wall clock) injected as `Today is …` on every session
 - Tracing → LangSmith-shaped Bluejay OTel `realtime_session → turn → {user_message, model, execute_tool}`; the `model` span carries Nova's `usageEvent` token breakdown (speech/text, per-turn delta) + time-to-first-token. Chirp stamps `X-Simulation-Result-Id`
 - Concurrency: the CHIRP parent accepts TCP and starts one Python process per call. Amazon's Bedrock streaming library shares state across a whole process, so two calls in one interpreter cancel each other. One container still takes many calls; CPU and memory bound the count.
 

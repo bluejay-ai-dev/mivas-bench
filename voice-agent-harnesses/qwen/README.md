@@ -14,7 +14,7 @@ Frontend-only: no ACP coding-agent backend. Shared builder: `harness.py`. Tracin
 - Speak-first: seed a user `conversation.item.create`, then `response.create` (pack owns greeting text; Qwen rejects a bare create on an empty conversation)
 - Audio: Qwen-Audio PCM 16 kHz in / 24 kHz out ↔ CHIRP 16 kHz `pcm_s16le`
 - Barge-in: Qwen `server_vad` (never mute on CHIRP VAD alone)
-- Clock: `Today is …` injected into every session instructions
+- Clock: pack `TODAY` (not the wall clock) injected as `Today is …` on every session
 - Tools: nested `{type: function, function: {name, description, parameters}}` per Model Studio docs
 - Tracing → LangSmith-shaped Bluejay OTel `realtime_session` → `turn` → {user_message, model (gen_ai.usage.* tokens + TTFT), execute_tool}; Chirp stamps `X-Simulation-Result-Id`
 
