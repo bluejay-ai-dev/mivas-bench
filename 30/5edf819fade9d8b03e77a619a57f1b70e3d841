@@ -1,0 +1,20 @@
+voice-agent-harnesses/openai/gpt-live-1-diamond-alpha/pack.py
+  s_db9d310afd2bd5::t_0ba40a4f2eb291 101-102
+  s_db9d310afd2bd5::t_6b9abbf7d294be 31-37
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "305edf819fade9d8b03e77a619a57f1b70e3d841",
+  "prompts": {},
+  "sessions": {
+    "s_db9d310afd2bd5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a7627e96-cc48-4afb-ac44-a416e816d225",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}
