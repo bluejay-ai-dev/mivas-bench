@@ -35,6 +35,23 @@
   ],
   "exp_tool_calls": [
     {
+      "name": "lookup_caller"
+    },
+    {
+      "name": "record_intake",
+      "parameters": {
+        "practice_area": "auto_accident",
+        "state": "CA",
+        "incident_date": "2026-07-10"
+      }
+    },
+    {
+      "name": "hold_evaluation",
+      "parameters": {
+        "practice_area": "auto_accident"
+      }
+    },
+    {
       "name": "confirm_evaluation"
     }
   ],

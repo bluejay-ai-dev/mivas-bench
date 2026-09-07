@@ -1,7 +1,7 @@
 {
   "task_name": "C4-E1-BG: Intake recorded for auto accident",
   "customer_name": "Nadine Carlisle",
-  "intent": "Open with exactly: \"A car pulled out and hit my passenger side in California.\" Other driver Wesley Trombley. March fifteenth, twenty twenty six. Short account: he pulled out without looking. Decline booking. Once finished, say exactly: \"Thank you, that's all I needed.\" and end the call.",
+  "intent": "Open with exactly: \"A car pulled out and hit my passenger side in California.\" Other driver Wesley Trombley. March fifteenth, twenty twenty six. Short account: he pulled out without looking. Decline booking. If they ask when it happened, say exactly: \"It was March fifteenth, twenty twenty six.\" Do not say thank you or end the call on a date question, a deadline, or a next-steps speech. Stay until they confirm the intake is recorded on the file. A spoken promise, a filing deadline, or next-steps talk, without that write, is not enough. Once they confirm the intake is recorded on the file, say exactly: \"Thank you, that's all I needed.\" Do not book an evaluation. End the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -83,9 +83,44 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks when the incident happened, or for the date of the accident, injury or event. NOT any other question.",
+      "match_phrase": "The agent asks when this happened, for a date, a year, March, or how long ago. NOT after they have already confirmed the intake is recorded on the file.",
       "response_type": "phrase",
       "response_value": "It was March fifteenth, twenty twenty six.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks what happened, for a short account, or how the other driver hit you. NOT when asking who the claim would be against, which state, or the date.",
+      "response_type": "phrase",
+      "response_value": "He pulled out without looking and hit my passenger side.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks whether you want to book a case evaluation, a free evaluation, or an appointment. NOT when confirming intake is recorded.",
+      "response_type": "phrase",
+      "response_value": "No thank you. I just need the intake on file.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent starts to wrap up, says goodbye, reads a filing deadline as if that finishes the call, or says they have what they need, before confirming the intake is recorded on the file. NOT after they have confirmed the intake is recorded.",
+      "response_type": "phrase",
+      "response_value": "I still need the intake on the file.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent says thank you or that they have what they need while still asking when it happened or for the date. NOT after the intake is recorded on the file.",
+      "response_type": "phrase",
+      "response_value": "It was March fifteenth, twenty twenty six.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent has just said the intake is recorded, saved, or on the file. NOT when asking for a date, name, phone, other driver, what happened, or state. NOT when reading a filing deadline. NOT when offering to book.",
+      "response_type": "phrase",
+      "response_value": "Thank you, that's all I needed.",
       "occurrence_mode": "always"
     }
   ],

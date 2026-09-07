@@ -1,7 +1,7 @@
 {
   "task_name": "C4-H3: Employment intake in Washington with packet and note",
   "customer_name": "Clara Whitman",
-  "intent": "Open with exactly: \"I was fired after I reported safety violations.\" When asked who this would be against, say exactly: \"It's Harborline Industries.\" Washington. April fifth, twenty twenty six. Give a short account when asked. If they record intake, say exactly: \"Please add an intake note that I still have the email I sent to HR about the safety violations.\" If offered the packet, say exactly: \"Email is fine.\" Decline booking. Stay until they confirm the intake, the note, and the email packet are on the file. A spoken promise that they will take care of it, without those writes, is not enough. Once they confirm the intake, the note, and the email packet are on the file, say exactly: \"Thank you, that's all I needed.\" Do not book an evaluation. End the call.",
+  "intent": "Open with exactly: \"I was fired after I reported safety violations.\" When asked who this would be against, say exactly: \"It's Harborline Industries.\" Washington. April fifth, twenty twenty six. Give a short account when asked. If they record intake, say exactly: \"Please add an intake note that I still have the email I sent to HR about the safety violations.\" If offered the packet, say exactly: \"Email is fine.\" If offered a case evaluation or appointment, say exactly: \"Not yet, let me read the paperwork first.\" Stay until they confirm the intake, the note, and the email packet are on the file. A spoken promise that they will take care of it, without those writes, is not enough. Once they confirm the intake, the note, and the email packet are on the file, say exactly: \"Thank you, that's all I needed.\" Do not book an evaluation. End the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -136,23 +136,37 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "has recorded the intake or asks if there is anything else to add. NOT when asking to book a case evaluation or appointment.",
+      "match_phrase": "The agent has already recorded the intake and asks if there is anything else to add to the file or for the attorney. NOT before the intake is recorded. NOT when asking what type of matter this is or whether this is employment. NOT when offering the packet by email or text. NOT when asking to book a case evaluation.",
       "response_type": "phrase",
       "response_value": "Please add an intake note that I still have the email I sent to HR about the safety violations.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "offers to transfer you to a human staff member, a live person at the front desk, or a real agent because they cannot continue on this line. NOT when transferring you to screening, intake, scheduling, or client services on this call. NOT when you already asked for a person.",
+      "match_phrase": "offers to transfer you to a human staff member, a live person at the front desk, or a real agent, including to send the packet or finish this. NOT when transferring you to screening, intake, scheduling, or client services on this call. NOT when you already asked for a person.",
       "response_type": "phrase",
       "response_value": "No, I don't need a person. Please finish what I asked on this call.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "asks whether you want to book a case evaluation, a free evaluation, or an appointment. NOT when asking if there is anything else to add after intake, and NOT before the intake note has been spoken.",
+      "match_phrase": "asks whether you want to book a case evaluation, a free evaluation, or an appointment. NOT when asking if there is anything else to add after intake, and NOT when offering the packet by email or text.",
       "response_type": "phrase",
-      "response_value": "No thank you. Intake is enough.",
+      "response_value": "Not yet, let me read the paperwork first.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent starts to wrap up, says goodbye, or asks if that is all, before confirming the intake, the note, and the email packet are on the file. NOT after they have confirmed all three are on the file.",
+      "response_type": "phrase",
+      "response_value": "I still need the intake, the HR-email note, and the email packet on the file.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent confirms the intake, the note, and the email packet are on the file. NOT when offering to book or asking whether anything else should go to the attorney.",
+      "response_type": "phrase",
+      "response_value": "Thank you, that's all I needed.",
       "occurrence_mode": "always"
     }
   ],

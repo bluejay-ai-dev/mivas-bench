@@ -395,8 +395,16 @@ def check(humans: list[dict[str, Any]], industry: str) -> None:
         if "exp_db_state" in dh:
             raise SystemExit(f"{key}: verifier fields must not be copied onto the DH")
         for pin in dh.get("scripted_responses") or []:
-            if pin.get("occurrence_mode") != "always":
-                raise SystemExit(f"{key}: scripted_responses need occurrence_mode=always")
+            mode = pin.get("occurrence_mode")
+            n = pin.get("occurrence_n")
+            if mode == "always":
+                continue
+            if mode == "first_n" and isinstance(n, int) and n > 0:
+                continue
+            raise SystemExit(
+                f"{key}: scripted_responses need occurrence_mode=always "
+                f"or first_n with occurrence_n>0, got {mode!r} n={n!r}"
+            )
         audio = trait_value(dh, "audio_condition")
         mapped = audio_fields(audio or "", industry)
         for field, want in mapped.items():

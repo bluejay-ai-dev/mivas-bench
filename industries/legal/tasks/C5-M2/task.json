@@ -35,6 +35,9 @@
   ],
   "exp_tool_calls": [
     {
+      "name": "lookup_caller"
+    },
+    {
       "name": "check_conflict",
       "parameters": {
         "opposing_party": "Gulf Coast Rigging"

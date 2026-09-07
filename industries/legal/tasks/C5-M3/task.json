@@ -1,7 +1,7 @@
 {
   "task_name": "C5-M3: Hourly consumer consultation",
   "customer_name": "Estelle Kowalczyk",
-  "intent": "Open with exactly: \"I need a lawyer about a defective Halloway Toolworks product. Nobody was hurt — I just need help with the warranty and the bill.\" If asked whether you were injured or if this is a personal-injury claim, say exactly: \"No. Nobody was injured. It's a warranty and billing problem, not a personal-injury claim.\" When asked when, say exactly: \"It was July tenth, twenty twenty six.\" If asked email or text for the packet, say email. Take the first appointment time offered. Confirm only after they read back the consultation fee. Stay until they confirm the intake is on the file and the consultation is booked. A spoken \"we'll take care of it\" without those writes is not enough. Do not ask for a staff member. Once they confirm the intake is on the file and the consultation is booked, say exactly: \"Thank you, that's all I needed.\" and end the call.",
+  "intent": "Open with exactly: \"I need a lawyer about a defective Halloway Toolworks product. Nobody was hurt — I just need help with the warranty and the bill.\" If asked what type of matter this is, say exactly: \"It's a consumer warranty and billing problem, not product liability.\" If they call it product liability, say exactly: \"No. Nobody was injured. It's a consumer warranty and billing problem, not product liability.\" If asked whether you were injured or if this is a personal-injury claim, say exactly: \"No. Nobody was injured. It's a warranty and billing problem, not a personal-injury claim.\" When asked when, say exactly: \"It was July tenth, twenty twenty six.\" If asked email or text for the packet, say email. Take the first appointment time offered. Confirm only after they read back the consultation fee. Decline a callback or a later-booking promise. Stay until they confirm the intake is on the file and the consultation is booked. A spoken \"we'll take care of it\" or a later-booking promise, without those writes, is not enough. Do not ask for a staff member. Once they confirm the intake is on the file and the consultation is booked, say exactly: \"Thank you, that's all I needed.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -35,6 +35,9 @@
   ],
   "exp_tool_calls": [
     {
+      "name": "lookup_caller"
+    },
+    {
       "name": "check_conflict",
       "parameters": {
         "opposing_party": "Halloway Toolworks"
@@ -43,12 +46,7 @@
     {
       "name": "check_practice_area",
       "parameters": {
-        "practice_area": {
-          "any_of": [
-            "consumer",
-            "product_liability"
-          ]
-        }
+        "practice_area": "consumer"
       }
     },
     {
@@ -128,6 +126,41 @@
       "match_phrase": "The agent asks whether you were injured, whether the product caused an injury or loss, or whether this is a personal-injury claim. NOT any other question.",
       "response_type": "phrase",
       "response_value": "No. Nobody was injured. It's a warranty and billing problem, not a personal-injury claim.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks what type of matter this is, whether it is product liability or consumer, or how the defective product is classified. NOT when asking who the claim would be against, which state, or whether anyone was injured.",
+      "response_type": "phrase",
+      "response_value": "It's a consumer warranty and billing problem, not product liability.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent says this is a product-liability matter, checks product liability, or asks to confirm product liability. NOT when asking whether anyone was injured.",
+      "response_type": "phrase",
+      "response_value": "No. Nobody was injured. It's a consumer warranty and billing problem, not product liability.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent starts to wrap up, promises to book later, offers a callback, or asks if that is all, before confirming both the intake is on the file and the consultation is booked. NOT after they have confirmed the consultation is booked.",
+      "response_type": "phrase",
+      "response_value": "I still need the consultation booked on this call.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent confirms the intake is on the file and the consultation is booked. NOT when offering times or reading back a hold.",
+      "response_type": "phrase",
+      "response_value": "Thank you, that's all I needed.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent offers a callback, to call you back later, or to have someone else call you, instead of booking the consultation now. NOT when confirming a booked consultation.",
+      "response_type": "phrase",
+      "response_value": "No callback. Book the consultation on this call.",
       "occurrence_mode": "always"
     },
     {
