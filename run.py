@@ -38,10 +38,6 @@ def _redact_cmd(cmd: list[str]) -> str:
         "OPENAI_API_KEY",
         "NVIDIA_API_KEY",
         "NGC_API_KEY",
-        "VAPI_API_KEY",
-        "RETELL_API_KEY",
-        "BLAND_API_KEY",
-        "CARTESIA_API_KEY",
         "ELEVENLABS_API_KEY",
         "ASSEMBLYAI_API_KEY",
         "DEEPGRAM_API_KEY",
@@ -374,10 +370,6 @@ _SECRET_ENV_KEYS = (
     "OPENAI_API_KEY",
     "NVIDIA_API_KEY",
     "NGC_API_KEY",
-    "VAPI_API_KEY",
-    "RETELL_API_KEY",
-    "BLAND_API_KEY",
-    "CARTESIA_API_KEY",
     "ELEVENLABS_API_KEY",
     "ASSEMBLYAI_API_KEY",
     "DEEPGRAM_API_KEY",
@@ -659,18 +651,10 @@ def apply_agents(pairs: list[tuple[str, str]], *, follow_logs: bool) -> None:
 
     n = replica_count()
     if n > 1:
-        families = {split_harness(h)[0] for h, _ in pairs}
         print(
-            f"MIVAS_REPLICAS={n}; tools run in-pod (127.0.0.1:8000). "
-            "vapi/retell/bland/cartesia must stay at 1.",
+            f"MIVAS_REPLICAS={n}; tools run in-pod (127.0.0.1:8000).",
             file=sys.stderr,
         )
-        if families & PLATFORM_FAMILIES:
-            print(
-                "warning: vapi/retell/bland/cartesia webhooks hit a random "
-                "replica; combined-pod SQLite will split across pods.",
-                file=sys.stderr,
-            )
 
     path = Path(tempfile.mkstemp(suffix=".yaml", prefix="mivas-agents-")[1])
     try:

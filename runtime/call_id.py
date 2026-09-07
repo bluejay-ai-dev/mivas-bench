@@ -258,12 +258,7 @@ def provider_id_from_request(
                 return str(val)
     if headers is not None:
         getter = headers.get if hasattr(headers, "get") else lambda _k: None
-        for key in (
-            "x-call-id",
-            "x-bland-call-id",
-            "x-cartesia-call-id",
-            "x-vapi-call-id",
-        ):
+        for key in ("x-call-id",):
             val = getter(key)
             if val not in (None, ""):
                 return str(val)
