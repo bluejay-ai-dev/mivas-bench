@@ -28,6 +28,13 @@ model has none) and the wire-level rule that the live model never calls tools.
 from __future__ import annotations
 
 import json
+import sys as _sys
+from pathlib import Path as _Path
+
+_runtime = _Path(__file__).resolve().parents[3] / "runtime"
+if _runtime.is_dir() and str(_runtime) not in _sys.path:
+    _sys.path.insert(0, str(_runtime))
+from pack_clock import today_clock_line  # noqa: E402
 import os
 from dataclasses import dataclass, field
 from datetime import date
@@ -91,8 +98,8 @@ def _first_sentence(text: str, limit: int = 160) -> str:
 
 
 def today_line(day: date | None = None) -> str:
-    d = day or date.today()
-    return f"Today is {d:%A}, {d:%B} {d.day}, {d.year}."
+    # Pack clock, not wall clock: seeds and deadlines pin the industry TODAY.
+    return today_clock_line(today=day)
 
 
 def industry_path(name: str | Path) -> Path:
