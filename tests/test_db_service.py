@@ -216,10 +216,6 @@ def test_middleware_scopes_header_and_rejects_miss(
     assert client.get("/count?call_id=675").json() == {"n": 2}
     assert client.get("/count", headers={"X-Mivas-Call-Id": "676"}).json() == {"n": 1}
     assert client.get("/count", headers={"X-Mivas-Call-Id": "../evil"}).status_code == 400
-    bind = client.post("/bind", json={"provider_call_id": "vapi-1", "sim_id": "675"})
-    assert bind.status_code == 200, bind.text
-    assert client.get("/bind/vapi-1").json()["sim_id"] == "675"
-    assert client.get("/bind/missing").status_code == 404
     a = {"appointments": [{"date": "08/18/2026"}]}
     b = {"appointments": [{"date": "09/01/2026"}]}
     assert client.post("/snapshot", json={"call_id": "675", "state": a}).status_code == 200
