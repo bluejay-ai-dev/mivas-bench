@@ -31,6 +31,12 @@
   "exp_handoff_path": [],
   "exp_tool_calls": [
     {
+      "name": "lookup_caller",
+      "parameters": {
+        "full_name": "Percival Ndiaye"
+      }
+    },
+    {
       "name": "check_conflict",
       "parameters": {
         "opposing_party": "Decatur Freight"

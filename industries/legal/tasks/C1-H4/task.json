@@ -86,7 +86,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent says they will connect you to a person, a staff member, or someone who can help. NOT when offering only a message.",
+      "match_phrase": "The agent says they will connect you to a person, a staff member, or someone who can help. NOT when offering only a message. NOT when transferring you to screening, intake, scheduling, or client services on this call.",
       "response_type": "phrase",
       "response_value": "Okay, thank you.",
       "occurrence_mode": "always"

@@ -40,16 +40,16 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
+      "match_phrase": "The agent asks whether another lawyer or another law firm currently represents the caller. NOT when asking whether this firm or an attorney here already represents the caller. NOT any other question.",
       "response_type": "phrase",
-      "response_value": "No, nobody represents me.",
+      "response_value": "No, nobody else. Halverson and Reed are handling it.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
+      "match_phrase": "The agent asks whether this firm, Halverson and Reed, or an attorney here already represents the caller, or whether the caller has already hired or signed with this firm. NOT when asking about another lawyer or another law firm. NOT any other question.",
       "response_type": "phrase",
-      "response_value": "No, nobody else. Halverson and Reed are handling it.",
+      "response_value": "Yes, Halverson and Reed already represent me.",
       "occurrence_mode": "always"
     }
   ],
