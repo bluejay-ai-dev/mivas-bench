@@ -1,0 +1,23 @@
+tests/test_bluejay_run_to_csv.py
+  s_db9d310afd2bd5::t_4d98590e5a999a 816-817,819,821,825,829-830,833
+scripts/bluejay_run_to_csv.py
+  s_db9d310afd2bd5::t_55d0bcddae8478 1493,1498,1502-1503,1508
+  s_db9d310afd2bd5::t_e5e2d962692e16 673
+  s_db9d310afd2bd5::t_e874679a6242b5 1491,1494-1497,1499-1501,1504-1507,1509-1512
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "8018f9096f7ece6bc586d82b9649da97e50b7b81",
+  "prompts": {},
+  "sessions": {
+    "s_db9d310afd2bd5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a7627e96-cc48-4afb-ac44-a416e816d225",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}
