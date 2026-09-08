@@ -1,0 +1,26 @@
+scripts/bluejay_run_to_csv.py
+  s_db9d310afd2bd5::t_e7502c38d675ef 1491-1504
+  s_db9d310afd2bd5::t_b3c8d6400938b6 1587
+  s_db9d310afd2bd5::t_65a5b305199c5b 1457
+  s_db9d310afd2bd5::t_ef5fefb5dec00c 1552-1560
+industries/legal/tasks/C5-H2/task.json
+  s_db9d310afd2bd5::t_bb0d84fad1e07e 211,328
+tests/test_bluejay_run_to_csv.py
+  s_db9d310afd2bd5::t_f8809eefd9c15f 811-833
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "06bdf2d7c508d7988da7a671e08d30acca3e4ddf",
+  "prompts": {},
+  "sessions": {
+    "s_db9d310afd2bd5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a7627e96-cc48-4afb-ac44-a416e816d225",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}
