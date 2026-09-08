@@ -670,7 +670,7 @@ def score_missing_hangup_dump(row: dict[str, Any]) -> None:
 def apply_csv_mark(row: dict[str, Any]) -> None:
     detail = row.get("detail") or {}
     pending = bool(row.get("pending"))
-    reason = csv_void_reason(detail, row.get("status"))
+    reason = str(detail.get("void_reason") or "") or csv_void_reason(detail, row.get("status"))
     row["void_reason"] = reason or None
     if not pending and not reason:
         score_missing_hangup_dump(row)
@@ -1488,20 +1488,28 @@ def collect_filled_results(
             scored["results"] = fill_void_holes(scored["results"], retry_packs)
         else:
             scored["results"] = fill_connection_holes(scored["results"], retry_packs)
-    if supersede_ids and retry_packs:
+    if supersede_ids:
         sup = {str(i) for i in supersede_ids}
-        placed = {str(r.get("id")) for r in scored["results"]}
-        scored["results"] = _fill_holes(
-            scored["results"],
-            retry_packs,
-            is_hole=lambda s: str(s.get("id")) in sup,
-            usable=lambda r: (
-                str(r.get("status") or "") == "COMPLETED"
-                and not r.get("pending")
-                and str(r.get("id")) not in sup
-                and str(r.get("id")) not in placed
-            ),
-        )
+        placed = {str(r.get("result_id")) for r in scored["results"]}
+        if retry_packs:
+            scored["results"] = _fill_holes(
+                scored["results"],
+                retry_packs,
+                is_hole=lambda s: str(s.get("result_id")) in sup,
+                usable=lambda r: (
+                    str(r.get("status") or "") == "COMPLETED"
+                    and not r.get("pending")
+                    and str(r.get("result_id")) not in sup
+                    and str(r.get("result_id")) not in placed
+                ),
+            )
+        # A superseded row with no clean replacement is no-signal, not a fail.
+        for r in scored["results"]:
+            if str(r.get("result_id")) in sup:
+                r["void_reason"] = (
+                    "superseded: digital-human deviation audited on this replica; "
+                    "no clean replacement replica available"
+                )
     return scored
 
 
