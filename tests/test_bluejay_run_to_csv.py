@@ -808,3 +808,26 @@ def test_overlay_tool_actuals_prefers_postgres_when_present() -> None:
     empty_pg = {"tool_calls": [{"name": "end_call", "actual": []}]}
     kept = exp.overlay_tool_actuals(listing, empty_pg)
     assert kept["tool_calls"][0]["name"] == "end_call"
+
+
+def test_supersede_refills_named_rows_from_retries():
+    import bluejay_run_to_csv as mod
+    primary = [
+        {"id": 1, "digital_human_id": 9, "status": "COMPLETED"},
+        {"id": 2, "digital_human_id": 9, "status": "COMPLETED"},
+    ]
+    retries = [[{"id": 7, "digital_human_id": 9, "status": "COMPLETED"}]]
+    sup = {"2"}
+    placed = {str(r["id"]) for r in primary}
+    out = mod._fill_holes(
+        primary,
+        retries,
+        is_hole=lambda s: str(s.get("id")) in sup,
+        usable=lambda r: (
+            str(r.get("status") or "") == "COMPLETED"
+            and not r.get("pending")
+            and str(r.get("id")) not in sup
+            and str(r.get("id")) not in placed
+        ),
+    )
+    assert [r["id"] for r in out] == [1, 7]

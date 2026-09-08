@@ -1454,6 +1454,7 @@ def collect_filled_results(
     sim_hint: str | None = None,
     include_void_holes: bool = False,
     fetch_details: bool = False,
+    supersede_ids: frozenset[str] = frozenset(),
 ) -> dict[str, Any]:
     """Score primary, then replace unanswered slots from later runs."""
     # ponytail: the Postgres bulk-listing fast path left with verify_runs_bulk.py;
@@ -1487,6 +1488,20 @@ def collect_filled_results(
             scored["results"] = fill_void_holes(scored["results"], retry_packs)
         else:
             scored["results"] = fill_connection_holes(scored["results"], retry_packs)
+    if supersede_ids and retry_packs:
+        sup = {str(i) for i in supersede_ids}
+        placed = {str(r.get("id")) for r in scored["results"]}
+        scored["results"] = _fill_holes(
+            scored["results"],
+            retry_packs,
+            is_hole=lambda s: str(s.get("id")) in sup,
+            usable=lambda r: (
+                str(r.get("status") or "") == "COMPLETED"
+                and not r.get("pending")
+                and str(r.get("id")) not in sup
+                and str(r.get("id")) not in placed
+            ),
+        )
     return scored
 
 
@@ -1534,6 +1549,15 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="GET each result instead of using the run listing",
     )
+    parser.add_argument(
+        "--supersede",
+        default="",
+        help=(
+            "Comma-separated result ids independently audited as test-environment "
+            "noise (e.g. DH pin misfire); their slots are refilled from later runs "
+            "like holes. Keep the audit trail next to the CSV."
+        ),
+    )
     args = parser.parse_args(argv)
 
     primary = args.run_id
@@ -1560,6 +1584,7 @@ def main(argv: list[str] | None = None) -> int:
         sim_hint=args.sim,
         include_void_holes=args.fill_voids,
         fetch_details=args.fetch_details,
+        supersede_ids=frozenset(x.strip() for x in args.supersede.split(",") if x.strip()),
     )
     agent_id = agent_id_of(scored.get("run") or {}, scored["results"], scored.get("simulation_id") or "")
     assign_conversation_indexes(scored["results"])
