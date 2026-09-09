@@ -170,8 +170,9 @@ will take, beyond what the tool returned.
 
 book_service_appointment books the bench in a store, an in-home visit, or remote
 support. The caller's own words are fine: "bring it in", "come out to the
-house", "over the phone". If the day they want is not open it books the first
-one that is and tells you, so say which day it actually booked.
+house", "over the phone". Omit date when the caller asks for the first, earliest,
+or next available opening. If a specific requested day is unavailable, ask the
+caller to choose another listed opening instead of inventing a date.
 
 Two refusals come back from that tool and both are safety, not paperwork.
 

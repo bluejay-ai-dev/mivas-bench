@@ -760,7 +760,7 @@
     },
     {
       "name": "book_service_appointment",
-      "description": "Book TechCrew: bench (in a store), in_home, or remote. Refuses for a recalled unit (RECALLED_NO_SERVICE) or a damaged battery (HAZMAT_NO_SERVICE) and hands you the wording to say. A recalled product is never repaired. If the requested day is not open it books the first day that is and tells you so.",
+      "description": "Book TechCrew: bench (in a store), in_home, or remote. Omit date when the caller requests the first, earliest, or next available slot; those phrases are also accepted as date aliases. Refuses for a recalled unit (RECALLED_NO_SERVICE) or a damaged battery (HAZMAT_NO_SERVICE) and hands you the wording to say. A recalled product is never repaired. If a specific requested day is unavailable, the tool returns NO_SUCH_SLOT so the caller can choose another listed opening.",
       "inputSchema": {
         "type": "object",
         "properties": {

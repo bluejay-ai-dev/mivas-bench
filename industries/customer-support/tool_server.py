@@ -1125,7 +1125,9 @@ def book_service_appointment(a: dict[str, Any]) -> dict[str, Any]:
         raise ToolError("NO_SUCH_SLOT",
                         "That kind of appointment isn't offered. The options are a "
                         "TechCrew Bench visit, an in-home visit, or remote support.")
-    wanted = a.get("date")
+    wanted = str(a.get("date") or "").strip()
+    if wanted.casefold() in {"first available", "earliest available", "next available"}:
+        wanted = ""
     slot = None
     relaxed = None
     if wanted:

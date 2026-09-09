@@ -219,6 +219,9 @@ def test_customer_support_rerun_pins_lock_contaminated_paths() -> None:
 
     t3h4 = load("T3-H4")
     assert "do not choose a calendar date" in t3h4["intent"].lower()
+    greeting = next(pin for pin in pins(t3h4) if "greets you" in pin["match_phrase"])
+    assert greeting["response_value"].startswith("Tell me what plans I have")
+    assert "then cancel it" in greeting["response_value"]
     date_pin = next(pin for pin in pins(t3h4) if "needs a specific month or day" in pin["match_phrase"])
     assert "first available bench slot" in date_pin["response_value"].lower()
     incomplete = next(

@@ -90,6 +90,13 @@
   "scripted_responses": [
     {
       "match_type": "context",
+      "match_phrase": "The agent greets you at the start of the call and asks how they can help. NOT after identity, coverage, booking, or cancellation work has started.",
+      "response_type": "phrase",
+      "response_value": "Tell me what plans I have, confirm the Aurora Pro that will not charge is covered at zero, book the first bench slot, then cancel it because I cannot make it.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
       "match_phrase": "The agent asks for the caller's full name and a phone number, or for a name and the number on the account. NOT when asking for ZIP, card last four, or an order number alone.",
       "response_type": "phrase",
       "response_value": "Grace Okonkwo, 541-555-0112.",

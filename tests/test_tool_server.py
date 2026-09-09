@@ -251,6 +251,36 @@ def test_legal_guards_survive_dispatch() -> None:
         assert reuse["ok"] is False and reuse["error_code"], "token must stay single-use"
 
 
+def test_customer_support_books_first_available_date_aliases() -> None:
+    with _load_tool_server("customer-support") as module, TestClient(module.app) as client:
+        def tool(name: str, args: dict[str, Any]) -> dict[str, Any]:
+            resp = client.post(f"/tools/{name}", json={"arguments": args})
+            assert resp.status_code == 200, resp.text
+            return resp.json()
+
+        assert tool(
+            "identify_customer",
+            {"full_name": "Grace Okonkwo", "phone": "5415550112"},
+        )["ok"]
+        assert tool(
+            "verify_identity",
+            {"postal_code": "97005", "card_last4": "6628"},
+        )["ok"]
+
+        for alias in ("first available", "earliest available", "next available"):
+            booked = tool(
+                "book_service_appointment",
+                {
+                    "order_number": "KE-4471860",
+                    "service_type": "bench",
+                    "issue": "will not charge",
+                    "date": alias,
+                },
+            )
+            assert booked["ok"], (alias, booked)
+            assert booked["data"]["date"] == "2026-08-03"
+
+
 def test_legal_record_intake_rejects_garbage() -> None:
     with _load_tool_server("legal") as module, TestClient(module.app) as client:
         def tool(name: str, args: dict[str, Any]) -> dict[str, Any]:
