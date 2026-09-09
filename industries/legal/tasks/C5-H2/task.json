@@ -208,7 +208,7 @@
       "response_type": "phrase",
       "response_value": "Cancel that one and take the next opening instead.",
       "occurrence_mode": "first_n",
-      "occurrence_n": 2
+      "occurrence_n": 1
     },
     {
       "match_type": "context",
