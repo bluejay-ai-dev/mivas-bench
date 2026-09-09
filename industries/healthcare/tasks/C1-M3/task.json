@@ -56,6 +56,18 @@
   "scripted_responses": [
     {
       "match_type": "context",
+      "match_phrase": "asks for your full name and date of birth, or asks you to confirm who you are, or asks for the patient's name and date of birth. NOT when asking only for a member ID or insurance card, NOT when asking which office or location, NOT when asking for a phone or mobile number, NOT when asking about an appointment day or time, NOT when reading your name and date of birth back to you for confirmation.",
+      "response_type": "phrase",
+      "response_value": "Bernadette Kohl. My date of birth is April twenty-second, nineteen ninety-three."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "reads your name and date of birth back to you and asks whether that is right, or asks you to confirm the name and date of birth they just repeated. NOT when first asking for your name and date of birth, NOT when asking for a phone or mobile number.",
+      "response_type": "phrase",
+      "response_value": "Yes, that's right."
+    },
+    {
+      "match_type": "context",
       "match_phrase": "offers an appointment day or time, or asks which day you want for allergy skin testing. NOT when asking for your name.",
       "response_type": "phrase",
       "response_value": "I need the Park Avenue skin-testing slot on August twenty-fourth."
@@ -83,6 +95,12 @@
       "match_phrase": "starts to book a regular medical visit, a rash visit, or a new-patient medical appointment instead of allergy skin testing. NOT when booking allergy skin testing.",
       "response_type": "phrase",
       "response_value": "No regular visit. I need allergy skin testing scheduled, not a regular rash visit."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before the Park Avenue allergy skin-testing visit is confirmed on the calendar. NOT when they have just confirmed the skin-testing service is scheduled.",
+      "response_type": "phrase",
+      "response_value": "I still need allergy skin testing scheduled at Park Avenue on August twenty-fourth. Please confirm it is on the calendar before I go."
     }
   ],
   "customer_name": "Bernadette Kohl",

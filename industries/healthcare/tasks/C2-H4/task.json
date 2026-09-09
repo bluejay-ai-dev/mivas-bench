@@ -1,6 +1,6 @@
 {
-  "task_name": "C2-H4: Cancel tomorrow then rebook a follow-up",
-  "intent": "You are an existing Straus patient. You have a follow-up tomorrow at Park Avenue and you need it cancelled because you are travelling, then you still want a new follow-up booked at Park Avenue for after you get back. Answer their identity questions once with your name and date of birth, confirm if they read it back, then go straight to the cancellation. After they explain a missed-visit fee, say you accept it and still want tomorrow cancelled. After it is cancelled, ask them to book a new follow-up at Park Avenue. Take the first appointment time they offer for that new visit. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first new time out loud, then thank them and end the call. Do not ask to join a waitlist. Do not ask to add insurance, for a callback, to speak to a person, a bill, a payment, the patient portal, a text, financing, or the street, floor, or suite. If they offer a waitlist instead of a new booking, refuse and ask them to book the first opening. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until tomorrow is cancelled and a new time is on the calendar. If they only list openings, say book the first one. Do not ask them to text you an appointment confirmation.",
+  "task_name": "C2-H4: Cancel the August 20 visit then rebook a follow-up",
+  "intent": "You are an existing Straus patient. You have a follow-up on August 20, 2026 at Park Avenue and you need it cancelled because you are travelling, then you still want a new follow-up booked at Park Avenue for after you get back. Answer their identity questions once with your name and date of birth, confirm if they read it back, then go straight to the cancellation. After they explain a missed-visit fee, say you accept it and still want the August 20 visit cancelled. After it is cancelled, ask them to book a new follow-up at Park Avenue. Take the first appointment time they offer for that new visit. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first new time out loud, then thank them and end the call. Do not ask to join a waitlist. Do not ask to add insurance, for a callback, to speak to a person, a bill, a payment, the patient portal, a text, financing, or the street, floor, or suite. If they offer a waitlist instead of a new booking, refuse and ask them to book the first opening. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until the August 20 visit is cancelled and a new time is on the calendar. If they only list openings, say book the first one. Do not ask them to text you an appointment confirmation.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -139,19 +139,19 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "explains a missed-visit fee, a cancellation fee, or that you will be charged for cancelling tomorrow, or asks whether you still want to cancel after naming a fee. NOT when they have already confirmed tomorrow is cancelled.",
+      "match_phrase": "has looked up the August 20 visit and explains a missed-visit fee or cancellation fee for cancelling that visit, or asks whether you still want to cancel the August 20 visit after naming that fee. NOT when they have already confirmed the August 20 visit is cancelled, NOT when stating a general cancellation policy before looking up that visit, NOT during identity verification, NOT when greeting you.",
       "response_type": "phrase",
-      "response_value": "I accept the missed-visit fee. Please cancel tomorrow, then book a new follow-up at Park Avenue."
+      "response_value": "I accept the missed-visit fee. Please cancel the August 20 visit, then book a new follow-up at Park Avenue."
     },
     {
       "match_type": "context",
-      "match_phrase": "offers another appointment time, to reschedule, or to rebook INSTEAD of cancelling tomorrow. NOT after tomorrow is already cancelled, NOT when offering a new time after the cancel is done.",
+      "match_phrase": "offers another appointment time, to reschedule, or to rebook INSTEAD of cancelling the August 20 visit. NOT after the August 20 visit is already cancelled, NOT when offering a new time after the cancel is done.",
       "response_type": "phrase",
-      "response_value": "Cancel tomorrow first. I accept the fee. Then book the first new follow-up time."
+      "response_value": "Cancel the August 20 visit first. I accept the fee. Then book the first new follow-up time."
     },
     {
       "match_type": "context",
-      "match_phrase": "offers an appointment time, a slot, or asks which day or time you want AFTER confirming tomorrow is cancelled. NOT when they are still explaining the fee, NOT when asking for your name or date of birth.",
+      "match_phrase": "offers an appointment time, a slot, or asks which day or time you want AFTER confirming the August 20 visit is cancelled. NOT when they are still explaining the fee, NOT when asking for your name or date of birth.",
       "response_type": "phrase",
       "response_value": "I'll take the first time you offered for the new follow-up."
     },
@@ -175,9 +175,9 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before tomorrow is cancelled AND a new follow-up time is confirmed on the calendar. NOT when both are complete.",
+      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before the August 20 visit is cancelled AND a new follow-up time is confirmed on the calendar. NOT when both are complete.",
       "response_type": "phrase",
-      "response_value": "I still need tomorrow cancelled and a new follow-up booked. Please finish both before I go."
+      "response_value": "I still need the August 20 visit cancelled and a new follow-up booked. Please finish both before I go."
     }
   ],
   "customer_name": "Jordan Lee",

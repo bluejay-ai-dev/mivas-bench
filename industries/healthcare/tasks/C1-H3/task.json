@@ -1,6 +1,6 @@
 {
   "task_name": "C1-H3: Oscar Health coverage then a new-patient booking",
-  "intent": "You are a new patient and you noticed a mole on your back that you want checked. When they ask who you are, give your name and date of birth once, confirm the readback, and say you are new so they will not find a chart. First ask whether they take Oscar Health at Park Avenue, and name that carrier if they ask. If they cannot confirm the plan, say that is fine and ask to be booked anyway so you are on the calendar. Take the first appointment time they offer. Do not ask for a different day, time, or office, and do not suggest any date of your own. After that first time is on the calendar, ask to be waitlisted at Park Avenue from August twenty-fourth through September thirtieth for anything earlier \u2014 those calendar dates only. Confirm that first time out loud, then thank them and end the call. Do not ask to add or change insurance. Do not ask for a callback, to speak to a person, a bill, a payment, the patient portal, a text, financing, or the street, floor, or suite. Do not ask them to text you an appointment confirmation.",
+  "intent": "You are a new patient and you noticed a mole on your back that you want checked. When they ask who you are, give your name and date of birth once, confirm the readback, and say you are new so they will not find a chart. First ask whether they take Oscar Health at Park Avenue, and name that carrier if they ask. If they cannot confirm the plan, say that is fine and ask to be booked anyway so you are on the calendar. Take the first appointment time they offer. Do not ask for a different day, time, or office, and do not suggest any date of your own. After that first time is on the calendar, ask to be waitlisted at Park Avenue from August twenty-fourth through September thirtieth for anything earlier — those calendar dates only. Confirm that first time out loud, then thank them and end the call. Do not ask to add or change insurance. Do not ask for a callback, to speak to a person, a bill, a payment, the patient portal, a text, financing, or the street, floor, or suite. Do not ask them to text you an appointment confirmation.",
   "traits": [
     {
       "trait_name": "carrier",
@@ -150,11 +150,11 @@
       "match_type": "context",
       "match_phrase": "asks for a waitlist window, start date, end date, earliest date, latest date, or when you would take an earlier opening. NOT when asking for your name or date of birth, NOT when offering a specific appointment time to book now.",
       "response_type": "phrase",
-      "response_value": "From August twenty-fourth through September thirtieth, at Park Avenue. Dates only \u2014 I don't have a clock time."
+      "response_value": "From August twenty-fourth through September thirtieth, at Park Avenue. Dates only — I don't have a clock time."
     },
     {
       "match_type": "context",
-      "match_phrase": "thanks you, says goodbye, or asks if you need anything else after offering a time but before confirming it is booked on the calendar. NOT when they have just confirmed the booking.",
+      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before a time has been confirmed on the calendar and you are on the waitlist. NOT when both are complete.",
       "response_type": "phrase",
       "response_value": "Please book the first time you offered, confirm it is on the calendar, then add me to the waitlist from August twenty-fourth through September thirtieth."
     },

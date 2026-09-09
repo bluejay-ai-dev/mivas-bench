@@ -1,6 +1,6 @@
 {
-  "task_name": "C2-H1: Cancel tomorrow's follow-up",
-  "intent": "You are an existing Straus patient. You have a follow-up tomorrow at Park Avenue and you need it cancelled outright because you are travelling. Answer their identity questions once with your name and date of birth, confirm if they read it back, then go straight to the cancellation. You will not rebook. If they offer another time, refuse it and say you only want this visit cancelled. After they explain a missed-visit fee, say you accept it and still want tomorrow cancelled. After it is cancelled, if they offer the waitlist for a later opening, say yes and ask to be listed from August twenty-fourth through September thirtieth at Park Avenue — those calendar dates only. Do not name a clock time, and if they ask for a latest time of day say end of September thirtieth is fine. Then thank them and end the call. Do not ask to book or reschedule a new visit. Do not ask to add insurance, for a callback, to speak to a person, a bill, a payment, the patient portal, or a text. Do not ask for the street, floor, suite, or office id. Do not volunteer a ZIP. Give the waitlist window once. If they ask again, say you already gave August twenty-fourth through September thirtieth — do not agree to a second listing. Do not ask them to text you an appointment confirmation.",
+  "task_name": "C2-H1: Cancel August 20 follow-up",
+  "intent": "You are an existing Straus patient. You have a follow-up on August 20, 2026 at Park Avenue and you need it cancelled outright because you are travelling. Answer their identity questions once with your name and date of birth, confirm if they read it back, then go straight to the cancellation. You will not rebook. If they offer another time, refuse it and say you only want this visit cancelled. After they explain a missed-visit fee, say you accept it and still want the August 20 visit cancelled. After it is cancelled, if they offer the waitlist for a later opening, say yes and ask to be listed from August twenty-fourth through September thirtieth at Park Avenue — those calendar dates only. Do not name a clock time, and if they ask for a latest time of day say end of September thirtieth is fine. Then thank them and end the call. Do not ask to book or reschedule a new visit. Do not ask to add insurance, for a callback, to speak to a person, a bill, a payment, the patient portal, or a text. Do not ask for the street, floor, suite, or office id. Do not volunteer a ZIP. Give the waitlist window once. If they ask again, say you already gave August twenty-fourth through September thirtieth — do not agree to a second listing. Do not ask them to text you an appointment confirmation.",
   "traits": [
     {
       "trait_name": "zip",
@@ -124,9 +124,9 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "explains a missed-visit fee, a cancellation fee, or that you will be charged for cancelling tomorrow, or asks whether you still want to cancel after naming a fee. NOT when they have already confirmed tomorrow is cancelled.",
+      "match_phrase": "explains a missed-visit fee, a cancellation fee, or that you will be charged for cancelling the August 20 visit, or asks whether you still want to cancel after naming a fee. NOT when they have already confirmed the August 20 visit is cancelled.",
       "response_type": "phrase",
-      "response_value": "I accept the missed-visit fee. Please cancel tomorrow."
+      "response_value": "I accept the missed-visit fee. Please cancel the August 20 visit."
     },
     {
       "match_type": "context",
@@ -142,15 +142,15 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before tomorrow is cancelled and you are on the waitlist. NOT when both are complete.",
+      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before the August 20 visit is cancelled and you are on the waitlist. NOT when both are complete.",
       "response_type": "phrase",
-      "response_value": "I still need tomorrow cancelled and the waitlist from August twenty-fourth through September thirtieth. I accept the fee."
+      "response_value": "I still need the August 20 visit cancelled and the waitlist from August twenty-fourth through September thirtieth. I accept the fee."
     },
     {
       "match_type": "context",
       "match_phrase": "offers another appointment time, to reschedule, or to rebook instead of cancelling. NOT when offering the waitlist, NOT when asking for a waitlist window, NOT when asking for your name or date of birth.",
       "response_type": "phrase",
-      "response_value": "No, I will not rebook. I only want tomorrow cancelled, then the waitlist."
+      "response_value": "No, I will not rebook. I only want the August 20 visit cancelled, then the waitlist."
     },
     {
       "match_type": "context",

@@ -30,7 +30,7 @@ for _root in (Path("/app"), *Path(__file__).resolve().parents):
             sys.path.insert(0, str(_runtime))
         break
 from call_id import call_session, headers as tool_headers, set_call_id  # noqa: E402
-from pack_clock import today_clock_line, with_pack_clock  # noqa: E402
+from pack_clock import pack_today, today_clock_line, with_pack_clock  # noqa: E402
 
 # Verbal booking confirm without a function-call event (same failure mode as
 # hosted VoiceChat). Recover schedule_appointment for tool-server + OTel.
@@ -214,11 +214,18 @@ def with_today_context(
     return with_pack_clock(instructions, industry_dir, today=today)
 
 
-def extract_appointment_date(text: str, *, default_year: int | None = None) -> str | None:
+def extract_appointment_date(
+    text: str,
+    *,
+    default_year: int | None = None,
+    today: _dt.date | None = None,
+    industry_dir: str | Path | None = None,
+) -> str | None:
     """Best-effort MM/DD/YYYY from agent speech (last concrete / next-weekday)."""
     if not text:
         return None
-    year_default = int(default_year or _dt.date.today().year)
+    clock = today if today is not None else pack_today(industry_dir)
+    year_default = int(default_year or clock.year)
     hits: list[tuple[int, int, str]] = []
 
     for m in _DATE_NUMERIC_RE.finditer(text):
@@ -231,11 +238,10 @@ def extract_appointment_date(text: str, *, default_year: int | None = None) -> s
         hits.append((50, m.end(), f"{month:02d}/{day:02d}/{year}"))
     for m in _NEXT_WEEKDAY_RE.finditer(text):
         target = _WEEKDAYS.index(m.group(1).lower())
-        today = _dt.date.today()
-        delta = (target - today.weekday()) % 7
+        delta = (target - clock.weekday()) % 7
         if delta == 0:
             delta = 7
-        day = today + _dt.timedelta(days=delta)
+        day = clock + _dt.timedelta(days=delta)
         hits.append((45, m.end(), day.strftime("%m/%d/%Y")))
 
     if not hits:
@@ -246,14 +252,21 @@ def extract_appointment_date(text: str, *, default_year: int | None = None) -> s
     return cands[-1][2]
 
 
-def infer_schedule_appointment(text: str) -> dict[str, Any] | None:
+def infer_schedule_appointment(
+    text: str,
+    *,
+    today: _dt.date | None = None,
+    industry_dir: str | Path | None = None,
+) -> dict[str, Any] | None:
     """If transcript confirms a booking, return schedule_appointment args."""
     if not text or not _BOOKING_CONFIRM_RE.search(text):
         return None
     m = _BOOKING_CONFIRM_RE.search(text)
     assert m is not None
     window = text[max(0, m.start() - 40) : min(len(text), m.end() + 100)]
-    date = extract_appointment_date(window) or extract_appointment_date(text)
+    date = extract_appointment_date(
+        window, today=today, industry_dir=industry_dir
+    ) or extract_appointment_date(text, today=today, industry_dir=industry_dir)
     if not date:
         return None
     return {"date": date}

@@ -193,4 +193,4 @@ request — never "Hi" and never "what test did you have?"
 # GLOBAL TOOLS
 - transfer_to_human — required: destination (patient_support_center | billing_team | location_front_desk | cosmetic_coordinator | clinical_triage | records | on_call), reason (caller_request | clinical_emergency | identity_locked | other).
 - create_callback_task — required: queue (billing | clinical | front_desk | cosmetic | records), callback_number (E.164). Optional: priority (stat | urgent | routine). Say the SLA it returns out loud.
-- end_call — required: reason (caller_done | spam | wrong_number).
+- end_call — required: reason (caller_done | spam | wrong_number). Include the confirmed outcome, next steps, and goodbye in your final response after the tool returns.

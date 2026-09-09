@@ -167,7 +167,9 @@ async def _bridge(ws, model: str, industry: str) -> None:
                     t["name"] for t in bp["agents"][state["agent"]]["tools"]
                 }:
                     return
-                args = infer_schedule_appointment(transcript)
+                args = infer_schedule_appointment(
+                    transcript, industry_dir=bp.get("industry_dir")
+                )
                 if not args:
                     return
                 inferred_booking["v"] = True

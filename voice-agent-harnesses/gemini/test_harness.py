@@ -29,6 +29,7 @@ def test_blueprint_and_greeting() -> None:
     assert bp["catalog"]
     health = harness.load_blueprint("healthcare")
     assert "Straus" in harness.greeting(health)
+    os.environ.pop("MIVAS_TODAY", None)
     clocked = harness.with_clock(health["agents"][health["start"]]["instructions"], health["industry_dir"])
     assert "August 19, 2026" in clocked
 

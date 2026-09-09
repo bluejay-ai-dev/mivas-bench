@@ -1682,7 +1682,7 @@
     },
     {
       "name": "end_call",
-      "description": "When to call this tool: the caller is done \u2014 say goodbye first \u2014 or this is spam or a wrong number. What it does: ends the session. A finished call after goodbye is caller_done; there is no silent-hangup reason. When another tool is better: transfer_to_human if they asked for a person or this is a clinical emergency after the 911 lines.",
+      "description": "When to call this tool: the caller is done, or this is spam or a wrong number. What it does: ends the session. Include the confirmed outcome, next steps, and goodbye in your final response after this tool returns. A finished call after that farewell is caller_done; there is no silent-hangup reason. When another tool is better: transfer_to_human if they asked for a person or this is a clinical emergency after the 911 lines.",
       "inputSchema": {
         "type": "object",
         "properties": {

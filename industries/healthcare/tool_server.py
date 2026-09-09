@@ -186,6 +186,8 @@ def create_appointment(body: AppointmentCreate) -> dict[str, Any]:
             "SELECT 1 FROM providers WHERE id = ?", (body.provider_id,)
         ).fetchone() is None:
             raise HTTPException(status_code=400, detail="unknown provider_id")
+        if _parse_local(body.start) < _parse_local(TODAY):
+            raise HTTPException(status_code=400, detail="cannot book in the past")
         try:
             cur = conn.execute(
                 """
@@ -365,6 +367,18 @@ def _iso_minute(value: datetime | str) -> str:
 def _iso_date(value: datetime | str) -> str:
     dt = value if isinstance(value, datetime) else _parse_local(str(value))
     return dt.strftime("%Y-%m-%d")
+
+
+def _reject_past(ts: str, *, what: str = "That time") -> None:
+    if _parse_local(ts) < _parse_local(TODAY):
+        raise ToolError(
+            "DATE_IN_PAST",
+            f"{what} is before today. Offer a future opening.",
+        )
+
+
+def _published_slot_start(start: str) -> bool:
+    return _iso_minute(start) in _SLOT_TIMES
 
 
 def _iso_plus_minutes(start: str, minutes: int) -> str:
@@ -568,6 +582,8 @@ def _d_find_slots(a: dict[str, Any]) -> dict[str, Any]:
             if prov is None:
                 continue
             for i, start in enumerate(_SLOT_TIMES):
+                if _parse_local(start) < _parse_local(TODAY):
+                    continue
                 if window_start and _parse_local(start) < _parse_local(window_start):
                     continue
                 slot_end = _iso_plus_minutes(start, 30)
@@ -631,6 +647,7 @@ def _d_book_appointment(a: dict[str, Any]) -> dict[str, Any]:
             "Cosmetic consults are booked with book_cosmetic_consult, not book_appointment.",
         )
     slot = _resolve_slot(str(a["slot_id"]))
+    _reject_past(slot["start"], what="That slot")
     if (
         str(a["location_id"]) != slot["location_id"]
         or str(a["provider_id"]) != slot["provider_id"]
@@ -674,10 +691,17 @@ def _d_reschedule_appointment(a: dict[str, Any]) -> dict[str, Any]:
     _require(a, "appointment_id", "new_start", "new_end")
     appt_id = int(a["appointment_id"])
     _owned_appointment(appt_id)
+    new_start = _iso_minute(a["new_start"])
+    _reject_past(new_start, what="That new time")
+    if not _published_slot_start(new_start):
+        raise ToolError(
+            "NO_AVAILABILITY",
+            "That time is not an open slot. Call find_slots and read back a listed time.",
+        )
     updated = update_appointment(
         appt_id,
         AppointmentUpdate(
-            start=_iso_minute(a["new_start"]),
+            start=new_start,
             end=_iso_minute(a["new_end"]),
             status="booked",
         ),
@@ -806,7 +830,8 @@ def _d_schedule_allergy_service(a: dict[str, Any]) -> dict[str, Any]:
     available = [
         slot_start
         for slot_start in _SLOT_TIMES
-        if (not window_start or slot_start >= window_start)
+        if _parse_local(slot_start) >= _parse_local(TODAY)
+        and (not window_start or slot_start >= window_start)
         and (
             not window_end
             or _naive_iso(_iso_plus_minutes(slot_start, duration_minutes)) <= window_end
@@ -1102,7 +1127,13 @@ def _d_book_cosmetic_consult(a: dict[str, Any]) -> dict[str, Any]:
     loc = _resolve_location(a["location_id"])
     if not loc["offers_cosmetic"]:
         raise ToolError("COSMETIC_NOT_OFFERED", f"{loc['name']} does not do cosmetic work.")
-    start = a["start"]
+    start = _iso_minute(a["start"])
+    _reject_past(start, what="That consult time")
+    if not _published_slot_start(start):
+        raise ToolError(
+            "NO_AVAILABILITY",
+            "That consult time is not an open slot. Call find_slots and read back a listed time.",
+        )
     created = create_appointment(
         AppointmentCreate(
             patient_id=_session_state().get("patient_id"),

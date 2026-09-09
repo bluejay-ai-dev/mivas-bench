@@ -1,6 +1,6 @@
 {
-  "task_name": "C5-H2: Balance question then move tomorrow's visit",
-  "intent": "You are an existing Straus patient. Start by asking what you owe \u2014 the total amount and a short explanation of the charges. Answer their identity questions once with your name and date of birth, confirm if they read it back, then go straight to the bill. As soon as you hear the amount and any short explanation, immediately say you also cannot make tomorrow's appointment at Park Avenue and you need to move it to a later date, not cancel it. Do not wait for them to finish offering payment, financing, a dispute, or a text. Do not agree to pay, dispute a fee, or take a payment link. Take the first appointment time they offer. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first time out loud, then thank them and end the call. Do not ask to cancel. Do not ask for a callback, to speak to a person, to change insurance, about the patient portal, a waitlist, or for a text. Do not ask for the street, floor, suite, or office id. Do not ask to move the visit until they have named the charge. After the move, stay until the new time is on the calendar. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar. If they only list openings, say book the first one. Do not ask them to text you an appointment confirmation.",
+  "task_name": "C5-H2: Balance question then move August 20 visit",
+  "intent": "You are an existing Straus patient. Start by asking what you owe \u2014 the total amount and a short explanation of the charges. Answer their identity questions once with your name and date of birth, confirm if they read it back, then go straight to the bill. As soon as you hear the amount and any short explanation, immediately say you also cannot make August 20 appointment at Park Avenue and you need to move it to a later date, not cancel it. Do not wait for them to finish offering payment, financing, a dispute, or a text. Do not agree to pay, dispute a fee, or take a payment link. Take the first appointment time they offer. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first time out loud, then thank them and end the call. Do not ask to cancel. Do not ask for a callback, to speak to a person, to change insurance, about the patient portal, a waitlist, or for a text. Do not ask for the street, floor, suite, or office id. Do not ask to move the visit until they have named the charge. After the move, stay until the new time is on the calendar. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar. If they only list openings, say book the first one. Do not ask them to text you an appointment confirmation.",
   "traits": [
     {
       "trait_name": "carrier",
@@ -133,7 +133,7 @@
       "match_type": "context",
       "match_phrase": "offers one or more concrete appointment dates or times after the balance and a charge explanation have been given, or asks you to choose among concrete slots. NOT before billing is explained, NOT when asking for your identity.",
       "response_type": "phrase",
-      "response_value": "Move tomorrow's visit to the first time you offered and confirm it is on the calendar."
+      "response_value": "Move August 20 visit to the first time you offered and confirm it is on the calendar."
     },
     {
       "match_type": "context",
@@ -163,19 +163,19 @@
       "match_type": "context",
       "match_phrase": "offers scheduling, asks about moving the appointment, or transfers to scheduling before stating the account balance and explaining at least one charge. NOT when the balance and a charge explanation have already been given.",
       "response_type": "phrase",
-      "response_value": "First tell me what I owe and briefly explain the charge. Then I need to move tomorrow's appointment."
+      "response_value": "First tell me what I owe and briefly explain the charge. Then I need to move August 20 appointment."
     },
     {
       "match_type": "context",
-      "match_phrase": "states the balance and explains a charge, then thanks you or starts wrapping up before moving tomorrow's appointment. NOT when scheduling is already finding a new time.",
+      "match_phrase": "states the balance and explains a charge, then thanks you or starts wrapping up before moving August 20 appointment. NOT when scheduling is already finding a new time.",
       "response_type": "phrase",
-      "response_value": "Thanks. I also cannot make tomorrow's Park Avenue appointment. Please move it to the first later opening."
+      "response_value": "Thanks. I also cannot make the August 20's Park Avenue appointment. Please move it to the first later opening."
     },
     {
       "match_type": "context",
       "match_phrase": "asks whether you want to pay, finance, dispute, or receive a payment link after stating the balance and explaining a charge. NOT before both the balance and a charge explanation have been given.",
       "response_type": "phrase",
-      "response_value": "No payment or dispute. Now move tomorrow's Park Avenue appointment to the first later opening."
+      "response_value": "No payment or dispute. Now move the August 20's Park Avenue appointment to the first later opening."
     }
   ],
   "customer_name": "Jordan Lee",

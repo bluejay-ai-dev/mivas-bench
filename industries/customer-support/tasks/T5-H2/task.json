@@ -124,7 +124,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers to book a repair, start a return, move a delivery, cancel a membership, send a confirmation text, or add another request after the thing you called about is already done. NOT when still working on the original request.",
+      "match_phrase": "has already finished the original request you called about, confirmed that outcome out loud, and is now offering a second unrelated request, a confirmation text, or asking if you need anything else. NOT during identity, NOT while they are still collecting facts or looking something up, and NOT before they have confirmed the original request is done.",
       "response_type": "phrase",
       "response_value": "That's all I needed. Thank you.",
       "occurrence_mode": "always"

@@ -425,13 +425,16 @@ def find_evaluation_slots(practice_area: str, state: str,
     pa = normalize_practice_area(practice_area)
     st = str(state or "").strip().upper()
     with _db() as conn:
-        slots = _slots(conn, pa, st, earliest_date)
-        if not slots:
-            # never return [] because of a guessed filter — widen and say so
-            widened = _slots(conn, pa, st, "")
-            if widened:
-                return {"slots": widened, "count": len(widened),
-                        "relaxed_filter": "earliest_date dropped"}
+        slots = [
+            row for row in _slots(conn, pa, st, earliest_date)
+            if row["datetime"][:10] >= TODAY
+        ]
+        if not slots and earliest_date:
+            return {
+                "slots": [],
+                "count": 0,
+                "note": "No open evaluation in that window. Ask for another date — do not book a different month.",
+            }
     return {"slots": slots, "count": len(slots)}
 
 
@@ -488,6 +491,9 @@ def create_hold(body: HoldCreate) -> dict[str, Any]:
             raise HTTPException(status_code=404,
                                 detail="That slot is not open. Call find_evaluation_slots "
                                        "again.")
+        if str(slot["starts_at"])[:10] < TODAY:
+            raise HTTPException(status_code=400,
+                                detail="That slot is before today. Offer a future evaluation.")
         if area is None:
             raise HTTPException(status_code=404, detail="Unknown practice area.")
         if area["fee_type"] == "contingency":
@@ -768,7 +774,9 @@ def _selfcheck() -> None:
 
     assert find_evaluation_slots("medical_malpractice", "FL", "2026-08-01")["count"] == 1
     wide = find_evaluation_slots("auto_accident", "CA", "2027-01-01")
-    assert wide["count"] > 0 and wide.get("relaxed_filter"), "empty-by-filter must widen"
+    assert wide["count"] == 0 and not wide.get("relaxed_filter"), (
+        "out-of-window searches must not silently book another month"
+    )
     assert find_evaluation_slots("medical_malpractice", "CA", "2026-08-01")["count"] == 0
 
     held = create_hold(HoldCreate(kind="evaluation", caller_id="c_001", slot_id="s_110",

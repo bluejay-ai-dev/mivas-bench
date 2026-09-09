@@ -1127,14 +1127,28 @@ def book_service_appointment(a: dict[str, Any]) -> dict[str, Any]:
                         "TechCrew Bench visit, an in-home visit, or remote support.")
     wanted = a.get("date")
     slot = None
+    relaxed = None
     if wanted:
-        target = _parse_date(wanted).isoformat()
+        parsed = _parse_date(wanted)
+        if parsed < _today():
+            raise ToolError(
+                "DATE_IN_PAST",
+                "That date is before today. Offer a future TechCrew opening.",
+            )
+        target = parsed.isoformat()
         slot = next((s for s in slots if s["date"] == target), None)
-    if slot is None:
-        slot = slots[0]
-        relaxed = "that day wasn't available; offering the first one that is"
+        if slot is None:
+            raise ToolError(
+                "NO_SUCH_SLOT",
+                "That day isn't available. Offer a listed TechCrew opening instead of booking a different date.",
+            )
     else:
-        relaxed = None
+        slot = next((s for s in slots if s["date"] >= _today().isoformat()), None)
+        if slot is None:
+            raise ToolError(
+                "NO_SUCH_SLOT",
+                "No future TechCrew opening is available for that service.",
+            )
     coverage = check_coverage({"order_number": order["order_number"],
                                "sku": item["sku"], "issue": a.get("issue") or ""})
     with _db() as conn:
@@ -1710,6 +1724,14 @@ def _selfcheck() -> None:
                                      "service_type": "in store",
                                      "issue": "won't charge", "date": "2026-08-05"})
     assert appt["date"] == "2026-08-05" and appt["service_type"] == "bench"
+    assert err(book_service_appointment, {"order_number": "KE-4471860",
+                                          "service_type": "bench",
+                                          "issue": "won't charge",
+                                          "date": "2026-09-03"}).code == "NO_SUCH_SLOT"
+    assert err(book_service_appointment, {"order_number": "KE-4471860",
+                                          "service_type": "bench",
+                                          "issue": "won't charge",
+                                          "date": "2026-07-15"}).code == "DATE_IN_PAST"
     assert cancel_service_appointment({"appointment_id": appt["appointment_id"]}
                                       )["status"] == "cancelled"
     login("Marcus Iyer", "5415550104", "97402", "8802")

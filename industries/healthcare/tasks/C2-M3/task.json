@@ -123,6 +123,12 @@
       "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when offering a payment link or deposit link, NOT when asking for a payment-link number, NOT when asking for your mobile number for identity, NOT when sending portal access.",
       "response_type": "phrase",
       "response_value": "No thanks, I don't need a confirmation text."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before a time has been confirmed on the calendar. NOT when they have just confirmed a booked time.",
+      "response_type": "phrase",
+      "response_value": "I still need that time booked. Please confirm it is on the calendar before I go."
     }
   ],
   "customer_name": "Sam Nguyen",

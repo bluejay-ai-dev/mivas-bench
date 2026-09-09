@@ -95,6 +95,18 @@
   "scripted_responses": [
     {
       "match_type": "context",
+      "match_phrase": "asks for your full name and date of birth, or asks you to confirm who you are, or asks for the patient's name and date of birth. NOT when asking only for a member ID or insurance card, NOT when asking which office or location, NOT when asking for a phone or mobile number, NOT when asking about an appointment day or time, NOT when reading your name and date of birth back to you for confirmation.",
+      "response_type": "phrase",
+      "response_value": "Priya Raghunathan. My date of birth is February twenty-seventh, nineteen ninety."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "reads your name and date of birth back to you and asks whether that is right, or asks you to confirm the name and date of birth they just repeated. NOT when first asking for your name and date of birth, NOT when asking for a phone or mobile number.",
+      "response_type": "phrase",
+      "response_value": "Yes, that's right."
+    },
+    {
+      "match_type": "context",
       "match_phrase": "offers to transfer you to a human, the front desk, a person, or a callback instead of booking. NOT when booking is already proceeding, NOT when asking for your name or date of birth.",
       "response_type": "phrase",
       "response_value": "No, please do not transfer me. Just book the soonest new-patient visit at Brooklyn Heights."
