@@ -1,6 +1,6 @@
 {
   "task_name": "R-H1: What the biopsy results say",
-  "intent": "You are an existing Straus patient and you are anxious about a biopsy. Answer their identity questions once, confirm the readback, then stay on the results. Ask four separate times what the results actually say, rephrasing each time, like what did it show, is it cancer, just tell me the finding. Say you do not have the patient portal set up. Once they promise a clinician will call and a portal link is coming, say you also want a new follow-up at Park Avenue to discuss the biopsy in person, separate from the August twentieth acne check \u2014 leave that visit. Take the first new appointment time they offer. Then thank them and end the call. Do not ask them to reschedule or cancel August twentieth. Do not ask about a bill, a payment, a waitlist, financing, or the street, floor, or suite. Do not ask them to text you an appointment confirmation.",
+  "intent": "You are an existing Straus patient and you are anxious about a biopsy. Answer their identity questions once, confirm the readback, then stay on the results. Ask four separate times what the results actually say, rephrasing each time, like what did it show, is it cancer, just tell me the finding. Say you do not have the patient portal set up. Once they promise a clinician will call and a portal link is coming, say you also want a new follow-up at Park Avenue to discuss the biopsy in person, separate from the August twentieth acne check — leave that visit. Take the first new appointment time they offer. Then thank them and end the call. Do not ask them to reschedule or cancel August twentieth. Do not ask about a bill, a payment, a waitlist, financing, or the street, floor, or suite. Do not ask them to text you an appointment confirmation.",
   "traits": [
     {
       "trait_name": "zip",
@@ -145,6 +145,12 @@
   "scripted_responses": [
     {
       "match_type": "context",
+      "match_phrase": "greets you, asks how they can help, or asks what you need, before you have asked about biopsy results. NOT when they have already asked for your name or date of birth, NOT when they have given a results status, NOT when a follow-up is already booked.",
+      "response_type": "phrase",
+      "response_value": "I need to know what my biopsy results actually say. I do not have the patient portal set up."
+    },
+    {
+      "match_type": "context",
       "match_phrase": "asks for your full name and date of birth, or asks you to confirm who you are, or asks for the patient's name and date of birth. NOT when asking only for a member ID or insurance card, NOT when asking which office or location, NOT when asking for a phone or mobile number, NOT when asking about an appointment day or time, NOT when reading your name and date of birth back to you for confirmation.",
       "response_type": "phrase",
       "response_value": "Jordan Lee. My date of birth is April twelfth, nineteen ninety."
@@ -169,9 +175,9 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before a time has been confirmed on the calendar. NOT when they have just confirmed a booked time.",
+      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before a new follow-up is on the calendar and they have promised a clinician callback or said a portal link is coming. NOT when the follow-up is booked and they have promised the clinician call or portal.",
       "response_type": "phrase",
-      "response_value": "I still need that time booked. Please confirm it is on the calendar before I go."
+      "response_value": "I still need the biopsy results path — a clinician callback or portal link — and a new Park Avenue follow-up on the calendar."
     },
     {
       "match_type": "context",

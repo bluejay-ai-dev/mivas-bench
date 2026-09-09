@@ -164,7 +164,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent has already held a slot and is reading back that held appointment's day, time, attorney and fee, asking whether to confirm it. NOT when first listing open times, and NOT when asking which slot to hold.",
+      "match_phrase": "The agent has already held a slot and is reading back that held appointment's day, time, attorney and fee, asking whether to confirm it. NOT when first listing open times, NOT during representation screening or conflict checks, and NOT before they have named the fee, and NOT when asking which slot to hold.",
       "response_type": "phrase",
       "response_value": "Yes, that's right, go ahead and book it.",
       "occurrence_mode": "always"

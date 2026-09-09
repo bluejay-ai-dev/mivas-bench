@@ -73,6 +73,6 @@ uv run python tool_server.py --selfcheck   # every trap, against a fresh DB
 Only what a real backend would. Ordering (conflict-before-facts, checks-before-booking) is **prose the model must follow** and is scored post-hoc from the tool sequence.
 
 - **Token discipline** — `POST /confirmations` refuses a token no hold issued, a token from the *other* hold, and a token already spent.
-- **Tolerant identifiers** — fuzzy name match plus last-4 phone on `POST /callers`; practice-area aliases ("car accident" → `auto_accident`); `GET /slots` widens by dropping `earliest_date` rather than returning `[]` on a guessed filter, and says so via `relaxed_filter`.
+- **Tolerant identifiers** — fuzzy name match plus last-4 phone on `POST /callers`; practice-area aliases ("car accident" → `auto_accident`); `GET /slots` returns no rows when `earliest_date` is past every open slot instead of silently booking another month.
 - **Conflict resolution by containment** — a caller who says "St. Benedict Medical Center and the surgeon involved" still hits the `unclear` fixture. Exact-key lookup made the firm's most important gate fail open.
 - **No status leakage** — `GET /matters/{id}/status` serves only matters this firm handles for that caller; another firm's matter 404s.

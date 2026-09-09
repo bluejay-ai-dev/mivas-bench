@@ -203,5 +203,5 @@ scam_report, product_safety, recall, damaged_delivery, billing_dispute,
 retention_save, not_authorized, identity_failed, marketplace_seller, complaint,
 caller_request, out_of_scope.
 end_call(reason): end the call once everything the caller needs is done, or
-immediately for spam or a wrong number. Say goodbye first. Never call it while
+immediately for spam or a wrong number. Include the confirmed outcome, next steps, and goodbye in your final response after this tool returns. Never call it while
 you still owe the caller an answer, a change, a return, a report or a transfer.

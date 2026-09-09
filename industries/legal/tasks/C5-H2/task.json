@@ -1,7 +1,7 @@
 {
   "task_name": "C5-H2: Book then cancel and rebook",
   "customer_name": "Delphine Mercer",
-  "intent": "Open with exactly: \"Book me for the first opening on my Northstar Logistics accident, then I need to change it.\" When asked when, say exactly: \"It was July tenth, twenty twenty six.\" Take the first appointment time offered. When a held appointment is read back to book, say exactly: \"Yes, that's right, go ahead and book it.\" After they confirm the first appointment is booked, ask to cancel that one and take the next opening instead. Do not let them change the time without cancelling. Do not ask for a staff member. Stay until they confirm the first booking, the cancellation, and the second booking are on the file. A spoken promise to change it, without those writes, is not enough. Once they confirm the second appointment is booked after the first was cancelled, say exactly: \"Thank you, that's all I needed.\" and end the call.",
+  "intent": "Open with exactly: \"Book me for the first opening on my Northstar Logistics accident.\" Do not mention cancelling, changing, or moving anything until they have confirmed the first evaluation is booked on the file. When asked when, say exactly: \"It was July tenth, twenty twenty six.\" Take the first appointment time offered. When a held appointment is read back with the fee, say exactly: \"Yes, that's right, go ahead and book it.\" Do not give that yes during screening, conflict checks, or before they have read back a held time and fee. After they confirm the first appointment is booked, then ask to cancel that one and take the next opening instead. Do not let them change the time without cancelling. Do not ask for a staff member. Stay until they confirm the first booking, the cancellation, and the second booking are on the file. A spoken promise to change it, without those writes, is not enough. Do not thank them, say you are done, or end the call until the second appointment is booked after the first was cancelled. Once that is confirmed, say exactly: \"Thank you, that's all I needed.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -169,28 +169,28 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent has already held a slot and is reading back that held appointment's day, time, attorney and fee, asking whether to confirm it. NOT when first listing open times, and NOT when asking which slot to hold.",
+      "match_phrase": "The agent has already held a slot and is reading back that held appointment's day, time, attorney and fee, asking whether to confirm it. NOT when first listing open times, NOT when asking which slot to hold, NOT during representation screening or conflict checks, and NOT before they have named the fee.",
       "response_type": "phrase",
       "response_value": "Yes, that's right, go ahead and book it.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent has quoted a cancellation and is asking whether to go ahead and cancel that evaluation. NOT when reading back a new held appointment to book, and NOT when offering open times.",
+      "match_phrase": "The agent has quoted a cancellation for an evaluation they already confirmed is booked, and is asking whether to go ahead and cancel it. NOT when reading back a new held appointment to book, NOT when offering open times, NOT during representation screening or conflict checks, and NOT before any evaluation has been confirmed booked.",
       "response_type": "phrase",
       "response_value": "Yes, cancel that one.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent says they can change, move, or reschedule the appointment without cancelling it, or that they will just update the time. NOT when they have already cancelled and are offering a new evaluation time.",
+      "match_phrase": "The agent says they can change, move, or reschedule an already-booked appointment without cancelling it, or that they will just update the time. NOT when they have already cancelled and are offering a new evaluation time, NOT during screening, and NOT before the first evaluation is confirmed booked.",
       "response_type": "phrase",
       "response_value": "Please cancel that one and book the next opening instead.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent confirms an appointment is booked and asks if you need anything else, or starts to wrap up, before a second appointment has been booked. NOT after they have already cancelled the first one and confirmed a second time.",
+      "match_phrase": "The agent confirms the first appointment is booked and asks if you need anything else, or starts to wrap up, before a second appointment has been booked. NOT after they have already cancelled the first one and confirmed a second time, NOT during screening, and NOT before the first evaluation is confirmed booked.",
       "response_type": "phrase",
       "response_value": "I need to cancel that one and take the next opening instead.",
       "occurrence_mode": "always"

@@ -1218,7 +1218,7 @@
     },
     {
       "name": "end_call",
-      "description": "End the call once everything the caller needs is done, or immediately for spam or a wrong number. Say goodbye first. Never call it while you still owe the caller an answer, a change, a return, a report or a transfer.",
+      "description": "End the call once everything the caller needs is done, or immediately for spam or a wrong number. Include the confirmed outcome, next steps, and goodbye in your final response after this tool returns. Never call it while you still owe the caller an answer, a change, a return, a report or a transfer.",
       "inputSchema": {
         "type": "object",
         "properties": {

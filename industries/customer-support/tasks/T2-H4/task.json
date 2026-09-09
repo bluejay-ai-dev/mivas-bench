@@ -1,7 +1,7 @@
 {
   "task_name": "T2-H4: Return the phone, label, then refund status",
   "customer_name": "Priya Raman",
-  "intent": "Open with exactly: \"Return the Solstice X5 I bought. Box is opened. I want the label, then tell me where that refund stands.\" Give identity when asked. Order KE-4462884. Accept the $45 fee after the readback, take the emailed label, then ask for the refund status on the return they just started. Hang up after the awaiting-return stage. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
+  "intent": "Open with exactly: \"Return the Solstice X5 I bought. Box is opened. I want the prepaid label.\" Do not ask about refund status until they have started the return and emailed the label. Give identity when asked. Order KE-4462884. Accept the $45 fee only after they read the fee back. Take the emailed label, then ask for the refund status on the return they just started. Hang up after the awaiting-return stage. Do not say you are done until they have started the return, sent the label, and told you the refund stage. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -118,14 +118,14 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers to book a repair, start a return, move a delivery, cancel a membership, send a confirmation text, or add another request after the thing you called about is already done. NOT when still working on the original request.",
+      "match_phrase": "has already started the return, emailed or sent the prepaid label, and told you the refund stage or that it is waiting for the item back, and is now offering a second unrelated request, a confirmation text, or asking if you need anything else. NOT during identity, NOT while they are still collecting facts or looking something up, NOT before the return is started, NOT before they have said the label was emailed or sent, and NOT before they have told you where that refund stands.",
       "response_type": "phrase",
       "response_value": "That's all I needed. Thank you.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "reads back the $45 restocking fee and the refund and asks whether to start the return.",
+      "match_phrase": "has already read back the $45 restocking fee and the refund path, and is asking whether to start the return. NOT during identity, NOT before they have named the forty-five dollar fee, and NOT when asking any other yes-or-no.",
       "response_type": "phrase",
       "response_value": "Yes, I accept the forty-five dollar fee. Start it.",
       "occurrence_mode": "always"
@@ -139,7 +139,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "has already started the return or sent the label, and asks if you need anything else. NOT before the return is started.",
+      "match_phrase": "has already started the return and has said the prepaid label was emailed or sent, and is now asking if you need anything else, confirming the label, or wrapping up. NOT before the return is started, NOT before they have said the label was emailed or sent, and NOT after they have already told you the refund stage.",
       "response_type": "phrase",
       "response_value": "Where does that refund stand now?",
       "occurrence_mode": "always"

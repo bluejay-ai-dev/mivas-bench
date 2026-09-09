@@ -1,6 +1,6 @@
 {
   "task_name": "C4-H4: Existing patient Botox after Windermere cannot do cosmetic",
-  "intent": "You are an existing Straus patient in Florida. Answer identity questions once with your name and date of birth, confirm if they read it back, then get to why you called. After they greet you or ask how they can help, your first spoken request is how much Botox costs and whether Windermere does cosmetic work — do not open by saying you still need a consult booked. Ask how much Botox costs, then ask them to look up whether Windermere does cosmetic work. When they say Windermere does not do cosmetic work, ask for a consult at Park Avenue instead. You need the Park Avenue street address, the floor, and the suite before you will take any time \u2014 if they skip any of those, ask again. After you hear the Botox price, say that is more than you can pay all at once and ask whether there is a way to spread the treatment cost out. When they explain the deposit and cancellation rules, agree. Ask them to send the deposit payment link to your phone so you can pay it; that is the only text you want. After you have the address, take the first appointment time they offer. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first time out loud, then thank them and end the call. Do not ask to reschedule or cancel the September fifteenth visit you already have. Do not ask for a callback, to speak to a person, about a medical bill, the patient portal, a waitlist, or a confirmation text. Never ask to speak to a person, a live agent, or the cosmetic team. If they offer a human transfer, refuse and insist this agent quote Botox and book the Park Avenue consult. Do not book anything except this Park Avenue Botox consult. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar, they have looked up financing, and a deposit payment link was sent to your phone. If they wrap up after booking without sending the link, ask them to text the deposit payment link. Do not ask them to text you an appointment confirmation.",
+  "intent": "You are an existing Straus patient in Florida. Answer identity questions once with your name and date of birth, confirm if they read it back, then get to why you called. After they greet you or ask how they can help, your first spoken request is how much Botox costs and whether Windermere does cosmetic work — do not open by saying you still need a consult booked. Ask how much Botox costs, then ask them to look up whether Windermere does cosmetic work. When they say Windermere does not do cosmetic work, ask for a consult at Park Avenue instead. You need the Park Avenue street address, the floor, and the suite before you will take any time — if they skip any of those, ask again. After you hear the Botox price, say that is more than you can pay all at once and ask whether there is a way to spread the treatment cost out. When they explain the deposit and cancellation rules, agree. Ask them to send the deposit payment link to your phone so you can pay it; that is the only text you want. After you have the address, take the first appointment time they offer. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first time out loud, then thank them and end the call. Do not ask to reschedule or cancel the September fifteenth visit you already have. Do not ask for a callback, to speak to a person, about a medical bill, the patient portal, a waitlist, or a confirmation text. Never ask to speak to a person, a live agent, or the cosmetic team. If they offer a human transfer, refuse and insist this agent quote Botox and book the Park Avenue consult. Do not book anything except this Park Avenue Botox consult. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar, they have looked up financing, and a deposit payment link was sent to your phone. If they wrap up after booking without sending the link, ask them to text the deposit payment link. Do not ask them to text you an appointment confirmation.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -190,9 +190,9 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "reads the cosmetic deposit and cancellation policy, asks whether you agree to it, or says they need a clear yes before booking. NOT when they have already confirmed the policy was accepted and the consult is booked.",
+      "match_phrase": "has already said the cosmetic deposit amount and the cancellation window out loud, and is asking whether you agree to that policy before booking. NOT when asking any other yes-or-no, NOT during identity verification, NOT when quoting a price range, and NOT before they have named both the deposit and the cancellation window.",
       "response_type": "phrase",
-      "response_value": "Yes. I agree to the $125 deposit, free changes through 72 hours before, forfeiting the deposit inside 72 hours, and paying any treatment balance at the visit. Please book the first time."
+      "response_value": "Yes. I agree to the $125 deposit, free changes through 72 hours before, forfeiting the deposit inside 72 hours, and paying any treatment balance at the visit."
     },
     {
       "match_type": "context",
@@ -211,6 +211,12 @@
       "match_phrase": "has quoted the Botox price and has not yet looked up financing or CareCredit. NOT when they have just confirmed a payment plan from their system.",
       "response_type": "phrase",
       "response_value": "That is more than I can pay all at once. Is there a way to spread the Botox cost out?"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to text a payment link or deposit link, asks whether you want the deposit payment link by text, or asks which mobile number should receive the payment link. NOT when offering an appointment confirmation, directions, or another unrelated text, NOT when asking for your mobile number for identity.",
+      "response_type": "phrase",
+      "response_value": "Yes, please text the deposit payment link to 407-555-0155."
     }
   ],
   "customer_name": "Alice Romano",

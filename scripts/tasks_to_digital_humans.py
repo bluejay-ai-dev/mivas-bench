@@ -28,6 +28,11 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 INDUSTRY_ROOT = ROOT / "industries"
+RUNTIME = ROOT / "runtime"
+if str(RUNTIME) not in sys.path:
+    sys.path.insert(0, str(RUNTIME))
+
+from pack_clock import today_clock_line  # noqa: E402
 DEFAULT_API = "https://api.getbluejay.ai/v1"
 
 ESCALATION_SILENCE_TIMEOUT_S = 30
@@ -283,6 +288,18 @@ def assign_voices(rows: list[dict[str, Any]]) -> dict[str, tuple[str, str]]:
     return assigned
 
 
+def with_scenario_clock(intent: str, industry: str) -> str:
+    """Pin the pack calendar on every DH so 'tomorrow' is not the wall clock."""
+    line = today_clock_line(industry)
+    text = (intent or "").rstrip()
+    if not text or line in text:
+        return text
+    return (
+        f"{line} Use that date for today, tomorrow, this week, and this Friday. "
+        f"Do not use the real-world calendar.\n\n{text}"
+    )
+
+
 def creativity_of(task: dict[str, Any]) -> float:
     """Bluejay DH temperature. task.json `behaviors.creativity` wins; else 0."""
     behaviors = task.get("behaviors")
@@ -320,7 +337,7 @@ def task_to_digital_human(
     dh: dict[str, Any] = {
         "name": person_name(task),
         "test_name": task["task_name"],
-        "intent": task.get("intent") or "",
+        "intent": with_scenario_clock(task.get("intent") or "", industry),
         "success_criteria": success_criteria(task.get("exp_tool_calls")),
         "expected_tool_calls": expected_tool_calls(task.get("exp_tool_calls")),
         "traits": traits,

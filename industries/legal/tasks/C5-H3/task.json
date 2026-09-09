@@ -163,14 +163,14 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent has read back the appointment day, time, attorney and fee and is asking whether to go ahead and book it. NOT a follow-up after you already answered.",
+      "match_phrase": "The agent has read back the appointment day, time, attorney and fee and is asking whether to go ahead and book it. NOT a follow-up after you already answered, NOT during representation screening or conflict checks, and NOT before they have named the fee.",
       "response_type": "phrase",
       "response_value": "Uh-huh.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks again to confirm the booking after you already mumbled, said uh-huh, or did not give a clear yes. NOT the first readback.",
+      "match_phrase": "The agent asks again to confirm the booking after you already mumbled, said uh-huh, or did not give a clear yes. NOT the first readback, NOT during representation screening or conflict checks, and NOT before they have named the fee.",
       "response_type": "phrase",
       "response_value": "Yes, that's right, go ahead and book it.",
       "occurrence_mode": "always"

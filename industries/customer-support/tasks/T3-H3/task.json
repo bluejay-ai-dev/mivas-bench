@@ -1,7 +1,7 @@
 {
   "task_name": "T3-H3: Book a bench visit then cancel it",
   "customer_name": "Grace Okonkwo",
-  "intent": "Open with exactly: \"Book a TechCrew Bench visit for my Aurora Pro 16 that will not charge, first available.\" Give identity when asked. Order KE-4471860. Let them book the first bench slot. Do not mention canceling until a visit is booked. As soon as they confirm a booked day and time, say exactly: \"I cannot make that day. Please cancel that appointment.\" Hang up once they confirm the cancel. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
+  "intent": "Open with exactly: \"Book a TechCrew Bench visit for my Aurora Pro 16 that will not charge, first available.\" Give identity when asked. Order KE-4471860. Let them book the first August bench slot on the store calendar. Do not ask for a September date. Do not mention canceling until they have confirmed a visit is booked. As soon as they confirm a booked day and time, say exactly: \"I cannot make that day. Please cancel that appointment.\" Hang up once they confirm the cancel. Do not say you are done until the cancel is confirmed. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -108,7 +108,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers to book a repair, start a return, move a delivery, cancel a membership, send a confirmation text, or add another request after the thing you called about is already done. NOT when still working on the original request.",
+      "match_phrase": "has already finished the original request you called about, confirmed that outcome out loud, and is now offering a second unrelated request, a confirmation text, or asking if you need anything else. NOT during identity, NOT while they are still collecting facts or looking something up, and NOT before they have confirmed the original request is done.",
       "response_type": "phrase",
       "response_value": "That's all I needed. Thank you.",
       "occurrence_mode": "always"

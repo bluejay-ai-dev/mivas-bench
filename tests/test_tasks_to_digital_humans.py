@@ -52,6 +52,17 @@ def test_case_key_trait_and_no_verifier_fields() -> None:
         assert conv.trait_value(dh, "expected_handoff_path") is not None
 
 
+def test_digital_humans_get_the_pack_clock() -> None:
+    for industry, needle in (
+        ("healthcare", "August 19, 2026"),
+        ("legal", "August 1, 2026"),
+        ("customer-support", "August 1, 2026"),
+    ):
+        for dh in conv.build(industry):
+            assert needle in dh["intent"], conv.case_key_of(dh)
+            assert "Do not use the real-world calendar." in dh["intent"]
+
+
 def test_scripted_responses_always_or_omitted() -> None:
     saw_pins = False
     for dh in _humans():
@@ -476,8 +487,8 @@ def test_healthcare_leftover_holes_are_closed() -> None:
     assert "do not transfer me to a person" in c2h3_blob
     assert "i accept the missed-visit fee" in c2h3_blob
     assert "talk to a person" in c2h3_blob
-    assert "friday is cancelled" in c2h3_blob
-    assert "do not open with the friday cancel" in c2h3["intent"].lower()
+    assert "august 21 consult is cancelled" in c2h3_blob
+    assert "do not open with the august 21 cancel" in c2h3["intent"].lower()
     greeting = next(p for p in c2h3["scripted_responses"] if "greets you" in (p.get("match_phrase") or ""))
     assert "total balance" in greeting["response_value"].lower()
     assert "cancel" not in greeting["response_value"].lower()

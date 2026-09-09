@@ -1,6 +1,6 @@
 {
   "task_name": "C4-M1: Microneedling consult",
-  "intent": "Ask what microneedling costs at Park Avenue, then ask to book a microneedling consult there. You must get the Park Avenue street address, floor, and suite before you accept a time \u2014 if they quote a time or an address without all three, ask for the street, the floor, and the suite. When they explain the deposit and the cancellation rules, agree to them. Take the first appointment time they offer after you have the address. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first time out loud. If they ask who you are, give your name once and continue. Ask them to text the deposit payment link to your phone; that is the only text you want. Do not thank them or end the call until a time is confirmed on the calendar and you have heard the street, floor, and suite. Do not ask for a callback, to speak to a person, about a medical bill, insurance, a medical appointment, the patient portal, a waitlist, or financing. Do not ask for a confirmation text. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar. If they only list openings, say book the first one. Do not thank them or hang up until they confirm a time is on the calendar and that a deposit payment link was sent to your phone. If they wrap up after booking without sending the link, ask them to text the deposit payment link. Do not ask them to text you an appointment confirmation.",
+  "intent": "Ask what microneedling costs at Park Avenue, then ask to book a microneedling consult there. You must get the Park Avenue street address, floor, and suite before you accept a time — if they quote a time or an address without all three, ask for the street, the floor, and the suite. When they explain the deposit and the cancellation rules, agree to them. Take the first appointment time they offer after you have the address. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first time out loud. If they ask who you are, give your name once and continue. Ask them to text the deposit payment link to your phone; that is the only text you want. Do not thank them or end the call until a time is confirmed on the calendar and you have heard the street, floor, and suite. Do not ask for a callback, to speak to a person, about a medical bill, insurance, a medical appointment, the patient portal, a waitlist, or financing. Do not ask for a confirmation text. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar. If they only list openings, say book the first one. Do not thank them or hang up until they confirm a time is on the calendar and that a deposit payment link was sent to your phone. If they wrap up after booking without sending the link, ask them to text the deposit payment link. Do not ask them to text you an appointment confirmation.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -95,6 +95,18 @@
     },
     {
       "match_type": "context",
+      "match_phrase": "asks for your full name and date of birth, or asks you to confirm who you are, or asks for the patient's name and date of birth. NOT when asking only for a member ID or insurance card, NOT when asking which office or location, NOT when asking for a phone or mobile number, NOT when asking about an appointment day or time, NOT when reading your name and date of birth back to you for confirmation.",
+      "response_type": "phrase",
+      "response_value": "Selina Marsh. My date of birth is June third, nineteen eighty-nine."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "reads your name and date of birth back to you and asks whether that is right, or asks you to confirm the name and date of birth they just repeated. NOT when first asking for your name and date of birth, NOT when asking for a phone or mobile number.",
+      "response_type": "phrase",
+      "response_value": "Yes, that's right."
+    },
+    {
+      "match_type": "context",
       "match_phrase": "offers an appointment time, a slot, or asks which day or time you want AFTER already saying the street address, the floor, and the suite. NOT when they have not yet given all three, NOT when asking for your name or date of birth.",
       "response_type": "phrase",
       "response_value": "I'll take the first time you offered."
@@ -137,9 +149,15 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "reads the cosmetic deposit and cancellation policy, asks whether you agree to it, or says they need a clear yes before booking. NOT when they have already confirmed the policy was accepted and the consult is booked.",
+      "match_phrase": "has already said the cosmetic deposit amount and the cancellation window out loud, and is asking whether you agree to that policy before booking. NOT when asking any other yes-or-no, NOT during identity verification, NOT when quoting a price range, and NOT before they have named both the deposit and the cancellation window.",
       "response_type": "phrase",
-      "response_value": "Yes. I agree to the $125 deposit, free changes through 72 hours before, forfeiting the deposit inside 72 hours, and paying any treatment balance at the visit. Please book the first time."
+      "response_value": "Yes. I agree to the $125 deposit, free changes through 72 hours before, forfeiting the deposit inside 72 hours, and paying any treatment balance at the visit."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to text a payment link or deposit link, asks whether you want the deposit payment link by text, or asks which mobile number should receive the payment link. NOT when offering an appointment confirmation, directions, or another unrelated text, NOT when asking for your mobile number for identity.",
+      "response_type": "phrase",
+      "response_value": "Yes, please text the deposit payment link to 212-555-0171."
     }
   ],
   "customer_name": "Selina Marsh",

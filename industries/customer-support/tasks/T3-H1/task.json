@@ -1,7 +1,7 @@
 {
   "task_name": "T3-H1: Book a Total-covered bench repair",
   "customer_name": "Grace Okonkwo",
-  "intent": "Open with exactly: \"My Aurora Pro 16 will not charge. I want a TechCrew Bench appointment, first available.\" Give identity when asked. Order KE-4471860. Accept the first available bench slot they offer. Stay until they say it is booked, Kestrel Total, $0.00. Do not cancel it. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
+  "intent": "Open with exactly: \"My Aurora Pro 16 will not charge. I want a TechCrew Bench appointment, first available.\" Give identity when asked. Order KE-4471860. Accept the first August bench slot they offer on the store calendar. Do not ask for a September date. Stay until they say it is booked, Kestrel Total, $0.00. Do not cancel it. Do not say you are done until they confirm the booked day and time. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -112,7 +112,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers to book a repair, start a return, move a delivery, cancel a membership, send a confirmation text, or add another request after the thing you called about is already done. NOT when still working on the original request.",
+      "match_phrase": "has already finished the original request you called about, confirmed that outcome out loud, and is now offering a second unrelated request, a confirmation text, or asking if you need anything else. NOT during identity, NOT while they are still collecting facts or looking something up, and NOT before they have confirmed the original request is done.",
       "response_type": "phrase",
       "response_value": "That's all I needed. Thank you.",
       "occurrence_mode": "always"

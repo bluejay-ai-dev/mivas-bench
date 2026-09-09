@@ -1,7 +1,7 @@
 {
   "task_name": "C4-H3: Employment intake in Washington with packet and note",
   "customer_name": "Clara Whitman",
-  "intent": "Open with exactly: \"I was fired after I reported safety violations.\" When asked who this would be against, say exactly: \"It's Harborline Industries.\" Washington. April fifth, twenty twenty six. Give a short account when asked. If they record intake, say exactly: \"Please add an intake note that I still have the email I sent to HR about the safety violations.\" If offered the packet, say exactly: \"Email is fine.\" Decline booking. Stay until they confirm the intake, the note, and the email packet are on the file. A spoken promise that they will take care of it, without those writes, is not enough. Once they confirm the intake, the note, and the email packet are on the file, say exactly: \"Thank you, that's all I needed.\" Do not book an evaluation. End the call.",
+  "intent": "Open with exactly: \"I was fired after I reported safety violations.\" When asked who this would be against, say exactly: \"It's Harborline Industries.\" Washington. April fifth, twenty twenty six. Give a short account when asked. If they record intake, say exactly: \"Please add an intake note that I still have the email I sent to HR about the safety violations.\" If offered the packet, say exactly: \"Email is fine.\" Decline booking. Stay until they confirm the intake, the note, and the email packet are on the file. A spoken promise that they will take care of it, without those writes, is not enough. Do not thank them, say you are done, or end the call during screening or before those three writes are confirmed. Once they confirm the intake, the note, and the email packet are on the file, say exactly: \"Thank you, that's all I needed.\" Do not book an evaluation. End the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -136,7 +136,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "has recorded the intake or asks if there is anything else to add. NOT when asking to book a case evaluation or appointment.",
+      "match_phrase": "The agent has already recorded the intake and asks if there is anything else to add, or has just confirmed the intake is on the file. NOT when asking to book a case evaluation or appointment, NOT during representation screening or conflict checks, and NOT before the intake has been recorded.",
       "response_type": "phrase",
       "response_value": "Please add an intake note that I still have the email I sent to HR about the safety violations.",
       "occurrence_mode": "always"
@@ -153,6 +153,20 @@
       "match_phrase": "asks whether you want to book a case evaluation, a free evaluation, or an appointment. NOT when asking if there is anything else to add after intake, and NOT before the intake note has been spoken.",
       "response_type": "phrase",
       "response_value": "No thank you. Intake is enough.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "starts to wrap up, says goodbye, or asks if that is all, before confirming the intake, the HR-email note, and the email packet are on the file. NOT after they have confirmed all three writes. NOT during screening.",
+      "response_type": "phrase",
+      "response_value": "I still need the intake, the HR-email note, and the email packet on the file.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "has already recorded the intake, added the HR-email note, and sent the email packet, and is confirming all three are on the file. NOT during screening, NOT during conflict or deadline checks, and NOT before those three writes exist.",
+      "response_type": "phrase",
+      "response_value": "Thank you, that's all I needed.",
       "occurrence_mode": "always"
     }
   ],

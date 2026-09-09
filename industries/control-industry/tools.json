@@ -56,7 +56,7 @@
     },
     {
       "name": "end_call",
-      "description": "End the call once the caller is done, or immediately if it is spam or a wrong number. Say goodbye first.",
+      "description": "End the call once the caller is done, or immediately if it is spam or a wrong number. Include the confirmed outcome, next steps, and goodbye in your final response after this tool returns.",
       "inputSchema": {
         "type": "object",
         "properties": {

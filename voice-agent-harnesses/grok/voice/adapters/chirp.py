@@ -588,7 +588,9 @@ async def _bridge(ws, industry: str, model: str) -> None:
                 ):
                     return
                 blob = " ".join(spoken.get(agent, [])[-6:] + [transcript]).strip()
-                args = infer_schedule_appointment(blob)
+                args = infer_schedule_appointment(
+                    blob, industry_dir=bp.get("industry_dir")
+                )
                 if not args:
                     return
                 _log(
