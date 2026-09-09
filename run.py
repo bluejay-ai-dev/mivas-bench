@@ -110,6 +110,8 @@ def harness_paths(harness: str) -> tuple[Path, Path]:
 LIVEKIT_WORKER_FAMILIES = frozenset({"livekit", "gemini"})
 WORKER_FAMILIES = LIVEKIT_WORKER_FAMILIES
 SIP_WORKER_FAMILIES = LIVEKIT_WORKER_FAMILIES
+# Platform webhook families must stay at MIVAS_REPLICAS=1 (shared SQLite + one webhook target).
+PLATFORM_FAMILIES = frozenset({"vapi", "retell", "bland", "cartesia"})
 
 
 def pair_needs_ingress(harness: str) -> bool:
