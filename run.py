@@ -113,7 +113,6 @@ LIVEKIT_WORKER_FAMILIES = frozenset({"livekit"})
 PIPECAT_WORKER_FAMILIES = frozenset({"pipecat"})
 WORKER_FAMILIES = LIVEKIT_WORKER_FAMILIES | PIPECAT_WORKER_FAMILIES
 SIP_WORKER_FAMILIES = LIVEKIT_WORKER_FAMILIES
-PLATFORM_FAMILIES = frozenset({"vapi", "retell", "bland", "cartesia"})
 
 
 def pair_needs_ingress(harness: str) -> bool:
@@ -713,18 +712,10 @@ def apply_agents(pairs: list[tuple[str, str]], *, follow_logs: bool) -> None:
 
     n = replica_count()
     if n > 1:
-        families = {split_harness(h)[0] for h, _ in pairs}
         print(
-            f"MIVAS_REPLICAS={n}; tools run in-pod (127.0.0.1:8000). "
-            "vapi/retell/bland/cartesia must stay at 1.",
+            f"MIVAS_REPLICAS={n}; tools run in-pod (127.0.0.1:8000).",
             file=sys.stderr,
         )
-        if families & PLATFORM_FAMILIES:
-            print(
-                "warning: vapi/retell/bland/cartesia webhooks hit a random "
-                "replica; combined-pod SQLite will split across pods.",
-                file=sys.stderr,
-            )
 
     path = Path(tempfile.mkstemp(suffix=".yaml", prefix="mivas-agents-")[1])
     try:
