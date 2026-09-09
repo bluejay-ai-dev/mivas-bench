@@ -70,16 +70,16 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers to transfer you to a human, a care advocate, the front desk, or a live agent because they cannot continue on this line. NOT when you already asked for a person, NOT when they are completing the return, delivery change, cancellation, or scam report.",
+      "match_phrase": "offers to transfer you to a human, a care advocate, the front desk, or a live agent BEFORE they have checked the charge and filed the scam report. NOT after they have already filed the report or said they reported it, NOT when they are completing the report.",
       "response_type": "phrase",
-      "response_value": "No, I don't need a person. Please finish what I asked on this call.",
+      "response_value": "Please check whether that charge is real and file the report first. Then I will take the person.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "has already finished the original request you called about, confirmed that outcome out loud, and is now offering a second unrelated request, a confirmation text, or asking if you need anything else. NOT during identity, NOT while they are still collecting facts or looking something up, and NOT before they have confirmed the original request is done.",
+      "match_phrase": "has already filed the scam report or said they reported it, and is now getting you to a person, a care advocate, or someone from Kestrel. NOT before they have filed or said they reported it, NOT when they are still checking the charge.",
       "response_type": "phrase",
-      "response_value": "That's all I needed. Thank you.",
+      "response_value": "Okay, thank you.",
       "occurrence_mode": "always"
     },
     {
