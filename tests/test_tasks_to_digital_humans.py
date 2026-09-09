@@ -210,6 +210,13 @@ def test_customer_support_rerun_pins_lock_contaminated_paths() -> None:
     reason = next(pin for pin in pins(t2h2) if "reason for the return" in pin["match_phrase"])
     assert reason["response_value"] == "I changed my mind."
 
+    t3h3 = load("T3-H3")
+    assert "do not choose a specific date" in t3h3["intent"].lower()
+    t3h3_date = next(pin for pin in pins(t3h3) if "specific month or day" in pin["match_phrase"])
+    assert "first available august bench visit" in t3h3_date["response_value"].lower()
+    t3h3_human = next(pin for pin in pins(t3h3) if "explicitly offers an external human" in pin["match_phrase"])
+    assert "internal transfer" in t3h3_human["match_phrase"].lower()
+
     t3h4 = load("T3-H4")
     assert "do not choose a calendar date" in t3h4["intent"].lower()
     date_pin = next(pin for pin in pins(t3h4) if "needs a specific month or day" in pin["match_phrase"])
