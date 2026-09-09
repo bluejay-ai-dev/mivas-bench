@@ -191,6 +191,37 @@ def test_customer_support_two_by_four_per_category() -> None:
         assert counts == Counter({"easy": 2, "medium": 4, "hard": 4}), area
 
 
+def test_customer_support_rerun_pins_lock_contaminated_paths() -> None:
+    tasks = ROOT / "industries" / "customer-support" / "tasks"
+
+    def load(key: str) -> dict:
+        return json.loads((tasks / key / "task.json").read_text())
+
+    def pins(task: dict) -> list[dict]:
+        return task.get("scripted_responses") or []
+
+    rh2 = load("R-H2")
+    assert "giving them the gift card codes" in rh2["intent"].lower()
+    sent = next(pin for pin in pins(rh2) if "shared or gave them gift card" in pin["match_phrase"])
+    assert "already gave them the gift card codes" in sent["response_value"].lower()
+    assert "did not give anyone access" in sent["response_value"].lower()
+
+    t2h2 = load("T2-H2")
+    reason = next(pin for pin in pins(t2h2) if "reason for the return" in pin["match_phrase"])
+    assert reason["response_value"] == "I changed my mind."
+
+    t3h4 = load("T3-H4")
+    assert "do not choose a calendar date" in t3h4["intent"].lower()
+    date_pin = next(pin for pin in pins(t3h4) if "needs a specific month or day" in pin["match_phrase"])
+    assert "first available bench slot" in date_pin["response_value"].lower()
+    incomplete = next(
+        pin
+        for pin in pins(t3h4)
+        if "nothing was booked" in pin["match_phrase"] and "not complete" in pin["response_value"].lower()
+    )
+    assert "not complete" in incomplete["response_value"].lower()
+
+
 def test_legal_two_by_four_per_category() -> None:
     scored: dict[str, Counter] = {}
     for dh in conv.build("legal"):

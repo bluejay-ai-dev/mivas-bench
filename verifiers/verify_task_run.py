@@ -389,6 +389,41 @@ def _legal_table_match(expected_rows: list[Any], actual_rows: list[Any], *, extr
     return True
 
 
+def _scam_report_row_matches(expected: Any, actual: Any) -> bool:
+    """Match a report by its facts and either supplied contact channel."""
+    if not isinstance(expected, dict) or not isinstance(actual, dict):
+        return expected == actual
+    contact_keys = ("phone", "email")
+    expected_facts = {key: value for key, value in expected.items() if key not in contact_keys}
+    actual_facts = {key: value for key, value in actual.items() if key not in contact_keys}
+    if expected_facts != actual_facts:
+        return False
+    supplied = [key for key in contact_keys if _present_nonempty(actual.get(key))]
+    if not supplied:
+        return False
+    return all(
+        _present_nonempty(expected.get(key))
+        and _values_equal(key, expected.get(key), actual.get(key))
+        for key in supplied
+    )
+
+
+def _scam_reports_match(expected_rows: list[Any], actual_rows: list[Any]) -> bool:
+    """Require the same reports while allowing the prompt's phone-or-email route."""
+    if len(expected_rows) != len(actual_rows):
+        return False
+    remaining = list(actual_rows)
+    for expected in expected_rows:
+        match_at = next(
+            (i for i, actual in enumerate(remaining) if _scam_report_row_matches(expected, actual)),
+            None,
+        )
+        if match_at is None:
+            return False
+        remaining.pop(match_at)
+    return True
+
+
 def office_states_match(expected: Any, actual: Any, industry: str | None = None) -> bool:
     """Healthcare: patients/appointments exact; waitlist subset when expected non-empty.
     Legal: mutation tables match on constrained fields. Empty expected intakes /
@@ -410,6 +445,10 @@ def office_states_match(expected: Any, actual: Any, industry: str | None = None)
         if industry == "legal":
             extras_ok = table in LEGAL_EXTRA_OK_TABLES
             if not _legal_table_match(exp[table], act[table], extras_ok=extras_ok):
+                return False
+            continue
+        if industry == "customer-support" and table == "scam_reports":
+            if not _scam_reports_match(exp[table], act[table]):
                 return False
             continue
         if not exp[table]:

@@ -145,6 +145,36 @@ def test_office_datetimes_match_at_minute_precision() -> None:
     assert vtr.office_states_match(omitted_seconds, with_seconds, industry="healthcare") is True
 
 
+def test_customer_support_scam_report_accepts_either_matching_contact() -> None:
+    report = {
+        "id": 1,
+        "phone": "5415550133",
+        "email": "rosalind.baptiste@example.test",
+        "channel": "email",
+        "claimed_brand": "TechCrew",
+        "amount": "399.99",
+        "payment_requested": "gift cards",
+        "money_sent": 1,
+        "remote_access_given": 0,
+    }
+    expected = {"scam_reports": [report]}
+
+    email_only = {"scam_reports": [{**report, "phone": ""}]}
+    assert vtr.office_states_match(expected, email_only, industry="customer-support") is True
+
+    phone_only = {"scam_reports": [{**report, "email": ""}]}
+    assert vtr.office_states_match(expected, phone_only, industry="customer-support") is True
+
+    wrong_supplied_phone = {"scam_reports": [{**report, "phone": "5415559999"}]}
+    assert vtr.office_states_match(expected, wrong_supplied_phone, industry="customer-support") is False
+
+    no_contact = {"scam_reports": [{**report, "phone": "", "email": ""}]}
+    assert vtr.office_states_match(expected, no_contact, industry="customer-support") is False
+
+    wrong_amount = {"scam_reports": [{**report, "phone": "", "amount": "500"}]}
+    assert vtr.office_states_match(expected, wrong_amount, industry="customer-support") is False
+
+
 def test_verify_result_ignores_tool_events_in_state() -> None:
     task = {
         "exp_db_state": {

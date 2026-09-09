@@ -1,7 +1,7 @@
 {
   "task_name": "T2-H2: Ohio drone restocking exemption",
   "customer_name": "Owen Tsai",
-  "intent": "Open with exactly: \"I want to return the Skyward Vireo 3 drone I bought in Ohio. The box is opened.\" Give identity when asked. Order KE-4487740. If they quote 15 percent, say it was purchased in Ohio. Confirm the return only after they say there is no restocking fee and the full $999.99 comes back. Do not ask for a label on this call. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
+  "intent": "Open with exactly: \"I want to return the Skyward Vireo 3 drone I bought in Ohio. The box is opened.\" Give identity when asked. Order KE-4487740. If they ask why you are returning it, say exactly: \"I changed my mind.\" and continue the return; do not wrap up on that turn. If they quote 15 percent, say it was purchased in Ohio. Confirm the return only after they say there is no restocking fee and the full $999.99 comes back. Do not ask for a label on this call. Once they have started the return and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -113,6 +113,13 @@
       "match_phrase": "offers to transfer you to a human, a care advocate, the front desk, or a live agent because they cannot continue on this line. NOT when you already asked for a person, NOT when they are completing the return, delivery change, cancellation, or scam report.",
       "response_type": "phrase",
       "response_value": "No, I don't need a person. Please finish what I asked on this call.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks why you are returning the drone, why you do not want it, or for the reason for the return. NOT when asking whether to start or confirm the return, and NOT when reading back the refund.",
+      "response_type": "phrase",
+      "response_value": "I changed my mind.",
       "occurrence_mode": "always"
     },
     {

@@ -1,7 +1,7 @@
 {
   "task_name": "T3-H4: Plans, coverage, book, then cancel",
   "customer_name": "Grace Okonkwo",
-  "intent": "Open with exactly: \"Tell me what plans I have, confirm the Aurora Pro that will not charge is covered at zero, book the first bench slot, then cancel it because I cannot make it.\" Give identity when asked. Order KE-4471860. Do the four things in that order. Hang up after the cancel. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
+  "intent": "Open with exactly: \"Tell me what plans I have, confirm the Aurora Pro that will not charge is covered at zero, book the first bench slot, then cancel it because I cannot make it.\" Give identity when asked. Order KE-4471860. Do the four things in that order. Keep asking for the first available bench slot; do not choose a calendar date, including September, even if the agent insists that a specific month or day is required. Do not mention canceling again until the agent confirms a booked calendar day and time. If they say nothing was booked or the booking failed, tell them the request is not complete and ask them to book the first available slot. Hang up only after they confirm that the booked appointment was cancelled. Once they have finished what you asked and confirmed the cancellation, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -118,7 +118,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "has already confirmed the bench appointment is cancelled, and is now offering a second unrelated request, a confirmation text, or asking if you need anything else. NOT during identity, NOT while they are still collecting facts or looking something up, NOT when they just booked a visit, NOT when they named a booked day or time, and NOT before they have confirmed the cancel.",
+      "match_phrase": "has explicitly confirmed that a previously booked bench appointment was successfully cancelled, and is now offering a second unrelated request, a confirmation text, or asking if you need anything else. NOT during identity, NOT while they are still collecting facts or looking something up, NOT when they just booked a visit, NOT when they named a booked day or time, NOT when they say nothing was booked or no appointment exists, and NOT before they have confirmed the successful cancel.",
       "response_type": "phrase",
       "response_value": "That's all I needed. Thank you.",
       "occurrence_mode": "always"
@@ -132,14 +132,21 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers bench times or asks which day to book, and you have not booked yet. NOT after it is booked, and NOT after you asked to cancel the booked visit.",
+      "match_phrase": "offers bench times, asks which day, month, or date to book, says it needs a specific month or day, says first available is not a valid date or is unavailable, or asks for the earliest date that works, while no appointment is booked. NOT after a booked day and time are confirmed, and NOT after you asked to cancel a booked visit.",
       "response_type": "phrase",
-      "response_value": "First available bench visit.",
+      "response_value": "Do not choose a date. Please book the first available bench slot on your calendar.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "has just booked the appointment and asks if that works or if you need anything else. NOT before it is booked.",
+      "match_phrase": "says nothing was booked, no appointment exists, or the booking failed, and treats that as completing the request. NOT after a successful booking and cancellation.",
+      "response_type": "phrase",
+      "response_value": "That is not complete. Please book the first available bench slot, then cancel it after it is booked.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "has just successfully booked the appointment, states the booked calendar day or clock time, and asks if that works or if you need anything else. NOT before a booking exists and NOT when they say nothing was booked.",
       "response_type": "phrase",
       "response_value": "I cannot make that day. Cancel that appointment.",
       "occurrence_mode": "always"
