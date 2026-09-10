@@ -61,8 +61,9 @@ async def _bridge(ws, model: str, industry: str) -> None:
     workflow = f"mivas-{Path(industry_dir).name}-{model}"
     t_accept = time.monotonic()
     sim_id = _simulation_result_id(ws)
+    tag = f"[{sim_id or '-'}]"
     if sim_id:
-        print(f"chirp sim_result_id={sim_id}", flush=True)
+        print(f"chirp {tag} sim_result_id={sim_id}", flush=True)
     set_call_id(sim_id)
 
     key = os.environ.get("ASSEMBLYAI_API_KEY")
@@ -96,7 +97,7 @@ async def _bridge(ws, model: str, industry: str) -> None:
     ), call_session(sim_id):
         async with connect(key) as agent_ws:
             cfg = session_config(bp)
-            print(f"chirp greeting={cfg['greeting']!r}", flush=True)
+            print(f"chirp {tag} greeting={cfg['greeting']!r}", flush=True)
             open_from_prompt = not cfg["greeting"]
             await agent_ws.send(json.dumps({"type": "session.update", "session": cfg}))
             pacer = PcmPacer(ws.send)
@@ -119,7 +120,7 @@ async def _bridge(ws, model: str, industry: str) -> None:
                             win_peak = max(win_peak, audioop.rms(msg, W) if len(msg) >= W else 0)
                             now = time.monotonic()
                             if now - win_t >= 1.0:
-                                print(f"chirp in t={now - t_accept:.1f}s bytes={win_n} peak_rms={win_peak}", flush=True)
+                                print(f"chirp {tag} in t={now - t_accept:.1f}s bytes={win_n} peak_rms={win_peak}", flush=True)
                                 win_t, win_n, win_peak = now, 0, 0
                             pcm, up = audioop.ratecv(msg, W, 1, R_CHIRP, R_OUT, up)
                             if pcm:
@@ -138,17 +139,54 @@ async def _bridge(ws, model: str, industry: str) -> None:
                     with contextlib.suppress(Exception):
                         await agent_ws.close()
 
+            async def drain_tools() -> None:
+                """Run queued tool.calls and answer each with tool.result."""
+                nonlocal should_end
+                calls, pending[:] = list(pending), []
+                for call in calls:
+                    result, stop = await run_tool(
+                        call["name"],
+                        dict(call.get("arguments") or {}),
+                        bp,
+                        state,
+                        call_id=call.get("call_id"),
+                    )
+                    should_end = should_end or stop or call["name"] == "end_call"
+                    role = result.get("role")
+                    if role:
+                        print(f"chirp {tag} handoff → {role}", flush=True)
+                        await agent_ws.send(
+                            json.dumps(
+                                {"type": "session.update", "session": handoff_session(bp, role)}
+                            )
+                        )
+                    await agent_ws.send(
+                        json.dumps(
+                            {
+                                "type": "tool.result",
+                                "call_id": call["call_id"],
+                                "result": json.dumps(result),
+                            }
+                        )
+                    )
+                    print(f"chirp {tag} t={time.monotonic() - t_accept:.1f}s -> tool.result {call['name']}", flush=True)
+
             async def outbound() -> None:
-                """assemblyai reply.audio → chirp 16 khz pcm; drain tool.call on reply.done."""
+                """assemblyai reply.audio → chirp 16 khz pcm; tool.calls drain at reply.done,
+                or at once when no reply is in flight (the order is not guaranteed)."""
                 nonlocal down, utt, speech_otel, should_end, customer_otel
+                reply_active = False
                 try:
                     async for raw in agent_ws:
                         if end.is_set():
                             break
                         event = json.loads(raw)
                         etype = event.get("type")
-                        if etype in ("input.speech.started", "input.speech.stopped", "transcript.user"):
-                            print(f"chirp t={time.monotonic() - t_accept:.1f}s {etype} {event.get('text', '')!s:.120}", flush=True)
+                        if etype != "reply.audio" and not etype.endswith(".delta"):
+                            detail = event.get("text") or event.get("name") or event.get("status") or event.get("code") or ""
+                            print(f"chirp {tag} t={time.monotonic() - t_accept:.1f}s <- {etype} {detail!s:.120}", flush=True)
+                        if etype == "reply.started":
+                            reply_active = True
                         if etype == "input.speech.started":
                             _close_customer()
                             customer_otel = start_speech_span(
@@ -157,7 +195,6 @@ async def _bridge(ws, model: str, industry: str) -> None:
                         elif etype == "input.speech.stopped":
                             _close_customer()
                         elif etype == "session.ready":
-                            print("chirp session.ready", flush=True)
                             ready.set()
                             if open_from_prompt:
                                 # No pack greeting: the model opens from the prompt.
@@ -174,43 +211,17 @@ async def _bridge(ws, model: str, industry: str) -> None:
                                 pacer.push(pcm)
                         elif etype == "tool.call":
                             pending.append(event)
+                            if not reply_active:
+                                await drain_tools()
                         elif etype == "reply.done":
+                            reply_active = False
                             if utt:
                                 await pacer.wait_until_idle()
                                 pacer.reset_clock()
                                 await ws.send(_event("speech.completed", {"utterance_id": utt}))
                                 _close_utt()
                             if pending:
-                                calls, pending[:] = list(pending), []
-                                for call in calls:
-                                    result, stop = await run_tool(
-                                        call["name"],
-                                        dict(call.get("arguments") or {}),
-                                        bp,
-                                        state,
-                                        call_id=call.get("call_id"),
-                                    )
-                                    should_end = should_end or stop or call["name"] == "end_call"
-                                    role = result.get("role")
-                                    if role:
-                                        print(f"chirp handoff → {role}", flush=True)
-                                        await agent_ws.send(
-                                            json.dumps(
-                                                {
-                                                    "type": "session.update",
-                                                    "session": handoff_session(bp, role),
-                                                }
-                                            )
-                                        )
-                                    await agent_ws.send(
-                                        json.dumps(
-                                            {
-                                                "type": "tool.result",
-                                                "call_id": call["call_id"],
-                                                "result": json.dumps(result),
-                                            }
-                                        )
-                                    )
+                                await drain_tools()
                             if should_end:
                                 with contextlib.suppress(Exception):
                                     await agent_ws.send(json.dumps({"type": "session.end"}))
@@ -218,7 +229,7 @@ async def _bridge(ws, model: str, industry: str) -> None:
                             end.set()
                             break
                         elif etype == "session.error":
-                            print(f"chirp assemblyai error: {event}", flush=True)
+                            print(f"chirp {tag} assemblyai error: {event}", flush=True)
                 finally:
                     await pacer.wait_until_idle()
                     pacer.close()
