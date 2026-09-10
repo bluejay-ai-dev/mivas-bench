@@ -59,6 +59,7 @@ async def _bridge(ws, model: str, industry: str) -> None:
     state = {"agent": bp["start"]}
     industry_dir = industry_path(industry)
     workflow = f"mivas-{Path(industry_dir).name}-{model}"
+    t_accept = time.monotonic()
     sim_id = _simulation_result_id(ws)
     if sim_id:
         print(f"chirp sim_result_id={sim_id}", flush=True)
@@ -108,11 +109,18 @@ async def _bridge(ws, model: str, industry: str) -> None:
                 streaming, so gating on it truncates the caller. Turn detection is
                 AssemblyAI's own VAD (input.speech.*)."""
                 nonlocal up
+                win_t, win_n, win_peak = time.monotonic(), 0, 0
                 try:
                     async for msg in ws:
                         if end.is_set():
                             break
                         if isinstance(msg, bytes) and msg and ready.is_set():
+                            win_n += len(msg)
+                            win_peak = max(win_peak, audioop.rms(msg, W) if len(msg) >= W else 0)
+                            now = time.monotonic()
+                            if now - win_t >= 1.0:
+                                print(f"chirp in t={now - t_accept:.1f}s bytes={win_n} peak_rms={win_peak}", flush=True)
+                                win_t, win_n, win_peak = now, 0, 0
                             pcm, up = audioop.ratecv(msg, W, 1, R_CHIRP, R_OUT, up)
                             if pcm:
                                 await agent_ws.send(
@@ -139,6 +147,8 @@ async def _bridge(ws, model: str, industry: str) -> None:
                             break
                         event = json.loads(raw)
                         etype = event.get("type")
+                        if etype in ("input.speech.started", "input.speech.stopped", "transcript.user"):
+                            print(f"chirp t={time.monotonic() - t_accept:.1f}s {etype} {event.get('text', '')!s:.120}", flush=True)
                         if etype == "input.speech.started":
                             _close_customer()
                             customer_otel = start_speech_span(
