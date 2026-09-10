@@ -30,7 +30,6 @@ ENV HARNESS=openai/gpt-live-1 \
     UV_COMPILE_BYTECODE=1 \
     BLUEJAY_SERVICE_NAME=mivas-openai-gpt-live \
     OPENAI_API_KEY="" \
-    OPENAI_LIVE_MODEL=gpt-live-1 \
     GPT_LIVE_BACKEND_MODEL=gpt-5.6-terra \
     CHIRP_PORT=8765 \
     CHIRP_USER="" \
