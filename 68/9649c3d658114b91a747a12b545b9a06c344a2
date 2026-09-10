@@ -1,0 +1,52 @@
+voice-agent-harnesses/openai/gpt-live-1/test_gpt_live.py
+  s_a57cf3caba4bab::t_86e41120c0af37 1,77,79,161-169,174-177,181
+  s_a57cf3caba4bab::t_d37460faac8928 2-76,78,80-160,178-180,182-196
+  s_a57cf3caba4bab::t_17fcd6b3b1245f 170-173
+voice-agent-harnesses/openai/gpt-live-1/agent.py
+  s_a57cf3caba4bab::t_5d0c803cf92d57 1,36-38
+  s_a57cf3caba4bab::t_d37460faac8928 2-35,39-52
+voice-agent-harnesses/openai/gpt-live-1/tools.py
+  s_a57cf3caba4bab::t_d37460faac8928 1-39
+voice-agent-harnesses/openai/gpt-live-1/adapters/chirp.py
+  s_a57cf3caba4bab::t_6773a213180a8f 15-18
+  s_a57cf3caba4bab::t_d37460faac8928 2-10,14,19-217
+  s_a57cf3caba4bab::t_c559a4959cdd05 11-13
+  s_a57cf3caba4bab::t_5d0c803cf92d57 1
+tests/test_dockerfiles.py
+  s_a57cf3caba4bab::t_d6be8129f99bef 15-16
+voice-agent-harnesses/openai/gpt-live-1/tracing.py
+  s_a57cf3caba4bab::t_5d0c803cf92d57 40
+  s_a57cf3caba4bab::t_d37460faac8928 1-39,41-299
+voice-agent-harnesses/s2s-model-pricing.json
+  s_a57cf3caba4bab::t_d6be8129f99bef 42-43
+voice-agent-harnesses/openai/gpt-live-1/requirements.txt
+  s_a57cf3caba4bab::t_d37460faac8928 1-7
+voice-agent-harnesses/openai/gpt-live-1/README.md
+  s_a57cf3caba4bab::t_09d7ab1dc50dab 1,3-5,10,16-58,64-77,81-86,91-92,97,105-106,109-114
+  s_a57cf3caba4bab::t_d37460faac8928 2,6-9,11-15,59-63,78-80,87-90,93-96,98-104,107-108
+voice-agent-harnesses/openai/gpt-live-1/pack.py
+  s_a57cf3caba4bab::t_79137cc93d77ac 1,3,46,180-181,184-185,188
+  s_a57cf3caba4bab::t_d37460faac8928 2,4-45,47-179,182-183,186-187,189-227
+voice-agent-harnesses/openai/gpt-live-1/live.py
+  s_a57cf3caba4bab::t_d37460faac8928 6-46,48-49,54-208,210-227,236-549,551-566
+  s_a57cf3caba4bab::t_5413b874b963fe 1-5,47,50-53,209,228-235,550
+voice-agent-harnesses/openai/gpt-live-1/Dockerfile
+  s_a57cf3caba4bab::t_d37460faac8928 1,3,5,7-15,17-20,22,24-32,34-48,50-55,57-64
+  s_a57cf3caba4bab::t_5d0c803cf92d57 2,4,6,16,21,23,33,49,56
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "689649c3d658114b91a747a12b545b9a06c344a2",
+  "prompts": {},
+  "sessions": {
+    "s_a57cf3caba4bab": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b479f552-1d29-4d1b-9264-9df46532e755",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}
