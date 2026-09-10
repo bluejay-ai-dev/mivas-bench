@@ -1,0 +1,19 @@
+voice-agent-harnesses/assemblyai/adapters/chirp.py
+  s_358eda35ccb225::t_3335fd804cf5a6 62,112,118-123,150-151
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "2244838ed5811de3281387bd9dfbdc88d0d1e58b",
+  "prompts": {},
+  "sessions": {
+    "s_358eda35ccb225": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0af12aad-4c5f-4179-80f5-d54cc28d3402",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}
