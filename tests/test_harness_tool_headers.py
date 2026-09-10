@@ -24,6 +24,7 @@ from call_id import HEADER, reset, set_call_id  # noqa: E402
 
 FAMILIES = (
     "openai",
+    "assemblyai",
     "gemini",
     "grok",
     "nvidia",
@@ -158,7 +159,7 @@ def _dispatch_family(family: str, harness: Any) -> None:
         if family == "openai":
             _run(harness.dispatch_industry_tool("schedule_appointment", {"date": "08/15/2026"}))
             return
-        if family == "gemini":
+        if family in {"gemini", "assemblyai"}:
             _run(harness._dispatch("schedule_appointment", {"date": "08/15/2026"}))
             return
         if family == "livekit":

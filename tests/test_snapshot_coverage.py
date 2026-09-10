@@ -22,6 +22,7 @@ import call_id as call_id_mod  # noqa: E402
 
 # family -> the file that owns its call teardown
 HOOK_SITES = {
+    "assemblyai": ["adapters/chirp.py"],
     "aws": ["report.py"],
     "gemini": ["harness.py"],
     "grok": ["voice/adapters/chirp.py"],

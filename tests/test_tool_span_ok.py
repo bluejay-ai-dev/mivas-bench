@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
-HARNESSES = ["grok", "aws", "qwen", "nvidia"]
+HARNESSES = ["assemblyai", "grok", "aws", "qwen", "nvidia"]
 
 
 @pytest.mark.parametrize("family", HARNESSES)
