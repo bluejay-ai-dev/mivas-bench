@@ -1,0 +1,58 @@
+voice-agent-harnesses/assemblyai/requirements.txt
+  s_358eda35ccb225::t_ef2a206d837117 1-6
+voice-agent-harnesses/assemblyai/voice-agent/adapters/chirp.py
+  s_358eda35ccb225::t_ef2a206d837117 1-8
+voice-agent-harnesses/assemblyai/voice-agent/Dockerfile
+  s_358eda35ccb225::t_ef2a206d837117 1-64
+tests/test_harness_tool_headers.py
+  s_358eda35ccb225::t_c547859a84d1e5 27,162
+README.md
+  s_358eda35ccb225::t_c547859a84d1e5 254
+voice-agent-harnesses/assemblyai/README.md
+  s_358eda35ccb225::t_c547859a84d1e5 3
+  s_358eda35ccb225::t_ef2a206d837117 1-2,4-14,16-19
+  s_358eda35ccb225::t_ba9f34a56745ce 15
+voice-agent-harnesses/assemblyai/adapters/chirp.py
+  s_358eda35ccb225::t_c547859a84d1e5 20-28,99
+  s_358eda35ccb225::t_ba9f34a56745ce 172-174
+  s_358eda35ccb225::t_ef2a206d837117 1-19,29-98,100-171,175-289
+tests/test_assemblyai_greeting.py
+  s_358eda35ccb225::t_ef2a206d837117 1-4,6-10,20-32,41-42,52-89
+  s_358eda35ccb225::t_ba9f34a56745ce 43-51
+  s_358eda35ccb225::t_fa7e6cf823d4aa 5,11-18
+  s_358eda35ccb225::t_c547859a84d1e5 19,33-40
+.env.example
+  s_358eda35ccb225::t_c547859a84d1e5 76-82,100,118
+voice-agent-harnesses/assemblyai/report.py
+  s_358eda35ccb225::t_ef2a206d837117 1-559
+voice-agent-harnesses/assemblyai/pcm.py
+  s_358eda35ccb225::t_ef2a206d837117 1-126
+voice-agent-harnesses/assemblyai/harness.py
+  s_358eda35ccb225::t_ba9f34a56745ce 108-110,130,238-239,245-246
+  s_358eda35ccb225::t_ef2a206d837117 1-26,28-33,39-107,111-123,127-129,131-203,214-236,240-244,247-291
+  s_358eda35ccb225::t_c547859a84d1e5 27,34-38,124-126,204-213,237
+tests/test_tool_span_ok.py
+  s_358eda35ccb225::t_c547859a84d1e5 10
+tests/test_dockerfiles.py
+  s_358eda35ccb225::t_c547859a84d1e5 15-16
+tests/test_snapshot_coverage.py
+  s_358eda35ccb225::t_c547859a84d1e5 25
+voice-agent-harnesses/assemblyai/voice-agent/agent.py
+  s_358eda35ccb225::t_ef2a206d837117 1-31
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "a136693ce7fd5c585108f5e7ddafc96005db4e14",
+  "prompts": {},
+  "sessions": {
+    "s_358eda35ccb225": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0af12aad-4c5f-4179-80f5-d54cc28d3402",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}
