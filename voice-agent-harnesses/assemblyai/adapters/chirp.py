@@ -76,10 +76,6 @@ async def _bridge(ws, model: str, industry: str) -> None:
     should_end = False
     ready = asyncio.Event()
     end = asyncio.Event()
-    # Bluejay keeps sending PCM after speech.completed (hold noise). If that
-    # reaches AssemblyAI, VAD never sees a quiet open and the pack greeting
-    # does not play — DH waits ~60s and nudges.
-    listening = False
 
     def _close_utt() -> None:
         nonlocal utt, speech_otel
@@ -106,15 +102,17 @@ async def _bridge(ws, model: str, industry: str) -> None:
             pacer_task = asyncio.create_task(pacer.run())
 
             async def inbound() -> None:
-                """chirp 16 khz pcm → assemblyai 24 khz base64 input.audio (only once ready)."""
-                nonlocal up, customer_otel, listening
+                """chirp 16 khz pcm → assemblyai 24 khz base64 input.audio, every byte once ready.
+
+                Bluejay's speech.completed lands before the utterance PCM finishes
+                streaming, so gating on it truncates the caller. Turn detection is
+                AssemblyAI's own VAD (input.speech.*)."""
+                nonlocal up
                 try:
                     async for msg in ws:
                         if end.is_set():
                             break
                         if isinstance(msg, bytes) and msg and ready.is_set():
-                            if not listening:
-                                continue
                             pcm, up = audioop.ratecv(msg, W, 1, R_CHIRP, R_OUT, up)
                             if pcm:
                                 await agent_ws.send(
@@ -126,33 +124,6 @@ async def _bridge(ws, model: str, industry: str) -> None:
                                     )
                                 )
                             continue
-                        if not isinstance(msg, str):
-                            continue
-                        try:
-                            event = json.loads(msg)
-                        except json.JSONDecodeError:
-                            continue
-                        etype = event.get("type")
-                        data = event.get("data") or {}
-                        if etype == "speech.started":
-                            listening = True
-                            _close_customer()
-                            uid = data.get("utterance_id") or f"c_{uuid.uuid4().hex[:12]}"
-                            customer_otel = start_speech_span(uid, speaker="customer")
-                        elif etype == "speech.completed":
-                            listening = False
-                            if ready.is_set():
-                                # 200ms of zeros so AssemblyAI VAD commits the turn.
-                                silence = b"\x00" * (R_OUT * W // 5)
-                                await agent_ws.send(
-                                    json.dumps(
-                                        {
-                                            "type": "input.audio",
-                                            "audio": base64.b64encode(silence).decode(),
-                                        }
-                                    )
-                                )
-                            _close_customer()
                 finally:
                     _close_customer()
                     end.set()
@@ -161,14 +132,21 @@ async def _bridge(ws, model: str, industry: str) -> None:
 
             async def outbound() -> None:
                 """assemblyai reply.audio → chirp 16 khz pcm; drain tool.call on reply.done."""
-                nonlocal down, utt, speech_otel, should_end
+                nonlocal down, utt, speech_otel, should_end, customer_otel
                 try:
                     async for raw in agent_ws:
                         if end.is_set():
                             break
                         event = json.loads(raw)
                         etype = event.get("type")
-                        if etype == "session.ready":
+                        if etype == "input.speech.started":
+                            _close_customer()
+                            customer_otel = start_speech_span(
+                                f"c_{uuid.uuid4().hex[:12]}", speaker="customer"
+                            )
+                        elif etype == "input.speech.stopped":
+                            _close_customer()
+                        elif etype == "session.ready":
                             print("chirp session.ready", flush=True)
                             ready.set()
                             if open_from_prompt:

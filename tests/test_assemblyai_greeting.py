@@ -58,11 +58,10 @@ def test_session_config_env_override_wins(monkeypatch) -> None:
     assert cfg["greeting"] == "Hello from env."
 
 
-def test_chirp_gates_pcm_on_bluejay_speech_events() -> None:
+def test_chirp_forwards_all_caller_pcm_and_uses_provider_vad() -> None:
     text = (FAMILY / "adapters" / "chirp.py").read_text()
-    assert "listening = False" in text
-    assert "if not listening:" in text
-    assert "speech.completed" in text
+    assert "listening" not in text  # gating on Bluejay speech.completed truncated callers
+    assert '"input.speech.started"' in text and '"input.speech.stopped"' in text
     assert "session_config(bp)" in text
 
 
