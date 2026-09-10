@@ -99,6 +99,9 @@ async def _bridge(ws, model: str, industry: str) -> None:
         async with connect(key) as agent_ws:
             cfg = session_config(bp)
             print(f"chirp greeting={cfg['greeting']!r}", flush=True)
+            # Read before outbound() closes over cfg: the handoff branch rebinds
+            # cfg there, which would make this lookup an UnboundLocalError.
+            open_from_prompt = not cfg["greeting"]
             await agent_ws.send(json.dumps({"type": "session.update", "session": cfg}))
             pacer = PcmPacer(ws.send)
             pacer_task = asyncio.create_task(pacer.run())
@@ -169,7 +172,7 @@ async def _bridge(ws, model: str, industry: str) -> None:
                         if etype == "session.ready":
                             print("chirp session.ready", flush=True)
                             ready.set()
-                            if not cfg["greeting"]:
+                            if open_from_prompt:
                                 # No pack greeting: the model opens from the prompt.
                                 await agent_ws.send(json.dumps({"type": "reply.create"}))
                         elif etype == "reply.audio":

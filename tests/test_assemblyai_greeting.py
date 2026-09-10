@@ -45,7 +45,9 @@ def test_legal_has_no_pack_greeting_so_model_opens_from_prompt(monkeypatch) -> N
     bp = load_blueprint(ROOT / "industries" / "legal")
     assert session_config(bp)["greeting"] == ""
     text = (FAMILY / "adapters" / "chirp.py").read_text()
-    assert 'if not cfg["greeting"]:' in text
+    assert 'if open_from_prompt:' in text
+    # cfg is rebound inside outbound() on handoff; reading it there is an UnboundLocalError
+    assert 'if not cfg["greeting"]' not in text
     assert '{"type": "reply.create"}' in text
 
 
