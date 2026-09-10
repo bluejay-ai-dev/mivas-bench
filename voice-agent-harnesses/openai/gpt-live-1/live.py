@@ -227,9 +227,10 @@ class LiveSession:
     async def speak_first(self) -> None:
         """GA guide, "Ask the model to speak first": one fresh session.instructions.append
         with ``delegation_id: null``. Not commentary — commentary is paraphrased, and the
-        pack's greeting is fixed text the benchmark compares against."""
+        pack's greeting is fixed text the benchmark compares against. Sent, not awaited
+        (see ``_post``): the caller's first audio has not arrived yet at this point."""
         for chunk in _chunks(self.pack.speak_first_prompt()):
-            await self._command(
+            await self._post(
                 {"type": "session.instructions.append", "delegation_id": None, "content": chunk},
                 ack="session.instructions.appended",
             )
@@ -279,9 +280,16 @@ class LiveSession:
         return task
 
     async def drain(self) -> None:
-        """Wait for in-flight tool/continue/hang-up tasks (tests, shutdown)."""
-        while self._tasks:
-            await asyncio.gather(*list(self._tasks), return_exceptions=True)
+        """Wait for in-flight tool/continue/hang-up tasks (tests, shutdown).
+
+        Append reports are excluded: they resolve only when the service says the
+        text was injected, which may be after the call is over.
+        """
+        while True:
+            work = [t for t in self._tasks if t.get_name() != "gpt-live-append"]
+            if not work:
+                return
+            await asyncio.gather(*work, return_exceptions=True)
 
     def _finish(self, reason: str) -> None:
         if self._closed.is_set():
@@ -300,6 +308,38 @@ class LiveSession:
             log.debug("-> %s", json.dumps(event)[:600])
         async with self._send_lock:
             await self._ws.send(json.dumps(event, separators=(",", ":")))
+
+    async def _post(self, event: dict[str, Any], *, ack: str) -> None:
+        """Send a ``*.append`` and keep going.
+
+        ``session.instructions.appended`` is not a protocol ack: it reports where the
+        text landed on the conversation timeline (``start_ms``/``end_ms``) and only
+        fires once the timeline reaches that point, which needs caller audio to be
+        flowing. Awaiting it stalls the greeting until the first caller audio and can
+        stall a handoff for as long as the caller stays silent. Measured against GA
+        on 2026-09-10: appended arrives ~0.7 s after audio starts, and a session
+        closed before then answers with ``server_error / context_injection_incomplete``.
+        Frames stay ordered on the wire, so a following ``response.create`` still
+        arrives after the append.
+        """
+        eid = event.setdefault("event_id", _eid(event["type"].replace(".", "_")))
+        fut: asyncio.Future[dict[str, Any]] = asyncio.get_running_loop().create_future()
+        self._waiters[eid] = fut
+
+        async def report() -> None:
+            try:
+                ev = await fut
+            except LiveError as e:
+                log.warning("%s not applied: %s", event["type"], e)
+            except asyncio.CancelledError:
+                raise
+            else:
+                log.debug("%s at %s-%sms", ack, ev.get("start_ms"), ev.get("end_ms"))
+            finally:
+                self._waiters.pop(eid, None)
+
+        self._spawn(report(), name="gpt-live-append")
+        await self._send(event)
 
     async def _command(self, event: dict[str, Any], *, ack: str) -> dict[str, Any]:
         """Send with an event_id and wait for its acknowledgment (or correlated error)."""
@@ -535,7 +575,7 @@ class LiveSession:
             ack="session.updated",
         )
         for chunk in _chunks(stage.handoff_notice()):
-            await self._command(
+            await self._post(
                 {"type": "session.instructions.append", "delegation_id": None, "content": chunk},
                 ack="session.instructions.appended",
             )

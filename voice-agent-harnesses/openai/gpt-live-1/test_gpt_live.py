@@ -61,14 +61,17 @@ def _completed(rid: str, delegation="item_1") -> dict:
 
 
 async def _ack_commands(live: LiveSession, ws: FakeWS, ack_for: dict[str, str]) -> None:
-    """Acknowledge every pending command the way the server would."""
+    """Acknowledge the listed pending commands the way the server would. Anything
+    not listed (the fire-and-forget appends) is left unanswered on purpose."""
     for _ in range(50):
         await asyncio.sleep(0)
         for eid, fut in list(live._waiters.items()):
             if fut.done():
                 continue
             sent = next(e for e in ws.sent if e.get("event_id") == eid)
-            await live._handle({"type": ack_for[sent["type"]], "client_event_id": eid, "session": {}})
+            ack = ack_for.get(sent["type"])
+            if ack:
+                await live._handle({"type": ack, "client_event_id": eid, "session": {}})
 
 
 def test_session_start_shape() -> None:
@@ -113,10 +116,7 @@ def test_handoff_answers_call_then_swaps_backend_then_continues() -> None:
     async def go() -> None:
         live, ws = _session([])
         await live._handle(_fc("call_h", "handoff_to_scheduler", {}))
-        acks = asyncio.create_task(_ack_commands(live, ws, {
-            "session.update": "session.updated",
-            "session.instructions.append": "session.instructions.appended",
-        }))
+        acks = asyncio.create_task(_ack_commands(live, ws, {"session.update": "session.updated"}))
         await live._handle(_completed("resp_h"))
         await acks
         await live.drain()
@@ -158,12 +158,13 @@ def test_end_call_closes_after_grace(monkeypatch: pytest.MonkeyPatch) -> None:
     asyncio.run(go())
 
 
-def test_speak_first_uses_instructions_append() -> None:
+def test_speak_first_appends_instructions_without_awaiting_the_report() -> None:
+    """session.instructions.appended only fires once caller audio advances the
+    timeline, so the greeting must not block on it."""
+
     async def go() -> None:
         live, ws = _session([])
-        task = asyncio.create_task(live.speak_first())
-        await _ack_commands(live, ws, {"session.instructions.append": "session.instructions.appended"})
-        await task
+        await asyncio.wait_for(live.speak_first(), 0.5)  # no ack is ever delivered
         sent = ws.of("session.instructions.append")
         assert sent and not ws.of("session.commentary.append")
         assert all(e["delegation_id"] is None for e in sent)

@@ -41,6 +41,14 @@ Sources: `guides/voice-websockets?api=live`, `guides/live-delegation`,
 - speak-first: one `session.instructions.append` with `delegation_id: null` after
   `session.started`. Instructions, not commentary: commentary is paraphrased and the
   pack's greeting is fixed text.
+- **`*.appended` is not a protocol ack.** It reports where the text landed on the
+  conversation timeline (`start_ms`/`end_ms`) and only fires once the timeline reaches
+  that point, which needs caller audio to be flowing. Measured 2026-09-10: with audio
+  flowing it arrives ~0.7 s after the append, and a session closed before then answers
+  `server_error / context_injection_incomplete` instead. So appends are sent and not
+  awaited — awaiting the greeting's append stalls the whole call until the caller
+  speaks first. `session.update` *is* a real ack (`session.updated` in ~50 ms with or
+  without audio) and is still awaited.
 - multi-agent = soft handoff on the one session: `session.update` swaps
   `delegation.responses.{instructions,tools}` to the target stage, then
   `session.instructions.append` (≤500 tokens, chunked) tells the live model the role
