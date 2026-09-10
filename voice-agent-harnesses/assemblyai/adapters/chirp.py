@@ -110,18 +110,11 @@ async def _bridge(ws, model: str, industry: str) -> None:
                 streaming, so gating on it truncates the caller. Turn detection is
                 AssemblyAI's own VAD (input.speech.*)."""
                 nonlocal up
-                win_t, win_n, win_peak = time.monotonic(), 0, 0
                 try:
                     async for msg in ws:
                         if end.is_set():
                             break
                         if isinstance(msg, bytes) and msg and ready.is_set():
-                            win_n += len(msg)
-                            win_peak = max(win_peak, audioop.rms(msg, W) if len(msg) >= W else 0)
-                            now = time.monotonic()
-                            if now - win_t >= 1.0:
-                                print(f"chirp {tag} in t={now - t_accept:.1f}s bytes={win_n} peak_rms={win_peak}", flush=True)
-                                win_t, win_n, win_peak = now, 0, 0
                             pcm, up = audioop.ratecv(msg, W, 1, R_CHIRP, R_OUT, up)
                             if pcm:
                                 await agent_ws.send(
