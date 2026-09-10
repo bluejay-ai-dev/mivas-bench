@@ -20,6 +20,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from harness import (  # noqa: E402
     call_session,
     connect,
+    handoff_session,
     industry_path,
     load_blueprint,
     run_tool,
@@ -99,8 +100,6 @@ async def _bridge(ws, model: str, industry: str) -> None:
         async with connect(key) as agent_ws:
             cfg = session_config(bp)
             print(f"chirp greeting={cfg['greeting']!r}", flush=True)
-            # Read before outbound() closes over cfg: the handoff branch rebinds
-            # cfg there, which would make this lookup an UnboundLocalError.
             open_from_prompt = not cfg["greeting"]
             await agent_ws.send(json.dumps({"type": "session.update", "session": cfg}))
             pacer = PcmPacer(ws.send)
@@ -207,9 +206,13 @@ async def _bridge(ws, model: str, industry: str) -> None:
                                     role = result.get("role")
                                     if role:
                                         print(f"chirp handoff → {role}", flush=True)
-                                        cfg = session_config(bp, agent=role, greeting="")
                                         await agent_ws.send(
-                                            json.dumps({"type": "session.update", "session": cfg})
+                                            json.dumps(
+                                                {
+                                                    "type": "session.update",
+                                                    "session": handoff_session(bp, role),
+                                                }
+                                            )
                                         )
                                     await agent_ws.send(
                                         json.dumps(

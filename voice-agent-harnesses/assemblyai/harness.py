@@ -140,6 +140,13 @@ def session_config(
     }
 
 
+def handoff_session(bp: dict[str, Any], agent: str) -> dict[str, Any]:
+    """Mid-call session.update for a soft handoff. Only system_prompt: greeting,
+    formats, voice and tools are immutable after the first session.update and
+    the API rejects the whole message (session.error immutable_field)."""
+    return {"system_prompt": session_config(bp, agent=agent, greeting="")["system_prompt"]}
+
+
 def _tool_entry(bp: dict[str, Any], agent: str, name: str) -> dict[str, Any] | None:
     """The blueprint entry for a tool, preferring the current agent's copy."""
     for owner in [agent] + [a for a in bp["agents"] if a != agent]:

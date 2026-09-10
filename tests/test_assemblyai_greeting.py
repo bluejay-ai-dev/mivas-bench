@@ -15,6 +15,7 @@ assert _spec is not None and _spec.loader is not None
 _harness = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_harness)  # also puts runtime/ on sys.path
 load_blueprint, session_config = _harness.load_blueprint, _harness.session_config
+handoff_session = _harness.handoff_session
 
 from pack_clock import today_clock_line  # noqa: E402
 
@@ -46,8 +47,7 @@ def test_legal_has_no_pack_greeting_so_model_opens_from_prompt(monkeypatch) -> N
     assert session_config(bp)["greeting"] == ""
     text = (FAMILY / "adapters" / "chirp.py").read_text()
     assert 'if open_from_prompt:' in text
-    # cfg is rebound inside outbound() on handoff; reading it there is an UnboundLocalError
-    assert 'if not cfg["greeting"]' not in text
+    assert 'if not cfg["greeting"]' not in text  # cfg must not be read inside outbound()
     assert '{"type": "reply.create"}' in text
 
 
@@ -84,8 +84,17 @@ def test_session_config_handoff_update_skips_greeting(monkeypatch) -> None:
     assert "scheduling" in cfg["system_prompt"].lower() or "schedul" in cfg["system_prompt"].lower()
 
 
+def test_handoff_update_carries_only_the_mutable_prompt() -> None:
+    bp = load_blueprint(ROOT / "industries" / "legal")
+    upd = handoff_session(bp, "screening")
+    assert set(upd) == {"system_prompt"}
+    assert "screening" in upd["system_prompt"].lower()
+    assert upd["system_prompt"] != handoff_session(bp, "intake")["system_prompt"]
+
+
 def test_chirp_handoff_rewires_and_ends_human_transfer() -> None:
     text = (FAMILY / "adapters" / "chirp.py").read_text()
-    assert 'session_config(bp, agent=role, greeting="")' in text
+    assert '"session": handoff_session(bp, role)' in text
+    assert 'session_config(bp, agent=role' not in text
     assert "should_end = should_end or stop" in text
     assert '{"type": "session.end"}' in text
