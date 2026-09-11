@@ -1,0 +1,61 @@
+industries/legal/tasks/C1-E2/task.json
+  s_c79534fcd0239b::t_02417fb8048e20 4,18-27,50,52,93
+industries/legal/tasks/C1-H4/task.json
+  s_c79534fcd0239b::t_4037ed976613a9 89
+industries/legal/tasks/C2-H2/task.json
+  s_c79534fcd0239b::t_ccdc45b3b1ab43 4,122,124-131
+industries/legal/tasks/C2-H4/task.json
+  s_c79534fcd0239b::t_8c0d84dd796470 4,24-27,34-40,62-68,85,89-95,153
+industries/legal/tasks/C4-E1-BG/task.json
+  s_c79534fcd0239b::t_2cf8bc0ac25ce9 4,86,90-124
+industries/legal/tasks/C4-E1-SIG/task.json
+  s_c79534fcd0239b::t_365bd4694a004f 4,90-117
+industries/legal/tasks/C4-H3/task.json
+  s_c79534fcd0239b::t_0f205d3f0516e8 4,139,146,153,155,160,167
+industries/legal/tasks/C4-M2/task.json
+  s_c79534fcd0239b::t_eb900d38cd2592 4
+industries/legal/tasks/C5-E1-BG/task.json
+  s_c79534fcd0239b::t_6f7f78e3c86574 37-53
+industries/legal/tasks/C5-E1-SIG/task.json
+  s_c79534fcd0239b::t_f33f38cfcfe1b3 37-53
+industries/legal/tasks/C5-E1/task.json
+  s_c79534fcd0239b::t_1c1236191314c3 37-53
+industries/legal/tasks/C5-H2/task.json
+  s_c79534fcd0239b::t_e7577b5a121091 4,37-39,147,154,161,168,171-180,184,187-188,192,195-217,222,224,328
+industries/legal/tasks/C5-H4/task.json
+  s_c79534fcd0239b::t_b7fadf8b4d1567 37-39
+industries/legal/tasks/C5-M1/task.json
+  s_c79534fcd0239b::t_dd72ed5aa806f3 37-39
+industries/legal/tasks/C5-M2/task.json
+  s_c79534fcd0239b::t_4379814bac1d11 37-39
+industries/legal/tasks/C5-M3/task.json
+  s_c79534fcd0239b::t_72cd7565fdeb33 4,37-39,49,131-165
+industries/legal/tasks/R-E1-BG/task.json
+  s_c79534fcd0239b::t_543bca4194218a 43,45,50,52
+industries/legal/tasks/R-E2/task.json
+  s_c79534fcd0239b::t_3014f2f7e615ad 4,18-21,41-54
+industries/legal/tasks/R-H1/task.json
+  s_c79534fcd0239b::t_7921ded7fc7f4b 4,127
+industries/legal/tasks/R-H4/task.json
+  s_c79534fcd0239b::t_40f4c4610ec9c0 4,117-123
+industries/legal/tasks/R-M2/task.json
+  s_c79534fcd0239b::t_7deda0d14455d3 33-38
+industries/legal/tasks/R-M3/task.json
+  s_c79534fcd0239b::t_aa99de37255278 149
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "e4dbb81ddea3737d29f8c1d25ae95a1f6756ab58",
+  "prompts": {},
+  "sessions": {
+    "s_c79534fcd0239b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2c3de37c-b760-4edd-9a68-9191c31127a0",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}
