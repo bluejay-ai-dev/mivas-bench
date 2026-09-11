@@ -39,6 +39,8 @@
   "_note_grok_text_input": "xAI also charges $0.004 per text input on top of the audio minute (https://docs.x.ai/docs/models). Not modelled — the grok harness emits no text-input count. Understates grok by a few tenths of a cent per call.",
   "per_minute_pricing": {
     "_note_": "grok-voice-latest is an alias of grok-voice-think-fast-2.0 (verified 2026-08-22, https://docs.x.ai/docs/models: '$0.08 / min ($4.80 / hr) audio'). xAI meters the speech-to-speech model as ONE per-minute charge, not as separate STT/LLM/TTS legs — grok-stt ($0.10/hr REST, $0.20/hr streaming) and grok-tts ($15.00/1M chars) are separate products that a cascaded pipeline would pay for instead. Duration minutes are the right billing basis. Add $0.01/min if xAI PSTN telephony is used (we use CHIRP, so no).",
+    "_note_gpt-live-1": "GPT-Live meters the voice session per minute, billed per second ($0.05/min, https://developers.openai.com/api/docs/models/gpt-live-1, checked 2026-09-10). The backend Responses model is billed separately on its own tokens — price those from the chat spans, not from this row.",
+    "gpt-live-1":                    0.05,
     "grok-voice-latest":             0.08,
     "grok-voice-think-fast-2.0":     0.08,
     "grok-voice-think-fast-1.0":     0.05
