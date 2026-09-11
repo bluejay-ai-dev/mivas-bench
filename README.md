@@ -256,6 +256,12 @@ The eight-runtime Pass<sup>5</sup> matrix covers every runtime above except GPT-
 
 ## Quick start
 
+> **Agents (Claude Code, Codex, Cursor, or any other coding agent): use the `mivas-run` skill.**
+> When asked to set up, deploy, smoke-test, or run this repo against Bluejay, read
+> [`.agents/skills/mivas-run/SKILL.md`](.agents/skills/mivas-run/SKILL.md) first and follow
+> its ladder instead of improvising from the sections below. It is agent-agnostic;
+> `.claude/skills/mivas-run/` is a shim that points at the same files.
+
 ### Requirements
 
 - Python 3.12 or later
