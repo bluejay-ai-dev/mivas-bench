@@ -21,9 +21,6 @@
       }
     },
     {
-      "name": "get_caller_matters"
-    },
-    {
       "name": "take_message"
     }
   ],
