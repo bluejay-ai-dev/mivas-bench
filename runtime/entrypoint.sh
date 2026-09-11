@@ -30,6 +30,7 @@ fi
 case "${HARNESS_RUNTIME}" in
   realtime-2.1) : "${OPENAI_REALTIME_MODEL:=gpt-realtime-2.1}" ;;
   realtime-2.1-mini) : "${OPENAI_REALTIME_MODEL:=gpt-realtime-2.1-mini}" ;;
+  gpt-live-1) : "${OPENAI_REALTIME_MODEL:=gpt-live-1}" ;;
 esac
 export OPENAI_REALTIME_MODEL="${OPENAI_REALTIME_MODEL:-}"
 export HARNESS_RUNTIME

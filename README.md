@@ -249,11 +249,11 @@ Harnesses translate the MIVAS blueprint into provider-specific runtimes. Native 
 
 | Status | Runtime |
 | ------ | ------- |
-| Native S2S | [OpenAI Realtime 2.1 and 2.1 Mini](voice-agent-harnesses/openai/), [Gemini Flash Live 3.1 and 2.5 Flash Native Audio](voice-agent-harnesses/gemini/), [Amazon Nova Sonic 2](voice-agent-harnesses/aws/), [Grok Voice](voice-agent-harnesses/grok/), [Qwen Audio Realtime](voice-agent-harnesses/qwen/) |
+| Native S2S | [OpenAI GPT-Live 1](voice-agent-harnesses/openai/gpt-live-1/), [OpenAI Realtime 2.1 and 2.1 Mini](voice-agent-harnesses/openai/), [Gemini Flash Live 3.1 and 2.5 Flash Native Audio](voice-agent-harnesses/gemini/), [Amazon Nova Sonic 2](voice-agent-harnesses/aws/), [Grok Voice](voice-agent-harnesses/grok/), [Qwen Audio Realtime](voice-agent-harnesses/qwen/) |
 | Cascaded baseline | [LiveKit Cascaded](voice-agent-harnesses/livekit/) with Deepgram Flux, GPT-4.1, and ElevenLabs |
 | Hosted voice-agent platform | [AssemblyAI Voice Agent](voice-agent-harnesses/assemblyai/) |
 
-The completed runtimes above account for the eight-runtime Pass<sup>5</sup> matrix. See the [harness contract](voice-agent-harnesses/README.md) for the provider adapter, tool dispatch, handoff, and session requirements.
+The eight-runtime Pass<sup>5</sup> matrix covers every runtime above except GPT-Live 1 and the AssemblyAI Voice Agent, which have landed and pass an end-to-end smoke but are not yet scored. See the [harness contract](voice-agent-harnesses/README.md) for the provider adapter, tool dispatch, handoff, and session requirements.
 
 ## Quick start
 
