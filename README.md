@@ -310,6 +310,8 @@ See [tests/README.md](tests/README.md) for the text fallback and additional loca
 
 ## Deployment
 
+The end-to-end consumer path (prerequisites, Kubernetes targets, Bluejay smoke calls, integrity checks, full industry run) is the `mivas-run` skill in [`.claude/skills/mivas-run/`](.claude/skills/mivas-run/SKILL.md); it works as plain documentation too.
+
 Each harness and industry pair becomes a Kubernetes Deployment and Service:
 
 ```bash

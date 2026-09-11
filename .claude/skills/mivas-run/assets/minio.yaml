@@ -1,0 +1,85 @@
+# Single-node MinIO as the MIVAS snapshot store for local / self-managed clusters.
+# kubectl apply -f .claude/skills/mivas-run/assets/minio.yaml
+# Pods:    AWS_ENDPOINT_URL_S3=http://minio:9000   MIVAS_SNAPSHOT_BUCKET=mivas
+# Laptop:  kubectl port-forward svc/minio 9000:9000 ; AWS_ENDPOINT_URL_S3=http://127.0.0.1:9000
+# Change the root credentials before exposing this anywhere.
+apiVersion: v1
+kind: Secret
+metadata:
+  name: minio-root
+type: Opaque
+stringData:
+  MINIO_ROOT_USER: mivas
+  MINIO_ROOT_PASSWORD: mivasmivas
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: minio-data
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests:
+      storage: 20Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: minio
+  labels: {app: minio}
+spec:
+  replicas: 1
+  strategy: {type: Recreate}
+  selector:
+    matchLabels: {app: minio}
+  template:
+    metadata:
+      labels: {app: minio}
+    spec:
+      containers:
+        - name: minio
+          image: quay.io/minio/minio:RELEASE.2025-04-22T22-12-26Z
+          args: ["server", "/data", "--console-address", ":9001"]
+          envFrom:
+            - secretRef: {name: minio-root}
+          ports:
+            - {containerPort: 9000, name: s3}
+            - {containerPort: 9001, name: console}
+          readinessProbe:
+            httpGet: {path: /minio/health/ready, port: 9000}
+          volumeMounts:
+            - {name: data, mountPath: /data}
+      volumes:
+        - name: data
+          persistentVolumeClaim: {claimName: minio-data}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: minio
+spec:
+  selector: {app: minio}
+  ports:
+    - {name: s3, port: 9000, targetPort: 9000}
+    - {name: console, port: 9001, targetPort: 9001}
+---
+# Creates the `mivas` bucket once MinIO is up.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: minio-make-bucket
+spec:
+  backoffLimit: 10
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: mc
+          image: quay.io/minio/mc:RELEASE.2025-04-16T18-13-26Z
+          envFrom:
+            - secretRef: {name: minio-root}
+          command: ["/bin/sh", "-c"]
+          args:
+            - >
+              until mc alias set local http://minio:9000 "$MINIO_ROOT_USER" "$MINIO_ROOT_PASSWORD"; do sleep 3; done;
+              mc mb --ignore-existing local/mivas

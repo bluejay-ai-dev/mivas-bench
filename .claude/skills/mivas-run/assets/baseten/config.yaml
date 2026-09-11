@@ -1,0 +1,46 @@
+# Truss config for one MIVAS pair on Baseten as a Custom Server (WebSocket transport).
+# 1. Build + push the pair image to a registry Baseten can pull:
+#      MIVAS_IMAGE_PREFIX=docker.io/<you>/mivas-bench uv run python run.py --harness openai/realtime-2.1 --industry control-industry --build
+# 2. Create Baseten secrets (Workspace → Secrets) named below; they mount at /secrets/<name>.
+# 3. truss push config.yaml --publish
+# 4. Front the model URL with assets/baseten/auth-proxy-worker.js (Bluejay sends basic auth, Baseten wants a bearer).
+model_name: mivas-openai-realtime-2-1-control-industry
+base_image:
+  image: docker.io/<you>/mivas-bench:openai-realtime-2-1-control-industry
+docker_server:
+  # secrets → env, then the normal combined entrypoint (tool server :8000 + CHIRP :8765)
+  start_command: >-
+    /bin/sh -c 'for s in /secrets/*; do [ -f "$s" ] && export "$(basename "$s")=$(cat "$s")"; done;
+    exec /app/runtime/entrypoint.sh'
+  server_port: 8765
+  predict_endpoint: /v1/websocket
+  readiness_endpoint: /health
+  liveness_endpoint: /health
+runtime:
+  transport:
+    kind: websocket
+  predict_concurrency: 3          # ≈ concurrent calls per replica; keep 2–4 for CHIRP families
+resources:
+  cpu: "1"
+  memory: 2Gi
+  use_gpu: false
+environment_variables:
+  HARNESS: openai/realtime-2.1
+  INDUSTRY: control-industry
+  MIVAS_MODE: chirp
+  MIVAS_SLUG: openai-realtime-2-1-control-industry   # snapshot key prefix; k8s sets this from the Deployment
+  CHIRP_USER: ""                                     # auth is the proxy's job; leave both empty
+  CHIRP_PASS: ""
+  MIVAS_SNAPSHOT_BUCKET: ""                          # external S3 / R2 bucket; empty = pod-local only
+  MIVAS_SNAPSHOT_PREFIX: mivas
+  AWS_DEFAULT_REGION: us-east-1
+  AWS_ENDPOINT_URL_S3: ""                            # set for R2 / MinIO / GCS interop
+  BLUEJAY_API_URL: https://api.getbluejay.ai/v1
+  BLUEJAY_OTLP_ENDPOINT: https://otlp.getbluejay.ai/v1/traces
+  BLUEJAY_SERVICE_NAME: mivas-openai
+  PYTHONUNBUFFERED: "1"
+secrets:
+  OPENAI_API_KEY: null        # provider key for this family
+  BLUEJAY_API_KEY: null       # traces + result relink
+  AWS_ACCESS_KEY_ID: null     # snapshot store (optional)
+  AWS_SECRET_ACCESS_KEY: null

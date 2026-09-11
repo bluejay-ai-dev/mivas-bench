@@ -1,0 +1,38 @@
+# Any ingress controller (ingress-nginx, traefik, GKE, ...) when MIVAS_INGRESS_CLASS is set.
+# Host: __HOST__  →  wss://__HOST__/ (Bluejay dials)  and  https://__HOST__/ (PUBLIC_URL)
+# TLS: cert-manager issues mivas-<slug>-tls when MIVAS_CLUSTER_ISSUER is set, or point
+# MIVAS_TLS_SECRET at a Secret you provisioned (wildcard cert for *.MIVAS_BASE_DOMAIN).
+# CHIRP sockets live for the whole call; the timeouts below stop nginx cutting them at 60s.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mivas-__SLUG__
+  labels:
+    app: mivas-bench
+    mivas.harness_family: "__HARNESS_FAMILY__"
+    mivas.harness_runtime: "__HARNESS_RUNTIME__"
+    mivas.industry: "__INDUSTRY__"
+    mivas.slug: "__SLUG__"
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-body-size: "16m"
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    __CLUSTER_ISSUER_ANNOTATION__
+spec:
+  ingressClassName: __INGRESS_CLASS__
+  tls:
+    - hosts:
+        - __HOST__
+      secretName: __TLS_SECRET__
+  rules:
+    - host: __HOST__
+      http:
+        paths:
+          - path: __INGRESS_PATH__
+            pathType: Prefix
+            backend:
+              service:
+                name: mivas-__SLUG__
+                port:
+                  name: __INGRESS_PORT_NAME__
