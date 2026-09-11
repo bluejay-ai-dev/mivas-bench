@@ -56,8 +56,8 @@ called the tool and fails calls that did; the scripts print it but never gate on
 ## Reading a result
 
 ```bash
-uv run python .claude/skills/mivas-run/scripts/bluejay.py results --run RUN --out verify-out/smoke/RUN
-uv run python .claude/skills/mivas-run/scripts/bluejay.py score verify-out/smoke/RUN
+uv run python .agents/skills/mivas-run/scripts/bluejay.py results --run RUN --out verify-out/smoke/RUN
+uv run python .agents/skills/mivas-run/scripts/bluejay.py score verify-out/smoke/RUN
 curl -s "$(jq -r .simulation_result.transcript_url verify-out/smoke/RUN/<id>.json)" | jq '.[] | {speaker, start_offset_ms, text}'
 ```
 

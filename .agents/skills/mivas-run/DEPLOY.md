@@ -36,7 +36,7 @@ public hostname lands on a random pod. Pick one:
 | Any S3-compatible (MinIO, Cloudflare R2, GCS interop, DO Spaces) | same plus `AWS_ENDPOINT_URL_S3=https://…` and that store's key pair | `AWS_ENDPOINT_URL_S3` pointing at the same store (for in-cluster MinIO: `kubectl port-forward svc/minio 9000:9000` → `http://127.0.0.1:9000`) | boto3 honours `AWS_ENDPOINT_URL_S3`; no code change |
 | None | leave `MIVAS_SNAPSHOT_BUCKET` unset | – | `.final.json` stays in the pod; rung 3 checks it via `kubectl exec`; rung 4 state scoring is skipped |
 
-In-cluster MinIO for local / own clusters: `kubectl apply -f .claude/skills/mivas-run/assets/minio.yaml`
+In-cluster MinIO for local / own clusters: `kubectl apply -f .agents/skills/mivas-run/assets/minio.yaml`
 (20 Gi PVC, bucket `mivas` created by a Job, root creds `mivas`/`mivasmivas` — change them),
 then in `.env`:
 
@@ -126,7 +126,7 @@ to bridge:
 
 ```bash
 MIVAS_IMAGE_PREFIX=docker.io/<you>/mivas-bench uv run python run.py --build   # amd64 push
-cp .claude/skills/mivas-run/assets/baseten/config.yaml ./baseten-config.yaml    # edit image, slug, env
+cp .agents/skills/mivas-run/assets/baseten/config.yaml ./baseten-config.yaml    # edit image, slug, env
 pip install truss && truss push baseten-config.yaml --publish
 ```
 
@@ -179,7 +179,7 @@ Storage: MinIO from `assets/minio.yaml`, or an external S3-compatible bucket.
 ```bash
 kubectl rollout status deployment/mivas-<slug> --timeout=180s
 kubectl logs deployment/mivas-<slug> --tail=50      # "snapshot: preflight ok" and the CHIRP bind line ("ws↔…")
-uv run python .claude/skills/mivas-run/scripts/preflight.py --harness $H --industry $I --k8s
+uv run python .agents/skills/mivas-run/scripts/preflight.py --harness $H --industry $I --k8s
 ```
 
 Readiness probes `:8000/health` (tools), so a pod can be Ready a few seconds before CHIRP

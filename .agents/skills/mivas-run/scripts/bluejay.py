@@ -4,12 +4,12 @@
 Everything goes through the public REST API with your own BLUEJAY_API_KEY
 (X-API-Key). No Bluejay internals, no MCP.
 
-    uv run python .claude/skills/mivas-run/scripts/bluejay.py ensure-agent --harness openai/realtime-2.1 --industry control-industry --url wss://HOST
-    uv run python .claude/skills/mivas-run/scripts/bluejay.py smoke        --harness openai/realtime-2.1 --industry control-industry --url wss://HOST
-    uv run python .claude/skills/mivas-run/scripts/bluejay.py full         --harness openai/realtime-2.1 --industry healthcare --runs 5
-    uv run python .claude/skills/mivas-run/scripts/bluejay.py poll  --run RUN_ID
-    uv run python .claude/skills/mivas-run/scripts/bluejay.py results --run RUN_ID --out verify-out/smoke/RUN_ID
-    uv run python .claude/skills/mivas-run/scripts/bluejay.py score verify-out/smoke/RUN_ID
+    uv run python .agents/skills/mivas-run/scripts/bluejay.py ensure-agent --harness openai/realtime-2.1 --industry control-industry --url wss://HOST
+    uv run python .agents/skills/mivas-run/scripts/bluejay.py smoke        --harness openai/realtime-2.1 --industry control-industry --url wss://HOST
+    uv run python .agents/skills/mivas-run/scripts/bluejay.py full         --harness openai/realtime-2.1 --industry healthcare --runs 5
+    uv run python .agents/skills/mivas-run/scripts/bluejay.py poll  --run RUN_ID
+    uv run python .agents/skills/mivas-run/scripts/bluejay.py results --run RUN_ID --out verify-out/smoke/RUN_ID
+    uv run python .agents/skills/mivas-run/scripts/bluejay.py score verify-out/smoke/RUN_ID
 
 `smoke` = ensure agent → dedicated smoke simulation → smoke digital humans →
 queue → poll → dump results → rubric. Exit 0 only when every call passes.

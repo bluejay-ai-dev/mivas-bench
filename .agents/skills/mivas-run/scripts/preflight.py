@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Phase-0/1 gate: is this machine, this pair, and this deployment ready for Bluejay?
 
-    uv run python .claude/skills/mivas-run/scripts/preflight.py --harness openai/realtime-2.1 --industry control-industry
-    uv run python .claude/skills/mivas-run/scripts/preflight.py ... --k8s                 # pods + wss probe via MIVAS_BASE_DOMAIN
-    uv run python .claude/skills/mivas-run/scripts/preflight.py ... --url wss://HOST      # probe an explicit URL (tunnel, Baseten proxy)
+    uv run python .agents/skills/mivas-run/scripts/preflight.py --harness openai/realtime-2.1 --industry control-industry
+    uv run python .agents/skills/mivas-run/scripts/preflight.py ... --k8s                 # pods + wss probe via MIVAS_BASE_DOMAIN
+    uv run python .agents/skills/mivas-run/scripts/preflight.py ... --url wss://HOST      # probe an explicit URL (tunnel, Baseten proxy)
 
 Prints one PASS/FAIL/WARN/SKIP line per check; exit 1 on any FAIL.
 """

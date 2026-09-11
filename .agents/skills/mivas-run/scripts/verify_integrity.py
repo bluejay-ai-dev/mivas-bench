@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Phase 3: harness integrity + benchmark integrity after a passing smoke.
 
-    uv run python .claude/skills/mivas-run/scripts/verify_integrity.py \
+    uv run python .agents/skills/mivas-run/scripts/verify_integrity.py \
         --harness openai/realtime-2.1 --industry healthcare \
         --smoke-dir verify-out/smoke/openai-realtime-2-1-healthcare/RUN_ID [--k8s]
 

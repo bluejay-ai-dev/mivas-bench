@@ -82,7 +82,7 @@ voice-agent-harnesses/<family>/
 uv run python run.py --harness <family>/<runtime> --industry control-industry --check
 uv run python run.py --harness <family>/<runtime> --industry control-industry      # tools :8000 + CHIRP
 cloudflared tunnel --url http://127.0.0.1:8765 --no-autoupdate
-uv run python .claude/skills/mivas-run/scripts/bluejay.py smoke --harness <family>/<runtime> --industry control-industry --url wss://<tunnel>
+uv run python .agents/skills/mivas-run/scripts/bluejay.py smoke --harness <family>/<runtime> --industry control-industry --url wss://<tunnel>
 ```
 
 Done only when three consecutive control-industry smoke calls pass the rubric **and** a

@@ -1,5 +1,5 @@
 # Single-node MinIO as the MIVAS snapshot store for local / self-managed clusters.
-# kubectl apply -f .claude/skills/mivas-run/assets/minio.yaml
+# kubectl apply -f .agents/skills/mivas-run/assets/minio.yaml
 # Pods:    AWS_ENDPOINT_URL_S3=http://minio:9000   MIVAS_SNAPSHOT_BUCKET=mivas
 # Laptop:  kubectl port-forward svc/minio 9000:9000 ; AWS_ENDPOINT_URL_S3=http://127.0.0.1:9000
 # Change the root credentials before exposing this anywhere.
