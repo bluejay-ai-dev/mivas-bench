@@ -30,6 +30,8 @@ from typing import Any
 from websockets.asyncio.server import serve
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "runtime"))  # repo runtime/ when not in-pod
+from chirp_health import process_request as _health  # noqa: E402
 from harness import (  # noqa: E402
     END_CALL_CLOSE_DELAY_S,
     INPUT_RATE,
@@ -317,7 +319,7 @@ def main(model: str | None = None) -> None:
     )
 
     async def run() -> None:
-        async with serve(lambda ws: _handler(ws, a.model, a.industry), a.host, a.port):
+        async with serve(lambda ws: _handler(ws, a.model, a.industry), a.host, a.port, process_request=_health):
             await asyncio.Future()
 
     asyncio.run(run())

@@ -29,6 +29,8 @@ from typing import Any
 from websockets.asyncio.server import serve
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[4] / "runtime"))  # repo runtime/ when not in-pod
+from chirp_health import process_request as _health  # noqa: E402
 from harness import industry_path, load_blueprint, set_call_id  # noqa: E402
 from report import RealtimeSpanTracer, traced_run  # noqa: E402
 from voicechat import (  # noqa: E402
@@ -911,7 +913,7 @@ def main(model: str | None = None) -> None:
     )
 
     async def run() -> None:
-        async with serve(lambda ws: _handler(ws, a.industry), a.host, a.port):
+        async with serve(lambda ws: _handler(ws, a.industry), a.host, a.port, process_request=_health):
             await asyncio.Future()
 
     asyncio.run(run())

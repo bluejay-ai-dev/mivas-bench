@@ -251,6 +251,13 @@ spec:
                   name: mivas-secrets
                   key: AWS_SESSION_TOKEN
                   optional: true
+            # S3-compatible snapshot store (MinIO / R2 / GCS interop). Unset = AWS S3.
+            - name: AWS_ENDPOINT_URL_S3
+              valueFrom:
+                secretKeyRef:
+                  name: mivas-secrets
+                  key: AWS_ENDPOINT_URL_S3
+                  optional: true
             - name: LIVEKIT_URL
               valueFrom:
                 secretKeyRef:

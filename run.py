@@ -7,6 +7,7 @@ import argparse
 import base64
 import json
 import os
+import platform
 import signal
 import subprocess
 import sys
@@ -187,6 +188,33 @@ def ingress_enabled() -> bool:
     return bool(os.environ.get("MIVAS_BASE_DOMAIN", "").strip())
 
 
+def ingress_class() -> str:
+    """MIVAS_INGRESS_CLASS; empty means the EKS Auto Mode ALB pair (mivas-alb)."""
+    return os.environ.get("MIVAS_INGRESS_CLASS", "").strip()
+
+
+def generic_ingress() -> bool:
+    """Any non-EKS controller (nginx, traefik, ...) → k8s/ingress-generic.yaml."""
+    cls = ingress_class()
+    return bool(cls) and cls != "mivas-alb"
+
+
+def tls_secret_name(harness: str, industry: str) -> str:
+    return os.environ.get("MIVAS_TLS_SECRET", "").strip() or f"mivas-{slug(harness, industry)}-tls"
+
+
+def cluster_issuer_annotation() -> str:
+    issuer = os.environ.get("MIVAS_CLUSTER_ISSUER", "").strip()
+    if issuer:
+        return f'cert-manager.io/cluster-issuer: "{issuer}"'
+    return 'mivas.tls: "provisioned"'
+
+
+def service_account_annotations() -> str:
+    role = os.environ.get("MIVAS_IRSA_ROLE_ARN", "").strip()
+    return f'{{eks.amazonaws.com/role-arn: "{role}"}}' if role else "{}"
+
+
 def _ecr_registry_host(prefix: str) -> str | None:
     """Return the ECR registry host from MIVAS_IMAGE_PREFIX, or None if not ECR."""
     host = prefix.strip().rstrip("/").split("/")[0]
@@ -250,7 +278,8 @@ def build_image(harness: str, industry: str, image: str) -> None:
             ]
         )
         return
-    platforms = platforms or "linux/arm64"
+    host_arch = "arm64" if platform.machine().lower() in {"arm64", "aarch64"} else "amd64"
+    platforms = platforms or f"linux/{host_arch}"
     print(f"building {image} (-f {dockerfile.relative_to(ROOT)}) {platforms}")
     run(
         [
@@ -269,7 +298,14 @@ def build_image(harness: str, industry: str, image: str) -> None:
     )
 
 
-def _render(template_name: str, harness: str, industry: str, image: str, service_type: str) -> str:
+def _render(
+    template_name: str,
+    harness: str,
+    industry: str,
+    image: str,
+    service_type: str,
+    **extra: str,
+) -> str:
     family, runtime = split_harness(harness)
     pair_slug = slug(harness, industry)
     host = pair_dns_host(harness, industry) or ""
@@ -289,6 +325,8 @@ def _render(template_name: str, harness: str, industry: str, image: str, service
     )
     cpu_req, mem_req, mem_lim = pair_resources(harness)
     template = (ROOT / "k8s" / template_name).read_text()
+    for key, value in extra.items():
+        template = template.replace(f"__{key}__", value)
     return (
         template.replace("__HARNESS__", harness)
         .replace("__HARNESS_FAMILY__", family)
@@ -313,6 +351,10 @@ def _render(template_name: str, harness: str, industry: str, image: str, service
         .replace("__SNAPSHOT_BUCKET__", os.environ.get("MIVAS_SNAPSHOT_BUCKET", "").strip())
         .replace("__SNAPSHOT_PREFIX__", os.environ.get("MIVAS_SNAPSHOT_PREFIX", "mivas").strip() or "mivas")
         .replace("__AWS_REGION__", os.environ.get("AWS_DEFAULT_REGION") or os.environ.get("AWS_REGION") or "us-west-1")
+        .replace("__SA_ANNOTATIONS__", service_account_annotations())
+        .replace("__INGRESS_CLASS__", ingress_class())
+        .replace("__TLS_SECRET__", tls_secret_name(harness, industry))
+        .replace("__CLUSTER_ISSUER_ANNOTATION__", cluster_issuer_annotation())
     )
 
 
@@ -408,6 +450,7 @@ _SECRET_ENV_KEYS = (
     "PUBLIC_URL",
     "CHIRP_USER",
     "CHIRP_PASS",
+    "AWS_ENDPOINT_URL_S3",
 )
 
 
@@ -620,23 +663,42 @@ def resolve_pairs(harness: str, industry: str) -> list[tuple[str, str]]:
 def render_agents_yaml(pairs: list[tuple[str, str]], service_type: str) -> str:
     docs: list[str] = []
     use_ingress = ingress_enabled()
-    if use_ingress and not os.environ.get("MIVAS_ACM_CERTIFICATE_ARN", "").strip():
+    generic = generic_ingress()
+    if use_ingress and not generic and not os.environ.get("MIVAS_ACM_CERTIFICATE_ARN", "").strip():
         raise ValueError(
             "MIVAS_BASE_DOMAIN is set but MIVAS_ACM_CERTIFICATE_ARN is missing "
-            "(needed for HTTPS/WSS Ingress on EKS)"
+            "(needed for HTTPS/WSS Ingress on EKS; set MIVAS_INGRESS_CLASS for other clusters)"
         )
-    if use_ingress:
+    if generic and not (
+        os.environ.get("MIVAS_CLUSTER_ISSUER", "").strip() or os.environ.get("MIVAS_TLS_SECRET", "").strip()
+    ):
+        raise ValueError(
+            "MIVAS_INGRESS_CLASS is set but neither MIVAS_CLUSTER_ISSUER (cert-manager) "
+            "nor MIVAS_TLS_SECRET is set; Bluejay needs wss://"
+        )
+    h0, i0 = pairs[0]
+    # Deployments reference serviceAccountName mivas-bench; render it so non-EKS clusters have it.
+    docs.append(_render("serviceaccount.yaml", h0, i0, image_ref(h0, i0), service_type))
+    if use_ingress and not generic:
         # Cluster-scoped; same cert/group for every pair. Render with the first pair
         # so __ACM_CERTIFICATE_ARN__ is filled (other pair fields unused).
-        h0, i0 = pairs[0]
         docs.append(_render("ingressclass.yaml", h0, i0, image_ref(h0, i0), service_type))
     for harness, industry in pairs:
         image = image_ref(harness, industry)
         docs.append(_render("deployment.yaml", harness, industry, image, service_type))
         docs.append(_render("service.yaml", harness, industry, image, service_type))
-        if use_ingress and pair_needs_ingress(harness):
+        if not use_ingress:
+            continue
+        chirp = pair_needs_ingress(harness)
+        if generic:
+            docs.append(_render(
+                "ingress-generic.yaml", harness, industry, image, service_type,
+                INGRESS_PATH="/" if chirp else "/tools",
+                INGRESS_PORT_NAME="chirp" if chirp else "tools",
+            ))
+        elif chirp:
             docs.append(_render("ingress.yaml", harness, industry, image, service_type))
-        elif use_ingress:
+        else:
             docs.append(_render("ingress-tools.yaml", harness, industry, image, service_type))
     return "\n---\n".join(docs) + "\n"
 
@@ -732,10 +794,10 @@ def apply_agents(pairs: list[tuple[str, str]], *, follow_logs: bool) -> None:
             "(auth: CHIRP_USER/CHIRP_PASS). Hostnames are deterministic per slug."
         )
         print("List: kubectl get ingress,svc,deploy -l app=mivas-bench")
-        print("ALB hostname (wildcard CNAME target for MIVAS_BASE_DOMAIN):")
+        print("Ingress address (wildcard DNS target for *.MIVAS_BASE_DOMAIN):")
         print(
             "  kubectl get ingress -l app=mivas-bench "
-            "-o jsonpath='{.items[0].status.loadBalancer.ingress[0].hostname}'"
+            "-o jsonpath='{.items[0].status.loadBalancer.ingress[0]}'"
         )
     elif chirp_pairs:
         print("Point each Bluejay agent websocket_url at its Service (auth: CHIRP_USER/CHIRP_PASS).")

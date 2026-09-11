@@ -65,4 +65,6 @@ Thumbs.db
 # call areas and one-pager under docs/<industry>/, and none of it is tracked.
 docs/
 graphify-out/
-.claude/
+# .claude/skills/ ships with the repo (mivas-run); the rest stays local.
+.claude/*
+!.claude/skills/

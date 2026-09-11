@@ -58,7 +58,7 @@ def test_render_agents_yaml_two_pairs(monkeypatch: pytest.MonkeyPatch) -> None:
         "LoadBalancer",
     )
     assert yaml_text.count("kind: Deployment") == 2
-    assert yaml_text.count("kind: Service") == 2
+    assert yaml_text.count("kind: Service\n") == 2
     assert "name: tools" in yaml_text
     assert "---" in yaml_text
     assert f"name: mivas-{slug('openai/realtime-2.1', 'healthcare')}" in yaml_text
@@ -269,3 +269,48 @@ def test_cascaded_nemotron_gets_heavier_pod() -> None:
     assert yaml_text.count("cpu: 250m") == 1
     assert "__CPU_REQUEST__" not in yaml_text
     assert "__MEMORY_LIMIT__" not in yaml_text
+
+
+def test_service_account_always_rendered(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("MIVAS_BASE_DOMAIN", raising=False)
+    monkeypatch.delenv("MIVAS_IRSA_ROLE_ARN", raising=False)
+    yaml_text = render_agents_yaml([("openai/realtime-2.1", "control-industry")], "LoadBalancer")
+    assert yaml_text.count("kind: ServiceAccount") == 1
+    assert "name: mivas-bench" in yaml_text
+    assert "annotations: {}" in yaml_text
+    monkeypatch.setenv("MIVAS_IRSA_ROLE_ARN", "arn:aws:iam::123456789012:role/mivas")
+    yaml_text = render_agents_yaml([("openai/realtime-2.1", "control-industry")], "LoadBalancer")
+    assert 'eks.amazonaws.com/role-arn: "arn:aws:iam::123456789012:role/mivas"' in yaml_text
+
+
+def test_generic_ingress_render(monkeypatch: pytest.MonkeyPatch) -> None:
+    from run import generic_ingress
+
+    monkeypatch.setenv("MIVAS_BASE_DOMAIN", "mivas.example.org")
+    monkeypatch.setenv("MIVAS_INGRESS_CLASS", "nginx")
+    monkeypatch.setenv("MIVAS_CLUSTER_ISSUER", "letsencrypt-prod")
+    monkeypatch.delenv("MIVAS_ACM_CERTIFICATE_ARN", raising=False)
+    monkeypatch.delenv("MIVAS_TLS_SECRET", raising=False)
+    assert generic_ingress()
+    yaml_text = render_agents_yaml(
+        [("openai/realtime-2.1", "healthcare"), ("livekit/cascaded", "healthcare")], "ClusterIP",
+    )
+    s = slug("openai/realtime-2.1", "healthcare")
+    assert "kind: IngressClassParams" not in yaml_text
+    assert yaml_text.count("\nkind: Ingress\n") == 2
+    assert "ingressClassName: nginx" in yaml_text
+    assert 'cert-manager.io/cluster-issuer: "letsencrypt-prod"' in yaml_text
+    assert f"secretName: mivas-{s}-tls" in yaml_text
+    assert f"host: {s}.mivas.example.org" in yaml_text
+    assert "path: /\n" in yaml_text and "path: /tools\n" in yaml_text
+    assert "name: chirp\n" in yaml_text and "name: tools\n" in yaml_text
+    assert "__INGRESS_PATH__" not in yaml_text and "__INGRESS_PORT_NAME__" not in yaml_text
+    assert "__CLUSTER_ISSUER_ANNOTATION__" not in yaml_text
+
+    monkeypatch.delenv("MIVAS_CLUSTER_ISSUER")
+    with pytest.raises(ValueError, match="MIVAS_TLS_SECRET"):
+        render_agents_yaml([("openai/realtime-2.1", "healthcare")], "ClusterIP")
+    monkeypatch.setenv("MIVAS_TLS_SECRET", "wildcard-tls")
+    yaml_text = render_agents_yaml([("openai/realtime-2.1", "healthcare")], "ClusterIP")
+    assert "secretName: wildcard-tls" in yaml_text
+    assert 'mivas.tls: "provisioned"' in yaml_text
