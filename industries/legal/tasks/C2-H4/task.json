@@ -1,7 +1,7 @@
 {
   "task_name": "C2-H4: Other driver reveals after looking like a new client",
   "customer_name": "Wade Killian",
-  "intent": "Open with exactly: \"I need to talk about a car accident.\" You sound like someone starting a new claim. Do not say you are being sued or that a client of this firm hit you unless asked who this would be against or who the other side is. When asked that, say exactly: \"I'm the one being sued. Your client hit me.\" You are the person being sued, not bringing a claim. After that, if they ask which state, when it happened, for a written account, or offer an appointment, say exactly: \"I'm the other driver. I don't want to start a claim.\" Stay until they confirm a person will take it from here. A spoken 'we'll take care of it' without transferring you to a person is not enough. When told a person will take it from here, say exactly: \"Okay, thank you.\" and end the call.",
+  "intent": "Open with exactly: \"I need to talk about a car accident.\" You sound like someone starting a new claim. If they greet you or ask how they can help, say that same line. If they ask what happened or for more details before they ask who this would be against, say exactly: \"It's a car accident.\" Do not say you are being sued or that a client of this firm hit you unless asked who this would be against or who the other side is. When asked that, say exactly: \"I'm the one being sued. Your client hit me.\" You are the person being sued, not bringing a claim. After that, if they ask which state, when it happened, for a written account, or offer an appointment, say exactly: \"I'm the other driver. I don't want to start a claim.\" Stay until they confirm a person or staff member will take the call from here. A spoken 'we'll take care of it' or being asked for more details, without transferring you to a person, is not enough. When they say a person or staff member will take the call from here, say exactly: \"Okay, thank you.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -21,13 +21,23 @@
       }
     },
     {
-      "name": "escalate_to_human"
+      "name": "escalate_to_human",
+      "parameters": {
+        "reason_code": "adverse_party"
+      }
     }
   ],
   "behaviors": {
     "creativity": 0
   },
   "scripted_responses": [
+    {
+      "match_type": "context",
+      "match_phrase": "The agent greets the caller, asks how they can help, or asks what the call is about. NOT when asking for a name or phone number, NOT when asking who the other side is, and NOT when asking whether anyone represents the caller.",
+      "response_type": "phrase",
+      "response_value": "I need to talk about a car accident.",
+      "occurrence_mode": "always"
+    },
     {
       "match_type": "context",
       "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
@@ -51,6 +61,13 @@
     },
     {
       "match_type": "context",
+      "match_phrase": "The agent asks what happened, asks for more details about the accident, or asks the caller to tell the story. NOT when asking who this would be against, NOT when asking which state or when it happened, and NOT when offering an appointment.",
+      "response_type": "phrase",
+      "response_value": "It's a car accident.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
       "match_phrase": "The agent asks which state this happened in, or where it took place. NOT any other question.",
       "response_type": "phrase",
       "response_value": "I'm the other driver. I don't want to start a claim.",
@@ -65,9 +82,16 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent starts taking a written account, asks you to describe what happened in writing, or offers an appointment. NOT when asking which state or when it happened.",
+      "match_phrase": "The agent starts taking a written account, asks you to describe what happened in writing, or offers an appointment. NOT when asking which state or when it happened, and NOT when asking who this would be against.",
       "response_type": "phrase",
       "response_value": "I'm the other driver. I don't want to start a claim.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent says a person, a staff member, or someone at the firm will take the call from here. NOT when offering only a message. NOT when transferring you to screening, intake, scheduling, or client services on this call. NOT when asking who this would be against.",
+      "response_type": "phrase",
+      "response_value": "Okay, thank you.",
       "occurrence_mode": "always"
     }
   ],

@@ -35,6 +35,9 @@
   ],
   "exp_tool_calls": [
     {
+      "name": "lookup_caller"
+    },
+    {
       "name": "transfer_to_screening"
     },
     {

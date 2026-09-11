@@ -1,7 +1,7 @@
 {
   "task_name": "C2-H2: Conflict unclear, hospital and surgeon",
   "customer_name": "Gloria Mensah",
-  "intent": "Open with exactly: \"I think the hospital and the surgeon both messed up my surgery.\" When asked who this would be against, say exactly: \"It's St. Benedict Medical Center and the surgeon involved.\" If they ask you to pick only the hospital or only the surgeon, say exactly: \"Both \u2014 St. Benedict Medical Center and the surgeon involved.\" State: Illinois. Date: November second, twenty twenty five. If they offer an appointment or evaluation, decline. Stay until they confirm your contact details are on the file and that a person will review the conflict. A spoken 'we'll take care of it' without those writes is not enough. When they confirm your contact is on the file and a person will review the conflict, say exactly: \"Okay, thank you.\" and end the call.",
+  "intent": "Open with exactly: \"I think the hospital and the surgeon both messed up my surgery.\" When asked who this would be against, say exactly: \"It's St. Benedict Medical Center and the surgeon involved.\" If they ask you to pick only the hospital or only the surgeon, say exactly: \"Both \u2014 St. Benedict Medical Center and the surgeon involved.\" State: Illinois. Date: November second, twenty twenty five. If they offer an appointment or evaluation, decline. If they offer a person before confirming your contact details are on the file, decline and ask them to finish. Stay until they confirm your contact details are on the file and that a person will review the conflict. A spoken 'we'll take care of it' or sending you to a person without confirming your contact details are on the file is not enough. After they confirm your contact details are on the file and a person will review the conflict, say exactly: \"Okay, thank you.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -119,9 +119,16 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers to transfer you to a human staff member, a live person at the front desk, or a real agent because they cannot continue on this line, before they have confirmed your contact details are on the file. NOT when they have already recorded your contact or said a person will review the conflict. NOT when transferring you to screening or intake on this call.",
+      "match_phrase": "says they will connect you to a person, a staff member, or someone who will review the conflict, without confirming that your contact details are on the file. NOT when they have already confirmed the contact details are recorded, NOT when asking who this is against, which state, or when it happened, and NOT when transferring you to screening or intake on this call.",
       "response_type": "phrase",
-      "response_value": "No, I don't need a person yet. Please finish putting my contact on the file.",
+      "response_value": "Please confirm my contact details are on the file first.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "confirms your contact details are recorded or on the file, and that a person will review the conflict. NOT when they only offer a person without confirming the file, and NOT when asking who this is against.",
+      "response_type": "phrase",
+      "response_value": "Okay, thank you.",
       "occurrence_mode": "always"
     }
   ],
