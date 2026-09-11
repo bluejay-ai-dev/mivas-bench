@@ -1,0 +1,45 @@
+README.md
+  s_c79534fcd0239b::t_c9720d74a607b7 252,256
+runtime/entrypoint.sh
+  s_c79534fcd0239b::t_3bf33761753242 33
+tests/test_dockerfiles.py
+  s_c79534fcd0239b::t_ba65b19398a8c7 15-16
+voice-agent-harnesses/openai/gpt-live-1/Dockerfile
+  s_c79534fcd0239b::t_230d9445c0ce21 1-63
+voice-agent-harnesses/openai/gpt-live-1/README.md
+  s_c79534fcd0239b::t_1a5a8191e62f20 1-122
+voice-agent-harnesses/openai/gpt-live-1/adapters/chirp.py
+  s_c79534fcd0239b::t_4df15e93f2ad9c 1-217
+voice-agent-harnesses/openai/gpt-live-1/agent.py
+  s_c79534fcd0239b::t_4c6fab3e6c849e 1-52
+voice-agent-harnesses/openai/gpt-live-1/live.py
+  s_c79534fcd0239b::t_dd040923b44ba6 1-606
+voice-agent-harnesses/openai/gpt-live-1/pack.py
+  s_c79534fcd0239b::t_015fd369da8472 1-227
+voice-agent-harnesses/openai/gpt-live-1/requirements.txt
+  s_c79534fcd0239b::t_70c026f9c91c2f 1-7
+voice-agent-harnesses/openai/gpt-live-1/test_gpt_live.py
+  s_c79534fcd0239b::t_3e5f19c65d8c38 1-197
+voice-agent-harnesses/openai/gpt-live-1/tools.py
+  s_c79534fcd0239b::t_4ca49130bfd085 1-39
+voice-agent-harnesses/openai/gpt-live-1/tracing.py
+  s_c79534fcd0239b::t_f96f56dafc0c82 1-299
+voice-agent-harnesses/s2s-model-pricing.json
+  s_c79534fcd0239b::t_605889c6efc259 42-43
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "6703570753e75ef3723fedceaf7b8c7f1042985b",
+  "prompts": {},
+  "sessions": {
+    "s_c79534fcd0239b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2c3de37c-b760-4edd-9a68-9191c31127a0",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}
