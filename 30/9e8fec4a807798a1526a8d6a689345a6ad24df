@@ -1,0 +1,78 @@
+voice-agent-harnesses/assemblyai/adapters/chirp.py
+  s_462b09f5e2df1c::t_dea5263651d039 20-21,282
+.claude/skills/mivas-run/scripts/score_rubric.py
+  s_462b09f5e2df1c::t_fc661b3cc25666 1-402
+.claude/skills/mivas-run/BLUEJAY.md
+  s_462b09f5e2df1c::t_4d3ab697ae2205 1-81
+voice-agent-harnesses/grok/voice/adapters/chirp.py
+  s_462b09f5e2df1c::t_dea5263651d039 42-43,885
+.claude/skills/mivas-run/assets/baseten/auth-proxy-worker.js
+  s_462b09f5e2df1c::t_411402a6aea263 1-28
+runtime/chirp_health.py
+  s_462b09f5e2df1c::t_df808a02692650 1-22
+k8s/serviceaccount.yaml
+  s_462b09f5e2df1c::t_df808a02692650 1-12
+run.py
+  s_462b09f5e2df1c::t_45f9899e358467 10,187-213,277-278,297-304,324-325,350-353,445,658-659,662,664-674,682-691,693,789,792
+.claude/skills/mivas-run/assets/baseten/config.yaml
+  s_462b09f5e2df1c::t_411402a6aea263 1-46
+.claude/skills/mivas-run/SKILL.md
+  s_462b09f5e2df1c::t_d50c18bd1e5b7a 1-87
+.claude/skills/mivas-run/assets/minio.yaml
+  s_462b09f5e2df1c::t_411402a6aea263 1-85
+k8s/ingress-generic.yaml
+  s_462b09f5e2df1c::t_df808a02692650 1-38
+.claude/skills/mivas-run/scripts/bluejay.py
+  s_462b09f5e2df1c::t_fc661b3cc25666 1-257,259,279-575
+  s_462b09f5e2df1c::t_e828f909a03942 258,260-278
+k8s/secret.example.yaml
+  s_462b09f5e2df1c::t_d902e63d280643 37-38
+.gitignore
+  s_462b09f5e2df1c::t_d902e63d280643 68-70
+.claude/skills/mivas-run/scripts/verify_integrity.py
+  s_462b09f5e2df1c::t_1a43b155814756 1-51,55-146,149-168
+  s_462b09f5e2df1c::t_e828f909a03942 52-54,147-148
+.claude/skills/mivas-run/scripts/preflight.py
+  s_462b09f5e2df1c::t_e828f909a03942 79-80,124-126
+  s_462b09f5e2df1c::t_1a43b155814756 1-78,81-123,127-244
+voice-agent-harnesses/nvidia/nemotron-voicechat/adapters/chirp.py
+  s_462b09f5e2df1c::t_dea5263651d039 32-33,916
+.env.example
+  s_462b09f5e2df1c::t_d902e63d280643 135-146
+tests/test_agents.py
+  s_462b09f5e2df1c::t_c017c1943f74e6 272-316
+  s_462b09f5e2df1c::t_7095059223d388 61
+tests/test_chirp_health.py
+  s_462b09f5e2df1c::t_df808a02692650 1-48
+k8s/deployment.yaml
+  s_462b09f5e2df1c::t_d902e63d280643 254-260
+voice-agent-harnesses/openai/gpt-live-1-diamond-alpha/adapters/chirp.py
+  s_462b09f5e2df1c::t_dea5263651d039 37,210
+  s_462b09f5e2df1c::t_c1266a6df3c944 36
+.claude/skills/mivas-run/DEPLOY.md
+  s_462b09f5e2df1c::t_4d3ab697ae2205 1-194
+voice-agent-harnesses/openai/adapters/chirp.py
+  s_462b09f5e2df1c::t_dea5263651d039 27-28,227
+.claude/skills/mivas-run/HARNESS.md
+  s_462b09f5e2df1c::t_4d3ab697ae2205 1-105
+README.md
+  s_462b09f5e2df1c::t_e78bc75aeea53e 314-315
+voice-agent-harnesses/qwen/adapters/chirp.py
+  s_462b09f5e2df1c::t_dea5263651d039 33-34,322
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "309e8fec4a807798a1526a8d6a689345a6ad24df",
+  "prompts": {},
+  "sessions": {
+    "s_462b09f5e2df1c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8b47c759-c23d-410c-b962-ca570f8fb6c5",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}
