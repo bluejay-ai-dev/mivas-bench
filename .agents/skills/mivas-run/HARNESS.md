@@ -6,15 +6,20 @@ You need **full control** of the harness you run: its Dockerfile, its adapter, i
 
 ## Existing harnesses
 
-| `family/runtime` | Model | Env keys | Local CHIRP port |
-|---|---|---|---|
-| `openai/realtime-2.1`, `openai/realtime-2.1-mini` | gpt-realtime-2.1 (mini) | `OPENAI_API_KEY` | 8765 / 8766 |
-| `gemini/flash-live-3.1`, `gemini/2.5-flash-native-audio` | Gemini Live (LiveKit SIP worker) | `GOOGLE_API_KEY`, `LIVEKIT_URL/API_KEY/API_SECRET`, `LIVEKIT_SIP_HOST` | – (SIP) |
-| `aws/nova-sonic-2` | Amazon Nova 2 Sonic | `AWS_ACCESS_KEY_ID`/`SECRET` (+`AWS_SESSION_TOKEN`), `NOVA_SONIC_REGION` | 8774 |
-| `grok/voice` | xAI Grok voice | `GROK_API_KEY` (or `XAI_API_KEY`) | 8768 |
-| `qwen/audio-realtime` | Qwen Audio Realtime | `DASHSCOPE_API_KEY`, `QWEN_WORKSPACE_ID`, `QWEN_REGION` | 8769 |
-| `nvidia/nemotron`, `nvidia/nemotron-voicechat` | cascaded Nemotron / VoiceChat NIM | `NVIDIA_API_KEY` (or NIM `NEMOTRON_*` / `VOICECHAT_*` URLs) | 8766 |
-| `livekit/cascaded` | Deepgram Flux → GPT-4.1 → ElevenLabs (LiveKit SIP worker) | `LIVEKIT_*`, `OPENAI_API_KEY`, `DEEPGRAM_API_KEY`, `ELEVENLABS_API_KEY` | – (SIP) |
+Every runtime with a Dockerfile in this repo. "Inference" says whether the model comes from a
+vendor API or can be pointed at an endpoint you host — see [INFERENCE.md](INFERENCE.md).
+
+| `family/runtime` | Model | Inference | Env keys | Local CHIRP port |
+|---|---|---|---|---|
+| `openai/realtime-2.1`, `openai/realtime-2.1-mini` | gpt-realtime-2.1 (mini) | vendor | `OPENAI_API_KEY` | 8765 / 8766 |
+| `openai/gpt-live-1` | GPT-Live 1 | vendor (account needs access) | `OPENAI_API_KEY` | 8765 |
+| `gemini/flash-live-3.1`, `gemini/2.5-flash-native-audio` | Gemini Live (LiveKit SIP worker) | vendor | `GOOGLE_API_KEY`, `LIVEKIT_URL/API_KEY/API_SECRET`, `LIVEKIT_SIP_HOST` | – (SIP) |
+| `aws/nova-sonic-2` | Amazon Nova 2 Sonic | vendor (Bedrock) | `AWS_ACCESS_KEY_ID`/`SECRET` (+`AWS_SESSION_TOKEN`), `NOVA_SONIC_REGION` | 8774 |
+| `grok/voice` | xAI Grok voice | vendor | `GROK_API_KEY` (or `XAI_API_KEY`) | 8768 |
+| `qwen/audio-realtime` | Qwen Audio Realtime | vendor | `DASHSCOPE_API_KEY`, `QWEN_WORKSPACE_ID`, `QWEN_REGION` | 8769 |
+| `nvidia/nemotron` | cascaded Nemotron (Riva ASR → LLM → Magpie TTS) | **your endpoint** via `NEMOTRON_LLM_BASE_URL`, or NVIDIA-hosted | `NVIDIA_API_KEY`, optional `NEMOTRON_*` | 8766 |
+| `nvidia/nemotron-voicechat` | Nemotron VoiceChat NIM | NVIDIA-hosted, or your own NIM via `VOICECHAT_WS_URL` | `NVIDIA_API_KEY` / `VOICECHAT_*` | 8766 |
+| `livekit/cascaded` | Deepgram Flux → GPT-4.1 → ElevenLabs (LiveKit SIP worker) | vendor; LLM leg repointable with `OPENAI_BASE_URL` (untested) | `LIVEKIT_*`, `OPENAI_API_KEY`, `DEEPGRAM_API_KEY`, `ELEVENLABS_API_KEY` | – (SIP) |
 
 Each family README documents its wire contract and gotchas. Every pod also needs
 `BLUEJAY_API_KEY` (trace upload + result relink) and `CHIRP_USER`/`CHIRP_PASS`.
