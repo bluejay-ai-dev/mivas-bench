@@ -17,8 +17,6 @@ vendor API or can be pointed at an endpoint you host — see [INFERENCE.md](INFE
 | `aws/nova-sonic-2` | Amazon Nova 2 Sonic | vendor (Bedrock) | `AWS_ACCESS_KEY_ID`/`SECRET` (+`AWS_SESSION_TOKEN`), `NOVA_SONIC_REGION` | 8774 |
 | `grok/voice` | xAI Grok voice | vendor | `GROK_API_KEY` (or `XAI_API_KEY`) | 8768 |
 | `qwen/audio-realtime` | Qwen Audio Realtime | vendor | `DASHSCOPE_API_KEY`, `QWEN_WORKSPACE_ID`, `QWEN_REGION` | 8769 |
-| `nvidia/nemotron` | cascaded Nemotron (Riva ASR → LLM → Magpie TTS) | **your endpoint** via `NEMOTRON_LLM_BASE_URL`, or NVIDIA-hosted | `NVIDIA_API_KEY`, optional `NEMOTRON_*` | 8766 |
-| `nvidia/nemotron-voicechat` | Nemotron VoiceChat NIM | NVIDIA-hosted, or your own NIM via `VOICECHAT_WS_URL` | `NVIDIA_API_KEY` / `VOICECHAT_*` | 8766 |
 | `livekit/cascaded` | Deepgram Flux → GPT-4.1 → ElevenLabs (LiveKit SIP worker) | vendor; LLM leg repointable with `OPENAI_BASE_URL` (untested) | `LIVEKIT_*`, `OPENAI_API_KEY`, `DEEPGRAM_API_KEY`, `ELEVENLABS_API_KEY` | – (SIP) |
 
 Each family README documents its wire contract and gotchas. Every pod also needs
@@ -31,7 +29,7 @@ Offline gate for any pair: `uv run python run.py --harness $H --industry $I --ch
 ## Build your own
 
 Layout (copy the closest family; `openai/` for a soft-handoff realtime API, `grok/`
-for a raw WebSocket provider, `nvidia/nemotron-voicechat` for hard dual-session):
+for a raw WebSocket provider):
 
 ```
 voice-agent-harnesses/<family>/

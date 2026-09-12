@@ -27,17 +27,17 @@ from run import (  # noqa: E402
 
 def test_parse_agents_basic() -> None:
     assert parse_agents(
-        "openai/realtime-2.1:healthcare,nvidia/nemotron:control-industry"
+        "openai/realtime-2.1:healthcare,grok/voice:control-industry"
     ) == [
         ("openai/realtime-2.1", "healthcare"),
-        ("nvidia/nemotron", "control-industry"),
+        ("grok/voice", "control-industry"),
     ]
 
 
 def test_parse_agents_strips_whitespace() -> None:
-    assert parse_agents("  openai/realtime-2.1:legal , nvidia/nemotron:healthcare ") == [
+    assert parse_agents("  openai/realtime-2.1:legal , grok/voice:healthcare ") == [
         ("openai/realtime-2.1", "legal"),
-        ("nvidia/nemotron", "healthcare"),
+        ("grok/voice", "healthcare"),
     ]
 
 
@@ -53,7 +53,7 @@ def test_render_agents_yaml_two_pairs(monkeypatch: pytest.MonkeyPatch) -> None:
     yaml_text = render_agents_yaml(
         [
             ("openai/realtime-2.1", "healthcare"),
-            ("nvidia/nemotron", "control-industry"),
+            ("grok/voice", "control-industry"),
         ],
         "LoadBalancer",
     )
@@ -63,12 +63,12 @@ def test_render_agents_yaml_two_pairs(monkeypatch: pytest.MonkeyPatch) -> None:
     assert "---" in yaml_text
     assert f"name: mivas-{slug('openai/realtime-2.1', 'healthcare')}" in yaml_text
     assert f"name: mivas-{slug('openai/realtime-2.1', 'healthcare')}-tools" not in yaml_text
-    assert f"name: mivas-{slug('nvidia/nemotron', 'control-industry')}" in yaml_text
-    assert f"name: mivas-{slug('nvidia/nemotron', 'control-industry')}-tools" not in yaml_text
+    assert f"name: mivas-{slug('grok/voice', 'control-industry')}" in yaml_text
+    assert f"name: mivas-{slug('grok/voice', 'control-industry')}-tools" not in yaml_text
     assert 'mivas.harness_family: "openai"' in yaml_text
     assert 'mivas.harness_runtime: "realtime-2.1"' in yaml_text
-    assert 'mivas.harness_family: "nvidia"' in yaml_text
-    assert 'mivas.harness_runtime: "nemotron"' in yaml_text
+    assert 'mivas.harness_family: "grok"' in yaml_text
+    assert 'mivas.harness_runtime: "voice"' in yaml_text
     assert "__SLUG__" not in yaml_text
     assert "__HARNESS_RUNTIME__" not in yaml_text
     assert "Thank you for calling Straus Dermatology." in yaml_text
@@ -251,17 +251,16 @@ def test_livekit_cascaded_sip_secret_is_per_runtime_not_industry(
     assert "name: mivas-gemini-flash-live-3-1-legal" in gemini_yaml
 
 
-def test_cascaded_nemotron_gets_heavier_pod() -> None:
-    assert pair_resources("nvidia/nemotron") == ("1000m", "1Gi", "3Gi")
+def test_cascaded_pairs_get_heavier_pod() -> None:
     assert pair_resources("livekit/cascaded") == ("1000m", "1Gi", "3Gi")
     assert pair_resources("gemini/flash-live-3.1") == ("1000m", "1Gi", "3Gi")
     assert pair_resources("gemini/2.5-flash-native-audio") == ("1000m", "1Gi", "3Gi")
-    assert pair_resources("nvidia/nemotron-voicechat") == ("250m", "384Mi", "1536Mi")
+    assert pair_resources("grok/voice") == ("250m", "384Mi", "1536Mi")
     assert pair_resources("openai/realtime-2.1") == ("250m", "384Mi", "1536Mi")
     yaml_text = render_agents_yaml(
         [
             ("openai/realtime-2.1", "healthcare"),
-            ("nvidia/nemotron", "healthcare"),
+            ("livekit/cascaded", "healthcare"),
         ],
         "LoadBalancer",
     )

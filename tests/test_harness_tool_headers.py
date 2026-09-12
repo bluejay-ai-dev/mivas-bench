@@ -26,7 +26,6 @@ FAMILIES = (
     "openai",
     "gemini",
     "grok",
-    "nvidia",
     "livekit",
 )
 
@@ -164,7 +163,7 @@ def _dispatch_family(family: str, harness: Any) -> None:
         if family == "livekit":
             _run(harness._execute("schedule_appointment", {"date": "08/15/2026"}, local=False))
             return
-        if family in {"grok", "nvidia"}:
+        if family == "grok":
             bp = {
                 "agents": {
                     "scheduler": {

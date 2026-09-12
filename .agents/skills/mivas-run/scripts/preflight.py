@@ -33,7 +33,6 @@ PROVIDER_KEYS = {
     "aws": [["AWS_ACCESS_KEY_ID", "AWS_PROFILE"], ["AWS_SECRET_ACCESS_KEY", "AWS_PROFILE"]],
     "grok": [["GROK_API_KEY", "XAI_API_KEY"]],
     "qwen": [["DASHSCOPE_API_KEY", "QWEN_API_KEY"]],
-    "nvidia": [["NVIDIA_API_KEY", "NEMOTRON_LLM_BASE_URL"]],
     "livekit": [["LIVEKIT_URL"], ["LIVEKIT_API_KEY"], ["LIVEKIT_API_SECRET"], ["OPENAI_API_KEY"], ["DEEPGRAM_API_KEY"], ["ELEVENLABS_API_KEY"]],
 }
 WORKER_FAMILIES = {"livekit", "gemini"}

@@ -21,7 +21,6 @@ local flows all read from there.
 | `aws/nova-sonic-2` | AWS account with Bedrock access to Nova Sonic 2 in the chosen region | `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, optional `AWS_SESSION_TOKEN`, `NOVA_SONIC_REGION` |
 | `grok/voice` | console.x.ai | `GROK_API_KEY` (alias `XAI_API_KEY`) |
 | `qwen/audio-realtime` | Alibaba Model Studio / DashScope | `DASHSCOPE_API_KEY`, `QWEN_WORKSPACE_ID`, `QWEN_REGION` |
-| `nvidia/nemotron`, `nvidia/nemotron-voicechat` | build.nvidia.com — hosted NVCF serves the LLM, ASR and TTS together | `NVIDIA_API_KEY` |
 | `livekit/cascaded` | four vendors: Deepgram (STT), OpenAI (LLM), ElevenLabs (TTS), LiveKit Cloud | `DEEPGRAM_API_KEY`, `OPENAI_API_KEY`, `ELEVENLABS_API_KEY`, `LIVEKIT_*` |
 
 Every container also needs `BLUEJAY_API_KEY` (trace upload and result relink) and
@@ -71,21 +70,6 @@ dead air in the rubric and look like a model failure. Fix it now.
 
 Only cascaded harnesses have a separable LLM leg. The speech-to-speech families talk one
 proprietary protocol and cannot be repointed.
-
-**`nvidia/nemotron`** reads the LLM endpoint from the environment:
-
-```dotenv
-NEMOTRON_LLM_BASE_URL=https://inference.baseten.co/v1
-NEMOTRON_LLM_MODEL=<the model name that endpoint serves>
-NVIDIA_API_KEY=<your Baseten key>      # see the constraint below
-```
-
-> **Constraint, verified in `voice-agent-harnesses/nvidia/harness.py`.** One variable,
-> `NVIDIA_API_KEY`, authenticates *both* the LLM client and the Riva ASR/TTS gRPC calls. So
-> **LLM on Baseten while ASR and TTS stay on NVIDIA NVCF is not possible** without a code
-> change. Two workable setups: everything on NVIDIA (path A, recommended), or the LLM on your
-> provider **and** your own Riva ASR/TTS NIMs via `NEMOTRON_ASR_SERVER`, `NEMOTRON_TTS_SERVER`,
-> `NEMOTRON_USE_SSL=false`, where the shared key value is ignored by your own servers.
 
 **`livekit/cascaded`** builds its LLM leg with the OpenAI SDK, which honours `OPENAI_BASE_URL`.
 Setting `OPENAI_BASE_URL` and `OPENAI_API_KEY` to your provider should send only the LLM leg

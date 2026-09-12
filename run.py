@@ -37,8 +37,6 @@ def _redact_cmd(cmd: list[str]) -> str:
     out: list[str] = []
     secret_prefixes = tuple(f"--from-literal={k}=" for k in (
         "OPENAI_API_KEY",
-        "NVIDIA_API_KEY",
-        "NGC_API_KEY",
         "VAPI_API_KEY",
         "RETELL_API_KEY",
         "BLAND_API_KEY",
@@ -70,8 +68,6 @@ def _redact_cmd(cmd: list[str]) -> str:
             continue
         if "OPENAI_API_KEY=" in part and not part.startswith("OPENAI_API_KEY=***"):
             out.append("OPENAI_API_KEY=***")
-        elif "NVIDIA_API_KEY=" in part and not part.startswith("NVIDIA_API_KEY=***"):
-            out.append("NVIDIA_API_KEY=***")
         else:
             out.append(part)
     return " ".join(out)
@@ -369,12 +365,11 @@ def livekit_secret_name(harness: str, industry: str) -> str:
 def pair_resources(harness: str) -> tuple[str, str, str]:
     """cpu request, memory request, memory limit.
 
-    Cascaded Nemotron runs Silero + NVCF STT/LLM/TTS per websocket. Six of those
-    on the default 250m/384Mi box never reached TTS (runs 230627 / 230659).
+    A cascaded pipeline runs VAD + STT/LLM/TTS per websocket. Six of those on the
+    default 250m/384Mi box never reached TTS (runs 230627 / 230659).
     """
     family, runtime = split_harness(harness)
-    if (family == "nvidia" and runtime == "nemotron") \
-            or family == "gemini" \
+    if family == "gemini" \
             or (family in LIVEKIT_WORKER_FAMILIES and runtime == "cascaded"):
         return "1000m", "1Gi", "3Gi"
     return "250m", "384Mi", "1536Mi"
@@ -414,8 +409,6 @@ def secret_exists() -> bool:
 # Keys synced from the local environment into mivas-secrets (when present).
 _SECRET_ENV_KEYS = (
     "OPENAI_API_KEY",
-    "NVIDIA_API_KEY",
-    "NGC_API_KEY",
     "VAPI_API_KEY",
     "RETELL_API_KEY",
     "BLAND_API_KEY",
@@ -457,7 +450,7 @@ _SECRET_ENV_KEYS = (
 def ensure_secret() -> None:
     """Create or refresh mivas-secrets from env (provider keys + Bluejay/CHIRP).
 
-    Merges into any existing Secret so a NVIDIA-only refresh cannot wipe
+    Merges into any existing Secret so a single-provider refresh cannot wipe
     OPENAI_API_KEY / custom CHIRP credentials already on the cluster.
     """
     present = {k: os.environ.get(k, "") for k in _SECRET_ENV_KEYS if os.environ.get(k, "")}

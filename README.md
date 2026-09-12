@@ -327,7 +327,7 @@ uv run python run.py --build --apply --no-logs
 For several pairs:
 
 ```dotenv
-AGENTS=openai/realtime-2.1:healthcare,nvidia/nemotron:control-industry
+AGENTS=openai/realtime-2.1:healthcare,grok/voice:control-industry
 ```
 
 ```bash

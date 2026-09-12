@@ -26,13 +26,12 @@ HOOK_SITES = {
     "gemini": ["harness.py"],
     "grok": ["voice/adapters/chirp.py"],
     "livekit": ["harness.py"],
-    "nvidia": ["bot.py"],
     "openai": ["report.py"],
     "qwen": ["report.py"],
 }
 
 # any one of these means the family reaches capture_final on teardown.
-# `end_session` matches bare too: nvidia/pipecat/livekit hand it to
+# `end_session` matches bare too: livekit hands it to
 # asyncio.to_thread as a reference rather than calling it.
 HOOKS = ("call_session(", "end_session", "capture_final")
 
