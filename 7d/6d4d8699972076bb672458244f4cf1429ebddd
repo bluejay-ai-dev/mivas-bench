@@ -1,0 +1,81 @@
+voice-agent-harnesses/openai/adapters/chirp.py
+  s_c10e1002e55231::t_dbccd2805d25c0 27-28,227
+pyproject.toml
+  s_c10e1002e55231::t_dbccd2805d25c0 40
+tests/test_dockerfiles.py
+  s_c10e1002e55231::t_e80991cda836b4 15-16
+tests/test_agents.py
+  s_c10e1002e55231::t_dbccd2805d25c0 30,33,38,40,56,61,66-67,70-71,254,258,263,271-315
+.env.example
+  s_c10e1002e55231::t_dbccd2805d25c0 96,114-125,135
+  s_c10e1002e55231::t_e80991cda836b4 79
+tests/test_harness_tool_headers.py
+  s_c10e1002e55231::t_dbccd2805d25c0 167
+.agents/skills/mivas-run/HOSTING.md
+  s_c10e1002e55231::t_dbccd2805d25c0 1-243
+.agents/skills/mivas-run/scripts/verify_integrity.py
+  s_c10e1002e55231::t_dbccd2805d25c0 1-168
+voice-agent-harnesses/qwen/adapters/chirp.py
+  s_c10e1002e55231::t_dbccd2805d25c0 33-34,322
+.agents/skills/mivas-run/SKILL.md
+  s_c10e1002e55231::t_dbccd2805d25c0 1-125
+k8s/ingress-generic.yaml
+  s_c10e1002e55231::t_dbccd2805d25c0 1-38
+README.md
+  s_c10e1002e55231::t_dbccd2805d25c0 260-265,320-321,331
+.agents/skills/mivas-run/assets/minio.yaml
+  s_c10e1002e55231::t_dbccd2805d25c0 1-85
+k8s/deployment.yaml
+  s_c10e1002e55231::t_dbccd2805d25c0 206-211
+  s_c10e1002e55231::t_b64f3022b8a1bb 212
+tests/test_snapshot_coverage.py
+  s_c10e1002e55231::t_dbccd2805d25c0 35
+tests/test_tool_span_ok.py
+  s_c10e1002e55231::t_e80991cda836b4 10
+run.py
+  s_c10e1002e55231::t_dbccd2805d25c0 10,183-209,273-274,293-300,320-321,346-349,364-365,368,438,445,651-652,655,657-667,675-684,686,782,785
+.agents/skills/mivas-run/HARNESS.md
+  s_c10e1002e55231::t_dbccd2805d25c0 1-105
+tests/test_chirp_health.py
+  s_c10e1002e55231::t_dbccd2805d25c0 1-48
+.agents/skills/mivas-run/scripts/pair_env.py
+  s_c10e1002e55231::t_dbccd2805d25c0 1-105
+.agents/skills/mivas-run/BLUEJAY.md
+  s_c10e1002e55231::t_dbccd2805d25c0 1-81
+.agents/skills/mivas-run/scripts/preflight.py
+  s_c10e1002e55231::t_dbccd2805d25c0 1-242
+.claude/skills/mivas-run/SKILL.md
+  s_c10e1002e55231::t_dbccd2805d25c0 1-19
+k8s/secret.example.yaml
+  s_c10e1002e55231::t_dbccd2805d25c0 35-36
+runtime/chirp_health.py
+  s_c10e1002e55231::t_dbccd2805d25c0 1-22
+.agents/skills/mivas-run/scripts/score_rubric.py
+  s_c10e1002e55231::t_dbccd2805d25c0 1-402
+.agents/skills/mivas-run/INFERENCE.md
+  s_c10e1002e55231::t_dbccd2805d25c0 1-93
+.agents/skills/mivas-run/scripts/bluejay.py
+  s_c10e1002e55231::t_dbccd2805d25c0 1-575
+.gitignore
+  s_c10e1002e55231::t_dbccd2805d25c0 68-70
+voice-agent-harnesses/grok/voice/adapters/chirp.py
+  s_c10e1002e55231::t_dbccd2805d25c0 42-43,885
+k8s/serviceaccount.yaml
+  s_c10e1002e55231::t_dbccd2805d25c0 1-12
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "7d6d4d8699972076bb672458244f4cf1429ebddd",
+  "prompts": {},
+  "sessions": {
+    "s_c10e1002e55231": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6dce3838-863f-4d52-bfc3-be60f0a1deb1",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}
