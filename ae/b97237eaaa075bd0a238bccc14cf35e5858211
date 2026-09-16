@@ -1,0 +1,19 @@
+industries/healthcare/tasks/C2-H1/task.json
+  s_83c00853a54796::t_0cbd949a579d11 111-112
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "aeb97237eaaa075bd0a238bccc14cf35e5858211",
+  "prompts": {},
+  "sessions": {
+    "s_83c00853a54796": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f31a9718-9aae-44ee-9b43-125cdaad356c",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}
