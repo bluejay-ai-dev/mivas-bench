@@ -63,6 +63,20 @@ def provider() -> TracerProvider | None:
                 schedule_delay_millis=1000,
             )
         )
+        # Internal spend is invisible unless something reports it: this turns the
+        # gen_ai.usage.* attributes stamped below into usage events. Inert without
+        # METRONOME_SQS_QUEUE_URL, so an outside clone never tries to meter. Each
+        # harness ships its own image, so say so rather than lose tracing when one
+        # of them is built without runtime/ on the path.
+        try:
+            from metering import processor as _usage_processor
+
+            _meter = _usage_processor()
+            if _meter is not None:
+                p.add_span_processor(_meter)
+        except ImportError:
+            log.warning("metering unavailable (runtime/ not importable); spend is not tracked")
+
         otel.set_tracer_provider(p)
         _provider = p
         log.info("otel → %s service=%s", OTLP_ENDPOINT, SERVICE)
