@@ -77,6 +77,18 @@ spec:
               value: "__AWS_REGION__"
             - name: INDUSTRY_DIR
               value: "/app/industry"
+            - name: METRONOME_AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: mivas-secrets
+                  key: METRONOME_AWS_ACCESS_KEY_ID
+                  optional: true
+            - name: METRONOME_AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: mivas-secrets
+                  key: METRONOME_AWS_SECRET_ACCESS_KEY
+                  optional: true
             - name: METRONOME_SQS_QUEUE_URL
               valueFrom:
                 secretKeyRef:
