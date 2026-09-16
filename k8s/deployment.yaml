@@ -82,16 +82,19 @@ spec:
                 secretKeyRef:
                   name: mivas-secrets
                   key: METRONOME_SQS_QUEUE_URL
+                  optional: true
             - name: METRONOME_CUSTOMER_ID
               valueFrom:
                 secretKeyRef:
                   name: mivas-secrets
                   key: METRONOME_CUSTOMER_ID
+                  optional: true
             - name: METRONOME_ORG_ID
               valueFrom:
                 secretKeyRef:
                   name: mivas-secrets
                   key: METRONOME_ORG_ID
+                  optional: true
             - name: PUBLIC_URL
               value: "__PUBLIC_URL__"
             - name: OPENAI_API_KEY

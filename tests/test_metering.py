@@ -110,3 +110,28 @@ def test_chat_prefixed_generation_spans_are_metered():
 
 def test_spans_without_usage_are_ignored():
     assert _metered([_Span("model", {"gen_ai.request.model": "m"})]) == []
+
+
+def test_span_derived_values_are_clipped():
+    # one oversized model string would otherwise push the batch past SQS's body limit and
+    # take every event beside it down
+    props = _by_model(metering.build_events(
+        "m" * 5000, {"input_tokens": 1, "output_tokens": 1},
+        span_id="s" * 5000, timestamp="t", metadata={"mivas_event": "e" * 5000},
+    ))
+    name = next(iter(props))
+    assert len(name) == 256
+    event = metering.build_events(
+        "m", {"input_tokens": 1}, span_id="s" * 5000, timestamp="t",
+        metadata={"mivas_event": "e" * 5000},
+    )[0]
+    assert len(event["metadata"]["span_id"]) == 256
+    assert len(event["metadata"]["mivas_event"]) == 256
+
+
+def test_token_counts_are_clamped_to_what_cost_events_holds():
+    props = _by_model(metering.build_events(
+        "m", {"input_tokens": 10**18, "output_tokens": -5}, span_id="s", timestamp="t"
+    ))
+    assert int(props["m"]["input_tokens"]) == 2**32 - 1
+    assert int(props["m"]["output_tokens"]) == 0

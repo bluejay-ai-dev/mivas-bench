@@ -22,7 +22,9 @@ import os
 import threading
 from datetime import datetime, timezone
 from functools import wraps
+from uuid import uuid4
 from typing import Any, Callable, Iterable
+from urllib.parse import urlparse
 
 from opentelemetry.sdk.trace import ReadableSpan, SpanProcessor
 
@@ -42,6 +44,10 @@ GENERATION_PREFIX = "chat "
 ROOT_SPANS = {"voice.call"}
 
 _FLUSH_AT = 100
+_FLUSH_TIMEOUT = 5.0
+_MAX_TRACKED_TRACES = 50_000
+_MAX_TOKENS = 2**32 - 1  # cost_events stores quantities as UInt32
+_MAX_ATTR = 256
 
 
 def _queue_url() -> str:
@@ -67,12 +73,20 @@ def transaction_id(span_id: str, part: str) -> str:
     return f"{h[:8]}-{h[8:12]}-{h[12:16]}-{h[16:20]}-{h[20:32]}"
 
 
+def _clip(value: Any) -> str:
+    """Span attributes are provider-shaped and unbounded; the SQS body is not."""
+    s = str(value)
+    return s if len(s) <= _MAX_ATTR else s[:_MAX_ATTR]
+
+
 def _int(value: Any) -> int:
+    """Clamped to what cost_events can hold. A provider reporting nonsense should cost us a
+    wrong row, never a rejected insert or a bill nobody can explain."""
     try:
         n = int(value)
     except (TypeError, ValueError):
         return 0
-    return n if n > 0 else 0
+    return min(max(n, 0), _MAX_TOKENS)
 
 
 def build_events(
@@ -104,11 +118,12 @@ def build_events(
     cached_text = min(cached, text_in)
     cached_audio = cached - cached_text
 
+    model = _clip(model)
     base: dict[str, str] = {
         "unmetered": "true",
         "source_service": SOURCE_SERVICE,
-        "span_id": span_id,
-        **(metadata or {}),
+        "span_id": _clip(span_id),
+        **{k: _clip(v) for k, v in (metadata or {}).items()},
     }
     if source_operation:
         base["source_operation"] = source_operation
@@ -141,37 +156,86 @@ def build_events(
 
 
 class _Sender:
-    """Buffers events and ships them to SQS. Best-effort by design: a bench run must never
-    fail because the ledger is unreachable, but every drop says why."""
+    """Buffers events and ships them to SQS from a worker thread.
+
+    Never from the calling thread: spans end on the asyncio loop, and a blocking export from
+    there is what starved the loop badly enough to lose tool calls before the tracers moved
+    to BatchSpanProcessor. The same rule applies to a send that has to cross the network.
+
+    Best-effort by design — a bench run must never fail because the ledger is unreachable,
+    but every drop says why.
+    """
 
     def __init__(self) -> None:
         self._buffer: list[dict[str, Any]] = []
         self._lock = threading.Lock()
         self._client: Any = None
+        self._pool: Any = None
+        self._pending: set[Any] = set()
 
     def _sqs(self) -> Any:
         if self._client is None:
             import boto3  # imported late: the bench runs fine without it
+            from botocore.config import Config
 
-            self._client = boto3.client("sqs")
+            # Short and few: a slow queue must not hold a worker while spans pile up behind it.
+            # the queue URL names its own region; relying on AWS_DEFAULT_REGION would point
+            # metering at whichever region the bench happens to run snapshots in
+            host = urlparse(_queue_url()).hostname or ""
+            parts = host.split(".")
+            region = parts[1] if len(parts) > 3 and parts[0] == "sqs" else None
+            self._client = boto3.client(
+                "sqs",
+                region_name=region,
+                config=Config(
+                    connect_timeout=3,
+                    read_timeout=5,
+                    retries={"max_attempts": 2, "mode": "standard"},
+                ),
+            )
         return self._client
+
+    def _submit(self, events: list[dict[str, Any]]) -> None:
+        from concurrent.futures import ThreadPoolExecutor
+
+        with self._lock:
+            if self._pool is None:
+                self._pool = ThreadPoolExecutor(max_workers=1, thread_name_prefix="metering")
+            future = self._pool.submit(self._send, events)
+            self._pending.add(future)
+        future.add_done_callback(lambda f: self._pending.discard(f))
 
     def add(self, events: list[dict[str, Any]]) -> None:
         if not events:
             return
         with self._lock:
             self._buffer.extend(events)
-            ready = self._buffer if len(self._buffer) >= _FLUSH_AT else None
-            if ready is not None:
-                self._buffer = []
+            ready = None
+            if len(self._buffer) >= _FLUSH_AT:
+                ready, self._buffer = self._buffer, []
         if ready:
-            self._send(ready)
+            self._submit(ready)
 
-    def flush(self) -> None:
+    def flush(self, timeout: float = _FLUSH_TIMEOUT) -> None:
+        """Hand the buffer to the worker and wait for what is already in flight. The wait is
+        bounded: the caller is usually a harness about to post its trace ids, and metering is
+        never worth delaying that."""
         with self._lock:
             ready, self._buffer = self._buffer, []
         if ready:
-            self._send(ready)
+            self._submit(ready)
+        for future in list(self._pending):
+            try:
+                future.result(timeout=timeout)
+            except Exception:
+                pass  # _send already logged; a timeout here just means the send outlives the wait
+
+    def shutdown(self) -> None:
+        self.flush()
+        with self._lock:
+            pool, self._pool = self._pool, None
+        if pool is not None:
+            pool.shutdown(wait=False)
 
     def _send(self, events: list[dict[str, Any]]) -> None:
         try:
@@ -223,7 +287,7 @@ def meter_llm_usage(fn: Callable[..., Any]) -> Callable[..., Any]:
     def wrapper(*args: Any, **kwargs: Any) -> Any:
         result, reported = fn(*args, **kwargs)
         model, usage = reported
-        record_llm_usage(model, usage, span_id=transaction_id(repr(reported), "call"))
+        record_llm_usage(model, usage, span_id=uuid4().hex)
         return result
 
     return wrapper
@@ -300,6 +364,11 @@ class UsageMeteringProcessor(SpanProcessor):
         )
         if is_generation:
             with self._lock:
+                if len(self._metered_traces) >= _MAX_TRACKED_TRACES:
+                    # only reachable via calls killed before their root span ended; dropping the
+                    # oldest ids can at worst let a stale root re-meter, never lose a generation
+                    self._metered_traces.clear()
+                    logger.warning("metering trace table full; cleared")
                 self._metered_traces.add(trace_id)
 
     def _warn_unmetered(self, name: str) -> None:
@@ -314,7 +383,7 @@ class UsageMeteringProcessor(SpanProcessor):
         return True
 
     def shutdown(self) -> None:
-        _sender.flush()
+        _sender.shutdown()
 
 
 def processor() -> SpanProcessor | None:
