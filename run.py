@@ -86,8 +86,30 @@ def health_ok(url: str) -> bool:
         return False
 
 
+def split_variant(harness: str) -> tuple[str, str | None]:
+    """family/runtime@variant → (family/runtime, variant). No @ → (harness, None)."""
+    base, sep, variant = harness.partition("@")
+    return (base, variant or None) if sep else (harness, None)
+
+
+def variant_env(harness: str) -> dict[str, str]:
+    """Env overrides for a variant, from <family>/<runtime>/variants.json."""
+    base, variant = split_variant(harness)
+    if not variant:
+        return {}
+    family, runtime = base.split("/", 1)
+    path = ROOT / "voice-agent-harnesses" / family / runtime / "variants.json"
+    if not path.is_file():
+        raise ValueError(f"{harness}: no variants.json for {base}")
+    table = json.loads(path.read_text())
+    if variant not in table:
+        raise ValueError(f"{harness}: variant {variant!r} not in {sorted(table)}")
+    return {str(k): str(v) for k, v in table[variant].items()}
+
+
 def split_harness(harness: str) -> tuple[str, str]:
-    """HARNESS like openai/realtime-2.1 → (family, runtime)."""
+    """HARNESS like openai/realtime-2.1[@variant] → (family, runtime). Variant stripped."""
+    harness, _ = split_variant(harness)
     if "/" not in harness:
         raise ValueError(
             f"HARNESS must be family/runtime (e.g. openai/realtime-2.1), got {harness!r}"
@@ -133,7 +155,7 @@ def pair_mivas_mode(harness: str) -> str:
 
 def slug(harness: str, industry: str) -> str:
     return (
-        f"{harness.replace('/', '-')}-{industry}"
+        f"{harness.replace('/', '-').replace('@', '-')}-{industry}"
         .replace("_", "-")
         .replace(".", "-")
         .lower()
@@ -141,8 +163,11 @@ def slug(harness: str, industry: str) -> str:
 
 
 def image_ref(harness: str, industry: str) -> str:
-    """Local tag, or registry image when MIVAS_IMAGE_PREFIX is set (ECR etc.)."""
-    tag = slug(harness, industry)
+    """Local tag, or registry image when MIVAS_IMAGE_PREFIX is set (ECR etc.).
+
+    Variants share the base runtime's image: only Deployment env differs."""
+    base, _ = split_variant(harness)
+    tag = slug(base, industry)
     prefix = os.environ.get("MIVAS_IMAGE_PREFIX", "").strip().rstrip("/")
     if prefix:
         return f"{prefix}:{tag}"
@@ -321,6 +346,11 @@ def _render(
     )
     cpu_req, mem_req, mem_lim = pair_resources(harness)
     template = (ROOT / "k8s" / template_name).read_text()
+    vlines = "".join(
+        f'            - name: {k}\n              value: "{v}"\n'
+        for k, v in variant_env(harness).items()
+    )
+    template = template.replace("__VARIANT_ENV__", vlines)
     for key, value in extra.items():
         template = template.replace(f"__{key}__", value)
     return (

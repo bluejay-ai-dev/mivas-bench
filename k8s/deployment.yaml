@@ -43,7 +43,7 @@ spec:
           image: __IMAGE__
           imagePullPolicy: __IMAGE_PULL_POLICY__
           env:
-            - name: MIVAS_MODE
+__VARIANT_ENV__            - name: MIVAS_MODE
               value: "__MIVAS_MODE__"
             - name: HARNESS
               value: "__HARNESS__"

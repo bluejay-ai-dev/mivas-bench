@@ -1,0 +1,10 @@
+{
+  "sol-low": {
+    "GPT_LIVE_BACKEND_MODEL": "gpt-5.6-sol",
+    "GPT_LIVE_REASONING_EFFORT": "low"
+  },
+  "astra-medium": {
+    "GPT_LIVE_BACKEND_MODEL": "gpt-6-astra",
+    "GPT_LIVE_REASONING_EFFORT": "medium"
+  }
+}

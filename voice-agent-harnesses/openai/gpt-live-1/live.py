@@ -47,6 +47,8 @@ log = logging.getLogger("mivas.gpt-live")
 MODEL = "gpt-live-1"
 LIVE_URL = os.environ.get("GPT_LIVE_URL", "wss://api.openai.com/v1/live/sessions")
 BACKEND_MODEL = os.environ.get("GPT_LIVE_BACKEND_MODEL", "gpt-5.6-terra")
+# Optional variant knob: delegation reasoning effort ("low"/"medium"/...). Unset → field omitted.
+REASONING_EFFORT = os.environ.get("GPT_LIVE_REASONING_EFFORT", "").strip()
 VOICE = os.environ.get("GPT_LIVE_VOICE", "gleam")
 # 24 kHz is the documented default; 16 kHz PCM is a supported format and is what
 # CHIRP carries, so picking it keeps the caller leg resample-free in both directions.
@@ -198,6 +200,7 @@ class LiveSession:
                     "tools": start.responses_tools(),
                     "tool_choice": "auto",
                     "parallel_tool_calls": False,
+                    **({"reasoning": {"effort": REASONING_EFFORT}} if REASONING_EFFORT else {}),
                 },
             },
         }
