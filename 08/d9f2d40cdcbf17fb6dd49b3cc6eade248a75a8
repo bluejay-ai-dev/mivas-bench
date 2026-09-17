@@ -1,0 +1,35 @@
+industries/travel/system-prompts/ancillaries.md
+  s_6fc856dfb82314::t_538f781f82c5f2 133-242
+industries/travel/tool_server.py
+  s_6fc856dfb82314::t_266f76d45c9146 1691-1696,1712-1719,1727,1729
+industries/travel/README.md
+  s_6fc856dfb82314::t_daf7802df89f68 114
+industries/travel/docs/ONEPAGER.md
+  s_6fc856dfb82314::t_1e06af608f5d58 85-92
+industries/travel/system-prompts/reception.md
+  s_6fc856dfb82314::t_9bafb34c16680c 16-109
+industries/travel/system-prompts/ticketing.md
+  s_6fc856dfb82314::t_bde1d68db4dbe5 129-237
+industries/travel/system-prompts/payments.md
+  s_6fc856dfb82314::t_0a2ecba9fd9927 16-99
+industries/travel/system-prompts/irrops.md
+  s_6fc856dfb82314::t_4bd6499cfdd1c1 16-115
+industries/travel/system-prompts/pass_services.md
+  s_6fc856dfb82314::t_c611c7f5f0980f 16-115
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "08d9f2d40cdcbf17fb6dd49b3cc6eade248a75a8",
+  "prompts": {},
+  "sessions": {
+    "s_6fc856dfb82314": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "8641c07f-a3b9-4475-986d-e3aa57284eb3",
+        "model": "grok-4.6"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

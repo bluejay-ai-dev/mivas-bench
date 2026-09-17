@@ -1,0 +1,54 @@
+tests/test_tasks_to_digital_humans.py
+  s_fe90f2f98408ce::t_61b611e4dd1769 414-415
+  s_fe90f2f98408ce::t_2ae46920860fc7 425-431
+  s_fe90f2f98408ce::t_d0c918688f4116 443-446
+  s_fe90f2f98408ce::t_d0f6cd27679585 452-453,455,457-458
+industries/healthcare/tasks/C5-H1/task.json
+  s_fe90f2f98408ce::t_4f3ce5eec8c570 125
+voice-agent-harnesses/openai/test_llm_usage_span.py
+  s_fe90f2f98408ce::t_fbc3c405bfc6ed 112-115
+  s_fe90f2f98408ce::t_45c47c76e527be 92-111,116
+industries/healthcare/system-prompts/scheduling.md
+  s_fe90f2f98408ce::t_a7891e689ed4eb 159-163
+industries/healthcare/system-prompts/clinical.md
+  s_fe90f2f98408ce::t_789bf4f3928444 145-147
+  s_fe90f2f98408ce::t_9947658b1dfa81 164
+tests/test_tool_server.py
+  s_fe90f2f98408ce::t_391a71720f664c 380-382
+tests/test_verify_task_run.py
+  s_fe90f2f98408ce::t_5dd5c5966c4a5e 391
+voice-agent-harnesses/openai/report.py
+  s_fe90f2f98408ce::t_4ecc25661e0e19 430,443,445-458
+  s_fe90f2f98408ce::t_08fee5f806a2a3 288
+industries/healthcare/tasks/C5-H3/task.json
+  s_fe90f2f98408ce::t_b28ba37ad5a196 109-115
+industries/healthcare/system-prompts/billing.md
+  s_fe90f2f98408ce::t_7ade6c7ce230d6 120-122
+industries/healthcare/db/schema.sql
+  s_fe90f2f98408ce::t_4dbac86c513eab 56-58
+  s_fe90f2f98408ce::t_29fad29514b4e3 54-55,59
+industries/healthcare/tool_server.py
+  s_fe90f2f98408ce::t_cf90c3c9991dbc 761-769,771-810
+industries/healthcare/tasks/C4-H1/task.json
+  s_fe90f2f98408ce::t_fccf22135b7881 95
+industries/healthcare/tasks/C1-H2/task.json
+  s_fe90f2f98408ce::t_b9760dea9e08d7 169
+industries/healthcare/tasks/R-H2/task.json
+  s_fe90f2f98408ce::t_a0a67c5dc68077 142
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "3a4c7d82f5c194ee2275b54e4c7c96cb87221071",
+  "prompts": {},
+  "sessions": {
+    "s_fe90f2f98408ce": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "87cf1cde-07c3-45f9-85f0-06db01052429",
+        "model": "cursor-grok-4.6-high-fast"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

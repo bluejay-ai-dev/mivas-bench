@@ -1,0 +1,40 @@
+tests/test_cartesia_industry.py
+  s_65d5342a79eeac::t_9ea0fb5ddd0c03 1-38
+  s_65d5342a79eeac::t_513a07714a755e 39-65
+voice-agent-harnesses/cartesia/adapters/chirp.py
+  s_65d5342a79eeac::t_3dc165755f6544 117
+  s_65d5342a79eeac::t_6b4119a74bc5f7 42
+voice-agent-harnesses/cartesia/line_agent/main.py
+  s_65d5342a79eeac::t_8a00d011259afc 79-88,91,94-97,115,121-122
+  s_65d5342a79eeac::t_85d5cd856c4552 36-38
+  s_65d5342a79eeac::t_42c25f376ea6b9 109-114,119
+  s_65d5342a79eeac::t_9831445f72a447 123-138
+voice-agent-harnesses/cartesia/harness.py
+  s_65d5342a79eeac::t_e6d34bdbc5eb82 196,203-204
+  s_65d5342a79eeac::t_89a5b6d683d37a 102-103
+  s_65d5342a79eeac::t_9999a396e6b82b 138-141
+  s_65d5342a79eeac::t_b21424997b19d1 182
+  s_65d5342a79eeac::t_e0760617d155cc 69-85
+  s_65d5342a79eeac::t_f2cb58ce4dd195 199-202
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "cda18077a49acbd233c7b1af73de82e2d62a256f",
+  "prompts": {},
+  "humans": {
+    "h_bbe1a3ca680b9f": {
+      "author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_65d5342a79eeac": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "1a796477-7be8-4e20-9a74-f7394f552db0",
+        "model": "grok-4.6"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

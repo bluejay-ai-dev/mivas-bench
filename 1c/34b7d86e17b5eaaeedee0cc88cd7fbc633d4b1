@@ -1,0 +1,24 @@
+voice-agent-harnesses/gemini/harness.py
+  s_07d7a36d687777::t_2e0c90bf6bb325 117
+  s_07d7a36d687777::t_b1cf8498f5aff5 304
+  s_07d7a36d687777::t_461697b596c9b1 331-334
+  s_07d7a36d687777::t_5b7092e3809107 285-290
+voice-agent-harnesses/gemini/report.py
+  s_07d7a36d687777::t_5720541bab1f45 30-35,38-39,58-60
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "1c34b7d86e17b5eaaeedee0cc88cd7fbc633d4b1",
+  "prompts": {},
+  "sessions": {
+    "s_07d7a36d687777": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "72150785-e81a-4513-bfd8-e5511a1312ef",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}

@@ -1,0 +1,22 @@
+voice-agent-harnesses/livekit/README.md
+  s_1cb9a0689f7f64::t_2b18b2ab25063a 58
+  s_1cb9a0689f7f64::t_58b5abc3f4d7c4 3
+run.py
+  s_1cb9a0689f7f64::t_6c3bae18a896f5 328
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "c4e14f7e22b6f8dc96628d1031cfbd2d11ed42a2",
+  "prompts": {},
+  "sessions": {
+    "s_1cb9a0689f7f64": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9db2f26b-93c7-45ee-a25b-887b8a2e808a",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}

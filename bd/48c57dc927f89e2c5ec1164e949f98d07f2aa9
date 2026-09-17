@@ -1,0 +1,29 @@
+voice-agent-harnesses/openai/report.py
+  s_529682e286274b::t_32f9518b6302fb 1-2,5-12,20,25,31,36,51,72-74,77-89,91-109,113-114,121-126,137,211-510,512,518-520,522-523,526-528,535-541,547-548,551,554-563,565-581
+  s_529682e286274b::t_e6b35a8f9356c0 511,513-517,521,524-525,529-534
+  s_529682e286274b::t_1ea3e7678caca2 3-4,13-14
+voice-agent-harnesses/openai/README.md
+  s_529682e286274b::t_907f7f8af4e7ce 15
+voice-agent-harnesses/openai/realtime-2.1/agent.py
+  s_529682e286274b::t_8f4ffdb16129b0 32,36-37
+voice-agent-harnesses/openai/adapters/chirp.py
+  s_529682e286274b::t_f5c1b5f50bcd0d 3-4,25,58,81,106
+voice-agent-harnesses/openai/realtime-2.1-mini/agent.py
+  s_529682e286274b::t_c41c1041586107 32,36-37
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "bd48c57dc927f89e2c5ec1164e949f98d07f2aa9",
+  "prompts": {},
+  "sessions": {
+    "s_529682e286274b": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "193d5298-7ec4-49a6-b2c3-125217dfa9e2",
+        "model": "default"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}

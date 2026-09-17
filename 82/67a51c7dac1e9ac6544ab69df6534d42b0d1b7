@@ -1,0 +1,19 @@
+scripts/transcribe_diarize_runs.py
+  s_db9d310afd2bd5::t_5cddffcec9ef78 1-255
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "8267a51c7dac1e9ac6544ab69df6534d42b0d1b7",
+  "prompts": {},
+  "sessions": {
+    "s_db9d310afd2bd5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a7627e96-cc48-4afb-ac44-a416e816d225",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}

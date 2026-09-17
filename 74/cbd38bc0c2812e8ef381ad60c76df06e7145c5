@@ -1,0 +1,28 @@
+industries/healthcare/system-prompts/coverage.md
+  s_ac61f807d2de62::t_42d719897ce170 123-126
+industries/healthcare/system-prompts/clinical.md
+  s_ac61f807d2de62::t_3f1b87da40be6e 138-142
+  s_ac61f807d2de62::t_3473f6133c365a 153-154
+industries/healthcare/tool_server.py
+  s_ac61f807d2de62::t_2dcb26b7fba34e 965-968
+industries/healthcare/tasks/C5-H3/task.json
+  s_ac61f807d2de62::t_fb1cf02f8a944f 38
+scripts/encode_healthcare_tasks.py
+  s_ac61f807d2de62::t_42399e49014f70 762-763
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "74cbd38bc0c2812e8ef381ad60c76df06e7145c5",
+  "prompts": {},
+  "sessions": {
+    "s_ac61f807d2de62": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "557b5c01-6ef2-49b7-a1c0-9a9536da2fb4",
+        "model": "grok-4.6"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

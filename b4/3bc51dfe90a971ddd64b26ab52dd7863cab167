@@ -1,0 +1,37 @@
+industries/travel/docs/TRIAGE_LEDGER.md
+  s_7e9aac830cc833::t_d25b684b2892b9 1-87
+industries/travel/tool_server.py
+  s_7e9aac830cc833::t_857ba9a3105dc4 167-170
+  s_7e9aac830cc833::t_97e18254940460 156-163,165,171-176
+scripts/apply_travel_dhs.py
+  s_7e9aac830cc833::t_52ed56f2590285 282-290
+  s_7e9aac830cc833::t_327a8fba1bf0fb 166-167,169-249
+industries/travel/docs/CASE_LEDGER.csv
+  s_7e9aac830cc833::t_3c37755ea72b6b 1-61
+industries/travel/tests/test_name_close.py
+  s_7e9aac830cc833::t_e1b703ed6a99bb 1-35
+scripts/dh_final.json
+  s_7e9aac830cc833::t_2d21fefa621a9e 11,25,39,53,67,81,95,109,123,125-126,138,152,154-155,167,181,195,197-198,210,224,238,252,266,280,294,308,322,324-325,337,351,365,379,393,395-396,408,422,436,438-439,451,465,479,481-482,494,508,522,536,550,564,578,592,606,620,634,648,742,756,758-759,771,785,799,815,829,843,857,871
+voice-agent-harnesses/gemini/flash-live-3.1/adapters/travelrig_gemini.py
+  s_7e9aac830cc833::t_8f62ba5836f50e 1-8
+voice-agent-harnesses/openai/realtime-2.1/adapters/travelrig_openai.py
+  s_7e9aac830cc833::t_4ebae88f191a5d 1-8
+voice-agent-harnesses/vapi/flux-gpt4.1-flash2.5/adapters/travelrig_vapi.py
+  s_7e9aac830cc833::t_b5ff886b62ac70 1-8
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "b43bc51dfe90a971ddd64b26ab52dd7863cab167",
+  "prompts": {},
+  "sessions": {
+    "s_7e9aac830cc833": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f7cf4396-0714-4864-bd0f-370d6e3f87ec",
+        "model": "claude-opus-5"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

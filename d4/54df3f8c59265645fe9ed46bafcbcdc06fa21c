@@ -1,0 +1,24 @@
+README.md
+  s_014ceaa01ffa6b::t_619a847fe89990 375
+  s_014ceaa01ffa6b::t_f926ed7e30cb4f 373-374
+pyproject.toml
+  s_014ceaa01ffa6b::t_0bd24623aa99d9 6
+LICENSE
+  s_014ceaa01ffa6b::t_453733fea1818c 1-21
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "d454df3f8c59265645fe9ed46bafcbcdc06fa21c",
+  "prompts": {},
+  "sessions": {
+    "s_014ceaa01ffa6b": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "867ccd7f-82e4-4d30-9eb1-d8bda6398e6f",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

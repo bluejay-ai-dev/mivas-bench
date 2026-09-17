@@ -1,0 +1,81 @@
+scripts/legal_task_spec.py
+  s_db3f161d9f83e0::t_72cbe5f581ebc6 305
+  s_0dd721e3059a44::t_b4da8e451fac2f 530-531
+  s_0dd721e3059a44::t_944fa7c8ec7390 1640
+  s_0dd721e3059a44::t_5d13e198d0b0b9 1655
+industries/legal/tasks/R-M2/task.json
+  s_0dd721e3059a44::t_e7bbba6e69921f 48,89
+industries/legal/system-prompts/intake.md
+  s_cd31627aece48a::t_e1b59ee9a2dc93 165-168
+  s_cd31627aece48a::t_8759ae2ec4cf37 151-154
+  s_cd31627aece48a::t_dd0cbbe4d68fc1 126-140
+tests/test_verify_task_run.py
+  s_db3f161d9f83e0::t_99ec8fc92b9445 402-403,408-414
+tests/test_tool_server.py
+  s_719e9f30e20ab7::t_5c959ec2bfe43d 182
+  s_719e9f30e20ab7::t_d6e3949e1de597 282-318
+  s_719e9f30e20ab7::t_e48153beb89292 121-126
+industries/legal/tasks/R-M1/task.json
+  s_0dd721e3059a44::t_e7bbba6e69921f 48,89
+industries/legal/system-prompts/screening.md
+  s_cd31627aece48a::t_5a090b915d418b 136-140
+  s_cd31627aece48a::t_b5a6455f38bc4e 168-169
+tests/test_tasks_to_digital_humans.py
+  s_db3f161d9f83e0::t_03b517c96cdd78 549-554
+  s_0dd721e3059a44::t_f513219d8cf642 511-548
+industries/legal/tasks/C2-H1/task.json
+  s_0dd721e3059a44::t_e7bbba6e69921f 4
+industries/legal/tool_server.py
+  s_719e9f30e20ab7::t_fb70752ef4fedb 737-760
+  s_719e9f30e20ab7::t_bc38d76d14e818 144-181
+  s_719e9f30e20ab7::t_5d315c8ef596bf 66-83
+  s_719e9f30e20ab7::t_2993601e829ee1 436-437,442
+scripts/encode_legal_tasks.py
+  s_db3f161d9f83e0::t_c4145068546e3f 126-127,129
+  s_db3f161d9f83e0::t_704a074e015947 274-276
+  s_db3f161d9f83e0::t_9369ce03ecb098 236-249
+industries/legal/tools.json
+  s_719e9f30e20ab7::t_35eacf8c066b52 340,344-345
+industries/legal/tasks/C1-M3/task.json
+  s_db3f161d9f83e0::t_3bece84feb00c5 18
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "c5e106650147effb499656d901035580d661dd75",
+  "prompts": {},
+  "sessions": {
+    "s_0dd721e3059a44": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "9863733d-f4f2-4186-b30e-12d9000a9869",
+        "model": "default"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    },
+    "s_719e9f30e20ab7": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "4b51e9bb-3f84-4f52-b2e2-b95d3c97cf9e",
+        "model": "default"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    },
+    "s_cd31627aece48a": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "ced5ce78-957a-4b63-90f6-af110933e619",
+        "model": "default"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    },
+    "s_db3f161d9f83e0": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "d9be1db5-e1ad-4f92-a906-c3f4fd329833",
+        "model": "default"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}

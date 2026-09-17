@@ -1,0 +1,57 @@
+voice-agent-harnesses/bland/harness.py
+  s_d9436387cf46d4::t_b2a89ba307b48b 233-244,256-262,267-268,272-322,326-328,335-353,356-378,381-412,428-435
+  s_d9436387cf46d4::t_8a7c555bb334e9 269
+  s_d9436387cf46d4::t_3eb1fe43cad507 270-271
+  s_d9436387cf46d4::t_67abe8416e8469 579,590
+  s_d9436387cf46d4::t_07a5a06617fbc2 413-427
+  s_d9436387cf46d4::t_6901ea8ab52f59 379-380
+  s_d9436387cf46d4::t_f6516be5cdba26 264-266
+  s_d9436387cf46d4::t_9f97825c512bda 117-119,122-126,129-135
+  s_d9436387cf46d4::t_30fe2134b9d0f3 146-150
+  s_d9436387cf46d4::t_b7dd948b089bfc 128
+  s_d9436387cf46d4::t_2d647516e38345 127
+  s_d9436387cf46d4::t_056cdb9ed364b3 263
+  s_d9436387cf46d4::t_c8254f2b37e8d2 245-255
+  s_d9436387cf46d4::t_207440dc4c3a9a 354-355
+  s_d9436387cf46d4::t_18963113aee0f6 136
+  s_d9436387cf46d4::t_8f60cddaf660bf 436
+voice-agent-harnesses/bland/pcm.py
+  s_d9436387cf46d4::t_4b3ec920c2bc7c 1-2,9-21,25-38,40-52,54-58,60-61,78-81,86-91,93-104,110,116-118,120-123,125-126,130-131,133-134,149-154,160
+  s_d9436387cf46d4::t_23b2b844ae13a2 3-8,22-24,39,53,59,62-65,67,77,82-85,92,105-107,111-115,119,124,127-129,132,135,137-138,145,158
+  s_d9436387cf46d4::t_2b6c962be40142 66,68-76,108-109,136,139-144,146-148,155-157,159
+voice-agent-harnesses/bland/base/agent.py
+  s_d9436387cf46d4::t_2e6c49c33a45ee 29-30,32,34-61
+voice-agent-harnesses/bland/adapters/chirp.py
+  s_d9436387cf46d4::t_71d035eec261fd 225
+  s_d9436387cf46d4::t_f0c8ae7971ddb2 198-199,206
+  s_d9436387cf46d4::t_cf2fbf031df7fe 55-58
+  s_d9436387cf46d4::t_2d4ac609ba9f23 52-53
+  s_d9436387cf46d4::t_54e85f6453f04e 170-173,185,211-212,217
+  s_d9436387cf46d4::t_97882f2f16fa71 47
+  s_d9436387cf46d4::t_0581d203809fc2 168-169,174,179-180,186,222-223,228-230
+tests/test_bland_pcm_pacer.py
+  s_d9436387cf46d4::t_6005b66a5c3ff1 52-106
+  s_d9436387cf46d4::t_05e98a006c9d72 1-51
+tests/test_bland_pathway.py
+  s_d9436387cf46d4::t_9b1479af4bbd14 70-74
+  s_d9436387cf46d4::t_28df8734a7ec84 67-69
+  s_d9436387cf46d4::t_781c71cf3e03c3 1-66
+  s_d9436387cf46d4::t_c4e0bd180f98ad 75-76
+  s_d9436387cf46d4::t_545def37927acb 77-78
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "f14074fef3fbc6a166df0c1f12634be30b179536",
+  "prompts": {},
+  "sessions": {
+    "s_d9436387cf46d4": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "13d35798-8b9f-45a1-802f-f6cf65bd763e",
+        "model": "grok-4.6"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

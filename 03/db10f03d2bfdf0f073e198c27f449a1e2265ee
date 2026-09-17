@@ -1,0 +1,85 @@
+.gitignore
+  s_d699876125c6ea::t_6f84a5151db18f 27-29
+voice-agent-harnesses/assemblyai/README.md
+  s_d699876125c6ea::t_6f84a5151db18f 3-19
+voice-agent-harnesses/assemblyai/harness.py
+  s_d699876125c6ea::t_6f84a5151db18f 1-232
+voice-agent-harnesses/openai/adapters/chirp.py
+  s_d699876125c6ea::t_6f84a5151db18f 100-108,111-112,114,152-161,164
+  s_d699876125c6ea::t_58d3c33747e52a 5,109-110,113,115,117-118
+voice-agent-harnesses/deepgram/voice-agent/agent.py
+  s_d699876125c6ea::t_6f84a5151db18f 1-34
+voice-agent-harnesses/assemblyai/voice-agent/agent.py
+  s_d699876125c6ea::t_6f84a5151db18f 1-31
+voice-agent-harnesses/assemblyai/adapters/chirp.py
+  s_d699876125c6ea::t_6f84a5151db18f 1-239
+voice-agent-harnesses/deepgram/README.md
+  s_d699876125c6ea::t_6f84a5151db18f 3-25
+voice-agent-harnesses/gemini/adapters/chirp.py
+  s_d699876125c6ea::t_6f84a5151db18f 23,54,65-77,86,97-111,113,117,126,140,170-171,176-185,188
+voice-agent-harnesses/openai/report.py
+  s_d699876125c6ea::t_67cbec973a6405 594
+  s_d699876125c6ea::t_5301c5dc27c34d 292,299-323
+  s_d699876125c6ea::t_62b0d395fc8c0a 51-59
+  s_d699876125c6ea::t_d552afd34f8e23 184-240,251-254,259,276-279
+  s_d699876125c6ea::t_6b69ce49b536dc 324
+voice-agent-harnesses/elevenlabs/README.md
+  s_d699876125c6ea::t_6f84a5151db18f 3-29
+voice-agent-harnesses/gemini/harness.py
+  s_d699876125c6ea::t_6f84a5151db18f 150,152,155-157
+voice-agent-harnesses/elevenlabs/requirements.txt
+  s_d699876125c6ea::t_6f84a5151db18f 1-6
+voice-agent-harnesses/assemblyai/voice-agent/adapters/chirp.py
+  s_d699876125c6ea::t_6f84a5151db18f 1-8
+voice-agent-harnesses/assemblyai/requirements.txt
+  s_d699876125c6ea::t_6f84a5151db18f 1-6
+voice-agent-harnesses/deepgram/voice-agent/adapters/chirp.py
+  s_d699876125c6ea::t_6f84a5151db18f 1-8
+voice-agent-harnesses/deepgram/harness.py
+  s_d699876125c6ea::t_6f84a5151db18f 1-221
+.env.example
+  s_d699876125c6ea::t_6f84a5151db18f 22-42,53
+voice-agent-harnesses/deepgram/requirements.txt
+  s_d699876125c6ea::t_6f84a5151db18f 1-5
+voice-agent-harnesses/elevenlabs/convai/adapters/chirp.py
+  s_d699876125c6ea::t_6f84a5151db18f 1-8
+voice-agent-harnesses/deepgram/adapters/chirp.py
+  s_d699876125c6ea::t_6f84a5151db18f 1-254
+pyproject.toml
+  s_d699876125c6ea::t_6f84a5151db18f 33
+voice-agent-harnesses/elevenlabs/harness.py
+  s_d699876125c6ea::t_6f84a5151db18f 1-419
+voice-agent-harnesses/elevenlabs/adapters/chirp.py
+  s_d699876125c6ea::t_6f84a5151db18f 1-271
+voice-agent-harnesses/deepgram/report.py
+  s_d699876125c6ea::t_6f84a5151db18f 1-539
+voice-agent-harnesses/gemini/report.py
+  s_d699876125c6ea::t_6f84a5151db18f 6,9-12,22,37-42,55-66,71-77,105-113,147-183,192-193,197,201,204,223-268,271,273,301-308,310,313,318-321,323-378,380,382-401,403-447,457-459,465,468-469,480-486,494-497,516-518,521-522,525-536
+voice-agent-harnesses/assemblyai/report.py
+  s_d699876125c6ea::t_6f84a5151db18f 1-540
+voice-agent-harnesses/elevenlabs/report.py
+  s_d699876125c6ea::t_6f84a5151db18f 1-524
+voice-agent-harnesses/elevenlabs/convai/agent.py
+  s_d699876125c6ea::t_6f84a5151db18f 1-32
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "03db10f03d2bfdf0f073e198c27f449a1e2265ee",
+  "prompts": {},
+  "humans": {
+    "h_bbe1a3ca680b9f": {
+      "author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_d699876125c6ea": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "99aaff9a-5019-40cf-bc79-c1a8c275271d",
+        "model": "grok-4.5"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

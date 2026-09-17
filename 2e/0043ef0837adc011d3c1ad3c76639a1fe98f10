@@ -1,0 +1,44 @@
+industries/healthcare/tasks/C2-M1/task.json
+  s_ac61f807d2de62::t_d237faba419082 79
+industries/healthcare/tasks/C5-H2/task.json
+  s_ac61f807d2de62::t_d237faba419082 110
+industries/healthcare/tools.json
+  s_ac61f807d2de62::t_abe926d1e16070 1506-1507
+  s_ac61f807d2de62::t_0041644697a496 1535-1536,1564-1565,1593-1594,1622-1623,1651-1652
+industries/healthcare/system-prompts/reception.md
+  s_ac61f807d2de62::t_adde6791df7453 65-67
+  s_ac61f807d2de62::t_351202dbbc022d 143-145
+industries/healthcare/system-prompts/coverage.md
+  s_ac61f807d2de62::t_b6d31b22aa9e9f 58-60
+tests/test_industry_contract.py
+  s_ac61f807d2de62::t_199196d47fe9b4 30
+scripts/encode_healthcare_tasks.py
+  s_ac61f807d2de62::t_a64a4e050d18d4 891-892
+industries/healthcare/system-prompts/scheduling.md
+  s_ac61f807d2de62::t_29da0c7f272c90 58,60-61
+industries/healthcare/tasks/C2-H1/task.json
+  s_ac61f807d2de62::t_d237faba419082 89,103
+industries/healthcare/tasks/C2-H3/task.json
+  s_ac61f807d2de62::t_d237faba419082 77,91
+industries/healthcare/system-prompts/cosmetic.md
+  s_ac61f807d2de62::t_c97d6c088c7b10 59-61
+  s_ac61f807d2de62::t_95c25b92548dc3 128-129
+industries/healthcare/tasks/C2-M2/task.json
+  s_ac61f807d2de62::t_d237faba419082 76
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "2e0043ef0837adc011d3c1ad3c76639a1fe98f10",
+  "prompts": {},
+  "sessions": {
+    "s_ac61f807d2de62": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "557b5c01-6ef2-49b7-a1c0-9a9536da2fb4",
+        "model": "grok-4.6"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

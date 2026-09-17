@@ -1,0 +1,98 @@
+voice-agent-harnesses/vapi/report.py
+  s_92c82cd07029f6::t_35205035df8f15 105-109,151-155,173,175-180,434,446,467-468
+  s_6a814060c5d2c4::t_fd8cf1bd492eaf 261-273,302
+  s_92c82cd07029f6::t_88b0f33ab57bc3 64-77
+  s_6a814060c5d2c4::t_7d8f320bf4de88 346-353
+industries/healthcare/tool_server.py
+  s_92c82cd07029f6::t_035d467c9558ca 355-356,412,446,460,462,633,720,760,972,1101-1102
+  s_92c82cd07029f6::t_6b21cea8113c5d 330-335
+  s_92c82cd07029f6::t_e6aca70ea5ce13 1171-1178,1180-1184,1192
+  s_92c82cd07029f6::t_49336dc76a65f5 1209-1210
+  s_92c82cd07029f6::t_bbfdbf2a09dd7e 18-19,21,23,27,35-38,40-44,46-48,59-84,87
+voice-agent-harnesses/openai/harness.py
+  s_92c82cd07029f6::t_6a1d4ee5b9b7b3 22
+  s_92c82cd07029f6::t_28d4f0a1cbc18b 42-47,50-51,53-55
+  s_6a814060c5d2c4::t_9fbb3d3a07c2a3 31-32
+  s_6a814060c5d2c4::t_a6bb1916734460 178
+voice-agent-harnesses/vapi/adapters/chirp.py
+  s_92c82cd07029f6::t_ad7ec773e1eaa1 42
+  s_92c82cd07029f6::t_8971a90697b680 80-82,85-87,97-99,137-139
+voice-agent-harnesses/gemini/adapters/chirp.py
+  s_92c82cd07029f6::t_5b3d303a0e52bc 22,59-61
+voice-agent-harnesses/gemini/report.py
+  s_6a814060c5d2c4::t_fd8cf1bd492eaf 267-279,304
+  s_6a814060c5d2c4::t_7d8f320bf4de88 350-357
+voice-agent-harnesses/openai/report.py
+  s_6a814060c5d2c4::t_cac3833a66799b 53-61
+  s_6a814060c5d2c4::t_69277e55f8198f 443
+  s_6a814060c5d2c4::t_fd8cf1bd492eaf 159-171,196
+  s_6a814060c5d2c4::t_fade0ea0621847 291-296
+tests/test_tool_server.py
+  s_92c82cd07029f6::t_b3f861fd336b40 266-317,434
+  s_92c82cd07029f6::t_c72b47fcf87060 247-265,435
+industries/healthcare/db/seed.sql
+  s_92c82cd07029f6::t_1557f953a6c216 3-23
+  s_92c82cd07029f6::t_9016c82e984522 41-55,58-61,65-80
+scripts/healthcare_digital_humans.py
+  s_92c82cd07029f6::t_43680ade86e285 1727-1734
+  s_92c82cd07029f6::t_b85b8139c089a8 1744,1751-1757
+  s_92c82cd07029f6::t_558218d0e6dc3e 1-25,34-40,42-981,986-1032,1037-1458,1463-1652,1654-1726,1735-1743,1745-1750,1758-1767,1770-1775,1779,1786-1824
+  s_92c82cd07029f6::t_438f7bf58e93a8 1784-1785
+  s_92c82cd07029f6::t_82097b197f5c87 26-33,41,1768-1769
+  s_92c82cd07029f6::t_461efdd4fef0ad 982-985,1033-1036,1459-1462,1653
+  s_92c82cd07029f6::t_a738f9e108e873 1776-1778,1780-1783
+voice-agent-harnesses/gemini/harness.py
+  s_92c82cd07029f6::t_5f40531ae1c0c5 68-88,95
+  s_92c82cd07029f6::t_5b3d303a0e52bc 13,157-162,165-166,168-170
+industries/healthcare/agent_blueprint.json
+  s_92c82cd07029f6::t_2c026de7d480ad 2
+industries/healthcare/db/schema.sql
+  s_92c82cd07029f6::t_651d8c79b16938 1-4,9-16
+voice-agent-harnesses/vapi/harness.py
+  s_92c82cd07029f6::t_fce66f67d78212 296-299
+  s_92c82cd07029f6::t_8971a90697b680 347-353,356-360,365,367
+  s_92c82cd07029f6::t_bfa6feab7b1da9 150,152-157,162-163,168
+  s_92c82cd07029f6::t_6681b0c7049ab7 69-71
+  s_92c82cd07029f6::t_ca838ca96a9aff 95-114,120
+  s_92c82cd07029f6::t_5b3d303a0e52bc 331-339,341-343
+  s_92c82cd07029f6::t_eeaae067127b8b 234-240,242-243,248,252-268,270-277,282
+.gitignore
+  s_92c82cd07029f6::t_5c1461ddf3ab26 26-27
+tests/test_tool_schema_conversion.py
+  s_92c82cd07029f6::t_e4f58739025aa6 1-75
+scripts/supervise.sh
+  s_92c82cd07029f6::t_c4464353ca4332 1-60
+scripts/verify_run.py
+  s_92c82cd07029f6::t_84eb733f0c3eae 1-50,54-60,63-122,124-126,137-141,147-155
+  s_92c82cd07029f6::t_9e2c7c7f3719a3 51-53,61-62
+  s_92c82cd07029f6::t_e0034edbcfc89d 123,127-136,142-146
+industries/healthcare/tools.json
+  s_92c82cd07029f6::t_62fbdf56bc7c52 187,263
+voice-agent-harnesses/openai/adapters/chirp.py
+  s_92c82cd07029f6::t_f6b6e103bc2ecd 26
+  s_92c82cd07029f6::t_0c9c95f456ee60 69-72
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "1e572abe41743be2c8d46145b7f2670055a7af37",
+  "prompts": {},
+  "sessions": {
+    "s_6a814060c5d2c4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3f2df1e6-8829-448f-81ea-d18b9e84438f",
+        "model": "claude-opus-5"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    },
+    "s_92c82cd07029f6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "00c236a5-34d1-400c-8e58-30426c55d543",
+        "model": "claude-opus-5"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

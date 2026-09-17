@@ -1,0 +1,43 @@
+pyproject.toml
+  s_d699876125c6ea::t_7cf810fe9156d9 17
+.env.example
+  s_d699876125c6ea::t_c95d8730eb0d57 19-28
+voice-agent-harnesses/openai/README.md
+  s_d699876125c6ea::t_326ba77b74179d 12-13,19-23
+voice-agent-harnesses/openai/adapters/chirp.py
+  s_d699876125c6ea::t_26aa22fb6e8d6c 1,10,13-14,22,30-36,40,57,60-69,93-101
+  s_d699876125c6ea::t_1b18394a86e93f 19,21,23-28,37-39,41,44-45,47-51,56,71,74,77-79,82-83,87-92
+  s_d699876125c6ea::t_ef3bae8ad950ad 9
+  s_d699876125c6ea::t_ae72a22c170f9b 2-8,11-12,15-18,20,29,42-43,46,52-55,58-59,70,72-73,75-76,80-81,84-86,102-105
+voice-agent-harnesses/openai/realtime-2.1/adapters/chirp.py
+  s_d699876125c6ea::t_64676f08a58968 8
+  s_d699876125c6ea::t_77bc5868b491a3 1-7
+voice-agent-harnesses/openai/requirements.txt
+  s_d699876125c6ea::t_372173eb6c60ed 6
+voice-agent-harnesses/openai/realtime-2.1-mini/adapters/chirp.py
+  s_d699876125c6ea::t_803a1d38066062 8
+  s_d699876125c6ea::t_c2e1db929fdc6b 1-7
+uv.lock
+  s_d699876125c6ea::t_bfc6ec93354c4d 498,510
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "21955e6fb0dd1cfcf99d868dfa967e7a455eb1e9",
+  "prompts": {},
+  "humans": {
+    "h_bbe1a3ca680b9f": {
+      "author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_d699876125c6ea": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "99aaff9a-5019-40cf-bc79-c1a8c275271d",
+        "model": "grok-4.5"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

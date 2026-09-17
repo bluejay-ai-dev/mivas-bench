@@ -1,0 +1,19 @@
+industries/healthcare/tools.json
+  s_ac61f807d2de62::t_c35aeaaa7a123d 139
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "987731e2c78a7157561433ed40db527cd8880214",
+  "prompts": {},
+  "sessions": {
+    "s_ac61f807d2de62": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "557b5c01-6ef2-49b7-a1c0-9a9536da2fb4",
+        "model": "grok-4.6"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

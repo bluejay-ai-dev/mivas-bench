@@ -1,0 +1,37 @@
+industries/control-industry/tool_server.py
+  s_276c21537d096d::t_04c40725ad01d4 114-150
+  s_276c21537d096d::t_863c336092d165 1,3-5
+industries/travel/tool_server.py
+  s_276c21537d096d::t_b8a7c26a3ddb39 538-608
+  s_276c21537d096d::t_194452d6f3689d 711-739,741
+industries/healthcare/db/schema.sql
+  s_276c21537d096d::t_30e62669224054 52-60
+industries/legal/tool_server.py
+  s_276c21537d096d::t_dd65d170aa9ad2 62
+  s_276c21537d096d::t_c5a89dcc853deb 525-611
+  s_276c21537d096d::t_4dac475d60e96b 688-722,724-725
+industries/healthcare/tool_server.py
+  s_276c21537d096d::t_caf37f48cd9984 1,3-10
+  s_276c21537d096d::t_ecbe65accab9db 33
+  s_276c21537d096d::t_f41431d758e9f6 281-307,310-1038
+  s_276c21537d096d::t_09536e50df89aa 308-309
+  s_276c21537d096d::t_ab8f03af3f5bc0 139-143,150
+tests/test_tool_server.py
+  s_276c21537d096d::t_b6493b47b1f421 1-6,10-12,14,16,21-60,63-66,68-98,105-141,143-179,181-194,196-197,199-204,208-212
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "156f2470bb9ad86fca1f33dbd559ee64bca38a27",
+  "prompts": {},
+  "sessions": {
+    "s_276c21537d096d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9251081c-886e-438f-9432-de6eafc80e6e",
+        "model": "claude-fable-5"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

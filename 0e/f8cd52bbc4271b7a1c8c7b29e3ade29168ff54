@@ -1,0 +1,47 @@
+voice-agent-harnesses/test_await_terminal.py
+  s_a5a1471f1d4fe7::t_7dca0d3f47aed1 7,9-21,23-25,28,30,34-36,46-47,50
+  s_a5a1471f1d4fe7::t_2bb6bbafdf08ae 2,8,26,37-38,43,48,62,74,79-81
+  s_a5a1471f1d4fe7::t_2eb4362591e1d8 31-33,39-42,49,52-53,59,61,66-70,72-73,75
+  s_a5a1471f1d4fe7::t_b2a73dc59e5940 1,3-6,22,27,29,44-45,51,54-58,60,63-65,71,76-78
+voice-agent-harnesses/openai/report.py
+  s_a5a1471f1d4fe7::t_b0da1b6fe32b0e 153-158
+  s_a5a1471f1d4fe7::t_b4ea4dc32a7e52 190-194,196,205-206,209,214-222
+  s_a5a1471f1d4fe7::t_d5791c76b54cf0 151,159,174
+voice-agent-harnesses/deepgram/report.py
+  s_a5a1471f1d4fe7::t_b4ea4dc32a7e52 392-396,398,407-408,411,416-424
+  s_a5a1471f1d4fe7::t_d5791c76b54cf0 267,275,290
+  s_a5a1471f1d4fe7::t_b0da1b6fe32b0e 269-274
+voice-agent-harnesses/elevenlabs/report.py
+  s_a5a1471f1d4fe7::t_b0da1b6fe32b0e 283-288
+  s_a5a1471f1d4fe7::t_b4ea4dc32a7e52 391-395,397,406-407,410,415-423
+  s_a5a1471f1d4fe7::t_d5791c76b54cf0 281,289,304
+voice-agent-harnesses/gemini/report.py
+  s_a5a1471f1d4fe7::t_d5791c76b54cf0 268,276,291
+  s_a5a1471f1d4fe7::t_b0da1b6fe32b0e 270-275
+  s_a5a1471f1d4fe7::t_b4ea4dc32a7e52 392-396,398,407-408,411,416-424
+voice-agent-harnesses/assemblyai/report.py
+  s_a5a1471f1d4fe7::t_b4ea4dc32a7e52 392-396,398,407-408,411,416-424
+  s_a5a1471f1d4fe7::t_b0da1b6fe32b0e 269-274
+  s_a5a1471f1d4fe7::t_d5791c76b54cf0 267,275,290
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "0ef8cd52bbc4271b7a1c8c7b29e3ade29168ff54",
+  "prompts": {},
+  "humans": {
+    "h_bbe1a3ca680b9f": {
+      "author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_a5a1471f1d4fe7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6728e3a3-6be9-4622-947c-1a4ebfb88bfb",
+        "model": "claude-opus-5"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

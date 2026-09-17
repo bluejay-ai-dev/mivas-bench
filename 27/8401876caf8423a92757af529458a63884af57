@@ -1,0 +1,26 @@
+.env.example
+  s_d699876125c6ea::t_141f8bae9335c8 32
+voice-agent-harnesses/gemini/README.md
+  s_d699876125c6ea::t_59cf2694a85556 10,15,18
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "278401876caf8423a92757af529458a63884af57",
+  "prompts": {},
+  "humans": {
+    "h_bbe1a3ca680b9f": {
+      "author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_d699876125c6ea": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "99aaff9a-5019-40cf-bc79-c1a8c275271d",
+        "model": "grok-4.5"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

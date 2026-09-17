@@ -1,0 +1,438 @@
+voice-agent-harnesses/assemblyai/harness.py
+  s_23683cdf99cb99::t_ec69d87f5e9288 20-27
+  s_23683cdf99cb99::t_19be713f9f14c2 133-137
+tests/test_call_id.py
+  s_23683cdf99cb99::t_d33dccce48af9c 23-25
+  s_23683cdf99cb99::t_276c057ef2b950 27
+  s_23683cdf99cb99::t_bff1e3f95782d4 1-22,26,28-101,103-114
+  s_23683cdf99cb99::t_1934bdad5be8f6 102
+  s_23683cdf99cb99::t_b3c77a70ccadd8 115-116,124-131
+  s_23683cdf99cb99::t_239e235bca7a69 117-123
+tests/test_harness_tool_headers.py
+  s_23683cdf99cb99::t_76e872b85cab42 9
+  s_23683cdf99cb99::t_e5a925664ee745 165-168
+  s_23683cdf99cb99::t_e45b37a4c30001 175,178
+  s_23683cdf99cb99::t_bc42c2645fa773 151-152,169-174
+  s_23683cdf99cb99::t_760f97cfc35906 176-177
+  s_23683cdf99cb99::t_049c3854ac8d77 1-8,10-149,179-291
+  s_23683cdf99cb99::t_53c21fb3a72e68 150
+  s_23683cdf99cb99::t_7b0dbcbc6806fb 153-164
+voice-agent-harnesses/nvidia/adapters/chirp.py
+  s_23683cdf99cb99::t_09dbd68aef219d 59
+  s_23683cdf99cb99::t_1ffed619cd09cb 27
+industries/travel/README.md
+  s_23683cdf99cb99::t_56f301a87da63b 77,79-80
+voice-agent-harnesses/gemini/harness.py
+  s_23683cdf99cb99::t_bd7098bfdf310d 171-173
+  s_23683cdf99cb99::t_bad792ff0da9b8 20-26
+  s_23683cdf99cb99::t_143a0198ff7867 27
+.gitignore
+  h_f787e3fe1ad713 52
+voice-agent-harnesses/livekit/harness.py
+  s_23683cdf99cb99::t_66ffb3a0a69a4b 31,50-55
+  s_23683cdf99cb99::t_28318da50503a1 394
+  s_23683cdf99cb99::t_1e1eea73f0f39a 144-148
+  s_23683cdf99cb99::t_39c9ff778ac79e 56
+  s_23683cdf99cb99::t_af9d39b3dd6ca5 393
+  s_23683cdf99cb99::t_0971d84d699809 57
+k8s/deployment-tools.yaml
+  s_23683cdf99cb99::t_f9c1c0e186fbb4 1-81
+tests/test_twilio_industry.py
+  s_23683cdf99cb99::t_e8fb5df6793923 1-4,6-13,16-25,27-29
+  s_23683cdf99cb99::t_f416423b475e47 5,14
+  s_23683cdf99cb99::t_63c48f4aa62afc 15
+  s_23683cdf99cb99::t_1cb2493e1608e0 30-67
+  s_23683cdf99cb99::t_bbe4b9f91a9883 68-74
+  s_23683cdf99cb99::t_ca408c4a39dfed 26
+runtime/call_id.py
+  s_23683cdf99cb99::t_386dd99751b5e8 144-147
+  s_23683cdf99cb99::t_17c5f13aa0db1e 97-129,133-139
+  s_23683cdf99cb99::t_38915d9c3eff34 170-175
+  s_23683cdf99cb99::t_ef41bca1551ec3 1-9,12,16-44,59-77,86-96,143,148-150,152-169,176-209,240-245
+  s_23683cdf99cb99::t_014e3f03aff035 78-85
+  s_23683cdf99cb99::t_c29114c5d81841 11
+  s_23683cdf99cb99::t_2ca8be6c979ceb 14
+  s_23683cdf99cb99::t_38ad41e088be85 10,13,15
+  s_23683cdf99cb99::t_eb779cf3748cd8 45-58
+  s_23683cdf99cb99::t_10afed62d4f171 130-132,140-142,151
+  s_23683cdf99cb99::t_359d1bdc917e01 210-239
+industries/legal/README.md
+  s_23683cdf99cb99::t_7669fa10c47b66 63,65-66
+voice-agent-harnesses/cartesia/harness.py
+  s_23683cdf99cb99::t_f7fcde2bce31df 137-147
+  s_23683cdf99cb99::t_69ca64e5c77189 191-201,203-206
+  s_23683cdf99cb99::t_7fa83849efcd3b 26,33-45,47-49
+  s_23683cdf99cb99::t_c3595777a48107 211-215
+  s_23683cdf99cb99::t_e3dcf5bbe7d757 46
+  s_23683cdf99cb99::t_dffdbd04e3bf8b 247-253,257-263
+  s_23683cdf99cb99::t_774fffce12ab39 239-243
+  s_23683cdf99cb99::t_173ac6722fdf98 183,185-190
+  s_23683cdf99cb99::t_abf9ec6f227a9e 216
+  s_23683cdf99cb99::t_32e951e9a62c66 266-267
+  s_23683cdf99cb99::t_2e040b4d94d268 50
+voice-agent-harnesses/twilio/conversationrelay-gpt4.1/agent.py
+  s_23683cdf99cb99::t_d585210d858c3f 37
+  s_23683cdf99cb99::t_a5baec6e70869d 48,51-52
+tests/test_snapshot.py
+  s_23683cdf99cb99::t_7a132a9f3dbcba 57,59
+  s_23683cdf99cb99::t_b57a1733db7cf6 1-31,41-56,58,60-66,69-82,90,92-94,96-98,100-102,106-113
+  s_23683cdf99cb99::t_25cff6a429fe3c 67-68
+  s_23683cdf99cb99::t_cc110983a527de 32-40
+  s_23683cdf99cb99::t_9deefb5cc13a9b 83-89,91,95,99,103-105
+voice-agent-harnesses/cartesia/line_agent/main.py
+  s_23683cdf99cb99::t_76c02267573a08 12,14-17
+  s_23683cdf99cb99::t_84c1ba76b3301e 42-50,54-57,60,64-69,73,76,80,85,96,109
+  s_23683cdf99cb99::t_6823c505b20322 23
+k8s/ingress-tools.yaml
+  s_23683cdf99cb99::t_f6eabe91095ecb 40-46
+  s_23683cdf99cb99::t_c766a81d63ee1e 1-39,47-53
+voice-agent-harnesses/nvidia/nemotron-voicechat/adapters/chirp.py
+  s_23683cdf99cb99::t_a568f0d282eaa7 278
+  s_23683cdf99cb99::t_2c2b83fae59b85 32
+industries/healthcare/tool_server.py
+  s_23683cdf99cb99::t_f7122f8dde44cb 46-47
+  s_23683cdf99cb99::t_8e39564cd39a23 48
+  s_23683cdf99cb99::t_21a7758fcb3dfd 281
+  s_23683cdf99cb99::t_f646eec03cebbc 1118
+  s_23683cdf99cb99::t_bf7cda1fe767f7 20-21,25,30-35,37,42
+voice-agent-harnesses/pipecat/harness.py
+  s_23683cdf99cb99::t_615504d0cfb648 51
+  s_23683cdf99cb99::t_af27397081c2ad 39,45-50
+  s_23683cdf99cb99::t_6a10f984c08dd3 182-184
+  s_23683cdf99cb99::t_25217a77f1d8c6 52
+tests/test_a5_smoke.py
+  s_23683cdf99cb99::t_4b9a9d55867ffa 157
+  s_23683cdf99cb99::t_a0b73da72af5c3 1-156,158-164,173-184,188-215,217-231,238-249,260-265,267-279,297-308,336-382,384,391-420
+  s_23683cdf99cb99::t_0aca959456b394 185-187
+  s_23683cdf99cb99::t_58aa571b7531a3 250-256
+  s_23683cdf99cb99::t_372da77c37019b 383,385-390
+  s_23683cdf99cb99::t_6e73e9ce8c8688 165-172
+  s_23683cdf99cb99::t_b7c8aada85b18e 232-237
+  s_23683cdf99cb99::t_dca2b6e55bb9da 309-335
+  s_23683cdf99cb99::t_b99093fe67245a 216
+  s_23683cdf99cb99::t_1c37db2119cd35 257-259,266
+  s_23683cdf99cb99::t_319e28a0802219 280-296
+industries/control-industry/tool_server.py
+  s_23683cdf99cb99::t_173412b99ecc45 11-12,20-28,33,37-38
+  s_23683cdf99cb99::t_4834077013d0be 39
+voice-agent-harnesses/bland/adapters/chirp.py
+  s_23683cdf99cb99::t_ef46828cbfb23c 35-36,38-42,44-46
+  s_23683cdf99cb99::t_1dc73577a89272 37,43
+  s_23683cdf99cb99::t_b8c21d2e0e4991 114
+  s_23683cdf99cb99::t_bc82cfc4660ef5 113,116-117
+  s_23683cdf99cb99::t_422cea62a4c751 82
+  s_23683cdf99cb99::t_1ee7634a71957e 224-225
+  s_23683cdf99cb99::t_a7723aa6e0e42b 118,120-122,125-181,186-199,201-205,207-223
+  s_23683cdf99cb99::t_4eb420b222e948 182-185
+voice-agent-harnesses/grok/voice/adapters/chirp.py
+  s_23683cdf99cb99::t_5e5a7243c0e442 57
+  s_23683cdf99cb99::t_496c8533a98c6f 300
+industries/travel/tool_server.py
+  s_23683cdf99cb99::t_e25fc9bacb1821 71
+  s_23683cdf99cb99::t_c71febe98663ee 615-620
+  s_23683cdf99cb99::t_eadeffc2e53cbd 28,37-45
+  s_23683cdf99cb99::t_238c5b79455b03 60,65,69-70
+voice-agent-harnesses/openai/report.py
+  s_23683cdf99cb99::t_272e9ac8eaa7ae 237-256
+  s_23683cdf99cb99::t_faaa06d5fc206b 735-741
+runtime/entrypoint.sh
+  s_23683cdf99cb99::t_c68fd98c1a6683 20
+  s_23683cdf99cb99::t_b9460d6ede9e6c 2-4,17,36-46,70-74,76-104,107-111,114-127
+  s_23683cdf99cb99::t_20e96ae8a0c04f 49-51,61,64,67-68
+k8s/deployment.yaml
+  s_23683cdf99cb99::t_9db6279f1bedf1 12-19
+  s_23683cdf99cb99::t_d9e80eb54426a6 131
+  s_23683cdf99cb99::t_851e68bc5cf7a6 11
+  s_23683cdf99cb99::t_15b238837e44bb 224-225
+  s_23683cdf99cb99::t_8a0bf9a67823ac 54-55,57
+voice-agent-harnesses/twilio/adapters/conversationrelay.py
+  s_23683cdf99cb99::t_0d017cff61af75 228-232,237-240
+  s_23683cdf99cb99::t_6677a5f892501e 227,233,235-236,241-243
+  s_23683cdf99cb99::t_8d9891c843f673 3-4,6-7,14-15
+  s_23683cdf99cb99::t_b240746735fcb3 100-107,117-120
+  s_23683cdf99cb99::t_acf179307d1705 234
+  s_23683cdf99cb99::t_8a0e8f6326822d 29
+  s_23683cdf99cb99::t_4829f95da9b8e1 99
+  h_f787e3fe1ad713 49-50,52,135-157,172-173,177-186,192-194,246-249,251-252
+industries/legal/tool_server.py
+  s_23683cdf99cb99::t_bfc1ad7a0aba86 67,72,76-77
+  s_23683cdf99cb99::t_d52620bd30f4e2 25,34-42
+  s_23683cdf99cb99::t_368a78dad158ff 515-520
+  s_23683cdf99cb99::t_3e4c4c3ccd8bff 532
+  s_23683cdf99cb99::t_f295ac81a8124d 524
+  s_23683cdf99cb99::t_cfc20dc1246c5d 605-609
+  s_23683cdf99cb99::t_3921e7f98e23fe 78
+  s_23683cdf99cb99::t_72d78bc13749e3 604
+tests/test_industry_contract.py
+  s_23683cdf99cb99::t_1781ab2b8a3953 150
+  s_23683cdf99cb99::t_1588fc73d2a63c 183-184
+  s_23683cdf99cb99::t_0bff64b21fbe80 40
+  s_23683cdf99cb99::t_eb77e513fc9740 82,85,100-103
+  s_23683cdf99cb99::t_f8db5acd5748f2 180-182,185
+voice-agent-harnesses/gemini/adapters/chirp.py
+  s_23683cdf99cb99::t_bbe962df91d519 61
+  s_23683cdf99cb99::t_a7f44449b964ca 22
+industries/healthcare/README.md
+  s_23683cdf99cb99::t_2a2dee2689a8e3 51,53
+voice-agent-harnesses/grok/harness.py
+  s_23683cdf99cb99::t_20cc37d9150dd3 319-325
+  s_23683cdf99cb99::t_3c55b0940714c9 20,27-33
+  s_23683cdf99cb99::t_a341ac9d394a20 34
+runtime/db_service.py
+  s_23683cdf99cb99::t_4e254611437925 232-235
+  s_23683cdf99cb99::t_e7d49b339b6e20 1-9,12-19,21-41,43-44,71-81,229-231,236-247
+  s_23683cdf99cb99::t_6ec50aedc966f6 11
+  s_23683cdf99cb99::t_8759dca76c79ee 122-125,127,133-139,144-147
+  s_23683cdf99cb99::t_2ec8dc3726a4c2 161,167
+  s_23683cdf99cb99::t_205c69402ffea3 131-132
+  s_23683cdf99cb99::t_448f1610e39b62 126
+  s_23683cdf99cb99::t_322226995a1375 10
+  s_23683cdf99cb99::t_87084148cf3abf 182-218,223-224
+  s_23683cdf99cb99::t_a682a9ec1f3b36 45-70
+  s_23683cdf99cb99::t_72a37cfeb4157a 128-130
+  s_23683cdf99cb99::t_81cdfe5cf3c41f 140-143
+  s_23683cdf99cb99::t_f345b7055dce46 151-152,156-159,164,168-169,173,176,178,227-228
+  s_23683cdf99cb99::t_65dfaa51249eea 148-150
+  s_23683cdf99cb99::t_87f1eefc23ea3a 153-155,160,162-163,165-166,170-172,174-175,177,179-181,219-222,225-226
+  s_23683cdf99cb99::t_dcf0827ba9773a 42,82-121
+  s_23683cdf99cb99::t_3057d19accac0d 20
+tests/test_db_service.py
+  s_23683cdf99cb99::t_f83560219f5eb4 153
+  s_23683cdf99cb99::t_76f49c351f520c 69-86
+  s_23683cdf99cb99::t_0f91c80a3d73fc 191
+  s_23683cdf99cb99::t_f10ef3e5d0e3e6 20,147-149,151-152,155-157,159-178
+  s_23683cdf99cb99::t_d25b6f0c22a565 1-19,21-50
+  s_23683cdf99cb99::t_b377737a45c108 145-146,150,154,158
+  s_23683cdf99cb99::t_d7b2f5cac8416e 87-113
+  s_23683cdf99cb99::t_21920e3af7a1c3 114-144
+  s_23683cdf99cb99::t_c94fb060db9dcf 51-68
+  s_23683cdf99cb99::t_e0add940c9d25d 179-182
+  s_23683cdf99cb99::t_d551b375cae06b 183-190
+  s_23683cdf99cb99::t_22745f586f25bd 192-193
+  s_23683cdf99cb99::t_c2370f1c8821c5 194-209
+run.py
+  s_23683cdf99cb99::t_eca5287146716d 105-106,115-123,125-130
+  s_23683cdf99cb99::t_11c00c290a22ec 304,306-312,329-331
+  s_23683cdf99cb99::t_336eeb8a8cc0c2 565-566
+  s_23683cdf99cb99::t_ac09d2b0b947ec 591-594,597-600,603-605
+  s_23683cdf99cb99::t_e77c005033f206 299
+  s_23683cdf99cb99::t_604c240ba4f863 748-751,753-759
+  s_23683cdf99cb99::t_27cdab8fe48908 595-596,601-602
+  s_23683cdf99cb99::t_61795ffa2d22e8 571-572
+  s_23683cdf99cb99::t_af80d0881e4472 151-152,159-165,167-168,175
+  s_23683cdf99cb99::t_9fb2de00d77fbb 822-823,826
+  s_23683cdf99cb99::t_f99f68b0b63fb1 267
+  s_23683cdf99cb99::t_8e9085154b32a3 704-707
+  s_23683cdf99cb99::t_0b827b2f3b7b78 708
+  s_23683cdf99cb99::t_36314bf6dde576 298,332-339
+  s_23683cdf99cb99::t_dda8433a776f51 527,533-534
+  s_23683cdf99cb99::t_489f1e4d1fcec2 300
+  s_23683cdf99cb99::t_331e75f97114b2 108
+  s_23683cdf99cb99::t_4a74184c012cd0 622-624
+  s_23683cdf99cb99::t_71717db6e4f4bb 634,636-637
+  s_23683cdf99cb99::t_0ad8b2a806243d 795,799,801
+  s_23683cdf99cb99::t_32fc0f0a8c1701 305,313-328
+  s_23683cdf99cb99::t_7ff1d69c37e96e 340-341
+  s_23683cdf99cb99::t_59b101810cb570 621
+voice-agent-harnesses/cartesia/README.md
+  s_23683cdf99cb99::t_a0824018ca9cb7 47-48,50-51
+  s_23683cdf99cb99::t_0ac63244e07364 49
+  s_23683cdf99cb99::t_8c3a4921b6a5d9 40-46
+k8s/ingress.yaml
+  s_23683cdf99cb99::t_f403ddde252ef3 4
+  s_23683cdf99cb99::t_b4fdb182bb7745 28-30
+  s_23683cdf99cb99::t_84827160ebbef5 51-57
+  s_23683cdf99cb99::t_9c09ce174b83d9 5-6,21-22,37-50,58-64
+voice-agent-harnesses/retell/adapters/chirp.py
+  s_23683cdf99cb99::t_09fb0060df7833 38-39,41,43,49
+  s_23683cdf99cb99::t_698788fadea347 126-176,179-260
+  s_23683cdf99cb99::t_5eb16ced6dba79 261-263
+  s_23683cdf99cb99::t_fc59c948dcf99c 72
+  s_23683cdf99cb99::t_9b87f63c05e71b 112-113,115
+.env.example
+  s_23683cdf99cb99::t_ef55f5828b813e 143
+  s_23683cdf99cb99::t_5e95a4cd341078 142,144
+voice-agent-harnesses/nvidia/harness.py
+  s_23683cdf99cb99::t_b6905bc310ef58 18,24-29
+  s_23683cdf99cb99::t_26459b082d5c06 143-149
+  s_23683cdf99cb99::t_4911a86f8b22e2 30
+  s_23683cdf99cb99::t_f6421207c52714 31
+voice-agent-harnesses/pipecat/bot.py
+  s_23683cdf99cb99::t_453c1afa17213f 377
+  s_23683cdf99cb99::t_6f4151ef74f06e 376
+voice-agent-harnesses/elevenlabs/harness.py
+  s_23683cdf99cb99::t_35751f3b34687a 23-30
+  s_23683cdf99cb99::t_1727958588e040 339-343
+voice-agent-harnesses/vapi/harness.py
+  s_23683cdf99cb99::t_fb9369d5d8b0d2 353-354,358-360
+  s_23683cdf99cb99::t_d191d17ed62dbc 385
+  s_23683cdf99cb99::t_f682f81efc8051 22,28-42
+  s_23683cdf99cb99::t_b71ae6a5b3ab02 43
+runtime/snapshot.py
+  s_23683cdf99cb99::t_beb7d5892942c7 1-55
+industries/README.md
+  s_23683cdf99cb99::t_32cabca792f35b 40-41,43-47
+  s_23683cdf99cb99::t_3345c9f5d1c8ba 28-39,42
+  s_23683cdf99cb99::t_19664e67e86215 15-27
+voice-agent-harnesses/twilio/conversationrelay-gpt4.1/adapters/conversationrelay.py
+  s_23683cdf99cb99::t_503c1abcc5c231 1-9
+voice-agent-harnesses/twilio/conversationrelay-gpt4.1/smoke_ws.py
+  s_23683cdf99cb99::t_6dbaf6e202f9dc 3
+voice-agent-harnesses/elevenlabs/adapters/chirp.py
+  s_23683cdf99cb99::t_eb5d34bdee0369 25
+  s_23683cdf99cb99::t_65c9dacf6adce8 66
+tests/test_tool_server.py
+  s_23683cdf99cb99::t_04f29c9e7df846 282,284
+  s_23683cdf99cb99::t_9cb48298c6ad78 329-347
+  s_23683cdf99cb99::t_a05455cb421b4b 459-486,512-524,534,536-538,548-563
+  s_23683cdf99cb99::t_357db4e8a21b99 487-511
+  s_23683cdf99cb99::t_2f860c174376f1 26,29-31,33,36-39,55-58
+  s_23683cdf99cb99::t_06dff155e165cc 525-533,535,539-547
+README.md
+  s_23683cdf99cb99::t_b7b993e957f79d 69-78
+  s_23683cdf99cb99::t_3869c16e00eb74 64-68,79,83
+  s_23683cdf99cb99::t_4f672b9886a159 14
+  s_23683cdf99cb99::t_ea732451af3875 80-82
+  s_23683cdf99cb99::t_241087076a9015 63
+industries/control-industry/README.md
+  s_23683cdf99cb99::t_c5095ca5a17035 21
+  s_23683cdf99cb99::t_503b23a4914c5a 42-44
+voice-agent-harnesses/twilio/harness.py
+  s_23683cdf99cb99::t_d1b07c1bd2dff7 157-166,170-172,174-175,177-182
+  s_23683cdf99cb99::t_12639fb945ce35 204,219,221,223-224,226-227,231-242
+  s_23683cdf99cb99::t_44d2de41a741c6 528-530
+  s_23683cdf99cb99::t_b83e7b3b83d60d 21,27-33
+  s_23683cdf99cb99::t_503b9b8d0d32ee 167-169,173
+  s_23683cdf99cb99::t_23c8ab8195236b 185-203,205-218,220,222,225,228-230,243-254
+  s_23683cdf99cb99::t_dc7484ceadae13 691-699,707-710
+  s_23683cdf99cb99::t_7d0be994f4d5f2 34
+  s_23683cdf99cb99::t_cb95b4eb926f04 183-184
+voice-agent-harnesses/vapi/adapters/chirp.py
+  s_23683cdf99cb99::t_7a3875a97d7a0a 253-255
+  s_23683cdf99cb99::t_ad4b3717f878cb 134-137
+  s_23683cdf99cb99::t_2c88c63789a3ab 34-36,38,43
+  s_23683cdf99cb99::t_1154fdfa2eb53f 145-252
+  s_23683cdf99cb99::t_9dc8a0a3da3cc5 92
+voice-agent-harnesses/cartesia/adapters/chirp.py
+  s_23683cdf99cb99::t_05c226509c24fe 135-138,146-164,166-210,213-215,217-228,238-259
+  s_23683cdf99cb99::t_84066a957095db 264-272,275,282-287,290
+  s_23683cdf99cb99::t_cce50e8b693938 38,44
+  s_23683cdf99cb99::t_67dada76867a61 122,124
+  s_23683cdf99cb99::t_a75cde022fe4a2 90-92,95
+  s_23683cdf99cb99::t_5442e6ac1f8ef7 94
+  s_23683cdf99cb99::t_d29d226dcec454 123
+  s_23683cdf99cb99::t_1d70b836495661 133-134
+  s_23683cdf99cb99::t_3b335427a9d387 36-37,39-43,45-46
+  s_23683cdf99cb99::t_cdfc5f3826b488 139-145
+  s_23683cdf99cb99::t_3740b4e207dc47 216
+  s_23683cdf99cb99::t_95d920e4f422f3 229-237
+  s_23683cdf99cb99::t_43dac9904eca94 260-261
+  s_23683cdf99cb99::t_55289e2f071ccc 262-263
+voice-agent-harnesses/deepgram/harness.py
+  s_23683cdf99cb99::t_cc747c944751b5 152-156
+  s_23683cdf99cb99::t_23e42f0e4b4dba 15,22-28
+  s_23683cdf99cb99::t_09c5b4e6c97505 29
+voice-agent-harnesses/twilio/README.md
+  s_23683cdf99cb99::t_ec2eb7c282f4ae 106
+  s_23683cdf99cb99::t_a5957c05088c4d 21
+  s_23683cdf99cb99::t_e32f6297d32f5c 86
+  s_23683cdf99cb99::t_4d2da811c41c78 103-105
+  s_23683cdf99cb99::t_36f711b3d8d890 108
+  s_23683cdf99cb99::t_d77a79eb130bf2 79
+  s_23683cdf99cb99::t_833d2d2fbc0a9a 132-133
+  s_23683cdf99cb99::t_21072ee8d46cc4 118-119
+  s_23683cdf99cb99::t_4bb475b688bd2f 18,22
+voice-agent-harnesses/README.md
+  s_23683cdf99cb99::t_04e1714cfaa58d 21-48
+  s_23683cdf99cb99::t_c7538ed79b0a64 66-68
+  s_23683cdf99cb99::t_6f1868d2cf704d 61-64,69-73
+  s_23683cdf99cb99::t_8c75c754d84b2c 65
+runtime/harness_health.py
+  s_23683cdf99cb99::t_a8bc3b38e4b96a 1-37
+tests/test_agents.py
+  s_23683cdf99cb99::t_bb790e71eacdfb 76,78-79
+  s_23683cdf99cb99::t_73c6cbf82200b8 21
+  s_23683cdf99cb99::t_5aaf4a981e65ed 114-116,118
+  s_23683cdf99cb99::t_0ca140356eec1e 139
+  s_23683cdf99cb99::t_d2e4498216cdf8 198-221,223-226,232
+  s_23683cdf99cb99::t_7e1d3cbfda7f1a 73-75
+  s_23683cdf99cb99::t_a937db2d5ada5a 59-60,64,66
+  s_23683cdf99cb99::t_43e3b9458a698b 23
+  s_23683cdf99cb99::t_ea7a7cc231ed4d 77
+  s_23683cdf99cb99::t_98a9bfb4ed1f02 107-113
+  s_23683cdf99cb99::t_a7b23c2fd03f1a 151,162-172
+  s_23683cdf99cb99::t_0db28b4267de59 153-161
+  s_23683cdf99cb99::t_d90ab651b9fb83 222,227-231,233-240
+  s_23683cdf99cb99::t_5015d5ed9fa727 136-138,141-143
+  s_23683cdf99cb99::t_052fb2b193a126 50-51
+  s_23683cdf99cb99::t_e9fdee60070979 117
+voice-agent-harnesses/retell/harness.py
+  s_23683cdf99cb99::t_1c27efb0872f0d 356-360
+  s_23683cdf99cb99::t_c16354b8d661d8 370
+  s_23683cdf99cb99::t_ad6bb345938bd1 21,28-43
+  s_23683cdf99cb99::t_390063861fb0ac 44
+voice-agent-harnesses/bland/harness.py
+  s_23683cdf99cb99::t_3b81ea2167424a 43
+  s_23683cdf99cb99::t_3946145eb83cdc 23,30-42,44-46
+  s_23683cdf99cb99::t_dbdea57e85a9d7 441-445
+  s_23683cdf99cb99::t_118d1545068c98 47
+industries/finance/README.md
+  s_23683cdf99cb99::t_7738e6ca5967b7 120-122
+voice-agent-harnesses/openai/harness.py
+  s_23683cdf99cb99::t_80b895a84a4cef 22,33-38,40,54-56
+  s_23683cdf99cb99::t_3e4cbc7229356c 39
+voice-agent-harnesses/openai/adapters/chirp.py
+  s_23683cdf99cb99::t_347961c008366d 67-68
+  s_23683cdf99cb99::t_9542b36e062e5e 26
+voice-agent-harnesses/deepgram/adapters/chirp.py
+  s_23683cdf99cb99::t_c44868f9b2c40d 21
+  s_23683cdf99cb99::t_b6e0bfc92c8bff 66
+voice-agent-harnesses/nvidia/bot.py
+  s_23683cdf99cb99::t_078ff629c44ca8 105
+  s_23683cdf99cb99::t_f8f8e28eee1bf9 104
+voice-agent-harnesses/pipecat/adapters/livekit_worker.py
+  s_23683cdf99cb99::t_2306f20a07a903 122
+  s_23683cdf99cb99::t_1bb1bdb250ff3b 5-7
+  s_23683cdf99cb99::t_f4503085181c02 121
+voice-agent-harnesses/assemblyai/adapters/chirp.py
+  s_23683cdf99cb99::t_c93956cb4fcd2d 56
+  s_23683cdf99cb99::t_aca32a418ca327 21
+industries/finance/tool_server.py
+  s_23683cdf99cb99::t_d963a294dd3b6d 34,45-53
+  s_23683cdf99cb99::t_97e362e13057dd 123,128,132-133
+  s_23683cdf99cb99::t_9270a5f175fd57 438-439
+  s_23683cdf99cb99::t_db3921aef44b44 198-199,422,426,963
+  s_23683cdf99cb99::t_d3b50bba013206 413
+  s_23683cdf99cb99::t_8d6ac0e3a724b0 1056-1060
+  s_23683cdf99cb99::t_43933085e88694 134
+  s_23683cdf99cb99::t_6c975c26d79cf6 183-188
+  s_23683cdf99cb99::t_fed8a1d5d2f5f8 409,435
+  s_23683cdf99cb99::t_11cb4143910052 414
+  s_23683cdf99cb99::t_63ab53e153d5bc 1072,1077,1089,1097
+  s_23683cdf99cb99::t_937ef6a34f0a0a 1055
+tests/helpers.py
+  s_23683cdf99cb99::t_f1579987bc53ca 45,47-50
+k8s/service-tools.yaml
+  s_23683cdf99cb99::t_263c3b6e7d261e 1-22
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "8676ea643388de66daf6f47365e402a567d3044c",
+  "prompts": {},
+  "humans": {
+    "h_f787e3fe1ad713": {
+      "author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_23683cdf99cb99": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "0b380b47-72bc-4002-867a-9db870f5fb7c",
+        "model": "grok-4.6"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}

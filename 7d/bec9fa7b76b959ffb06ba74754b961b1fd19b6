@@ -1,0 +1,21 @@
+runtime/db_service.py
+  s_ff5a259575efa2::t_279016851a1ac5 85,88-106,110
+tests/test_db_service.py
+  s_ff5a259575efa2::t_6da5f5424cbd04 146-168
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "7dbec9fa7b76b959ffb06ba74754b961b1fd19b6",
+  "prompts": {},
+  "sessions": {
+    "s_ff5a259575efa2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "721849e5-0358-4482-b8c3-3e82957f674d",
+        "model": "claude-opus-5"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

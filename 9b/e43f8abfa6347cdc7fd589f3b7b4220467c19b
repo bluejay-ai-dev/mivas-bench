@@ -1,0 +1,54 @@
+industries/healthcare/tasks/C4-H1/task.json
+  s_2c3b52acb87f73::t_891c82c0d4c95b 101,103
+  s_2c3b52acb87f73::t_0d297868744bea 3
+tests/test_tasks_to_digital_humans.py
+  s_2c3b52acb87f73::t_637b7a33d26d07 487-530
+tests/test_verify_task_run.py
+  s_da435bb48dd330::t_202ece8e16f4a8 81-95
+industries/healthcare/tasks/C3-M3/task.json
+  s_8fe6b02490915e::t_d5a0657149453e 107-110
+  s_2c3b52acb87f73::t_5b9b86603acaad 3
+  s_8fe6b02490915e::t_80b4b301f6f13f 105-106
+industries/healthcare/tasks/C2-H3/task.json
+  s_2c3b52acb87f73::t_316e0d7fa9f870 137-139
+  s_2c3b52acb87f73::t_491c42a7fe4e0f 131,133
+  s_2c3b52acb87f73::t_133969228f87c6 3
+  s_2c3b52acb87f73::t_7edb3b549a9f45 134-136
+industries/healthcare/tasks/C2-H2/task.json
+  s_8fe6b02490915e::t_56660c0b4d2bd0 93,97-114
+  s_2c3b52acb87f73::t_73072b04feb038 3
+scripts/verify_task_run.py
+  s_da435bb48dd330::t_1f13740ee2aa9d 290-296
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "9be43f8abfa6347cdc7fd589f3b7b4220467c19b",
+  "prompts": {},
+  "sessions": {
+    "s_2c3b52acb87f73": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "1faf1925-f490-4de7-a18a-1914caf86d1e",
+        "model": "cursor-grok-4.6-high-fast"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    },
+    "s_8fe6b02490915e": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "05072506-6805-4b5f-96d3-4dd557e9783d",
+        "model": "cursor-grok-4.6-high-fast"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    },
+    "s_da435bb48dd330": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "2553bb9e-5301-4a8a-9512-c1adc7d20844",
+        "model": "cursor-grok-4.6-high-fast"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

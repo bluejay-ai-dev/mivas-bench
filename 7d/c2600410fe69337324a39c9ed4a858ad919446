@@ -1,0 +1,39 @@
+industries/control-industry/system-prompts/receptionist.md
+  s_6dd0c90f375723::t_3e9147948d3eee 1-2,4-6,8-10,12-15
+  s_6dd0c90f375723::t_dbe1e6f5c61fc3 3,11
+  h_bbe1a3ca680b9f 7
+industries/control-industry/README.md
+  s_6dd0c90f375723::t_5d513c14e0b08e 5,11,21
+  s_6dd0c90f375723::t_84a0631f8ae771 3-4,7-10,12-20
+  s_6dd0c90f375723::t_073a0ade2c56da 6
+.cursor/rules/commit-as-user.mdc
+  s_6dd0c90f375723::t_612c152d5b4b98 1-16
+industries/control-industry/system-prompts/scheduler.md
+  s_6dd0c90f375723::t_d4c69fc41a1494 3,7,10
+  s_6dd0c90f375723::t_f0d4ffc60aedc4 1-2,4-6,8-9,11-16
+industries/control-industry/tools.json
+  s_6dd0c90f375723::t_1a66f1b31bfcec 9-15,30-36,38-40
+  s_6dd0c90f375723::t_223715ea62520a 5,20,26,37
+  s_6dd0c90f375723::t_e040ae37b1bb5a 1-4,6-8,16-19,21-25,27-29,41-44
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "7dc2600410fe69337324a39c9ed4a858ad919446",
+  "prompts": {},
+  "humans": {
+    "h_bbe1a3ca680b9f": {
+      "author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_6dd0c90f375723": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "319bc4cb-9526-48f5-95f2-bb0f8a259311",
+        "model": "grok-4.5"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

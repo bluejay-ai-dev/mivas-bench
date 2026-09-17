@@ -1,0 +1,19 @@
+README.md
+  s_03ee845a0fa9f1::t_1da1c97ac5949e 9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "825e54229d21d221180365c3d99c6e53d1761cb6",
+  "prompts": {},
+  "sessions": {
+    "s_03ee845a0fa9f1": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "6b761e2b-060d-4894-aedd-5014fb982d8d",
+        "model": "gpt-5.6-sol-medium-fast"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

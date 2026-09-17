@@ -1,0 +1,30 @@
+scripts/legal_digital_humans.py
+  s_845b352bcf124c::t_ef73d5abf48720 2025-2028,2038-2039
+  s_845b352bcf124c::t_005b63ad018ccd 369-373
+  s_845b352bcf124c::t_35b7769bf2265a 1-109,114-368,374-647,650-659,661-672,675-684,686-1994,2002-2010,2013-2024,2029-2037,2040-2181,2184-2193,2195-2364,2366-2405
+  s_845b352bcf124c::t_333409fc027d8b 685
+  s_845b352bcf124c::t_369963757e5d86 1995-2001,2011-2012
+  s_845b352bcf124c::t_8fe4e00a665f32 673-674
+  s_845b352bcf124c::t_d8204296336620 2182-2183
+  s_845b352bcf124c::t_c4e2505cc7d74a 660
+  s_845b352bcf124c::t_c4423ee80cb93e 2194
+  s_845b352bcf124c::t_82b397c5389f84 110-113
+  s_845b352bcf124c::t_7eac4951f673ba 2365
+  s_845b352bcf124c::t_5f18d169f3dba9 648-649
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "b21d7485fb548debc9e61a35b392819ab88bf2cc",
+  "prompts": {},
+  "sessions": {
+    "s_845b352bcf124c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "bc9a6540-d54c-41c0-8c82-b14b272c7508",
+        "model": "claude-opus-5"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

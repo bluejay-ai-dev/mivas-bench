@@ -1,0 +1,21 @@
+voice-agent-harnesses/openai/report.py
+  s_9d2f77bfd49fda::t_49998cd3fd194a 207-208,210-213,228,233,239
+voice-agent-harnesses/openai/test_post_trace_ids.py
+  s_9d2f77bfd49fda::t_c5f65e68d42e00 1-82
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "ac0dce4813c4790c2808fecd7a11434e91c56672",
+  "prompts": {},
+  "sessions": {
+    "s_9d2f77bfd49fda": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "0f9d6c71-ac43-4776-aa21-177f6bcae14d",
+        "model": "grok-4.6"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

@@ -1,0 +1,63 @@
+tests/test_dockerfiles.py
+  s_fe3cabe170230c::t_f4852c700120fe 15-16
+voice-agent-harnesses/openai/gpt-live-1-diamond-alpha/Dockerfile
+  s_fe3cabe170230c::t_f4852c700120fe 33-34
+  s_fe3cabe170230c::t_36e22ab454bf6c 1-32,35-64
+voice-agent-harnesses/openai/gpt-live-1-diamond-alpha/agent.py
+  s_fe3cabe170230c::t_a136e3d7093c78 47
+  s_fe3cabe170230c::t_d2e5ed318198bd 35
+  s_fe3cabe170230c::t_36e22ab454bf6c 1-34,36-46,48-51
+voice-agent-harnesses/openai/gpt-live-1-diamond-alpha/live.py
+  s_fe3cabe170230c::t_0143e7eea9fbdb 1-16,20-55,59-63,66-87,90-99,101-165,168-169,174-267,270-275,288-300,303-342,345-407,417-430,432-435,445-447,453-469,477,481-484,488-493,511-549,560,566-568
+  s_fe3cabe170230c::t_0e7464425ac90f 57,555-556,561,564
+  s_fe3cabe170230c::t_3800e89a900cda 88-89,412,414,436-444,472,498-510
+  s_fe3cabe170230c::t_a3eeb6fbf23e45 167,268-269,276-287,431,448-450,480
+  s_fe3cabe170230c::t_93e3e3c74268ab 56,58,170-173,451-452,478-479,550-554,557-559,562-563,565
+  s_fe3cabe170230c::t_3ff4b64f91c764 100,408-411,413,415-416
+  s_fe3cabe170230c::t_74a73ff31e71e8 17-19,166,470-471,473-476,494-497
+  s_fe3cabe170230c::t_39ec5ed857da53 64-65,301-302,343-344,485-487
+voice-agent-harnesses/openai/gpt-live-1-diamond-alpha/tools.py
+  s_fe3cabe170230c::t_0143e7eea9fbdb 1-39
+voice-agent-harnesses/openai/gpt-live-1-diamond-alpha/README.md
+  s_fe3cabe170230c::t_87b04eb6789255 19,24-25
+  s_fe3cabe170230c::t_ee58efae9e37b7 20,83
+  s_fe3cabe170230c::t_05904ddece69d9 31-57
+  s_fe3cabe170230c::t_a2235cf2cbda1c 1-18,21-23,26-30,58-82
+voice-agent-harnesses/openai/gpt-live-1-diamond-alpha/test_gpt_live.py
+  s_fe3cabe170230c::t_74a73ff31e71e8 1-81,84-98,100-119,121-133,135-146,148,151-176
+  s_fe3cabe170230c::t_7d10a4d03bbc10 177
+  s_fe3cabe170230c::t_a3eeb6fbf23e45 99,120,147
+  s_fe3cabe170230c::t_3d523b627c1b1c 82-83
+  s_fe3cabe170230c::t_3800e89a900cda 134
+  s_fe3cabe170230c::t_93e3e3c74268ab 149-150
+voice-agent-harnesses/openai/gpt-live-1-diamond-alpha/tracing.py
+  s_fe3cabe170230c::t_3ff4b64f91c764 72-76,169,189-194
+  s_fe3cabe170230c::t_71bd2303462c7c 1-71,77-168,170-188,195-299
+voice-agent-harnesses/openai/gpt-live-1-diamond-alpha/adapters/chirp.py
+  s_fe3cabe170230c::t_36e22ab454bf6c 1-11,17-66,68-73,79-80,103-106,108-109,114-168,172-215
+  s_fe3cabe170230c::t_7d10a4d03bbc10 91,100-102,107,170
+  s_fe3cabe170230c::t_ee58efae9e37b7 12-16,67,90,110-113,169,171
+  s_fe3cabe170230c::t_bc59fb8408978e 74-78,81-89,92-99
+voice-agent-harnesses/openai/gpt-live-1-diamond-alpha/pack.py
+  s_fe3cabe170230c::t_3d523b627c1b1c 17-18,20,137-139,145-148,170,204-205,208,210
+  s_fe3cabe170230c::t_d2e5ed318198bd 84-92
+  s_fe3cabe170230c::t_02623d3ec17ea7 1-16,19,21-83,93-136,140-144,149-169,171-203,206-207,209,211-217
+voice-agent-harnesses/openai/gpt-live-1-diamond-alpha/requirements.txt
+  s_fe3cabe170230c::t_36e22ab454bf6c 1-7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "eb9e4073744795adb0ffac160d3f80682cf05d55",
+  "prompts": {},
+  "sessions": {
+    "s_fe3cabe170230c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c43e0f04-cca7-40e2-b432-b26f7848cf15",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}

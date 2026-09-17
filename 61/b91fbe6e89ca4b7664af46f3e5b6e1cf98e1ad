@@ -1,0 +1,28 @@
+industries/healthcare/tool_server.py
+  s_0d00e88b1c778a::t_c58c6604affd66 637-639
+industries/travel/tool_server.py
+  s_0d00e88b1c778a::t_bf2874461c9890 486,488-494
+  s_0d00e88b1c778a::t_8f660da4d556c6 618-620
+  s_0d00e88b1c778a::t_1a0f42b19add28 582-586
+voice-agent-harnesses/gemini/harness.py
+  s_0d00e88b1c778a::t_503d239a8602eb 172-179
+tests/test_tool_server.py
+  s_0d00e88b1c778a::t_fe224125e9ce8a 129-146
+  s_0d00e88b1c778a::t_07344d9da5e4f2 160
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "61b91fbe6e89ca4b7664af46f3e5b6e1cf98e1ad",
+  "prompts": {},
+  "sessions": {
+    "s_0d00e88b1c778a": {
+      "agent_id": {
+        "tool": "windsurf",
+        "id": "dawn-noodle",
+        "model": "unknown"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

@@ -1,0 +1,19 @@
+tests/test_tasks_to_digital_humans.py
+  s_b0f244e7a4890f::t_a14d670a2bf7dd 486
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "c9182e35be2233de3c5c8741822fd872940926c5",
+  "prompts": {},
+  "sessions": {
+    "s_b0f244e7a4890f": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "0faecc53-46d5-47cf-8395-9127cdb7470b",
+        "model": "cursor-grok-4.6-high-fast"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

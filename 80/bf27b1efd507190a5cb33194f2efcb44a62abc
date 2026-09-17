@@ -1,0 +1,93 @@
+README.md
+  s_014ceaa01ffa6b::t_880ec92e35a6c2 237-240
+.env.example
+  s_014ceaa01ffa6b::t_7d17de5497a068 34,52,93,98-105,108-109
+.gitignore
+  s_014ceaa01ffa6b::t_b50e5740e1f87d 68
+codebuild/fleet.py
+  s_014ceaa01ffa6b::t_15fd8eb30864bd 19-22,290-292
+industries/README.md
+  s_014ceaa01ffa6b::t_0a57b9405cc38c 10
+industries/customer-support/system-prompts/fraud.md
+  s_014ceaa01ffa6b::t_ce47c2575daaa4 98-107,139-140,143,152-153,156-159,163-164,169-172,178-181,187-190,193-197,199-200,202,218-219
+industries/customer-support/system-prompts/membership.md
+  s_014ceaa01ffa6b::t_22686f50e65ccc 97-106,138-139,165-170,172-175,191-193
+industries/customer-support/system-prompts/orders.md
+  s_014ceaa01ffa6b::t_6e9319449d683b 96-105,137-138
+industries/customer-support/system-prompts/reception.md
+  s_014ceaa01ffa6b::t_ea3caf7318c1b8 96-105,137-138,165-171,202-204
+industries/customer-support/system-prompts/returns.md
+  s_014ceaa01ffa6b::t_f4218cfdabdb93 97-106,138-139
+industries/customer-support/system-prompts/service.md
+  s_014ceaa01ffa6b::t_52c9d1d01ac181 96-105,137-138
+industries/customer-support/system-prompts/verification.md
+  s_014ceaa01ffa6b::t_daf755d39f6463 97-106,138-139
+industries/customer-support/tasks/R-H2/task.json
+  s_014ceaa01ffa6b::t_ee07464e3ec5b8 4,94,101,108
+industries/customer-support/tasks/R-H4/task.json
+  s_014ceaa01ffa6b::t_655d0908c899d0 4,147,161,168
+industries/customer-support/tasks/R-M4/task.json
+  s_014ceaa01ffa6b::t_2bfc1c207c96c2 4,88,102
+run.py
+  s_014ceaa01ffa6b::t_cda3519f462470 111,322,336
+runtime/db_service.py
+  s_014ceaa01ffa6b::t_1532bd5be16575 84-90
+scripts/annotate_eval_costs.py
+  s_014ceaa01ffa6b::t_3021fb6735e616 5,47-63,75,146-150,155-160
+scripts/expected_final_state.py
+  s_014ceaa01ffa6b::t_e21a96b94ab89e 495
+scripts/tasks_to_digital_humans.py
+  s_014ceaa01ffa6b::t_bef6089c13ea16 89-101,103,622-630
+tests/test_a5_smoke.py
+  s_014ceaa01ffa6b::t_14bd141c6edbcf 33,307,318,324-326
+tests/test_agents.py
+  s_014ceaa01ffa6b::t_8783094d9123ae 38,40,140-141,144,154
+tests/test_dockerfiles.py
+  s_014ceaa01ffa6b::t_c820a10327e5c3 15-16
+tests/test_expected_final_state.py
+  s_014ceaa01ffa6b::t_dcef830ad63aa2 151
+tests/test_harness_tool_headers.py
+  s_014ceaa01ffa6b::t_c7aed019990a83 23
+tests/test_tool_server.py
+  s_014ceaa01ffa6b::t_c832f33da5cd30 24
+tests/test_tool_span_ok.py
+  s_014ceaa01ffa6b::t_12784d94b0f7d9 1-3,7,9-10,13-20
+tests/test_verify_runs_bulk.py
+  s_014ceaa01ffa6b::t_80839bfe13d4ef 1,5,10-16,19-33,36-44,46-49,51-70,72-75
+voice-agent-harnesses/README.md
+  s_014ceaa01ffa6b::t_5051afb866cfe5 25-26,47,62
+voice-agent-harnesses/aws/harness.py
+  s_014ceaa01ffa6b::t_9101e03916fc2a 509-510
+voice-agent-harnesses/grok/harness.py
+  s_014ceaa01ffa6b::t_37e404cbf82611 377-378
+voice-agent-harnesses/livekit/README.md
+  s_014ceaa01ffa6b::t_0ebb477066a1ee 3,58
+voice-agent-harnesses/livekit/test_harness.py
+  s_014ceaa01ffa6b::t_a43bbe095ab00e 96,129,131
+voice-agent-harnesses/nvidia/README.md
+  s_014ceaa01ffa6b::t_2e953d86704597 89,123
+voice-agent-harnesses/nvidia/harness.py
+  s_014ceaa01ffa6b::t_9b225a54b675db 53,221-222,266-267
+voice-agent-harnesses/nvidia/nemotron-voicechat/Dockerfile
+  s_014ceaa01ffa6b::t_8d8514e19c47ce 36
+voice-agent-harnesses/nvidia/voicechat.py
+  s_014ceaa01ffa6b::t_8c7c9ca9dcf59e 45,88-89
+voice-agent-harnesses/qwen/harness.py
+  s_014ceaa01ffa6b::t_0b7b7d65dd1766 348-349
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "80bf27b1efd507190a5cb33194f2efcb44a62abc",
+  "prompts": {},
+  "sessions": {
+    "s_014ceaa01ffa6b": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "867ccd7f-82e4-4d30-9eb1-d8bda6398e6f",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

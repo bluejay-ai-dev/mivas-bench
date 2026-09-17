@@ -1,0 +1,287 @@
+industries/legal/tasks/R-M3/task.json
+  s_db3f161d9f83e0::t_2d175cbc7fab69 4,72
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-3,5-71,73-94
+industries/legal/tasks/C5-H3/task.json
+  s_db3f161d9f83e0::t_2d175cbc7fab69 142,177
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-141,143-176,178-195
+industries/legal/tasks/R-E2/task.json
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-2,5-7,9-19,21-31,33-68,70-86,88-93
+  s_db3f161d9f83e0::t_2d175cbc7fab69 3-4,8,20,32,69,87
+industries/legal/tasks/C3-H2/task.json
+  s_db3f161d9f83e0::t_2d175cbc7fab69 145
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-144,146-173
+scripts/encode_legal_tasks.py
+  s_db3f161d9f83e0::t_096701dcd7995c 165
+  s_db3f161d9f83e0::t_1cff61807ed76b 149-164,166-175
+  s_db3f161d9f83e0::t_6f28fc571f4817 134-136
+  s_db3f161d9f83e0::t_a04de78c8d4d4a 197-198
+  s_db3f161d9f83e0::t_4cc16a41699563 126-128
+  s_db3f161d9f83e0::t_574a12d564ded6 129-130
+  s_db3f161d9f83e0::t_75f20a1af894df 195-196
+  s_db3f161d9f83e0::t_2e757459a23e4b 1-125,131-133,137-148,176-194,199-264
+industries/legal/tasks/C2-E1/task.json
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-2,4-7,9-35,37-80,82-90,92-109
+  s_db3f161d9f83e0::t_2d175cbc7fab69 3,8,36,81,91
+industries/legal/tasks/C4-E1/task.json
+  s_db3f161d9f83e0::t_2d175cbc7fab69 3,8,56,114,124
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-2,4-7,9-55,57-113,115-123,125-145
+industries/legal/tasks/C4-H2/task.json
+  s_db3f161d9f83e0::t_2d175cbc7fab69 156
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-155,157-194
+industries/legal/tasks/C4-H1/task.json
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-148,150-193
+  s_db3f161d9f83e0::t_2d175cbc7fab69 149
+industries/legal/tasks/R-E3/task.json
+  s_db3f161d9f83e0::t_2d175cbc7fab69 3,8,32,70
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-2,4-7,9-31,33-69,71-93
+industries/legal/tasks/C1-M3/task.json
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-68,70-98
+  s_db3f161d9f83e0::t_2d175cbc7fab69 69
+industries/legal/tasks/C5-H1/task.json
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-141,143-195
+  s_db3f161d9f83e0::t_2d175cbc7fab69 142
+industries/legal/tasks/C2-E1-BG/task.json
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-2,4-7,9-35,37-80,82-90,92-109
+  s_db3f161d9f83e0::t_2d175cbc7fab69 3,8,36,81,91
+industries/legal/tasks/C4-M3/task.json
+  s_db3f161d9f83e0::t_2d175cbc7fab69 127
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-126,128-165
+industries/legal/tasks/C5-H2/task.json
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-2,4-7,9-94,96-153,155-163,165-199,201-227
+  s_db3f161d9f83e0::t_2d175cbc7fab69 3,8,95,154,164,200
+industries/legal/tasks/C3-H1/task.json
+  s_db3f161d9f83e0::t_2d175cbc7fab69 3,8,87,145,155
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-2,4-7,9-86,88-144,146-154,156-176
+industries/legal/tasks/R-H1/task.json
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-3,5-75,77-104
+  s_db3f161d9f83e0::t_2d175cbc7fab69 4,76
+industries/legal/tasks/C1-H3/task.json
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-46,48-64
+  s_db3f161d9f83e0::t_2d175cbc7fab69 47
+industries/legal/tasks/C3-H3/task.json
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-2,4-7,9-92,94-157,159-167,169-196
+  s_db3f161d9f83e0::t_2d175cbc7fab69 3,8,93,158,168
+industries/legal/tasks/C2-H2/task.json
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-129,131-167
+  s_db3f161d9f83e0::t_2d175cbc7fab69 130
+industries/legal/tasks/C5-E3/task.json
+  s_db3f161d9f83e0::t_2d175cbc7fab69 106,141
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-105,107-140,142-149
+industries/legal/tasks/C5-E2/task.json
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-2,4-7,9-53,55-112,114-122,124-166
+  s_db3f161d9f83e0::t_2d175cbc7fab69 3,8,54,113,123
+industries/legal/tasks/C5-M3/task.json
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-118,120-172
+  s_db3f161d9f83e0::t_2d175cbc7fab69 119
+industries/legal/tasks/C4-E1-SIG/task.json
+  s_db3f161d9f83e0::t_2d175cbc7fab69 3,8,56,114,124
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-2,4-7,9-55,57-113,115-123,125-145
+industries/legal/tasks/C2-H1/task.json
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-129,131-167
+  s_db3f161d9f83e0::t_2d175cbc7fab69 130
+industries/legal/tasks/C3-E1-SIG/task.json
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-79,81-108
+  s_db3f161d9f83e0::t_2d175cbc7fab69 80
+tests/test_verify_task_run.py
+  s_db3f161d9f83e0::t_02341745a2fe00 392,395-396,401,427,430,433-435,438,441-443,448,454-456,461,464,468-469,472-511
+  s_db3f161d9f83e0::t_d30e0a6e1b81ef 372-373
+  s_db3f161d9f83e0::t_4edd5c01f4b2d0 376,402,405-425
+  s_db3f161d9f83e0::t_eb865ea7763c66 76,78,80-81,369-371,374-375,377-391,393-394,397-400,403-404,426,428-429,431-432,436-437,439-440,444-447,449-453,457-460,462-463,465-467,470-471
+scripts/legal_task_spec.py
+  s_1298e406d1032a::t_ae917214c6e08f 1242-1254,1256-1257,1260-1262
+  s_db3f161d9f83e0::t_5e906fbd0fcd9a 1321
+  s_1298e406d1032a::t_846ab89ee6b9f0 1174-1196
+  s_1298e406d1032a::t_7f7ceefd8f6ada 343,385,387,390,410,434,438,460,467,479,495,499,517,530,534,896,903,907,925,936,940,1013,1053,1064,1074,1078,1118-1119,1126,1156,1163,1198,1225,1231,1258,1264,1297,1346,1384-1396,1399-1414,1539
+  s_1a1b19ee67c061::t_eb683e94e546b7 688
+  s_1a1b19ee67c061::t_7f7cc59384281c 506
+  s_1298e406d1032a::t_09a413f9fb1db5 1209-1221,1223-1224,1227-1229
+  s_1a1b19ee67c061::t_e19bfb63bcb513 414
+  s_db3f161d9f83e0::t_b57ad58fa51a68 148-341,552-685,693-885,1092,1110,1120,1132,1153,1157,1204,1222,1226,1237,1255,1259,1340,1364,1370,1421-1529
+  s_ca86604da87474::t_24819da0c74769 956-979
+  s_1298e406d1032a::t_e565b7affe331a 924,1275-1295
+  s_1a1b19ee67c061::t_da5a79e992043e 543
+  s_1298e406d1032a::t_029bc8d4789067 1345,1355-1357,1360-1363,1365-1369,1371-1374
+  s_db3f161d9f83e0::t_c3a24f5f3ecccc 1354,1359
+  s_1298e406d1032a::t_9fa3bafbef03f2 1308-1319,1322-1335
+  s_1a1b19ee67c061::t_5822d28fa0df0c 913,945,1014
+  s_ca86604da87474::t_2d6ebcb767bb67 1025-1047
+  s_db3f161d9f83e0::t_c8272d05cb95c6 1398
+  s_1a1b19ee67c061::t_b77480c1137e85 1084
+  s_1298e406d1032a::t_c4bb24b666db61 1137-1152,1154-1155,1158-1160
+  s_ca86604da87474::t_b49bdafe3f84c3 899,909-911,942,990-1011
+  s_1298e406d1032a::t_1d28dcccb147ff 1097-1109,1111-1112,1121-1123
+  s_ca86604da87474::t_7784dadf8f6b42 389,458,527
+  s_ca86604da87474::t_23205a49c39d31 492
+  s_db3f161d9f83e0::t_844427c51547b2 1-147,342,344-384,386,388,391-409,411-413,415-433,435-437,439-457,459,461-466,468-478,480-491,493-494,496-498,500-505,507-516,518-526,528-529,531-533,535-542,544-551,686-687,689-692,886-895,897-898,900-902,904-906,908,912,914-923,926-935,937-939,941,943-944,946-955,980-989,1012,1015-1024,1048-1052,1054-1063,1065-1073,1075-1077,1079-1083,1085-1091,1093-1096,1113-1117,1124-1125,1127-1131,1133-1136,1161-1162,1164-1173,1197,1199-1203,1205-1208,1230,1232-1236,1238-1241,1263,1265-1274,1296,1298-1307,1320,1336-1339,1341-1344,1347-1353,1358,1375-1383,1397,1415-1420,1530-1538,1540-1626
+industries/legal/tasks/C1-H1/task.json
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-2,5-7,9-24,26-61,63-71,73-84
+  s_db3f161d9f83e0::t_2d175cbc7fab69 3-4,8,25,62,72
+industries/legal/tasks/C3-M2/task.json
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-2,4-7,9-57,59-109,111-119,121-138
+  s_db3f161d9f83e0::t_2d175cbc7fab69 3,8,58,110,120
+industries/legal/tasks/C2-E1-SIG/task.json
+  s_db3f161d9f83e0::t_2d175cbc7fab69 3,8,36,81,91
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-2,4-7,9-35,37-80,82-90,92-109
+industries/legal/tasks/C5-M1/task.json
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-2,4-7,9-56,58-115,117-125,127-150,152-169
+  s_db3f161d9f83e0::t_2d175cbc7fab69 3,8,57,116,126,151
+industries/legal/tasks/C1-M1/task.json
+  s_db3f161d9f83e0::t_2d175cbc7fab69 4,29,78,96
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-3,5-28,30-77,79-95,97-102
+industries/legal/tasks/C4-M2/task.json
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-105,107-143
+  s_db3f161d9f83e0::t_2d175cbc7fab69 106
+industries/legal/tasks/C5-M2/task.json
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-2,4-7,9-56,58-115,117-125,127-169
+  s_db3f161d9f83e0::t_2d175cbc7fab69 3,8,57,116,126
+industries/legal/tasks/C3-E1/task.json
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-79,81-108
+  s_db3f161d9f83e0::t_2d175cbc7fab69 80
+industries/legal/tasks/R-E1/task.json
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-2,4-7,9-37,39-81,83-99
+  s_db3f161d9f83e0::t_2d175cbc7fab69 3,8,38,82
+industries/legal/tasks/C2-M3/task.json
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-78,80-107
+  s_db3f161d9f83e0::t_2d175cbc7fab69 79
+industries/legal/tasks/R-H2/task.json
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-69,71-98
+  s_db3f161d9f83e0::t_2d175cbc7fab69 70
+industries/legal/tasks/C4-M1/task.json
+  s_db3f161d9f83e0::t_2d175cbc7fab69 116
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-115,117-154
+industries/legal/tasks/C5-E1-BG/task.json
+  s_db3f161d9f83e0::t_2d175cbc7fab69 3,8,48,114,124,149
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-2,4-7,9-47,49-113,115-123,125-148,150-167
+scripts/verify_task_run.py
+  s_db3f161d9f83e0::t_a1c255a8bf048c 123-126
+  s_db3f161d9f83e0::t_e8fe5e4d4feec6 122
+  s_db3f161d9f83e0::t_f5394f0c229b51 127-128
+industries/legal/tasks/C1-H2/task.json
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-46,48-64
+  s_db3f161d9f83e0::t_2d175cbc7fab69 47
+industries/legal/tasks/C2-E3/task.json
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-76,78-100
+  s_db3f161d9f83e0::t_2d175cbc7fab69 77
+industries/legal/tasks/C3-E1-BG/task.json
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-79,81-108
+  s_db3f161d9f83e0::t_2d175cbc7fab69 80
+industries/legal/tasks/C1-M2/task.json
+  s_db3f161d9f83e0::t_2d175cbc7fab69 63
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-62,64-91
+industries/legal/tasks/C2-M1/task.json
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-91,93-120
+  s_db3f161d9f83e0::t_2d175cbc7fab69 92
+industries/legal/tasks/C4-E1-BG/task.json
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-2,4-7,9-55,57-113,115-123,125-145
+  s_db3f161d9f83e0::t_2d175cbc7fab69 3,8,56,114,124
+industries/legal/tasks/C4-E3/task.json
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-2,5-7,9-23,25-52,54-66,68-110,112-120,122-142
+  s_db3f161d9f83e0::t_2d175cbc7fab69 3-4,8,24,53,67,111,121
+industries/legal/tasks/C5-E1-SIG/task.json
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-2,4-7,9-47,49-113,115-123,125-148,150-167
+  s_db3f161d9f83e0::t_2d175cbc7fab69 3,8,48,114,124,149
+industries/legal/tasks/R-H3/task.json
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-61,63-79
+  s_db3f161d9f83e0::t_2d175cbc7fab69 62
+industries/legal/db/seed.sql
+  s_db3f161d9f83e0::t_b57ad58fa51a68 7,38,55-57,61,77
+industries/legal/tasks/C1-E1-BG/task.json
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-2,4-7,9-31,33-68,70-78,80-98
+  s_db3f161d9f83e0::t_2d175cbc7fab69 3,8,32,69,79
+industries/legal/tasks/C3-E2/task.json
+  s_db3f161d9f83e0::t_2d175cbc7fab69 80
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-79,81-108
+scripts/legal_digital_humans.py
+  s_db3f161d9f83e0::t_b57ad58fa51a68 221,228,232,239,248,439,444,452,458,757,763,771,781,1107,1116,1123,1137,1434,1444,1451,1472,1823-1824,1831,1838,1858-1859,2002,2007,2014,2020,2030,2035,2042,2048,2241-2242
+industries/legal/tasks/C3-E3/task.json
+  s_db3f161d9f83e0::t_2d175cbc7fab69 80
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-79,81-108
+industries/legal/tasks/C3-M3/task.json
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-3,5-71,73-109,111-138
+  s_db3f161d9f83e0::t_2d175cbc7fab69 4,72,110
+industries/legal/tasks/C1-E3/task.json
+  s_db3f161d9f83e0::t_2d175cbc7fab69 77
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-76,78-105
+industries/legal/tasks/C3-M1/task.json
+  s_db3f161d9f83e0::t_2d175cbc7fab69 3,8,58,110,120
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-2,4-7,9-57,59-109,111-119,121-138
+industries/legal/tasks/C2-E2/task.json
+  s_db3f161d9f83e0::t_2d175cbc7fab69 70
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-69,71-98
+industries/legal/tasks/C2-H3/task.json
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-3,5-69,71-98
+  s_db3f161d9f83e0::t_2d175cbc7fab69 4,70
+industries/legal/tasks/R-M1/task.json
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-68,70-91
+  s_db3f161d9f83e0::t_2d175cbc7fab69 69
+industries/legal/tasks/R-M2/task.json
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-68,70-91
+  s_db3f161d9f83e0::t_2d175cbc7fab69 69
+industries/legal/tasks/C5-E1/task.json
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-2,4-7,9-47,49-113,115-123,125-148,150-167
+  s_db3f161d9f83e0::t_2d175cbc7fab69 3,8,48,114,124,149
+industries/legal/tasks/C1-E2/task.json
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-3,5-23,25-72,74-90,92-97
+  s_db3f161d9f83e0::t_2d175cbc7fab69 4,24,73,91
+industries/legal/tasks/C1-E1/task.json
+  s_db3f161d9f83e0::t_2d175cbc7fab69 3,8,32,69,79
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-2,4-7,9-31,33-68,70-78,80-98
+industries/legal/tasks/C2-M2/task.json
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-87,89-116
+  s_db3f161d9f83e0::t_2d175cbc7fab69 88
+industries/legal/tasks/C1-E1-SIG/task.json
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-2,4-7,9-31,33-68,70-78,80-98
+  s_db3f161d9f83e0::t_2d175cbc7fab69 3,8,32,69,79
+industries/legal/tasks/R-E1-BG/task.json
+  s_db3f161d9f83e0::t_2d175cbc7fab69 3,8,38,82
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-2,4-7,9-37,39-81,83-99
+industries/legal/tasks/R-E1-SIG/task.json
+  s_db3f161d9f83e0::t_2d175cbc7fab69 3,8,38,82
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-2,4-7,9-37,39-81,83-99
+industries/legal/tasks/C4-H3/task.json
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-138,140-177
+  s_db3f161d9f83e0::t_2d175cbc7fab69 139
+industries/legal/tasks/C4-E2/task.json
+  s_db3f161d9f83e0::t_2d175cbc7fab69 3,8,50,115,125
+  s_db3f161d9f83e0::t_963a4a4df4a506 1-2,4-7,9-49,51-114,116-124,126-153
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "8767b7075400510b14fe6eb23d086172a725a2df",
+  "prompts": {},
+  "sessions": {
+    "s_1298e406d1032a": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "62e9dfee-ebdd-4b5a-af6b-32df6554c668",
+        "model": "default"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    },
+    "s_1a1b19ee67c061": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "c345500a-411d-451b-9a59-9685dc74828c",
+        "model": "default"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    },
+    "s_ca86604da87474": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "f5646521-7bc9-4eae-9fc8-91c09f8a51d8",
+        "model": "default"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    },
+    "s_db3f161d9f83e0": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "d9be1db5-e1ad-4f92-a906-c3f4fd329833",
+        "model": "default"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}

@@ -1,0 +1,31 @@
+scripts/expected_final_state.py
+  s_1cb9a0689f7f64::t_b20c1dde0d23ac 495
+scripts/tasks_to_digital_humans.py
+  s_1cb9a0689f7f64::t_7440258d2c9529 89-101,103
+tests/test_tool_span_ok.py
+  s_4544e608accab4::t_b1ae7b9c1c8ce8 1-20
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "979698ffc07becb2adff9890825329981a42302d",
+  "prompts": {},
+  "sessions": {
+    "s_1cb9a0689f7f64": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9db2f26b-93c7-45ee-a25b-887b8a2e808a",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    },
+    "s_4544e608accab4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "234aab04-bf24-4282-8375-9078f57074fe",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}

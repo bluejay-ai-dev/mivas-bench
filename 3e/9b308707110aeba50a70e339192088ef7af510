@@ -1,0 +1,19 @@
+scripts/tasks_to_digital_humans.py
+  s_c79534fcd0239b::t_7ccd000c14855a 415-424
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "3e9b308707110aeba50a70e339192088ef7af510",
+  "prompts": {},
+  "sessions": {
+    "s_c79534fcd0239b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2c3de37c-b760-4edd-9a68-9191c31127a0",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}

@@ -1,0 +1,27 @@
+industries/legal/system-prompts/client_services.md
+  s_cf97cff4a365b3::t_04211c74e38a6b 1-110,114-119,122-123,130,133-137,139,142-146,149-150,153-154,157-164
+industries/legal/system-prompts/intake.md
+  s_cf97cff4a365b3::t_4f7d9c83fc5a28 1-110,114-119,122-123,127-129,131-134,140-141,144-148,151-153,156-157,160-167
+industries/legal/system-prompts/reception.md
+  s_cf97cff4a365b3::t_9e346066c6517f 1-110,113-114,119-124,127,130-136,139,142-143,148-149,152-156,159-166,169,172-179
+industries/legal/system-prompts/scheduling.md
+  s_cf97cff4a365b3::t_7100dd563ff96f 1-110,114-119,122-123,127-134,139-140,143-144,147-154,157-158,161-163,166-173
+industries/legal/system-prompts/screening.md
+  s_cf97cff4a365b3::t_a6a99f57a2ad4f 1-110,114-119,122-124,128-130,134-139,141-144,147-150,152-153,156-163,166-168,171-172,175-182
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "c663d14360ef800c1cdfac04844b56500b924dc3",
+  "prompts": {},
+  "sessions": {
+    "s_cf97cff4a365b3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f4559822-b9b8-4166-93eb-34c79638bc15",
+        "model": "claude-opus-5"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

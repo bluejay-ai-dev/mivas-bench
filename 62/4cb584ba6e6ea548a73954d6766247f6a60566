@@ -1,0 +1,19 @@
+industries/healthcare/db/schema.sql
+  s_fe90f2f98408ce::t_5a9b3cc0cf0683 54-55
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "624cb584ba6e6ea548a73954d6766247f6a60566",
+  "prompts": {},
+  "sessions": {
+    "s_fe90f2f98408ce": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "87cf1cde-07c3-45f9-85f0-06db01052429",
+        "model": "cursor-grok-4.6-high-fast"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

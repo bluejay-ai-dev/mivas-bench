@@ -1,0 +1,68 @@
+voice-agent-harnesses/openai/report.py
+  s_529682e286274b::t_b5876bfa240d75 1,3,7-11,16,19,21,23,35-44,47,51-79,86-89,94,96,115-116,131-198,200-207,212-214,216-225,229-235
+  s_529682e286274b::t_74dde09a8de92a 2,5,12-15,17-18,24-25,31,48-50,82-83,90-91,95,99,110,113,118,121-122,125,127,129-130,215,227
+  s_529682e286274b::t_aa34db202f6d7a 4,6,20,22,26-30,32-34,45-46,80-81,84-85,92-93,97-98,100-109,111-112,114,117,119-120,123-124,126,128,199,208-211,226,228
+voice-agent-harnesses/openai/realtime-2.1/agent.py
+  s_529682e286274b::t_0f9cc888a3403a 17,31-37
+.env.example
+  s_529682e286274b::t_170ec3b67da6b5 25-26,28
+  s_529682e286274b::t_5773cdc911aa18 27,29
+industries/healthcare/db/schema.sql
+  s_2c8a9c83b2344f::t_ca748f5b12cc09 1-51
+industries/healthcare/README.md
+  s_2c8a9c83b2344f::t_0108831df4299c 27-51
+pyproject.toml
+  s_529682e286274b::t_509955b0f8859b 17
+  s_529682e286274b::t_44bc67467ed65f 18-20
+industries/healthcare/tool_server.py
+  s_2c8a9c83b2344f::t_830e497f74f71e 1-272
+tests/converse.py
+  s_529682e286274b::t_c0b11115e72eda 356
+  s_529682e286274b::t_3420d4c197c71a 355,357-374,408-416,437-440,442-448,450-469
+voice-agent-harnesses/openai/adapters/chirp.py
+  s_529682e286274b::t_192b7e1a0d5724 20-21,48-49,54-90
+  s_529682e286274b::t_ec9e634d1bedd7 40-44
+  s_529682e286274b::t_93a48f16c078fd 38-39,45-46,50-53
+industries/healthcare/db/seed.sql
+  s_2c8a9c83b2344f::t_cd5412328dac90 1-34
+k8s/job.yaml
+  s_529682e286274b::t_dc7e9f9ded7945 56
+  s_529682e286274b::t_de1b7a6165884b 57
+  s_529682e286274b::t_874a003d4376ab 49-55
+voice-agent-harnesses/openai/README.md
+  s_529682e286274b::t_88c0cb3d5cea2f 15
+  s_529682e286274b::t_6870c18659c481 10
+voice-agent-harnesses/openai/requirements.txt
+  s_529682e286274b::t_33dd4ada8a2487 4-6
+  s_529682e286274b::t_600c10be145609 3
+industries/healthcare/requirements.txt
+  s_2c8a9c83b2344f::t_5da6149e98f982 1-3
+voice-agent-harnesses/openai/realtime-2.1-mini/agent.py
+  s_529682e286274b::t_8292f074bc3057 17,31-37
+uv.lock
+  s_529682e286274b::t_90f366abb886b6 302-313,507-510,522-525,622-731
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "ff8573a381d965f324d9015c581cf29e26a86f32",
+  "prompts": {},
+  "sessions": {
+    "s_2c8a9c83b2344f": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "753c8a7f-330a-4c2d-9085-9c6034d26057",
+        "model": "grok-4.5"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    },
+    "s_529682e286274b": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "193d5298-7ec4-49a6-b2c3-125217dfa9e2",
+        "model": "default"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}

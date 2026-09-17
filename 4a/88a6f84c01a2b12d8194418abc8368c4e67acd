@@ -1,0 +1,19 @@
+runtime/entrypoint.sh
+  s_a57cf3caba4bab::t_21afdf8af49e86 33
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "4a88a6f84c01a2b12d8194418abc8368c4e67acd",
+  "prompts": {},
+  "sessions": {
+    "s_a57cf3caba4bab": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b479f552-1d29-4d1b-9264-9df46532e755",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}

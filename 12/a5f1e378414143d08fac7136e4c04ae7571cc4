@@ -1,0 +1,27 @@
+voice-agent-harnesses/nvidia/harness.py
+  s_4544e608accab4::t_39b6270e787ec2 266-267
+voice-agent-harnesses/qwen/harness.py
+  s_4544e608accab4::t_496aa6d360cf1b 348-349
+runtime/db_service.py
+  s_4544e608accab4::t_9f0eea7e3109e4 84-90
+voice-agent-harnesses/aws/harness.py
+  s_4544e608accab4::t_a0c3d2519a4019 509-510
+voice-agent-harnesses/grok/harness.py
+  s_4544e608accab4::t_bfe3f25cf5630b 377-378
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "12a5f1e378414143d08fac7136e4c04ae7571cc4",
+  "prompts": {},
+  "sessions": {
+    "s_4544e608accab4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "234aab04-bf24-4282-8375-9078f57074fe",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}

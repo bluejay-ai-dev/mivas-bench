@@ -1,0 +1,25 @@
+voice-agent-harnesses/openai/report.py
+  s_845b352bcf124c::t_0e3a958db30cef 196-202,208,220-221
+scripts/apply_legal_digital_humans.py
+  s_845b352bcf124c::t_429af73d8143d2 1-139
+voice-agent-harnesses/openai/test_upsert_settle.py
+  s_845b352bcf124c::t_f6975580407c3e 34-54
+  s_845b352bcf124c::t_6f1a7daffdf3e4 31-33
+  s_845b352bcf124c::t_6cf6a447c09eef 55-57
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "05d221bbcc020260dadf47fc974ce2231fe8782a",
+  "prompts": {},
+  "sessions": {
+    "s_845b352bcf124c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "bc9a6540-d54c-41c0-8c82-b14b272c7508",
+        "model": "claude-opus-5"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

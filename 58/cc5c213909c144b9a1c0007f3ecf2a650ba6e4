@@ -1,0 +1,43 @@
+voice-agent-harnesses/openai/realtime-2.1/agent.py
+  s_d699876125c6ea::t_1d01e7cdabb8dd 30-32
+industries/control-industry/system-prompts/scheduler.md
+  s_d699876125c6ea::t_a92e91c951fa07 8-12
+voice-agent-harnesses/openai/realtime-2.1-mini/agent.py
+  s_d699876125c6ea::t_38f64ad2c50fa9 30-32
+industries/healthcare/agent_blueprint.json
+  s_d699876125c6ea::t_bd2358a17a9611 25,83,146,223,275,335,391
+industries/control-industry/agent_blueprint.json
+  s_d699876125c6ea::t_2a7027ff7b6e7a 14,23,27
+industries/control-industry/README.md
+  s_d699876125c6ea::t_8ac31ed7238fd8 34
+tests/converse.py
+  s_d699876125c6ea::t_53be2f2a000a10 288-293,299,303-307,326-330,333
+  s_d699876125c6ea::t_dd0b1cc982d78d 416-418
+  s_d699876125c6ea::t_64e73e6051a07f 388-390
+voice-agent-harnesses/openai/runtime.py
+  s_d699876125c6ea::t_ee8ca83b93351e 172
+  s_d699876125c6ea::t_2ddf41562e9bb9 3-9,40-47,53,58-60,62,64,85,133-171,173-179
+  s_d699876125c6ea::t_2b7ae1eeae4089 61,63
+  s_d699876125c6ea::t_148f231687c5a3 14
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "58cc5c213909c144b9a1c0007f3ecf2a650ba6e4",
+  "prompts": {},
+  "humans": {
+    "h_bbe1a3ca680b9f": {
+      "author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_d699876125c6ea": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "99aaff9a-5019-40cf-bc79-c1a8c275271d",
+        "model": "grok-4.5"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

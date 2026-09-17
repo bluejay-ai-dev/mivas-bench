@@ -1,0 +1,28 @@
+voice-agent-harnesses/openai/README.md
+  s_d699876125c6ea::t_8e3c3910e74b03 16,23-24
+voice-agent-harnesses/openai/adapters/chirp.py
+  s_d699876125c6ea::t_d80fd7c38f0000 95
+  s_d699876125c6ea::t_7029b4abaf052f 20
+  s_d699876125c6ea::t_315fb85a569c12 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "37fcf20de60f678fb09a01f283882589355b563a",
+  "prompts": {},
+  "humans": {
+    "h_bbe1a3ca680b9f": {
+      "author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_d699876125c6ea": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "99aaff9a-5019-40cf-bc79-c1a8c275271d",
+        "model": "grok-4.5"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

@@ -1,0 +1,37 @@
+scripts/tunnel_keeper.sh
+  s_6a814060c5d2c4::t_70a659ab19235c 1-64
+scripts/attribution_bundle.py
+  s_02b652e639a135::t_2ca5cb9f036489 1-135
+scripts/compare_dashboard.py
+  s_02b652e639a135::t_1af03289b3a45b 1-429
+scripts/dashboard_data.py
+  s_02b652e639a135::t_4087107338078c 1-154
+scripts/finance_digital_humans.py
+  s_02b652e639a135::t_e9ab633ad3c227 1-1237
+tests/test_voicechat_toolcall_channel.py
+  s_02b652e639a135::t_5af38da796c2d0 1-83
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "b79d20e20c5359eeb03d68b9fd3b06aa9fb03fb8",
+  "prompts": {},
+  "sessions": {
+    "s_02b652e639a135": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "87606ab8-5595-44d8-a900-562c09129cd5",
+        "model": "claude-opus-5"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    },
+    "s_6a814060c5d2c4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3f2df1e6-8829-448f-81ea-d18b9e84438f",
+        "model": "claude-opus-5"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

@@ -1,0 +1,181 @@
+voice-agent-harnesses/grok/voice/adapters/chirp.py
+  s_a959513d7ad95b::t_5210cdbf5059ed 13-19
+  s_a959513d7ad95b::t_37eb0856bb34be 353
+  s_a959513d7ad95b::t_8eb14713a6713a 684-690
+  s_a959513d7ad95b::t_2734ce709d2715 811,814-821,825-830
+  s_a959513d7ad95b::t_4bbedcbc14e682 439-441,443-451
+  s_a959513d7ad95b::t_8572838c6b2bde 68
+  s_a959513d7ad95b::t_a1dbd384054ad2 597
+  s_a959513d7ad95b::t_41ac87e42093a5 420-424,427-428
+  s_a959513d7ad95b::t_2a92506fb5cc46 62
+  s_a959513d7ad95b::t_8e5f860dcfdda3 473-475,485
+  s_a959513d7ad95b::t_284bf8959da8d3 839-842
+  s_a959513d7ad95b::t_ed976cd231601d 346
+  s_a959513d7ad95b::t_aa0c8f781ad73c 812-813,822-824
+  s_a959513d7ad95b::t_5467762c65a619 354-355,366-370
+  s_a959513d7ad95b::t_3ee2e6c7f71885 336-345
+  s_a959513d7ad95b::t_7991875d9cb0b0 724
+  s_a959513d7ad95b::t_dfa9089007bf4c 655
+  s_a959513d7ad95b::t_3f189b96fe0254 838
+  s_a959513d7ad95b::t_30bdcab4884da2 347
+  s_a959513d7ad95b::t_7fd6361126f9d3 371
+tests/test_grok_pcm_pacer.py
+  s_d9436387cf46d4::t_24e0762a2b0f10 6,13-26
+  s_a959513d7ad95b::t_bd78c3828f91c8 146-147
+  s_a959513d7ad95b::t_e51a0211e30c51 134-141,148-149
+  s_a959513d7ad95b::t_e38fd9885051e0 1-5,7-8,10-12,27-52,82-133,150-169,172-175
+  s_a959513d7ad95b::t_364d271d2892ee 9
+  s_a959513d7ad95b::t_9b66622809c623 53-81
+  s_a959513d7ad95b::t_c19b99614a8bf5 142-143
+  s_a959513d7ad95b::t_7613d054ae2ba4 144
+  s_a959513d7ad95b::t_fe03982f0c3a09 145
+  s_d9436387cf46d4::t_e0179c56afd0de 170-171
+tests/test_deepgram_pcm_pacer.py
+  s_9f6ea52b670920::t_6db3128c7c2f77 1-5,7-11,26-51,56-72
+  s_9f6ea52b670920::t_f70f3b9499b810 52-55
+  s_d9436387cf46d4::t_db047bbec82345 6,12-25
+voice-agent-harnesses/grok/pcm.py
+  s_a959513d7ad95b::t_795896778d926e 1-2,11-15,17-23,25-29,32-39,41-44,46-50,53-61,63,66-72,74-97,110-114,116-126
+  s_a959513d7ad95b::t_d0270bc9baf7b9 73
+  s_a959513d7ad95b::t_f0871a9ca86c4d 3-10,16,24,30-31,40,45,51-52,62,64-65,98-109,115
+voice-agent-harnesses/deepgram/harness.py
+  s_9f6ea52b670920::t_8f84e006a1617f 129-133,150
+  s_9f6ea52b670920::t_d2a1330dbf8cce 75
+  s_9f6ea52b670920::t_8174c0e750cea4 37
+tests/test_elevenlabs_agents.py
+  s_5b9c851bf11ca7::t_7b58c6f4e6fa9d 1-5,7-51,53-56,75-86
+  s_5b9c851bf11ca7::t_2de26ac1417c52 89-107,112-117,119-121
+  s_5b9c851bf11ca7::t_d10f04d48ed9de 122-123
+  s_5b9c851bf11ca7::t_3c7d1a597371b2 52
+  s_5b9c851bf11ca7::t_81c715770cd5a1 57-74
+  s_5b9c851bf11ca7::t_6d5cf844e24572 87-88
+  s_d9436387cf46d4::t_098ee369ef5cf5 108-111,118
+  s_5b9c851bf11ca7::t_b79eb4d1236ce6 6
+tests/test_vapi_pcm_pacer.py
+  s_d9436387cf46d4::t_1365acd9af100e 6-25
+  s_d9436387cf46d4::t_336f83ba050a50 3-5
+  s_d9436387cf46d4::t_af5057985a7b89 26-28
+  s_9f6ea52b670920::t_9375abea1d685d 1-2,29-114
+voice-agent-harnesses/deepgram/pcm.py
+  s_9f6ea52b670920::t_1e82040c79a871 1-18,22-126
+  s_9f6ea52b670920::t_74f7a666986284 19-21
+voice-agent-harnesses/grok/harness.py
+  s_a959513d7ad95b::t_9a530739fee198 325-331
+tests/test_bland_pcm_pacer.py
+  s_d9436387cf46d4::t_caa508cc90a601 6,13-25
+voice-agent-harnesses/elevenlabs/harness.py
+  s_5b9c851bf11ca7::t_20a711174a0303 168
+  s_5b9c851bf11ca7::t_0195d96aa0c245 213-216,224-230,233-234,239-243
+  s_5b9c851bf11ca7::t_f06922c663a934 410,427
+  s_5b9c851bf11ca7::t_c1e78566b68175 17
+  s_5b9c851bf11ca7::t_f4503c20a46262 275-276
+  s_5b9c851bf11ca7::t_b58416064f8315 274,277-278
+  s_5b9c851bf11ca7::t_147c094036163d 201-206
+  s_5b9c851bf11ca7::t_668c5b8941d2d6 400
+  s_5b9c851bf11ca7::t_515b7074457cc5 94,98-99,101-104,106-129,133-134
+  s_5b9c851bf11ca7::t_54a9a2c21d008f 291-300,304,308,312-321,335-366,368,371-375,395,399,401-404,406-409,413-416,420-426,428-429,431-434,436,438,440,443
+  s_5b9c851bf11ca7::t_9c960294b0230f 198-200
+  s_5b9c851bf11ca7::t_202eeac42ae312 156,165-166,171,182-186,189-190,192-194,221,223,232,238,244-249,257-258,265-267,271
+  s_5b9c851bf11ca7::t_27082b2a18d24d 169
+  s_5b9c851bf11ca7::t_9c6f90311b4269 41
+  s_5b9c851bf11ca7::t_e06b75b5fc7c52 376-378,380-386
+tests/test_deepgram_greeting.py
+  s_d9436387cf46d4::t_ab7b6d63b15efd 5,11-30
+  s_9f6ea52b670920::t_92f1eca880f776 61
+  s_d9436387cf46d4::t_b7001153ce955d 72-74
+  s_9f6ea52b670920::t_de4d9c1c582685 1-4,6-10,31-60
+  s_9f6ea52b670920::t_52ba4629e45ab7 63,65-71,75-85
+  s_9f6ea52b670920::t_f1992f6d6e46cd 64
+  s_9f6ea52b670920::t_fe926d87b4ad71 62
+voice-agent-harnesses/deepgram/adapters/chirp.py
+  s_9f6ea52b670920::t_e33e36d3e0264e 291-292,299-300
+  s_9f6ea52b670920::t_30f0b660fdb086 99-100,107-108,114,129-132,141-142,236,246,273-278,288-290,293
+  s_9f6ea52b670920::t_f49e7931db88c8 231
+  s_9f6ea52b670920::t_b8c64d30deb886 295,302-303
+  s_9f6ea52b670920::t_24b97ecbf81ed7 126,136-140,145-146,153-161,170-187,189-190,192-193,196-201,206-208,219-230,237
+  s_9f6ea52b670920::t_cfd3116bc99f04 279
+  s_9f6ea52b670920::t_c8c0926503060f 22
+  s_9f6ea52b670920::t_391b32dcc8efc1 169
+  s_9f6ea52b670920::t_11b81009f04322 332
+  s_9f6ea52b670920::t_a49bf06122c70e 133-135,168,202-205
+  s_9f6ea52b670920::t_b9aeef0a31e900 188,191,194-195
+  s_9f6ea52b670920::t_d57089706b7fbf 266
+  s_9f6ea52b670920::t_bf7e943ba0a123 333-334,343,345-364
+  s_9f6ea52b670920::t_3eed4a4a7f7666 125
+  s_9f6ea52b670920::t_e0748611dd7897 28-64
+  s_d9436387cf46d4::t_bbf2e04bc4d714 162
+voice-agent-harnesses/elevenlabs/adapters/chirp.py
+  s_5b9c851bf11ca7::t_94d099ede5a993 113-119,125-130,141,146-156
+  s_5b9c851bf11ca7::t_73ac9b9f01e247 170,184-197
+  s_5b9c851bf11ca7::t_3f4e5c4aaa40c3 90
+  s_5b9c851bf11ca7::t_58ea6ee9ad557b 273-275
+  s_5b9c851bf11ca7::t_92803afc3ac313 326-332
+  s_5b9c851bf11ca7::t_a7127bc5f6d771 238-243
+  s_5b9c851bf11ca7::t_401193f4a8679b 36-42
+  s_5b9c851bf11ca7::t_c6a53cff1893b7 75,78-82,88-89,91
+  s_5b9c851bf11ca7::t_f623bdd4b82eb8 256-262
+voice-agent-harnesses/vapi/README.md
+  s_7b61a8ab541dd7::t_3615e7913c2154 64
+voice-agent-harnesses/vapi/report.py
+  s_65d5342a79eeac::t_db3f7472148a51 55
+voice-agent-harnesses/vapi/adapters/chirp.py
+  s_9f6ea52b670920::t_14be78d664c841 8-12,49,159-160,165,173-174,209,223-224,245-247,258-260
+voice-agent-harnesses/vapi/pcm.py
+  s_9f6ea52b670920::t_4f209750ce58c4 1-124
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "101cdfa7cb37518a234bf12ad444bda815b01c65",
+  "prompts": {},
+  "sessions": {
+    "s_5b9c851bf11ca7": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "ecb9e2ba-343e-4833-b240-8907b7652a0c",
+        "model": "grok-4.6"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    },
+    "s_65d5342a79eeac": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "1a796477-7be8-4e20-9a74-f7394f552db0",
+        "model": "grok-4.6"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    },
+    "s_7b61a8ab541dd7": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "02fd5376-8f30-402a-99eb-7dbc16a28c66",
+        "model": "grok-4.6"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    },
+    "s_9f6ea52b670920": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "ec2c5f12-dead-4776-920a-ce77c183c0b1",
+        "model": "grok-4.6"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    },
+    "s_a959513d7ad95b": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "c9d7f8b8-470d-44d3-82f8-a72bc6c8db5a",
+        "model": "grok-4.6"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    },
+    "s_d9436387cf46d4": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "13d35798-8b9f-45a1-802f-f6cf65bd763e",
+        "model": "grok-4.6"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

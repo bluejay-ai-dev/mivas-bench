@@ -1,0 +1,19 @@
+scripts/legal_digital_humans.py
+  s_845b352bcf124c::t_18ebabeeafec4b 111-113
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "0c59e24610d97bc7328d3e5f2936011ce6839a14",
+  "prompts": {},
+  "sessions": {
+    "s_845b352bcf124c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "bc9a6540-d54c-41c0-8c82-b14b272c7508",
+        "model": "claude-opus-5"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

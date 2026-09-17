@@ -1,0 +1,121 @@
+industries/finance/tool_server.py
+  s_45ff4528f38a78::t_f8e8db4ce24ec2 135
+  s_45ff4528f38a78::t_e5b7fa55de7522 52
+k8s/service-pods.yaml
+  s_45ff4528f38a78::t_f4deb1ea914d56 1-3,20-22
+  s_45ff4528f38a78::t_4b0a1195850c64 4-19,23
+voice-agent-harnesses/pipecat/bot.py
+  s_45ff4528f38a78::t_66b44258c96be8 3
+  s_45ff4528f38a78::t_d5493e63901b12 500-519,521,524,528
+  s_45ff4528f38a78::t_ad43ce97ec3b0d 417,426-427
+  s_45ff4528f38a78::t_00e4e30554bbb2 425,430-431
+  s_45ff4528f38a78::t_ee8708fb8e33e7 520,522-523,525-527
+  s_45ff4528f38a78::t_086fa1acf0b44e 4-6
+  s_45ff4528f38a78::t_a94ddfa9ea0cdc 480
+  s_45ff4528f38a78::t_deb31103b58785 20-21
+  s_45ff4528f38a78::t_c83ee1670f5899 419
+  s_45ff4528f38a78::t_9811af743aa923 494
+industries/control-industry/tool_server.py
+  s_45ff4528f38a78::t_08bbd67ddf002c 40
+  s_45ff4528f38a78::t_35a121dea48ddc 27
+voice-agent-harnesses/pipecat/README.md
+  s_45ff4528f38a78::t_4462f8112329ee 116
+  s_45ff4528f38a78::t_e071024c07cec3 23-26
+  s_45ff4528f38a78::t_53ce4680c68ac7 102
+  s_45ff4528f38a78::t_8751e4caa021fb 17-19
+industries/legal/tool_server.py
+  s_45ff4528f38a78::t_44a98217b117d9 41
+  s_45ff4528f38a78::t_0cac8c8c090dea 79
+runtime/tools_http.py
+  s_45ff4528f38a78::t_8767621f00ebd9 1-17
+voice-agent-harnesses/pipecat/report.py
+  s_45ff4528f38a78::t_9ce4ea33f38703 286-289,291,299
+runtime/provider_bind.py
+  s_45ff4528f38a78::t_73f85c722547a4 1-48
+run.py
+  s_45ff4528f38a78::t_933053fe954622 630
+  s_45ff4528f38a78::t_e2e08d20c9f002 657
+  s_45ff4528f38a78::t_378dc55e72ca1b 659-661,671
+  s_45ff4528f38a78::t_ac7df3a7cdafff 907
+  s_45ff4528f38a78::t_29d4356659bf6a 631
+  s_45ff4528f38a78::t_a59bf086b0a5f8 776
+  s_45ff4528f38a78::t_038add6c5ee92f 658
+voice-agent-harnesses/pipecat/test_harness.py
+  s_45ff4528f38a78::t_c25e1db0612e29 121
+  s_45ff4528f38a78::t_42294253facc16 116-118
+tests/test_snapshot.py
+  s_45ff4528f38a78::t_310de3406e4306 22
+  s_45ff4528f38a78::t_7ffab1a2db72bb 48
+k8s/dispatcher.yaml
+  s_45ff4528f38a78::t_ad6d3ce144b89e 49-50
+industries/travel/tool_server.py
+  s_45ff4528f38a78::t_e80b21a56f4af6 52
+  s_45ff4528f38a78::t_d36d9a1c2e927a 124
+k8s/service.yaml
+  s_45ff4528f38a78::t_ba45f4e25f3edb 24-27
+runtime/db_service.py
+  s_45ff4528f38a78::t_7f2232ea2f7b3e 175
+  s_45ff4528f38a78::t_6a964c4cd7c6b8 76,106
+runtime/snapshot.py
+  s_45ff4528f38a78::t_843deb8f364e45 133-187
+voice-agent-harnesses/pipecat/test_dispatcher.py
+  s_45ff4528f38a78::t_18c9bd9161b6ca 31
+  s_45ff4528f38a78::t_a29d46580b601e 90
+  s_45ff4528f38a78::t_8bc89d72d5ba49 122
+  s_45ff4528f38a78::t_b2f344bf5fbac5 23-25
+  s_45ff4528f38a78::t_d7f46d0afa15f7 224-225
+  s_45ff4528f38a78::t_9139deb4883c06 51
+  s_45ff4528f38a78::t_4dcb61c7f68453 5
+  s_45ff4528f38a78::t_419b6fbc5af71b 184
+  s_45ff4528f38a78::t_06e37a188b2035 208
+  s_45ff4528f38a78::t_0f76cabdd52224 32,148-183,185-207,209-223,226-228
+  s_45ff4528f38a78::t_d1db61cfa32ce6 29,33-34,40-50,52-56
+  s_45ff4528f38a78::t_8c4a3c99b7bddd 61
+tests/test_agents.py
+  s_45ff4528f38a78::t_0185c8ea839ef2 148-150
+  s_45ff4528f38a78::t_8a5e76dac9f09e 185
+  s_45ff4528f38a78::t_ec2f363d5dafa1 186,189
+tests/test_db_service.py
+  s_45ff4528f38a78::t_9379fea4f7c146 189-190,193
+industries/healthcare/tool_server.py
+  s_45ff4528f38a78::t_90f22ed3f9cc9c 36
+  s_45ff4528f38a78::t_7dab3b55545a76 49
+industries/customer-support/tool_server.py
+  s_45ff4528f38a78::t_1d24682402be30 199
+  s_45ff4528f38a78::t_204115481fa62b 64
+runtime/entrypoint.sh
+  s_45ff4528f38a78::t_08f6e1ead3a8fb 28
+voice-agent-harnesses/pipecat/dispatcher.py
+  s_45ff4528f38a78::t_dfa67241123ab6 31-32
+  s_45ff4528f38a78::t_761b855bab260d 6-8
+  s_45ff4528f38a78::t_e863b50d67e952 33-43
+  s_45ff4528f38a78::t_dc3690605422ab 44
+  s_45ff4528f38a78::t_86f7ed0b077aa2 50
+  s_45ff4528f38a78::t_c843c95fb7cfb7 99
+  s_45ff4528f38a78::t_e78a1ada3e35a2 1,4-5,9,21,55-66,68-98,100-118,121-184,207-213,215,217
+  s_45ff4528f38a78::t_de6b057c9496a2 206,214,224
+  s_45ff4528f38a78::t_32cb8db18105be 67
+k8s/deployment.yaml
+  s_45ff4528f38a78::t_bca8db2ce7f635 273-274
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "5965847a0eb0b9d063f9c9390015b3ca16ec8f81",
+  "prompts": {},
+  "humans": {
+    "h_f787e3fe1ad713": {
+      "author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_45ff4528f38a78": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "1f10f9a7-87a5-4982-9246-10e271e79bfd",
+        "model": "grok-4.6"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}

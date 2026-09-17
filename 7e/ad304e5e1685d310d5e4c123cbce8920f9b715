@@ -1,0 +1,19 @@
+README.md
+  s_462b09f5e2df1c::t_00456ea06ecf52 259-264
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "7ead304e5e1685d310d5e4c123cbce8920f9b715",
+  "prompts": {},
+  "sessions": {
+    "s_462b09f5e2df1c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8b47c759-c23d-410c-b962-ca570f8fb6c5",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}

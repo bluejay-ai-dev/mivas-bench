@@ -1,0 +1,37 @@
+industries/legal/tool_server.py
+  s_3a1a4472f6b0f4::t_b63609f6cf29c9 300-304
+tests/test_verify_task_run.py
+  s_3a1a4472f6b0f4::t_fa650af5c4141a 485-490
+industries/legal/tasks/C5-M3/task.json
+  s_3a1a4472f6b0f4::t_2186225997c5ca 4,46-51
+verifiers/verify_task_run.py
+  s_3a1a4472f6b0f4::t_2d1e20fe2da7cf 617,621-623,627,629-630
+  s_3a1a4472f6b0f4::t_a9ec833df8f5cb 581-593,597-600,602-603,618,624-626,628,631-632,636-637,641-642,648
+  s_3a1a4472f6b0f4::t_0225e26602a0c0 594-596,601
+  s_3a1a4472f6b0f4::t_9ab30c7d785cd6 646
+  s_3a1a4472f6b0f4::t_43c8b187bd74a2 604-616,619-620,633-635
+industries/legal/tasks/C4-H2/task.json
+  s_3a1a4472f6b0f4::t_2186225997c5ca 54-59,66-71,78-83,93-98,216-221
+industries/legal/tasks/R-H1/task.json
+  s_3a1a4472f6b0f4::t_1f7b4cadbd4578 4
+industries/legal/tasks/R-E2/task.json
+  s_3a1a4472f6b0f4::t_2186225997c5ca 15
+industries/legal/tasks/C2-H4/task.json
+  s_3a1a4472f6b0f4::t_2186225997c5ca 15
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "d4294fe602c17d4eecd74deeb1c354d8d63164fe",
+  "prompts": {},
+  "sessions": {
+    "s_3a1a4472f6b0f4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "898e5346-f299-4ffb-8922-7a63c54e3f46",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}

@@ -1,0 +1,19 @@
+run.py
+  s_f9b9415af7fc3d::t_ae9b3ee383f7b1 597
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "c772e33f5959ddc5fba2c60574a4bd1573b8b0a9",
+  "prompts": {},
+  "sessions": {
+    "s_f9b9415af7fc3d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f4041a6e-ae90-4add-8228-418a3fdf2327",
+        "model": "unknown"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}

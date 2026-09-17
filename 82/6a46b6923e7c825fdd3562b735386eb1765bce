@@ -1,0 +1,35 @@
+voice-agent-harnesses/gemini/harness.py
+  s_07d7a36d687777::t_2e0c90bf6bb325 117
+  s_07d7a36d687777::t_b1cf8498f5aff5 304
+  s_07d7a36d687777::t_5b7092e3809107 285-290
+  s_07d7a36d687777::t_461697b596c9b1 331-334
+voice-agent-harnesses/gemini/report.py
+  s_07d7a36d687777::t_5720541bab1f45 30-35,38-39,58-60
+voice-agent-harnesses/qwen/harness.py
+  s_e53867ee37a152::t_94417fb6b0b89d 6-8
+  s_e53867ee37a152::t_c7cefff7eb3dd8 317,327-329
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "826a46b6923e7c825fdd3562b735386eb1765bce",
+  "prompts": {},
+  "sessions": {
+    "s_07d7a36d687777": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "72150785-e81a-4513-bfd8-e5511a1312ef",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    },
+    "s_e53867ee37a152": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "a6dd642d-39c3-4a24-bab0-1ca2ca6b33db",
+        "model": "cursor-grok-4.6-high-fast"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}

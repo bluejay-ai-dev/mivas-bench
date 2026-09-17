@@ -1,0 +1,67 @@
+.env.example
+  s_083fbd3e7687af::t_8f757277851a0c 150
+  s_083fbd3e7687af::t_80c5646b8e53f7 95-105
+voice-agent-harnesses/qwen/harness.py
+  s_083fbd3e7687af::t_23fab9398f753b 481-483
+  s_083fbd3e7687af::t_75845358d0fbce 261-263,267-275,285-289
+  s_083fbd3e7687af::t_14bba72f60ed28 478-480
+  s_083fbd3e7687af::t_f77416d934dbae 367-382
+  s_083fbd3e7687af::t_ca44e53734ffbe 1-260,264-266,276-284,290-366,383-477,484-507
+voice-agent-harnesses/qwen/audio-realtime/adapters/chirp.py
+  s_083fbd3e7687af::t_4cb8da27166f88 1-8
+voice-agent-harnesses/qwen/adapters/chirp.py
+  s_083fbd3e7687af::t_acf3c22a1b624c 7
+  s_083fbd3e7687af::t_bd5c66e0b0b64c 99,104-106
+  s_083fbd3e7687af::t_8daab2e13a26d6 49
+  s_083fbd3e7687af::t_39626de2c88d35 189
+  s_083fbd3e7687af::t_bb737db6d7aafb 1-6,8-48,50-98,100-103,107-188,190-339
+voice-agent-harnesses/qwen/audio-realtime/Dockerfile
+  s_083fbd3e7687af::t_3b5d51eba77699 1-68
+voice-agent-harnesses/qwen/README.md
+  s_083fbd3e7687af::t_53b4e3efc612d8 14
+  s_083fbd3e7687af::t_e588333aef1eda 56
+  s_083fbd3e7687af::t_05b23bb70b2890 3-13,15-49,52
+  s_083fbd3e7687af::t_fb10083cca54a8 57
+  s_083fbd3e7687af::t_2122b2055a0450 59
+  s_083fbd3e7687af::t_c1b55206465ed3 50-51,53-55,58
+k8s/deployment.yaml
+  s_083fbd3e7687af::t_998cb5330348c8 206-235
+pyproject.toml
+  s_083fbd3e7687af::t_0fa73819c74295 36
+voice-agent-harnesses/qwen/report.py
+  s_083fbd3e7687af::t_59125be022d713 310
+  s_083fbd3e7687af::t_8c89be50b0ce51 254
+  s_083fbd3e7687af::t_56b6995f6d6bb4 1-253,255-309,311-350
+voice-agent-harnesses/qwen/requirements.txt
+  s_083fbd3e7687af::t_e681a15d617c20 1-6
+voice-agent-harnesses/qwen/audio-realtime/agent.py
+  s_083fbd3e7687af::t_6135297e4a7d2a 1-6,9-43,48-50,52-54
+  s_083fbd3e7687af::t_8b6408d5d8400b 7-8
+  s_083fbd3e7687af::t_27fde18feb6eb2 44-47,51
+run.py
+  s_083fbd3e7687af::t_721e7c334b105c 392-396
+  s_083fbd3e7687af::t_1b5d0182b16399 51-54
+k8s/secret.example.yaml
+  s_083fbd3e7687af::t_934be9d87a98eb 29-33
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "28985ae8d99d9af0cab5637569bc63071addc7e5",
+  "prompts": {},
+  "humans": {
+    "h_f787e3fe1ad713": {
+      "author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_083fbd3e7687af": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "a11504ce-003d-4339-b8ab-1d53c8b1a01c",
+        "model": "grok-4.6"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}

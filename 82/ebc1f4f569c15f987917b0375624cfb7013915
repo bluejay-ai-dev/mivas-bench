@@ -1,0 +1,34 @@
+voice-agent-harnesses/openai/realtime-2.1-mini/README.md
+  s_6dd0c90f375723::t_f243dee74c50d6 1-11
+voice-agent-harnesses/openai/runtime.py
+  s_6dd0c90f375723::t_1fec91010d8164 1,34-35,58,80,83,89,106-107
+voice-agent-harnesses/openai/realtime-2.1/README.md
+  s_6dd0c90f375723::t_990d6cb3c9a83a 1-11
+voice-agent-harnesses/openai/realtime-2.1/agent.py
+  s_6dd0c90f375723::t_d82a2a9caa2ef8 1-30
+voice-agent-harnesses/openai/realtime-2.1-mini/agent.py
+  s_6dd0c90f375723::t_b320e852b7b07e 1-30
+voice-agent-harnesses/openai/README.md
+  s_6dd0c90f375723::t_08e7bccc51dd55 3-8,13-14
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "82ebc1f4f569c15f987917b0375624cfb7013915",
+  "prompts": {},
+  "humans": {
+    "h_bbe1a3ca680b9f": {
+      "author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_6dd0c90f375723": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "319bc4cb-9526-48f5-95f2-bb0f8a259311",
+        "model": "grok-4.5"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

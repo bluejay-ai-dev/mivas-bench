@@ -1,0 +1,21 @@
+run.py
+  s_db9d310afd2bd5::t_dce89c7065f30f 655
+runtime/call_id.py
+  s_db9d310afd2bd5::t_44b5060e9c711b 261
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "32d18e479101b0d882b23266536b00762c5dff9c",
+  "prompts": {},
+  "sessions": {
+    "s_db9d310afd2bd5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a7627e96-cc48-4afb-ac44-a416e816d225",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}

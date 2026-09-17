@@ -1,0 +1,80 @@
+voice-agent-harnesses/vapi/adapters/chirp.py
+  s_276c21537d096d::t_1093e5460167dd 36,39
+  s_276c21537d096d::t_867b6c1c908b34 243-244
+  s_276c21537d096d::t_521d32029b465d 270-275
+voice-agent-harnesses/openai/harness.py
+  s_276c21537d096d::t_95b6fb4d5e40d4 233-237
+  s_276c21537d096d::t_6ba38b5ade063e 4-6,10
+  s_276c21537d096d::t_e5b9865ef27cee 38-39,41
+  s_276c21537d096d::t_1cf4ef28edbaaf 102-103
+voice-agent-harnesses/README.md
+  s_276c21537d096d::t_13762dfb2c3047 4-37
+voice-agent-harnesses/cartesia/harness.py
+  s_276c21537d096d::t_d7d11f53440173 154-157,167-168
+  s_276c21537d096d::t_2a3e43dd856a60 8-12
+voice-agent-harnesses/livekit/harness.py
+  s_276c21537d096d::t_90d929c8999d99 55-56
+  s_276c21537d096d::t_5e21116c39ef6a 104-107,109-111,114-120,124-125,133,136-196,198-199,202-213,219,222,224,226-232,234,237-238
+  s_276c21537d096d::t_3584f13b24c355 1,5-8
+voice-agent-harnesses/livekit/test_harness.py
+  s_276c21537d096d::t_a64b9ccf3ae5d2 21
+  s_276c21537d096d::t_eff30a58b77b9a 54-60,65-68,72-73,77-85
+  s_276c21537d096d::t_10df7c6febc7a1 115
+  s_276c21537d096d::t_539c848d82fd7b 86-87
+voice-agent-harnesses/elevenlabs/harness.py
+  s_276c21537d096d::t_e66044a326a2a0 322-327
+  s_276c21537d096d::t_8a1e503a2f30ae 402
+  s_276c21537d096d::t_d4d74fc7344459 7-8
+  s_276c21537d096d::t_c286e64cce1e5f 345-346
+voice-agent-harnesses/deepgram/harness.py
+  s_276c21537d096d::t_60fe5c46ac2572 108-109
+  s_276c21537d096d::t_0c1e1749e9aa96 187-188
+  s_276c21537d096d::t_97eee21e8cb4e8 131-141,143-144,153-157,161,165-166,169,172
+  s_276c21537d096d::t_8758fd0c9084bf 60-76
+voice-agent-harnesses/pipecat/harness.py
+  s_276c21537d096d::t_fc5c5de6a7467e 140-148,154-156,160-161,168,171-175
+  s_276c21537d096d::t_ca96fbb14cf963 192
+  s_276c21537d096d::t_ff2e34bda478e7 3-6
+voice-agent-harnesses/livekit/openai-realtime-2.1/agent.py
+  s_276c21537d096d::t_ec410fd87b5ffc 38
+voice-agent-harnesses/vapi/harness.py
+  s_276c21537d096d::t_b305b0e1dc813f 8-11
+  s_276c21537d096d::t_87bff7790306df 309
+  s_276c21537d096d::t_378bec74f8f69a 285-293,297-300,313-314
+voice-agent-harnesses/livekit/cascaded/agent.py
+  s_276c21537d096d::t_b1ec69951e04ed 45
+voice-agent-harnesses/bland/harness.py
+  s_276c21537d096d::t_7993ffa0f797b9 400-414,416-419,421-423,432
+voice-agent-harnesses/retell/harness.py
+  s_276c21537d096d::t_a7d92e2e6c9d1b 336-339,349-350
+  s_276c21537d096d::t_c6d21f24ea6334 345
+  s_276c21537d096d::t_6195e31f212769 9-13
+voice-agent-harnesses/gemini/harness.py
+  s_276c21537d096d::t_1252381f6cdea3 50-66
+  s_276c21537d096d::t_99a5317a2a500b 98-99
+  s_276c21537d096d::t_f173602f2fe644 112-122,124-125,134-138,142,146-147,150,153
+  s_276c21537d096d::t_542693da63c022 168-169
+voice-agent-harnesses/assemblyai/harness.py
+  s_276c21537d096d::t_e266d879d5b2f3 56-72
+  s_276c21537d096d::t_44f8550c9b01e5 113-123,125-126,135-139,143,147-148,151,154
+  s_276c21537d096d::t_e94c2a0855e52b 169-170
+  s_276c21537d096d::t_72125a37dd6e5a 99-100
+voice-agent-harnesses/livekit/gemini-flash-live-3.1/agent.py
+  s_276c21537d096d::t_0a1550d4bbd0bb 61-66,68,70-71
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "7f19d5266a77122eea68602df2927a4eee7857c1",
+  "prompts": {},
+  "sessions": {
+    "s_276c21537d096d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9251081c-886e-438f-9432-de6eafc80e6e",
+        "model": "claude-fable-5"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

@@ -1,0 +1,42 @@
+voice-agent-harnesses/assemblyai/pcm.py
+  s_ae186cafb8fdd5::t_81ebbd6a06c794 1-18,22-65,71-121,125-126
+  s_ae186cafb8fdd5::t_ace7f40fa39484 66-70
+  s_ae186cafb8fdd5::t_6b6c2c4647031e 19-21
+  s_ae186cafb8fdd5::t_d3adc7d517ddfa 122-124
+tests/test_assemblyai_greeting.py
+  s_ae186cafb8fdd5::t_488380a1a2652f 44-53
+  s_ae186cafb8fdd5::t_9311bd2ea21dff 1-41
+  s_ae186cafb8fdd5::t_0d5d08c2bcd6bd 42-43,63
+  s_ae186cafb8fdd5::t_2e2ade9f962743 54-62,64-66
+voice-agent-harnesses/assemblyai/harness.py
+  s_ae186cafb8fdd5::t_03dc2c5796e1e3 94-98,100-104,107-108,115-125
+  s_ae186cafb8fdd5::t_c5fa47c13331c9 128
+  s_ae186cafb8fdd5::t_348e47b5c74e89 61
+voice-agent-harnesses/assemblyai/adapters/chirp.py
+  s_ae186cafb8fdd5::t_8e68d61d55de75 163
+  s_ae186cafb8fdd5::t_dc24d703c8b52a 223-224
+  s_ae186cafb8fdd5::t_54ddc947670b3c 174,179
+  s_ae186cafb8fdd5::t_3c1ea3557f2446 71-74
+  s_ae186cafb8fdd5::t_b56681a09c0e10 93-95,101,107-108,129,134-145
+  s_ae186cafb8fdd5::t_e4f1a121515f2f 22
+  s_ae186cafb8fdd5::t_dc01d1e4e4f6f5 96-97
+  s_ae186cafb8fdd5::t_de86b763134be6 193-203,213
+  s_ae186cafb8fdd5::t_aeb4a097f5955a 180
+  s_ae186cafb8fdd5::t_7feebbb61efd91 222,225
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "7ce0316e47fe9f1b7da133025584104a1e0f3bd7",
+  "prompts": {},
+  "sessions": {
+    "s_ae186cafb8fdd5": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "cff2fbc0-3582-44fb-972d-53e91cb3042f",
+        "model": "grok-4.6"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

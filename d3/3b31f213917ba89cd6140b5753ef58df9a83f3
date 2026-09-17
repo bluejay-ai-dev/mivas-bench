@@ -1,0 +1,19 @@
+tests/test_tool_server.py
+  s_276c21537d096d::t_dc147df5b6ee3b 95-104
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "d33b31f213917ba89cd6140b5753ef58df9a83f3",
+  "prompts": {},
+  "sessions": {
+    "s_276c21537d096d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9251081c-886e-438f-9432-de6eafc80e6e",
+        "model": "claude-fable-5"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

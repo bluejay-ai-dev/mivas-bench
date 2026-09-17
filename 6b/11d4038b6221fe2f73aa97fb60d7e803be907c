@@ -1,0 +1,227 @@
+tests/test_verify_task_run.py
+  s_845bdb7f901f50::t_35c54ed8b5dea4 112-113,132-144,745-758
+  s_845bdb7f901f50::t_7effc40c334cb6 759
+industries/healthcare/tasks/C4-H3/task.json
+  s_845bdb7f901f50::t_4aec433e7c8d08 130-133,166
+  s_845bdb7f901f50::t_2320dbf866f811 128-129
+tests/test_tasks_to_digital_humans.py
+  s_845bdb7f901f50::t_6678ec8934a2c3 152-172,770-809,901-905
+industries/healthcare/tasks/C1-E3/task.json
+  s_845bdb7f901f50::t_4aec433e7c8d08 94-99
+scripts/tasks_to_digital_humans.py
+  s_845bdb7f901f50::t_35c54ed8b5dea4 37,378-380
+industries/customer-support/db/seed.sql
+  s_845bdb7f901f50::t_620893cc8d2bce 120,145
+industries/customer-support/tasks/R-E1-BG/task.json
+  s_845bdb7f901f50::t_68969347ce66a4 1-716
+industries/customer-support/tasks/R-E1-SIG/task.json
+  s_845bdb7f901f50::t_07649cf211f524 1-723
+industries/customer-support/tasks/R-E1/task.json
+  s_845bdb7f901f50::t_2900480b076846 1-723
+industries/customer-support/tasks/R-E2/task.json
+  s_845bdb7f901f50::t_66e222ec875bde 1-716
+industries/customer-support/tasks/R-H1/task.json
+  s_845bdb7f901f50::t_3ff16aa4c31e5b 1-784
+industries/customer-support/tasks/R-H2/task.json
+  s_845bdb7f901f50::t_154d97e8999269 1-796
+industries/customer-support/tasks/R-H3/task.json
+  s_845bdb7f901f50::t_b0efe9d36b2587 1-810
+industries/customer-support/tasks/R-H4/task.json
+  s_845bdb7f901f50::t_b6d9ff59602b1b 1-856
+industries/customer-support/tasks/R-M1/task.json
+  s_845bdb7f901f50::t_2195ccc9f3ccae 1-765
+industries/customer-support/tasks/R-M2/task.json
+  s_845bdb7f901f50::t_07cde1736c48e9 1-735
+industries/customer-support/tasks/R-M3/task.json
+  s_845bdb7f901f50::t_3dbf6f5c22aa61 1-772
+industries/customer-support/tasks/R-M4/task.json
+  s_845bdb7f901f50::t_719a593295157b 1-783
+industries/customer-support/tasks/T1-E1-BG/task.json
+  s_845bdb7f901f50::t_a0078022e28b82 1-714
+industries/customer-support/tasks/T1-E1-SIG/task.json
+  s_845bdb7f901f50::t_b4eab25d52af16 1-714
+industries/customer-support/tasks/T1-E1/task.json
+  s_845bdb7f901f50::t_480913f8bd9b20 1-714
+industries/customer-support/tasks/T1-E2/task.json
+  s_845bdb7f901f50::t_34c3c5d3a64912 1-709
+industries/customer-support/tasks/T1-H1/task.json
+  s_845bdb7f901f50::t_96ad41cd77a4e5 1-781
+industries/customer-support/tasks/T1-H2/task.json
+  s_845bdb7f901f50::t_018704e4fe8639 1-778
+industries/customer-support/tasks/T1-H3/task.json
+  s_845bdb7f901f50::t_ff41feb62066d1 1-794
+industries/customer-support/tasks/T1-H4/task.json
+  s_845bdb7f901f50::t_05ce1e5fe78890 1-782
+industries/customer-support/tasks/T1-M1/task.json
+  s_845bdb7f901f50::t_b8a52316424c61 1-765
+industries/customer-support/tasks/T1-M2/task.json
+  s_845bdb7f901f50::t_7511688e92d66d 1-765
+industries/customer-support/tasks/T1-M3/task.json
+  s_845bdb7f901f50::t_d7a3c971449a63 1-772
+industries/customer-support/tasks/T1-M4/task.json
+  s_845bdb7f901f50::t_73f288402b34f1 1-772
+industries/customer-support/tasks/T2-E1-BG/task.json
+  s_845bdb7f901f50::t_08adb492c57a85 1-713
+industries/customer-support/tasks/T2-E1-SIG/task.json
+  s_845bdb7f901f50::t_a48464dc53ed7d 1-713
+industries/customer-support/tasks/T2-E1/task.json
+  s_845bdb7f901f50::t_c0b6e76f08d244 1-713
+industries/customer-support/tasks/T2-E2/task.json
+  s_845bdb7f901f50::t_dcefea4f387508 1-709
+industries/customer-support/tasks/T2-H1/task.json
+  s_845bdb7f901f50::t_617e2d34caf1ce 1-795
+industries/customer-support/tasks/T2-H2/task.json
+  s_845bdb7f901f50::t_401fcf2c53751b 1-796
+industries/customer-support/tasks/T2-H3/task.json
+  s_845bdb7f901f50::t_3ab8708f54bb48 1-805
+industries/customer-support/tasks/T2-H4/task.json
+  s_845bdb7f901f50::t_df5e059d05e2e1 1-806
+industries/customer-support/tasks/T2-M1/task.json
+  s_845bdb7f901f50::t_ab49f948b5d1ae 1-772
+industries/customer-support/tasks/T2-M2/task.json
+  s_845bdb7f901f50::t_778aad73a9778f 1-772
+industries/customer-support/tasks/T2-M3/task.json
+  s_845bdb7f901f50::t_8744a0f48fea9b 1-773
+industries/customer-support/tasks/T2-M4/task.json
+  s_845bdb7f901f50::t_fc318bdadf4b90 1-766
+industries/customer-support/tasks/T3-E1-BG/task.json
+  s_845bdb7f901f50::t_83105aa0599851 1-702
+industries/customer-support/tasks/T3-E1-SIG/task.json
+  s_845bdb7f901f50::t_32c133edc5d8ba 1-702
+industries/customer-support/tasks/T3-E1/task.json
+  s_845bdb7f901f50::t_049a27e6e67f80 1-702
+industries/customer-support/tasks/T3-E2/task.json
+  s_845bdb7f901f50::t_273dfd8975b73d 1-709
+industries/customer-support/tasks/T3-H1/task.json
+  s_845bdb7f901f50::t_0d6fbc333d1bb1 1-787
+industries/customer-support/tasks/T3-H2/task.json
+  s_845bdb7f901f50::t_30c0ea0208a0fd 1-757
+industries/customer-support/tasks/T3-H3/task.json
+  s_845bdb7f901f50::t_5b2ccf553e48b1 1-802
+industries/customer-support/tasks/T3-H4/task.json
+  s_845bdb7f901f50::t_378a283b40d15d 1-807
+industries/customer-support/tasks/T3-M1/task.json
+  s_845bdb7f901f50::t_f77820fd72876a 1-773
+industries/customer-support/tasks/T3-M2/task.json
+  s_845bdb7f901f50::t_424a6534c10df5 1-773
+industries/customer-support/tasks/T3-M3/task.json
+  s_845bdb7f901f50::t_cbeb43c6e26c55 1-772
+industries/customer-support/tasks/T3-M4/task.json
+  s_845bdb7f901f50::t_c334bc635137ee 1-762
+industries/customer-support/tasks/T4-E1-BG/task.json
+  s_845bdb7f901f50::t_a6a2fd9e292051 1-715
+industries/customer-support/tasks/T4-E1-SIG/task.json
+  s_845bdb7f901f50::t_abd56a703116b3 1-715
+industries/customer-support/tasks/T4-E1/task.json
+  s_845bdb7f901f50::t_43b36834327475 1-715
+industries/customer-support/tasks/T4-E2/task.json
+  s_845bdb7f901f50::t_2cf9f7fb747f02 1-709
+industries/customer-support/tasks/T4-H1/task.json
+  s_845bdb7f901f50::t_96e32f681250a3 1-782
+industries/customer-support/tasks/T4-H2/task.json
+  s_845bdb7f901f50::t_36209386a83f63 1-772
+industries/customer-support/tasks/T4-H3/task.json
+  s_845bdb7f901f50::t_6e09709d1a15e9 1-782
+industries/customer-support/tasks/T4-H4/task.json
+  s_845bdb7f901f50::t_acc515bd8bb1cb 1-782
+industries/customer-support/tasks/T4-M1/task.json
+  s_845bdb7f901f50::t_ebf1128b363f63 1-762
+industries/customer-support/tasks/T4-M2/task.json
+  s_845bdb7f901f50::t_54f3751ec07e1f 1-762
+industries/customer-support/tasks/T4-M3/task.json
+  s_845bdb7f901f50::t_b66ae9b0c9f82e 1-762
+industries/customer-support/tasks/T4-M4/task.json
+  s_845bdb7f901f50::t_13f1fdae53c434 1-769
+industries/customer-support/tasks/T5-E1-BG/task.json
+  s_845bdb7f901f50::t_5a151a1c6f1e79 1-709
+industries/customer-support/tasks/T5-E1-SIG/task.json
+  s_845bdb7f901f50::t_79e336d483cf1f 1-709
+industries/customer-support/tasks/T5-E1/task.json
+  s_845bdb7f901f50::t_7b46879a631ca4 1-709
+industries/customer-support/tasks/T5-E2/task.json
+  s_845bdb7f901f50::t_082be0c4ed9eca 1-709
+industries/customer-support/tasks/T5-H1/task.json
+  s_845bdb7f901f50::t_bec43d7ae47f28 1-777
+industries/customer-support/tasks/T5-H2/task.json
+  s_845bdb7f901f50::t_4cc03840f5b8bc 1-799
+industries/customer-support/tasks/T5-H3/task.json
+  s_845bdb7f901f50::t_8f560d1781ac4c 1-798
+industries/customer-support/tasks/T5-H4/task.json
+  s_845bdb7f901f50::t_4bd6361e243d45 1-784
+industries/customer-support/tasks/T5-M1/task.json
+  s_845bdb7f901f50::t_1ff84becbde58c 1-774
+industries/customer-support/tasks/T5-M2/task.json
+  s_845bdb7f901f50::t_4ac54fadace34e 1-781
+industries/customer-support/tasks/T5-M3/task.json
+  s_845bdb7f901f50::t_6bc7c804e8288a 1-775
+industries/customer-support/tasks/T5-M4/task.json
+  s_845bdb7f901f50::t_6cdbd6ebf99518 1-767
+industries/healthcare/tasks/C4-M2/task.json
+  s_845bdb7f901f50::t_75464f74fc6ff8 78-83,116,122
+industries/legal/tasks/C1-H1/task.json
+  s_845bdb7f901f50::t_349fee794426dd 4,34-54
+industries/legal/tasks/C2-E1-BG/task.json
+  s_845bdb7f901f50::t_fdc1f56e121794 19-21,23-31
+industries/legal/tasks/C2-E1-SIG/task.json
+  s_845bdb7f901f50::t_cd66db45a1987f 19-21,23-31
+industries/legal/tasks/C2-E1/task.json
+  s_845bdb7f901f50::t_3a6d3c631783f5 19-21,23-31
+industries/legal/tasks/C2-E2/task.json
+  s_845bdb7f901f50::t_18d9fc95adde40 4
+industries/legal/tasks/C2-H4/task.json
+  s_845bdb7f901f50::t_9010bf0f8b707a 15-17,19-21
+industries/legal/tasks/C2-M4/task.json
+  s_845bdb7f901f50::t_934cfe7104a0a4 4,53-73
+industries/legal/tasks/C3-H3/task.json
+  s_845bdb7f901f50::t_a1b9413d298ff1 4,130-136
+industries/legal/tasks/C3-M2/task.json
+  s_845bdb7f901f50::t_64ed57d8eb815f 4,78-84
+industries/legal/tasks/C4-E1-BG/task.json
+  s_845bdb7f901f50::t_2b169c01ef64a5 32,36-38
+industries/legal/tasks/C4-E1-SIG/task.json
+  s_845bdb7f901f50::t_fdb21dfcf7807b 32,36-38
+industries/legal/tasks/C4-E1/task.json
+  s_845bdb7f901f50::t_c3c07262fce07f 32,36-38
+industries/legal/tasks/C4-E2/task.json
+  s_845bdb7f901f50::t_fc041ca1a190ce 32,36-41
+industries/legal/tasks/C4-H3/task.json
+  s_845bdb7f901f50::t_c052272ce1636e 111-117
+industries/legal/tasks/C4-H4/task.json
+  s_845bdb7f901f50::t_22eb187befebde 4,129-135,152
+industries/legal/tasks/C4-M1/task.json
+  s_845bdb7f901f50::t_9b3542fe287e5f 28,32-34
+industries/legal/tasks/C4-M2/task.json
+  s_845bdb7f901f50::t_524f699da95726 32,36-38,85,99
+industries/legal/tasks/C4-M3/task.json
+  s_845bdb7f901f50::t_accc82ce4f6c67 32,36-38
+industries/legal/tasks/C4-M4/task.json
+  s_845bdb7f901f50::t_6135bfad84e4b3 4,106-112,129
+industries/legal/tasks/R-E2/task.json
+  s_845bdb7f901f50::t_72ef4e80560e22 15-17,19-21
+scripts/customer_support_task_spec.py
+  s_845bdb7f901f50::t_4bd231ddbd67ea 1-1667
+scripts/encode_customer_support_tasks.py
+  s_845bdb7f901f50::t_415a847622337d 1-235
+scripts/encode_legal_tasks.py
+  s_845bdb7f901f50::t_e10ce5bfbefd9b 246-253,295-298
+scripts/legal_task_spec.py
+  s_845bdb7f901f50::t_0e9762561b0b43 4,102-119,307,344-347,354-361,440-445,460,470,567-569,579-581,698-702,809-812,827-832,990-992,1014-1016,1087,1092,1115-1116,1120,1143,1149,1179,1185,1190-1191,1196-1198,1224,1230,1392,1902-1906,2096
+scripts/verify_task_run.py
+  s_845bdb7f901f50::t_0228b5cad4df32 57-61,72-78,97-100,111-117,304-307,828-834
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "6b11d4038b6221fe2f73aa97fb60d7e803be907c",
+  "prompts": {},
+  "sessions": {
+    "s_845bdb7f901f50": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "422044d6-826a-442a-bed0-ad869e2e162d",
+        "model": "cursor-grok-4.6-high-fast"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

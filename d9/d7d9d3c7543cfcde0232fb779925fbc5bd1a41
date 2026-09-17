@@ -1,0 +1,51 @@
+voice-agent-harnesses/openai/realtime-2.1/agent.py
+  s_529682e286274b::t_cf69af364e0cdd 11
+tests/converse.py
+  s_529682e286274b::t_a75ca60bd41824 55
+industries/control-industry/README.md
+  s_529682e286274b::t_2cca406cb7ecc9 30-31,35-38
+  s_529682e286274b::t_78d6418739a2e0 21,23,29,32-33,42
+pyproject.toml
+  s_529682e286274b::t_a2864c246786e1 8
+  s_529682e286274b::t_0f1ac4b51843e6 22-26
+  s_529682e286274b::t_fd14bb12a2d18e 27
+voice-agent-harnesses/openai/realtime-2.1-mini/agent.py
+  s_529682e286274b::t_2746c61fee79de 11
+industries/control-industry/tool_server.py
+  s_529682e286274b::t_1843aaf549755e 1-5,15-16,57-67,77,79,84-85,89-102,108-110
+  s_529682e286274b::t_15023df3b582c3 103-107
+industries/control-industry/system-prompts/scheduler.md
+  s_529682e286274b::t_4d1aa524e9417d 18
+tests/test_tool_server.py
+  s_529682e286274b::t_ba33fec6b9ca05 1,16,19-20,22-26,33,35-36,40-41
+voice-agent-harnesses/openai/README.md
+  s_529682e286274b::t_ae150403b58514 10
+  s_529682e286274b::t_ebb6511da4d7cb 3
+  s_529682e286274b::t_628903c2137c56 11-16
+README.md
+  s_529682e286274b::t_6e5d19dcb38f9f 11
+  s_529682e286274b::t_44e5232890d51d 13-18
+voice-agent-harnesses/openai/harness.py
+  s_529682e286274b::t_2e373414cf6e5f 4-5,7-10,22,31-62,87-101,105,108,111,183,205-211,215,218
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "d9d7d9d3c7543cfcde0232fb779925fbc5bd1a41",
+  "prompts": {},
+  "humans": {
+    "h_f787e3fe1ad713": {
+      "author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_529682e286274b": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "193d5298-7ec4-49a6-b2c3-125217dfa9e2",
+        "model": "default"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}

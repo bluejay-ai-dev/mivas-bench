@@ -1,0 +1,41 @@
+voice-agent-harnesses/gemini/2.5-flash-native-audio/agent.py
+  s_07d7a36d687777::t_3942196fa9af06 39-44,49-52
+  s_07d7a36d687777::t_7f5654ac224d0a 45-48
+  s_07d7a36d687777::t_708869467da2db 27
+  s_07d7a36d687777::t_57995faa977b9d 67,70-73
+voice-agent-harnesses/gemini/harness.py
+  s_07d7a36d687777::t_f69eba2cae1d59 362-371
+  s_07d7a36d687777::t_9cdccb0a31a40e 57,61-62,65,68-69
+  s_07d7a36d687777::t_5562e6a1d5640b 445-447
+  s_07d7a36d687777::t_ee5013c1a3f71e 384-385
+  s_07d7a36d687777::t_8f9e3d6e08c774 296,299-302
+  s_07d7a36d687777::t_8cc17cc87dad6d 372-375
+  s_07d7a36d687777::t_9df866fec22714 47-55,60,71-74
+  s_07d7a36d687777::t_8b828f23643756 251
+  s_07d7a36d687777::t_904ef47cfc46a9 56,58-59,63-64,66-67,70
+  s_07d7a36d687777::t_3ab1cbe6833fb6 252-254
+voice-agent-harnesses/gemini/flash-live-3.1/agent.py
+  s_07d7a36d687777::t_2e1000ae6b73ae 41-44,49-52
+  s_07d7a36d687777::t_7f5654ac224d0a 45-48
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "f0791d1cbab80fd6418adcb9d9451327398601e3",
+  "prompts": {},
+  "humans": {
+    "h_f787e3fe1ad713": {
+      "author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_07d7a36d687777": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "72150785-e81a-4513-bfd8-e5511a1312ef",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}

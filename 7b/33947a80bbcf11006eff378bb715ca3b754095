@@ -1,0 +1,28 @@
+README.md
+  s_181bb490d8c70f::t_662cf56ddf93b9 93-97,99-111,131-135,137-147,157-161,163-174,201-204
+  s_5ec4507064e562::t_e822abf2545d84 98,112-130,136,148-156,162,175-200
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "7b33947a80bbcf11006eff378bb715ca3b754095",
+  "prompts": {},
+  "sessions": {
+    "s_181bb490d8c70f": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "37459eb9-a400-438c-a4bb-2a2d4abd7d59",
+        "model": "gpt-5.6-sol-medium-fast"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    },
+    "s_5ec4507064e562": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "70affaee-8499-4d51-82ae-2cb0d2e757b7",
+        "model": "gpt-5.6-sol-medium-fast"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

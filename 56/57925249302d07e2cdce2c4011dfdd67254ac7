@@ -1,0 +1,37 @@
+run.py
+  s_e1707bda1b8e2a::t_c8ab33d3d80a01 141-145,148-149,157,160-191,202-209
+  s_e1707bda1b8e2a::t_cf4887e786685f 7
+voice-agent-harnesses/nvidia/voicechat.py
+  s_e1707bda1b8e2a::t_44c97bb5760ba9 531-532,534,536-544
+k8s/secret.example.yaml
+  s_e1707bda1b8e2a::t_ea66faee9b8274 5,20
+voice-agent-harnesses/nvidia/adapters/chirp.py
+  s_e1707bda1b8e2a::t_e078728b0cb0a2 107
+voice-agent-harnesses/nvidia/nemotron-voicechat/adapters/chirp.py
+  s_e1707bda1b8e2a::t_5947f3a75aa8a1 331-335,347-364
+  s_e1707bda1b8e2a::t_c76dd48751220d 526-528,549-550
+  s_e1707bda1b8e2a::t_595cb2d530c196 310
+  s_e1707bda1b8e2a::t_8b5b50e2d02662 461
+  s_e1707bda1b8e2a::t_ec506e9afffe7b 697
+  s_e1707bda1b8e2a::t_e5bf4fc409f236 496-497
+  s_e1707bda1b8e2a::t_677ee4b5338d96 453,459-460,462-464
+  s_e1707bda1b8e2a::t_8b4762dd4790b5 365
+voice-agent-harnesses/nvidia/README.md
+  s_e1707bda1b8e2a::t_e268486787e0ff 89,92,94
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "5657925249302d07e2cdce2c4011dfdd67254ac7",
+  "prompts": {},
+  "sessions": {
+    "s_e1707bda1b8e2a": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "f1471c44-d1c6-4aa0-8fde-5690e08c7038",
+        "model": "grok-4.5"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}

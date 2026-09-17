@@ -1,0 +1,117 @@
+tests/test_tool_schema_conversion.py
+  s_5b9c851bf11ca7::t_26bb4fa6105d55 53
+  s_5b9c851bf11ca7::t_057636d9456583 63
+scripts/nemotron_dashboard.py
+  s_5057ce21c76114::t_512c09c0e7fb3a 67-74
+  s_5057ce21c76114::t_8c6f65ccd5aaf0 26
+  s_5057ce21c76114::t_8b7021a2abee64 383-398
+  s_5057ce21c76114::t_0498bb79300c8d 377
+  s_5057ce21c76114::t_3453b57457fe06 322
+  s_5057ce21c76114::t_1f8d43b72cccef 147
+  s_5057ce21c76114::t_faeaee8d16c1cc 304
+  s_5057ce21c76114::t_a74bbf7316ab96 307-309
+  s_5057ce21c76114::t_7eb8af96c5ef5c 57
+  s_5057ce21c76114::t_625fb737095e09 75-82
+  s_5057ce21c76114::t_e2835982ddae3d 330
+  s_5057ce21c76114::t_1f24c3973e66c3 381,407-410
+  s_5057ce21c76114::t_cc6d1aac1d639a 142
+  s_5057ce21c76114::t_9903ad41daee48 135
+  s_5057ce21c76114::t_e4921295521d5e 95-100,111
+  s_5057ce21c76114::t_b9c9c9306faa75 279
+  s_5057ce21c76114::t_1ba8926528ce24 255
+  s_5057ce21c76114::t_7c323031fc9663 107
+  s_5057ce21c76114::t_d7cca34a60d171 83,378-380
+  s_5057ce21c76114::t_8d28a70ac43196 376
+  s_5057ce21c76114::t_472187b75126a8 125
+  s_5057ce21c76114::t_78024a8c83d195 23-25
+  s_5057ce21c76114::t_1a30ff104b3929 27-29,54-56
+  s_5057ce21c76114::t_90c4925bb17fc2 58-60,64-66
+  s_5057ce21c76114::t_eea5473b40dc26 84-86,92-94
+  s_5057ce21c76114::t_4821739f964645 101-106
+  s_5057ce21c76114::t_4719aee50d4a00 108-110
+  s_5057ce21c76114::t_f260ef412f5fa3 112-114,122-124
+  s_5057ce21c76114::t_762a9b08c7b763 126-128,132-134
+  s_5057ce21c76114::t_922147eac0cb7a 136-141
+  s_5057ce21c76114::t_c7487e131c3815 143-146
+  s_5057ce21c76114::t_67a932fd82b7e7 148-150,252-254
+  s_5057ce21c76114::t_d7fe8d618f59dc 256-258,276-278
+  s_5057ce21c76114::t_7aab9ff371e04b 280-282,301-303
+  s_5057ce21c76114::t_a33256363833f8 305-306
+  s_5057ce21c76114::t_342bbb5845b4ad 310-312,319-321
+  s_5057ce21c76114::t_1915e6b6f694cc 323-325,327-329
+  s_5057ce21c76114::t_ebd233d6412c41 331-333,373-375
+  s_5057ce21c76114::t_d6523039319f8b 382
+  s_5057ce21c76114::t_3c260a071a40e0 399-401,404-406
+  s_5057ce21c76114::t_53d43a5cad7884 411-413
+  s_ad1c2f38cdd353::t_00fa952108ab2b 1-22,30-53,61-63,87-91,115-121,129-131,151-251,259-275,283-300,313-318,326,334-372,402-403,414-420
+scripts/export_run_csv.py
+  s_5057ce21c76114::t_7e27ab431eb991 225
+  s_5057ce21c76114::t_53561232bdc333 34
+  s_5057ce21c76114::t_424301fb590b89 195-199
+  s_5057ce21c76114::t_5357d9819ce6b0 155,161-170,174-183
+  s_a959513d7ad95b::t_c6c0d24ab0ef7a 184
+scripts/healthcare_runs_dashboard.py
+  s_ad1c2f38cdd353::t_12b7d8215a7fa7 129-165
+  s_ad1c2f38cdd353::t_f40dbb1627643d 263-266,268-271
+  s_ad1c2f38cdd353::t_b50c29b035cd65 193-194,203-209
+  s_ad1c2f38cdd353::t_f8f7a96a2d74a5 1-128,166-192,195-202,210-262,267,272-296,303-322,331-354,356-382,385,387-405,408-419,422-437,439-441,444-467,469-476,479-480,485-487,490-543
+  s_ad1c2f38cdd353::t_9f45258a67b7e8 355
+  s_ad1c2f38cdd353::t_7d3391993e7f9c 420-421
+  s_ad1c2f38cdd353::t_ac35c672fc663f 438,442-443
+  s_ad1c2f38cdd353::t_35828a744848f1 297-302,323-330
+  s_ad1c2f38cdd353::t_dfd98a806adc93 383-384,386
+  s_ad1c2f38cdd353::t_c0166c53dc878b 468,477-478,481-484,488-489
+  s_ad1c2f38cdd353::t_773da360d6b3a9 406-407
+.gitignore
+  s_c17d9c72f060ab::t_226e07d5b7281d 44
+scripts/audit_tool_calls.py
+  s_ad1c2f38cdd353::t_c45b26ee13f6c5 1-91
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "1f6edafee1e068622694bb2ffa63764b12987de6",
+  "prompts": {},
+  "sessions": {
+    "s_5057ce21c76114": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "ef819117-1d0f-40d9-8b65-226a25beaa31",
+        "model": "grok-4.6"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    },
+    "s_5b9c851bf11ca7": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "ecb9e2ba-343e-4833-b240-8907b7652a0c",
+        "model": "grok-4.6"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    },
+    "s_a959513d7ad95b": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "c9d7f8b8-470d-44d3-82f8-a72bc6c8db5a",
+        "model": "grok-4.6"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    },
+    "s_ad1c2f38cdd353": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "9258fc2d-083f-4ace-b36b-c236a5693693",
+        "model": "grok-4.6"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    },
+    "s_c17d9c72f060ab": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "20f9c89d-312d-42dd-886a-28af9c6a21fe",
+        "model": "grok-4.6"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

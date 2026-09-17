@@ -1,0 +1,37 @@
+tests/test_dockerfiles.py
+  s_c10e1002e55231::t_3f9c9d1e8db704 15-16
+pyproject.toml
+  s_c10e1002e55231::t_5fd4ce57a766cc 40
+run.py
+  s_c10e1002e55231::t_5fd4ce57a766cc 368-369,372,453
+tests/test_tool_span_ok.py
+  s_c10e1002e55231::t_3f9c9d1e8db704 10
+.env.example
+  s_c10e1002e55231::t_9fccc8d9ea4103 72,89,128
+tests/test_harness_tool_headers.py
+  s_c10e1002e55231::t_3f9c9d1e8db704 166
+tests/test_snapshot_coverage.py
+  s_c10e1002e55231::t_3f9c9d1e8db704 34
+tests/test_agents.py
+  s_c10e1002e55231::t_3f9c9d1e8db704 30,33,38,40,56,66-67,70-71,254,258,263
+README.md
+  s_c10e1002e55231::t_9fccc8d9ea4103 330
+.agents/skills/mivas-run/HARNESS.md
+  s_c10e1002e55231::t_9fccc8d9ea4103 32
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "07f0c0e1949158a432ee1e0c875c9dc306753e79",
+  "prompts": {},
+  "sessions": {
+    "s_c10e1002e55231": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6dce3838-863f-4d52-bfc3-be60f0a1deb1",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}

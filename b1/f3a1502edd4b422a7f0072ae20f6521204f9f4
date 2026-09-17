@@ -1,0 +1,86 @@
+voice-agent-harnesses/twilio/adapters/conversationrelay.py
+  s_2640c0fed4e62e::t_82a98b383f3758 174-175,177
+  s_2640c0fed4e62e::t_2ff27a6057438c 49
+  s_2640c0fed4e62e::t_c080c2e8dfc4b5 176,178
+voice-agent-harnesses/livekit/harness.py
+  s_2640c0fed4e62e::t_5b86a141078e06 56,394-401
+voice-agent-harnesses/assemblyai/adapters/chirp.py
+  s_2640c0fed4e62e::t_3e43fcc78ee08b 21,82-83,85
+  s_2640c0fed4e62e::t_c080c2e8dfc4b5 84,86
+voice-agent-harnesses/twilio/harness.py
+  s_2640c0fed4e62e::t_4b1be1415554be 33
+voice-agent-harnesses/nvidia/nemotron-voicechat/adapters/chirp.py
+  s_2640c0fed4e62e::t_5b86a141078e06 64,327-328,333-339,619-623,625-627,648,651-652,660,730-732,735,840-846
+voice-agent-harnesses/deepgram/adapters/chirp.py
+  s_2640c0fed4e62e::t_3e43fcc78ee08b 21,73-74,76
+  s_2640c0fed4e62e::t_c080c2e8dfc4b5 75,77
+voice-agent-harnesses/nvidia/bot.py
+  s_2640c0fed4e62e::t_5b86a141078e06 19,105,119,121,177-208,211-218,239-242
+runtime/call_id.py
+  s_2640c0fed4e62e::t_e65b542a34226c 10,18,20
+  s_2640c0fed4e62e::t_5059d2fd808e00 90-120
+voice-agent-harnesses/nvidia/README.md
+  s_2640c0fed4e62e::t_5b86a141078e06 48-51
+voice-agent-harnesses/assemblyai/harness.py
+  s_2640c0fed4e62e::t_4b1be1415554be 26
+industries/customer-support/requirements.txt
+  s_2640c0fed4e62e::t_5b86a141078e06 4
+voice-agent-harnesses/pipecat/harness.py
+  s_2640c0fed4e62e::t_5b86a141078e06 51
+voice-agent-harnesses/grok/voice/adapters/chirp.py
+  s_2640c0fed4e62e::t_c080c2e8dfc4b5 314
+  s_2640c0fed4e62e::t_50fbcde3d2cbfb 47
+  s_2640c0fed4e62e::t_608113c88cbe7a 311
+tests/test_agents.py
+  s_2640c0fed4e62e::t_5b86a141078e06 18,109-112,236-237,250-266
+voice-agent-harnesses/deepgram/harness.py
+  s_2640c0fed4e62e::t_4b1be1415554be 28
+voice-agent-harnesses/elevenlabs/adapters/chirp.py
+  s_2640c0fed4e62e::t_c080c2e8dfc4b5 89,91
+  s_2640c0fed4e62e::t_3e43fcc78ee08b 25,87-88,90
+k8s/deployment.yaml
+  s_2640c0fed4e62e::t_5b86a141078e06 26-30,38-40,233-234,236
+voice-agent-harnesses/pipecat/bot.py
+  s_2640c0fed4e62e::t_5b86a141078e06 399-405
+run.py
+  s_2640c0fed4e62e::t_5b86a141078e06 286,305-307,314-323
+  s_2640c0fed4e62e::t_347b9a0e66da7a 324-325
+voice-agent-harnesses/gemini/adapters/chirp.py
+  s_2640c0fed4e62e::t_3e43fcc78ee08b 22,81-82,84
+  s_2640c0fed4e62e::t_c080c2e8dfc4b5 83,85
+tests/test_snapshot_coverage.py
+  s_2640c0fed4e62e::t_37d9e2b947cba4 41-44
+  s_2640c0fed4e62e::t_714af5cdb2b26a 1-40,45-135
+voice-agent-harnesses/nvidia/harness.py
+  s_2640c0fed4e62e::t_5b86a141078e06 16-17,21,33,59-114,149-151,249-255,277,284-296,330-352
+tests/test_nvidia_speak_first.py
+  s_2640c0fed4e62e::t_5b86a141078e06 1-157
+runtime/snapshot.py
+  s_2640c0fed4e62e::t_5b86a141078e06 52-77,119-125
+voice-agent-harnesses/nvidia/adapters/chirp.py
+  s_2640c0fed4e62e::t_5b86a141078e06 11,15,29-43,45
+voice-agent-harnesses/elevenlabs/harness.py
+  s_2640c0fed4e62e::t_4b1be1415554be 29
+voice-agent-harnesses/grok/harness.py
+  s_2640c0fed4e62e::t_4b1be1415554be 33
+runtime/entrypoint.sh
+  s_2640c0fed4e62e::t_5b86a141078e06 35-37
+voice-agent-harnesses/gemini/harness.py
+  s_2640c0fed4e62e::t_4b1be1415554be 26
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "b1f3a1502edd4b422a7f0072ae20f6521204f9f4",
+  "prompts": {},
+  "sessions": {
+    "s_2640c0fed4e62e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1285f68b-b481-49f3-ab65-877c2cdc6e0a",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}

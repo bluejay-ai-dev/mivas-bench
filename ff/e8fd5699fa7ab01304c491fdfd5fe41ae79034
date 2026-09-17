@@ -1,0 +1,84 @@
+voice-agent-harnesses/nvidia/voicechat.py
+  s_c10e1002e55231::t_35c578f645cfbc 1-323
+run.py
+  s_c10e1002e55231::t_35c578f645cfbc 40-41,69-70,368-369,372-373,413-414,452
+.agents/skills/mivas-run/HARNESS.md
+  s_c10e1002e55231::t_35c578f645cfbc 20-21,34
+tests/test_voicechat_toolcall_channel.py
+  s_c10e1002e55231::t_35c578f645cfbc 1-83
+voice-agent-harnesses/nvidia/report.py
+  s_c10e1002e55231::t_35c578f645cfbc 1-764
+.agents/skills/mivas-run/scripts/preflight.py
+  s_c10e1002e55231::t_35c578f645cfbc 36
+voice-agent-harnesses/nvidia/nemotron-voicechat/Dockerfile
+  s_c10e1002e55231::t_35c578f645cfbc 1-67
+.agents/skills/mivas-run/INFERENCE.md
+  s_c10e1002e55231::t_35c578f645cfbc 24,75-88
+  s_c10e1002e55231::t_626464481b0784 89
+voice-agent-harnesses/nvidia/chirp_serializer.py
+  s_c10e1002e55231::t_35c578f645cfbc 1-103
+tests/test_harness_tool_headers.py
+  s_c10e1002e55231::t_35c578f645cfbc 30,168
+tests/test_dockerfiles.py
+  s_c10e1002e55231::t_aa4dfe6783f68c 16
+  s_c10e1002e55231::t_b6f530b640bc6b 15
+voice-agent-harnesses/nvidia/nemotron/Dockerfile
+  s_c10e1002e55231::t_35c578f645cfbc 1-67
+k8s/deployment.yaml
+  s_c10e1002e55231::t_35c578f645cfbc 88-135,279-290
+tests/test_tool_span_ok.py
+  s_c10e1002e55231::t_b6f530b640bc6b 10
+voice-agent-harnesses/nvidia/nemotron-voicechat/adapters/chirp.py
+  s_c10e1002e55231::t_35c578f645cfbc 1-923
+voice-agent-harnesses/nvidia/nemotron/adapters/chirp.py
+  s_c10e1002e55231::t_35c578f645cfbc 1-12
+tests/test_snapshot_coverage.py
+  s_c10e1002e55231::t_35c578f645cfbc 30,36
+.env.example
+  s_c10e1002e55231::t_b6f530b640bc6b 100
+  s_c10e1002e55231::t_35c578f645cfbc 34-54,117,156
+tests/test_agents.py
+  s_c10e1002e55231::t_35c578f645cfbc 30,33,38,40,56,66-67,70-71,254-255,259,264
+voice-agent-harnesses/nvidia/adapters/chirp.py
+  s_c10e1002e55231::t_35c578f645cfbc 1-136
+pyproject.toml
+  s_c10e1002e55231::t_35c578f645cfbc 40
+voice-agent-harnesses/nvidia/test_llm_usage_span.py
+  s_c10e1002e55231::t_35c578f645cfbc 1-58
+voice-agent-harnesses/nvidia/requirements.txt
+  s_c10e1002e55231::t_35c578f645cfbc 1-9
+voice-agent-harnesses/nvidia/harness.py
+  s_c10e1002e55231::t_35c578f645cfbc 1-1041
+k8s/secret.example.yaml
+  s_c10e1002e55231::t_35c578f645cfbc 17-18,43-44
+voice-agent-harnesses/nvidia/README.md
+  s_c10e1002e55231::t_35c578f645cfbc 1-132
+tests/test_nvidia_speak_first.py
+  s_c10e1002e55231::t_35c578f645cfbc 1-178
+README.md
+  s_c10e1002e55231::t_35c578f645cfbc 331
+voice-agent-harnesses/nvidia/bot.py
+  s_c10e1002e55231::t_35c578f645cfbc 1-297
+voice-agent-harnesses/nvidia/nemotron-voicechat/agent.py
+  s_c10e1002e55231::t_35c578f645cfbc 1-54
+voice-agent-harnesses/nvidia/nemotron/agent.py
+  s_c10e1002e55231::t_35c578f645cfbc 1-35
+voice-agent-harnesses/nvidia/nvidia_fc.py
+  s_c10e1002e55231::t_35c578f645cfbc 1-372
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "ffe8fd5699fa7ab01304c491fdfd5fe41ae79034",
+  "prompts": {},
+  "sessions": {
+    "s_c10e1002e55231": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6dce3838-863f-4d52-bfc3-be60f0a1deb1",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}

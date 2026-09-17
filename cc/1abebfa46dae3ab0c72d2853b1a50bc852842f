@@ -1,0 +1,19 @@
+industries/legal/tasks/C5-H2/task.json
+  s_7f2f17a62e4dbc::t_6317979b4e5429 211
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "cc1abebfa46dae3ab0c72d2853b1a50bc852842f",
+  "prompts": {},
+  "sessions": {
+    "s_7f2f17a62e4dbc": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9a63219f-9fe4-4ce1-ad0c-9b4fb16fe7ae",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}

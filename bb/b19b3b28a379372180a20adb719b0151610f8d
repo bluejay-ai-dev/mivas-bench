@@ -1,0 +1,117 @@
+voice-agent-harnesses/gemini/test_harness.py
+  s_d05bd8ac7d9999::t_7592d072a57eb9 46,57-59,66
+  s_dfe805aea454af::t_1c95198087d546 47-56
+  s_dfe805aea454af::t_7d9df0c12481ed 1,5,11-45,63-65,67
+tests/test_agents.py
+  s_2f9eab297a3107::t_6bc80e751c547a 17
+  s_dfe805aea454af::t_8f671dcbf0a681 287-288
+  s_dfe805aea454af::t_356cdc3c8800a0 293-294,296
+  s_dfe805aea454af::t_1e7c71512f70fc 295
+  s_dfe805aea454af::t_2eb87135997b6b 303-304,306
+  s_2f9eab297a3107::t_59c8d9911797e1 280-285,289-292
+  s_dfe805aea454af::t_cc24bd7da068f0 286
+  s_dfe805aea454af::t_c45bcee0d20576 297-298
+run.py
+  s_dfe805aea454af::t_59825db63c7d1c 328
+  s_dfe805aea454af::t_c945cd832fc7c1 326
+  s_dfe805aea454af::t_81e2f4039b428d 341
+  s_dfe805aea454af::t_0cec1eaacc7d06 112
+  s_2f9eab297a3107::t_551a8266e95ae0 327
+tests/test_snapshot_coverage.py
+  s_dfe805aea454af::t_9ffeb3f66181a1 31
+voice-agent-harnesses/gemini/report.py
+  s_b97824c42e5814::t_78e7378b308c94 1,4-6,15,17,19,26,29-30,32-33,36,38,42-45,50,52-53,55,59-66,70-72,74-78,80,84-85,87-96,98-100,103
+  s_b97824c42e5814::t_ed7ca49779257b 41,48,54,56,102
+  s_b97824c42e5814::t_a8bc041207e7ba 3,37
+voice-agent-harnesses/gemini/flash-live-3.1/Dockerfile
+  s_dfe805aea454af::t_bce0fa72e2e7a9 32-34,42
+voice-agent-harnesses/gemini/harness.py
+  s_b97824c42e5814::t_3e177a5164afda 323-324
+  s_dfe805aea454af::t_ca20ed4f94bfa5 23
+  s_d05bd8ac7d9999::t_7f506b19ada53e 265,268-270,275
+  s_d05bd8ac7d9999::t_b427fb205e1f5d 30
+  s_dfe805aea454af::t_00c4c854760091 113-114,120-125,128-130
+  s_dfe805aea454af::t_c7d717d37d671d 1,3-7,13,15,17,20,24-29,31-33,41-42,45,49,77-78,91,97-99,102-104,107-110,112,131-161,163-174,188,191-198,204,206-215,228,234-236,248,252,255-264,266-267,271-274,276-277,280-284,287-319,329,354-366,368-377,379-388
+  s_dfe805aea454af::t_780b1cfc0ed859 199-203,205
+  s_dfe805aea454af::t_f05957ba42f04f 286
+  s_b97824c42e5814::t_de6b7ba75aa838 244-246
+  s_d05bd8ac7d9999::t_ed1fce5e6d4800 117,126-127
+  s_b97824c42e5814::t_f7cd0881058332 43-44
+  s_dfe805aea454af::t_6a373eaad2885f 50-64
+  s_d05bd8ac7d9999::t_d3f11906019462 278-279,285
+  s_b97824c42e5814::t_db96b758a66dee 320-322,325-328,330-334,349-353
+  s_b97824c42e5814::t_80431ad61a303d 338-346
+  s_b97824c42e5814::t_8f3e80cbcd38f4 367
+  s_b97824c42e5814::t_6d2971a6c8572d 335-337,347-348
+  s_dfe805aea454af::t_4efa720856390d 238-243,247,249-251
+  s_b97824c42e5814::t_b1f81ba68dedb5 221,225,229-233
+  s_d05bd8ac7d9999::t_d286da2a195908 216-220,222-224,226-227
+  s_d05bd8ac7d9999::t_6aeade8276a325 118-119
+voice-agent-harnesses/gemini/README.md
+  s_dfe805aea454af::t_8038c124c51e8e 9
+  s_dfe805aea454af::t_bebf7f90bb6536 11-14
+  s_dfe805aea454af::t_225847a8ac933a 3-4,8,16,20,22,24-25
+  s_dfe805aea454af::t_e568f006950fce 15
+voice-agent-harnesses/gemini/2.5-flash-native-audio/Dockerfile
+  s_dfe805aea454af::t_92fb004d46df0a 32-34,42
+voice-agent-harnesses/gemini/flash-live-3.1/agent.py
+  s_d05bd8ac7d9999::t_1cca631669d3ad 3-5
+  s_dfe805aea454af::t_2bb722007f9a76 45,55,58-61,68
+  s_dfe805aea454af::t_c2c1040321f6b9 1,6,13,16-21,23-26,29-30,32-33,41,43-44,52,54,56-57,62-67,69-70
+  s_b97824c42e5814::t_a2f62021a85be6 22,34-40
+  s_dfe805aea454af::t_2cefea2281457c 50-51
+voice-agent-harnesses/gemini/requirements.txt
+  s_dfe805aea454af::t_f8e77396da687b 1
+  s_dfe805aea454af::t_add08d3322cb10 2-3
+runtime/entrypoint.sh
+  s_dfe805aea454af::t_4d074b19e49005 93
+voice-agent-harnesses/gemini/2.5-flash-native-audio/agent.py
+  s_b97824c42e5814::t_05f97de7e721ee 21,33-38
+  s_dfe805aea454af::t_4cf99a0ce58db8 27
+  s_dfe805aea454af::t_894bd3d2cb583e 1-5,12,16-20,22-26,28-29,31-32,39,41-43,48-50,52-64
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "bbb19b3b28a379372180a20adb719b0151610f8d",
+  "prompts": {},
+  "humans": {
+    "h_f787e3fe1ad713": {
+      "author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_2f9eab297a3107": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "3ee8ecd6-ac5f-4730-917d-7acd2cb028a4",
+        "model": "grok-4.6"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    },
+    "s_b97824c42e5814": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6c050367-f304-44d3-8bd4-7fafdd04fb7d",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    },
+    "s_d05bd8ac7d9999": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "481c0818-067e-4e68-9458-c890924f11c6",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    },
+    "s_dfe805aea454af": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "2352b213-cc25-4b23-89e5-46ff966bbd48",
+        "model": "grok-4.6"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}

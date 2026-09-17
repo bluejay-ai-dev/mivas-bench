@@ -1,0 +1,22 @@
+scripts/customer_support_digital_humans.py
+  s_ff5a259575efa2::t_7f95753a74e761 1-1859
+scripts/apply_digital_humans.py
+  s_ff5a259575efa2::t_ae7874a7433586 31-36
+  s_ff5a259575efa2::t_d5fc1cdb2341b2 127-129
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "46f046e5c6c7b176190e94ad551fa8635d028b1d",
+  "prompts": {},
+  "sessions": {
+    "s_ff5a259575efa2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "721849e5-0358-4482-b8c3-3e82957f674d",
+        "model": "claude-opus-5"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

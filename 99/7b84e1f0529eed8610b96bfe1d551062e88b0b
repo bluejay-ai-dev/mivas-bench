@@ -1,0 +1,69 @@
+.gitignore
+  s_92c1806412ba38::t_37b2239cba37a3 41-43
+voice-agent-harnesses/pipecat/bot.py
+  s_92c1806412ba38::t_f1a374e3e1acca 162-178
+  s_92c1806412ba38::t_7ba78430897b95 159-161
+  s_92c1806412ba38::t_a287b6a420c528 179-181
+voice-agent-harnesses/pipecat/Dockerfile
+  s_218f61232702d0::t_23ec796735872a 1-9
+voice-agent-harnesses/pipecat/cascaded/agent.py
+  s_218f61232702d0::t_33d4ff2e203650 1-14
+voice-agent-harnesses/pipecat/gemini-flash-live-3.1/agent.py
+  s_218f61232702d0::t_d9d139103066c0 1-14
+voice-agent-harnesses/pipecat/openai-realtime-2.1/agent.py
+  s_218f61232702d0::t_20e978a141ac25 1-14
+voice-agent-harnesses/pipecat/requirements.txt
+  s_218f61232702d0::t_d39be289184235 1-4
+voice-agent-harnesses/pipecat/README.md
+  s_7b232f2c03137b::t_799ba63c3beb21 1,3-105
+voice-agent-harnesses/pipecat/bluejay_setup.py
+  s_2a90e7170856be::t_696e1d2bbfa922 1-139
+voice-agent-harnesses/pipecat/check.py
+  s_7b232f2c03137b::t_a3f1c08903ec33 1-56
+voice-agent-harnesses/pipecat/deploy.py
+  s_2a90e7170856be::t_21103e1b037833 1-164
+voice-agent-harnesses/pipecat/harness.py
+  s_7b232f2c03137b::t_85884da4212d02 1-297
+voice-agent-harnesses/pipecat/report.py
+  s_7b232f2c03137b::t_bb02fda6a6f7d6 1-614
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "997b84e1f0529eed8610b96bfe1d551062e88b0b",
+  "prompts": {},
+  "sessions": {
+    "s_218f61232702d0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "03a733cf-ac6f-4e95-bd91-d1eda51f8b0f",
+        "model": "claude-opus-5"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    },
+    "s_2a90e7170856be": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-aedc3f0e8dc74423f",
+        "model": "unknown"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    },
+    "s_7b232f2c03137b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-a25495137d71e348b",
+        "model": "unknown"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    },
+    "s_92c1806412ba38": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7515e261-7210-4088-a905-e7178e85045f",
+        "model": "claude-opus-5"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

@@ -1,0 +1,19 @@
+industries/travel/docs/TRIAGE_LEDGER.md
+  s_7e9aac830cc833::t_55866f3f9a532e 7,11-19,76
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "7314b2cada2bc0c97dcfa91eae1f25c153174273",
+  "prompts": {},
+  "sessions": {
+    "s_7e9aac830cc833": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f7cf4396-0714-4864-bd0f-370d6e3f87ec",
+        "model": "claude-opus-5"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

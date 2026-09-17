@@ -1,0 +1,38 @@
+voice-agent-harnesses/twilio/conversationrelay-gpt4.1/agent.py
+  s_e1707bda1b8e2a::t_c7c67baeb1c0be 1-55
+.env.example
+  s_e1707bda1b8e2a::t_05b5a59e0ff167 77-88
+  s_e1707bda1b8e2a::t_8d7787ba48ee6e 76
+voice-agent-harnesses/twilio/README.md
+  s_e1707bda1b8e2a::t_ea1e5ee357199c 1,3-135
+voice-agent-harnesses/twilio/harness.py
+  s_e1707bda1b8e2a::t_5d459cd86ac3cf 1-599
+voice-agent-harnesses/twilio/requirements.txt
+  s_e1707bda1b8e2a::t_af2fbbf58d8b61 1-9
+voice-agent-harnesses/twilio/conversationrelay-gpt4.1/adapters/chirp.py
+  s_e1707bda1b8e2a::t_61527027c2f58a 1-12
+voice-agent-harnesses/twilio/adapters/chirp.py
+  s_e1707bda1b8e2a::t_7acfe312cad0c9 1-456
+voice-agent-harnesses/twilio/report.py
+  s_e1707bda1b8e2a::t_a877d27c0ede70 1-563
+pyproject.toml
+  s_e1707bda1b8e2a::t_05b5a59e0ff167 35
+voice-agent-harnesses/twilio/conversationrelay-gpt4.1/smoke_ws.py
+  s_e1707bda1b8e2a::t_3315fe6b9fd243 1-67
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "8be16a054b918a5cacb539f345f2300625131d58",
+  "prompts": {},
+  "sessions": {
+    "s_e1707bda1b8e2a": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "f1471c44-d1c6-4aa0-8fde-5690e08c7038",
+        "model": "grok-4.5"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}

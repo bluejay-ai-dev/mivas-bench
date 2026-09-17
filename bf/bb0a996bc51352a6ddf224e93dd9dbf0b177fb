@@ -1,0 +1,21 @@
+README.md
+  s_8d482f04b5ce98::t_a41855c69a8184 49-53,55
+assets/benchmark-partial.svg
+  s_8d482f04b5ce98::t_0926d4a323a67f 1-5
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "bfbb0a996bc51352a6ddf224e93dd9dbf0b177fb",
+  "prompts": {},
+  "sessions": {
+    "s_8d482f04b5ce98": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "8a6cd5c7-aa15-435b-804a-6ccfd296253c",
+        "model": "gpt-5.6-sol-medium-fast"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

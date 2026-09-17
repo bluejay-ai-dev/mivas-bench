@@ -1,0 +1,29 @@
+voice-agent-harnesses/nvidia/voicechat.py
+  s_bb12d5d6e7fd32::t_966be928a8ecb9 11-18,38,48-58,115-122,156,161,165,272-273,292-300,304-309
+  s_bb12d5d6e7fd32::t_c8be34ea22078e 6-9
+  s_bb12d5d6e7fd32::t_56e289f34b3be6 10
+voice-agent-harnesses/nvidia/nemotron-voicechat/adapters/chirp.py
+  s_bb12d5d6e7fd32::t_05f8a1932b0296 809
+  s_bb12d5d6e7fd32::t_0c3322ae9c479e 760
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "7c9ade2bd3ea97542271177086c14ec10a2f9cf8",
+  "prompts": {},
+  "humans": {
+    "h_f787e3fe1ad713": {
+      "author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_bb12d5d6e7fd32": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6150455f-f2f4-47e7-a840-14a96d14d13b",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}

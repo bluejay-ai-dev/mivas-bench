@@ -1,0 +1,32 @@
+runtime/db_service.py
+  s_e65a199262c4ca::t_948de00499d715 262-267
+  s_e65a199262c4ca::t_eb3d07544463ad 105-106,108-109
+  s_e65a199262c4ca::t_96bfa972296128 6-10
+  s_e65a199262c4ca::t_3c9da3225a895e 88-103
+tests/test_db_service.py
+  s_e65a199262c4ca::t_d95202490a155d 71-106
+tests/test_industry_contract.py
+  s_e65a199262c4ca::t_c69b03ab9a5a53 177-178,188-193
+industries/finance/tool_server.py
+  s_e65a199262c4ca::t_4ed58e5e548604 1056
+industries/legal/tool_server.py
+  s_e65a199262c4ca::t_142c1a21c42bbf 605
+industries/travel/tool_server.py
+  s_e65a199262c4ca::t_d257a70e242c1b 615
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "44d3b8c611f95a15811e95d74f5a3cf2d6e41d44",
+  "prompts": {},
+  "sessions": {
+    "s_e65a199262c4ca": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ac68c65c-8544-4d04-99d4-9117a1f04a27",
+        "model": "claude-opus-5"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

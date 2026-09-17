@@ -1,0 +1,19 @@
+scripts/verify_task_run.py
+  s_901b1b0ab5e3ab::t_94f499efde350c 797-803
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "0aa8efc601879ad631a93a6e13f4a8157a1ad0d3",
+  "prompts": {},
+  "sessions": {
+    "s_901b1b0ab5e3ab": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "1c6f4acd-bc12-4882-b0fb-77c212573099",
+        "model": "grok-4.6"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

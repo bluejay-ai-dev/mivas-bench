@@ -1,0 +1,63 @@
+industries/legal/tasks/C2-H4/task.json
+  s_c79534fcd0239b::t_5753913d0a96fa 4,24-27,34-40,62-68,85,89-95,153
+industries/legal/tasks/C5-E1-SIG/task.json
+  s_c79534fcd0239b::t_52910c80a9bc87 37-53
+industries/legal/tasks/C5-M3/task.json
+  s_c79534fcd0239b::t_841531c85be8fb 4,37-39,49,131-165
+industries/legal/tasks/R-E1-BG/task.json
+  s_c79534fcd0239b::t_1d05e350cdc650 43,45,50,52
+industries/legal/tasks/C2-H2/task.json
+  s_c79534fcd0239b::t_adbb829fb0a087 4,122,124-131
+scripts/tasks_to_digital_humans.py
+  s_c79534fcd0239b::t_4093bad0db4162 415-424
+industries/legal/tasks/R-H4/task.json
+  s_c79534fcd0239b::t_d28bc4bde2a500 4,117-123
+industries/legal/tasks/C4-M2/task.json
+  s_c79534fcd0239b::t_84a04b9be2987e 4
+industries/legal/tasks/C4-H3/task.json
+  s_c79534fcd0239b::t_1a3bbd76024d2f 4,139,146,153,155,160,167
+industries/legal/tasks/C5-M2/task.json
+  s_c79534fcd0239b::t_24ffeda029865d 37-39
+industries/legal/tasks/C5-M1/task.json
+  s_c79534fcd0239b::t_831a30cf4c7d38 37-39
+industries/legal/tasks/C5-E1/task.json
+  s_c79534fcd0239b::t_601fa59ef82e53 37-53
+industries/legal/tasks/C1-H4/task.json
+  s_c79534fcd0239b::t_356440205b893a 89
+industries/legal/tasks/C4-E1-SIG/task.json
+  s_c79534fcd0239b::t_190fa9b10684cd 4,90-117
+industries/legal/tasks/C5-E1-BG/task.json
+  s_c79534fcd0239b::t_f1ff848edaa6d5 37-53
+industries/legal/tasks/R-M3/task.json
+  s_c79534fcd0239b::t_75cf3195c960b1 149
+industries/legal/tasks/R-H1/task.json
+  s_c79534fcd0239b::t_ce5efa60c98e24 4,127
+industries/legal/tasks/C5-H2/task.json
+  s_c79534fcd0239b::t_4c54cafd794123 4,37-39,147,154,161,168,171-180,184,187-188,192,195-217,222,224,328
+industries/legal/tasks/C5-H4/task.json
+  s_c79534fcd0239b::t_c6914f453f3fa2 37-39
+industries/legal/tasks/R-E2/task.json
+  s_c79534fcd0239b::t_8753acd768ae74 4,18-21,41-54
+industries/legal/tasks/R-M2/task.json
+  s_c79534fcd0239b::t_9a895c222054e0 33-38
+industries/legal/tasks/C4-E1-BG/task.json
+  s_c79534fcd0239b::t_bb6f19fb07dc42 4,86,90-124
+industries/legal/tasks/C1-E2/task.json
+  s_c79534fcd0239b::t_5c8475d16ba612 4,18-27,50,52,93
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "7a33549f75919ef10c405cc80de7643818ff27a8",
+  "prompts": {},
+  "sessions": {
+    "s_c79534fcd0239b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2c3de37c-b760-4edd-9a68-9191c31127a0",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}

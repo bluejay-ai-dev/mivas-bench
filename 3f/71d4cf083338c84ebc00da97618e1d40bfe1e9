@@ -1,0 +1,29 @@
+industries/healthcare/tasks/C4-H2/task.json
+  s_094e3f2faca04b::t_94e1f435519c8f 116-119
+  s_094e3f2faca04b::t_9af04ca7b7746f 114-115
+industries/healthcare/tasks/C3-H2/task.json
+  s_094e3f2faca04b::t_c18f1b69e4a6bd 83-94,101-106
+industries/healthcare/tasks/C3-M1/task.json
+  s_094e3f2faca04b::t_04cd558625dc3e 99,101
+  s_094e3f2faca04b::t_aabf7e68d18499 102-110
+  s_094e3f2faca04b::t_4722478ec76f55 111-113
+industries/healthcare/tasks/C5-H2/task.json
+  s_094e3f2faca04b::t_69062b239eb9b6 113-116
+  s_094e3f2faca04b::t_d3a90db8e62d0b 111-112
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "3f71d4cf083338c84ebc00da97618e1d40bfe1e9",
+  "prompts": {},
+  "sessions": {
+    "s_094e3f2faca04b": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "1fd74d00-363b-4972-8cc0-e3aafe4e53c9",
+        "model": "gpt-5.6-sol-medium-fast"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

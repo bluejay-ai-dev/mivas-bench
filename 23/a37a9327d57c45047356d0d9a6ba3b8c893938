@@ -1,0 +1,77 @@
+scripts/verify_task_run.py
+  s_502c381357fdec::t_f03aaf3d029506 938
+  s_502c381357fdec::t_b03f2d155960ee 964
+  s_502c381357fdec::t_12e4cc6821c371 1052,1056,1058-1060,1062-1063,1065-1067,1069-1072
+  s_502c381357fdec::t_0ae08efb882b00 34
+  s_502c381357fdec::t_f26c52019de281 823-839,841
+  s_502c381357fdec::t_48a4533d6af797 1087-1091
+  s_502c381357fdec::t_dd810bef4109a3 926-937,941,967,980,993,998,1002-1007,1012-1051
+scripts/verify_run.py
+  s_117116ee74e696::t_c4d3000adaa999 80-82,93,105,126-129
+  s_78047483e69252::t_c4e977d5a0528b 130-131
+.gitignore
+  s_d9f518dc27d3d3::t_48156ac1cf2ef0 32-33,36
+  s_7614e8bc9a6253::t_91c1d1025ffc58 34-35
+scripts/bluejay_run_to_csv.py
+  s_c0b8a3578d20de::t_5a9571940c0592 1-729
+scripts/refresh_k5_monitor.py
+  s_c0b8a3578d20de::t_5e6ff3f83045da 1-360
+tests/test_bluejay_run_to_csv.py
+  s_c0b8a3578d20de::t_02f21a0c29b5f0 1-337
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "23a37a9327d57c45047356d0d9a6ba3b8c893938",
+  "prompts": {},
+  "sessions": {
+    "s_117116ee74e696": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "06fd6c26-35ae-4580-8c2f-42642ee288ac",
+        "model": "cursor-grok-4.6-high-fast"
+      },
+      "human_author": null
+    },
+    "s_502c381357fdec": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "802eddfe-6430-47b6-9b13-c6fda10f2134",
+        "model": "cursor-grok-4.6-high-fast"
+      },
+      "human_author": null
+    },
+    "s_7614e8bc9a6253": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "1da73767-ac96-41b0-889b-0ad99b083c3b",
+        "model": "cursor-grok-4.6-high-fast"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    },
+    "s_78047483e69252": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "c7e5e259-9df7-412f-aee8-4637603bfdb2",
+        "model": "cursor-grok-4.6-high-fast"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    },
+    "s_c0b8a3578d20de": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "cc5d6e4b-3c33-4907-8dcb-542c3e7cb41d",
+        "model": "cursor-grok-4.6-high-fast"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    },
+    "s_d9f518dc27d3d3": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "c9eec8d8-c5a6-4dbc-884d-5c003638cf54",
+        "model": "cursor-grok-4.6-high-fast"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

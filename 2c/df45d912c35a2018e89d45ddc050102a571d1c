@@ -1,0 +1,33 @@
+voice-agent-harnesses/gemini/adapters/chirp.py
+  s_d699876125c6ea::t_530e0f2b7bf210 50
+  s_d699876125c6ea::t_7d0878f2c4d11d 124,126-129
+  s_d699876125c6ea::t_9066ee10ebb240 2-49,54-123,125,130-143,145-154
+  s_d699876125c6ea::t_5b4bbc9ad11627 1
+  s_d699876125c6ea::t_23ddc3010dc635 144
+  s_d699876125c6ea::t_a0ec44c80e67a8 51-53
+voice-agent-harnesses/gemini/2.5-flash-native-audio/adapters/chirp.py
+  s_d699876125c6ea::t_b0c1f6276a4f8a 1-8
+voice-agent-harnesses/gemini/flash-live-3.1/adapters/chirp.py
+  s_d699876125c6ea::t_6615b7c1f5deb0 1-8
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "2cdf45d912c35a2018e89d45ddc050102a571d1c",
+  "prompts": {},
+  "humans": {
+    "h_bbe1a3ca680b9f": {
+      "author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_d699876125c6ea": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "99aaff9a-5019-40cf-bc79-c1a8c275271d",
+        "model": "grok-4.5"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

@@ -1,0 +1,21 @@
+tests/test_tasks_to_digital_humans.py
+  s_32a4ee4fe28bb2::t_c4304bd5895c26 805-813
+industries/healthcare/tasks/C4-H4/task.json
+  s_32a4ee4fe28bb2::t_c4304bd5895c26 3,137-142,205
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "74beb2b2e8f1e2f5277bd48e4823aef99c2a6120",
+  "prompts": {},
+  "sessions": {
+    "s_32a4ee4fe28bb2": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "036558dc-46ac-4d1b-ab1a-419040a0397d",
+        "model": "cursor-grok-4.6-high-fast"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

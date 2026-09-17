@@ -1,0 +1,96 @@
+voice-agent-harnesses/thinkingmachines/requirements.txt
+  s_627d4034ab5b4e::t_c9822c260e5d18 1-3,10-12
+  s_627d4034ab5b4e::t_374cdeb06f5660 4-9
+voice-agent-harnesses/thinkingmachines/README.md
+  s_627d4034ab5b4e::t_3a641666d8d905 105-108
+  s_627d4034ab5b4e::t_c376d31729f0f5 1-6,8-12,15-16,20-21,28-31,36-43,47-52,56,65,72-75,78-82,89-99,115,120-123
+  s_627d4034ab5b4e::t_c00003709aff4f 32-35,100-104,109-111
+  s_627d4034ab5b4e::t_73de559192aed2 7,13-14,17-19,22-27,44-46,53-55,57-64,66-71,76-77,83-88,112-114,116-119,124-126
+pyproject.toml
+  s_627d4034ab5b4e::t_74a37d0ab37c45 40
+tests/test_harness_tool_headers.py
+  s_627d4034ab5b4e::t_74a37d0ab37c45 31,168
+run.py
+  s_627d4034ab5b4e::t_361c4cfed7cb80 56,340,407
+  s_627d4034ab5b4e::t_f9a9819c83fd7f 383-385
+  s_504bc38f1cfd89::t_1fa822947e0f65 140-141
+  s_627d4034ab5b4e::t_74a37d0ab37c45 55,406,408-410
+  s_504bc38f1cfd89::t_8c17f2da2bebef 912
+  s_504bc38f1cfd89::t_652d5bf1798567 127-130
+  s_504bc38f1cfd89::t_7a06f3a539d3b1 857,862-865
+  s_627d4034ab5b4e::t_dc3c92b5ba6cb6 343-344
+voice-agent-harnesses/thinkingmachines/inkling-small/agent.py
+  s_627d4034ab5b4e::t_361c4cfed7cb80 24,45-46
+  s_627d4034ab5b4e::t_cb51ed12b5953a 1-23,25-44,47-53
+voice-agent-harnesses/pine/requirements.txt
+  s_504bc38f1cfd89::t_da9c7eea1a06d5 1-7
+voice-agent-harnesses/thinkingmachines/inkling-small/adapters/chirp.py
+  s_627d4034ab5b4e::t_361c4cfed7cb80 37,335-338,349
+  s_627d4034ab5b4e::t_d1c19ce9ff3e5c 145-149,353-363,365
+  s_627d4034ab5b4e::t_6741413ba18c5b 43,366
+  s_627d4034ab5b4e::t_65dde3b8492898 66,199-204,206,208,367-375
+  s_627d4034ab5b4e::t_4b944a0dac1663 339-347
+  s_627d4034ab5b4e::t_fa15ba4df75993 126-128
+  s_627d4034ab5b4e::t_8952302fdb8a52 129
+  s_627d4034ab5b4e::t_3a43ec0c41062b 63-64,155,195-196,207
+  s_627d4034ab5b4e::t_d11562d2f88343 65
+  s_627d4034ab5b4e::t_2acf35b93a34a6 1-36,38-42,44-62,67-125,130-144,150-154,156-194,197-198,205,209-334,348,350-352,364,376-383
+voice-agent-harnesses/pine/report.py
+  s_504bc38f1cfd89::t_ce483fbdb5aefa 1-353
+voice-agent-harnesses/pine/README.md
+  s_504bc38f1cfd89::t_a6d147edf8f470 1-106
+tests/test_dockerfiles.py
+  s_627d4034ab5b4e::t_df126fc1ac94ee 15-16
+voice-agent-harnesses/thinkingmachines/harness.py
+  s_627d4034ab5b4e::t_6741413ba18c5b 245-251,376-384
+  s_627d4034ab5b4e::t_361c4cfed7cb80 11-15,23,51-52,61-63,241-244,254-262,268,290-302,308-375,385-431,615-618
+  s_627d4034ab5b4e::t_2cdea95be53195 303-307
+  s_627d4034ab5b4e::t_101df0860b7b40 649-658,665-671,673-674
+  s_627d4034ab5b4e::t_0febc30db07a53 1-10,16-22,24-50,53-60,64-240,252-253,263-267,269-289,432-614,619-648,659-664,672,675-687
+k8s/deployment.yaml
+  s_627d4034ab5b4e::t_190befae34f959 200-211
+voice-agent-harnesses/pine/voice/agent.py
+  s_504bc38f1cfd89::t_ba122a45169406 1-81
+voice-agent-harnesses/pine/harness.py
+  s_504bc38f1cfd89::t_023db5c282b73d 1-408
+voice-agent-harnesses/thinkingmachines/report.py
+  s_627d4034ab5b4e::t_b6302b752ea9eb 1-409
+voice-agent-harnesses/s2s-model-pricing.json
+  s_627d4034ab5b4e::t_024861573f8523 35
+  s_627d4034ab5b4e::t_74a37d0ab37c45 34,36
+voice-agent-harnesses/thinkingmachines/inkling-small/Dockerfile
+  s_627d4034ab5b4e::t_2cdea95be53195 37-38
+  s_627d4034ab5b4e::t_374cdeb06f5660 1-31,33-34,39-55,57,60-61,64-74
+  s_627d4034ab5b4e::t_6741413ba18c5b 32,35-36,56,58-59,62-63
+tests/test_snapshot_coverage.py
+  s_627d4034ab5b4e::t_b257a654d49a85 32
+voice-agent-harnesses/pine/voice/adapters/trigger.py
+  s_504bc38f1cfd89::t_6f0e7aba76c6cf 1-156
+voice-agent-harnesses/thinkingmachines/pcm.py
+  s_627d4034ab5b4e::t_87fb91581f65c8 1-52,57,62-114,118-140
+  s_627d4034ab5b4e::t_d1c19ce9ff3e5c 53-56,58-61,115-117
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "094f2698ae21ae360478142db5765098e486c5d7",
+  "prompts": {},
+  "sessions": {
+    "s_504bc38f1cfd89": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6ec430a2-d117-42ad-9e6b-6797196cbab7",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    },
+    "s_627d4034ab5b4e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ae06ec58-4414-45f0-b284-8611c5b51321",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}

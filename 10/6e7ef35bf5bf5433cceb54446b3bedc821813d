@@ -1,0 +1,25 @@
+voice-agent-harnesses/s2s-model-pricing.json
+  s_e5feaf0cdec7f5::t_258deb9f528caa 1,3-33
+  h_f787e3fe1ad713 2
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "106e7ef35bf5bf5433cceb54446b3bedc821813d",
+  "prompts": {},
+  "humans": {
+    "h_f787e3fe1ad713": {
+      "author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_e5feaf0cdec7f5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1c53b6b1-58f4-458b-af32-21421c44b4b0",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}

@@ -1,0 +1,35 @@
+industries/travel/README.md
+  s_dec8be94946be7::t_d4063366b09866 110
+industries/travel/docs/ONEPAGER.md
+  s_dec8be94946be7::t_0e98f7c858b214 85-93,117-128
+industries/travel/system-prompts/ancillaries.md
+  s_dec8be94946be7::t_8273fd46b28475 1-3,5,7-9,11-15,17-133,135-137,139-159,161,164-189,193-198,201-216,219-220,222,227-231,234-242
+industries/travel/system-prompts/irrops.md
+  s_dec8be94946be7::t_d494258aec2732 1-3,5-9,11-136,146-182,185-198,201-203,205-206,209-212,215-224
+industries/travel/system-prompts/pass_services.md
+  s_dec8be94946be7::t_ebd6d4392a7169 1-3,5,7-9,11-15,17-131,133-141,146-163,165-167,169,171-172,175-177,179-185,188-198,201-204,206-207,211-212,215-223
+industries/travel/system-prompts/payments.md
+  s_dec8be94946be7::t_54d54e823f3448 1-3,5,7-9,11-130,132-136,138-139,141,144-145,148-167,172-179,193-202
+industries/travel/system-prompts/reception.md
+  s_dec8be94946be7::t_04753ba037dc07 1-3,5,7-9,11-15,18-140,142-146,148-187,190-197,200-215,218-219,222-231
+industries/travel/system-prompts/ticketing.md
+  s_dec8be94946be7::t_a3c85f809d99a3 1-3,5-132,134,136,143,150-154,159-191,194-208,211-215,217-218,222-224,227-235
+industries/travel/tool_server.py
+  s_dec8be94946be7::t_7334ba677c61dd 1681-1714
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "84d338a85ff1341558c240e81633c1d21cc9f999",
+  "prompts": {},
+  "sessions": {
+    "s_dec8be94946be7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8b6603b7-3e89-4369-ac83-69adb4ab10d9",
+        "model": "claude-opus-5"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

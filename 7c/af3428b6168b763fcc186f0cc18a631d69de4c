@@ -1,0 +1,40 @@
+voice-agent-harnesses/openai/report.py
+  s_fe90f2f98408ce::t_68c95ffdb48e38 423,429-430
+  s_fe90f2f98408ce::t_de2a5dfff72f44 447,452-458
+tests/test_tasks_to_digital_humans.py
+  s_fe90f2f98408ce::t_3cc01d78e68400 457-458
+  s_fe90f2f98408ce::t_db418657b98b76 443
+industries/healthcare/tasks/C4-H1/task.json
+  s_fe90f2f98408ce::t_cc6b055b1f5a66 97
+  s_fe90f2f98408ce::t_04b4483d0e9526 134-139
+industries/healthcare/tasks/C5-H3/task.json
+  s_fe90f2f98408ce::t_fafca7d2adf406 167
+industries/healthcare/tool_server.py
+  s_fe90f2f98408ce::t_b8020d90bb20d8 337-341
+  s_fe90f2f98408ce::t_21fbc5d926c033 766-767,774
+industries/healthcare/system-prompts/billing.md
+  s_fe90f2f98408ce::t_381819236ca453 123-127
+tests/test_tool_server.py
+  s_fe90f2f98408ce::t_42b813bbf408d0 354-364
+  s_fe90f2f98408ce::t_f9c2953571ed90 353
+industries/healthcare/tasks/R-H2/task.json
+  s_fe90f2f98408ce::t_2d2436c6cdc44d 75-77
+industries/healthcare/db/schema.sql
+  s_fe90f2f98408ce::t_098af2a106e00b 57
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "7caf3428b6168b763fcc186f0cc18a631d69de4c",
+  "prompts": {},
+  "sessions": {
+    "s_fe90f2f98408ce": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "87cf1cde-07c3-45f9-85f0-06db01052429",
+        "model": "cursor-grok-4.6-high-fast"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

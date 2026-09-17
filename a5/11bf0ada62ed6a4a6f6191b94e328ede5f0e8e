@@ -1,0 +1,29 @@
+voice-agent-harnesses/nvidia/harness.py
+  s_1cb9a0689f7f64::t_c1e381c8f4df6b 53
+  s_1cb9a0689f7f64::t_94d0761d23f35f 221-222
+README.md
+  s_1cb9a0689f7f64::t_cb3fbeba11c57d 107-111
+  s_1cb9a0689f7f64::t_7d524e2233d113 68
+  s_1cb9a0689f7f64::t_e120cb5de06262 7-16
+  s_1cb9a0689f7f64::t_5b5dc54418fd71 76
+  s_1cb9a0689f7f64::t_7b7d8838d96b79 55-56
+  s_1cb9a0689f7f64::t_fc4025bd7756fd 25
+voice-agent-harnesses/nvidia/nemotron-voicechat/Dockerfile
+  s_1cb9a0689f7f64::t_d46d2c1f9b6323 36
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "a511bf0ada62ed6a4a6f6191b94e328ede5f0e8e",
+  "prompts": {},
+  "sessions": {
+    "s_1cb9a0689f7f64": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9db2f26b-93c7-45ee-a25b-887b8a2e808a",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}

@@ -1,0 +1,24 @@
+scripts/tasks_to_digital_humans.py
+  s_ac61f807d2de62::t_119784b6525916 584
+tests/test_tasks_to_digital_humans.py
+  s_ac61f807d2de62::t_ae0eeff610f448 192-198
+  s_ac61f807d2de62::t_ae23d8007058bf 155-159
+scripts/encode_healthcare_tasks.py
+  s_ac61f807d2de62::t_e204d7f7c8ab4c 913
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "d0998c4a57b1525ac5587c32ecffe6258c6e87b2",
+  "prompts": {},
+  "sessions": {
+    "s_ac61f807d2de62": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "557b5c01-6ef2-49b7-a1c0-9a9536da2fb4",
+        "model": "grok-4.6"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

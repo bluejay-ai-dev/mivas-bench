@@ -1,0 +1,19 @@
+industries/finance/docs/ONEPAGER.md
+  s_e9341b759171e6::t_1f30b345bff826 1-355
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "68c566ff1e04dbb69e1c5ef3c8c34b01364b1258",
+  "prompts": {},
+  "sessions": {
+    "s_e9341b759171e6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "252fc55f-8dc4-4450-85dd-b357f7faf790",
+        "model": "claude-fable-5"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

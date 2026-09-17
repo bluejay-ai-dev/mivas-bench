@@ -1,0 +1,130 @@
+voice-agent-harnesses/bland/harness.py
+  s_51220fc11c9b4d::t_352b3a6ac08ddf 656-657,659
+  s_51220fc11c9b4d::t_3a021173cfd5d3 376,393-401
+  s_51220fc11c9b4d::t_e4e412d2239b8f 402-403
+voice-agent-harnesses/elevenlabs/adapters/chirp.py
+  s_51220fc11c9b4d::t_7628a3bf75a198 248-250
+  s_51220fc11c9b4d::t_a7ed6dc9286988 77
+  s_51220fc11c9b4d::t_c59b5909b6ac02 25-34
+industries/customer-support/agent_blueprint.json
+  s_51220fc11c9b4d::t_2e80515f8b80d6 11,25,46,65,83,101,116
+voice-agent-harnesses/cartesia/line_agent/main.py
+  s_51220fc11c9b4d::t_b6e004986dbf4e 135
+industries/finance/tool_server.py
+  s_51220fc11c9b4d::t_28b3bd030c48fe 1245
+voice-agent-harnesses/vapi/adapters/chirp.py
+  s_51220fc11c9b4d::t_6e62f5551eea80 284
+  s_51220fc11c9b4d::t_a372abd37d8dfa 266-270
+  s_51220fc11c9b4d::t_a5577fc83818b2 115-120
+  s_51220fc11c9b4d::t_fa3e5e2cc3af90 166
+  s_51220fc11c9b4d::t_e93d2d6d11b852 42
+  s_51220fc11c9b4d::t_45e50b49fe2da3 325,330-331
+  s_51220fc11c9b4d::t_22cbc6ff295f7f 62-63
+voice-agent-harnesses/elevenlabs/harness.py
+  s_51220fc11c9b4d::t_b192902579cfe1 31
+  s_51220fc11c9b4d::t_cbd5cab2045502 99-103
+  s_51220fc11c9b4d::t_638d778454312f 257
+tests/test_industry_contract.py
+  s_51220fc11c9b4d::t_8bdaa5aa377ab1 157-158
+industries/travel/tool_server.py
+  s_51220fc11c9b4d::t_db249acae1a485 1767
+voice-agent-harnesses/retell/adapters/chirp.py
+  s_51220fc11c9b4d::t_8b0eaa2312bc93 77-81
+  s_51220fc11c9b4d::t_4b016824fc9c06 126
+  s_51220fc11c9b4d::t_55dc94bcc59a8d 289,292-293
+  s_51220fc11c9b4d::t_d70284dbadd587 65
+  s_51220fc11c9b4d::t_b91a5082c0eba0 44
+  s_51220fc11c9b4d::t_a63def6cca0204 270
+industries/travel/agent_blueprint.json
+  s_51220fc11c9b4d::t_fac4d268fec5f7 11,33,52,69,89,103
+tests/test_tool_server.py
+  s_51220fc11c9b4d::t_bb459108ac1c07 198
+  s_51220fc11c9b4d::t_61da4e83c093c1 3-6
+  s_51220fc11c9b4d::t_fe460810db8279 215-216
+voice-agent-harnesses/retell/harness.py
+  s_51220fc11c9b4d::t_8436f945cb328b 168
+  s_51220fc11c9b4d::t_66ed3cec804ad7 44
+  s_51220fc11c9b4d::t_dc840596c06360 87-91
+voice-agent-harnesses/assemblyai/harness.py
+  s_51220fc11c9b4d::t_eb8b46c63131bd 181-183
+voice-agent-harnesses/cartesia/harness.py
+  s_51220fc11c9b4d::t_8e31818b289263 108-112
+  s_51220fc11c9b4d::t_895d2b69106c31 50
+voice-agent-harnesses/livekit/harness.py
+  s_51220fc11c9b4d::t_981a7fdead60e5 197,199
+  s_51220fc11c9b4d::t_33bdc83a1d14c4 277-280
+industries/legal/agent_blueprint.json
+  s_51220fc11c9b4d::t_b7470d8f2fc5d0 21-22,62-63,98-99,142-143,173-174
+voice-agent-harnesses/cartesia/adapters/chirp.py
+  s_51220fc11c9b4d::t_c982e3a0e5ee80 326-330
+  s_51220fc11c9b4d::t_bddc77ce9ac8d0 98-102
+  s_51220fc11c9b4d::t_8103cd26f6ada5 133
+  s_51220fc11c9b4d::t_de056c6086986a 275-279
+  s_51220fc11c9b4d::t_607f77f0124ffb 350,355
+  s_51220fc11c9b4d::t_c73e1de59bd7ea 295
+  s_51220fc11c9b4d::t_f764b07214f733 42
+scripts/expected_final_state.py
+  s_51220fc11c9b4d::t_2a6f9f6d203f48 152-156,158-160
+  s_51220fc11c9b4d::t_7975a1dae3d0b3 5-6
+voice-agent-harnesses/twilio/harness.py
+  s_51220fc11c9b4d::t_7e5c651f99a5d9 566,583-584
+runtime/session_tools.py
+  s_51220fc11c9b4d::t_15f9a7242fffe0 1-45
+industries/legal/tool_server.py
+  s_51220fc11c9b4d::t_48985de77ba0e9 727
+tests/test_elevenlabs_agents.py
+  s_51220fc11c9b4d::t_48be1438a1c2da 55-56
+tests/test_grok_pcm_pacer.py
+  s_51220fc11c9b4d::t_47372284caa62e 151
+tests/test_assemblyai_greeting.py
+  s_51220fc11c9b4d::t_6b9750add25a4f 65
+voice-agent-harnesses/nvidia/harness.py
+  s_51220fc11c9b4d::t_f82f0589ce9be3 236,245-248
+voice-agent-harnesses/openai/harness.py
+  s_51220fc11c9b4d::t_2a47e122a6a552 135
+  s_51220fc11c9b4d::t_99efe82474b5e1 8-10,12
+  s_51220fc11c9b4d::t_70dd083abe60fc 48-49,69-76
+voice-agent-harnesses/grok/harness.py
+  s_51220fc11c9b4d::t_f63b2afa806acf 316,326-328
+tests/test_session_tools.py
+  s_51220fc11c9b4d::t_ebce4760837360 1-5,7-9,15-41
+  s_51220fc11c9b4d::t_980196ea9f0c8e 6,10-14
+voice-agent-harnesses/gemini/harness.py
+  s_51220fc11c9b4d::t_e476038b016bef 212-214
+voice-agent-harnesses/deepgram/harness.py
+  s_51220fc11c9b4d::t_d5996ce01a136c 198-200
+industries/customer-support/tool_server.py
+  s_51220fc11c9b4d::t_339052306bd7ab 1786
+voice-agent-harnesses/pipecat/harness.py
+  s_51220fc11c9b4d::t_1a7c87e833b4f3 293-301
+  s_51220fc11c9b4d::t_e09e1b1923524f 277-279
+voice-agent-harnesses/vapi/harness.py
+  s_51220fc11c9b4d::t_0be06406b39a56 196
+  s_51220fc11c9b4d::t_b77210cf4a656d 93-97
+  s_51220fc11c9b4d::t_aad558b57f4463 43
+  s_51220fc11c9b4d::t_874f83ab51d30d 344-346,351
+industries/healthcare/agent_blueprint.json
+  s_51220fc11c9b4d::t_c149f023660330 22-23,77-78,141-142,219-220,272-273,333-334,390-391
+industries/finance/agent_blueprint.json
+  s_51220fc11c9b4d::t_62b7b0e52a03cd 25-26,61-62,128-129,198-199,242-243,278-279
+voice-agent-harnesses/assemblyai/adapters/chirp.py
+  s_51220fc11c9b4d::t_e2b192e9013bd2 193
+tests/test_expected_final_state.py
+  s_51220fc11c9b4d::t_3bb07640f28776 109-123,126-127
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "d2685653f218911719b454bc589ff5767781bbd9",
+  "prompts": {},
+  "sessions": {
+    "s_51220fc11c9b4d": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "b72d192b-35af-49cb-9d2c-fb72ef91ab97",
+        "model": "grok-4.6"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
