@@ -1,0 +1,55 @@
+voice-agent-harnesses/openai/gpt-live-1/live.py
+  s_e8ca06adbac3ad::t_9739a6cc903935 50-51,203
+run.py
+  s_e8ca06adbac3ad::t_3900ffc929d153 89-109,111-112,158,166-170,349-353
+k8s/deployment.yaml
+  s_e8ca06adbac3ad::t_3900ffc929d153 46
+voice-agent-harnesses/gemini/3.8-live/variants.json
+  s_b7e1504bfec758::t_0338da978ca603 3
+  s_e8ca06adbac3ad::t_9739a6cc903935 1-2,4-5
+tests/test_dockerfiles.py
+  s_b312545ee8b161::t_75caf17c726bd1 16
+voice-agent-harnesses/openai/gpt-live-1/variants.json
+  s_e8ca06adbac3ad::t_9739a6cc903935 1-10
+voice-agent-harnesses/gemini/3.8-live/agent.py
+  s_b7e1504bfec758::t_31781eac0601bb 1,3-7,13-32,51-55,57-68,70-72,90-92,94-110
+  s_b7e1504bfec758::t_4b4344bf74a380 2,8-12,69,86-89,93
+  s_b7e1504bfec758::t_fe51c6d50d1129 33-34,46-47,56
+  s_b7e1504bfec758::t_62be3ac843663e 35-45,48-50
+  s_b7e1504bfec758::t_b22efd8b3b11f7 73-85
+voice-agent-harnesses/gemini/3.8-live/Dockerfile
+  s_b7e1504bfec758::t_31781eac0601bb 2,6,8,31-34,36,42,48,55
+  s_b7e1504bfec758::t_ad6917bf928a5f 1,3-5,7,9-30,35,37-41,43-47,49-54,56-63
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "c5bfcfb171cd44ad9005523a39e63400fc415878",
+  "prompts": {},
+  "sessions": {
+    "s_b312545ee8b161": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e31290cc-deca-4618-97e7-b46fcaf77d34",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    },
+    "s_b7e1504bfec758": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "5bcf649b-88c9-479a-a4a7-592e6974c7fc",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    },
+    "s_e8ca06adbac3ad": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "bc7e4c08-b405-49d6-bb60-20ab60228ccc",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}
