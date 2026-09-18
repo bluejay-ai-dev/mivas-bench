@@ -163,12 +163,20 @@ def check_k8s(harness: str, industry: str) -> str | None:
     pods = subprocess.run(["kubectl", "get", "pods", "-l", f"mivas.slug={slug(harness, industry)}", "-o", "name"],
                           capture_output=True, text=True).stdout.split()
     listening = 0
-    for pod in pods:
-        logs = subprocess.run(["kubectl", "logs", pod, "--tail=400"], capture_output=True, text=True).stdout
-        if any(tok in logs for tok in ("ws↔", "starting CHIRP", "starting LiveKit SIP worker", "listening")):
-            listening += 1
-        if "snapshot: NO AWS CREDENTIALS" in logs:
-            rec("FAIL", f"{pod} snapshot creds", "pod has a bucket but no credentials (Pod Identity / IRSA / static keys)")
+
+    def _pod_logs(pod: str) -> tuple[str, str]:
+        # boot lines live at the log HEAD; a tail drowns in ALB health-check spam at high replica counts
+        return pod, subprocess.run(["kubectl", "logs", pod, "--limit-bytes=65536"],
+                                   capture_output=True, text=True).stdout
+
+    # serial kubectl-logs across 24 replicas dominated preflight wall clock; fetch wide
+    from concurrent.futures import ThreadPoolExecutor
+    with ThreadPoolExecutor(max_workers=min(16, max(1, len(pods)))) as ex:
+        for pod, logs in ex.map(_pod_logs, pods):
+            if any(tok in logs for tok in ("ws↔", "starting CHIRP", "starting LiveKit SIP worker", "listening")):
+                listening += 1
+            if "snapshot: NO AWS CREDENTIALS" in logs:
+                rec("FAIL", f"{pod} snapshot creds", "pod has a bucket but no credentials (Pod Identity / IRSA / static keys)")
     rec("PASS" if pods and listening == len(pods) else "FAIL", "CHIRP listening", f"{listening}/{len(pods)} pods log the bind line")
     base = os.environ.get("MIVAS_BASE_DOMAIN", "").strip()
     return f"wss://{slug(harness, industry)}.{base}" if base and harness.split('/')[0] not in WORKER_FAMILIES else None

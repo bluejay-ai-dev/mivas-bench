@@ -336,7 +336,10 @@ def task_to_digital_human(
 
     dh: dict[str, Any] = {
         "name": person_name(task),
-        "test_name": task["task_name"],
+        # test_name is the DH's stable ID: industry-qualified task FOLDER name.
+        # Folder keys collide across industries and by-test-name lookup is
+        # org-global, so the industry prefix is what keeps it unique.
+        "test_name": f"{industry}-{case_key}",
         "intent": with_scenario_clock(task.get("intent") or "", industry),
         "success_criteria": success_criteria(task.get("exp_tool_calls")),
         "expected_tool_calls": expected_tool_calls(task.get("exp_tool_calls")),
@@ -384,14 +387,20 @@ def trait_value(dh: dict[str, Any], name: str) -> str | None:
 
 
 def case_key_of(dh: dict[str, Any]) -> str:
-    keyed = trait_value(dh, "case_key")
-    if keyed:
-        return keyed
+    # test_name IS the digital human's id: "{industry}-{task folder}".
     test_name = str(dh.get("test_name") or "")
-    if ":" in test_name:
+    for _ind in ("legal", "healthcare", "customer-support", "control-industry"):
+        if test_name.startswith(_ind + "-"):
+            suffix = test_name[len(_ind) + 1:].strip()
+            if CASE_KEY_RE.match(suffix):
+                return suffix
+    if ":" in test_name:  # legacy "C1-E1: prose" names
         prefix = test_name.split(":", 1)[0].strip()
         if CASE_KEY_RE.match(prefix):
             return prefix
+    keyed = trait_value(dh, "case_key")
+    if keyed:
+        return keyed
     raise ValueError("digital human has no case_key")
 
 
@@ -407,8 +416,8 @@ def check(humans: list[dict[str, Any]], industry: str) -> None:
         name = dh.get("name") or ""
         if name.startswith(key) or CASE_KEY_RE.match(str(name).split()[0] if name else ""):
             raise SystemExit(f"{key}: name must be person-only, got {name!r}")
-        if dh.get("test_name", "").split(":", 1)[0].strip() != key:
-            raise SystemExit(f"{key}: test_name must start with the case key")
+        if dh.get("test_name") != f"{industry}-{key}":
+            raise SystemExit(f"{key}: test_name must be '{industry}-{key}', got {dh.get('test_name')!r}")
         if "exp_db_state" in dh:
             raise SystemExit(f"{key}: verifier fields must not be copied onto the DH")
         for pin in dh.get("scripted_responses") or []:

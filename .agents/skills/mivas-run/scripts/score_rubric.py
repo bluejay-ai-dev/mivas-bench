@@ -234,9 +234,16 @@ def score_call(
     }
 
     has_actual = _has_actual(result)
+    # a no-tools case (policy question answered by the standing spoken rule)
+    # legitimately records zero actuals — only fail when tools were expected
+    expects_tools = any(
+        isinstance(g, dict) and g.get("expected")
+        for g in result.get("tool_calls") or []
+    )
     checks["tool_calls"] = {
-        "pass": has_actual or in_pod_tools,
+        "pass": has_actual or in_pod_tools or not expects_tools,
         "has_actual": has_actual,
+        "expects_tools": expects_tools,
         "in_pod_tools": in_pod_tools,
     }
 

@@ -774,12 +774,14 @@ def apply_agents(pairs: list[tuple[str, str]], *, follow_logs: bool) -> None:
     finally:
         path.unlink(missing_ok=True)
 
-    for harness, industry in pairs:
-        name = f"mivas-{slug(harness, industry)}"
-        subprocess.run(
-            ["kubectl", "rollout", "status", f"deployment/{name}", "--timeout=180s"],
-            check=False,
-        )
+    # MIVAS_ROLLOUT_WAIT=0: return right after apply; the cluster finishes the rollout.
+    if os.environ.get("MIVAS_ROLLOUT_WAIT", "1").strip().lower() not in ("0", "false", "no"):
+        for harness, industry in pairs:
+            name = f"mivas-{slug(harness, industry)}"
+            subprocess.run(
+                ["kubectl", "rollout", "status", f"deployment/{name}", "--timeout=180s"],
+                check=False,
+            )
     for harness, industry in pairs:
         name = f"mivas-{slug(harness, industry)}"
         stable = pair_websocket_url(harness, industry)

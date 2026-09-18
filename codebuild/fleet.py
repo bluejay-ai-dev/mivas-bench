@@ -30,6 +30,11 @@ EXCLUDE_DIRS = {
     ".ruff_cache",
     "htmlcov",
     "node_modules",
+    # runtime artifacts, never needed by docker builds (1.3G raw, was the 200MB+ upload)
+    "verify-out",
+    "eval_outputs",
+    ".cache",
+    "actual-final-state",
 }
 EXCLUDE_FILES = {".env", ".DS_Store"}
 
@@ -240,17 +245,17 @@ def _ensure_project(cb, *, service_arn: str, batch_arn: str, bucket: str, prefix
 def _zip_repo() -> bytes:
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
-        for path in ROOT.rglob("*"):
-            if not path.is_file():
-                continue
-            rel = path.relative_to(ROOT)
-            if any(part in EXCLUDE_DIRS for part in rel.parts):
-                continue
-            if path.name in EXCLUDE_FILES or path.name.endswith(".pyc"):
-                continue
-            if rel.as_posix() == "buildspec.yml":
-                continue
-            zf.write(path, rel.as_posix())
+        # os.walk with dir pruning: rglob descends into excluded trees (multi-GB
+        # .venv/verify-out) just to discard every entry
+        for dirpath, dirnames, filenames in os.walk(ROOT):
+            dirnames[:] = [d for d in dirnames if d not in EXCLUDE_DIRS]
+            for fn in filenames:
+                if fn in EXCLUDE_FILES or fn.endswith(".pyc"):
+                    continue
+                rel = (Path(dirpath) / fn).relative_to(ROOT)
+                if rel.as_posix() == "buildspec.yml":
+                    continue
+                zf.write(Path(dirpath) / fn, rel.as_posix())
     return buf.getvalue()
 
 
@@ -307,6 +312,8 @@ def _upload_source(s3, bucket: str, pairs: list[tuple[str, str]]) -> str:
 def start_fleet(pairs: list[tuple[str, str]], *, wait: bool) -> str:
     if not pairs:
         raise ValueError("no pairs to build")
+    # variants (family/runtime@variant) share the base runtime's image — build the base
+    pairs = list(dict.fromkeys((h.split("@", 1)[0], i) for h, i in pairs))
     region = _region()
     bucket = _bucket()
     project = _project()

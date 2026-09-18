@@ -86,7 +86,7 @@ The verifier matches expected tools by name and constrained arguments, checks th
 
 ### Pass@1 and Pass<sup>5</sup>
 
-Pass@1 records whether one conversation satisfies the full conjunctive criterion. Pass<sup>5</sup> is stricter: a task receives a Pass<sup>5</sup> only when all five independent conversations pass. Repetition distinguishes a system that can complete a task from one that can do so reliably.
+Pass@1 records whether one conversation satisfies the full conjunctive criterion. Pass<sup>k</sup> is stricter: for a task with `c` passes among `n` scored conversations it is `C(c,k) / C(n,k)`, the chance that `k` conversations drawn from that task all pass, averaged unweighted across tasks. Every scored task runs `n = 5`, so at `k = 5` this is binary: a task receives a Pass<sup>5</sup> only when all five independent conversations pass. Repetition distinguishes a system that can complete a task from one that can do so reliably.
 
 The released evaluation matrix contains five conversations per case for eight completed runtimes across all three scored industries. Exports retain one row per conversation, including task identity, component passes, state differences, transcript and trace data, latency, metrics, and estimated cost. This preserves run-level failures and allows Pass@1, Pass<sup>5</sup>, and component scores to be recomputed from the underlying evidence.
 

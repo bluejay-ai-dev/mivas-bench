@@ -98,7 +98,8 @@ def req(method: str, path: str, payload: dict[str, Any] | None = None, *, not_fo
 
 
 def slug(harness: str, industry: str) -> str:
-    return f"{harness.replace('/', '-')}-{industry}".replace("_", "-").replace(".", "-").lower()
+    return (f"{harness.replace('/', '-').replace('@', '-')}-{industry}"
+            .replace("_", "-").replace(".", "-").lower())
 
 
 def default_url(harness: str, industry: str) -> str | None:
@@ -282,6 +283,45 @@ def smoke_humans(industry: str, n: int) -> list[dict[str, Any]]:
     return picked
 
 
+def attach_dhs(sim_id: int, dh_ids: list[int], *, tries: int = 4) -> None:
+    """Attach digital humans to a simulation, VERIFIED.
+
+    simulation_ids is replace-semantics and reads can be stale, so a naive
+    read-union-write can silently detach other sims (and Bluejay refuses to
+    dial a detached DH: instant NO_ANSWER). Write, re-read by id, and retry
+    unioning until every DH verifiably contains sim_id.
+    """
+    pending = list(dict.fromkeys(int(d) for d in dh_ids))
+    for _ in range(tries):
+        updates = []
+        for dh in pending:
+            body = req("GET", f"digital-human/{dh}")
+            d = body.get("digital_human", body)
+            d = d.get("digital_human", d)
+            sims = {int(s) for s in (body.get("simulation_ids") or d.get("simulation_ids") or [])
+                    if str(s).isdigit()}
+            sims.add(int(sim_id))
+            updates.append({"digital_human_id": dh, "update": {"simulation_ids": sorted(sims)}})
+        resp = req("PUT", "update-digital-humans", {"updates": updates})
+        errs = resp.get("errors") or []
+        if errs:
+            raise SystemExit(f"attach_dhs errors: {json.dumps(errs[:3])[:400]}")
+        still = []
+        for dh in pending:
+            body = req("GET", f"digital-human/{dh}")
+            d = body.get("digital_human", body)
+            d = d.get("digital_human", d)
+            sims = {int(s) for s in (body.get("simulation_ids") or d.get("simulation_ids") or [])
+                    if str(s).isdigit()}
+            if int(sim_id) not in sims:
+                still.append(dh)
+        pending = still
+        if not pending:
+            return
+        time.sleep(2)
+    raise SystemExit(f"attach_dhs: sim {sim_id} not verified on {pending[:5]}… after {tries} tries")
+
+
 def find_dh_by_test_name(title: str) -> dict[str, Any] | None:
     body = req("GET", f"digital-human-by-test-name/{urllib.parse.quote(title, safe='')}", not_found_ok=True)
     dh = _unwrap(body, "digital_human", "data") if body else {}
@@ -290,18 +330,30 @@ def find_dh_by_test_name(title: str) -> dict[str, Any] | None:
     return dh if isinstance(dh, dict) and dh.get("id") else None
 
 
-def ensure_humans(humans: list[dict[str, Any]], sim_id: int) -> list[int]:
+def ensure_humans(humans: list[dict[str, Any]], sim_id: int, *, allow_create: bool = False) -> list[int]:
+    from concurrent.futures import ThreadPoolExecutor
+
     ids: list[int] = []
     to_create: list[dict[str, Any]] = []
-    for dh in humans:
-        live = find_dh_by_test_name(dh["test_name"])
+    with ThreadPoolExecutor(max_workers=12) as ex:
+        found = list(ex.map(lambda dh: (dh, find_dh_by_test_name(dh["test_name"])), humans))
+    for dh, live in found:
         if live:
-            sims = {int(s) for s in (live.get("simulation_ids") or []) if str(s).isdigit()}
-            sims.add(sim_id)
-            req("PUT", f"update-digital-human/{live['id']}", {"simulation_ids": sorted(sims)})
             ids.append(int(live["id"]))
         else:
             to_create.append(dh)
+    if ids:
+        attach_dhs(sim_id, ids)
+    if to_create and not allow_create:
+        # benchmark DHs are canonical: they are NEVER minted here. A miss means the
+        # live test_name drifted from '{industry}-{case_key}' — rename the live DH,
+        # never create a duplicate.
+        missing = [d["test_name"] for d in to_create]
+        raise SystemExit(
+            f"REFUSING to create {len(missing)} digital humans (canonical set is locked). "
+            f"Unresolved test_names: {missing[:8]}{'…' if len(missing) > 8 else ''}. "
+            "Rename the live canonical DHs to match, then requeue."
+        )
     if to_create:
         resp = req("POST", "create-digital-humans", {"simulation_ids": [sim_id], "digital_humans": to_create})
         rows = resp.get("digital_humans") or resp.get("created") or resp.get("created_digital_humans") or []
@@ -342,9 +394,19 @@ def queue(sim_id: int, dh_ids: list[int], runs: int) -> int:
 
 
 def run_results(run_id: int) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    # the endpoint caps a response at 100 conversations and returns no page
+    # metadata, so a k=5 run reads back 100/360 unless it is paged out
     body = req("GET", f"retrieve-simulation-results/{run_id}")
     run = body.get("simulation_run") or {}
     results = body.get("simulation_results") or body.get("results") or []
+    while results and len(results) % 100 == 0:
+        page = req("GET", f"retrieve-simulation-results/{run_id}?offset={len(results)}")
+        more = page.get("simulation_results") or page.get("results") or []
+        seen = {str(r.get("id")) for r in results}
+        fresh = [r for r in more if str(r.get("id")) not in seen]
+        if not fresh:
+            break
+        results += fresh
     return run, results
 
 
@@ -382,7 +444,7 @@ def dump_results(run_id: int, out: Path) -> list[Path]:
 
 
 def score_dir(out: Path, *, in_pod_tools: bool = False) -> bool:
-    paths = sorted(out.glob("*.json"))
+    paths = [p for p in sorted(out.glob("*.json")) if p.name != "smoke.json"]  # smoke.json is run metadata, not a result
     if not paths:
         raise SystemExit(f"no result JSON in {out}")
     all_ok = True
@@ -427,7 +489,8 @@ def cmd_smoke(a: argparse.Namespace) -> int:
         agent_id, f"MIVAS smoke · {pair}", minutes=a.minutes, max_concurrent=a.max_concurrent,
     )
     humans = smoke_humans(a.industry, a.calls)
-    dh_ids = ensure_humans(humans, sim_id)
+    # smoke DHs ("MIVAS smoke · …") are prefixed copies — creating them once is fine
+    dh_ids = ensure_humans(humans, sim_id, allow_create=True)
     runs = a.calls if len(dh_ids) == 1 else 1
     run_id = queue(sim_id, dh_ids, runs)
     print(f"{app_url()}/simulations/{sim_id}/runs/{run_id}", flush=True)
@@ -477,24 +540,23 @@ def cmd_full(a: argparse.Namespace) -> int:
         if not url:
             raise SystemExit("pass --agent-id, or --url / MIVAS_BASE_DOMAIN so the agent can be ensured")
         agent_id = ensure_agent(a.harness, a.industry, url, a.user, a.password, None)
-    pair = slug(a.harness, a.industry)
-    cmd = [sys.executable, str(ROOT / "scripts" / "tasks_to_digital_humans.py"),
-           "--industry", a.industry, "--push", "--agent-id", str(agent_id),
-           "--name", f"MIVAS {a.industry} · {a.harness} · k={a.runs}"]
-    print("+", " ".join(cmd), flush=True)
-    proc = subprocess.run(cmd, cwd=str(ROOT), capture_output=True, text=True)
-    sys.stdout.write(proc.stdout)
-    sys.stderr.write(proc.stderr)
-    if proc.returncode != 0:
-        return proc.returncode
-    sim_id = None
-    for line in proc.stdout.splitlines():
-        if line.startswith("simulation ") and " on agent " in line:
-            sim_id = int(line.split()[1])
-    if sim_id is None:
-        raise SystemExit("could not read the simulation id from tasks_to_digital_humans output")
-    update_simulation(sim_id, max_concurrent=a.max_concurrent, runs_per_digital_human=a.runs)
-    dh_ids = humans_on_simulation(sim_id)
+    # Benchmark full runs NEVER create digital humans. The canonical DH for every
+    # task is resolved by its stable id — test_name "{industry}-{task folder}" —
+    # attached to a fresh simulation, and the membership is verified before a
+    # single call is queued. Any unresolved test_name aborts the queue.
+    task_dirs = sorted(d.name for d in (ROOT / "industries" / a.industry / "tasks").iterdir() if d.is_dir())
+    wanted = [{"test_name": f"{a.industry}-{key}"} for key in task_dirs]
+    sim_id = create_simulation(
+        agent_id, f"MIVAS {a.industry} · {a.harness} · k={a.runs}",
+        minutes=8, max_concurrent=a.max_concurrent, runs=a.runs,
+    )
+    dh_ids = ensure_humans(wanted, sim_id, allow_create=False)
+    on_sim = sorted(humans_on_simulation(sim_id))
+    if on_sim != sorted(dh_ids):
+        raise SystemExit(
+            f"simulation {sim_id} membership mismatch after attach: "
+            f"expected {sorted(dh_ids)[:5]}…({len(dh_ids)}), got {on_sim[:5]}…({len(on_sim)}). NOT queueing."
+        )
     run_id = queue(sim_id, dh_ids, a.runs)
     run_url = f"{app_url()}/simulations/{sim_id}/runs/{run_id}"
     print(run_url, flush=True)
@@ -534,7 +596,7 @@ def main(argv: list[str] | None = None) -> int:
 
     sp = sub.add_parser("smoke", help="3 smoke calls on Bluejay, scored by the rubric")
     pair_args(sp); poll_args(sp)
-    sp.add_argument("--calls", type=int, default=3)
+    sp.add_argument("--calls", type=int, default=1)
     sp.add_argument("--max-concurrent", type=int, default=1)
     sp.add_argument("--minutes", type=int, default=4, help="max call duration")
     sp.add_argument("--agent-id", type=int)
