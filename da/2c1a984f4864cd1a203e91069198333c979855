@@ -1,0 +1,163 @@
+mivas_finals/legal-gemini-2.5-flash-native-audio.csv
+  s_45dd87ae1ad373::t_9c241df0d20c3a 1-4286
+mivas_finals/legal-gemini-3.8-live-extended.csv
+  s_45dd87ae1ad373::t_9c241df0d20c3a 1-5218
+RUNBOOK_V3.md
+  s_45dd87ae1ad373::t_0fdaf7a15f602c 3
+  s_45dd87ae1ad373::t_0025e508a376d9 1-2,4-97
+mivas_finals/legal-grok-voice.csv
+  s_45dd87ae1ad373::t_9c241df0d20c3a 1-4006
+mivas_finals/legal-openai-realtime-2.1-mini.csv
+  s_45dd87ae1ad373::t_9c241df0d20c3a 1-3790
+mivas_finals/MANIFEST.csv
+  s_45dd87ae1ad373::t_9c241df0d20c3a 1-40
+mivas_finals/legal-assemblyai-voice-agent.csv
+  s_45dd87ae1ad373::t_9c241df0d20c3a 1-3815
+voice-agent-harnesses/s2s-model-pricing.json
+  s_45dd87ae1ad373::t_1a8710d1da9aaa 9-155,157-181,184-186,188-193,209
+mivas_finals/legal-gemini-3.8-live.csv
+  s_45dd87ae1ad373::t_9c241df0d20c3a 1-4528
+scripts/eval_costs.py
+  s_45dd87ae1ad373::t_60d63bee686cff 535-549
+  s_45dd87ae1ad373::t_705370ebc0efd8 64-66
+  s_45dd87ae1ad373::t_22ba783818ed97 327-330
+  s_45dd87ae1ad373::t_2731ab7326603e 33-36
+baseten-config.yaml
+  s_8e4ae5f96f961e::t_284e437769e545 1-50
+baseten/mivas-nvidia-nemotron-healthcare/config.yaml
+  s_8e4ae5f96f961e::t_a0f9a0e33afab6 1-50
+mivas_finals/customer-support-assemblyai-voice-agent.csv
+  s_45dd87ae1ad373::t_4e4cf803b52af5 1-4322
+mivas_finals/customer-support-aws-nova-sonic-2.csv
+  s_45dd87ae1ad373::t_9d62cd721b39a9 1-5337
+mivas_finals/customer-support-gemini-2.5-flash-native-audio.csv
+  s_45dd87ae1ad373::t_357ab491e17bdf 1-3685
+mivas_finals/customer-support-gemini-3.8-live-extended.csv
+  s_45dd87ae1ad373::t_6b8cc8e2cc8054 1-4657
+mivas_finals/customer-support-gemini-3.8-live.csv
+  s_45dd87ae1ad373::t_ccca2bd1a742ba 1-3444
+mivas_finals/customer-support-gemini-flash-live-3.1.csv
+  s_45dd87ae1ad373::t_554cb1509b9f32 1-3313
+mivas_finals/customer-support-grok-voice.csv
+  s_45dd87ae1ad373::t_d14264ba4d83e4 1-3075
+mivas_finals/customer-support-livekit-cascaded.csv
+  s_45dd87ae1ad373::t_3beb980569a27c 1-4145
+mivas_finals/customer-support-openai-gpt-live-1-astra-medium.csv
+  s_45dd87ae1ad373::t_2c62699e6e9d60 1-5571
+mivas_finals/customer-support-openai-gpt-live-1-sol-low.csv
+  s_45dd87ae1ad373::t_61f5cb8c3ac4e3 1-5919
+mivas_finals/customer-support-openai-realtime-2.1-mini.csv
+  s_45dd87ae1ad373::t_036f6ae1d3a95f 1-3005
+mivas_finals/customer-support-openai-realtime-2.1.csv
+  s_45dd87ae1ad373::t_53aee8c33ff2fc 1-3003
+mivas_finals/customer-support-qwen-audio-realtime.csv
+  s_45dd87ae1ad373::t_f42c28c917e120 1-5384
+mivas_finals/healthcare-assemblyai-voice-agent.csv
+  s_45dd87ae1ad373::t_fcdbdad7a97086 1-4040
+mivas_finals/healthcare-aws-nova-sonic-2.csv
+  s_45dd87ae1ad373::t_da178be57df74f 1-3909
+mivas_finals/healthcare-gemini-2.5-flash-native-audio.csv
+  s_45dd87ae1ad373::t_201cd4ed7b0b8d 1-4015
+mivas_finals/healthcare-gemini-3.8-live-extended.csv
+  s_45dd87ae1ad373::t_35513674e31a4d 1-6518
+mivas_finals/healthcare-gemini-3.8-live.csv
+  s_45dd87ae1ad373::t_93d29a3d469faf 1-4647
+mivas_finals/healthcare-gemini-flash-live-3.1.csv
+  s_45dd87ae1ad373::t_5c662f1efddbe4 1-4045
+mivas_finals/healthcare-grok-voice.csv
+  s_45dd87ae1ad373::t_26585d823fe0bd 1-3683
+mivas_finals/healthcare-livekit-cascaded.csv
+  s_45dd87ae1ad373::t_a68e114a144676 1-5324
+mivas_finals/healthcare-openai-gpt-live-1-astra-medium.csv
+  s_45dd87ae1ad373::t_bbcd10f365c472 1-10341
+mivas_finals/healthcare-openai-gpt-live-1-sol-low.csv
+  s_45dd87ae1ad373::t_5500ef14ca07ed 1-10379
+mivas_finals/healthcare-openai-realtime-2.1-mini.csv
+  s_45dd87ae1ad373::t_c8cc185d6f1739 1-4333
+mivas_finals/healthcare-openai-realtime-2.1.csv
+  s_45dd87ae1ad373::t_e950c8d37796e0 1-5462
+mivas_finals/healthcare-qwen-audio-realtime.csv
+  s_45dd87ae1ad373::t_513b00ef37d3aa 1-7497
+mivas_finals/legal-aws-nova-sonic-2.csv
+  s_45dd87ae1ad373::t_ce91af86f89e42 1-5411
+mivas_finals/legal-gemini-flash-live-3.1.csv
+  s_45dd87ae1ad373::t_c5bd1aaf30abda 1-5015
+mivas_finals/legal-livekit-cascaded.csv
+  s_45dd87ae1ad373::t_a3dc1f793133de 1-6055
+mivas_finals/legal-openai-gpt-live-1-astra-medium.csv
+  s_45dd87ae1ad373::t_d32418976db4f7 1-8748
+mivas_finals/legal-openai-gpt-live-1-sol-low.csv
+  s_45dd87ae1ad373::t_9b0e02371909ee 1-8732
+mivas_finals/legal-openai-realtime-2.1.csv
+  s_45dd87ae1ad373::t_8d7c33afdaa5ac 1-3898
+mivas_finals/legal-qwen-audio-realtime.csv
+  s_45dd87ae1ad373::t_709185ade08e67 1-7781
+pyproject.toml
+  s_8e4ae5f96f961e::t_84dc615c9bbd9a 29-30
+scripts/close_to_360.py
+  s_836ffa33641b35::t_88e221f9185317 1-181
+scripts/export_legal_v3.py
+  s_8e4ae5f96f961e::t_e6d5959835528a 1-397
+scripts/runbook.py
+  s_836ffa33641b35::t_bec85622e630d7 1-899
+tests/test_scenario_clock.py
+  s_8e4ae5f96f961e::t_00c06a9c5c990e 88-92,95-98
+tests/test_tasks_to_digital_humans.py
+  s_836ffa33641b35::t_a709a8baa10850 42,777-778,783
+uv.lock
+  s_8e4ae5f96f961e::t_e814fdbafa16e9 728,731,754,757,967-1024,1568-1576
+verifiers/attribution_bundle.py
+  s_8e4ae5f96f961e::t_0b573af8dd0ab1 14,21,39-43,45-54,57,60-66
+verifiers/verify_run.py
+  s_8e4ae5f96f961e::t_e4974cc9eaef11 102-108
+HANDOFF.md
+  s_836ffa33641b35::t_2ccf0fc1b00ea9 1-101
+scripts/bluejay_run_to_csv.py
+  s_06f29b6b68e06d::t_9e4283ab316e5a 44,52-53,740-780,1080-1089,1364-1366,1373,1380-1381,1383-1384,1439-1463,1540,1576-1577,1604,1619,1637-1640,1685,1724-1729
+scripts/render_runbook_md.py
+  s_06f29b6b68e06d::t_3648dc8483dbfa 1-140
+verifiers/pull_actual_final_state.py
+  s_836ffa33641b35::t_073cae78c64544 51,72-79
+verifiers/verify_task_run.py
+  s_836ffa33641b35::t_8b5f6f935b3948 35,201-202,204-209,213-215,940-949,954-971,985-1066
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "da2c1a984f4864cd1a203e91069198333c979855",
+  "prompts": {},
+  "sessions": {
+    "s_06f29b6b68e06d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f568b0b7-1958-4e26-91ee-dad5062e2e16",
+        "model": "unknown"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    },
+    "s_45dd87ae1ad373": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "87faeb31-4614-4097-bb19-a02b88949dc7",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    },
+    "s_836ffa33641b35": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2b9aa59c-802c-4472-8c8f-e56dc284fa8c",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    },
+    "s_8e4ae5f96f961e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e5f8b586-77e2-4335-b2e0-ab288230680d",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}
