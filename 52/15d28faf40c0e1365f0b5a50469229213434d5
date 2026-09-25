@@ -1,0 +1,19 @@
+tests/test_dockerfiles.py
+  s_8e4ae5f96f961e::t_63daed6a37b969 15
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "5215d28faf40c0e1365f0b5a50469229213434d5",
+  "prompts": {},
+  "sessions": {
+    "s_8e4ae5f96f961e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e5f8b586-77e2-4335-b2e0-ab288230680d",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}
