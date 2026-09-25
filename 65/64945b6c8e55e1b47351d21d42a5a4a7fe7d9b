@@ -1,0 +1,21 @@
+scripts/tasks_to_digital_humans.py
+  s_4ea68a93215613::t_c56dc87ec6bc34 299-300
+tests/test_tasks_to_digital_humans.py
+  s_4ea68a93215613::t_91c20a28401df4 75-80
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "6564945b6c8e55e1b47351d21d42a5a4a7fe7d9b",
+  "prompts": {},
+  "sessions": {
+    "s_4ea68a93215613": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8eb3d720-2035-4a81-aa92-006569f46f3c",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
