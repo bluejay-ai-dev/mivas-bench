@@ -69,6 +69,12 @@ CLOSED_TIMEOUT_S = float(os.environ.get("GPT_LIVE_CLOSED_TIMEOUT_S", "6"))
 # caller audio ever arrives), at most GREETING_RETRIES times.
 GREETING_RETRY_S = float(os.environ.get("GPT_LIVE_GREETING_RETRY_S", "6"))
 GREETING_RETRIES = int(os.environ.get("GPT_LIVE_GREETING_RETRIES", "2"))
+# The provider timeline, which the speak-first append lands on, only advances with input
+# audio, and Bluejay sends its first caller frame 2.1-3.6 s after the upgrade (measured
+# 2026-09-25), so the greeting waited on Bluejay. A phone line carries silence from the
+# moment it connects; 100 ms silence frames are fed until the caller leg's first frame,
+# for at most this long.
+PRIME_SILENCE_S = float(os.environ.get("GPT_LIVE_PRIME_SILENCE_S", "5"))
 # Appends are capped at 500 tokens; ~3 chars/token keeps a safe margin.
 APPEND_MAX_CHARS = 1400
 AUDIBLE_PEAK = 300  # int16 peak below this is silence for hang-up timing only
@@ -245,8 +251,21 @@ class LiveSession:
         pack's greeting is fixed text the benchmark compares against. Sent, not awaited
         (see ``_post``): the caller's first audio has not arrived yet at this point."""
         await self._append_all(self.pack.speak_first_prompt())
+        if PRIME_SILENCE_S > 0:
+            self._spawn(self._prime_silence(), name="gpt-live-prime")
         if GREETING_RETRIES > 0 and GREETING_RETRY_S > 0:
             self._spawn(self._greeting_watch(), name="gpt-live-greeting")
+
+    async def _prime_silence(self) -> None:
+        """Keep the input clock running until the caller leg's first frame (see PRIME_SILENCE_S)."""
+        frame = base64.b64encode(bytes(int(self.sample_rate * 0.1) * 2)).decode("ascii")
+        t0 = time.monotonic()
+        sent = 0
+        while not self._first_input_mono and not self._closed.is_set() and time.monotonic() - t0 < PRIME_SILENCE_S:
+            await self._send({"type": "session.input_audio.append", "audio": frame})
+            sent += 1
+            await asyncio.sleep(0.1)
+        log.info("primed %dms of silence before the first caller frame", sent * 100)
 
     async def _append_all(self, text: str) -> None:
         for chunk in _chunks(text):

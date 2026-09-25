@@ -223,3 +223,21 @@ def test_speak_first_is_resent_only_while_the_model_stays_silent(monkeypatch: py
 
     asyncio.run(silent())
     asyncio.run(spoke())
+
+
+def test_silence_is_primed_only_until_the_first_caller_frame(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(live_mod, "PRIME_SILENCE_S", 1.0)
+    monkeypatch.setattr(live_mod, "GREETING_RETRIES", 0)
+
+    async def go() -> None:
+        live, ws = _session([])
+        live._opened_mono = __import__("time").monotonic()
+        await live.speak_first()
+        await asyncio.sleep(0.25)
+        primed = len(ws.of("session.input_audio.append"))
+        assert 1 <= primed <= 4, primed
+        await live.send_audio(b"\x00\x00" * 160)  # first real caller frame
+        await asyncio.sleep(0.25)
+        assert len(ws.of("session.input_audio.append")) <= primed + 2, "priming must stop at the first caller frame"
+
+    asyncio.run(go())

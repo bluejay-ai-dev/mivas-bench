@@ -112,6 +112,17 @@ sizeable share of post-handoff continuations and the live model has nothing to s
   one 250m-CPU pod (2026-09-17 k=5 runs) on 21 percent of calls. Scale replicas, not
   per-pod concurrency.
 
+## Input clock priming
+
+The speak-first append lands on the provider timeline and the model acts on it only
+once that timeline advances, which needs input audio. Bluejay sends its first caller
+frame 2.1-3.6 s after the upgrade (measured 2026-09-25, 18 calls), so the greeting
+started 3.8-6.2 s after `session.started` while Gemini's CHIRP harness opens in under a
+second. `_prime_silence` feeds 100 ms PCM silence frames from `session.started` until the
+caller leg's first frame (at most `GPT_LIVE_PRIME_SILENCE_S`, 5 s), which is what a phone
+line would carry between connect and the first word. Silence only, never synthetic
+speech, and nothing after the first real frame.
+
 ## Speak-first retry
 
 The speak-first append is not always acted on. Measured 2026-09-25 over 18 smoke calls:
@@ -149,6 +160,7 @@ Env: `OPENAI_API_KEY`, `CHIRP_USER`/`CHIRP_PASS`, `CHIRP_PORT`, `TOOL_SERVER_URL
 `GPT_LIVE_SAMPLE_RATE` (default `16000`),
 `GPT_LIVE_END_CALL_QUIET_S` / `GPT_LIVE_END_CALL_GRACE_S` / `GPT_LIVE_END_CALL_MAX_S`,
 `GPT_LIVE_REASONING_EFFORT` (unset = omitted), `GPT_LIVE_GREETING_RETRY_S` / `GPT_LIVE_GREETING_RETRIES`,
+`GPT_LIVE_PRIME_SILENCE_S`,
 `GPT_LIVE_LOG_LEVEL` (`DEBUG` logs every non-audio event both ways).
 
 ## Pricing
