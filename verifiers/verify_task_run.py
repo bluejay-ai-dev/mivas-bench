@@ -153,9 +153,11 @@ LEGAL_IGNORE_ROW_KEYS = frozenset({
 LEGAL_EXTRA_OK_TABLES = frozenset({
     "messages", "intake_notes", "documents", "holds", "evaluations",
 })
-# free-text the agent invents (caller never states a return reason);
-# lives as an rmas/holds column and nested inside holds.payload JSON.
-CS_IGNORE_ROW_KEYS = frozenset({"reason"})
+# free-text the agent writes in its own words: a return reason the caller never
+# states (rmas/holds column, nested in holds.payload JSON) and the service
+# appointment's issue text ("will not charge" vs "Aurora Pro will not charge").
+# Both are already prose args in INDUSTRY_PROSE_ARG_KEYS for the tool-call check.
+CS_IGNORE_ROW_KEYS = frozenset({"reason", "issue"})
 PHONE_KEY_RE = re.compile(r"phone|_e164$", re.I)
 # ISO date + hour + minute; seconds, micros, and timezone are optional.
 _DATETIME_RE = re.compile(
