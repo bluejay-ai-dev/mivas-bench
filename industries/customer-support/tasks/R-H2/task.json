@@ -26,20 +26,15 @@
     {
       "name": "check_subscription_charge",
       "parameters": {
-        "phone": "541-555-0133",
         "amount": 399.99
       }
     },
     {
-      "name": "check_outbound_contact",
-      "parameters": {
-        "phone": "541-555-0133"
-      }
+      "name": "check_outbound_contact"
     },
     {
       "name": "report_scam_contact",
       "parameters": {
-        "phone": "541-555-0133",
         "channel": "email",
         "claimed_brand": "TechCrew",
         "amount": {
