@@ -1,0 +1,23 @@
+voice-agent-harnesses/openai/gpt-live-1/README.md
+  s_4ea68a93215613::t_95a2a71b1fc77d 115-125,163
+voice-agent-harnesses/openai/gpt-live-1/live.py
+  s_4ea68a93215613::t_dd0d2c01bc6c14 72-77,254-255,258-268
+voice-agent-harnesses/openai/gpt-live-1/test_gpt_live.py
+  s_4ea68a93215613::t_46eda235aecf56 226-243
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "9e918d85e0255cfcf7110ff8521d505f1ef78114",
+  "prompts": {},
+  "sessions": {
+    "s_4ea68a93215613": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8eb3d720-2035-4a81-aa92-006569f46f3c",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
