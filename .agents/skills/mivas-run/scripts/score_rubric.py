@@ -113,6 +113,14 @@ def _fetch_transcript(url: str) -> list[dict[str, Any]] | None:
     return None
 
 
+def inline_transcript(result: dict[str, Any]) -> list[dict[str, Any]] | None:
+    """The turns Bluejay now returns on the result itself (no transcript_url)."""
+    rows = result.get("transcript")
+    if isinstance(rows, list) and rows:
+        return [t for t in rows if isinstance(t, dict)]
+    return None
+
+
 def _speaker(turn: dict[str, Any]) -> str:
     raw = (
         turn.get("speaker")
@@ -134,7 +142,7 @@ def _is_user(turn: dict[str, Any]) -> bool:
 
 
 def _text(turn: dict[str, Any]) -> str:
-    return str(turn.get("text") or turn.get("content") or turn.get("transcript") or "")
+    return str(turn.get("text") or turn.get("utterance") or turn.get("content") or turn.get("transcript") or "")
 
 
 def _offset(turn: dict[str, Any], key: str) -> float | None:
@@ -225,12 +233,15 @@ def score_call(
     result = _unwrap(result)
     checks: dict[str, dict[str, Any]] = {}
 
+    if transcript is None:
+        transcript = inline_transcript(result)
     turns = _turns(result)
     url = result.get("transcript_url") or ""
     checks["utterances"] = {
-        "pass": turns > 0 and bool(url),
+        "pass": turns > 0 and bool(url or transcript),
         "num_turns": turns,
         "transcript_url": bool(url),
+        "inline_transcript": transcript is not None,
     }
 
     has_actual = _has_actual(result)

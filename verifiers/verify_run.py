@@ -62,9 +62,26 @@ def _get(path: str) -> dict:
         raise SystemExit(f"GET {path} → {e.code} {e.read()[:300].decode(errors='replace')}")
 
 
-def result_ids_for_run(run_id: str) -> list[str]:
-    body = _get(f"retrieve-simulation-results/{run_id}")
+def run_results(run_id: str, get=None) -> tuple[dict, list[dict]]:
+    """(simulation_run, every result). The endpoint caps a response at 100 rows
+    with no page metadata, so a k=5 run (360) has to be paged out by offset."""
+    get = get or _get
+    body = get(f"retrieve-simulation-results/{run_id}")
+    run = body.get("simulation_run") or {}
     results = body.get("simulation_results") or body.get("results") or []
+    while results and len(results) % 100 == 0:
+        page = get(f"retrieve-simulation-results/{run_id}?offset={len(results)}")
+        more = page.get("simulation_results") or page.get("results") or []
+        seen = {str(r.get("id")) for r in results}
+        fresh = [r for r in more if str(r.get("id")) not in seen]
+        if not fresh:
+            break
+        results += fresh
+    return run, results
+
+
+def result_ids_for_run(run_id: str) -> list[str]:
+    _, results = run_results(run_id)
     return [str(r.get("id")) for r in results if r.get("id")]
 
 

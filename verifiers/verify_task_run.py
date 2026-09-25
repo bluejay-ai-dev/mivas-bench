@@ -1043,9 +1043,7 @@ def collect_scored_results(
     """Score every conversation in a run. Used by verify CLI and CSV export."""
     slug = slug or pull.pair_slug(harness, industry)
     schemas = load_tool_schemas(industry)
-    run_body = _get_with_retry(f"retrieve-simulation-results/{run_id}")
-    run = run_body.get("simulation_run") or {}
-    results = run_body.get("simulation_results") or run_body.get("results") or []
+    run, results = verify_run.run_results(str(run_id), get=_get_with_retry)
     sim_id = str(run.get("simulation_id") or sim_hint or "")
     dh_by_id = _digital_humans_by_sim(sim_id) if sim_id else {}
 

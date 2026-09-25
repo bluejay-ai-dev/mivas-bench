@@ -188,6 +188,18 @@ class Pack:
             text += f"\n\nSay this welcome verbatim: {self.greeting}"
         return text
 
+    def speak_first_retry_prompt(self) -> str:
+        # Sent only when no agent audio has been heard since session.started, so the
+        # model has not greeted yet; the guard keeps a slow-but-started greeting single.
+        text = (
+            "The caller is on the line and still waiting in silence. If you have not "
+            "greeted them yet, greet them in English right now without waiting for them "
+            "to speak. If you already greeted them, say nothing and keep listening."
+        )
+        if self.greeting:
+            text += f"\n\nThe welcome to say verbatim: {self.greeting}"
+        return text
+
 
 def load_pack(industry: str | Path) -> Pack:
     industry_dir = industry_path(industry)

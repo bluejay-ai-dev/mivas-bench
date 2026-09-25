@@ -1371,9 +1371,7 @@ def collect_from_listing(
 
     slug = slug or verify_task_run.pull.pair_slug(harness, industry)
     schemas = verify_task_run.load_tool_schemas(industry)
-    run_body = verify_task_run._get_with_retry(f"retrieve-simulation-results/{run_id}")
-    run = run_body.get("simulation_run") or {}
-    listings = run_body.get("simulation_results") or run_body.get("results") or []
+    run, listings = verify_task_run.verify_run.run_results(str(run_id), get=verify_task_run._get_with_retry)
     sim_id = str(run.get("simulation_id") or sim_hint or "")
     dh_by_id = verify_task_run._digital_humans_by_sim(sim_id) if sim_id else {}
     actuals_dir, state_skip_note = _resolve_actuals_dir(str(run_id), slug, actuals_dir)

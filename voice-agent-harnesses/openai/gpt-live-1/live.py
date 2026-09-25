@@ -61,6 +61,14 @@ END_CALL_MAX_S = float(os.environ.get("GPT_LIVE_END_CALL_MAX_S", "20"))
 # ...and if no farewell audio starts at all within this window, hang up anyway.
 END_CALL_GRACE_S = float(os.environ.get("GPT_LIVE_END_CALL_GRACE_S", "4"))
 CLOSED_TIMEOUT_S = float(os.environ.get("GPT_LIVE_CLOSED_TIMEOUT_S", "6"))
+# speak-first retry. Measured 2026-09-25 over 36 smoke calls: the greeting starts
+# 0.3-1.8 s after the first caller audio frame (which Bluejay sends 2.1-3.6 s after the
+# upgrade), and in 5 calls the model stayed silent for 24-66 s until the caller spoke.
+# The speak-first append is sent again when no audible output has arrived
+# GREETING_RETRY_S after the first caller audio (or after session.started when no
+# caller audio ever arrives), at most GREETING_RETRIES times.
+GREETING_RETRY_S = float(os.environ.get("GPT_LIVE_GREETING_RETRY_S", "6"))
+GREETING_RETRIES = int(os.environ.get("GPT_LIVE_GREETING_RETRIES", "2"))
 # Appends are capped at 500 tokens; ~3 chars/token keeps a safe margin.
 APPEND_MAX_CHARS = 1400
 AUDIBLE_PEAK = 300  # int16 peak below this is silence for hang-up timing only
@@ -170,6 +178,9 @@ class LiveSession:
         self._handoff_target: str | None = None
         self._tasks: set[asyncio.Task[Any]] = set()
         self._last_audible_mono = 0.0
+        self._opened_mono = 0.0
+        self._first_input_mono = 0.0
+        self._first_audible_mono = 0.0
         self._ending: asyncio.Event = asyncio.Event()
         # Set when the backend finishes a turn with no function calls after end_call:
         # that turn is the summary the live model will speak as the farewell.
@@ -220,6 +231,7 @@ class LiveSession:
             ack="session.started",
         )
         session = started.get("session") or {}
+        self._opened_mono = time.monotonic()
         self.session_id = session.get("id")
         self.obs.session_started(session)
         log.info(
@@ -232,15 +244,42 @@ class LiveSession:
         with ``delegation_id: null``. Not commentary — commentary is paraphrased, and the
         pack's greeting is fixed text the benchmark compares against. Sent, not awaited
         (see ``_post``): the caller's first audio has not arrived yet at this point."""
-        for chunk in _chunks(self.pack.speak_first_prompt()):
+        await self._append_all(self.pack.speak_first_prompt())
+        if GREETING_RETRIES > 0 and GREETING_RETRY_S > 0:
+            self._spawn(self._greeting_watch(), name="gpt-live-greeting")
+
+    async def _append_all(self, text: str) -> None:
+        for chunk in _chunks(text):
             await self._post(
                 {"type": "session.instructions.append", "delegation_id": None, "content": chunk},
                 ack="session.instructions.appended",
             )
 
+    async def _greeting_watch(self) -> None:
+        """Re-send the speak-first instruction while the model stays silent (see GREETING_RETRY_S)."""
+        for attempt in range(1, GREETING_RETRIES + 1):
+            while True:
+                base = self._first_input_mono or self._opened_mono
+                wait = base + GREETING_RETRY_S * attempt - time.monotonic()
+                if wait <= 0:
+                    break
+                await asyncio.sleep(min(wait, 0.25))
+            if self._first_audible_mono or self._closed.is_set():
+                return
+            log.warning(
+                "no greeting audio %.0fs after session.started (%.0fs after first caller audio); "
+                "re-sending speak-first (%d/%d)",
+                time.monotonic() - self._opened_mono,
+                (time.monotonic() - self._first_input_mono) if self._first_input_mono else -1,
+                attempt, GREETING_RETRIES,
+            )
+            await self._append_all(self.pack.speak_first_retry_prompt())
+
     async def send_audio(self, pcm: bytes) -> None:
         if not pcm or self._closed.is_set():
             return
+        if not self._first_input_mono:
+            self._first_input_mono = time.monotonic()
         await self._send(
             {"type": "session.input_audio.append", "audio": base64.b64encode(pcm).decode("ascii")}
         )
@@ -309,6 +348,10 @@ class LiveSession:
     async def _send(self, event: dict[str, Any]) -> None:
         if event.get("type") != "session.input_audio.append" and log.isEnabledFor(logging.DEBUG):
             log.debug("-> %s", json.dumps(event)[:600])
+        if self._close_sent and event.get("type") != "session.close":
+            # after session.close the service answers every event with
+            # "The session is closing and cannot accept new client events"
+            return
         async with self._send_lock:
             await self._ws.send(json.dumps(event, separators=(",", ":")))
 
@@ -387,6 +430,10 @@ class LiveSession:
             pcm = base64.b64decode(ev["delta"])
             if _peak(pcm) >= AUDIBLE_PEAK:
                 self._last_audible_mono = time.monotonic()
+                if not self._first_audible_mono:
+                    self._first_audible_mono = self._last_audible_mono
+                    log.info("first agent audio %.0fms after session.started",
+                             (self._first_audible_mono - self._opened_mono) * 1000)
             await self.on_audio(pcm)
         elif t == "session.output_transcript.delta":
             self.obs.transcript("assistant", ev.get("delta", ""), ev.get("start_ms", 0), ev.get("end_ms", 0))

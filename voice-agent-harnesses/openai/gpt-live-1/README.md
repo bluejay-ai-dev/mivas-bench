@@ -13,6 +13,22 @@ different product and wire contract).
 | `adapters/chirp.py` | Bluejay CHIRP websocket ↔ `live.py`. All Bluejay specifics live here |
 | `agent.py` | `--check`: builds every session shape offline, no network |
 
+## Variants
+
+`variants.json` pins the backend Responses model and reasoning effort per variant; the
+live model is always `gpt-live-1` and the image is shared. Deploy as
+`openai/gpt-live-1@<variant>` (own Deployment, Service, Ingress and Bluejay agent per
+industry; the slug is `openai-gpt-live-1-<variant>-<industry>`).
+
+| Variant | `GPT_LIVE_BACKEND_MODEL` | `GPT_LIVE_REASONING_EFFORT` |
+|---|---|---|
+| `sol-low` | `gpt-5.6-sol` | `low` |
+| `astra-medium` | `gpt-6-astra` | `medium` |
+
+Unset effort omits the `reasoning` field. Smoke-verified 2026-09-25 on healthcare, legal
+and customer-support for both variants (tools captured, traces linked, handoffs continue
+with the target stage's tools).
+
 ## Contract used
 
 Sources: `guides/voice-websockets?api=live`, `guides/live-delegation`,
@@ -90,8 +106,27 @@ sizeable share of post-handoff continuations and the live model has nothing to s
   `schedule_appointment`, that is model signal and the trace shows no tool.
 - No upstream reconnect. A dropped provider socket ends the call and is logged with
   the reason.
-- No greeting nudge, echo-mute window, or playout buffer. Anything added here has to
-  move a Bluejay metric first.
+- No echo-mute window or playout buffer. Anything added here has to move a Bluejay
+  metric first. Provider audio arrives with occasional 250-570 ms mid-utterance gaps;
+  at 3 calls per pod Bluejay counted a dropout on 2 of 18 smoke calls, at 20 calls on
+  one 250m-CPU pod (2026-09-17 k=5 runs) on 21 percent of calls. Scale replicas, not
+  per-pod concurrency.
+
+## Speak-first retry
+
+The speak-first append is not always acted on. Measured 2026-09-25 over 18 smoke calls:
+15 greeted 1.2-2.2 s after `session.started`; 3 stayed silent for 24-66 s and only
+greeted after the caller spoke (the provider's own transcript timeline places those
+greetings at 28-63 s, so the model was silent, not the pipe). `_greeting_watch` re-sends
+the speak-first instruction, worded so an already-spoken greeting is not repeated, when
+no audible output has arrived `GPT_LIVE_GREETING_RETRY_S` (4 s) after `session.started`,
+up to `GPT_LIVE_GREETING_RETRIES` (2) times. `first agent audio … after session.started`
+and the CHIRP adapter's `agent speech start +…ms` / `first caller audio +…ms` lines are
+the wall-clock evidence per call; Bluejay's `time_to_first_agent_utterance` adds its own
+dial and ALB time on top.
+
+Log lines carry `[<simulation_result_id>]` so overlapping calls on one pod can be told
+apart (`kubectl logs deploy/mivas-openai-gpt-live-1-sol-low-legal | grep '\[1029726\]'`).
 
 ## Run
 
@@ -113,6 +148,7 @@ Env: `OPENAI_API_KEY`, `CHIRP_USER`/`CHIRP_PASS`, `CHIRP_PORT`, `TOOL_SERVER_URL
 `GPT_LIVE_BACKEND_MODEL` (default `gpt-5.6-terra`), `GPT_LIVE_VOICE` (default `gleam`),
 `GPT_LIVE_SAMPLE_RATE` (default `16000`),
 `GPT_LIVE_END_CALL_QUIET_S` / `GPT_LIVE_END_CALL_GRACE_S` / `GPT_LIVE_END_CALL_MAX_S`,
+`GPT_LIVE_REASONING_EFFORT` (unset = omitted), `GPT_LIVE_GREETING_RETRY_S` / `GPT_LIVE_GREETING_RETRIES`,
 `GPT_LIVE_LOG_LEVEL` (`DEBUG` logs every non-audio event both ways).
 
 ## Pricing
