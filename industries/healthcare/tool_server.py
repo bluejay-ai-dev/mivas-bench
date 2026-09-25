@@ -489,7 +489,9 @@ _VISIT_BY_CLASS = {
         "appointment_type_code": "MOHS_CONSULT",
         "visit_class": "mohs",
         "required_credential": "MD",
-        "duration_min": 45,
+        # every find_slots slot is 30 minutes; a longer advertised visit made careful
+        # agents refuse to book any offered slot (C1-H1, C1-M3, 2026-09-25)
+        "duration_min": 30,
         "urgency": "urgent",
         "constraints": ["must be booked with an MD, never a PA"],
     },
@@ -497,7 +499,7 @@ _VISIT_BY_CLASS = {
         "appointment_type_code": "ALLERGY_EVAL",
         "visit_class": "allergy",
         "required_credential": "MD",
-        "duration_min": 40,
+        "duration_min": 30,
         "urgency": "routine",
         "constraints": ["allergy services carry prep instructions"],
     },
