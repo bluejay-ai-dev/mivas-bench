@@ -46,8 +46,10 @@ def s3_final_key(slug: str, result_id: str) -> str:
 
 
 def pair_slug(harness: str, industry: str) -> str:
+    """Must match run.py slug(): pods write snapshots under MIVAS_SLUG, and a
+    variant (family/runtime@variant) folds its @ into the same dash."""
     return (
-        f"{harness.replace('/', '-')}-{industry}"
+        f"{harness.replace('/', '-').replace('@', '-')}-{industry}"
         .replace("_", "-")
         .replace(".", "-")
         .lower()
