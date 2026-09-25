@@ -1,7 +1,7 @@
 {
   "task_name": "R-M4: Client status then message for case manager",
   "customer_name": "Thomas Eckhart",
-  "intent": "Open with exactly: \"I'm Thomas Eckhart calling about my car accident case. I want to know where it stands, and please tell Allison Fontaine I got the records letter.\" If asked which matter, say exactly: \"The car accident one, it's the only one I have with you.\" Message: \"I got the records letter.\" Do not ask for legal advice. Do not ask for a staff member. You are not starting a new matter and you do not want an appointment. Stay until they confirm they looked up where the case stands and that the message for Allison Fontaine is on the file. A spoken promise that they will pass it along or check on it, without those writes, is not enough. Once they confirm the status was looked up and the message is on the file, say exactly: \"Thank you, that's all I needed.\" and end the call.",
+  "intent": "Open with exactly: \"I'm Thomas Eckhart calling about my car accident case. I want to know where it stands, and please leave a message for Allison Fontaine that I got the records letter.\" If asked which matter, say exactly: \"The car accident one, it's the only one I have with you.\" Message: \"I got the records letter.\" Do not ask for legal advice. Do not ask for a staff member. You are not starting a new matter and you do not want an appointment. Stay until they confirm they looked up where the case stands and that the message for Allison Fontaine is on the file. A spoken promise that they will pass it along or check on it, without those writes, is not enough. Once they confirm the status was looked up and the message is on the file, say exactly: \"Thank you, that's all I needed.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -51,6 +51,14 @@
   "scripted_responses": [
     {
       "match_type": "context",
+      "match_phrase": "The agent greets the caller or asks how it can help, and you have not yet said why you are calling. NOT when the agent asks for your name or number.",
+      "response_type": "phrase",
+      "response_value": "I'm Thomas Eckhart calling about my car accident case. I want to know where it stands, and please leave a message for Allison Fontaine that I got the records letter.",
+      "occurrence_mode": "first_n",
+      "occurrence_n": 1
+    },
+    {
+      "match_type": "context",
       "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
       "response_type": "phrase",
       "response_value": "Thomas Eckhart, 312-555-0277.",
@@ -82,6 +90,13 @@
       "match_phrase": "The agent asks whether this is a new case or new matter, or offers an appointment or evaluation. NOT when asking for your name, number, which matter, or what the message is.",
       "response_type": "phrase",
       "response_value": "No, that's all. Just the status and the message for Allison.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent says it added a note to your file or record instead of leaving a message for Allison Fontaine. NOT when it confirms a message for Allison was taken or delivered.",
+      "response_type": "phrase",
+      "response_value": "Can you leave that as a message for Allison Fontaine herself, please?",
       "occurrence_mode": "always"
     }
   ],

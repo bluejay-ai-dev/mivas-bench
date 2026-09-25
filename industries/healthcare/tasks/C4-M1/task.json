@@ -1,6 +1,6 @@
 {
   "task_name": "C4-M1: Microneedling consult",
-  "intent": "Ask what microneedling costs at Park Avenue, then ask to book a microneedling consult there. You must get the Park Avenue street address, floor, and suite before you accept a time — if they quote a time or an address without all three, ask for the street, the floor, and the suite. When they explain the deposit and the cancellation rules, agree to them. Take the first appointment time they offer after you have the address. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first time out loud. If they ask who you are, give your name once and continue. Ask them to text the deposit payment link to your phone; that is the only text you want. Do not thank them or end the call until a time is confirmed on the calendar and you have heard the street, floor, and suite. Do not ask for a callback, to speak to a person, about a medical bill, insurance, a medical appointment, the patient portal, a waitlist, or financing. Do not ask for a confirmation text. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar. If they only list openings, say book the first one. Do not thank them or hang up until they confirm a time is on the calendar and that a deposit payment link was sent to your phone. If they wrap up after booking without sending the link, ask them to text the deposit payment link. Do not ask them to text you an appointment confirmation.",
+  "intent": "Ask what microneedling costs at Park Avenue, then ask to book a microneedling consult there. You must get the Park Avenue street address, floor, and suite before you accept a time; if they quote a time or an address without all three, ask for the street, the floor, and the suite. When they explain the deposit and the cancellation rules, agree to them. Take the first appointment time they offer after you have the address. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first time out loud. If they ask who you are, give your name once and continue. Ask them to text the deposit payment link to your phone; that is the only text you want. Do not thank them or end the call until a time is confirmed on the calendar and you have heard the street, floor, and suite. Do not ask for a callback, to speak to a person, about a medical bill, insurance, a medical appointment, the patient portal, a waitlist, or financing. Do not ask for a confirmation text. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar. If they only list openings, say book the first one. Do not thank them or hang up until they confirm a time is on the calendar and that a deposit payment link was sent to your phone. If they wrap up after booking without sending the link, ask them to text the deposit payment link. Do not ask them to text you an appointment confirmation. Once they have said the consult is on the calendar and the deposit payment link was sent to your phone, thank them and end the call right away; do not ask for either again.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -131,31 +131,31 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers an appointment time, asks you to confirm a slot, or quotes an office name without the street address, floor, and suite. NOT when they have already said the street, the floor, and the suite.",
+      "match_phrase": "offers an appointment time or asks you to confirm a slot, and has NOT yet said the Park Avenue street address, floor, and suite anywhere earlier in the call. NOT when the street, floor, and suite have already been said at any point in the call, NOT when asking for your name, date of birth, ZIP code, or phone number.",
       "response_type": "phrase",
       "response_value": "Before I take a time, I need the street address, the floor, and the suite."
     },
     {
       "match_type": "context",
-      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before a consult time has been confirmed on the calendar. NOT when they have just confirmed a booked time.",
+      "match_phrase": "thanks you, says goodbye, wraps up, or asks if you need anything else, and no consult time has been booked yet anywhere in the call. NOT when they have said at any point that a consult is booked, confirmed, or on the calendar, NOT when greeting you at the start of the call, NOT when asking a question.",
       "response_type": "phrase",
       "response_value": "I still need the consult booked. Please confirm a time on the calendar before I go."
     },
     {
       "match_type": "context",
-      "match_phrase": "thanks you, says goodbye, confirms a consult time, or asks if you need anything else before saying a deposit payment link was sent. NOT when they have just said the payment link or deposit link was sent.",
+      "match_phrase": "thanks you, says goodbye, or asks if you need anything else, and has not yet said a deposit or payment link was sent. NOT when they have said at any point that the payment link or deposit link was sent or texted, NOT when asking for your mobile number, NOT when asking whether you agree to the deposit policy.",
       "response_type": "phrase",
       "response_value": "Please text me the deposit payment link before I go."
     },
     {
       "match_type": "context",
-      "match_phrase": "has already said the cosmetic deposit amount and the cancellation window out loud, and is asking whether you agree to that policy before booking. NOT when asking any other yes-or-no, NOT during identity verification, NOT when quoting a price range, and NOT before they have named both the deposit and the cancellation window.",
+      "match_phrase": "has already said the cosmetic deposit amount and the cancellation window out loud, and is asking whether you agree to that policy before booking. NOT when asking any other yes-or-no, NOT during identity verification, NOT when quoting a price range, and NOT before they have named both the deposit and the cancellation window. NOT when asking for a phone or mobile number, NOT when they have already booked the consult.",
       "response_type": "phrase",
       "response_value": "Yes. I agree to the $125 deposit, free changes through 72 hours before, forfeiting the deposit inside 72 hours, and paying any treatment balance at the visit."
     },
     {
       "match_type": "context",
-      "match_phrase": "offers to text a payment link or deposit link, asks whether you want the deposit payment link by text, or asks which mobile number should receive the payment link. NOT when offering an appointment confirmation, directions, or another unrelated text, NOT when asking for your mobile number for identity.",
+      "match_phrase": "offers to text a payment link or deposit link, asks whether you want the deposit payment link by text, or asks which mobile number should receive the payment link. NOT when offering an appointment confirmation, directions, or another unrelated text, NOT when asking for your mobile number for identity. NOT when they have already said the payment link or deposit link was sent or texted.",
       "response_type": "phrase",
       "response_value": "Yes, please text the deposit payment link to 212-555-0171."
     }

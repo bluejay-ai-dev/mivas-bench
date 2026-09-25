@@ -1,6 +1,6 @@
 {
   "task_name": "C1-M3: Allergy skin testing at Park Avenue",
-  "intent": "You are a new patient and you have had hives on and off for about three weeks. A primary-care doctor told you to get allergy skin testing. Ask specifically for allergy skin testing at Park Avenue, not a regular rash visit. Ask what medicines you must stop beforehand. Confirm the first available Park Avenue skin-testing slot on August 24. If they offer a different day, ask for August 24. Do not confirm any other date. Confirm August 24 out loud, then thank them and end the call. Do not ask to add or change insurance. Do not ask for a callback, to speak to a person, a bill, a payment, the patient portal, a waitlist, a text, financing, or the street, floor, or suite. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar. If they only list openings, say book the first one. If they start to book a regular medical visit, stop them and say you need allergy skin testing, not a regular rash visit. Stay until the skin-testing service is scheduled. Do not ask them to text you an appointment confirmation.",
+  "intent": "You are a new patient and you have had hives on and off for about three weeks. Your primary-care doctor already evaluated the hives and ordered allergy skin testing, so you do not need a separate allergy evaluation visit; you need the skin testing itself. Ask specifically for allergy skin testing at Park Avenue, not a regular rash visit. Ask what medicines you must stop beforehand. Confirm the first available Park Avenue skin-testing slot on August 24. If they offer a different day, ask for August 24. Do not confirm any other date. Confirm August 24 out loud, then thank them and end the call. Do not ask to add or change insurance. Do not ask for a callback, to speak to a person, a bill, a payment, the patient portal, a waitlist, a text, financing, or the street, floor, or suite. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar. If they only list openings, say book the first one. If they start to book a regular medical visit or an allergy evaluation visit, stop them and say you need allergy skin testing, not a regular rash visit. Stay until the skin-testing service is scheduled. Do not ask them to text you an appointment confirmation.",
   "traits": [
     {
       "trait_name": "mobile",
@@ -33,14 +33,6 @@
   "exp_tool_calls": [
     {
       "name": "transfer_to_scheduling"
-    },
-    {
-      "name": "classify_visit_request",
-      "parameters": {
-        "visit_class": "allergy",
-        "urgency": "routine",
-        "is_new_patient": true
-      }
     },
     {
       "name": "schedule_allergy_service",
@@ -92,15 +84,27 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "starts to book a regular medical visit, a rash visit, or a new-patient medical appointment instead of allergy skin testing. NOT when booking allergy skin testing.",
+      "match_phrase": "starts to book a regular medical visit, a rash visit, a new-patient medical appointment, or an allergy evaluation visit instead of the skin testing itself, or says you need an allergy evaluation first. NOT when booking allergy skin testing.",
       "response_type": "phrase",
-      "response_value": "No regular visit. I need allergy skin testing scheduled, not a regular rash visit."
+      "response_value": "No evaluation visit, please. My primary-care doctor already evaluated me and ordered the skin testing, so I need the allergy skin testing itself scheduled at Park Avenue."
     },
     {
       "match_type": "context",
       "match_phrase": "thanks you, says goodbye, or asks if you need anything else before the Park Avenue allergy skin-testing visit is confirmed on the calendar. NOT when they have just confirmed the skin-testing service is scheduled.",
       "response_type": "phrase",
       "response_value": "I still need allergy skin testing scheduled at Park Avenue on August twenty-fourth. Please confirm it is on the calendar before I go."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks whether you have already had an allergy evaluation, whether this is your first allergy visit, or whether a doctor told you to schedule skin testing. NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "My primary-care doctor already evaluated me and ordered allergy skin testing. I don't need a separate evaluation, just the skin testing."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks for your mobile or phone number. NOT when reading a number back to you.",
+      "response_type": "phrase",
+      "response_value": "My mobile is two, one, two, five, five, five, zero, one, nine, seven."
     }
   ],
   "customer_name": "Bernadette Kohl",

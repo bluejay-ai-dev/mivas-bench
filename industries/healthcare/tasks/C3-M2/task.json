@@ -1,6 +1,6 @@
 {
   "task_name": "C3-M2: New insurance card on file",
-  "intent": "You are an existing Straus patient. You changed jobs and you need your new insurance card put on file. That is the only reason you called. Answer their identity questions once, then stay on the insurance update. When they ask for the new plan, give the carrier and the member ID as one string. You do not have a group number \u2014 not now, not later. Carrier and member ID are enough to save. If they read the member ID back, confirm it. Once they say the new insurance is saved, thank them and end the call. Do not book, reschedule, or cancel. Do not agree to a callback, a front-desk follow-up, or a hold because a group number is missing. Do not ask to speak to a person, about a bill, a payment, the patient portal, a waitlist, a text, financing, or the street, floor, or suite. Stay until they confirm the new card is saved on the chart. A spoken 'we'll update it' or a callback is not enough \u2014 ask them to save it now. After any 'we will update it,' ask whether it is on your chart now. Do not ask them to text you an appointment confirmation.",
+  "intent": "You are an existing Straus patient. You changed jobs and you need your new insurance card put on file. That is the only reason you called. Answer their identity questions once, then stay on the insurance update. Do not say the member ID until they ask for it. When they ask for the new plan, say the carrier and the member ID exactly as C445566778. You do not have a group number, not now, not later. Carrier and member ID are enough to save. If they read the member ID back, confirm it. Once they say the new insurance is saved, thank them and end the call. Do not book, reschedule, or cancel. Do not agree to a callback, a front-desk follow-up, or a hold because a group number is missing. Do not ask to speak to a person, about a bill, a payment, the patient portal, a waitlist, a text, financing, or the street, floor, or suite. Stay until they confirm the new card is saved on the chart. A spoken 'we'll update it' or a callback is not enough, ask them to save it now. After any 'we will update it,' ask whether it is on your chart now. Do not ask them to text you an appointment confirmation.",
   "traits": [
     {
       "trait_name": "zip",
@@ -79,6 +79,18 @@
   "scripted_responses": [
     {
       "match_type": "context",
+      "match_phrase": "greets you and asks what you need, what they can help with, or why you are calling, before you have explained the reason for the call.",
+      "response_type": "phrase",
+      "response_value": "Hi, I'm an existing patient. I changed jobs and need my new insurance card put on file."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks whether you are the subscriber or policyholder, or whose name the policy is in, with or without also asking for a group number. NOT when reading the member ID back.",
+      "response_type": "phrase",
+      "response_value": "Yes, I'm the subscriber, it's in my name. There is no group number. Please save Cigna and the member ID now."
+    },
+    {
+      "match_type": "context",
       "match_phrase": "asks for your full name and date of birth, or asks you to confirm who you are, or asks for the patient's name and date of birth. NOT when asking only for a member ID or insurance card, NOT when asking which office or location, NOT when asking for a phone or mobile number, NOT when asking about an appointment day or time, NOT when reading your name and date of birth back to you for confirmation.",
       "response_type": "phrase",
       "response_value": "Jordan Lee. My date of birth is April twelfth, nineteen ninety."
@@ -87,7 +99,7 @@
       "match_type": "context",
       "match_phrase": "asks for the insurance carrier, plan name, member ID, subscriber ID, or the numbers on your new card. NOT when asking for a group number, NOT when reading the member ID back, NOT when asking for your name or date of birth.",
       "response_type": "phrase",
-      "response_value": "The carrier is Cigna. The member ID is C445566778."
+      "response_value": "The carrier is Cigna. The member ID is C, four, four, five, five, six, six, seven, seven, eight."
     },
     {
       "match_type": "context",
@@ -103,9 +115,15 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "reads your member ID back to you and asks whether it is correct. NOT when first asking for the member ID, NOT when also asking for a group number.",
+      "match_phrase": "reads your member ID back exactly as C445566778, the letter C then four four five five six six seven seven eight, and asks whether it is correct. NOT when the readback drops the C or has a different digit, NOT when first asking for the member ID, NOT when also asking for a group number.",
       "response_type": "phrase",
       "response_value": "Yes, that's right."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "reads your member ID back with a missing letter C, a different letter, an extra digit, or a missing digit. NOT when the readback is exactly C445566778.",
+      "response_type": "phrase",
+      "response_value": "No. It's the letter C, then four, four, five, five, six, six, seven, seven, eight."
     },
     {
       "match_type": "context",
@@ -136,6 +154,12 @@
       "match_phrase": "says they will update the insurance, put it on file later, or that the front desk will handle the card. NOT when they have just confirmed the new card is saved on the chart.",
       "response_type": "phrase",
       "response_value": "Is it on my chart now? Please save Cigna and the member ID before I go."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "says goodbye or asks if you need anything else while they have not yet said the new Cigna insurance is saved or updated on your chart. NOT once they have said it is saved or updated, NOT when they only say thanks, okay, or one moment, NOT when they are asking you a question.",
+      "response_type": "phrase",
+      "response_value": "Before I go, is the new Cigna card saved on my chart now? Please save it."
     }
   ],
   "customer_name": "Jordan Lee",

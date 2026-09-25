@@ -59,10 +59,14 @@
     {
       "name": "quote_price_match",
       "parameters": {
-        "order_number": "KE-4495108",
+        "order_number": {
+          "any_of": [
+            "KE-4495108",
+            "KE4495108"
+          ]
+        },
         "competitor": "Rivertide",
-        "competitor_price": 479.99,
-        "sku": "SKU-AUD-7720"
+        "competitor_price": 479.99
       }
     },
     {

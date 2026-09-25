@@ -1,7 +1,7 @@
 {
   "task_name": "T1-H3: Sunday fridge delivery then Monday",
   "customer_name": "Dana Whitlock",
-  "intent": "Open with exactly: \"I need my refrigerator delivery moved to Sunday August ninth.\" Give identity when asked. Order KE-4471209. If they say there are no Sunday deliveries, say exactly: \"Then Monday August tenth, same morning window.\" Confirm Monday August 10, 8am to 12pm, once they quote it. Do not insist on Sunday after the refusal. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
+  "intent": "Open with exactly: \"I need my refrigerator delivery moved to Sunday August ninth.\" Give identity when asked. Order KE-4471209. If they say there are no Sunday deliveries, say exactly: \"Then Monday August tenth, same morning window.\" When they quote Monday August 10 in the morning window (8am to 12pm, also said as 8AM to noon), say yes right away; do not ask them to repeat the window. Do not insist on Sunday after the refusal. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -57,22 +57,16 @@
       "name": "transfer_to_orders"
     },
     {
-      "name": "get_order",
-      "parameters": {
-        "order_number": "KE-4471209"
-      }
-    },
-    {
       "name": "quote_delivery_change",
       "parameters": {
-        "order_number": "KE-4471209",
-        "new_date": "2026-08-09"
-      }
-    },
-    {
-      "name": "quote_delivery_change",
-      "parameters": {
-        "order_number": "KE-4471209",
+        "order_number": {
+          "any_of": [
+            "KE-4471209",
+            "KE4471209",
+            "the refrigerator",
+            "refrigerator"
+          ]
+        },
         "new_date": "2026-08-10"
       }
     },
@@ -114,21 +108,21 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "has already finished the original request you called about, confirmed that outcome out loud, and is now offering a second unrelated request, a confirmation text, or asking if you need anything else. NOT during identity, NOT while they are still collecting facts or looking something up, and NOT before they have confirmed the original request is done.",
+      "match_phrase": "has already finished the original request you called about, confirmed that outcome out loud, and is now offering a second unrelated request, a confirmation text, or asking if you need anything else. NOT during identity, NOT while they are still collecting facts or looking something up, and NOT before they have confirmed the original request is done, and NOT while they are still asking whether to confirm the Monday move.",
       "response_type": "phrase",
       "response_value": "That's all I needed. Thank you.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "says there are no Sunday deliveries or that August 9 is not available. NOT when offering Monday.",
+      "match_phrase": "says there are no Sunday deliveries, that Sunday or August 9 is not available, or asks what other date would work after mentioning Sunday. NOT when offering or reading back Monday, NOT after you have already asked for Monday August tenth.",
       "response_type": "phrase",
       "response_value": "Then Monday August tenth, same morning window.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "reads back Monday August 10 and asks whether to go ahead. NOT when refusing Sunday.",
+      "match_phrase": "reads back Monday August 10 (in any wording of the morning window, such as 8AM to noon or eight to noon) and asks whether to go ahead or to confirm, including when they ask again. NOT when refusing Sunday.",
       "response_type": "phrase",
       "response_value": "Yes, Monday August tenth, 8am to 12pm.",
       "occurrence_mode": "always"

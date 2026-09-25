@@ -46,16 +46,23 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
+      "match_phrase": "The agent asks whether anyone, any lawyer, attorney, or law firm currently represents you, whether you have a lawyer for this, or whether you have already hired or signed with anyone. NOT any other question.",
       "response_type": "phrase",
       "response_value": "No, nobody represents me.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question.",
+      "match_phrase": "The agent asks who the claim would be against, who the other side is, who this would be against, or for the name of the delivery company, trucking company, or whoever hit you. NOT any other question.",
       "response_type": "phrase",
       "response_value": "It's Vertex Logistics.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks for the truck driver's name. NOT when asking for the company's name.",
+      "response_type": "phrase",
+      "response_value": "I don't know the driver's name. It was a Vertex Logistics truck.",
       "occurrence_mode": "always"
     }
   ],

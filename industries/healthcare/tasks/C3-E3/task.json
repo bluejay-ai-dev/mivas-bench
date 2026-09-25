@@ -42,6 +42,24 @@
   "scripted_responses": [
     {
       "match_type": "context",
+      "match_phrase": "asks which insurance carrier or plan you have. NOT when asking for a member ID, NOT when asking for a clinician or provider.",
+      "response_type": "phrase",
+      "response_value": "Aetna. I only need to know whether I need a referral at Park Avenue."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks whether you are a new or existing patient, or whether you have been seen at Straus before. NOT when asking for insurance, NOT when asking for a clinician.",
+      "response_type": "phrase",
+      "response_value": "I'd be a new patient. I just need the referral answer for Aetna at Park Avenue."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks for the exact plan name on the card, a member ID, or the ZIP code of the office. NOT when asking which carrier, NOT when asking for a clinician.",
+      "response_type": "phrase",
+      "response_value": "I only know it is Aetna, and I mean the Park Avenue office. Please check Aetna at Park Avenue."
+    },
+    {
+      "match_type": "context",
       "match_phrase": "offers to transfer you to a human, a person, the front desk, or a live agent. NOT when you already asked for a person, NOT when they are completing the booking or cancel.",
       "response_type": "phrase",
       "response_value": "No, I don't need a person. Please finish what I asked on this call."

@@ -1,6 +1,6 @@
 {
   "task_name": "C1-M1: New-patient rash visit at Park Avenue",
-  "intent": "You are a new patient and you have an itchy rash on your forearm. You want a new-patient visit at Park Avenue — that office only. Answer their questions about who you are and how to reach you once, then proceed to booking. Take the first appointment time they offer. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first time out loud. After they confirm a time is on the calendar, ask them to text you an appointment confirmation. That is the only text you want. Do not ask to add or change insurance. Do not ask for a callback, to speak to a person, a bill, a payment, the patient portal, a waitlist, financing, or the street, floor, or suite. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar and that the appointment confirmation was texted. If they only list openings, say book the first one. If they confirm the booking but have not texted the confirmation, ask them to text you the appointment confirmation.",
+  "intent": "You are a new patient and you have an itchy rash on your forearm. You want a new-patient visit at Park Avenue, that office only. Answer their questions about who you are and how to reach you once, then proceed to booking. Take the first appointment time they offer. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first time out loud. After they confirm a time is on the calendar, ask them to text you an appointment confirmation. That is the only text you want. Do not ask to add or change insurance. Do not ask for a callback, to speak to a person, a bill, a payment, the patient portal, a waitlist, financing, or the street, floor, or suite. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar and that the appointment confirmation was texted. If they only list openings, say book the first one. If they confirm the booking but have not texted the confirmation, ask them to text you the appointment confirmation. Always answer the question they just asked; never reply with only 'thanks' to a question.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -91,19 +91,19 @@
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "asks for your full name and date of birth, or asks you to confirm who you are, or asks for the patient's name and date of birth. NOT when asking only for a member ID or insurance card, NOT when asking which office or location, NOT when asking for a phone or mobile number, NOT when asking about an appointment day or time, NOT when reading your name and date of birth back to you for confirmation.",
+      "match_phrase": "asks for your full name and date of birth, or asks only for your date of birth, or asks you to confirm who you are, or asks for the patient's name and date of birth. NOT when asking only for a member ID or insurance card, NOT when asking which office or location, NOT when asking for a phone or mobile number, NOT when asking about an appointment day or time, NOT when reading your name and date of birth back to you for confirmation.",
       "response_type": "phrase",
       "response_value": "Hal Brenner. My date of birth is December second, nineteen seventy-five."
     },
     {
       "match_type": "context",
-      "match_phrase": "reads your name and date of birth back to you and asks whether that is right, or asks you to confirm the name and date of birth they just repeated. NOT when first asking for your name and date of birth, NOT when asking for a phone or mobile number.",
+      "match_phrase": "reads back any of your details (name, date of birth, phone or mobile number, ZIP) and asks whether that is right or correct. NOT when first asking for a detail, NOT when reading back an appointment time.",
       "response_type": "phrase",
       "response_value": "Yes, that's right."
     },
     {
       "match_type": "context",
-      "match_phrase": "offers an appointment time, a slot, or asks which day or time you want. NOT when asking for your name or date of birth, NOT when they have not yet given the street, floor, and suite if you still need those.",
+      "match_phrase": "names a specific appointment date and clock time and asks whether you want it or which one you want. NOT when asking for your name, date of birth, phone, or ZIP, NOT when only asking what days or times work for you, NOT when they say you are already booked.",
       "response_type": "phrase",
       "response_value": "I'll take the first time you offered."
     },
@@ -133,7 +133,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "thanks you, says goodbye, or starts wrapping up after the booking but before they confirm they sent the appointment confirmation text. NOT when they have just said the confirmation was texted.",
+      "match_phrase": "thanks you, says goodbye, or starts wrapping up AFTER saying a time is booked, but before saying they sent the appointment confirmation text. NOT when they have just said the confirmation was texted, NOT when no time is booked yet, NOT when they are asking for or reading back your details.",
       "response_type": "phrase",
       "response_value": "Please text me the appointment confirmation before I go."
     },
@@ -142,6 +142,30 @@
       "match_phrase": "thanks you, says goodbye, or asks if you need anything else after listing openings but before confirming a time is on the calendar. NOT when they have just confirmed the appointment is booked.",
       "response_type": "phrase",
       "response_value": "Please book the first time and confirm it is on the calendar before I go."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks what days or times work for you, whether you have a preference, or whether the first available time is okay, without naming a specific date and time. NOT when asking for your name, date of birth, phone, or ZIP.",
+      "response_type": "phrase",
+      "response_value": "Any day or time is fine. Please find the first available new-patient time at Park Avenue."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks for your mobile or phone number. NOT when reading a number back to you.",
+      "response_type": "phrase",
+      "response_value": "My mobile is two, one, two, five, five, five, zero, one, nine, four."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks for your ZIP code. NOT when asking for your name, date of birth, or mobile.",
+      "response_type": "phrase",
+      "response_value": "One, zero, zero, one, six."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "says a time is booked on the calendar AND that the appointment confirmation text was sent. NOT when either is still pending.",
+      "response_type": "phrase",
+      "response_value": "Great, I got it. Thank you, goodbye."
     }
   ],
   "customer_name": "Hal Brenner",

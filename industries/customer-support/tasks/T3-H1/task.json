@@ -1,7 +1,7 @@
 {
   "task_name": "T3-H1: Book a Total-covered bench repair",
   "customer_name": "Grace Okonkwo",
-  "intent": "Open with exactly: \"My Aurora Pro 16 will not charge. I want a TechCrew Bench appointment, first available.\" Give identity when asked. Order KE-4471860. Accept the first August bench slot they offer on the store calendar. Do not ask for a September date. Stay until they say it is booked, Kestrel Total, $0.00. Do not cancel it. Do not say you are done until they confirm the booked day and time. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
+  "intent": "Open with exactly: \"My Aurora Pro 16 will not charge. I want a TechCrew Bench appointment, first available.\" Give identity when asked. If asked to spell your name or repeat the phone number digit by digit, do exactly that. Always answer the question the agent just asked; never reply with only okay, sure, or thanks when they asked you for information. Order KE-4471860. Accept the first August bench slot they offer on the store calendar. Do not ask for a September date. Stay until they say it is booked, Kestrel Total, $0.00. Do not cancel it. Do not say you are done until they confirm the booked day and time. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -59,20 +59,35 @@
     {
       "name": "get_order",
       "parameters": {
-        "order_number": "KE-4471860"
+        "order_number": {
+          "any_of": [
+            "KE-4471860",
+            "KE4471860"
+          ]
+        }
       }
     },
     {
       "name": "check_coverage",
       "parameters": {
-        "order_number": "KE-4471860",
+        "order_number": {
+          "any_of": [
+            "KE-4471860",
+            "KE4471860"
+          ]
+        },
         "issue": "will not charge"
       }
     },
     {
       "name": "book_service_appointment",
       "parameters": {
-        "order_number": "KE-4471860",
+        "order_number": {
+          "any_of": [
+            "KE-4471860",
+            "KE4471860"
+          ]
+        },
         "service_type": "bench",
         "issue": "will not charge"
       }
@@ -84,9 +99,16 @@
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the caller's full name and a phone number, or for a name and the number on the account. NOT when asking for ZIP, card last four, or an order number alone.",
+      "match_phrase": "The agent asks for the caller's full name and a phone number, or for a name and the number on the account. NOT when asking you to spell your name or to repeat the phone number digit by digit or one digit at a time, NOT when asking for ZIP, card last four, or an order number alone.",
       "response_type": "phrase",
-      "response_value": "Grace Okonkwo, 541-555-0112.",
+      "response_value": "Grace Okonkwo, five four one, five five five, zero one one two.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks you to spell your name or last name, or to repeat the phone number digit by digit or one digit at a time, or says it did not catch the name or phone. NOT when asking for ZIP, card last four, or an order number, and NOT on the first plain request for a name and phone.",
+      "response_type": "phrase",
+      "response_value": "Okonkwo is O, K, O, N, K, W, O. The phone is five, four, one, five, five, five, zero, one, one, two.",
       "occurrence_mode": "always"
     },
     {
@@ -98,9 +120,9 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for an order number, which order, or which item. NOT when asking for name, phone, ZIP, or card last four.",
+      "match_phrase": "The agent asks for an order number, which order, or which item, or asks you to read the order number one character at a time. NOT when asking for name, phone, ZIP, or card last four.",
       "response_type": "phrase",
-      "response_value": "Order KE-4471860, the laptop.",
+      "response_value": "Order K, E, four, four, seven, one, eight, six, zero, the laptop.",
       "occurrence_mode": "always"
     },
     {

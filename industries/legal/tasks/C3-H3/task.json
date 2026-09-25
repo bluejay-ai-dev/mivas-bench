@@ -1,7 +1,7 @@
 {
   "task_name": "C3-H3: Tight deadline but books intake",
   "customer_name": "Nadine Carlisle",
-  "intent": "Open with exactly: \"A car pulled out of a driveway and hit my passenger side.\" When asked who this would be against, say exactly: \"It's Wesley Trombley.\" State is California. Date: September fifteenth, twenty twenty four. Stay until they confirm the intake is recorded and the new-client packet is on the file. A spoken promise without both on the file is not enough. Accept the packet by email if offered. If offered a free case evaluation or appointment, decline booking. Do not ask for a person. After they confirm intake is recorded and the packet is on the file, say exactly: \"Thank you, that's all I needed.\" Do not book an evaluation. End the call.",
+  "intent": "Open with exactly: \"A car pulled out of a driveway and hit my passenger side.\" When asked who this would be against, say exactly: \"It's Wesley Trombley.\" State is California. Date: September fifteenth, twenty twenty four. Stay until they confirm the intake is recorded and the new-client packet is on the file. A spoken promise without both on the file is not enough. Accept the packet by email if offered. If offered a free case evaluation or appointment, decline booking. Do not ask for a person. Never say \"Thank you, that's all I needed.\" in answer to a question about the state, the date, or the other side; answer the question instead. After they confirm intake is recorded and the packet is on the file, say exactly: \"Thank you, that's all I needed.\" Do not book an evaluation. End the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -94,9 +94,16 @@
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
+      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking to repeat only the number or some of its digits. NOT when asking about anything else.",
       "response_type": "phrase",
       "response_value": "Nadine Carlisle, 805-555-0167.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks you to repeat, confirm, or say one digit at a time your callback number, or only some of its digits such as the first six or last four. NOT when asking for your name.",
+      "response_type": "phrase",
+      "response_value": "Eight, zero, five, five, five, five, zero, one, six, seven.",
       "occurrence_mode": "always"
     },
     {
@@ -108,7 +115,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question.",
+      "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT when asking for your name or number. NOT any other question.",
       "response_type": "phrase",
       "response_value": "It's Wesley Trombley.",
       "occurrence_mode": "always"

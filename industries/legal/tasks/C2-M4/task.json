@@ -1,7 +1,7 @@
 {
   "task_name": "C2-M4: Consulted a lawyer but did not hire",
   "customer_name": "Lois Penney",
-  "intent": "Open with exactly: \"I fell at a store and I want to know my options.\" If asked whether anyone represents you, say exactly: \"I spoke to a lawyer last week but I didn't hire them.\" Do not volunteer that unless asked. When asked who this would be against, say exactly: \"It's Greenfield Market.\" Never name a state or a date. Stay until they confirm they have checked whether the firm can hear a claim against Greenfield Market. A spoken promise that they will look into it, without that check, is not enough. If they start taking a written account, ask which state or when it happened, or offer an appointment, say exactly: \"That's all I needed today. Thank you.\" and end the call. Once they confirm they have checked the other side, say exactly: \"Thank you, that's all I needed.\" and end the call.",
+  "intent": "Open with exactly: \"I fell at a store and I want to know my options.\" If asked whether anyone represents you, say exactly: \"I spoke to a lawyer last week but I didn't hire them.\" Do not volunteer that unless asked. When asked who this would be against, say exactly: \"It's Greenfield Market.\" Never name a state or a date. Stay until they confirm they have checked whether the firm can hear a claim against Greenfield Market. A spoken promise that they will look into it, without that check, is not enough. A short lead-in like \"let's get some quick details\" is not a written account; wait for their next question. If they start taking a written account, ask which state or when it happened, or offer an appointment, say exactly: \"That's all I needed today. Thank you.\" and end the call. Once they confirm they have checked the other side, say exactly: \"Thank you, that's all I needed.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -77,7 +77,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent starts taking a written account, asks you to describe what happened in writing, or offers an appointment. NOT when asking which state or when it happened.",
+      "match_phrase": "The agent starts taking a written account, asks you to describe what happened or your injuries, or offers an appointment. NOT when the agent only says a short lead-in such as 'let's get some quick details' or 'I'll get some quick details' without asking a question about the fall. NOT when asking which state or when it happened. NOT when asking who this would be against.",
       "response_type": "phrase",
       "response_value": "That's all I needed today. Thank you.",
       "occurrence_mode": "always"

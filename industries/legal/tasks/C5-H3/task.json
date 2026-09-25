@@ -1,7 +1,7 @@
 {
   "task_name": "C5-H3: Mumbled agreement is not a yes",
   "customer_name": "Lorraine Pike",
-  "intent": "Open with exactly: \"I want the first appointment you have for my Apex Collections accident.\" When asked when, say exactly: \"It was July tenth, twenty twenty six.\" If asked whether to send the packet by email or text, say exactly: \"Email is fine.\" Take the first appointment time offered. On the first booking readback, mumble exactly: \"Uh-huh.\" Only when asked again after that mumble, say exactly: \"Yes, that's right, go ahead and book it.\" Do not ask for a staff member. Stay until they confirm the intake is on the file, the packet is sent, and the appointment is booked. A spoken \"we'll take care of it\" without those writes is not enough. Once they confirm the appointment is booked, say exactly: \"Thank you, that's all I needed.\" and end the call.",
+  "intent": "Open with exactly: \"I want the first appointment you have for my Apex Collections accident.\" When asked when, say exactly: \"It was July tenth, twenty twenty six.\" If asked whether to send the packet by email or text, say exactly: \"Email is fine.\" Take the first appointment time offered. On the first booking readback, mumble exactly: \"Uh-huh.\" Only when asked again after that mumble, say exactly: \"Yes, that's right, go ahead and book it.\" Do not ask for a staff member. Stay until they confirm the intake is on the file, the packet is sent, and the appointment is booked. A spoken \"we'll take care of it\" without those writes is not enough. Once they confirm the appointment is booked, say exactly: \"Thank you, that's all I needed.\" and end the call. When the agent asks you a question, answer it in that same turn with the answer given here. Apart from the one scripted Uh-huh on the first booking readback, never answer a question with only okay, sure, mm-hmm, yeah or thanks, and never speak the agent's lines for it. Say \"Thank you, that's all I needed.\" only after the agent says the evaluation is booked for a specific day and time, never after 'will do', 'one moment', 'taking care of that' or 'let's get some details'. After you say it, end the call and say nothing more.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -114,7 +114,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
+      "match_phrase": "The agent asks whether a lawyer or law firm currently represents the caller, whether the caller has an attorney for this, or whether the caller has already hired or signed with anyone, including when the same turn also says they are looking the caller up or thanks them. NOT any other question.",
       "response_type": "phrase",
       "response_value": "No, nobody represents me.",
       "occurrence_mode": "always"
@@ -163,16 +163,45 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent has read back the appointment day, time, attorney and fee and is asking whether to go ahead and book it. NOT a follow-up after you already answered, NOT during representation screening or conflict checks, and NOT before they have named the fee.",
+      "match_phrase": "The agent has read back the appointment day, time, attorney and fee and is asking whether to go ahead and book it. NOT a follow-up after you already answered, NOT during representation screening or conflict checks, and NOT before they have named the fee. NOT after they have said the evaluation is booked or confirmed.",
       "response_type": "phrase",
       "response_value": "Uh-huh.",
-      "occurrence_mode": "always"
+      "occurrence_mode": "first_n",
+      "occurrence_n": 1
     },
     {
       "match_type": "context",
       "match_phrase": "The agent asks again to confirm the booking after you already mumbled, said uh-huh, or did not give a clear yes. NOT the first readback, NOT during representation screening or conflict checks, and NOT before they have named the fee.",
       "response_type": "phrase",
       "response_value": "Yes, that's right, go ahead and book it.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks you to describe what happened, what kind of accident or matter it was, where it happened, what injuries or losses you had, or whether you got medical treatment. NOT when asking the date, the state alone, your name or number, or who the other side is.",
+      "response_type": "phrase",
+      "response_value": "An Apex Collections company car rear-ended me at a stoplight in Oakland. My neck was sore, but I haven't had any medical treatment.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks for your email address or how to spell it. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "It's lorraine dot pike at example dot com.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent offers to send a medical records release or authorization for your signature, or asks which doctor or provider treated you. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "No thanks, not right now.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether you want to book or schedule the free case evaluation, or whether to find appointment times. NOT when listing specific times, NOT when reading back a held appointment, NOT after it is booked.",
+      "response_type": "phrase",
+      "response_value": "Yes, please book the free case evaluation.",
       "occurrence_mode": "always"
     }
   ],

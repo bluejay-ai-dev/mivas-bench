@@ -1,6 +1,6 @@
 {
   "task_name": "R-H4: Lab results, portal, then a follow-up to discuss them",
-  "intent": "You are an existing Straus patient. You had bloodwork done and you want to know whether the lab results are back yet, not what they say. Answer their identity questions once, confirm the readback, then stay on the status. Ask them to send portal access so you can see when they are released. After you have a status and they have sent portal access, say you also want a new follow-up at Park Avenue to go over the labs in person, separate from anything already on the calendar. If they offer to move the August twentieth acne check, refuse and leave that visit. Take the first new appointment time they offer. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first new time out loud, then thank them and end the call. Do not ask them to read the results. Do not ask for a callback, to speak to a person, a bill, a payment, a waitlist, financing, or the street, floor, or suite. Do not ask for a confirmation text. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar. If they only list openings, say book the first one. Do not ask them to text you an appointment confirmation.",
+  "intent": "You are an existing Straus patient. You had bloodwork done and you want to know whether the lab results are back yet, not what they say. Answer their identity questions once, confirm the readback, then stay on the status. Ask them to send portal access so you can see when they are released. After you have a status and they have sent portal access, say you also want a new follow-up at Park Avenue to go over the labs in person, separate from anything already on the calendar. If they offer to move the August twentieth acne check, or say that visit already covers the follow-up, refuse and leave that visit; you need a NEW separate follow-up to go over the labs. Take the first new appointment time they offer. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first new time out loud, then thank them and end the call. Do not ask them to read the results. Do not ask for a callback, to speak to a person, a bill, a payment, a waitlist, financing, or the street, floor, or suite. Do not ask for a confirmation text. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar. If they only list openings, say book the first one. Do not ask them to text you an appointment confirmation.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -152,9 +152,9 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers an appointment time, a slot, or asks which day or time you want. NOT when asking for your name or date of birth, NOT when they have not yet given the street, floor, and suite if you still need those.",
+      "match_phrase": "offers one or more concrete appointment days with clock times for the new follow-up, or asks whether to book a specific new time they just named. NOT when asking what day or time you prefer, NOT when mentioning your existing August twentieth appointment, NOT after they have said the new follow-up is booked, NOT when asking for your name or date of birth.",
       "response_type": "phrase",
-      "response_value": "I'll take the first time you offered."
+      "response_value": "Yes, book the first time you offered as a new visit."
     },
     {
       "match_type": "context",
@@ -176,9 +176,39 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before a time has been confirmed on the calendar. NOT when they have just confirmed a booked time.",
+      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before a time has been confirmed on the calendar. NOT when they have just confirmed a booked time. NOT during identity verification, NOT before you have asked for the new follow-up.",
       "response_type": "phrase",
       "response_value": "I still need that time booked. Please confirm it is on the calendar before I go."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks what day or time you prefer for the new follow-up, or whether the earliest Park Avenue opening is okay, before naming any concrete time. NOT when offering concrete times.",
+      "response_type": "phrase",
+      "response_value": "The first available at Park Avenue is fine. Please book it as a new separate visit."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "mentions your existing August twentieth appointment as the follow-up, says you already have a follow-up booked at Park Avenue, or asks whether the August twentieth visit is the one you mean. NOT when offering a new separate time, NOT when confirming a newly booked visit.",
+      "response_type": "phrase",
+      "response_value": "No, August twentieth is my acne check. Leave it. I need a NEW separate follow-up at Park Avenue to go over the labs."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks for a callback number or the best number to reach you. NOT when asking for your name, date of birth, or ZIP code.",
+      "response_type": "phrase",
+      "response_value": "Use 212-555-0100."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks whether to send the portal activation link by text or email. NOT after they have said portal access was sent.",
+      "response_type": "phrase",
+      "response_value": "Text, please, to 212-555-0100."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "confirms the new Park Avenue follow-up is booked on the calendar. NOT when only listing openings, NOT when referring to the August twentieth acne check.",
+      "response_type": "phrase",
+      "response_value": "Thank you, that's everything I needed. Goodbye."
     }
   ],
   "customer_name": "Jordan Lee",

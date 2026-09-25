@@ -1,6 +1,6 @@
 {
   "task_name": "C1-H3: Oscar Health coverage then a new-patient booking",
-  "intent": "You are a new patient and you noticed a mole on your back that you want checked. When they ask who you are, give your name and date of birth once, confirm the readback, and say you are new so they will not find a chart. First ask whether they take Oscar Health at Park Avenue, and name that carrier if they ask. If they cannot confirm the plan, say that is fine and ask to be booked anyway so you are on the calendar. Take the first appointment time they offer. Do not ask for a different day, time, or office, and do not suggest any date of your own. After that first time is on the calendar, ask to be waitlisted at Park Avenue from August twenty-fourth through September thirtieth for anything earlier — those calendar dates only. Confirm that first time out loud, then thank them and end the call. Do not ask to add or change insurance. Do not ask for a callback, to speak to a person, a bill, a payment, the patient portal, a text, financing, or the street, floor, or suite. Do not ask them to text you an appointment confirmation.",
+  "intent": "You are a new patient and you noticed a mole on your back that you want checked. When they ask who you are, give your name and date of birth once, confirm the readback, and say you are new so they will not find a chart. First ask whether they take Oscar Health at Park Avenue, and name that carrier if they ask. If they cannot confirm the plan, say that is fine and ask to be booked anyway so you are on the calendar. Take the first appointment time they offer. Do not ask for a different day, time, or office, and do not suggest any date of your own. After that first time is on the calendar, ask to be waitlisted at Park Avenue from August twenty-fourth through September thirtieth in case a better opening comes up, those calendar dates only. If they say those dates are not earlier than your booking or suggest other dates, say to use August twenty-fourth through September thirtieth anyway. Confirm that first time out loud, then thank them and end the call. Do not ask to add or change insurance. Do not ask for a callback, to speak to a person, a bill, a payment, the patient portal, a text, financing, or the street, floor, or suite. Do not ask them to text you an appointment confirmation. If they ask for a provider preference, say any doctor at Park Avenue is fine. Once they have said the first time is booked and you are on the waitlist, say thank you and goodbye and end the call; do not ask again for anything already done.",
   "traits": [
     {
       "trait_name": "carrier",
@@ -130,31 +130,31 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "asks what insurance you have, your carrier, or your plan. NOT when asking for a member ID.",
+      "match_phrase": "asks what insurance you have, your carrier, or your plan. NOT when asking for a member ID, NOT when asking which provider or doctor you want, NOT when asking for your ZIP code.",
       "response_type": "phrase",
       "response_value": "Oscar Health at Park Avenue."
     },
     {
       "match_type": "context",
-      "match_phrase": "offers one or more concrete appointment dates or times, or asks you to choose among concrete slots. NOT when asking for your name, date of birth, mobile number, or ZIP code.",
+      "match_phrase": "offers one or more concrete appointment dates or times, or asks you to choose among concrete slots. NOT when asking for your name, date of birth, mobile number, or ZIP code. NOT when they say the time is already booked.",
       "response_type": "phrase",
       "response_value": "I'll take the first time you offered."
     },
     {
       "match_type": "context",
-      "match_phrase": "asks whether you want the waitlist, offers to add you to a list for an earlier opening, or says they can list you if something sooner opens. NOT when asking for the date window, NOT when offering a specific appointment time to book now.",
+      "match_phrase": "asks whether you want the waitlist, offers to add you to a list for an earlier opening, or says they can list you if something sooner opens. NOT when asking for the date window, NOT when offering a specific appointment time to book now. NOT when they have already said you are on the waitlist.",
       "response_type": "phrase",
-      "response_value": "Yes, add me to the waitlist at Park Avenue from August twenty-fourth through September thirtieth after you book the first time."
+      "response_value": "Yes, add me to the waitlist at Park Avenue from August twenty-fourth through September thirtieth, in case a better opening comes up."
     },
     {
       "match_type": "context",
       "match_phrase": "asks for a waitlist window, start date, end date, earliest date, latest date, or when you would take an earlier opening. NOT when asking for your name or date of birth, NOT when offering a specific appointment time to book now.",
       "response_type": "phrase",
-      "response_value": "From August twenty-fourth through September thirtieth, at Park Avenue. Dates only — I don't have a clock time."
+      "response_value": "From August twenty-fourth through September thirtieth, at Park Avenue. Dates only, I don't have a clock time."
     },
     {
       "match_type": "context",
-      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before a time has been confirmed on the calendar and you are on the waitlist. NOT when both are complete.",
+      "match_phrase": "thanks you, says goodbye, or asks if you need anything else, while a time has NOT yet been booked or you are NOT yet on the waitlist. NOT when they have said you are booked AND on the waitlist, NOT when they are reading back or confirming the booking and waitlist.",
       "response_type": "phrase",
       "response_value": "Please book the first time you offered, confirm it is on the calendar, then add me to the waitlist from August twenty-fourth through September thirtieth."
     },
@@ -169,6 +169,36 @@
       "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when offering a payment link or deposit link, NOT when asking for a payment-link number, NOT when asking for your mobile number for identity, NOT when sending portal access.",
       "response_type": "phrase",
       "response_value": "No thanks, I don't need a confirmation text."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "says the August twenty-fourth to September thirtieth waitlist dates are not earlier than your booking, overlap with it, or suggests different waitlist dates such as today through August twenty-third. NOT when they have already added you to the August twenty-fourth to September thirtieth list.",
+      "response_type": "phrase",
+      "response_value": "Please use exactly August twenty-fourth through September thirtieth anyway, in case a better opening comes up in that range."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks which doctor or provider you want, or whether you have a provider preference. NOT when offering a specific appointment time.",
+      "response_type": "phrase",
+      "response_value": "No preference. Any doctor at Park Avenue is fine."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks for your mobile or phone number. NOT when reading a number back to you.",
+      "response_type": "phrase",
+      "response_value": "My mobile is two, one, two, five, five, five, zero, one, nine, three."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks for your ZIP code. NOT when asking for your name, date of birth, or mobile.",
+      "response_type": "phrase",
+      "response_value": "One, zero, zero, one, six."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "says you are booked for a specific time AND that you are on the waitlist. NOT when either one is still pending.",
+      "response_type": "phrase",
+      "response_value": "Great, thank you. Goodbye."
     }
   ],
   "customer_name": "Gwen Okoro",

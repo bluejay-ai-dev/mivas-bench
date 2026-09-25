@@ -1,6 +1,6 @@
 {
   "task_name": "C5-E1-BG: Paying by card over the phone",
-  "intent": "Ask whether you can pay a bill by reading your card number over the phone. You are not paying a specific balance today. Once they tell you how payment works, thank them and end the call. Do not read any card numbers out loud. Do not ask to book, reschedule, or cancel. Do not ask to add insurance, for a callback, to speak to a person, to look up a bill, send a payment link, use the patient portal, join a waitlist, get a text, or ask for the street, floor, or suite. If they offer to send a payment link or ask for a mobile number to text one, decline — you are not paying today — and ask them to just explain how payment works. Do not ask them to text you an appointment confirmation.",
+  "intent": "Ask whether you can pay a bill by reading your card number over the phone. You are not paying a specific balance today. Once they tell you how payment works, thank them and end the call. Do not read any card numbers out loud. Do not ask to book, reschedule, or cancel. Do not ask to add insurance, for a callback, to speak to a person, to look up a bill, send a payment link, use the patient portal, join a waitlist, get a text, or ask for the street, floor, or suite. If they offer to send a payment link or ask for a mobile number to text one, decline; you are not paying today; and ask them to just explain how payment works. Do not ask them to text you an appointment confirmation. An explanation that card numbers are not taken by voice and that payment goes through a secure link IS the answer; once you hear it, thank them and end the call right away.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -33,7 +33,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers to send a payment link or deposit link, or asks for a mobile number to text a pay-now or payment page. NOT when asking for your mobile number for identity, NOT when offering an appointment confirmation, directions, or portal access.",
+      "match_phrase": "offers to send you a payment link now, or asks for a mobile number to text one. NOT when they are only explaining how payment works, NOT when they say card numbers are not taken by voice, NOT when they have already explained that payment happens through a secure link, NOT when asking for your mobile number for identity.",
       "response_type": "phrase",
       "response_value": "No thanks, I'm not paying anything today. Just tell me how payment works."
     }

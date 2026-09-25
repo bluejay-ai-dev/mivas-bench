@@ -1,6 +1,6 @@
 {
   "task_name": "C3-H3: New Cigna card and a follow-up booking",
-  "intent": "You are an existing Straus patient. You have two jobs, in this order. First, answer their identity questions once. After they verify you, do not repeat your name and date of birth. Tell them you have a new Cigna card to put on file, give the new carrier and member ID, and confirm the ID if they read it back. You do not have a group number. Second, you already have a follow-up on August 20 at Park Avenue; leave that one on the books. You still need a new additional follow-up booked at Park Avenue, not a move of August 20. If they offer to move, change, or cancel the visit you already have, say leave that one and book a new one. Before you take a time, ask for the Park Avenue street address, floor, and suite so you know where to go. If they ask what day or time works, say the first available time at Park Avenue is fine. Take the first new appointment time they offer. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first new time out loud, then thank them and end the call. Do not ask for a callback, to speak to a person, a payment, the patient portal, a waitlist, a text, or financing. Do not ask to cancel or reschedule the visit you already have. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar. If they only list openings, say book the first one. Stay until they confirm the new card is saved on the chart. A spoken 'we'll update it' or a callback is not enough — ask them to save it now. After any 'we will update it,' ask whether it is on your chart now. Do not ask them to text you an appointment confirmation.",
+  "intent": "You are an existing Straus patient. You have two jobs, in this order. First, answer their identity questions once. After they verify you, do not repeat your name and date of birth. Tell them you have a new Cigna card to put on file, give the new carrier and member ID, and confirm the ID if they read it back. You do not have a group number. Second, you already have a follow-up on August 20 at Park Avenue; leave that one on the books. You still need a new additional follow-up booked at Park Avenue, not a move of August 20. If they offer to move, change, or cancel the visit you already have, say leave that one and book a new one. Before you take a time, ask for the Park Avenue street address, floor, and suite so you know where to go. If they ask what day or time works, say the first available time at Park Avenue is fine. Take the first new appointment time they offer. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first new time out loud, then thank them and end the call. Do not ask for a callback, to speak to a person, a payment, the patient portal, a waitlist, a text, or financing. Do not ask to cancel or reschedule the visit you already have. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar. If they only list openings, say book the first one. Stay until they confirm the new card is saved on the chart. A spoken 'we'll update it' or a callback is not enough, ask them to save it now. After any 'we will update it,' ask whether it is on your chart now. Do not ask them to text you an appointment confirmation.",
   "traits": [
     {
       "trait_name": "preferred_office",
@@ -114,6 +114,24 @@
   "scripted_responses": [
     {
       "match_type": "context",
+      "match_phrase": "greets you and asks what you need, what they can help with, or why you are calling, before you have explained the reason for the call.",
+      "response_type": "phrase",
+      "response_value": "Hi, I'm an existing patient. I have a new Cigna insurance card to put on file, and then I need a new follow-up booked at Park Avenue."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks for your new insurance carrier, member ID, or the numbers on the new card. NOT when asking for a group number, NOT when reading the member ID back, NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "The carrier is Cigna. The member ID is C, four, four, five, five, six, six, seven, seven, eight."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks whether you are the subscriber or policyholder, or whose name the policy is in, with or without also asking for a group number. NOT when reading the member ID back.",
+      "response_type": "phrase",
+      "response_value": "Yes, I'm the subscriber, it's in my name. There is no group number. Please save Cigna and the member ID now."
+    },
+    {
+      "match_type": "context",
       "match_phrase": "asks for a group number, group ID, or the number next to Group on the card. NOT when asking for the member ID or subscriber ID, NOT when reading the member ID back, NOT when asking for the carrier or plan name.",
       "response_type": "phrase",
       "response_value": "I don't have a group number. I just have the carrier and the member ID."
@@ -126,9 +144,15 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "reads your member ID back to you and asks whether it is correct. NOT when first asking for the member ID.",
+      "match_phrase": "reads your member ID back exactly as C445566778, the letter C then four four five five six six seven seven eight, and asks whether it is correct. NOT when the readback drops the C or has a different digit, NOT when first asking for the member ID.",
       "response_type": "phrase",
       "response_value": "Yes, that's right."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "reads your member ID back with a missing letter C, a different letter, an extra digit, or a missing digit. NOT when the readback is exactly C445566778.",
+      "response_type": "phrase",
+      "response_value": "No. It's the letter C, then four, four, five, five, six, six, seven, seven, eight."
     },
     {
       "match_type": "context",
@@ -180,7 +204,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers an appointment time, asks you to confirm a slot, or quotes an office name without the street address, floor, and suite. NOT when they have already said the street, the floor, and the suite.",
+      "match_phrase": "offers an appointment time or asks you to confirm a slot while they have not yet said the street address, the floor, and the suite anywhere in the call. NOT once they have said 386 Park Avenue South, the 4th floor, and Suite 410 at any earlier point in the call.",
       "response_type": "phrase",
       "response_value": "Before I take a time, I need the street address, the floor, and the suite."
     },
@@ -192,7 +216,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before the new Cigna card is saved on the chart and a new follow-up time is confirmed on the calendar. NOT when both are complete.",
+      "match_phrase": "says goodbye or asks if you need anything else while they have not yet said both that the new Cigna card is saved and that a new follow-up time is booked. NOT once they have said both at any point in the call, NOT when they only say thanks, okay, or one moment, NOT when they are asking you a question.",
       "response_type": "phrase",
       "response_value": "I still need the new Cigna card saved on my chart and a new additional follow-up booked at Park Avenue. Please finish both before I go."
     }

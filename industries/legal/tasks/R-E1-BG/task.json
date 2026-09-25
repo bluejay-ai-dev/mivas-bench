@@ -1,7 +1,7 @@
 {
   "task_name": "R-E1-BG: Existing client asks for status",
   "customer_name": "Thomas Eckhart",
-  "intent": "Open with exactly: \"I'm Thomas Eckhart, three one two five five five zero two seven seven, calling to check where things are on my case.\" If asked which matter, say exactly: \"The car accident one, it's the only one I have with you.\" Every time you are asked for your phone number, say exactly: three one two, five five five, zero two seven seven, which is 312-555-0277. Do not ask for legal advice. Once finished, say exactly: \"Thank you, that's all I needed.\" and end the call.",
+  "intent": "Open with exactly: \"I'm Thomas Eckhart, three one two five five five zero two seven seven, calling to check where things are on my case.\" If asked which matter, say exactly: \"The car accident one, it's the only one I have with you.\" Every time you are asked for your phone number, say exactly: three one two, five five five, zero two seven seven, which is 312-555-0277. Do not ask for legal advice. Never mention a case key, a matter ID, or client services, and never ask to be transferred or to speak to a person. Once finished, say exactly: \"Thank you, that's all I needed.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -33,6 +33,14 @@
   "scripted_responses": [
     {
       "match_type": "context",
+      "match_phrase": "The agent greets the caller or asks how it can help, and you have not yet said why you are calling. NOT when the agent asks for your name or number.",
+      "response_type": "phrase",
+      "response_value": "I'm Thomas Eckhart, three one two five five five zero two seven seven, calling to check where things are on my case.",
+      "occurrence_mode": "first_n",
+      "occurrence_n": 1
+    },
+    {
+      "match_type": "context",
       "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
       "response_type": "phrase",
       "response_value": "Thomas Eckhart, 312-555-0277.",
@@ -40,16 +48,37 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks whether another lawyer or another law firm currently represents the caller. NOT when asking whether this firm or an attorney here already represents the caller. NOT any other question.",
+      "match_phrase": "The agent asks whether another lawyer or another law firm currently represents the caller. NOT when asking whether this firm or an attorney here already represents the caller, NOT when asking whether your case is with Halverson and Reed. NOT any other question.",
       "response_type": "phrase",
-      "response_value": "No, nobody else. Halverson and Reed are handling it.",
+      "response_value": "Nobody else. Halverson and Reed are handling it.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks whether this firm, Halverson and Reed, or an attorney here already represents the caller, or whether the caller has already hired or signed with this firm. NOT when asking about another lawyer or another law firm. NOT any other question.",
+      "match_phrase": "The agent asks whether Halverson and Reed or an attorney here already represents the caller, whether you signed a representation agreement with this firm, whether your case is with Halverson and Reed or another firm, or whether you are only following up on an evaluation. NOT when asking about another lawyer or another law firm. NOT any other question.",
       "response_type": "phrase",
-      "response_value": "Yes, Halverson and Reed already represent me.",
+      "response_value": "Yes, I signed with Halverson and Reed. They represent me on my car accident case.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks which matter or which case you are calling about, or who the claim is against. NOT when asking for your name or number, NOT when asking about representation.",
+      "response_type": "phrase",
+      "response_value": "The car accident one, it's the only one I have with you.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks you to spell your last name or your name. NOT when asking for your phone number.",
+      "response_type": "phrase",
+      "response_value": "E, C, K, H, A, R, T. Eckhart.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent has just told you the status of your case, such as what the case is waiting on, who your case manager is, or that nothing is needed from you. NOT when the agent is asking you a question.",
+      "response_type": "phrase",
+      "response_value": "Thank you, that's all I needed.",
       "occurrence_mode": "always"
     }
   ],

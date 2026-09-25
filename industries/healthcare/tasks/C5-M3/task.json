@@ -1,6 +1,6 @@
 {
   "task_name": "C5-M3: A bill the caller is sure they received",
-  "intent": "You are an existing Straus patient and you are sure you were sent a bill \u2014 you remember opening a statement. Answer their identity questions once with your name and date of birth. If they ask for a second identity factor, give your ZIP code 11201, and confirm each readback. Then go straight to the bill. If they say the balance is zero, insist once that you definitely received something and ask them to look again. After they look again and confirm the balance is still zero, accept that, thank them, and end the call. If they offer a callback, a payment link, a transfer to a person, or to book, move, or cancel an appointment, decline and stay on the bill. Do not volunteer a callback, do not give a callback number, and do not ask for a text, the street, the floor, the suite, an office id, a waitlist, or financing. Stay on the bill. If they try to book, transfer, or wrap up before they have looked at the account again, bring them back to the statement. Do not ask them to text you an appointment confirmation.",
+  "intent": "You are an existing Straus patient and you are sure you were sent a bill; you remember opening a statement. Answer their identity questions once with your name and date of birth. Your last name is spelled N, G, U, Y, E, N. If they ask you to spell it, spell exactly those letters. If they ask for a second identity factor, give your ZIP code 11201, and confirm each readback. Then go straight to the bill. If they say the balance is zero, insist once that you definitely received something and ask them to look again. After they look again and confirm the balance is still zero, accept that, thank them, and end the call. If they offer a callback, a payment link, a transfer to a person, or to book, move, or cancel an appointment, decline and stay on the bill. Do not volunteer a callback, do not give a callback number, and do not ask for a text, the street, the floor, the suite, an office id, a waitlist, or financing. Stay on the bill. If they try to book, transfer, or wrap up before they have looked at the account again, bring them back to the statement. Do not ask them to text you an appointment confirmation.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -76,7 +76,7 @@
       "match_type": "context",
       "match_phrase": "asks for your full name and date of birth, or asks you to confirm who you are, or asks for the patient's name and date of birth. NOT when asking only for a member ID or insurance card, NOT when asking which office or location, NOT when asking for a phone or mobile number, NOT when asking about an appointment day or time, NOT when reading your name and date of birth back to you for confirmation.",
       "response_type": "phrase",
-      "response_value": "Sam Nguyen. My date of birth is November third, nineteen eighty-five."
+      "response_value": "Sam Nguyen, that's N, G, U, Y, E, N. My date of birth is November third, nineteen eighty-five."
     },
     {
       "match_type": "context",
@@ -86,7 +86,19 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "asks for a ZIP code or postal code as a second identity check after confirming your name and date of birth. NOT when asking for an office ZIP, NOT when reading the ZIP back for confirmation.",
+      "match_phrase": "asks you to spell your first or last name, or says they could not find a match for your name. NOT when reading your spelling back to you, NOT when asking for your ZIP code.",
+      "response_type": "phrase",
+      "response_value": "First name Sam, S, A, M. Last name Nguyen: N as in Nancy, G as in George, U as in Uncle, Y as in Yellow, E as in Edward, N as in Nancy."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "reads your last name spelling back as N, G, U, Y, E, N and asks whether it is right. NOT when the spelling they read back has any other letters, NOT when first asking you to spell it.",
+      "response_type": "phrase",
+      "response_value": "Yes, that's right."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks for your ZIP code or postal code. NOT when asking for an office ZIP, NOT when reading the ZIP back for confirmation.",
       "response_type": "phrase",
       "response_value": "My ZIP code is 11201."
     },
@@ -119,6 +131,18 @@
       "match_phrase": "thanks you, says goodbye, offers to book, or transfers you before they have looked at the account a second time. NOT when they have just confirmed the balance is still zero after looking again.",
       "response_type": "phrase",
       "response_value": "Please look at the statement again. I definitely received a bill."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "says your balance is zero, that nothing is due, or that there is no bill, before you have asked them to look at the account again. NOT after you already asked them to look again, NOT when asking for your identity.",
+      "response_type": "phrase",
+      "response_value": "I definitely received a statement. Please look at my billing account again."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "says the balance is still zero after you already asked them to look at the account again. NOT the first time they say the balance is zero.",
+      "response_type": "phrase",
+      "response_value": "Okay, thank you for checking again. Goodbye."
     }
   ],
   "customer_name": "Sam Nguyen",

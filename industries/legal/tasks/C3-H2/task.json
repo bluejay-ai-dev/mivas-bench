@@ -1,7 +1,7 @@
 {
   "task_name": "C3-H2: Filing deadline expired",
   "customer_name": "Pauline Hart",
-  "intent": "Open with exactly: \"I was rear-ended years ago and never filed anything.\" Other side: Delta Freight. Georgia. Incident March tenth, twenty twenty two. Give name and number only if asked. If they offer a case evaluation, an appointment, a packet, or to start a written account, decline and stay on the filing deadline. Stay until they confirm a person will review the filing deadline. A spoken 'we will look at the date' or 'someone will call you' without transferring you to a person is not enough. When they confirm a person will review the deadline, say exactly: \"Okay, thank you.\" and end the call. Do not book. Do not start intake.",
+  "intent": "Open with exactly: \"I was rear-ended years ago and never filed anything.\" Other side: Delta Freight. Georgia. Incident March tenth, twenty twenty two. Give name and number only if asked. Answer every question about the other side, the state, the date, or whether a lawyer represents you with those facts, never with only \"sure\" or \"okay\". Do not ask for a person until they have told you the result of the filing deadline check. A date they read back as the filing deadline, such as March ninth, twenty twenty four, is the deadline and not your incident date, so do not correct it. If they offer a case evaluation, an appointment, a packet, or to start a written account, decline and stay on the filing deadline. Stay until they confirm a person will review the filing deadline. A spoken 'we will look at the date' or 'someone will call you' without transferring you to a person is not enough. When they confirm a person will review the deadline, say exactly: \"Okay, thank you.\" and end the call. Do not book. Do not start intake.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -78,28 +78,28 @@
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
+      "match_phrase": "The agent asks for the caller's full name and a callback or phone number, or asks to repeat the callback number. NOT when asking who the claim would be against. NOT when asking about anything else.",
       "response_type": "phrase",
       "response_value": "Pauline Hart, 404-555-0188.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
+      "match_phrase": "The agent asks whether any lawyer or law firm currently represents the caller, including 'does a lawyer currently represent you for this accident, injury, fall or matter', or whether the caller has already hired or signed with anyone. NOT any other question.",
       "response_type": "phrase",
       "response_value": "No, nobody represents me.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question.",
+      "match_phrase": "The agent asks who the claim would be against, who the other side is, who this would be against, or the name of the driver, person, or company. NOT when asking for your own name or number.",
       "response_type": "phrase",
       "response_value": "It's Delta Freight.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks which state this happened in, or where it took place. NOT any other question.",
+      "match_phrase": "The agent asks which state this happened in, what state the crash happened in, or where it took place. NOT any other question.",
       "response_type": "phrase",
       "response_value": "In Georgia.",
       "occurrence_mode": "always"

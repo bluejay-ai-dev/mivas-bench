@@ -72,9 +72,16 @@
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the caller's full name and a phone number, or for a name and the number on the account. NOT when asking for ZIP, card last four, or an order number alone.",
+      "match_phrase": "The agent asks for the caller's full name and a phone number, or for a name and the number on the account. NOT when asking for ZIP, card last four, or an order number alone. NOT when they say they missed or did not catch the phone number or name, and NOT when they ask you to repeat it one digit at a time or to spell your name.",
       "response_type": "phrase",
       "response_value": "Felix Moreau, 541-555-0108.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent says it missed or did not catch the phone number or the name, or asks you to repeat the phone number slowly or one digit at a time, or to spell your name. NOT when asking for ZIP, card last four, or an order number.",
+      "response_type": "phrase",
+      "response_value": "Moreau is spelled M, O, R, E, A, U. The phone number is five four one, five five five, zero one zero eight.",
       "occurrence_mode": "always"
     },
     {
@@ -88,7 +95,7 @@
       "match_type": "context",
       "match_phrase": "The agent asks for an order number, which order, or which item. NOT when asking for name, phone, ZIP, or card last four.",
       "response_type": "phrase",
-      "response_value": "Order KE-4495108, the soundbar.",
+      "response_value": "Order K, E, four, four, nine, five, one, zero, eight, the soundbar.",
       "occurrence_mode": "always"
     },
     {

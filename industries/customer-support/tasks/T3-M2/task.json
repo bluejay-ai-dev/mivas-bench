@@ -1,7 +1,7 @@
 {
   "task_name": "T3-M2: Dropped-phone protection-plan deductible",
   "customer_name": "Priya Raman",
-  "intent": "Open with exactly: \"I dropped my Solstice X5 and the screen cracked. What would I pay under the protection plan?\" Give identity when asked. Order KE-4462884. You only want the deductible. Do not book a claim visit. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
+  "intent": "Open with exactly: \"I dropped my Solstice X5 and the screen cracked. What would I pay under the protection plan?\" Give identity when asked. Order KE-4462884. You only want the deductible. Do not book a claim visit. You are the caller, never the store: never quote a deductible, price, or policy yourself; wait for the agent to say it. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -77,7 +77,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the ZIP code on the order and the last four digits of the card, together or in either order. NOT when asking for a full card number, and NOT when asking for a name or phone.",
+      "match_phrase": "The agent asks for, or says it needs, the ZIP code on the order and the last four digits of the card, together or in either order. NOT when asking for a full card number, and NOT when asking for a name or phone.",
       "response_type": "phrase",
       "response_value": "ZIP 98104, card ending 3361.",
       "occurrence_mode": "always"

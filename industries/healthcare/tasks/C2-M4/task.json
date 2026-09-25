@@ -99,9 +99,15 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers an appointment time, a slot, or asks which day or time you want. NOT when asking for your name or date of birth, NOT when they have not yet given the street, floor, and suite if you still need those.",
+      "match_phrase": "offers one or more concrete earlier appointment dates or times to move into. NOT when they are only reading back your existing September fifteenth visit, NOT when asking which day or time you prefer, NOT when asking for your name or date of birth.",
       "response_type": "phrase",
-      "response_value": "I'll take the first time you offered."
+      "response_value": "Move me into the first time you offered, please."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks which day, week, or time works, or whether any weekday and time is okay, or whether to look for something sooner, before offering a concrete earlier time. NOT when offering a concrete appointment time, NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "Yes, anything sooner than September fifteenth at Windermere. Please look for the first opening and move me into it."
     },
     {
       "match_type": "context",
@@ -123,7 +129,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before a time has been confirmed on the calendar. NOT when they have just confirmed a booked time.",
+      "match_phrase": "says goodbye or asks if you need anything else while the visit has not yet been said to be moved to a new time. NOT once they have said the visit was moved or rescheduled, NOT when they only say thanks, okay, or one moment, NOT when they are asking you a question such as your ZIP code.",
       "response_type": "phrase",
       "response_value": "I still need that time booked. Please confirm it is on the calendar before I go."
     }

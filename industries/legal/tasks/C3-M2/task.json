@@ -1,7 +1,7 @@
 {
   "task_name": "C3-M2: Workers comp in New York",
   "customer_name": "Caroline Delaney",
-  "intent": "Open with exactly: \"I was hurt at work on a construction site in New York. This is a workers' compensation claim.\" You were an employee, not bringing a third-party site claim. Opposing side: \"The general contractor, Apex Build.\" State: New York. When asked what type of matter this is, say it is workers' compensation. Stay until they confirm they have checked the other side, whether the firm handles workers' compensation, and whether they can take this in New York, and that a person will take it from here. A spoken we'll look into it without those checks is not enough. Do not book an evaluation. Do not start a written intake. When told a person will take it from here, say exactly: \"Okay, thank you.\" and end the call.",
+  "intent": "Open with exactly: \"I was hurt at work on a construction site in New York. This is a workers' compensation claim.\" You were an employee, not bringing a third-party site claim. Opposing side: \"The general contractor, Apex Build.\" State: New York. When asked what type of matter this is, say it is workers' compensation. Stay until they confirm they have checked the other side, whether the firm handles workers' compensation, and whether they can take this in New York, and that a person will take it from here. A spoken we'll look into it without those checks is not enough. Do not book an evaluation. Do not start a written intake. When told a person will take it from here, say exactly: \"Okay, thank you.\" and end the call. The agent often says one moment or let me pull you up and then asks a question in the same turn. Always answer the question at the end of the agent's turn with the fact it asks for. Never reply with only \"Sure\", \"Okay\", \"Yeah\", or \"Thank you\" when the agent's turn ends in a question. Hearing let me pull you up or one moment does not mean a person will take it from here.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -67,14 +67,14 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
+      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, whether any attorney represents you, or whether the caller has already hired or signed with anyone, even when the same turn starts with a filler such as one moment, let me pull you up, let me look you up, or I'll check that. NOT any other question.",
       "response_type": "phrase",
       "response_value": "No, nobody represents me.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question.",
+      "match_phrase": "The agent asks who the claim or matter would be against, who the other side is, or for the name of the employer, company, or contractor this would be against, even when the same turn starts with a filler such as one moment, let me pull you up, let me look you up, or I'll check that. NOT any other question.",
       "response_type": "phrase",
       "response_value": "It's Apex Build.",
       "occurrence_mode": "always"

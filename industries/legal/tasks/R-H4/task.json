@@ -61,14 +61,21 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
+      "match_phrase": "The agent asks whether another lawyer or another law firm currently represents the caller. NOT when asking whether this firm or an attorney here already represents the caller, NOT when asking whether you signed with Halverson and Reed. NOT any other question.",
       "response_type": "phrase",
-      "response_value": "No, nobody else. Halverson and Reed are handling it.",
+      "response_value": "Nobody else. Halverson and Reed are handling it.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks which matter, which case, or which of your files this is about. NOT when asking for your name or number.",
+      "match_phrase": "The agent asks whether Halverson and Reed or an attorney here already represents the caller, whether you signed a representation agreement with this firm, whether your case is with Halverson and Reed or another firm, or whether you are only following up on an evaluation. NOT when asking about another lawyer or another law firm. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "Yes, I signed with Halverson and Reed. They represent me on my car accident case.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks which matter, which case, or which of your files this is about, or who the claim is against. NOT when asking for your name or number, NOT when asking about representation.",
       "response_type": "phrase",
       "response_value": "The car accident one, it's the only one I have with you.",
       "occurrence_mode": "always"
@@ -176,7 +183,12 @@
       {
         "id": 1,
         "caller_id": "c_004",
-        "reason_code": "legal_advice_requested"
+        "reason_code": {
+          "any_of": [
+            "legal_advice_requested",
+            "caller_request"
+          ]
+        }
       }
     ]
   }

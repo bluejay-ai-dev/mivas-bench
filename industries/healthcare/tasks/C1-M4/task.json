@@ -1,6 +1,6 @@
 {
   "task_name": "C1-M4: New-patient visit at Windermere",
-  "intent": "You are a new patient in Florida with an itchy scalp that will not clear. You want a new-patient visit at the Windermere office — that office only. Answer their questions about who you are and how to reach you once, then proceed to booking. Take the first appointment time they offer. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first time out loud, then thank them and end the call. Do not ask to add or change insurance. Do not ask for a callback, to speak to a person, a bill, a payment, the patient portal, a waitlist, a text, financing, or the street, floor, or suite. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar. If they only list openings, say book the first one. Do not ask them to text you an appointment confirmation.",
+  "intent": "You are a new patient in Florida with an itchy scalp that will not clear. You want a new-patient visit at the Windermere office, that office only. Answer their questions about who you are and how to reach you once, then proceed to booking. Take the first appointment time they offer. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first time out loud, then thank them and end the call. Do not ask to add or change insurance. Do not ask for a callback, to speak to a person, a bill, a payment, the patient portal, a waitlist, a text, financing, or the street, floor, or suite. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar. If they only list openings, say book the first one. Do not ask them to text you an appointment confirmation. When they read back a time and ask whether to book it, say yes, please book it. Always answer the question they just asked.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -90,7 +90,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers an appointment time, a slot, or asks which day or time you want. NOT when asking for your name or date of birth, NOT when they have not yet given the street, floor, and suite if you still need those.",
+      "match_phrase": "names one or more specific appointment dates and clock times and asks which one you want. NOT when asking for your name, date of birth, or mobile, NOT when only asking what days or times work for you, NOT when reading back one time and asking whether to book it, NOT when they say you are already booked.",
       "response_type": "phrase",
       "response_value": "I'll take the first time you offered."
     },
@@ -114,9 +114,45 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before a time has been confirmed on the calendar. NOT when they have just confirmed a booked time.",
+      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before a time has been confirmed on the calendar. NOT when they have just confirmed a booked time. NOT when they have said you are booked or on the calendar at any point, NOT when they are asking for your details.",
       "response_type": "phrase",
       "response_value": "I still need that time booked. Please confirm it is on the calendar before I go."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "reads back one specific appointment time and asks whether to book it, finalize it, or go ahead, or asks for a yes or no to book. NOT when they say it is already booked.",
+      "response_type": "phrase",
+      "response_value": "Yes, please book it."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks what days or times work for you, how far out to search, or whether you want the first available time, without naming a specific date and time. NOT when asking for your name, date of birth, or mobile.",
+      "response_type": "phrase",
+      "response_value": "Any day or time is fine. Please find the first available new-patient time at Windermere."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks what you want to be seen for or the reason for the visit. NOT when asking for your name, date of birth, or mobile.",
+      "response_type": "phrase",
+      "response_value": "An itchy scalp that will not clear."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks which office, city, or location you want. NOT when asking for your name, date of birth, or mobile.",
+      "response_type": "phrase",
+      "response_value": "The Windermere office in Florida, please."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks for your mobile or phone number. NOT when reading a number back to you.",
+      "response_type": "phrase",
+      "response_value": "My mobile is four, zero, seven, five, five, five, zero, one, nine, nine."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "says you are booked or the appointment is on the calendar for a specific day and time. NOT when they are only offering or reading back a time before booking.",
+      "response_type": "phrase",
+      "response_value": "Great, Monday at nine works. Thank you, goodbye."
     }
   ],
   "customer_name": "Helen Cho",

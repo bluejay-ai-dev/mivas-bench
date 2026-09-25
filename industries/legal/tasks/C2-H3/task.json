@@ -51,6 +51,13 @@
     },
     {
       "match_type": "context",
+      "match_phrase": "The agent asks what the caller's role is, whether the caller is an attorney, an insurance representative, an adjuster, or the opposing side, or on whose behalf the caller is calling. NOT when asking for the caller's name and number.",
+      "response_type": "phrase",
+      "response_value": "I'm the Northgate adjuster on the Eckhart claim. I'm not starting a new matter.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
       "match_phrase": "The agent asks which state this happened in, or where it took place. NOT any other question.",
       "response_type": "phrase",
       "response_value": "I'm the Northgate adjuster on the Eckhart claim. I'm not starting a new matter.",

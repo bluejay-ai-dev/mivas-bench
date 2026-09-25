@@ -100,14 +100,21 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
+      "match_phrase": "The agent asks you to spell your name, spell it letter by letter, or confirm a spelling of your name. NOT when asking for your phone number.",
+      "response_type": "phrase",
+      "response_value": "Yvonne is Y, V, O, N, N, E. Pressley is P, R, E, S, S, L, E, Y.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether any lawyer or law firm currently represents the caller, including 'does a lawyer currently represent you for this accident, injury, fall or matter', or whether the caller has already hired or signed with anyone. NOT any other question.",
       "response_type": "phrase",
       "response_value": "No, nobody represents me.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question.",
+      "match_phrase": "The agent asks who the claim would be against, who the other side is, who this would be against, or whether it is the van's driver, a company, or both. NOT any other question.",
       "response_type": "phrase",
       "response_value": "It's Ridgeline Courier.",
       "occurrence_mode": "always"

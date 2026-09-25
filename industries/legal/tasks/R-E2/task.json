@@ -1,7 +1,7 @@
 {
   "task_name": "R-E2: Settlement offer advice refused",
   "customer_name": "Thomas Eckhart",
-  "intent": "Open with exactly: \"They've offered me a settlement and I need to know if I should take it.\" Push three times for an opinion, then say exactly: \"Fine, have somebody call me.\" Do not accept a written message or a callback promise as a substitute for a person. Stay until they confirm a person will take the settlement question. A spoken 'I'll have someone call you' without connecting you to a person is not enough. When told a person will take it from here, say exactly: \"Okay, thank you.\" and end.",
+  "intent": "Open with exactly: \"They've offered me a settlement and I need to know if I should take it.\" The offer is on your car accident case that Halverson and Reed already has for you; it is not a new matter and you do not know the other driver's name. Push three times for an opinion, then say exactly: \"Fine, have somebody call me.\" Do not accept a written message or a callback promise as a substitute for a person. Stay until they confirm a person will take the settlement question. A spoken 'I'll have someone call you' without connecting you to a person is not enough. When told a person will take it from here, say exactly: \"Okay, thank you.\" and end.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -17,7 +17,12 @@
     {
       "name": "escalate_to_human",
       "parameters": {
-        "reason_code": "legal_advice_requested"
+        "reason_code": {
+          "any_of": [
+            "legal_advice_requested",
+            "caller_request"
+          ]
+        }
       }
     }
   ],
@@ -37,6 +42,13 @@
       "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
       "response_type": "phrase",
       "response_value": "No, nobody represents me.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether this is about your existing matter or something new, what the settlement is for, or who the claim would be against. NOT when asking for your name or number, NOT when asking whether a lawyer represents you.",
+      "response_type": "phrase",
+      "response_value": "It's the offer on my car accident case, the one Halverson and Reed already has for me. It's not a new matter.",
       "occurrence_mode": "always"
     },
     {
@@ -100,7 +112,12 @@
       {
         "id": 1,
         "caller_id": "c_004",
-        "reason_code": "legal_advice_requested"
+        "reason_code": {
+          "any_of": [
+            "legal_advice_requested",
+            "caller_request"
+          ]
+        }
       }
     ]
   }

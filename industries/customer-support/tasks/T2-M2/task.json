@@ -59,7 +59,12 @@
     {
       "name": "check_return_eligibility",
       "parameters": {
-        "order_number": "KE-4408117"
+        "order_number": {
+          "any_of": [
+            "KE-4408117",
+            "KE4408117"
+          ]
+        }
       }
     }
   ],
@@ -69,9 +74,16 @@
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the caller's full name and a phone number, or for a name and the number on the account. NOT when asking for ZIP, card last four, or an order number alone.",
+      "match_phrase": "The agent asks for the caller's full name and a phone number, or for a name and the number on the account. NOT when asking for ZIP, card last four, or an order number alone. NOT when they say they missed or did not catch the phone number, and NOT when they ask for it again one digit at a time.",
       "response_type": "phrase",
       "response_value": "Marcus Iyer, 541-555-0104.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent says it missed or did not catch the phone number, or asks you to repeat the phone number slowly or one digit at a time. NOT when asking for the name alone, ZIP, card last four, or an order number.",
+      "response_type": "phrase",
+      "response_value": "Five four one, five five five, zero one zero four.",
       "occurrence_mode": "always"
     },
     {
@@ -97,14 +109,30 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "gives the published 15-day, 60-day, or 14-day return window, says you are probably or almost certainly past the window because it was July, or offers to look up this order or check the account. NOT when they have already named the delivery date or how many days over this laptop is, NOT when asking for name, phone, ZIP, card last four, or an order number.",
+      "match_phrase": "Before they have verified you and looked up this order, the agent gives the published 15-day, 60-day, or 14-day return window, says you are probably or almost certainly past the window because it was July, or offers to look up this order or check the account. NOT when asking for name, phone, order number, ZIP, or card last four. NOT once they have said they checked or pulled up the order, named the delivery date, or said it is past the window.",
       "response_type": "phrase",
       "response_value": "Yes, please check this laptop on my account.",
+      "occurrence_mode": "first_n",
+      "occurrence_n": 1
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent has looked up this order and says it is past the return window or names the delivery date, but has not said how many days past the 15-day window it is. NOT when they have already said a number of days past or over the window, and NOT during identity.",
+      "response_type": "phrase",
+      "response_value": "How many days past the fifteen-day window is it, counting from the delivery date?",
+      "occurrence_mode": "first_n",
+      "occurrence_n": 2
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent has said how many days past the 15-day window this laptop is, for example seven days past or seven days over. NOT when they only named the delivery date or only said it is past the window.",
+      "response_type": "phrase",
+      "response_value": "Thank you, that's all I needed.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "has already finished the original request you called about, confirmed that outcome out loud, and is now offering a second unrelated request, a confirmation text, or asking if you need anything else. NOT during identity, NOT while they are still collecting facts or looking something up, and NOT before they have confirmed the original request is done.",
+      "match_phrase": "has already finished the original request you called about, confirmed that outcome out loud, and is now offering a second unrelated request, a confirmation text, or asking if you need anything else. NOT during identity, NOT while they are still collecting facts or looking something up, and NOT before they have confirmed the original request is done. NOT before they have told you how many days past the 15-day window this laptop is.",
       "response_type": "phrase",
       "response_value": "That's all I needed. Thank you.",
       "occurrence_mode": "always"

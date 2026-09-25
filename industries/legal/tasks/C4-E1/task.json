@@ -1,7 +1,7 @@
 {
   "task_name": "C4-E1: Intake recorded for auto accident",
   "customer_name": "Nadine Carlisle",
-  "intent": "Open with exactly: \"A car pulled out and hit my passenger side in California.\" Other driver Wesley Trombley. March fifteenth, twenty twenty six. Short account: he pulled out without looking. Decline booking. Once finished, say exactly: \"Thank you, that's all I needed.\" and end the call.",
+  "intent": "Open with exactly: \"A car pulled out and hit my passenger side in California.\" Other driver Wesley Trombley. March fifteenth, twenty twenty six. Short account: he pulled out without looking. Decline booking. If they ask when it happened, say exactly: \"It was March fifteenth, twenty twenty six.\" Do not say thank you or end the call on a date question, a deadline, or a next-steps speech. Stay until they confirm the intake is recorded on the file. A spoken promise, a filing deadline, or next-steps talk, without that write, is not enough. Once they confirm the intake is recorded on the file, say exactly: \"Thank you, that's all I needed.\" Do not book an evaluation. End the call. The agent often says one moment or let me pull you up and then asks a question in the same turn. Always answer the question at the end of the agent's turn with the fact it asks for. Never reply with only \"Sure\", \"Okay\", \"Yeah\", or \"Thank you\" when the agent's turn ends in a question.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -62,16 +62,23 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
+      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, whether any attorney represents you, or whether the caller has already hired or signed with anyone, even when the same turn starts with a filler such as one moment, let me pull you up, let me look you up, or I'll check that. NOT any other question.",
       "response_type": "phrase",
       "response_value": "No, nobody represents me.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question.",
+      "match_phrase": "The agent asks who the claim or matter would be against, who the other side is, or for the name of the other driver or person this would be against, even when the same turn starts with a filler such as one moment, let me pull you up, let me look you up, or I'll check that. NOT any other question. NOT when the agent has already said the name Wesley Trombley and only asks you to confirm he is the other driver or the person the claim is against.",
       "response_type": "phrase",
       "response_value": "It's Wesley Trombley.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent has already said the name Wesley Trombley and asks you to confirm whether he is the other driver, whether he is the person the claim is against, or asks for a yes or no about him. NOT when first asking who the claim would be against.",
+      "response_type": "phrase",
+      "response_value": "Yes. Wesley Trombley is the other driver, and the claim is against him.",
       "occurrence_mode": "always"
     },
     {
@@ -83,9 +90,44 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks when the incident happened, or for the date of the accident, injury or event. NOT any other question.",
+      "match_phrase": "The agent asks when this happened, for a date, a year, March, or how long ago. NOT after they have already confirmed the intake is recorded on the file.",
       "response_type": "phrase",
       "response_value": "It was March fifteenth, twenty twenty six.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks what happened, for a short account, or how the other driver hit you. NOT when asking who the claim would be against, which state, or the date.",
+      "response_type": "phrase",
+      "response_value": "He pulled out without looking and hit my passenger side.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks whether you want to book a case evaluation, a free evaluation, or an appointment. NOT when confirming intake is recorded.",
+      "response_type": "phrase",
+      "response_value": "No thank you. I just need the intake on file.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent starts to wrap up, says goodbye, reads a filing deadline as if that finishes the call, or says they have what they need, before confirming the intake is recorded on the file. NOT after they have confirmed the intake is recorded.",
+      "response_type": "phrase",
+      "response_value": "I still need the intake on the file.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent says thank you or that they have what they need while still asking when it happened or for the date. NOT after the intake is recorded on the file.",
+      "response_type": "phrase",
+      "response_value": "It was March fifteenth, twenty twenty six.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent has just said the intake is recorded, saved, or on the file. NOT when asking who the claim would be against, NOT when asking for a date, name, phone, representation, what happened, or state. NOT when reading a filing deadline. NOT when offering to book or saying one moment.",
+      "response_type": "phrase",
+      "response_value": "Thank you, that's all I needed.",
       "occurrence_mode": "always"
     }
   ],

@@ -1,7 +1,7 @@
 {
   "task_name": "R-H1: Total member insists on 60 days for a phone",
   "customer_name": "Glen Aldridge",
-  "intent": "Open with exactly: \"I am Total, so I have sixty days. Return the Solstice phone I got in mid-July.\" Give identity when asked. Order KE-4455031. After they say 14 days and you are over, say exactly: \"That is not acceptable. I want a person.\" Stay until they escalate. The moment you are told a person, a care advocate, or someone from Kestrel will take it from here, say exactly: \"Okay, thank you.\" and end the call yourself. Do not wait on the line.",
+  "intent": "Open with exactly: \"I am Total, so I have sixty days. Return the Solstice phone I got in mid-July.\" You are only calling to return that phone; you are not buying or ordering anything. Your order number is KE-4455031, the number of the phone's order, never a product code. When asked, give your name and phone (Glen Aldridge, 541-555-0127), and when asked for the ZIP and card give them straight away: ZIP 97213, card ending 5540. Never answer a question for a detail with only \"okay\" or \"thanks\". After they say the phone is past the 14-day window or cannot go back, say exactly: \"I still want to talk to a person, please.\" Do not say you are done or that is all you needed before a person has been offered. Stay until they escalate. The moment you are told a person, a care advocate, or someone from Kestrel will take it from here, say exactly: \"Okay, thank you.\" and end the call yourself. Do not wait on the line.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -88,30 +88,30 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the ZIP code on the order and the last four digits of the card, together or in either order. NOT when asking for a full card number, and NOT when asking for a name or phone.",
+      "match_phrase": "The agent asks for the ZIP code on the order and the last four digits of the card, together or in either order, or repeats that request. NOT when asking for a full card number, and NOT when asking for a name or phone.",
       "response_type": "phrase",
       "response_value": "ZIP 97213, card ending 5540.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for an order number, which order, or which item. NOT when asking for name, phone, ZIP, or card last four.",
+      "match_phrase": "The agent asks for an order number, which order, which item, or whether you meant the return or a new purchase. NOT when asking for name, phone, ZIP, or card last four.",
       "response_type": "phrase",
-      "response_value": "Order KE-4455031, the phone.",
+      "response_value": "Order KE-4455031, the phone. I only want to return it.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "has already finished the original request you called about, confirmed that outcome out loud, and is now offering a second unrelated request, a confirmation text, or asking if you need anything else. NOT during identity, NOT while they are still collecting facts or looking something up, and NOT before they have confirmed the original request is done.",
+      "match_phrase": "has already finished the original request you called about, confirmed that outcome out loud, and is now offering a second unrelated request, a confirmation text, or asking if you need anything else. NOT during identity, NOT while they are still collecting facts or looking something up, NOT before they have confirmed the original request is done, and NOT when they have said the phone is past the window, not eligible, or cannot be returned and have not yet offered a person.",
       "response_type": "phrase",
       "response_value": "That's all I needed. Thank you.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "says the phone is past the 14-day window, or that membership does not extend it. NOT before they check.",
+      "match_phrase": "says the phone is past the 14-day window, is not eligible for return, cannot go back, or that membership does not extend the window, even if the same turn also asks whether you need anything else. NOT before they have looked up the order, NOT when they are only asking for identity or the order number, and NOT after they have already offered to get you a person.",
       "response_type": "phrase",
-      "response_value": "That is not acceptable. I want a person.",
+      "response_value": "I still want to talk to a person, please.",
       "occurrence_mode": "always"
     }
   ],

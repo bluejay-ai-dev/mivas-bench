@@ -1,7 +1,7 @@
 {
   "task_name": "T2-H2: Ohio drone restocking exemption",
   "customer_name": "Owen Tsai",
-  "intent": "Open with exactly: \"I want to return the Skyward Vireo 3 drone I bought in Ohio. The box is opened.\" Give identity when asked. Order KE-4487740. If they ask why you are returning it, say exactly: \"I changed my mind.\" and continue the return; do not wrap up on that turn. If they quote 15 percent, say it was purchased in Ohio. Confirm the return only after they say there is no restocking fee and the full $999.99 comes back. Do not ask for a label on this call. Once they have started the return and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
+  "intent": "Open with exactly: \"I want to return the Skyward Vireo 3 drone I bought in Ohio. The box is opened.\" Give identity when asked. Order KE-4487740. If they ask why you are returning it, say exactly: \"I changed my mind.\" and continue the return; do not wrap up on that turn. If they quote 15 percent, say it was purchased in Ohio. When they say there is no restocking fee and the full $999.99 comes back and ask whether to start the return, say exactly: \"Yes, start the return.\" Never decline or wrap up on that question. After the return is started, if they have not already said a prepaid label was emailed, ask for the prepaid return label by email. Only once they have said the return is started and the label was emailed, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -57,12 +57,6 @@
       "name": "transfer_to_returns"
     },
     {
-      "name": "get_order",
-      "parameters": {
-        "order_number": "KE-4487740"
-      }
-    },
-    {
       "name": "check_return_eligibility",
       "parameters": {
         "order_number": "KE-4487740",
@@ -81,6 +75,9 @@
       "parameters": {
         "confirmation_token": "KE-RTN-4417"
       }
+    },
+    {
+      "name": "create_return_label"
     }
   ],
   "behaviors": {
@@ -117,14 +114,14 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "asks why you are returning the drone, why you do not want it, or for the reason for the return. NOT when asking whether to start or confirm the return, and NOT when reading back the refund.",
+      "match_phrase": "asks why you are returning the drone, why you do not want it, or for the reason for the return. NOT when asking for a ZIP code, card last four, name, phone, or order number, NOT when asking whether to start or confirm the return, and NOT when reading back the refund.",
       "response_type": "phrase",
       "response_value": "I changed my mind.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "has already started the return, read back no restocking fee and the full $999.99 refund, and is now offering a second unrelated request, a confirmation text, or asking if you need anything else. NOT during identity, NOT while they are still collecting facts or looking something up, NOT when they are quoting the refund, NOT when they are asking whether to start or confirm the return, and NOT before the return has been started.",
+      "match_phrase": "has already started the return, and has said a prepaid return label was emailed, and is now offering a second unrelated request, a confirmation text, or asking if you need anything else. NOT during identity, NOT while they are still collecting facts or looking something up, NOT when they are quoting the refund, NOT when they are asking whether to start or confirm the return, NOT before the return has been started, and NOT before they have said the label was emailed.",
       "response_type": "phrase",
       "response_value": "That's all I needed. Thank you.",
       "occurrence_mode": "always"
@@ -138,9 +135,16 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "reads back no restocking fee and the full $999.99 refund and asks whether to start the return.",
+      "match_phrase": "reads back no restocking fee and the full $999.99 refund and asks whether to start the return, or asks whether you want them to go ahead with the return. NOT after they have already said the return is started.",
       "response_type": "phrase",
       "response_value": "Yes, start the return.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "has said the return is started but has not said a prepaid return label was emailed, and asks if you need anything else, or asks whether you want a prepaid label, email, or mail-back. NOT before the return is started, and NOT after they have said the label was emailed.",
+      "response_type": "phrase",
+      "response_value": "Yes, please email me the prepaid return label.",
       "occurrence_mode": "always"
     }
   ],
@@ -819,7 +823,14 @@
         "status": "open"
       }
     ],
-    "return_labels": [],
+    "return_labels": [
+      {
+        "id": 1,
+        "rma_number": "RMA-7798555",
+        "sent_to": "owen.tsai@example.test",
+        "label_id": "KL-409232"
+      }
+    ],
     "price_matches": [],
     "delivery_changes": [],
     "order_cancellations": [],

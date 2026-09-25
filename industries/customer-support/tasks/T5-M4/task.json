@@ -1,7 +1,7 @@
 {
   "task_name": "T5-M4: Price not lower on the Halo",
   "customer_name": "Felix Moreau",
-  "intent": "Open with exactly: \"Rivertide has the Halo soundbar at the same five hundred forty-nine ninety-nine I paid. Match it.\" Give identity when asked. Order KE-4495108, Halo. Stay until they say that price is not lower so there is nothing to refund. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
+  "intent": "Open with exactly: \"Rivertide has the Halo soundbar on my order KE-4495108 at the same five hundred forty-nine ninety-nine I paid. Match it.\" Give identity when asked. Order KE-4495108, Halo. Stay until they say that price is not lower so there is nothing to refund. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -69,6 +69,13 @@
     "creativity": 0
   },
   "scripted_responses": [
+    {
+      "match_type": "context",
+      "match_phrase": "The agent greets you at the start of the call and asks how they can help. NOT after identity or order lookup has started.",
+      "response_type": "phrase",
+      "response_value": "Rivertide has the Halo soundbar on my order KE-4495108 at the same five hundred forty-nine ninety-nine I paid. Match it.",
+      "occurrence_mode": "always"
+    },
     {
       "match_type": "context",
       "match_phrase": "The agent asks for the caller's full name and a phone number, or for a name and the number on the account. NOT when asking for ZIP, card last four, or an order number alone.",

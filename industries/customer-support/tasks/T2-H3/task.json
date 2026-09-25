@@ -57,12 +57,6 @@
       "name": "transfer_to_returns"
     },
     {
-      "name": "get_order",
-      "parameters": {
-        "order_number": "KE-4479002"
-      }
-    },
-    {
       "name": "check_return_eligibility",
       "parameters": {
         "order_number": "KE-4479002"
@@ -102,21 +96,21 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers to transfer you to a human, a care advocate, the front desk, or a live agent because they cannot continue on this line. NOT when you already asked for a person, NOT when they are completing the return, delivery change, cancellation, or scam report, NOT when they say a Marketplace seller owns the return or that they can get you to someone who will put you in touch with that seller.",
+      "match_phrase": "offers to transfer you to a human, a care advocate, the front desk, or a live agent because they cannot continue on this line, before any Marketplace seller has been mentioned. NOT when you already asked for a person, NOT when they are completing the return, delivery change, cancellation, or scam report, and NOT at any point after they have said a Marketplace seller (for example Northwind Supply) owns the return, the refund, or the policy.",
       "response_type": "phrase",
       "response_value": "No, I don't need a person. Please finish what I asked on this call.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "says a Marketplace seller owns the return, the refund, or the policy, or that the return goes through the seller, and has not yet connected you to a person. NOT when they have already named the seller and said a person will take it from here.",
+      "match_phrase": "says a Marketplace seller owns the return, the refund, or the policy, or that the return goes through the seller, without saying the seller's name, and has not yet said a person will help. NOT when they have already said the seller's name (for example Northwind Supply), and NOT when they have said a person or care advocate will take it from here.",
       "response_type": "phrase",
       "response_value": "Who is the seller? Please get me to a person who can deal with that seller.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "quotes a Kestrel refund amount or asks you to confirm a Kestrel return on this order. NOT when they have said a Marketplace seller owns the policy.",
+      "match_phrase": "states a Kestrel refund dollar amount, or asks you to confirm or start a Kestrel return on this order. NOT when asking for an order number, name, phone, ZIP, or card last four, NOT when asking how they can help, and NOT when they have said a Marketplace seller owns the policy.",
       "response_type": "phrase",
       "response_value": "I don't want a Kestrel refund. Get me to a person who can deal with the seller.",
       "occurrence_mode": "always"
@@ -133,6 +127,13 @@
       "match_phrase": "has already finished the original request you called about, confirmed that outcome out loud, and is now offering a second unrelated request, a confirmation text, or asking if you need anything else. NOT during identity, NOT while they are still collecting facts or looking something up, and NOT before they have confirmed the original request is done.",
       "response_type": "phrase",
       "response_value": "That's all I needed. Thank you.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "has already said the seller's name (for example Northwind Supply) and that the seller's policy applies, but has not said a person or care advocate will help. NOT when they have said a person, care advocate, or someone from Kestrel will take it from here.",
+      "response_type": "phrase",
+      "response_value": "Please get me to a person who can deal with that seller.",
       "occurrence_mode": "always"
     }
   ],

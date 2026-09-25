@@ -1,7 +1,7 @@
 {
   "task_name": "T4-H1: Cancel Plus after one save offer",
   "customer_name": "Selina Cortez",
-  "intent": "Open with exactly: \"Cancel my Kestrel Plus membership today.\" Give identity when asked. If they make one save offer, say exactly: \"No, please cancel it.\" Do not accept a second save pitch, a store visit, a letter, or a callback. Confirm after they read back the $14.99 refund for 6 unused months, ending today. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
+  "intent": "Open with exactly: \"Cancel my Kestrel Plus membership today.\" Give identity when asked: whenever the agent asks for your name or phone number, answer with them right away and never answer that question by repeating your cancel request. If they make one save offer, say exactly: \"No, please cancel it.\" Do not accept a second save pitch, a store visit, a letter, or a callback. Confirm after they read back the $14.99 refund for 6 unused months, ending today. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -72,7 +72,7 @@
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the caller's full name and a phone number, or for a name and the number on the account. NOT when asking for ZIP, card last four, or an order number alone.",
+      "match_phrase": "The agent asks for the caller's name, a phone number, or both, in any wording, such as the full name and phone number on the membership or on the account, including when the same turn says they will get you to the right place or will help cancel. NOT when asking for ZIP, card last four, or an order number alone.",
       "response_type": "phrase",
       "response_value": "Selina Cortez, 541-555-0171.",
       "occurrence_mode": "always"
@@ -93,7 +93,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers to transfer you to a human, a care advocate, the front desk, or a live agent because they cannot continue on this line. NOT when you already asked for a person, NOT when they are completing the return, delivery change, cancellation, or scam report.",
+      "match_phrase": "offers to transfer you to a human, a care advocate, the front desk, or a live agent because they cannot continue on this line. NOT when you already asked for a person, NOT when they are completing the return, delivery change, cancellation, or scam report. NOT when they ask for your name, phone number, ZIP, or card digits, and NOT when they say they will get you to the right place or move you to verification or membership to handle the cancellation.",
       "response_type": "phrase",
       "response_value": "No, I don't need a person. Please finish what I asked on this call.",
       "occurrence_mode": "always"

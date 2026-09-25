@@ -1,7 +1,7 @@
 {
   "task_name": "T5-M1: Price match on an open-box TV",
   "customer_name": "Felix Moreau",
-  "intent": "Open with exactly: \"Price match my open-box Kestrel Vista 55 TV. Rivertide has a new one for fifty dollars less.\" Give identity when asked. Order KE-4495108, the open-box TV. Stay on the line while they look up your purchase. If they only recite the published open-box or price-match policy, keep going — that is not done. Stay until they confirm the open-box exclusion on YOUR order. Do not hang up after a general policy explanation. Do not accept a hint that someone else could match it. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
+  "intent": "Open with exactly: \"Price match my open-box Kestrel Vista 55 TV on order KE-4495108. Rivertide has a new one for fifty dollars less.\" Give identity when asked. Order KE-4495108, the open-box TV. Stay on the line while they look up your purchase. If they only recite the published open-box or price-match policy, keep going. That is not done. Stay until they confirm the open-box exclusion on YOUR order. Do not hang up after a general policy explanation. Do not accept a hint that someone else could match it. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -57,10 +57,14 @@
       "name": "transfer_to_orders"
     },
     {
-      "name": "quote_price_match",
+      "name": "get_order",
       "parameters": {
-        "order_number": "KE-4495108",
-        "competitor": "Rivertide"
+        "order_number": {
+          "any_of": [
+            "KE-4495108",
+            "KE4495108"
+          ]
+        }
       }
     }
   ],
@@ -68,6 +72,13 @@
     "creativity": 0
   },
   "scripted_responses": [
+    {
+      "match_type": "context",
+      "match_phrase": "The agent greets you at the start of the call and asks how they can help. NOT after identity or order lookup has started.",
+      "response_type": "phrase",
+      "response_value": "Price match my open-box Kestrel Vista 55 TV on order KE-4495108. Rivertide has a new one for fifty dollars less.",
+      "occurrence_mode": "always"
+    },
     {
       "match_type": "context",
       "match_phrase": "The agent asks for the caller's full name and a phone number, or for a name and the number on the account. NOT when asking for ZIP, card last four, or an order number alone.",
@@ -98,7 +109,14 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "recites the published open-box or price-match policy, including that open-box items are not price matched, without having looked up your specific purchase. NOT when they have confirmed the exclusion on your Vista 55 TV or the order they pulled up.",
+      "match_phrase": "The agent asks which competitor, the competitor's price, or whether the competitor's TV is new and in stock. NOT identity questions and NOT when asking for an order number.",
+      "response_type": "phrase",
+      "response_value": "Rivertide, spelled R, I, V, E, R, T, I, D, E. They have it new and in stock for three hundred forty-nine ninety-nine.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "explains in general terms that open-box items are not price matched, without having looked up your order. NOT when they mention your order, your Vista 55 TV, its open-box grade, or say they checked or pulled up your order.",
       "response_type": "phrase",
       "response_value": "Okay, please look up my order. I still want that price match.",
       "occurrence_mode": "always"

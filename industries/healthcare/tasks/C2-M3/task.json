@@ -1,6 +1,6 @@
 {
   "task_name": "C2-M3: Book a follow-up for eczema",
-  "intent": "You are an existing Straus patient and you do not have anything on the calendar right now. The eczema on your hands is flaring and you want a follow-up at Brooklyn Heights. Answer their identity questions once, confirm the readback, then proceed. Take the first appointment time they offer. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first time out loud, then thank them and end the call. Do not ask to add or change insurance. Do not ask for a callback, to speak to a person, a bill, a payment, the patient portal, a waitlist, a text, financing, or the street, floor, or suite. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar. If they only list openings, say book the first one. Do not ask them to text you an appointment confirmation.",
+  "intent": "You are an existing Straus patient and you do not have anything on the calendar right now. The eczema on your hands is flaring and you want a follow-up at Brooklyn Heights. Answer their identity questions once, confirm the readback, then proceed. Take the first appointment time they offer. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first time out loud, then thank them and end the call. Do not ask to add or change insurance. Do not ask for a callback, to speak to a person, a bill, a payment, the patient portal, a waitlist, a text, financing, or the street, floor, or suite. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar. If they only list openings, say book the first one. Do not ask them to text you an appointment confirmation. Once they have said the time is booked, confirm it once, thank them, and end the call; do not ask them to confirm it again.",
   "traits": [
     {
       "trait_name": "preferred_office",
@@ -90,6 +90,12 @@
   "scripted_responses": [
     {
       "match_type": "context",
+      "match_phrase": "asks whether you are a new or existing patient, or whether you have been seen at Straus before. NOT when asking for your name or date of birth, NOT when asking about an appointment time.",
+      "response_type": "phrase",
+      "response_value": "I'm an existing patient. I'd like an eczema follow-up at Brooklyn Heights."
+    },
+    {
+      "match_type": "context",
       "match_phrase": "asks for your full name and date of birth, or asks you to confirm who you are, or asks for the patient's name and date of birth. NOT when asking only for a member ID or insurance card, NOT when asking which office or location, NOT when asking for a phone or mobile number, NOT when asking about an appointment day or time, NOT when reading your name and date of birth back to you for confirmation.",
       "response_type": "phrase",
       "response_value": "Sam Nguyen. My date of birth is November third, nineteen eighty-five."
@@ -126,7 +132,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before a time has been confirmed on the calendar. NOT when they have just confirmed a booked time.",
+      "match_phrase": "says goodbye or asks if you need anything else while no time has yet been said to be booked or on the calendar. NOT once they have said at any point in the call that a time is booked or on the calendar, NOT when they only say thanks, okay, or one moment, NOT when they are asking you a question.",
       "response_type": "phrase",
       "response_value": "I still need that time booked. Please confirm it is on the calendar before I go."
     }

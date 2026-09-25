@@ -119,9 +119,9 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks whether to send the packet by email or text, or which channel to use. NOT any other question.",
+      "match_phrase": "The agent asks whether to send the packet by email or text, which channel to use, or for your email address. NOT any other question.",
       "response_type": "phrase",
-      "response_value": "Email is fine.",
+      "response_value": "Email is fine. It's raymond dot cho at example dot com. Please send it by email, not text.",
       "occurrence_mode": "always"
     },
     {
@@ -133,7 +133,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers an appointment or evaluation time",
+      "match_phrase": "The agent offers to book an appointment or free case evaluation now. NOT when asking whether to continue the intake or screening, NOT when asking about the packet, NOT after you have already declined an appointment on this call.",
       "response_type": "phrase",
       "response_value": "Not yet, let me read the paperwork first.",
       "occurrence_mode": "always"
@@ -143,6 +143,13 @@
       "match_phrase": "The agent offers to send a medical records release or asks which doctor, hospital, clinic, or provider treated you. NOT when asking who this would be against, which state, when it happened, or how to send the packet.",
       "response_type": "phrase",
       "response_value": "No records release. I wasn't treated.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "After you have already declined booking an appointment, the agent says take your time, or that you can set up the evaluation when you are ready, and the intake and emailed packet were already confirmed. NOT when the agent asks you a question.",
+      "response_type": "phrase",
+      "response_value": "Thank you, that's all I needed.",
       "occurrence_mode": "always"
     }
   ],

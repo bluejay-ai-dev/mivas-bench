@@ -1,6 +1,6 @@
 {
   "task_name": "C5-H2: Balance question then move August 20 visit",
-  "intent": "You are an existing Straus patient. Start by asking what you owe \u2014 the total amount and a short explanation of the charges. Answer their identity questions once with your name and date of birth, confirm if they read it back, then go straight to the bill. As soon as you hear the amount and any short explanation, immediately say you also cannot make August 20 appointment at Park Avenue and you need to move it to a later date, not cancel it. Do not wait for them to finish offering payment, financing, a dispute, or a text. Do not agree to pay, dispute a fee, or take a payment link. Take the first appointment time they offer. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first time out loud, then thank them and end the call. Do not ask to cancel. Do not ask for a callback, to speak to a person, to change insurance, about the patient portal, a waitlist, or for a text. Do not ask for the street, floor, suite, or office id. Do not ask to move the visit until they have named the charge. After the move, stay until the new time is on the calendar. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar. If they only list openings, say book the first one. Do not ask them to text you an appointment confirmation.",
+  "intent": "You are an existing Straus patient. Start by asking what you owe: the total amount and a short explanation of the charges. Do not mention the August 20 appointment at all until they have told you the dollar amount you owe and explained a charge. Answer their identity questions once with your name and date of birth, confirm if they read it back, then go straight to the bill. As soon as you hear the amount and any short explanation, immediately say you also cannot make August 20 appointment at Park Avenue and you need to move it to a later date, not cancel it. Do not wait for them to finish offering payment, financing, a dispute, or a text. Do not agree to pay, dispute a fee, or take a payment link. Take the first appointment time they offer. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first time out loud, then thank them and end the call. Do not ask to cancel. Do not ask for a callback, to speak to a person, to change insurance, about the patient portal, a waitlist, or for a text. Do not ask for the street, floor, suite, or office id. Do not ask to move the visit until they have named the charge. After the move, stay until the new time is on the calendar. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar. If they only list openings, say book the first one. Do not ask them to text you an appointment confirmation.",
   "traits": [
     {
       "trait_name": "carrier",
@@ -131,7 +131,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers one or more concrete appointment dates or times after the balance and a charge explanation have been given, or asks you to choose among concrete slots. NOT before billing is explained, NOT when asking for your identity.",
+      "match_phrase": "offers one or more concrete appointment dates or times after the balance and a charge explanation have been given, or asks you to choose among concrete slots. NOT before billing is explained, NOT when asking for your identity. NOT when they are only reading back your existing August 20 appointment, NOT when asking what later date or range to search.",
       "response_type": "phrase",
       "response_value": "Move August 20 visit to the first time you offered and confirm it is on the calendar."
     },
@@ -143,7 +143,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers the waitlist, a later opening, or to add you to a list. NOT when offering a specific appointment time to book now, NOT when asking for your name or date of birth.",
+      "match_phrase": "offers the waitlist, a later opening, or to add you to a list. NOT when offering a specific appointment time to book now, NOT when asking for your name or date of birth. NOT when asking what later date or date range to search for the new time.",
       "response_type": "phrase",
       "response_value": "No waitlist. Please just finish what I asked."
     },
@@ -155,7 +155,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before a time has been confirmed on the calendar. NOT when they have just confirmed a booked time.",
+      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before a time has been confirmed on the calendar. NOT when they have just confirmed a booked time. NOT a short 'thank you', 'okay', or 'one second' while they are verifying your identity or looking up your bill, NOT before they have started looking for a new appointment time.",
       "response_type": "phrase",
       "response_value": "I still need that time booked. Please confirm it is on the calendar before I go."
     },
@@ -176,6 +176,18 @@
       "match_phrase": "asks whether you want to pay, finance, dispute, or receive a payment link after stating the balance and explaining a charge. NOT before both the balance and a charge explanation have been given.",
       "response_type": "phrase",
       "response_value": "No payment or dispute. Now move the August 20's Park Avenue appointment to the first later opening."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks what later date, date range, or day you want them to search for the moved appointment, before offering any concrete time. NOT when offering concrete times, NOT when asking for your identity.",
+      "response_type": "phrase",
+      "response_value": "Any later date is fine. Please move it to the first later opening you find."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "confirms the August 20 visit was moved and the new time is on the calendar, after they have told you the balance and explained a charge. NOT when only listing openings, NOT before the balance was given.",
+      "response_type": "phrase",
+      "response_value": "Thank you, that's everything I needed. Goodbye."
     }
   ],
   "customer_name": "Jordan Lee",

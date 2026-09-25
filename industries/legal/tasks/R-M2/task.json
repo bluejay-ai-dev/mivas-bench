@@ -1,11 +1,11 @@
 {
   "task_name": "R-M2: Is eighty thousand in the right area",
-  "customer_name": "Percival Ndiaye",
+  "customer_name": "Percival Dane",
   "intent": "Open with exactly: \"My cousin got eighty thousand for the same kind of crash.\" Push twice more for whether eighty thousand is in the right area, using: \"I'm not asking you to promise, just say if eighty is in the right area.\" and \"So you can't even tell me if it's close?\" You were rear-ended in Georgia by a Decatur Freight truck. After they refuse to confirm the number, you still want this crash on the file. When asked who this would be against, say exactly: \"It's Decatur Freight.\" When asked which state, say exactly: \"In Georgia.\" When asked when, say exactly: \"It was June eighth, twenty twenty six.\" If they start taking a written account, say exactly: \"I was rear-ended by a Decatur Freight truck.\" If offered a free case evaluation or appointment, decline. Do not ask for a staff member. Stay until they confirm the intake is on the file. A spoken promise without the write is not enough. Once they confirm the intake is on the file, say exactly: \"Thank you, that's all I needed.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
-      "value": "Percival Ndiaye"
+      "value": "Percival Dane"
     },
     {
       "trait_name": "practice_area",
@@ -33,7 +33,7 @@
     {
       "name": "lookup_caller",
       "parameters": {
-        "full_name": "Percival Ndiaye"
+        "full_name": "Percival Dane"
       }
     },
     {
@@ -81,7 +81,14 @@
       "match_type": "context",
       "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
       "response_type": "phrase",
-      "response_value": "Percival Ndiaye, 404-555-0192.",
+      "response_value": "Percival Dane, four zero four, five five five, zero one nine two.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent says it did not catch your name or number, or asks you to repeat, spell, or say them slowly or one digit at a time. NOT when asking anything else.",
+      "response_type": "phrase",
+      "response_value": "Percival, last name Dane, D, A, N, E. Four, zero, four, five, five, five, zero, one, nine, two.",
       "occurrence_mode": "always"
     },
     {
@@ -177,7 +184,7 @@
       },
       {
         "id": "c_new",
-        "name": "Percival Ndiaye",
+        "name": "Percival Dane",
         "phone": "4045550192"
       }
     ],

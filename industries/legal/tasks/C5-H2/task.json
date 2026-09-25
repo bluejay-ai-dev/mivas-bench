@@ -1,7 +1,7 @@
 {
   "task_name": "C5-H2: Book then cancel and rebook",
   "customer_name": "Delphine Mercer",
-  "intent": "Open with exactly: \"Book me for the first opening on my Northstar Logistics accident.\" When asked when, say exactly: \"It was July tenth, twenty twenty six.\" Take the first appointment time offered. When a held appointment is read back to book, say exactly: \"Yes, that's right, go ahead and book it.\" Do not mention cancelling or changing until they confirm the first morning appointment is booked. After they confirm that first morning appointment is booked, and before any cancellation, say exactly: \"Cancel that one and take the next opening instead.\" Do not let them change the time without cancelling. After they confirm the later afternoon replacement is booked, do not cancel again. If they ask to cancel that replacement, say exactly: \"No, keep the second one. That's all I needed.\" Do not ask for a staff member. Stay until they confirm the first booking, the cancellation, and the second booking are on the file. A spoken promise to change it, without those writes, is not enough. Once they confirm the later afternoon replacement is booked after the first was cancelled, say exactly: \"Thank you, that's all I needed.\" and end the call.",
+  "intent": "Open with exactly: \"Book me for the first opening on my Northstar Logistics accident.\" When asked when, say exactly: \"It was July tenth, twenty twenty six.\" Take the first appointment time offered. When a held appointment is read back to book, say exactly: \"Yes, that's right, go ahead and book it.\" Do not mention cancelling or changing until they confirm the first morning appointment is booked. After they confirm that first morning appointment is booked, and before any cancellation, say exactly: \"Cancel that one and take the next opening instead.\" Do not let them change the time without cancelling. After they confirm the later afternoon replacement is booked, do not cancel again. If they ask to cancel that replacement, say exactly: \"No, keep the second one. That's all I needed.\" Do not ask for a staff member. Stay until they confirm the first booking, the cancellation, and the second booking are on the file. A spoken promise to change it, without those writes, is not enough. Once they confirm the later afternoon replacement is booked after the first was cancelled, say exactly: \"Thank you, that's all I needed.\" and end the call. When the agent asks you a question, answer it in that same turn with the answer given here. Never answer a question with only okay, sure, mm-hmm, yeah or thanks, and never speak the agent's lines for it.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -123,7 +123,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
+      "match_phrase": "The agent asks whether a lawyer or law firm currently represents the caller, whether the caller has an attorney for this, or whether the caller has already hired or signed with anyone, including when the same turn also says they are looking the caller up or thanks them. NOT any other question.",
       "response_type": "phrase",
       "response_value": "No, nobody represents me.",
       "occurrence_mode": "always"
@@ -137,7 +137,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks which state this happened in, or where it took place. NOT any other question.",
+      "match_phrase": "The agent asks which state this happened in, or where it took place. NOT when asking where in California or which city. NOT any other question.",
       "response_type": "phrase",
       "response_value": "In California.",
       "occurrence_mode": "always"
@@ -165,7 +165,15 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent has held a morning or August eleventh or nine o'clock evaluation and is reading back that hold's day, time, attorney and fee, asking whether to confirm it. NOT when holding an afternoon or August twelfth time. NOT when first listing open times.",
+      "match_phrase": "The agent has held a morning or August eleventh or nine o'clock evaluation and is reading back that hold's day, time, attorney and fee, asking whether to confirm it. NOT when holding an afternoon or August twelfth time. NOT when first listing open times. NOT during screening or intake. NOT before the agent has named a specific day and time.",
+      "response_type": "phrase",
+      "response_value": "Yes, that's right, go ahead and book it. Please stay on the line after, I have one more thing.",
+      "occurrence_mode": "first_n",
+      "occurrence_n": 1
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent has held an afternoon or August twelfth or three-thirty evaluation and is reading back that hold's day, time, attorney and fee, asking whether to confirm it. NOT when holding a morning or August eleventh time. NOT when first listing open times. NOT during screening or intake. NOT before the agent has named a specific day and time.",
       "response_type": "phrase",
       "response_value": "Yes, that's right, go ahead and book it.",
       "occurrence_mode": "first_n",
@@ -173,15 +181,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent has held an afternoon or August twelfth or three-thirty evaluation and is reading back that hold's day, time, attorney and fee, asking whether to confirm it. NOT when holding a morning or August eleventh time. NOT when first listing open times.",
-      "response_type": "phrase",
-      "response_value": "Yes, that's right, go ahead and book it.",
-      "occurrence_mode": "first_n",
-      "occurrence_n": 1
-    },
-    {
-      "match_type": "context",
-      "match_phrase": "The agent has quoted cancelling the first morning evaluation, such as the August eleventh or nine in the morning booking, and is asking whether to go ahead and cancel, and they have not yet booked a later replacement. NOT after they have already booked an afternoon or August twelfth evaluation. NOT when reading back a new held appointment to book. NOT when offering open times.",
+      "match_phrase": "The agent has quoted cancelling the first morning evaluation, such as the August eleventh or nine in the morning booking, and is asking whether to go ahead and cancel, and they have not yet booked a later replacement. NOT after they have already booked an afternoon or August twelfth evaluation. NOT when reading back a new held appointment to book. NOT when offering open times. NOT when asking whether to reserve, hold, or book a new time.",
       "response_type": "phrase",
       "response_value": "Yes, cancel that one.",
       "occurrence_mode": "first_n",
@@ -204,7 +204,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent has just confirmed an evaluation is booked, says you are all set, or starts to wrap up or say goodbye, and they have not cancelled any evaluation on this call yet. NOT after they have already cancelled an evaluation. NOT when they confirm an afternoon or August twelfth replacement is booked. NOT when reading back a hold. NOT when quoting a cancellation. NOT before any evaluation has been booked. NOT when only offering open times.",
+      "match_phrase": "The agent says the August eleventh, nine in the morning evaluation is booked or confirmed, or says goodbye or asks if there is anything else right after booking it, and no evaluation has been cancelled on this call yet. NOT when they are only holding or reading back a time. NOT during screening or intake. NOT before a booking is confirmed. NOT after they have already cancelled an evaluation.",
       "response_type": "phrase",
       "response_value": "Cancel that one and take the next opening instead.",
       "occurrence_mode": "first_n",
@@ -212,16 +212,58 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent confirms an afternoon evaluation or an August twelfth evaluation is already booked, or says you are all set after that replacement booking exists. NOT when they are only offering or holding that later time. NOT when confirming the first morning booking before any cancellation. NOT when quoting a cancellation.",
+      "match_phrase": "The agent says the August twelfth, three thirty in the afternoon evaluation is booked or confirmed, after the August eleventh one was cancelled. NOT when the agent says the August eleventh or nine in the morning evaluation is booked. NOT when only offering, holding, or reading back that later time. NOT when quoting a cancellation.",
       "response_type": "phrase",
       "response_value": "Thank you, that's all I needed.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent quotes cancelling, asks you to say yes to cancel, or offers another change after they have already booked an afternoon or August twelfth replacement evaluation. NOT when quoting cancellation of the first morning booking before any replacement is booked. NOT when the only booked evaluation is the first morning one.",
+      "match_phrase": "The agent quotes cancelling, asks you to say yes to cancel, or offers another change after they have already booked an afternoon or August twelfth replacement evaluation. NOT when quoting cancellation of the first morning booking before any replacement is booked. NOT when the only booked evaluation is the first morning one. NOT when asking whether to hold, reserve, or book the August twelfth time.",
       "response_type": "phrase",
       "response_value": "No, keep the second one. That's all I needed.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "After the August eleventh evaluation was cancelled, the agent asks whether to reserve, hold, or book the August twelfth, three thirty in the afternoon opening. NOT when reading back a held appointment's fee.",
+      "response_type": "phrase",
+      "response_value": "Yes, hold the August twelfth time and book it.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks you to repeat, spell, or read your name or phone number again, digit by digit or letter by letter. NOT when asking for the date. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "Delphine Mercer, D E L P H I N E, Mercer. My number is three two three, five five five, zero one four four.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks you to describe what happened, what kind of accident or matter it was, where it happened, what injuries or losses you had, or whether you got medical treatment. NOT when asking the date, the state alone, your name or number, or who the other side is.",
+      "response_type": "phrase",
+      "response_value": "A Northstar Logistics truck ran a red light and hit my car in Los Angeles. I hurt my shoulder, but I haven't had any medical treatment.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether to send the new client packet by email or text, or offers to send it by one channel, such as by text to your number. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "Text is fine.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent offers to send a medical records release or authorization for your signature, or asks which doctor or provider treated you. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "No thanks, not right now.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether you want to book or schedule the free case evaluation, or whether to find appointment times. NOT when listing specific times, NOT when reading back a held appointment, NOT after it is booked.",
+      "response_type": "phrase",
+      "response_value": "Yes, book the first opening.",
       "occurrence_mode": "always"
     }
   ],

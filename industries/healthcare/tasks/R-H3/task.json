@@ -1,6 +1,6 @@
 {
   "task_name": "R-H3: Dupixent authorization",
-  "intent": "You are an existing Straus patient on Dupixent and you are almost out. You want another prior authorization sent so the pharmacy can fill it. Give your name and date of birth once when they ask who you are, confirm if they read it back, then continue. Ask who actually handles this and tell them to have that person call you back after the request is sent — do not ask to speak to a person on this call. After they confirm the refill or authorization request was sent to the clinical team, ask them to send portal access so you can track the authorization, then ask to book a new medical follow-up at Park Avenue for the biologic, separate from Friday's cosmetic consult — leave Friday. Take the first new appointment time they offer. Once they give you a callback timeframe and the new visit is on the calendar, thank them and end the call. Do not ask to reschedule or cancel Friday. Do not ask about a bill, a payment, or a text other than portal access. Do not ask for a waitlist, financing, or the street, floor, or suite. Stay until they confirm the refill or authorization request was sent to the clinical team, not just a spoken callback promise, and a time is on the calendar. Do not ask them to text you an appointment confirmation.",
+  "intent": "You are an existing Straus patient on Dupixent and you are almost out. You want another prior authorization sent so the pharmacy can fill it. Ask for things one at a time in this order: the authorization request, then portal access, then the follow-up. Do not mention portal access or the follow-up until they say the request was sent. Give your name and date of birth once when they ask who you are, confirm if they read it back, then continue. Ask who actually handles this and tell them to have that person call you back after the request is sent, do not ask to speak to a person on this call. After they confirm the refill or authorization request was sent to the clinical team, ask them to send portal access so you can track the authorization, then ask to book a new medical follow-up at Park Avenue for the biologic, separate from Friday's cosmetic consult, leave Friday. Take the first new appointment time they offer. Once they give you a callback timeframe and the new visit is on the calendar, thank them and end the call. Do not ask to reschedule or cancel Friday. Do not ask about a bill, a payment, or a text other than portal access. Do not ask for a waitlist, financing, or the street, floor, or suite. Stay until they confirm the refill or authorization request was sent to the clinical team, not just a spoken callback promise, and a time is on the calendar. Do not ask them to text you an appointment confirmation.",
   "traits": [
     {
       "trait_name": "mobile",
@@ -150,6 +150,12 @@
   "scripted_responses": [
     {
       "match_type": "context",
+      "match_phrase": "greets you, asks how they can help, or asks why you are calling, before you have said why you are calling. NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "I'm on Dupixent and almost out. I need another prior authorization sent so the pharmacy can fill it."
+    },
+    {
+      "match_type": "context",
       "match_phrase": "asks for your full name and date of birth, or asks you to confirm who you are, or asks for the patient's name and date of birth. NOT when asking only for a member ID or insurance card, NOT when asking which office or location, NOT when asking for a phone or mobile number, NOT when asking about an appointment day or time, NOT when reading your name and date of birth back to you for confirmation.",
       "response_type": "phrase",
       "response_value": "Maria Alvarez. My date of birth is June thirtieth, nineteen seventy-two."
@@ -174,13 +180,13 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers a callback or to have the front desk or scheduling team call you back to book the visit, or says they cannot book the follow-up on this call. NOT when promising a callback about the refill or prior-authorization request itself, NOT when they have just confirmed the refill or authorization request was sent and are giving the clinical-team callback window, NOT when they have just confirmed a booked time on the calendar.",
+      "match_phrase": "offers to have the front desk or scheduling team call you back to book the follow-up, or says they cannot book the follow-up on this call, after you have asked for the follow-up. NOT when asking for your callback number, NOT when asking text or email for the portal, NOT when promising or arranging a callback about the refill or prior authorization, NOT before portal access has been sent, NOT when they have just confirmed a booked time.",
       "response_type": "phrase",
       "response_value": "Please book that new medical follow-up on this call. I need the time on the calendar before I go."
     },
     {
       "match_type": "context",
-      "match_phrase": "confirms a new medical follow-up is booked or on the calendar, or reads back that newly booked medical follow-up day and time, after they have said the refill or authorization request was sent and portal access was sent and they have given a callback timeframe. NOT when only listing openings you have not accepted, NOT when the refill or authorization request has not been sent, NOT when portal access has not been sent, NOT when they have not given a callback timeframe, NOT when confirming or reading back Friday's existing cosmetic consult or Botox appointment.",
+      "match_phrase": "confirms a new medical follow-up is booked or on the calendar, or reads back that newly booked medical follow-up day and time, after they have said the refill or authorization request was sent and portal access was sent and they have given a callback timeframe. NOT when only listing openings you have not accepted, NOT when the refill or authorization request has not been sent, NOT when portal access has not been sent, NOT when they have not given a callback timeframe, NOT when confirming or reading back Friday's existing cosmetic consult or Botox appointment. NOT when they say the follow-up still needs to be booked.",
       "response_type": "phrase",
       "response_value": "Thank you, that's all I needed. Goodbye."
     },
@@ -192,7 +198,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before a time has been confirmed on the calendar. NOT when they have just confirmed a booked time.",
+      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before a time has been confirmed on the calendar. NOT when they have just confirmed a booked time. NOT during identity verification, NOT before you have asked for the new follow-up.",
       "response_type": "phrase",
       "response_value": "I still need that time booked. Please confirm it is on the calendar before I go."
     },
@@ -219,6 +225,30 @@
       "match_phrase": "confirms a new medical follow-up is booked or on the calendar before saying portal access was sent, or before giving a callback timeframe. NOT when portal access has already been sent and they have given a callback timeframe, NOT when only listing openings you have not accepted, NOT when confirming Friday's existing cosmetic consult.",
       "response_type": "phrase",
       "response_value": "Please send portal access so I can track the authorization, and give me the callback timeframe before I go."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks for a callback number, the best number to reach you, or the phone number on file. NOT when asking for your name, date of birth, or ZIP code.",
+      "response_type": "phrase",
+      "response_value": "My number is 212-555-0133."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers portal access, or asks whether to send the portal activation link by text or email. NOT after they have said portal access was sent.",
+      "response_type": "phrase",
+      "response_value": "Text is fine, to 212-555-0133."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "says the refill or authorization request was sent, before saying portal access was sent. NOT after portal access was sent, NOT when asking for your callback number.",
+      "response_type": "phrase",
+      "response_value": "Thank you. Please send me portal access by text so I can track the authorization."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "says portal access was sent, after the refill or authorization request was sent, before any new follow-up has been booked. NOT after a new follow-up is booked.",
+      "response_type": "phrase",
+      "response_value": "Thanks. Now please book a new medical follow-up at Park Avenue for the biologic, separate from Friday's consult. The first opening is fine."
     }
   ],
   "customer_name": "Maria Alvarez",

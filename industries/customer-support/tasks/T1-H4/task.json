@@ -30,7 +30,6 @@
   ],
   "exp_handoff_path": [
     "transfer_to_verification",
-    "transfer_to_orders",
     "transfer_to_returns"
   ],
   "exp_tool_calls": [
@@ -55,13 +54,7 @@
       "name": "get_customer_summary"
     },
     {
-      "name": "transfer_to_orders"
-    },
-    {
-      "name": "get_order",
-      "parameters": {
-        "order_number": "KE-4408117"
-      }
+      "name": "get_order"
     },
     {
       "name": "transfer_to_returns"
@@ -107,7 +100,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers to book a repair, start a return, move a delivery, cancel a membership, send a confirmation text, or add another request after they have already said the laptop is past the 15-day window. NOT when still working on the original request, NOT when they just said the order shipped, was delivered, or cannot be cancelled, NOT when they are offering to check whether it can still be returned.",
+      "match_phrase": "offers to book a repair, start a return, move a delivery, cancel a membership, send a confirmation text, or add another request after they have finished saying the laptop is past the 15-day window (with how many days over). NOT when still working on the original request, NOT when they just said the order shipped, was delivered, or cannot be cancelled, NOT when they are offering to check whether it can still be returned.",
       "response_type": "phrase",
       "response_value": "That's all I needed. Thank you.",
       "occurrence_mode": "always"

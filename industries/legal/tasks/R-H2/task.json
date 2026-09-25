@@ -38,7 +38,7 @@
       "match_type": "context",
       "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
       "response_type": "phrase",
-      "response_value": "Vince Holloway, 702-555-0133.",
+      "response_value": "Vince Holloway, 702-555-0133. I need a written message left for Daniel Okonkwo, and after that is on the file I want this deletion request put on the record with a person.",
       "occurrence_mode": "always"
     },
     {
@@ -78,7 +78,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent confirms a message was taken, written down, or is on the file. NOT when offering to take a message or asking what the message should say.",
+      "match_phrase": "The agent confirms a message for Daniel Okonkwo was taken, delivered, or is on the file. NOT when the agent only says it will take the message down or offers to take one, NOT when asking what the message should say, NOT when asking for your name or number.",
       "response_type": "phrase",
       "response_value": "And I still want that recording deleted. Put it on the record. I want a person.",
       "occurrence_mode": "always"

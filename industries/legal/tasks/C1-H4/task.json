@@ -30,7 +30,7 @@
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
+      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. Also when the agent asks you to repeat, confirm, or say your number again, reads a number back to check it, or says it did not catch the number. NOT when asking about anything else.",
       "response_type": "phrase",
       "response_value": "Corinne Halberg, 651-555-0247.",
       "occurrence_mode": "always"
@@ -44,7 +44,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the brother's name, whether he can speak or call himself, or for his details. NOT when asking for your own name or number.",
+      "match_phrase": "The agent asks for the brother's name, whether he can speak or call himself, or for his details. NOT when the agent only says it is sorry or expresses sympathy, NOT when asking for your own name or number, and NOT when asking you to repeat your number.",
       "response_type": "phrase",
       "response_value": "His name is Owen Halberg. He is in a coma and cannot speak.",
       "occurrence_mode": "always"

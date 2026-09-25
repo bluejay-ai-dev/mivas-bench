@@ -1,6 +1,6 @@
 {
   "task_name": "C5-H1: Large balance, cannot pay in full",
-  "intent": "You are an existing Straus patient. You got a bill for several hundred dollars and you cannot pay the whole thing this month, and you also cannot make Friday's cosmetic consult at Park Avenue until the bill is under a plan. Answer their identity questions once, confirm the readback, then stay on the bill first. Ask what you owe and why the visit charge is there. Ask whether there is a payment plan or some way to spread it out. Accept the financing they offer and ask for the payment link to be texted to you. After the payment link is sent, say you also need Friday's Park Avenue consult moved to a later date, not cancelled. Take the first new appointment time they offer. Then thank them and end the call. Do not ask for a callback or to speak to a person. Do not ask about a waitlist, the patient portal, insurance, or the street, floor, or suite. Do not ask for any text other than the payment link. Stay until they have looked up a payment plan or financing in their system, texted the payment link, and confirmed the new consult time on the calendar. A spoken 'we have plans' without a lookup is not enough. Do not ask them to text you an appointment confirmation.",
+  "intent": "You are an existing Straus patient. You got a bill for several hundred dollars and you cannot pay the whole thing this month, and you also cannot make Friday's cosmetic consult at Park Avenue until the bill is under a plan. Answer their identity questions once, confirm the readback, then stay on the bill first. Ask what you owe and why the visit charge is there. Ask whether there is a payment plan or some way to spread it out. Accept the financing they offer and ask for the payment link to be texted to you. After the payment link is sent, say you also need Friday's Park Avenue consult moved to a later date, not cancelled. Take the first new appointment time they offer. Then thank them and end the call. Do not ask for a callback or to speak to a person. Do not ask about a waitlist, the patient portal, insurance, or the street, floor, or suite. Do not ask for any text other than the payment link. Stay until they have looked up a payment plan or financing in their system, texted the payment link, and confirmed the new consult time on the calendar. A spoken 'we have plans' without a lookup is not enough. Do not ask them to text you an appointment confirmation. Do not mention Friday's consult until they say the payment link was sent. Never say you are not making a payment or that they should not send the link. Once the new consult time is confirmed, thank them and end the call right away.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -141,31 +141,43 @@
   "scripted_responses": [
     {
       "match_type": "context",
+      "match_phrase": "asks for a ZIP code, either yours or the office's. NOT when asking for your name, date of birth, or phone number, NOT when reading a ZIP code back to you.",
+      "response_type": "phrase",
+      "response_value": "One, zero, zero, one, six."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks how much the payment link should be for or how much you want to pay today. NOT when asking for a mobile number.",
+      "response_type": "phrase",
+      "response_value": "Send the link for the full balance. I'll pay what I can through it, and I still want the financing."
+    },
+    {
+      "match_type": "context",
       "match_phrase": "asks for your full name and date of birth, or asks you to confirm who you are, or asks for the patient's name and date of birth. NOT when asking only for a member ID or insurance card, NOT when asking which office or location, NOT when asking for a phone or mobile number, NOT when asking about an appointment day or time, NOT when reading your name and date of birth back to you for confirmation.",
       "response_type": "phrase",
       "response_value": "Maria Alvarez. My date of birth is June thirtieth, nineteen seventy-two."
     },
     {
       "match_type": "context",
-      "match_phrase": "reads your name and date of birth back to you and asks whether that is right, or asks you to confirm the name and date of birth they just repeated. NOT when first asking for your name and date of birth, NOT when asking for a phone or mobile number.",
+      "match_phrase": "reads your name and date of birth back to you and asks whether that is right, or asks you to confirm the name and date of birth they just repeated. NOT when first asking for your name and date of birth, NOT when asking for a phone or mobile number. NOT when asking for a ZIP code.",
       "response_type": "phrase",
       "response_value": "Yes, that's right."
     },
     {
       "match_type": "context",
-      "match_phrase": "offers to text a payment link, asks whether you want the payment link by text, or asks which mobile number should receive the payment link. NOT when offering an appointment confirmation, directions, or another unrelated text, NOT when they have not yet looked up a payment plan or financing.",
+      "match_phrase": "offers to text a payment link, asks whether you want the payment link by text, or asks which mobile number should receive the payment link. NOT when offering an appointment confirmation, directions, or another unrelated text, NOT when they have already said the payment link was sent.",
       "response_type": "phrase",
       "response_value": "Yes, please text the payment link to 212-555-0133."
     },
     {
       "match_type": "context",
-      "match_phrase": "thanks you, says goodbye, or offers a payment link before they have looked up a payment plan or financing. NOT when they have just confirmed a plan from their system.",
+      "match_phrase": "thanks you, says goodbye, or wraps up before they have looked up a payment plan or financing. NOT when they have said at any point that CareCredit or financing is available, NOT when asking how much the payment link should be for, NOT when asking for your ZIP code, mobile number, or identity.",
       "response_type": "phrase",
       "response_value": "I still need a way to spread this out. Please look up a payment plan before I go."
     },
     {
       "match_type": "context",
-      "match_phrase": "says the payment link was sent, or asks if you need anything else after sending the payment link, before Friday's consult has been moved. NOT when the new time is already booked.",
+      "match_phrase": "says the payment link was sent or texted to your phone. NOT when they have only quoted the balance, explained a charge, or mentioned financing, NOT when they have not yet said a payment link was sent, NOT when the new time is already booked.",
       "response_type": "phrase",
       "response_value": "Thanks. I also need Friday's Park Avenue consult moved to a later date, not cancelled. I'll take the first time you offer."
     },

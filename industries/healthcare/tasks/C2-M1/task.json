@@ -122,7 +122,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers one or more concrete appointment dates or times, or asks you to choose among concrete slots. NOT when asking for your name, date of birth, mobile number, or ZIP code.",
+      "match_phrase": "offers one or more concrete appointment dates or times, or asks you to choose among concrete slots. NOT when asking for your name, date of birth, mobile number, or ZIP code. NOT when they have said the visit is already moved or confirmed on the calendar.",
       "response_type": "phrase",
       "response_value": "Move my visit to the first time you offered and confirm it is on the calendar."
     },
@@ -140,7 +140,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "thanks you, says goodbye, or asks if you need anything else after listing openings but before confirming the visit was moved. NOT when they have just confirmed the appointment was rescheduled or moved.",
+      "match_phrase": "thanks you, says goodbye, or asks if you need anything else after listing openings but before confirming the visit was moved. NOT when they have just confirmed the appointment was rescheduled or moved. NOT when they have said at any point that the visit was moved or is on the calendar.",
       "response_type": "phrase",
       "response_value": "Please move me into that first time and confirm it is on the calendar before I go."
     },
@@ -155,6 +155,36 @@
       "match_phrase": "thanks you, says goodbye, or starts wrapping up after confirming the visit was moved but before they confirm they sent the appointment confirmation text. NOT when they have just said the confirmation was texted.",
       "response_type": "phrase",
       "response_value": "Please text me the appointment confirmation before I go."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks for your mobile or phone number, or which number to text. NOT when reading a number back to you.",
+      "response_type": "phrase",
+      "response_value": "Two, one, two, five, five, five, zero, one, zero, zero."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "reads back a mobile or phone number or ZIP code and asks whether it is correct. NOT when reading back an appointment time.",
+      "response_type": "phrase",
+      "response_value": "Yes, that's right."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks for your ZIP code. NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "One, zero, zero, one, six."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks whether the follow-up is medical or cosmetic. NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "It's a medical follow-up."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "says the visit was moved to a specific time AND says the confirmation text was sent. NOT when either is still pending.",
+      "response_type": "phrase",
+      "response_value": "Great, thank you. Goodbye."
     }
   ],
   "customer_name": "Jordan Lee",

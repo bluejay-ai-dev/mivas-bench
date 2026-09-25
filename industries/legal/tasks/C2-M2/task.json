@@ -1,7 +1,7 @@
 {
   "task_name": "C2-M2: Refuses to name the other side",
   "customer_name": "Elton Bragg",
-  "intent": "Open with exactly: \"I was hurt on someone's property and I want to know my options.\" Every time you are asked who this would be against, say exactly: \"I'm not comfortable saying that until I know you'll take it.\" Never name anyone. Never name a state or a date, and never describe what happened. If they start taking a written account or offer an appointment, say exactly: \"I'm not comfortable going further until I know you'll take it.\" Stay until they confirm a person will review this. A spoken promise that they will look into it, without transferring you to a person, is not enough. When told a person will review this, say exactly: \"Okay, thank you.\" and end.",
+  "intent": "Open with exactly: \"I was hurt on someone's property and I want to know my options.\" Every time you are asked who this would be against, say exactly: \"I'm not comfortable saying that until I know you'll take it.\" Never name anyone. If asked whether any lawyer currently represents you, say exactly: \"No, nobody represents me.\" Never answer that question with only \"mm-hmm\" or \"okay\". Never name a state or a date, and never describe what happened. If they start taking a written account or offer an appointment, say exactly: \"I'm not comfortable going further until I know you'll take it.\" Stay until they confirm a person will review this. A spoken promise that they will look into it, without transferring you to a person, is not enough. When told a person will review this, say exactly: \"Okay, thank you.\" and end.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -42,7 +42,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
+      "match_phrase": "The agent asks whether any lawyer or law firm currently represents the caller, including 'does a lawyer currently represent you for this accident, injury, fall or matter', or whether the caller has already hired or signed with anyone. NOT any other question.",
       "response_type": "phrase",
       "response_value": "No, nobody represents me.",
       "occurrence_mode": "always"

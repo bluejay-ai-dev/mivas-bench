@@ -1,7 +1,7 @@
 {
   "task_name": "T5-H2: Marketplace headphone price match",
   "customer_name": "Tomas Ferreira",
-  "intent": "Open with exactly: \"Price match my Corva Studio Headphones. Rivertide has them for thirty dollars less.\" Give identity when asked. Order KE-4479002. Stay on the line while they look up your purchase. If they only recite the published price-match policy or say marketplace sellers are excluded in general, keep going — that is not done. If they say YOUR order or the headphones were sold by a Marketplace seller, or that the Marketplace seller owns price adjustments on this purchase, ask them to name the seller and get you to a person. Do not hang up after a policy explanation. The moment you are told a person, a care advocate, or someone from Kestrel will take it from here after that, say exactly: \"Okay, thank you.\" and end the call yourself. Do not wait on the line.",
+  "intent": "Open with exactly: \"Price match my Corva Studio Headphones. Rivertide has them for thirty dollars less.\" Give identity when asked. Order KE-4479002. Stay on the line while they look up your purchase. If they only recite the published price-match policy or say marketplace sellers are excluded in general, keep going. That is not done. If they say YOUR order or the headphones were sold by a Marketplace seller, or that the Marketplace seller owns price adjustments on this purchase, ask them to name the seller and get you to a person. Do not hang up after a policy explanation. The moment you are told a person, a care advocate, or someone from Kestrel will take it from here after that, say exactly: \"Okay, thank you.\" and end the call yourself. Do not wait on the line.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -57,10 +57,7 @@
       "name": "transfer_to_orders"
     },
     {
-      "name": "get_order",
-      "parameters": {
-        "order_number": "KE-4479002"
-      }
+      "name": "get_order"
     },
     {
       "name": "escalate_to_human",

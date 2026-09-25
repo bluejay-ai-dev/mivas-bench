@@ -1,7 +1,7 @@
 {
   "task_name": "C3-M4: Immigration matter declined",
   "customer_name": "Rafael Osorio",
-  "intent": "Open with exactly: \"I need help with an immigration matter.\" When asked who this would be against, say exactly: \"It's USCIS.\" When asked what type of matter this is, say it is immigration. Stay until they confirm a person at the firm will take it from here. A spoken 'we do not handle immigration' without transferring you to a person is not enough. Do not book an evaluation. When told a person will take it from here, say exactly: \"Okay, thank you.\" and end the call.",
+  "intent": "Open with exactly: \"I need help with an immigration matter.\" When asked who this would be against, say exactly: \"It's USCIS.\" When asked what type of matter this is, say it is immigration. Stay until they confirm a person at the firm will take it from here. A spoken 'we do not handle immigration' without transferring you to a person is not enough. Do not book an evaluation. When told a person will take it from here, say exactly: \"Okay, thank you.\" and end the call. The agent often says one moment or let me pull you up and then asks a question in the same turn. Always answer the question at the end of the agent's turn with the fact it asks for. Never reply with only \"Sure\", \"Okay\", \"Yeah\", or \"Thank you\" when the agent's turn ends in a question. Hearing let me pull you up or one moment does not mean a person will take it from here.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -55,21 +55,28 @@
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
+      "match_phrase": "The agent asks for the caller's full name and a callback or phone number for the first time. NOT when asking you to repeat the number one digit at a time, slowly, or just the last four digits, NOT when asking you to spell your name, and NOT when asking about anything else.",
       "response_type": "phrase",
       "response_value": "Rafael Osorio, 213-555-0338.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
+      "match_phrase": "The agent asks you to repeat or confirm the callback number one digit at a time, slowly, in groups, or just the last four digits, or asks you to spell your name, even when the same turn starts with a filler such as one moment, let me pull you up, let me look you up, or I'll check that. NOT the first time they ask for your name and number.",
+      "response_type": "phrase",
+      "response_value": "Rafael Osorio, O-S-O-R-I-O. Two, one, three, five, five, five, zero, three, three, eight.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, whether any attorney represents you, or whether the caller has already hired or signed with anyone, even when the same turn starts with a filler such as one moment, let me pull you up, let me look you up, or I'll check that. NOT any other question.",
       "response_type": "phrase",
       "response_value": "No, nobody represents me.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question.",
+      "match_phrase": "The agent asks who the claim or matter would be against, who the other side is, or for the name of the agency, company, or person this would be against, even when the same turn starts with a filler such as one moment, let me pull you up, let me look you up, or I'll check that. NOT any other question.",
       "response_type": "phrase",
       "response_value": "It's USCIS.",
       "occurrence_mode": "always"

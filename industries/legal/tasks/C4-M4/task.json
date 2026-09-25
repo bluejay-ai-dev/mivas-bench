@@ -1,7 +1,7 @@
 {
   "task_name": "C4-M4: Auto accident intake with packet and records",
   "customer_name": "Chester Lang",
-  "intent": "Open with exactly: \"A van hit me and I went to the ER with a broken collarbone.\" Other side Pellham Transit. California. March twelfth, twenty twenty six. Stay until they confirm the intake is recorded, the Mercy General records release is on the file, and the packet has been emailed. A spoken \"we'll send that\" or \"we'll take care of the paperwork\" without those writes is not enough. If a records release is offered, accept it, including when they offer it in the same turn as the packet or a booking. When asked which doctor, hospital, clinic, or provider treated you, say exactly: \"Mercy General.\" If offered the packet, say exactly: \"Email is fine.\" Decline booking. Do not ask for a person. Once they confirm the intake, the records release, and the emailed packet are on the file, say exactly: \"Thank you, that's all I needed.\" and end the call.",
+  "intent": "Open with exactly: \"A van hit me and I went to the ER with a broken collarbone.\" Say nothing else in that first turn. The other side is Pellham Transit, it happened in California, and it happened on March twelfth, twenty twenty six; give each one only when asked. Stay until they confirm the intake is recorded, the Mercy General records release is on the file, and the packet has been emailed. A spoken \"we'll send that\" or \"we'll take care of the paperwork\" without those writes is not enough. If a records release is offered, accept it, including when they offer it in the same turn as the packet or a booking. When asked which doctor, hospital, clinic, or provider treated you, say exactly: \"Mercy General.\" If offered the packet, say exactly: \"Email is fine.\" Decline booking. Do not ask for a person. Once they confirm the intake, the records release, and the emailed packet are on the file, say exactly: \"Thank you, that's all I needed.\" and end the call. When the agent asks you a question, answer it in that same turn with the answer given here. Never answer a question with only okay, sure, mm-hmm, yeah or thanks, and never speak the agent's lines for it. Once you have said the closing line, end the call and say nothing more.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -86,7 +86,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
+      "match_phrase": "The agent asks whether a lawyer or law firm currently represents the caller, whether the caller has an attorney for this, or whether the caller has already hired or signed with anyone, including when the same turn also says they are looking the caller up or thanks them. NOT any other question.",
       "response_type": "phrase",
       "response_value": "No, nobody represents me.",
       "occurrence_mode": "always"
@@ -142,9 +142,23 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers an appointment or evaluation time. NOT when they are offering a medical records release or authorization in the same turn.",
+      "match_phrase": "The agent asks whether you want to book or schedule the free case evaluation, or offers appointment or evaluation times. NOT when they are offering a medical records release or authorization in the same turn.",
       "response_type": "phrase",
       "response_value": "Not yet, let me read the paperwork first.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks you to describe what happened, what kind of accident or matter it was, where it happened, what injuries or losses you had, or whether you got medical treatment. NOT when asking the date, the state alone, your name or number, or who the other side is.",
+      "response_type": "phrase",
+      "response_value": "A Pellham Transit van ran a stop sign and hit my car in Sacramento. I broke my collarbone and was treated in the ER at Mercy General.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks for your email address or how to spell it. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "It's chester dot lang at example dot com.",
       "occurrence_mode": "always"
     }
   ],

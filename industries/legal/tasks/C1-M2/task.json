@@ -1,7 +1,7 @@
 {
   "task_name": "C1-M2: Identification fails twice",
   "customer_name": "Curtis Beaumont",
-  "intent": "Open with exactly: \"I got hurt at work and I want to talk to a lawyer.\" Every time you are asked for your name and phone number, say exactly: \"Curtis Beaumont, five five five, one two.\" Never give ten digits. Never invent the missing digits. If asked about what happened, who this is against, which state, or when it happened, say exactly: \"I'd rather talk to a person about that.\" If they offer only a message or a callback instead of a person, say exactly: \"No, I need a person. I don't have a full number.\" Stay until they confirm a person will take the call because they could not get a usable callback number. A spoken 'we'll have someone call you' without sending you to a person is not enough. When told a person will take it from here, say exactly: \"Okay, thank you.\" and end the call.",
+  "intent": "Open with exactly: \"I got hurt at work and I want to talk to a lawyer.\" Every time you are asked for your name and phone number, including when asked to repeat it, finish it, give the rest of it, or give all ten digits, say exactly: \"Curtis Beaumont, five five five, one two.\" Never give ten digits. Never invent the missing digits. If asked about what happened, who this is against, which state, or when it happened, say exactly: \"Can we sort out my details first?\" If they offer only a message or a callback, say exactly: \"A callback won't work. I don't have a full number.\" Do not ask for a person yourself. Stay until they confirm a person will take the call because they could not get a usable callback number. When told a person will take it from here, say exactly: \"Okay, thank you.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -24,7 +24,7 @@
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
+      "match_phrase": "The agent asks for your name or phone number, asks you to repeat, confirm, or finish the number, asks for the rest of the number, the area code, or all ten digits, or says it did not catch the number. NOT when asking about anything else.",
       "response_type": "phrase",
       "response_value": "Curtis Beaumont, five five five, one two.",
       "occurrence_mode": "always"
@@ -40,35 +40,35 @@
       "match_type": "context",
       "match_phrase": "asks what happened, how you got hurt, about the work injury, or to describe the incident. NOT when asking for your name or phone number, who this is against, which state, or when it happened.",
       "response_type": "phrase",
-      "response_value": "I'd rather talk to a person about that.",
+      "response_value": "Can we sort out my details first?",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
       "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question.",
       "response_type": "phrase",
-      "response_value": "I'd rather talk to a person about that.",
+      "response_value": "Can we sort out my details first?",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
       "match_phrase": "The agent asks which state this happened in, or where it took place. NOT any other question.",
       "response_type": "phrase",
-      "response_value": "I'd rather talk to a person about that.",
+      "response_value": "Can we sort out my details first?",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
       "match_phrase": "The agent asks when the incident happened, or for the date of the accident, injury or event. NOT any other question.",
       "response_type": "phrase",
-      "response_value": "I'd rather talk to a person about that.",
+      "response_value": "Can we sort out my details first?",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent offers to take a message or says someone will call you back, without connecting you to a person. NOT when they are connecting you to a staff member or live person.",
+      "match_phrase": "The agent offers to take a message or says someone will call you back, without connecting you to a person. NOT when asking for your number again or for the rest of your number, and NOT when they are connecting you to a staff member or live person.",
       "response_type": "phrase",
-      "response_value": "No, I need a person. I don't have a full number.",
+      "response_value": "A callback won't work. I don't have a full number.",
       "occurrence_mode": "always"
     },
     {

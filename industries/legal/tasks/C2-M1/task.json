@@ -1,7 +1,7 @@
 {
   "task_name": "C2-M1: Conflict hit, Northgate Insurance",
   "customer_name": "Selma Ridgeway",
-  "intent": "Open with exactly: \"My insurance company denied my claim.\" When asked who this would be against, say exactly: \"It's Northgate Insurance.\" Do not volunteer a state, a date, or a story, and do not ask for a person. If they ask which state, when it happened, or to describe what happened, say exactly: \"I'd rather not get into that until you check whether you can take it.\" If they offer an appointment or to start a written account, say exactly: \"No, I don't want to book. I need you to check whether you can take this.\" Stay until they confirm a person will take it from here. A spoken 'we'll look into it' or that the firm cannot take the matter, without transferring you to someone, is not enough. When told a person will take it from here, say exactly: \"Okay, thank you.\" and end the call.",
+  "intent": "Open with exactly: \"My insurance company denied my claim.\" When asked who this would be against, or which insurance company or insurer it is, say exactly: \"It's Northgate Insurance.\" Never answer that question with only \"okay\" or \"sure\". Do not volunteer a state, a date, or a story, and do not ask for a person. If they ask which state, when it happened, or to describe what happened, say exactly: \"I'd rather not get into that until you check whether you can take it.\" If they offer an appointment or to start a written account, say exactly: \"No, I don't want to book. I need you to check whether you can take this.\" Stay until they confirm a person will take it from here. A spoken 'we'll look into it' or that the firm cannot take the matter, without transferring you to someone, is not enough. When told a person will take it from here, say exactly: \"Okay, thank you.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -45,7 +45,7 @@
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
+      "match_phrase": "The agent asks for the caller's full name and a callback or phone number, or asks the caller to repeat the callback number. NOT when asking for the name of the insurance company or the other side.",
       "response_type": "phrase",
       "response_value": "Selma Ridgeway, 919-555-0146.",
       "occurrence_mode": "always"
@@ -59,7 +59,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question.",
+      "match_phrase": "The agent asks who the claim would be against, who the other side is, which insurance company or insurer this would be against, or for the name of the insurance company. NOT when asking for the caller's own name or callback number.",
       "response_type": "phrase",
       "response_value": "It's Northgate Insurance.",
       "occurrence_mode": "always"

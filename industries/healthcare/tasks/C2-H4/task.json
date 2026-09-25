@@ -1,6 +1,6 @@
 {
   "task_name": "C2-H4: Cancel the August 20 visit then rebook a follow-up",
-  "intent": "You are an existing Straus patient. You have a follow-up on August 20, 2026 at Park Avenue and you need it cancelled because you are travelling, then you still want a new follow-up booked at Park Avenue for after you get back. Answer their identity questions once with your name and date of birth, confirm if they read it back, then go straight to the cancellation. After they explain a missed-visit fee, say you accept it and still want the August 20 visit cancelled. After it is cancelled, ask them to book a new follow-up at Park Avenue. Take the first appointment time they offer for that new visit. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first new time out loud, then thank them and end the call. Do not ask to join a waitlist. Do not ask to add insurance, for a callback, to speak to a person, a bill, a payment, the patient portal, a text, financing, or the street, floor, or suite. If they offer a waitlist instead of a new booking, refuse and ask them to book the first opening. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until the August 20 visit is cancelled and a new time is on the calendar. If they only list openings, say book the first one. Do not ask them to text you an appointment confirmation.",
+  "intent": "You are an existing Straus patient. You have a follow-up on August 20, 2026 at Park Avenue and you need it cancelled because you are travelling, then you still want a separate new follow-up booked at Park Avenue. Your trip is short: you are back on August twenty-third, so any opening from August twenty-fourth on is fine. Never name any other return date. Answer their identity questions once with your name and date of birth, confirm if they read it back, then go straight to the cancellation. After they explain a missed-visit fee, say you accept it and still want the August 20 visit cancelled. After it is cancelled, ask them to book a new follow-up at Park Avenue. Take the first appointment time they offer for that new visit. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first new time out loud, then thank them and end the call. Do not ask to join a waitlist. Do not ask to add insurance, for a callback, to speak to a person, a bill, a payment, the patient portal, a text, financing, or the street, floor, or suite. If they offer a waitlist instead of a new booking, refuse and ask them to book the first opening. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until the August 20 visit is cancelled and a new time is on the calendar. If they only list openings, say book the first one. Do not ask them to text you an appointment confirmation. Say cancel, never reschedule or move: if they say moving is free or offer to move the visit, say no, you want it cancelled and a new visit booked. Once they say August 20 is cancelled and the new time is booked, thank them and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -127,6 +127,12 @@
   "scripted_responses": [
     {
       "match_type": "context",
+      "match_phrase": "greets you and asks what you need, what they can help with, or why you are calling, before you have explained the reason for the call.",
+      "response_type": "phrase",
+      "response_value": "Hi, I'm an existing patient. I need to cancel my August 20 follow-up at Park Avenue, and then book a separate new follow-up there."
+    },
+    {
+      "match_type": "context",
       "match_phrase": "asks for your full name and date of birth, or asks you to confirm who you are, or asks for the patient's name and date of birth. NOT when asking only for a member ID or insurance card, NOT when asking which office or location, NOT when asking for a phone or mobile number, NOT when asking about an appointment day or time, NOT when reading your name and date of birth back to you for confirmation.",
       "response_type": "phrase",
       "response_value": "Jordan Lee. My date of birth is April twelfth, nineteen ninety."
@@ -145,9 +151,9 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers another appointment time, to reschedule, or to rebook INSTEAD of cancelling the August 20 visit. NOT after the August 20 visit is already cancelled, NOT when offering a new time after the cancel is done.",
+      "match_phrase": "offers to move or reschedule the August 20 visit, says moving it is free, or asks whether you want a different time or still want to cancel, while the August 20 visit is not cancelled yet. NOT after the August 20 visit is already cancelled, NOT when offering a new time after the cancel is done.",
       "response_type": "phrase",
-      "response_value": "Cancel the August 20 visit first. I accept the fee. Then book the first new follow-up time."
+      "response_value": "No, don't move it. Please cancel the August 20 visit; I accept the fee. Then book a new follow-up at Park Avenue."
     },
     {
       "match_type": "context",
@@ -178,6 +184,24 @@
       "match_phrase": "thanks you, says goodbye, or asks if you need anything else before the August 20 visit is cancelled AND a new follow-up time is confirmed on the calendar. NOT when both are complete.",
       "response_type": "phrase",
       "response_value": "I still need the August 20 visit cancelled and a new follow-up booked. Please finish both before I go."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks when you get back, what date you return, what dates work, or how far out to search for the new follow-up. NOT when asking for your name, date of birth, or ZIP.",
+      "response_type": "phrase",
+      "response_value": "I'm back on August twenty-third, so the first available follow-up at Park Avenue from August twenty-fourth on is fine."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks for your ZIP code. NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "One, zero, zero, one, six."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "says the August 20 visit is cancelled AND that a new follow-up is booked for a specific day and time. NOT when either is still pending.",
+      "response_type": "phrase",
+      "response_value": "Great, thank you. Goodbye."
     }
   ],
   "customer_name": "Jordan Lee",

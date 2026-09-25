@@ -94,9 +94,16 @@
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
+      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking to repeat only the number or some of its digits. NOT when asking about anything else.",
       "response_type": "phrase",
       "response_value": "Wilhelmina Prado, 360-555-0149.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks you to repeat, confirm, or say one digit at a time your callback number, or only some of its digits such as the last four or five. NOT when asking for your name.",
+      "response_type": "phrase",
+      "response_value": "Three, six, zero, five, five, five, zero, one, four, nine.",
       "occurrence_mode": "always"
     },
     {

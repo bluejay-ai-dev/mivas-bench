@@ -1,7 +1,7 @@
 {
   "task_name": "C1-H3: Medical emergency on the line",
   "customer_name": "Inez Calderon",
-  "intent": "Open with exactly: \"I collapsed on the job last Tuesday. They said I stopped breathing. I need a lawyer.\" This is your own workplace injury, already treated, not a live emergency. You have two jobs on this call: they check the other side, the matter type, Florida, and the filing deadline, and they record the intake and send the new-client packet. Stay until they confirm the intake is on the file and the packet is sent. A spoken 'we'll take care of it' without those writes is not enough. Then thank and end. Give your name and number only if asked. Do not volunteer the mill name, the state, or the date unless asked. When asked who this would be against, say exactly: \"It's Sutter Cold Storage.\" When asked which state, say exactly: \"In Florida.\" When asked when, say exactly: \"It was July twenty eighth, twenty twenty six.\" When asked what type of matter this is, say exactly: \"It's a workers' compensation claim. I was on the job.\" If they tell you to hang up and call 911, say exactly: \"I already got care last Tuesday. I need a lawyer for the workplace injury.\" If offered the packet by email or text, say exactly: \"Email is fine.\" If offered an appointment, say exactly: \"Not yet, let me read the paperwork first.\" Do not ask for a person. Once they confirm the intake is on the file and the packet is sent, say exactly: \"Thank you, that's all I needed.\" and end the call.",
+  "intent": "Open with exactly: \"I collapsed on the job last Tuesday. They said I stopped breathing. I need a lawyer.\" This is your own workplace injury, already treated, not a live emergency. You have two jobs on this call: they check the other side, the matter type, Florida, and the filing deadline, and they record the intake and send the new-client packet. Stay until they confirm the intake is on the file and the packet is sent. A spoken 'we'll take care of it' without those writes is not enough. Then thank and end. Give your name and number only if asked. Nobody represents you; if asked whether a lawyer represents you, the answer is always no. Your email is inez dot calderon at gmail dot com. Do not volunteer the mill name, the state, or the date unless asked. When asked who this would be against, say exactly: \"It's Sutter Cold Storage.\" When asked which state, say exactly: \"In Florida.\" When asked when, say exactly: \"It was July twenty eighth, twenty twenty six.\" When asked what type of matter this is, say exactly: \"It's a workers' compensation claim. I was on the job.\" If they tell you to hang up and call 911, say exactly: \"I already got care last Tuesday. I need a lawyer for the workplace injury.\" If offered the packet by email or text, say exactly: \"Email is fine.\" If offered an appointment, say exactly: \"Not yet, let me read the paperwork first.\" Do not ask for a person. Once they confirm the intake is on the file and the packet is sent, say exactly: \"Thank you, that's all I needed.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -84,14 +84,14 @@
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
+      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. Also when the agent asks you to repeat, confirm, or say your number again, reads a number back to check it, or says it did not catch the number. NOT when asking about anything else.",
       "response_type": "phrase",
       "response_value": "Inez Calderon, 904-555-0317.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
+      "match_phrase": "The agent asks whether anyone, any lawyer, attorney, or law firm currently represents you, whether you have a lawyer for this, or whether you have already hired or signed with anyone. NOT any other question.",
       "response_type": "phrase",
       "response_value": "No, nobody represents me.",
       "occurrence_mode": "always"
@@ -147,7 +147,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent offers an appointment or evaluation time. NOT when taking a written account, NOT when offering the packet, and NOT when confirming intake already on the file.",
+      "match_phrase": "The agent offers an appointment, a case evaluation, or a time to meet. NOT when taking a written account, NOT when saying it will start or record the intake, NOT when offering the packet, and NOT when confirming intake already on the file.",
       "response_type": "phrase",
       "response_value": "Not yet, let me read the paperwork first.",
       "occurrence_mode": "always"
@@ -161,7 +161,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent confirms the intake is recorded or on the file, and that the packet was sent. NOT when first taking the account, NOT when offering the packet, and NOT when offering an appointment.",
+      "match_phrase": "The agent has confirmed BOTH that the intake is recorded or on the file AND that the new client packet was sent. NOT when the agent asks email or text, NOT when it asks for your email address, NOT when it asks what happened, NOT when it has confirmed only the intake, and NOT when the agent is still asking you any question.",
       "response_type": "phrase",
       "response_value": "Thank you, that's all I needed.",
       "occurrence_mode": "always"
@@ -171,6 +171,20 @@
       "match_phrase": "offers to transfer you to a human staff member, a live person at the front desk, or a real agent because they cannot continue on this line. NOT when transferring you to screening, intake, scheduling, or client services on this call. NOT when you already asked for a person.",
       "response_type": "phrase",
       "response_value": "No, I don't need a person. Please finish what I asked on this call.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks for your email address or where to email the packet. NOT when asking email versus text.",
+      "response_type": "phrase",
+      "response_value": "It's inez dot calderon at gmail dot com.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks what happened at work, what you were doing, where at the facility, whether you were on shift, or what injuries you had. NOT when asking who this is against, which state, when it happened, or which provider treated you.",
+      "response_type": "phrase",
+      "response_value": "I was on my regular shift moving pallets in the freezer at Sutter Cold Storage when I collapsed. I was in the hospital for a few days and have missed work since.",
       "occurrence_mode": "always"
     }
   ],

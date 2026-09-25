@@ -1,7 +1,7 @@
 {
   "task_name": "T2-H4: Return the phone, label, then refund status",
   "customer_name": "Priya Raman",
-  "intent": "Open with exactly: \"Return the Solstice X5 I bought. Box is opened. I want the prepaid label.\" Do not ask about refund status until they have started the return and emailed the label. Give identity when asked. Order KE-4462884. Accept the $45 fee only after they read the fee back. Take the emailed label, then ask for the refund status on the return they just started. Hang up after the awaiting-return stage. Do not say you are done until they have started the return, sent the label, and told you the refund stage. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
+  "intent": "Open with exactly: \"Return the Solstice X5 I bought. Box is opened. I want the prepaid label.\" Do not ask about refund status before they have read the fee back. When you accept the fee, ask them to start the return, email the label, and then tell you where the refund stands. Give identity when asked. Order KE-4462884. Accept the $45 fee only after they read the fee back. Take the emailed label, then ask for the refund status on the return they just started. Hang up after the awaiting-return stage. Do not say you are done until they have started the return, sent the label, and told you the refund stage. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -59,14 +59,24 @@
     {
       "name": "check_return_eligibility",
       "parameters": {
-        "order_number": "KE-4462884",
+        "order_number": {
+          "any_of": [
+            "KE-4462884",
+            "KE4462884"
+          ]
+        },
         "opened": true
       }
     },
     {
       "name": "quote_return",
       "parameters": {
-        "order_number": "KE-4462884",
+        "order_number": {
+          "any_of": [
+            "KE-4462884",
+            "KE4462884"
+          ]
+        },
         "opened": true
       }
     },
@@ -90,9 +100,16 @@
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the caller's full name and a phone number, or for a name and the number on the account. NOT when asking for ZIP, card last four, or an order number alone.",
+      "match_phrase": "The agent asks for the caller's full name and a phone number, or for a name and the number on the account. NOT when asking for ZIP, card last four, or an order number alone. NOT when they say they missed or did not catch the phone number, and NOT when they ask for it again one digit at a time.",
       "response_type": "phrase",
       "response_value": "Priya Raman, 541-555-0119.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent says it missed or did not catch the phone number, or asks you to repeat the phone number slowly or one digit at a time. NOT when asking for the name alone, ZIP, card last four, or an order number.",
+      "response_type": "phrase",
+      "response_value": "Five four one, five five five, zero one one nine.",
       "occurrence_mode": "always"
     },
     {
@@ -118,7 +135,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "has already started the return, emailed or sent the prepaid label, and told you the refund stage or that it is waiting for the item back, and is now offering a second unrelated request, a confirmation text, or asking if you need anything else. NOT during identity, NOT while they are still collecting facts or looking something up, NOT before the return is started, NOT before they have said the label was emailed or sent, and NOT before they have told you where that refund stands.",
+      "match_phrase": "has already started the return, emailed or sent the prepaid label, and told you the refund stage or that it is waiting for the item back, and is now offering a second unrelated request, a confirmation text, or asking if you need anything else. NOT during identity, NOT while they are still collecting facts or looking something up, NOT before the return is started, NOT before they have said the label was emailed or sent, and NOT before they have told you where that refund stands. Saying the refund amount or the card it goes back to is NOT the refund stage; they must name the stage, such as awaiting return or waiting for the item back.",
       "response_type": "phrase",
       "response_value": "That's all I needed. Thank you.",
       "occurrence_mode": "always"
@@ -127,19 +144,19 @@
       "match_type": "context",
       "match_phrase": "has already read back the $45 restocking fee and the refund path, and is asking whether to start the return. NOT during identity, NOT before they have named the forty-five dollar fee, and NOT when asking any other yes-or-no.",
       "response_type": "phrase",
-      "response_value": "Yes, I accept the forty-five dollar fee. Start it.",
+      "response_value": "Yes, I accept the forty-five dollar fee. Start it, email me the prepaid label, and then tell me where the refund stands.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
       "match_phrase": "asks whether you want a prepaid label emailed. NOT when asking identity.",
       "response_type": "phrase",
-      "response_value": "Yes, email me the prepaid return label.",
+      "response_value": "Yes, email me the prepaid return label, and then tell me where the refund stands.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "has already started the return and has said the prepaid label was emailed or sent, and is now asking if you need anything else, confirming the label, or wrapping up. NOT before the return is started, NOT before they have said the label was emailed or sent, and NOT after they have already told you the refund stage.",
+      "match_phrase": "has already started the return and has said the prepaid label was emailed or sent, and is now asking if you need anything else, confirming the label, or wrapping up. NOT before the return is started, NOT before they have said the label was emailed or sent, and NOT after they have already told you the refund stage. Saying the refund amount or the card it goes back to is not the refund stage, so this still applies after that.",
       "response_type": "phrase",
       "response_value": "Where does that refund stand now?",
       "occurrence_mode": "always"

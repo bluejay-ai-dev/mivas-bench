@@ -42,10 +42,7 @@
   ],
   "exp_tool_calls": [
     {
-      "name": "transfer_to_identity",
-      "parameters": {
-        "next_intent": "coverage"
-      }
+      "name": "transfer_to_identity"
     },
     {
       "name": "verify_identity",
@@ -146,6 +143,30 @@
   "scripted_responses": [
     {
       "match_type": "context",
+      "match_phrase": "greets you and asks what you need, what they can help with, or why you are calling, before you have explained the reason for the call.",
+      "response_type": "phrase",
+      "response_value": "Hi, I'm an existing patient. I'd like to book an additional follow-up at Windermere."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks whether you are a new or existing patient, or whether you have been seen at Straus before. NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "I'm an existing patient."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks what the new follow-up is for, the reason for the visit, or whether it is a skin, medical, cosmetic, or allergy visit. NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "It's a routine medical follow-up for my eczema. Please leave September fifteenth on the books."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "reads your Oscar member ID and date of birth back for the eligibility check and asks whether they are right. NOT when reading back only your name and date of birth for identity.",
+      "response_type": "phrase",
+      "response_value": "Yes, that's right. Please run the eligibility for a visit on August twenty-fourth."
+    },
+    {
+      "match_type": "context",
       "match_phrase": "asks for your full name and date of birth, or asks you to confirm who you are, or asks for the patient's name and date of birth. NOT when asking only for a member ID or insurance card, NOT when asking which office or location, NOT when asking for a phone or mobile number, NOT when asking about an appointment day or time, NOT when reading your name and date of birth back to you for confirmation.",
       "response_type": "phrase",
       "response_value": "Alice Romano. My date of birth is September eighth, nineteen ninety-five."
@@ -200,7 +221,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before a time has been confirmed on the calendar. NOT when they have just confirmed a booked time.",
+      "match_phrase": "says goodbye or asks if you need anything else while no new follow-up time has yet been said to be booked. NOT once they have said at any point that a new time is booked, NOT when they only say thanks, okay, or one moment, NOT when they are asking you a question.",
       "response_type": "phrase",
       "response_value": "I still need that time booked. Please confirm it is on the calendar before I go."
     },

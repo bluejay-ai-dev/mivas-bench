@@ -1,7 +1,7 @@
 {
   "task_name": "C1-E1-SIG: Message for Daniel Okonkwo",
   "customer_name": "Renee Whitmore",
-  "intent": "Open with exactly: \"I need to leave a message for Daniel Okonkwo.\" You are calling about forms Daniel mailed you. You do not want a new matter or an appointment. When asked what the message is, say exactly: \"Tell him the forms he mailed arrived and I have a question about page four.\" If asked about a new matter, say exactly: \"No, just the message please.\" Once finished, say exactly: \"Thank you, that's all I needed.\" and end the call.",
+  "intent": "Open with exactly: \"I need to leave a message for Daniel Okonkwo.\" You are calling about forms Daniel mailed you. You do not want a new matter or an appointment. When asked what the message is, say exactly: \"Tell him the forms he mailed arrived and I have a question about page four.\" If asked about a new matter, say exactly: \"No, just the message please.\" If asked to repeat your number or to spell Daniel's last name, answer it; never close while the agent is still asking you something. Only once they confirm the message is taken or passed along, say exactly: \"Thank you, that's all I needed.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -27,7 +27,7 @@
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
+      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. Also when the agent asks you to repeat, confirm, or say your number again, reads a number back to check it, or says it did not catch the number. NOT when asking about anything else.",
       "response_type": "phrase",
       "response_value": "Renee Whitmore, 214-555-0163.",
       "occurrence_mode": "always"
@@ -37,6 +37,27 @@
       "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
       "response_type": "phrase",
       "response_value": "No, nobody represents me.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks what the message is, what to pass along to Daniel, or what you want written down. NOT when asking for your name or number, and NOT when asking for a spelling.",
+      "response_type": "phrase",
+      "response_value": "Tell him the forms he mailed arrived and I have a question about page four.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks you to spell Daniel's last name or the name of the person the message is for, or asks for a word for each letter. NOT when asking for your own name or number.",
+      "response_type": "phrase",
+      "response_value": "Okonkwo. O as in Oscar, K as in Kilo, O as in Oscar, N as in November, K as in Kilo, W as in Whiskey, O as in Oscar.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent confirms the message for Daniel was taken, passed along, or is on the file, or asks whether there is anything else after confirming it. NOT when the agent is still asking for your number, a spelling, or the message, and NOT when the agent only says one moment or that it is passing it on.",
+      "response_type": "phrase",
+      "response_value": "Thank you, that's all I needed.",
       "occurrence_mode": "always"
     }
   ],

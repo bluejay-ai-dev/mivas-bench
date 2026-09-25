@@ -72,14 +72,14 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
+      "match_phrase": "The agent asks whether anyone, any lawyer, attorney, or law firm currently represents you, whether you have a lawyer for this, or whether you have already hired or signed with anyone. NOT any other question.",
       "response_type": "phrase",
       "response_value": "No, nobody represents me.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question.",
+      "match_phrase": "The agent asks who the claim would be against, who the other side is, who this would be against, or for the name of the landlord, property owner, property manager, or management company. NOT any other question.",
       "response_type": "phrase",
       "response_value": "It's Harlow Properties.",
       "occurrence_mode": "always"
@@ -128,9 +128,16 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "confirms your contact details are recorded or on the file, and that a person will review the conflict. NOT when they only offer a person without confirming the file, and NOT when asking who this is against.",
+      "match_phrase": "After asking which state and when it happened, the agent confirms your contact details or record are saved or on the file, and that a person will review the conflict. NOT when they only offer a person without confirming the file, NOT when asking who this is against, and NOT when the agent is still asking you a question.",
       "response_type": "phrase",
       "response_value": "Okay, thank you.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks both which state it happened in and when it happened, in one question. NOT when asking only one of them.",
+      "response_type": "phrase",
+      "response_value": "In CA. It was January eighteenth, twenty twenty six.",
       "occurrence_mode": "always"
     }
   ],

@@ -1,7 +1,7 @@
 {
   "task_name": "T4-M1: Plus status and renewal date",
   "customer_name": "Selina Cortez",
-  "intent": "Open with exactly: \"What membership do I have, and when does it renew?\" Give identity when asked. You are checking Plus status, not a charge from an email. Do not cancel. Do not upgrade. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
+  "intent": "Open with exactly: \"What membership do I have, and when does it renew?\" Give identity when asked. You are checking Plus status, not a charge from an email. Do not cancel. Do not upgrade. Do not say the closing line while they are still verifying you or looking it up. Once they have told you both your membership tier and the renewal date, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
   "traits": [
     {
       "trait_name": "full_name",

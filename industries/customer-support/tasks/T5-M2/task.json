@@ -1,7 +1,7 @@
 {
   "task_name": "T5-M2: Price match at an unqualified retailer",
   "customer_name": "Felix Moreau",
-  "intent": "Open with exactly: \"Price match the Aurelian Halo soundbar. Grimwald's has it for seventy dollars less.\" Give identity when asked. Order KE-4495108, the Halo soundbar. If they ask for Grimwald's price in dollars, repeat that it is seventy dollars less than you paid. Do not invent a dollar amount. If they only recite the published price-match policy, that is not done — stay on the line. Stay until they refuse Grimwald's and read the qualified-competitor list. Do not name a second retailer. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
+  "intent": "Open with exactly: \"Price match the Aurelian Halo soundbar. Grimwald's has it for seventy dollars less.\" Give identity when asked. Order KE-4495108, the Halo soundbar. If they ask for Grimwald's price in dollars, repeat that it is seventy dollars less than you paid. Do not invent a dollar amount. If they only recite the published price-match policy, that is not done. Stay on the line. Stay until they refuse Grimwald's and read the qualified-competitor list. Do not name a second retailer. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -91,9 +91,16 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for Grimwald's actual price in dollars, the competitor price as a number, or what you paid versus their price, not just the difference. NOT when asking for name, phone, ZIP, card last four, or an order number.",
+      "match_phrase": "The agent asks for Grimwald's actual price in dollars, the competitor price as a number, or what you paid versus their price, not just the difference. NOT when asking for name, phone, ZIP, card last four, or an order number. NOT when asking whether it is new, identical, or in stock.",
       "response_type": "phrase",
       "response_value": "It's seventy dollars less than what I paid.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether Grimwald's has the identical new soundbar in stock, or asks you to read the listing's availability. NOT when asking for the dollar price, and NOT identity questions.",
+      "response_type": "phrase",
+      "response_value": "Yes, it's the identical new soundbar, in stock at Grimwald's.",
       "occurrence_mode": "always"
     },
     {

@@ -1,7 +1,7 @@
 {
   "task_name": "T1-M1: Where is the unshipped speaker",
   "customer_name": "Selina Cortez",
-  "intent": "Open with exactly: \"I ordered a Corva Mini Bluetooth speaker and I want to know if it has shipped yet.\" Give your name and phone when asked. Give the ZIP and card last four when asked. The order is KE-4498870. You only want the current status. Do not cancel it. Do not ask for a tracking guess. Hang up once they tell you it is still processing. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
+  "intent": "Open with exactly: \"I ordered a Corva Mini Bluetooth speaker and I want to know if it has shipped yet.\" Give your name and phone (Selina Cortez, 541-555-0171) as soon as they ask, and the ZIP and card last four (ZIP 97035, card ending 1156) as soon as they ask. Never answer a request for a detail with just \"okay\" or \"sure\". If they ask you to repeat the phone number, say it slowly digit by digit. The order is KE-4498870. You only want the current status. Do not cancel it. Do not ask for a tracking guess. Hang up once they tell you it is still processing. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -76,6 +76,13 @@
     },
     {
       "match_type": "context",
+      "match_phrase": "asks you to repeat or confirm the phone number, says they did not catch it, or asks for the rest of the number. NOT when asking for ZIP, card last four, or an order number.",
+      "response_type": "phrase",
+      "response_value": "Sure. Five four one, five five five, zero one seven one.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
       "match_phrase": "The agent asks for the ZIP code on the order and the last four digits of the card, together or in either order. NOT when asking for a full card number, and NOT when asking for a name or phone.",
       "response_type": "phrase",
       "response_value": "ZIP 97035, card ending 1156.",
@@ -97,7 +104,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "has already finished the original request you called about, confirmed that outcome out loud, and is now offering a second unrelated request, a confirmation text, or asking if you need anything else. NOT during identity, NOT while they are still collecting facts or looking something up, and NOT before they have confirmed the original request is done.",
+      "match_phrase": "has already finished the original request you called about, confirmed that outcome out loud, and is now offering a second unrelated request, a confirmation text, or asking if you need anything else. NOT during identity or while they are asking you to repeat a detail, NOT while they are still collecting facts or looking something up, and NOT before they have confirmed the original request is done.",
       "response_type": "phrase",
       "response_value": "That's all I needed. Thank you.",
       "occurrence_mode": "always"
