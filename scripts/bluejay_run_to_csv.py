@@ -1389,7 +1389,7 @@ def collect_from_listing(
     for detail in details:
         result_id = str(detail.get("id") or "")
         classified = verify_run.classify_detail(detail, result_id)
-        dh = detail.get("digital_human") or dh_by_id.get(str(detail.get("digital_human_id"))) or {}
+        dh = verify_task_run.result_digital_human(detail, dh_by_id)
         case_key = verify_task_run.case_key_from_dh(dh) if dh else None
         if not case_key and pg_by_id.get(result_id, {}).get("case_key"):
             case_key = str(pg_by_id[result_id]["case_key"])

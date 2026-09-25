@@ -950,6 +950,31 @@ def _fetch_result(result_id: str) -> dict[str, Any]:
     return body.get("simulation_result") or body
 
 
+_DH_CACHE: dict[str, dict[str, Any]] = {}
+
+
+def result_digital_human(detail: dict[str, Any], dh_by_id: dict[str, dict[str, Any]]) -> dict[str, Any]:
+    """The result's digital human. Results no longer embed it and the bulk
+    digital-humans-by-simulation endpoint 500s intermittently, so fall back to
+    GET digital-human/{id}, cached (a run has at most 72 distinct DHs)."""
+    if detail.get("digital_human"):
+        return detail["digital_human"]
+    dh_id = str(detail.get("digital_human_id") or "")
+    if not dh_id:
+        return {}
+    if dh_id in dh_by_id:
+        return dh_by_id[dh_id]
+    if dh_id not in _DH_CACHE:
+        try:
+            body = _get_with_retry(f"digital-human/{dh_id}")
+        except SystemExit:
+            body = {}
+        dh = body.get("digital_human", body) if isinstance(body, dict) else {}
+        dh = dh.get("digital_human", dh) if isinstance(dh, dict) else {}
+        _DH_CACHE[dh_id] = dh if isinstance(dh, dict) else {}
+    return _DH_CACHE[dh_id]
+
+
 def _digital_humans_by_sim(sim_id: str) -> dict[str, dict[str, Any]]:
     # sim 30915 (customer-support) 500s this list endpoint; each result still
     # carries digital_human, so scoring can continue without the bulk lookup.
@@ -1068,7 +1093,7 @@ def collect_scored_results(
             continue
         detail = _fetch_result(result_id)
         classified = verify_run.classify_detail(detail, result_id)
-        dh = detail.get("digital_human") or dh_by_id.get(str(detail.get("digital_human_id"))) or {}
+        dh = result_digital_human(detail, dh_by_id)
         case_key = case_key_from_dh(dh)
         task = load_task(industry, case_key) if case_key else None
 
