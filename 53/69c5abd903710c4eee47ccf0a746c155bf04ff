@@ -1,0 +1,31 @@
+voice-agent-harnesses/gemini/README.md
+  s_b8b1f16f08cab5::t_881b2646d2ff48 10,19-26
+voice-agent-harnesses/gemini/harness.py
+  s_b8b1f16f08cab5::t_039b633bd3129c 377-385
+.agents/skills/mivas-run/scripts/score_rubric.py
+  s_b8b1f16f08cab5::t_14fd4deeaf0d70 231-232
+.agents/skills/mivas-run/HARNESS.md
+  s_b8b1f16f08cab5::t_9e0d67e59c934e 16
+voice-agent-harnesses/gemini/report.py
+  s_b8b1f16f08cab5::t_aa2bd6a90e443d 13-14,21,29,49-50,52,56-57,84-93,105-110,112,114-144
+README.md
+  s_b8b1f16f08cab5::t_9c8a4fcf08e87a 252
+voice-agent-harnesses/gemini/3.8-live/agent.py
+  s_b8b1f16f08cab5::t_5256d3946fd70d 3-13,18,34,39,46-48,59-85,88-118,120,122,126-127,135-137,145,162
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "5369c5abd903710c4eee47ccf0a746c155bf04ff",
+  "prompts": {},
+  "sessions": {
+    "s_b8b1f16f08cab5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "94092b8e-9afd-43dd-b9b6-e5158ad4c7f3",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
