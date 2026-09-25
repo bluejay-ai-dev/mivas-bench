@@ -197,37 +197,8 @@ def test_append_chunks_respect_cap() -> None:
 
 
 
-def test_speak_first_is_resent_only_while_the_model_stays_silent(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(live_mod, "GREETING_RETRY_S", 0.05)
-    monkeypatch.setattr(live_mod, "GREETING_RETRIES", 2)
-
-    async def silent() -> None:
-        live, ws = _session([])
-        live._opened_mono = __import__("time").monotonic()
-        await live.speak_first()
-        await asyncio.sleep(0.3)
-        appends = ws.of("session.instructions.append")
-        # first greeting + two retries, each a single chunk
-        assert len(appends) == 3 and all(e["delegation_id"] is None for e in appends)
-        assert "If you already greeted them, say nothing" in appends[-1]["content"]
-
-    async def spoke() -> None:
-        live, ws = _session([])
-        live._opened_mono = __import__("time").monotonic()
-        await live.speak_first()
-        loud = (b"\x10\x27" * 160)  # 0x2710 = 10000 > AUDIBLE_PEAK
-        import base64
-        await live._handle({"type": "session.output_audio.delta", "delta": base64.b64encode(loud).decode()})
-        await asyncio.sleep(0.2)
-        assert len(ws.of("session.instructions.append")) == 1, "no retry once the model has spoken"
-
-    asyncio.run(silent())
-    asyncio.run(spoke())
-
-
 def test_silence_is_primed_only_until_the_first_caller_frame(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(live_mod, "PRIME_SILENCE_S", 1.0)
-    monkeypatch.setattr(live_mod, "GREETING_RETRIES", 0)
 
     async def go() -> None:
         live, ws = _session([])

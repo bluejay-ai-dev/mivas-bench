@@ -123,18 +123,15 @@ caller leg's first frame (at most `GPT_LIVE_PRIME_SILENCE_S`, 5 s), which is wha
 line would carry between connect and the first word. Silence only, never synthetic
 speech, and nothing after the first real frame.
 
-## Speak-first retry
+## Late greetings are the model's
 
-The speak-first append is not always acted on. Measured 2026-09-25 over 18 smoke calls:
-15 greeted 1.2-2.2 s after `session.started`; 3 stayed silent for 24-66 s and only
-greeted after the caller spoke (the provider's own transcript timeline places those
-greetings at 28-63 s, so the model was silent, not the pipe). `_greeting_watch` re-sends
-the speak-first instruction, worded so an already-spoken greeting is not repeated, when
-no audible output has arrived `GPT_LIVE_GREETING_RETRY_S` (4 s) after `session.started`,
-up to `GPT_LIVE_GREETING_RETRIES` (2) times. `first agent audio … after session.started`
-and the CHIRP adapter's `agent speech start +…ms` / `first caller audio +…ms` lines are
-the wall-clock evidence per call; Bluejay's `time_to_first_agent_utterance` adds its own
-dial and ALB time on top.
+Across 72 smoke calls on 2026-09-25, 6 had no greeting for 24-67 s and the model only
+spoke after the caller did; the provider's own transcript timeline places those
+greetings at 28-63 s, so the model was silent, not the pipe. Re-sending the speak-first
+append 6 s and 12 s after the first caller frame was tried on 3 of them and moved
+nothing, so there is no retry. `first agent audio … after session.started` and the CHIRP
+adapter's `agent speech start +…ms` / `first caller audio +…ms` lines are the wall-clock
+evidence per call; Bluejay's `time_to_first_agent_utterance` adds its own dial time.
 
 Log lines carry `[<simulation_result_id>]` so overlapping calls on one pod can be told
 apart (`kubectl logs deploy/mivas-openai-gpt-live-1-sol-low-legal | grep '\[1029726\]'`).
@@ -159,8 +156,7 @@ Env: `OPENAI_API_KEY`, `CHIRP_USER`/`CHIRP_PASS`, `CHIRP_PORT`, `TOOL_SERVER_URL
 `GPT_LIVE_BACKEND_MODEL` (default `gpt-5.6-terra`), `GPT_LIVE_VOICE` (default `gleam`),
 `GPT_LIVE_SAMPLE_RATE` (default `16000`),
 `GPT_LIVE_END_CALL_QUIET_S` / `GPT_LIVE_END_CALL_GRACE_S` / `GPT_LIVE_END_CALL_MAX_S`,
-`GPT_LIVE_REASONING_EFFORT` (unset = omitted), `GPT_LIVE_GREETING_RETRY_S` / `GPT_LIVE_GREETING_RETRIES`,
-`GPT_LIVE_PRIME_SILENCE_S`,
+`GPT_LIVE_REASONING_EFFORT` (unset = omitted), `GPT_LIVE_PRIME_SILENCE_S`,
 `GPT_LIVE_LOG_LEVEL` (`DEBUG` logs every non-audio event both ways).
 
 ## Pricing

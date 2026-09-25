@@ -61,14 +61,6 @@ END_CALL_MAX_S = float(os.environ.get("GPT_LIVE_END_CALL_MAX_S", "20"))
 # ...and if no farewell audio starts at all within this window, hang up anyway.
 END_CALL_GRACE_S = float(os.environ.get("GPT_LIVE_END_CALL_GRACE_S", "4"))
 CLOSED_TIMEOUT_S = float(os.environ.get("GPT_LIVE_CLOSED_TIMEOUT_S", "6"))
-# speak-first retry. Measured 2026-09-25 over 36 smoke calls: the greeting starts
-# 0.3-1.8 s after the first caller audio frame (which Bluejay sends 2.1-3.6 s after the
-# upgrade), and in 5 calls the model stayed silent for 24-66 s until the caller spoke.
-# The speak-first append is sent again when no audible output has arrived
-# GREETING_RETRY_S after the first caller audio (or after session.started when no
-# caller audio ever arrives), at most GREETING_RETRIES times.
-GREETING_RETRY_S = float(os.environ.get("GPT_LIVE_GREETING_RETRY_S", "6"))
-GREETING_RETRIES = int(os.environ.get("GPT_LIVE_GREETING_RETRIES", "2"))
 # The provider timeline, which the speak-first append lands on, only advances with input
 # audio, and Bluejay sends its first caller frame 2.1-3.6 s after the upgrade (measured
 # 2026-09-25), so the greeting waited on Bluejay. A phone line carries silence from the
@@ -253,8 +245,6 @@ class LiveSession:
         await self._append_all(self.pack.speak_first_prompt())
         if PRIME_SILENCE_S > 0:
             self._spawn(self._prime_silence(), name="gpt-live-prime")
-        if GREETING_RETRIES > 0 and GREETING_RETRY_S > 0:
-            self._spawn(self._greeting_watch(), name="gpt-live-greeting")
 
     async def _prime_silence(self) -> None:
         """Keep the input clock running until the caller leg's first frame (see PRIME_SILENCE_S)."""
@@ -273,26 +263,6 @@ class LiveSession:
                 {"type": "session.instructions.append", "delegation_id": None, "content": chunk},
                 ack="session.instructions.appended",
             )
-
-    async def _greeting_watch(self) -> None:
-        """Re-send the speak-first instruction while the model stays silent (see GREETING_RETRY_S)."""
-        for attempt in range(1, GREETING_RETRIES + 1):
-            while True:
-                base = self._first_input_mono or self._opened_mono
-                wait = base + GREETING_RETRY_S * attempt - time.monotonic()
-                if wait <= 0:
-                    break
-                await asyncio.sleep(min(wait, 0.25))
-            if self._first_audible_mono or self._closed.is_set():
-                return
-            log.warning(
-                "no greeting audio %.0fs after session.started (%.0fs after first caller audio); "
-                "re-sending speak-first (%d/%d)",
-                time.monotonic() - self._opened_mono,
-                (time.monotonic() - self._first_input_mono) if self._first_input_mono else -1,
-                attempt, GREETING_RETRIES,
-            )
-            await self._append_all(self.pack.speak_first_retry_prompt())
 
     async def send_audio(self, pcm: bytes) -> None:
         if not pcm or self._closed.is_set():
