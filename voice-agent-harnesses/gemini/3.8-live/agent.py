@@ -115,9 +115,16 @@ if EXTENDED:
                 return
 
     def _send_and_watch(self: Any, event: Any) -> None:
-        _orig_send(self, event)
         if isinstance(event, genai_types.LiveClientToolResponse) and event.function_responses:
+            # the plugin declares 3.8 tools NON_BLOCKING and then marks a result
+            # that needs no reply SILENT; extended closes the socket on any
+            # scheduling value (1007), which ended 9 of 720 k=5 calls mid-call
+            for fr in event.function_responses:
+                fr.scheduling = None
+            _orig_send(self, event)
             asyncio.ensure_future(_force_turn_when_idle(self, asyncio.get_event_loop().time()))
+            return
+        _orig_send(self, event)
 
     _lk_rt.RealtimeSession._send_client_event = _send_and_watch
 
