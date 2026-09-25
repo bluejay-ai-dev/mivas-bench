@@ -89,6 +89,15 @@ def list_run_results(run_id: str) -> tuple[dict[str, Any], list[dict[str, Any]]]
     body = _req(f"retrieve-simulation-results/{run_id}")
     run = body.get("simulation_run") or {}
     results = body.get("simulation_results") or body.get("results") or []
+    # capped at 100 rows with no page metadata; a k=5 run is 360
+    while results and len(results) % 100 == 0:
+        page = _req(f"retrieve-simulation-results/{run_id}?offset={len(results)}")
+        more = page.get("simulation_results") or page.get("results") or []
+        seen = {str(r.get("id")) for r in results}
+        fresh = [r for r in more if str(r.get("id")) not in seen]
+        if not fresh:
+            break
+        results += fresh
     if not results:
         raise SystemExit(f"no simulation results for run {run_id}")
     return run, results
