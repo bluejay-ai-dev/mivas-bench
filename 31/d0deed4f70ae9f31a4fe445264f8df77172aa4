@@ -1,0 +1,41 @@
+.agents/skills/mivas-run/HARNESS.md
+  s_4ea68a93215613::t_bda2220c8245d6 16
+.agents/skills/mivas-run/scripts/bluejay.py
+  s_4ea68a93215613::t_9e2c440e2576b0 459
+.agents/skills/mivas-run/scripts/score_rubric.py
+  s_4ea68a93215613::t_acad4e3618ea85 116-123,145,236-237,241,244
+scripts/bluejay_run_to_csv.py
+  s_4ea68a93215613::t_088cfe3e85de47 1374
+verifiers/verify_run.py
+  s_4ea68a93215613::t_00949a0d7c54c3 65-70,72-84
+verifiers/verify_task_run.py
+  s_4ea68a93215613::t_77b79fa215e17d 1046
+voice-agent-harnesses/openai/README.md
+  s_4ea68a93215613::t_0850da15c3afda 9
+voice-agent-harnesses/openai/gpt-live-1/README.md
+  s_4ea68a93215613::t_c45d49bd734c69 16-31,109-129,151
+voice-agent-harnesses/openai/gpt-live-1/adapters/chirp.py
+  s_4ea68a93215613::t_1f20eb34246a31 36,42,70-81,87,119-128,171-172,207-210,230,232-233
+voice-agent-harnesses/openai/gpt-live-1/live.py
+  s_4ea68a93215613::t_ae09106964fee2 64-69,179-180,231,244-249,255-266,416-419
+voice-agent-harnesses/openai/gpt-live-1/pack.py
+  s_4ea68a93215613::t_ef81db7967e31b 191-202
+voice-agent-harnesses/openai/gpt-live-1/test_gpt_live.py
+  s_4ea68a93215613::t_a51937ff71f658 198-223
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "31d0deed4f70ae9f31a4fe445264f8df77172aa4",
+  "prompts": {},
+  "sessions": {
+    "s_4ea68a93215613": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8eb3d720-2035-4a81-aa92-006569f46f3c",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
