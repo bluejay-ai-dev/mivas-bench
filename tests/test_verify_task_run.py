@@ -871,3 +871,12 @@ def test_legal_c4_still_requires_in_order_hops() -> None:
     out = vtr.verify_result(result, task, None, industry="legal")
     assert out["handoff"]["passed"] is False
     assert out["handoff"]["verdict"] == "incomplete"
+
+
+def test_cs_state_normalizes_scam_amount_payment_and_ignores_issue() -> None:
+    canon = lambda row: vtr._canon_row(row, "customer-support")
+    assert canon({"amount_text": "$399.99"}) == canon({"amount_text": "399.99"})
+    assert canon({"amount_text": "399.99"}) != canon({"amount_text": "39.99"})
+    assert canon({"payment_requested": "Not stated"}) == canon({"payment_requested": "none"})
+    assert canon({"payment_requested": "Gift Cards"}) == canon({"payment_requested": "gift card"})
+    assert canon({"issue": "Aurora Pro will not charge"}) == canon({"issue": "will not charge"})

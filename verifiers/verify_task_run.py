@@ -298,6 +298,26 @@ def _minute_datetime(value: Any) -> Any:
     return parsed.strftime("%Y-%m-%dT%H:%M")
 
 
+def _canon_amount(value: str) -> str:
+    """'$399.99' / '399.99 dollars' / '399.99' are one amount the caller stated."""
+    m = re.search(r"\d[\d,]*(?:\.\d+)?", value)
+    if not m:
+        return value.strip().casefold()
+    return f"{float(m.group(0).replace(',', '')):.2f}"
+
+
+_NO_PAYMENT = frozenset({"", "none", "not stated", "not requested", "no", "n/a", "na", "nothing"})
+
+
+def _canon_payment(value: str) -> str:
+    """Payment method the scammer asked for: 'none' / 'not stated' / '' mean none;
+    'gift card' and 'gift cards' are the same method."""
+    text = value.strip().casefold()
+    if text in _NO_PAYMENT:
+        return "none"
+    return re.sub(r"s\b", "", text)
+
+
 def _canon_row(row: Any, industry: str | None = None) -> Any:
     if not isinstance(row, dict):
         return row
@@ -320,6 +340,10 @@ def _canon_row(row: Any, industry: str | None = None) -> Any:
                 continue
         if isinstance(value, str) and _is_phone_key(key):
             out[key] = _digits_phone(value)
+        elif isinstance(value, str) and key == "amount_text":
+            out[key] = _canon_amount(value)
+        elif isinstance(value, str) and key == "payment_requested":
+            out[key] = _canon_payment(value)
         elif isinstance(value, str):
             # collapse T15:30 vs T15:30:00 first; casefold after so dump seconds
             # cannot disagree with a minute-precision seed.
