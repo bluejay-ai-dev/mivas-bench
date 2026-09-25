@@ -1,0 +1,23 @@
+tests/test_pull_actual_final_state.py
+  s_4ea68a93215613::t_ba7248feb711ee 26-29
+verifiers/verify_task_run.py
+  s_4ea68a93215613::t_1f99af7bb5618c 1113-1118,1121,1137
+voice-agent-harnesses/openai/gpt-live-1/live.py
+  s_4ea68a93215613::t_7fc5a95270597d 255-258
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "9a9d16536a46129164caa085b75ed8b46cd8b2f1",
+  "prompts": {},
+  "sessions": {
+    "s_4ea68a93215613": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8eb3d720-2035-4a81-aa92-006569f46f3c",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
