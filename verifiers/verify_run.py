@@ -35,7 +35,9 @@ Exit code 0 = every result is scorable. 1 = at least one is void (re-run those).
 from __future__ import annotations
 
 import argparse
+import http.client
 import json
+import time
 import os
 import sys
 import urllib.error
@@ -55,11 +57,20 @@ def _get(path: str) -> dict:
     if not key:
         raise SystemExit("need BLUEJAY_API_KEY")
     req = urllib.request.Request(f"{API}/{path}", headers={"X-API-Key": key})
-    try:
-        with urllib.request.urlopen(req, timeout=60) as r:
-            return json.load(r)
-    except urllib.error.HTTPError as e:
-        raise SystemExit(f"GET {path} → {e.code} {e.read()[:300].decode(errors='replace')}")
+    # Bluejay intermittently truncates response bodies (IncompleteRead) and drops
+    # connections; those are transport faults, so retry them here where every
+    # scorer's request passes through. HTTP errors keep their own handling.
+    for attempt in range(5):
+        try:
+            with urllib.request.urlopen(req, timeout=60) as r:
+                return json.load(r)
+        except urllib.error.HTTPError as e:
+            raise SystemExit(f"GET {path} → {e.code} {e.read()[:300].decode(errors='replace')}")
+        except (http.client.IncompleteRead, http.client.RemoteDisconnected, ConnectionError,
+                TimeoutError, urllib.error.URLError, json.JSONDecodeError) as e:
+            if attempt == 4:
+                raise SystemExit(f"GET {path} → {type(e).__name__} after 5 tries")
+            time.sleep(1.5 * (attempt + 1))
 
 
 def run_results(run_id: str, get=None) -> tuple[dict, list[dict]]:
