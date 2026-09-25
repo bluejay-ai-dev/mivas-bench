@@ -212,3 +212,13 @@ def test_silence_is_primed_only_until_the_first_caller_frame(monkeypatch: pytest
         assert len(ws.of("session.input_audio.append")) <= primed + 2, "priming must stop at the first caller frame"
 
     asyncio.run(go())
+
+
+def test_backend_tools_are_not_strict() -> None:
+    """Strict tools force the model to invent optional arguments (provider_id, zip,
+    group_number); the pack's optional fields must stay optional."""
+    for industry in ("control-industry", "healthcare", "legal", "customer-support"):
+        pack = load_pack(REPO_ROOT / "industries" / industry)
+        for stage in pack.stages.values():
+            for tool in stage.responses_tools():
+                assert tool["strict"] is False, (industry, stage.name, tool["name"])
