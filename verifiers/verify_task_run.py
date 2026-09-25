@@ -1110,9 +1110,15 @@ def collect_scored_results(
             detail, task, actual_state, state_note=note, schemas=schemas,
             industry=industry,
         )
+        void_reason = classified.get("void_reason")
+        if not void_reason and task and actual_state is None and actuals_dir is not None \
+                and expected_state(task) is not None:
+            # the store is configured and the task has an expected state, so a missing
+            # dump means state was never checked: void it rather than pass it
+            void_reason = "no final-state snapshot for this result"
         if classified.get("pending"):
             mark = "wait"
-        elif classified.get("void_reason"):
+        elif void_reason:
             mark = "VOID"
         elif not task:
             mark = "MISS"
@@ -1128,7 +1134,7 @@ def collect_scored_results(
             "digital_human_id": detail.get("digital_human_id"),
             "status": classified.get("status") or detail.get("status"),
             "pending": classified.get("pending"),
-            "void_reason": classified.get("void_reason"),
+            "void_reason": void_reason,
             "mark": mark,
             "detail": detail,
             "task": task,

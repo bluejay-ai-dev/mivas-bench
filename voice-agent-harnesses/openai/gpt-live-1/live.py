@@ -252,7 +252,10 @@ class LiveSession:
         t0 = time.monotonic()
         sent = 0
         while not self._first_input_mono and not self._closed.is_set() and time.monotonic() - t0 < PRIME_SILENCE_S:
-            await self._send({"type": "session.input_audio.append", "audio": frame})
+            try:
+                await self._send({"type": "session.input_audio.append", "audio": frame})
+            except ConnectionClosed:
+                return
             sent += 1
             await asyncio.sleep(0.1)
         log.info("primed %dms of silence before the first caller frame", sent * 100)
