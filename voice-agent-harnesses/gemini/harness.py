@@ -38,7 +38,7 @@ for _root in (Path("/app"), *Path(__file__).resolve().parents):
             sys.path.insert(0, str(_runtime))
         break
 from call_id import begin_session, end_session, headers as tool_headers, set_call_id  # noqa: E402
-from pack_clock import with_pack_clock  # noqa: E402
+from pack_clock import pack_today, with_pack_clock  # noqa: E402
 
 import report  # noqa: E402
 
@@ -128,8 +128,26 @@ def build_agents(industry_dir: str | Path) -> tuple[str, list[str]]:
 
 
 def with_clock(instructions: str, industry_dir: str | Path | None = None) -> str:
-    """Tell the model the pack's TODAY, not the wall clock."""
-    return with_pack_clock(instructions, industry_dir)
+    """Tell the model the pack's TODAY, not the wall clock.
+
+    One "Today is ..." line is enough for 3.1 flash live, but plain 3.8 Live
+    reverts to its own real-world date once a session carries handoff history:
+    on the 2026-09-26 legal run it searched slots from 2026-09-26 on 50 of 59
+    failed booking calls. Measured on the Live API with a handoff-style
+    history: the plain line at top and end holds the pack date 0/5, the same
+    line plus this calendar block holds it 13/13, a tool-description hint
+    alone 3/5. Wording is what works, not placement.
+    """
+    text = with_pack_clock(instructions, industry_dir)
+    day = pack_today(industry_dir)
+    block = (
+        f"CALENDAR: Today is {day.strftime('%A')}, {day.strftime('%B')} {day.day}, {day.year}. "
+        "That is the only current date for this call. Never use any other notion of "
+        "today's date, including any real-world date you may believe it is. Any date "
+        "argument that means today, now, the first opening or as soon as possible is "
+        f"{day.isoformat()}."
+    )
+    return text if block in text else f"{text}\n\n{block}"
 
 
 def greeting(bp: dict[str, Any]) -> str:
