@@ -32,6 +32,8 @@ HARNESS_MODELS = {
     "livekit-cascaded": "gpt-4.1",
     "openai-gpt-live-1@sol-low": "gpt-5.6-sol",
     "openai-gpt-live-1@astra-medium": "gpt-6-astra",
+    "gemini-3.8-live": "gemini-3.8-live",
+    "gemini-3.8-live@extended": "gemini-3.8-live-extended-thinking",
 }
 
 MODEL_ALIASES = {
