@@ -744,9 +744,7 @@ def _values_equal(key: str, expected: Any, actual: Any) -> bool:
         if key == "location_ids":
             exp_ids = {_canon_location(item) for item in expected}
             act_ids = {_canon_location(item) for item in actual}
-            # searching one more office the caller also named is not a miss; the booking
-            # row in hangup DB still pins which office was actually booked
-            return bool(exp_ids) and exp_ids <= act_ids
+            return bool(exp_ids) and exp_ids == act_ids
         if len(expected) != len(actual):
             return False
         return all(

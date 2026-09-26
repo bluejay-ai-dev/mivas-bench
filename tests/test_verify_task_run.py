@@ -921,8 +921,3 @@ def test_order_numbers_match_with_or_without_separators() -> None:
     assert vtr._values_equal("order_number", "KE-4483316", "KE4483316")
     assert vtr._values_equal("order_number", "KE-4471209", "ke 4471209")
     assert not vtr._values_equal("order_number", "KE-4483316", "KE-4483317")
-
-
-def test_slot_search_may_include_an_extra_office() -> None:
-    assert vtr._values_equal("location_ids", ["loc_brooklyn_heights"], ["loc_brooklyn_heights", "loc_park_ave"])
-    assert not vtr._values_equal("location_ids", ["loc_brooklyn_heights"], ["loc_park_ave"])
