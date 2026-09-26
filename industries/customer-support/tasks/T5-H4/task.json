@@ -1,7 +1,7 @@
 {
   "task_name": "T5-H4: Mini soundbar match at Crestline Audio",
   "customer_name": "Felix Moreau",
-  "intent": "Open with exactly: \"Price match the Aurelian Soundbar Mini. Crestline Audio has it in stock at three hundred ninety-nine ninety-nine.\" Give identity when asked. Order KE-4495108, the Mini, not the Halo and not the TV. Confirm the $50.00 refund after they read it back. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
+  "intent": "Open with exactly: \"Price match the Aurelian Soundbar Mini I already bought on order KE-4495108. Crestline Audio has it in stock at three hundred ninety-nine ninety-nine.\" Give identity when asked. Order KE-4495108, the Mini, not the Halo and not the TV. You already bought and received the Mini on that order; you are not buying a new one and you do not want to place an order. Confirm the $50.00 refund after they read it back. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -59,13 +59,23 @@
     {
       "name": "get_order",
       "parameters": {
-        "order_number": "KE-4495108"
+        "order_number": {
+          "any_of": [
+            "KE-4495108",
+            "KE4495108"
+          ]
+        }
       }
     },
     {
       "name": "quote_price_match",
       "parameters": {
-        "order_number": "KE-4495108",
+        "order_number": {
+          "any_of": [
+            "KE-4495108",
+            "KE4495108"
+          ]
+        },
         "sku": "SKU-AUD-8820",
         "competitor": "Crestline Audio",
         "competitor_price": 399.99
@@ -79,6 +89,13 @@
     "creativity": 0
   },
   "scripted_responses": [
+    {
+      "match_type": "context",
+      "match_phrase": "The agent greets you at the start of the call and asks how they can help. NOT after identity or order lookup has started.",
+      "response_type": "phrase",
+      "response_value": "Price match the Aurelian Soundbar Mini I already bought on order KE-4495108. Crestline Audio has it in stock at three hundred ninety-nine ninety-nine.",
+      "occurrence_mode": "always"
+    },
     {
       "match_type": "context",
       "match_phrase": "The agent asks for the caller's full name and a phone number, or for a name and the number on the account. NOT when asking for ZIP, card last four, or an order number alone.",
@@ -98,6 +115,20 @@
       "match_phrase": "The agent asks for an order number, which order, or which item. NOT when asking for name, phone, ZIP, or card last four.",
       "response_type": "phrase",
       "response_value": "Order KE-4495108, the Aurelian Soundbar Mini, not the Halo.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether you already bought the soundbar or are planning to buy it, whether this is a new purchase, or whether you want to place an order. NOT identity questions.",
+      "response_type": "phrase",
+      "response_value": "I already bought it. It's on order KE-4495108, the Aurelian Soundbar Mini. Please look up my order.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks which competitor, the competitor's price, or whether the Mini there is new and in stock. NOT identity questions and NOT when asking for an order number.",
+      "response_type": "phrase",
+      "response_value": "Crestline Audio, spelled C, R, E, S, T, L, I, N, E, Audio. They have the identical new Soundbar Mini in stock for three hundred ninety-nine ninety-nine.",
       "occurrence_mode": "always"
     },
     {

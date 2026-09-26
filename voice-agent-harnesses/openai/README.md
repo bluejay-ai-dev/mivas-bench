@@ -6,6 +6,7 @@ OpenAI Realtime harnesses. Each subfolder is one model runtime.
 |---|---|
 | `realtime-2.1/` | [`gpt-realtime-2.1`](https://developers.openai.com/api/docs/models/gpt-realtime-2.1) |
 | `realtime-2.1-mini/` | [`gpt-realtime-2.1-mini`](https://developers.openai.com/api/docs/models/gpt-realtime-2.1-mini) |
+| `gpt-live-1/` | [`gpt-live-1`](https://developers.openai.com/api/docs/models/gpt-live-1); self-contained (not `harness.py`). Variants `@sol-low` (backend `gpt-5.6-sol`, low effort) and `@astra-medium` (backend `gpt-6-astra`, medium effort) from its `variants.json` |
 
 Shared builder: `harness.py`. Tracing/reporting: `report.py`.
 

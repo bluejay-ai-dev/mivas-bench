@@ -75,26 +75,23 @@ def _req(path: str) -> dict[str, Any]:
         f"{API}/{path}",
         headers={"X-API-Key": _api_key(), "Content-Type": "application/json"},
     )
-    for attempt in range(4):
+    import http.client
+    import time
+
+    for attempt in range(5):  # Bluejay truncates bodies intermittently; retry transport faults
         try:
             with urlopen(req, timeout=120) as resp:
                 return json.load(resp)
-        except (OSError, ValueError, http.client.HTTPException) as e:
-            # body cut mid-read under load (IncompleteRead is an HTTPException)
-            if isinstance(e, HTTPError):
-                break
-            if attempt == 3:
-                raise SystemExit(f"GET {path} failed: {e}")
-            time.sleep(3 * (attempt + 1))
-    try:
-        with urlopen(req, timeout=120) as resp:
-            return json.load(resp)
-    except HTTPError as e:
-        raise SystemExit(
-            f"GET {path} → {e.code} {e.read()[:400].decode(errors='replace')}"
-        ) from e
-    except URLError as e:
-        raise SystemExit(f"GET {path} → {e}") from e
+        except HTTPError as e:
+            raise SystemExit(
+                f"GET {path} → {e.code} {e.read()[:400].decode(errors='replace')}"
+            ) from e
+        except (http.client.IncompleteRead, http.client.RemoteDisconnected, ConnectionError,
+                TimeoutError, URLError, json.JSONDecodeError) as e:
+            if attempt == 4:
+                raise SystemExit(f"GET {path} → {type(e).__name__} after 5 tries") from e
+            time.sleep(1.5 * (attempt + 1))
+    raise SystemExit(f"GET {path} → gave up")
 
 
 def list_run_results(run_id: str) -> tuple[dict[str, Any], list[dict[str, Any]]]:

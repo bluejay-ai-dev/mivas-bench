@@ -1,7 +1,7 @@
 {
   "task_name": "T3-M3: Cracked laptop screen with no coverage",
   "customer_name": "Marcus Iyer",
-  "intent": "Open with exactly: \"I cracked the screen on my Kestrel Aurora 14. Who pays, and is there a diagnostic fee?\" Give identity when asked. Order KE-4408117. Stay for not-covered and the $39.99 bench diagnostic. Do not book. Do not ask them to waive it. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
+  "intent": "Open with exactly: \"I cracked the screen on my Kestrel Aurora 14. Who pays, and is there a diagnostic fee?\" Give identity when asked. Order KE-4408117. Stay for not-covered and the $39.99 bench diagnostic. You only want two answers: who pays for the cracked screen on your own laptop, and the diagnostic fee. Never ask them to book, order, schedule, or apply anything, and never mention waiving. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request. Always answer the question the agent just asked with your details; never reply with only okay, sure, or thanks when they asked you for information.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -98,7 +98,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "has already finished the original request you called about, confirmed that outcome out loud, and is now offering a second unrelated request, a confirmation text, or asking if you need anything else. NOT during identity, NOT while they are still collecting facts or looking something up, and NOT before they have confirmed the original request is done.",
+      "match_phrase": "has already finished the original request you called about, confirmed that outcome out loud, and is now offering a second unrelated request, a confirmation text, or asking if you need anything else. NOT during identity, NOT while they are still collecting facts or looking something up, and NOT before they have confirmed the original request is done. NOT before they have checked your own order and said whether the cracked screen is covered.",
       "response_type": "phrase",
       "response_value": "That's all I needed. Thank you.",
       "occurrence_mode": "always"
@@ -108,6 +108,13 @@
       "match_phrase": "offers to book a bench, in-home, or remote appointment. NOT when giving the coverage verdict or the diagnostic fee.",
       "response_type": "phrase",
       "response_value": "Don't book it. I only needed to know who pays and whether there is a diagnostic fee.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "gives general warranty, plan, or fee information and says it needs your order or account to tell who pays. NOT when asking for ZIP or card last four, and NOT after they have said whether your own laptop is covered.",
+      "response_type": "phrase",
+      "response_value": "Please check it on my own laptop. Marcus Iyer, 541-555-0104, order KE-4408117.",
       "occurrence_mode": "always"
     }
   ],

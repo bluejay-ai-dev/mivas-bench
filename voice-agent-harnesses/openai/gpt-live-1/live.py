@@ -61,6 +61,12 @@ END_CALL_MAX_S = float(os.environ.get("GPT_LIVE_END_CALL_MAX_S", "20"))
 # ...and if no farewell audio starts at all within this window, hang up anyway.
 END_CALL_GRACE_S = float(os.environ.get("GPT_LIVE_END_CALL_GRACE_S", "4"))
 CLOSED_TIMEOUT_S = float(os.environ.get("GPT_LIVE_CLOSED_TIMEOUT_S", "6"))
+# The provider timeline, which the speak-first append lands on, only advances with input
+# audio, and Bluejay sends its first caller frame 2.1-3.6 s after the upgrade (measured
+# 2026-09-25), so the greeting waited on Bluejay. A phone line carries silence from the
+# moment it connects; 100 ms silence frames are fed until the caller leg's first frame,
+# for at most this long.
+PRIME_SILENCE_S = float(os.environ.get("GPT_LIVE_PRIME_SILENCE_S", "5"))
 # Appends are capped at 500 tokens; ~3 chars/token keeps a safe margin.
 APPEND_MAX_CHARS = 1400
 AUDIBLE_PEAK = 300  # int16 peak below this is silence for hang-up timing only
@@ -170,6 +176,9 @@ class LiveSession:
         self._handoff_target: str | None = None
         self._tasks: set[asyncio.Task[Any]] = set()
         self._last_audible_mono = 0.0
+        self._opened_mono = 0.0
+        self._first_input_mono = 0.0
+        self._first_audible_mono = 0.0
         self._ending: asyncio.Event = asyncio.Event()
         # Set when the backend finishes a turn with no function calls after end_call:
         # that turn is the summary the live model will speak as the farewell.
@@ -220,6 +229,7 @@ class LiveSession:
             ack="session.started",
         )
         session = started.get("session") or {}
+        self._opened_mono = time.monotonic()
         self.session_id = session.get("id")
         self.obs.session_started(session)
         log.info(
@@ -232,7 +242,26 @@ class LiveSession:
         with ``delegation_id: null``. Not commentary — commentary is paraphrased, and the
         pack's greeting is fixed text the benchmark compares against. Sent, not awaited
         (see ``_post``): the caller's first audio has not arrived yet at this point."""
-        for chunk in _chunks(self.pack.speak_first_prompt()):
+        await self._append_all(self.pack.speak_first_prompt())
+        if PRIME_SILENCE_S > 0:
+            self._spawn(self._prime_silence(), name="gpt-live-prime")
+
+    async def _prime_silence(self) -> None:
+        """Keep the input clock running until the caller leg's first frame (see PRIME_SILENCE_S)."""
+        frame = base64.b64encode(bytes(int(self.sample_rate * 0.1) * 2)).decode("ascii")
+        t0 = time.monotonic()
+        sent = 0
+        while not self._first_input_mono and not self._closed.is_set() and time.monotonic() - t0 < PRIME_SILENCE_S:
+            try:
+                await self._send({"type": "session.input_audio.append", "audio": frame})
+            except ConnectionClosed:
+                return
+            sent += 1
+            await asyncio.sleep(0.1)
+        log.info("primed %dms of silence before the first caller frame", sent * 100)
+
+    async def _append_all(self, text: str) -> None:
+        for chunk in _chunks(text):
             await self._post(
                 {"type": "session.instructions.append", "delegation_id": None, "content": chunk},
                 ack="session.instructions.appended",
@@ -241,6 +270,8 @@ class LiveSession:
     async def send_audio(self, pcm: bytes) -> None:
         if not pcm or self._closed.is_set():
             return
+        if not self._first_input_mono:
+            self._first_input_mono = time.monotonic()
         await self._send(
             {"type": "session.input_audio.append", "audio": base64.b64encode(pcm).decode("ascii")}
         )
@@ -309,6 +340,10 @@ class LiveSession:
     async def _send(self, event: dict[str, Any]) -> None:
         if event.get("type") != "session.input_audio.append" and log.isEnabledFor(logging.DEBUG):
             log.debug("-> %s", json.dumps(event)[:600])
+        if self._close_sent and event.get("type") != "session.close":
+            # after session.close the service answers every event with
+            # "The session is closing and cannot accept new client events"
+            return
         async with self._send_lock:
             await self._ws.send(json.dumps(event, separators=(",", ":")))
 
@@ -387,6 +422,10 @@ class LiveSession:
             pcm = base64.b64decode(ev["delta"])
             if _peak(pcm) >= AUDIBLE_PEAK:
                 self._last_audible_mono = time.monotonic()
+                if not self._first_audible_mono:
+                    self._first_audible_mono = self._last_audible_mono
+                    log.info("first agent audio %.0fms after session.started",
+                             (self._first_audible_mono - self._opened_mono) * 1000)
             await self.on_audio(pcm)
         elif t == "session.output_transcript.delta":
             self.obs.transcript("assistant", ev.get("delta", ""), ev.get("start_ms", 0), ev.get("end_ms", 0))

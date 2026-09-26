@@ -57,32 +57,42 @@ def _get(path: str) -> dict:
     if not key:
         raise SystemExit("need BLUEJAY_API_KEY")
     req = urllib.request.Request(f"{API}/{path}", headers={"X-API-Key": key})
-    for attempt in range(4):
+    # Bluejay intermittently truncates response bodies (IncompleteRead) and drops
+    # connections; those are transport faults, so retry them here where every
+    # scorer's request passes through. HTTP errors keep their own handling.
+    for attempt in range(5):
         try:
             with urllib.request.urlopen(req, timeout=60) as r:
                 return json.load(r)
         except urllib.error.HTTPError as e:
             raise SystemExit(f"GET {path} → {e.code} {e.read()[:300].decode(errors='replace')}")
-        except (OSError, ValueError, http.client.HTTPException) as e:
-            # a body cut mid-read (IncompleteRead is an HTTPException, not an OSError)
-            if attempt == 3:
-                raise SystemExit(f"GET {path} failed: {e}")
-            time.sleep(3 * (attempt + 1))
-    raise SystemExit(f"GET {path} failed")
+        except (http.client.IncompleteRead, http.client.RemoteDisconnected, ConnectionError,
+                TimeoutError, urllib.error.URLError, json.JSONDecodeError) as e:
+            if attempt == 4:
+                raise SystemExit(f"GET {path} → {type(e).__name__} after 5 tries")
+            time.sleep(1.5 * (attempt + 1))
 
 
-def result_ids_for_run(run_id: str) -> list[str]:
-    body = _get(f"retrieve-simulation-results/{run_id}")
+def run_results(run_id: str, get=None) -> tuple[dict, list[dict]]:
+    """(simulation_run, every result). The endpoint caps a response at 100 rows
+    with no page metadata, so a k=5 run (360) has to be paged out by offset."""
+    get = get or _get
+    body = get(f"retrieve-simulation-results/{run_id}")
+    run = body.get("simulation_run") or {}
     results = body.get("simulation_results") or body.get("results") or []
-    # 100 per page, no page metadata: page out a k=5 run
     while results and len(results) % 100 == 0:
-        page = _get(f"retrieve-simulation-results/{run_id}?offset={len(results)}")
+        page = get(f"retrieve-simulation-results/{run_id}?offset={len(results)}")
         more = page.get("simulation_results") or page.get("results") or []
         seen = {str(r.get("id")) for r in results}
         fresh = [r for r in more if str(r.get("id")) not in seen]
         if not fresh:
             break
         results += fresh
+    return run, results
+
+
+def result_ids_for_run(run_id: str) -> list[str]:
+    _, results = run_results(run_id)
     return [str(r.get("id")) for r in results if r.get("id")]
 
 
@@ -93,6 +103,12 @@ def latest_run_for_sim(sim_id: str) -> str:
         raise SystemExit(f"no runs for simulation {sim_id}")
     newest = max(runs, key=lambda r: str(r.get("created_at") or ""))
     return str(newest.get("id") or newest.get("simulation_run_id"))
+
+
+# Set for harnesses whose tool extraction is confirmed against the pod's own tool log
+# (openai/gpt-live-1, 2026-09-25: 17/17 empty-list calls had zero tool calls in the pod).
+# Then an empty list with a linked trace is a real zero, a model failure, not a void.
+TRUST_EMPTY_TOOLS = os.environ.get("MIVAS_TRUST_EMPTY_TOOLS", "").strip() in ("1", "true", "yes")
 
 
 def classify_detail(d: dict, result_id: str | None = None) -> dict:
@@ -116,7 +132,7 @@ def classify_detail(d: dict, result_id: str | None = None) -> dict:
         void_reason = f"no conversation ({status})"
     elif not d.get("trace_ids"):
         void_reason = "no trace linked — the harness never posted trace_ids"
-    elif expected and not fired:
+    elif expected and not fired and not TRUST_EMPTY_TOOLS:
         void_reason = "tool list empty while tools were expected — extraction did not land"
 
     return {

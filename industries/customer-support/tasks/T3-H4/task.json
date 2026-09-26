@@ -1,7 +1,7 @@
 {
   "task_name": "T3-H4: Plans, coverage, book, then cancel",
   "customer_name": "Grace Okonkwo",
-  "intent": "Open with exactly: \"Tell me what plans I have, confirm the Aurora Pro that will not charge is covered at zero, book the first bench slot, then cancel it because I cannot make it.\" Give identity when asked. Order KE-4471860. Do the four things in that order. Keep asking for the first available bench slot; do not choose a calendar date, including September, even if the agent insists that a specific month or day is required. Do not mention canceling again until the agent confirms a booked calendar day and time. If they say nothing was booked or the booking failed, tell them the request is not complete and ask them to book the first available slot. Hang up only after they confirm that the booked appointment was cancelled. Once they have finished what you asked and confirmed the cancellation, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
+  "intent": "Open with exactly: \"Tell me what plans I have, confirm the Aurora Pro that will not charge is covered at zero, book the first bench slot, then cancel it because I cannot make it.\" Give identity when asked. Order KE-4471860. Do the four things in that order. Keep asking for the first available bench slot; do not choose a calendar date, including September, even if the agent insists that a specific month or day is required. Do not mention canceling again until the agent confirms a booked calendar day and time. If they say nothing was booked or the booking failed, tell them the request is not complete and ask them to book the first available slot. Hang up only after they confirm that the booked appointment was cancelled. If they say they booked the first slot and cancelled it, even in one step, that is the whole request: never ask them to book again. Once they have finished what you asked and confirmed the cancellation, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request. Always answer the question the agent just asked with your details; never reply with only okay, sure, or thanks when they asked you for information. Never say you are done or that's all you needed before the agent has booked the bench slot and then told you it is cancelled.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -57,10 +57,7 @@
       "name": "transfer_to_service"
     },
     {
-      "name": "get_order",
-      "parameters": {
-        "order_number": "KE-4471860"
-      }
+      "name": "get_order"
     },
     {
       "name": "get_protection_plans"
@@ -68,14 +65,24 @@
     {
       "name": "check_coverage",
       "parameters": {
-        "order_number": "KE-4471860",
+        "order_number": {
+          "any_of": [
+            "KE-4471860",
+            "KE4471860"
+          ]
+        },
         "issue": "will not charge"
       }
     },
     {
       "name": "book_service_appointment",
       "parameters": {
-        "order_number": "KE-4471860",
+        "order_number": {
+          "any_of": [
+            "KE-4471860",
+            "KE4471860"
+          ]
+        },
         "service_type": "bench",
         "issue": "will not charge"
       }
@@ -97,9 +104,9 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the caller's full name and a phone number, or for a name and the number on the account. NOT when asking for ZIP, card last four, or an order number alone.",
+      "match_phrase": "The agent asks for the caller's full name and a phone number, or for a name and the number on the account, or asks you to spell the last name or repeat the phone number one digit at a time. NOT when asking for ZIP, card last four, or an order number alone.",
       "response_type": "phrase",
-      "response_value": "Grace Okonkwo, 541-555-0112.",
+      "response_value": "Grace Okonkwo, spelled O, K, O, N, K, W, O. Phone five four one, five five five, zero one one two.",
       "occurrence_mode": "always"
     },
     {
@@ -111,9 +118,9 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for an order number, which order, or which item. NOT when asking for name, phone, ZIP, or card last four.",
+      "match_phrase": "The agent asks for an order number, which order, or which item, or asks you to read the order number again one character at a time. NOT when asking for name, phone, ZIP, or card last four.",
       "response_type": "phrase",
-      "response_value": "Order KE-4471860, the laptop.",
+      "response_value": "Order K, E, four, four, seven, one, eight, six, zero, the laptop.",
       "occurrence_mode": "always"
     },
     {
@@ -125,7 +132,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "has explicitly confirmed that a previously booked bench appointment was successfully cancelled, and is now offering a second unrelated request, a confirmation text, or asking if you need anything else. NOT during identity, NOT while they are still collecting facts or looking something up, NOT when they just booked a visit, NOT when they named a booked day or time, NOT when they say nothing was booked or no appointment exists, and NOT before they have confirmed the successful cancel.",
+      "match_phrase": "says the bench appointment booked on this call is now cancelled (uses the word cancelled or canceled about that visit), including when they say they booked the first slot and then cancelled it in one step, whether or not they then ask if you need anything else or whether you want another day. NOT when asking for name, phone, ZIP, card last four, or an order number, NOT when reporting your plans or coverage, NOT when saying no appointments are booked right now, and NOT when no appointment has been booked on this call.",
       "response_type": "phrase",
       "response_value": "That's all I needed. Thank you.",
       "occurrence_mode": "always"
@@ -139,21 +146,21 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers bench times, asks which day, month, or date to book, says it needs a specific month or day, says first available is not a valid date or is unavailable, or asks for the earliest date that works, while no appointment is booked. NOT after a booked day and time are confirmed, and NOT after you asked to cancel a booked visit.",
+      "match_phrase": "offers bench times, asks which day, month, or date to book, says it needs a specific month or day, says first available is not a valid date or is unavailable, or asks for the earliest date that works, while no appointment is booked. NOT after a booked day and time are confirmed, and NOT after you asked to cancel a booked visit. NOT once they have said any visit was booked on this call, even if it was then cancelled.",
       "response_type": "phrase",
       "response_value": "Do not choose a date. Please book the first available bench slot on your calendar.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "says nothing was booked, no appointment exists, or the booking failed, and treats that as completing the request. NOT after a successful booking and cancellation.",
+      "match_phrase": "says nothing was booked, no appointment exists, or the booking failed, and treats that as completing the request. NOT after a successful booking and cancellation, NOT when they say they are moving you to service or are about to check coverage or book, and NOT when they only mention that no appointment was open before booking started. NOT when they have said a visit was booked on this call and then cancelled.",
       "response_type": "phrase",
       "response_value": "That is not complete. Please book the first available bench slot, then cancel it after it is booked.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "has just successfully booked the appointment, states the booked calendar day or clock time, and asks if that works or if you need anything else. NOT before a booking exists and NOT when they say nothing was booked.",
+      "match_phrase": "has just successfully booked the appointment, states the booked calendar day or clock time, and asks if that works or if you need anything else. NOT before a booking exists, NOT when they say nothing was booked, and NOT when they say the booked appointment was already cancelled or nothing remains booked.",
       "response_type": "phrase",
       "response_value": "I cannot make that day. Cancel that appointment.",
       "occurrence_mode": "always"

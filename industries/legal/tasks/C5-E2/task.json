@@ -1,7 +1,7 @@
 {
   "task_name": "C5-E2: Declines after fee disclosure",
   "customer_name": "Percival Ndiaye",
-  "intent": "Open with exactly: \"I was rear-ended by a Summit Hauling truck and I'm thinking about talking to a lawyer.\" When asked when, say exactly: \"It was July tenth, twenty twenty six.\" If asked to book a free evaluation before any fee numbers, say yes and look at times. When times are offered, take the first slot so they can hold it. After they have held a slot and read back that fee, say exactly: \"That's more than I expected \u2014 I'll call back later.\" Do not confirm booking. Do not ask for a staff member. End after declining to book.",
+  "intent": "Open with exactly: \"I was rear-ended by a Summit Hauling truck and I'm thinking about talking to a lawyer.\" When asked when, say exactly: \"It was July tenth, twenty twenty six.\" If asked to book a free evaluation before any fee numbers, say yes and look at times. When times are offered, take the first slot so they can hold it. After they have held a slot and read back that fee, say exactly: \"That's more than I expected , I'll call back later.\" Do not confirm booking. Do not ask for a staff member. End after declining to book. When the agent asks you a question, answer it in that same turn with the answer given here. Never answer a question with only okay, sure, mm-hmm, yeah or thanks, and never speak the agent's lines for it. Nobody represents you: whenever asked whether a lawyer represents you, say \"No, nobody represents me.\" If asked email or text for the packet, say \"Text is fine.\" If the agent lists open times, even in the same turn as the fee, that is not a hold yet: say \"I'll take the first time you offered.\" Say the decline line only after the agent says it has held a specific time and reads it back. You are only thinking about talking to a lawyer; you have NOT hired one. The answer to any question about whether a lawyer represents you is always no, never yes or of course.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -47,14 +47,14 @@
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
+      "match_phrase": "The agent asks for the caller's full name and a callback or phone number, or asks you to repeat or spell your name or number. NOT when asking about anything else.",
       "response_type": "phrase",
-      "response_value": "Percival Ndiaye, 404-555-0192.",
+      "response_value": "Percival Ndiaye. That's P E R C I V A L, last name N D I A Y E. My number is four zero four, five five five, zero one nine two.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
+      "match_phrase": "The agent asks whether a lawyer or law firm currently represents the caller (for example 'does any lawyer currently represent you for this accident?'), whether the caller has an attorney for this, or whether the caller has already hired or signed with anyone, including when the same turn also says they are looking the caller up, thanks them, or uses your first name. The answer is always no. NOT any other question.",
       "response_type": "phrase",
       "response_value": "No, nobody represents me.",
       "occurrence_mode": "always"
@@ -75,7 +75,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks when the incident happened, or for the date of the accident, injury or event. NOT any other question.",
+      "match_phrase": "The agent asks when the incident happened, or for the date of the accident, injury or event. NOT when asking for a phone number or name. NOT any other question.",
       "response_type": "phrase",
       "response_value": "It was July tenth, twenty twenty six.",
       "occurrence_mode": "always"
@@ -96,16 +96,51 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent offers available appointment times or asks which slot to hold. NOT after a slot is already held and they are asking to confirm that booking.",
+      "match_phrase": "The agent offers available appointment times or asks which slot to hold. NOT after a slot is already held and they are asking to confirm that booking. Includes a turn that lists open times together with the fee percentages and asks which works better.",
       "response_type": "phrase",
       "response_value": "I'll take the first time you offered.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent has already held a slot and is reading back that held appointment's fee, asking whether to confirm it. NOT when listing open times or asking which slot to hold, even if a fee percentage was mentioned on that same turn.",
+      "match_phrase": "The agent has already held a specific slot and reads back that held appointment with a specific day and time and the attorney's name, together with the fee, asking whether to confirm or book it. NOT when the agent only states contingency percentages or a consultation fee without a held appointment day and time. NOT when saying let's get some quick details, taking your account, recording what happened, or saying this conversation does not make you a client. NOT when listing open times or asking which slot to hold, even if a fee percentage was mentioned on that same turn.",
       "response_type": "phrase",
-      "response_value": "That's more than I expected \u2014 I'll call back later.",
+      "response_value": "That's more than I expected, I'll call back later.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks for both the state and the date of the accident in the same turn. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "In California, on July tenth, twenty twenty six.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks you to describe what happened, what kind of accident or matter it was, where it happened, what injuries or losses you had, or whether you got medical treatment. NOT when asking the date, the state alone, your name or number, or who the other side is.",
+      "response_type": "phrase",
+      "response_value": "A Summit Hauling truck rear-ended my car at a red light in Sacramento. My neck was sore, but I haven't had any medical treatment.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether to send the new client packet by email or text, or offers to send it by one channel, such as by text to your number. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "Text is fine.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent offers to send a medical records release or authorization for your signature, or asks which doctor or provider treated you. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "No thanks, not right now.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether your car was damaged, or whether you had any other losses besides your sore neck. NOT the first time they ask what happened.",
+      "response_type": "phrase",
+      "response_value": "Yes, the back of my car was dented and I had it towed to a shop.",
       "occurrence_mode": "always"
     }
   ],

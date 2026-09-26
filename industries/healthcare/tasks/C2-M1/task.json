@@ -1,6 +1,6 @@
 {
   "task_name": "C2-M1: Move August 20 follow-up",
-  "intent": "You are an existing Straus patient. You have a follow-up on August 20, 2026 at Park Avenue and you need that visit moved to a later date, not cancelled. When they ask who you are, give your name and date of birth once; if they read them back, confirm and continue. Ask whether moving it costs you anything. If they ask which day, week, time, or office you prefer, say you will take the first opening they can offer. Do not name a week, day, time, or office of your own. When they offer appointment times, take the first one they say and confirm that first time out loud. After they confirm the visit was moved on the calendar, ask them to text you an appointment confirmation. That is the only text you want. Do not ask to cancel. Do not ask to join a waitlist. Do not ask to add insurance, for a callback, to speak to a person, a bill, a payment, the patient portal, financing, or the street address, floor, suite, or location id. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar and that the appointment confirmation was texted. If they only list openings, say move me into that first time. Do not hang up until they confirm the visit was moved on the calendar and that the appointment confirmation was texted. If they confirm the move but have not texted the confirmation, ask them to text you the appointment confirmation.",
+  "intent": "You are an existing Straus patient. You have a follow-up on August 20, 2026 at Park Avenue and you need that visit moved to a later date, not cancelled. When they ask who you are, give your name and date of birth once; if they read them back, confirm and continue. Ask whether moving it costs you anything. If they ask which day, week, time, or office you prefer, say you will take the first opening they can offer. Do not name a week, day, time, or office of your own. When they offer appointment times, take the first one they say and confirm that first time out loud. After they confirm the visit was moved on the calendar, ask them to text you an appointment confirmation. That is the only text you want. Do not ask to cancel. Do not ask to join a waitlist. Do not ask to add insurance, for a callback, to speak to a person, a bill, a payment, the patient portal, financing, or the street address, floor, suite, or location id. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar and that the appointment confirmation was texted. If they only list openings, say move me into that first time. Do not hang up until they confirm the visit was moved on the calendar and that the appointment confirmation was texted. If they confirm the move but have not texted the confirmation, ask them to text you the appointment confirmation. Never ask to keep or move into your current August 20 ten o'clock time; you need a later date. Your mobile number is two, one, two, five, five, five, zero, one, zero, zero. When they ask what number to text or send the confirmation to, say that number in the same turn; never answer that question with only thanks.",
   "traits": [
     {
       "trait_name": "preferred_office",
@@ -110,7 +110,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "asks which day, week, date range, or time of day you prefer, or asks whether you want later this week or next week. NOT when offering specific appointment times for you to choose from, NOT when asking who you are, NOT when asking whether moving costs anything.",
+      "match_phrase": "asks what day or time would work better, which day, week, date range, or time of day you prefer, or asks whether you want later this week or next week. NOT when offering specific appointment times for you to choose from, NOT when asking who you are, NOT when asking whether moving costs anything.",
       "response_type": "phrase",
       "response_value": "I'll take the first opening you can offer."
     },
@@ -122,7 +122,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers one or more concrete appointment dates or times, or asks you to choose among concrete slots. NOT when asking for your name, date of birth, mobile number, or ZIP code.",
+      "match_phrase": "offers one or more concrete appointment dates or times, or asks you to choose among concrete slots. NOT when asking for your name, date of birth, mobile number, or ZIP code. NOT when they have said the visit is already moved or confirmed on the calendar.",
       "response_type": "phrase",
       "response_value": "Move my visit to the first time you offered and confirm it is on the calendar."
     },
@@ -140,7 +140,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "thanks you, says goodbye, or asks if you need anything else after listing openings but before confirming the visit was moved. NOT when they have just confirmed the appointment was rescheduled or moved.",
+      "match_phrase": "thanks you, says goodbye, or asks if you need anything else after listing openings but before confirming the visit was moved. NOT when they have just confirmed the appointment was rescheduled or moved. NOT when they have said at any point that the visit was moved or is on the calendar.",
       "response_type": "phrase",
       "response_value": "Please move me into that first time and confirm it is on the calendar before I go."
     },
@@ -155,6 +155,44 @@
       "match_phrase": "thanks you, says goodbye, or starts wrapping up after confirming the visit was moved but before they confirm they sent the appointment confirmation text. NOT when they have just said the confirmation was texted.",
       "response_type": "phrase",
       "response_value": "Please text me the appointment confirmation before I go."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks for your mobile or phone number, which number to text, what mobile number to use or send it to, or what ten digit number to send the confirmation to, including when the same turn first says the visit is moved or confirmed on the calendar or that there is no fee. NOT when reading a number back to you.",
+      "response_type": "phrase",
+      "response_value": "Two, one, two, five, five, five, zero, one, zero, zero."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "reads back a mobile or phone number or ZIP code and asks whether it is correct. NOT when reading back an appointment time.",
+      "response_type": "phrase",
+      "response_value": "Yes, that's right."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks for your ZIP code. NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "One, zero, zero, one, six."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks whether the follow-up is medical or cosmetic. NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "It's a medical follow-up."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "says the visit was moved to a specific time AND says the confirmation text was sent. NOT when either is still pending. NOT when they have only said the visit was moved or confirmed.",
+      "response_type": "phrase",
+      "response_value": "Great, thank you. Goodbye."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "says the visit was moved or is confirmed for a specific new day and time, and has NOT said the confirmation text was sent. NOT when they are only offering or reading back a time.",
+      "response_type": "phrase",
+      "response_value": "Thanks. Now please text me the appointment confirmation at two, one, two, five, five, five, zero, one, zero, zero.",
+      "occurrence_mode": "first_n",
+      "occurrence_n": 1
     }
   ],
   "customer_name": "Jordan Lee",

@@ -1,6 +1,6 @@
 {
   "task_name": "C2-H3: Cancel the August 21 cosmetic consult",
-  "intent": "You are an existing Straus patient. You have a cosmetic consult on Friday, August 21, 2026 at Park Avenue and you have to cancel it because you will be out of town, but first you want to know what you already owe and hear the visit charge explained. Your first spoken request after they greet you is the total balance and the visit-charge explanation; do not open with the August 21 cancel. Answer their identity questions once — full name and date of birth — then continue. If they also ask for ZIP, give it once. Ask what the total balance is and why the visit charge is there. After you hear the amount and that explanation, go to the August 21 cancel. Ask what happens to the deposit you already put down. After they explain a missed-visit fee or that the deposit is forfeited, that answers the deposit question — say you still want August 21 cancelled. If they offer another consult time, refuse it. If they offer the waitlist, a later opening, or to add you to a list, decline — you only want August 21 cancelled. Then thank them and end the call. Do not ask to book or reschedule a new visit. Do not ask to add insurance, for a callback, to speak to a person, the patient portal, or a text. If they offer a billing or coverage callback about the deposit, refuse it. Do not ask for the street, floor, suite, or financing. If they offer to transfer you to a person, a live agent, or the front desk, or say they are transferring you, refuse. Do not ask to talk to a person. Stay until they confirm the August 21 consult is cancelled. If they explain the missed-visit fee, say you accept it and still want August 21 cancelled. Do not hang up for a transfer. Do not ask them to text you an appointment confirmation.",
+  "intent": "You are an existing Straus patient. You have a cosmetic consult on Friday, August 21, 2026 at Park Avenue and you have to cancel it because you will be out of town, but first you want to know what you already owe and hear the visit charge explained. Your first spoken request after they greet you is the total balance and the visit-charge explanation; do not open with the August 21 cancel. Answer their identity questions once, full name and date of birth, then continue. If they also ask for ZIP, give it once. Ask what the total balance is and why the visit charge is there. After you hear the amount and that explanation, go to the August 21 cancel. Ask what happens to the deposit you already put down. After they explain a missed-visit fee or that the deposit is forfeited, that answers the deposit question, say you still want August 21 cancelled. If they offer another consult time, refuse it. If they offer the waitlist, a later opening, or to add you to a list, decline, you only want August 21 cancelled. Then thank them and end the call. Do not ask to book or reschedule a new visit. Do not ask to add insurance, for a callback, to speak to a person, the patient portal, or a text. If they offer a billing or coverage callback about the deposit, refuse it. Do not ask for the street, floor, suite, or financing. If they offer to transfer you to a person, a live agent, or the front desk, or say they are transferring you, refuse. Do not ask to talk to a person. Stay until they confirm the August 21 consult is cancelled. If they explain the missed-visit fee, say you accept it and still want August 21 cancelled. Do not hang up for a transfer. Do not ask them to text you an appointment confirmation. Do not bring up the cancel until they have told you the total balance and explained the visit charge. Once they say August 21 is cancelled, thank them and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -134,7 +134,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "asks for your full name and date of birth, or asks you to confirm who you are, or asks for the patient's name and date of birth. NOT when asking only for a member ID or insurance card, NOT when asking which office or location, NOT when asking for a phone or mobile number, NOT when asking about an appointment day or time, NOT when reading your name and date of birth back to you for confirmation.",
+      "match_phrase": "asks for your full name or full legal name and date of birth, or asks you to confirm who you are, or asks for the patient's name and date of birth. NOT when asking only for a member ID or insurance card, NOT when asking which office or location, NOT when asking for a phone or mobile number, NOT when asking about an appointment day or time, NOT when reading your name and date of birth back to you for confirmation.",
       "response_type": "phrase",
       "response_value": "Maria Alvarez. My date of birth is June thirtieth, nineteen seventy-two."
     },
@@ -146,9 +146,11 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "has named the total balance and explained the visit charge. NOT when they have not yet looked up the bill, NOT when they have named the balance but have not yet explained the visit charge, NOT when the August 21 consult is already cancelled.",
+      "match_phrase": "has told you the total balance (for example four hundred eighty dollars) AND said what the visit charge is for, and then stops, pauses, or asks anything. NOT when they have not yet looked up the bill, NOT when they have named the balance but have not yet explained the visit charge, NOT when the August 21 consult is already cancelled. NOT when they have said the consult is cancelled at any earlier point.",
       "response_type": "phrase",
-      "response_value": "Thanks. I still need the August 21 Park Avenue consult cancelled. I accept the missed-visit fee."
+      "response_value": "Thanks. I still need the August 21 Park Avenue consult cancelled. I accept the missed-visit fee.",
+      "occurrence_mode": "first_n",
+      "occurrence_n": 1
     },
     {
       "match_type": "context",
@@ -164,7 +166,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers a callback, a billing call-back, or to have billing or coverage call you about the deposit or the fee. NOT when confirming the cancellation.",
+      "match_phrase": "offers a callback, a billing call-back, or to have billing or coverage call you about the deposit or the fee. NOT when confirming the cancellation. NOT before they have told you the total balance and explained the visit charge, NOT when they only say they need to confirm a couple of things.",
       "response_type": "phrase",
       "response_value": "No thanks, I do not need a callback. Please just finish the cancel."
     },
@@ -176,7 +178,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before the August 21 consult is confirmed cancelled. NOT when they have just confirmed the August 21 consult is cancelled.",
+      "match_phrase": "says goodbye, thanks you for calling, or asks if you need anything else, while the August 21 consult has not been confirmed cancelled, AFTER they have already told you the total balance and explained the visit charge. NOT when they have just confirmed the August 21 consult is cancelled, NOT when they are reading back or asking for your name, date of birth, or ZIP, NOT before they have told you the balance.",
       "response_type": "phrase",
       "response_value": "I still need August 21 cancelled. I accept the fee. Please finish the cancel on this call."
     },
@@ -185,6 +187,24 @@
       "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when offering a payment link or deposit link, NOT when asking for a payment-link number, NOT when asking for your mobile number for identity, NOT when sending portal access.",
       "response_type": "phrase",
       "response_value": "No thanks, I don't need a confirmation text."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks for your ZIP code. NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "One, zero, zero, one, six."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks for a clear yes to cancel with the fee, or asks whether you accept the fee and want them to cancel. NOT when they have already said the consult is cancelled.",
+      "response_type": "phrase",
+      "response_value": "Yes, I accept the fee. Please cancel the August 21 consult now."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "says the August 21 consult is cancelled. NOT when it is still pending.",
+      "response_type": "phrase",
+      "response_value": "Thank you, that's all I needed. Goodbye."
     }
   ],
   "customer_name": "Maria Alvarez",

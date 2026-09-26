@@ -1,7 +1,7 @@
 {
   "task_name": "R-H4: Scam report, then the Bellwether return window",
   "customer_name": "Rosalind Baptiste",
-  "intent": "Open with exactly: \"I got a TechCrew email for a three hundred ninety-nine dollars and ninety-nine cents renewal. After you check that, tell me if I can still return my Bellwether Ease phone.\" Give your phone 541-555-0133 and email if asked. The amount in the email is $399.99. You have not sent money and have not given anyone device access. They did not ask you to buy store cards, send a gift card, or move money. Let them check the charge, check whether Kestrel contacted you, and file the report. Then give identity for the phone question. Order KE-4431775. Hang up after the return-window answer. Do not ask for a person unless they already transferred you. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
+  "intent": "Open with exactly: \"I got a TechCrew email for a three hundred ninety-nine dollars and ninety-nine cents renewal. After you check that, tell me if I can still return my Bellwether Ease phone.\" Say it word for word; do not rephrase it as a charge on your account or card. The charge exists only in that email; nothing appeared on your card statement or your account. Give your phone 541-555-0133 and your email if asked, spelling the surname: R O S A L I N D, dot, B A P T I S T E, at example dot test. The amount in the email is $399.99. You have not sent money and have not given anyone device access. They did not ask you to buy store cards, send a gift card, or move money. Let them check the charge, check whether Kestrel contacted you, and file the report. Then ask about the phone and give identity for it: name and phone Rosalind Baptiste, 541-555-0133, and when asked for the ZIP and card, ZIP 97401, card ending 7719. Never answer a question for a detail with only \"okay\", \"sure\", or \"thanks\"; always give the detail they asked for. Your order number is KE-4431775, the Bellwether Ease phone's order. Do not say you are done until they have answered whether the phone can still be returned. Hang up after the return-window answer. Do not ask for a person unless they already transferred you. Once they have answered the phone question, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -47,21 +47,22 @@
     {
       "name": "check_outbound_contact",
       "parameters": {
-        "phone": "541-555-0133",
-        "email": "rosalind.baptiste@example.test"
+        "phone": "541-555-0133"
       }
     },
     {
       "name": "report_scam_contact",
       "parameters": {
         "phone": "541-555-0133",
-        "email": "rosalind.baptiste@example.test",
         "channel": "email",
         "claimed_brand": "TechCrew",
-        "amount": "399.99",
-        "payment_requested": "none",
-        "money_sent": false,
-        "remote_access_given": false
+        "amount": {
+          "any_of": [
+            "399.99",
+            "$399.99",
+            "399.99 dollars"
+          ]
+        }
       }
     },
     {
@@ -88,15 +89,15 @@
       "name": "transfer_to_returns"
     },
     {
-      "name": "get_order",
-      "parameters": {
-        "order_number": "KE-4431775"
-      }
-    },
-    {
       "name": "check_return_eligibility",
       "parameters": {
-        "order_number": "KE-4431775"
+        "order_number": {
+          "any_of": [
+            "KE-4431775",
+            "KE4431775",
+            "KE 4431775"
+          ]
+        }
       }
     }
   ],
@@ -106,14 +107,22 @@
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the caller's full name and a phone number, or for a name and the number on the account. NOT when asking for ZIP, card last four, or an order number alone.",
+      "match_phrase": "The agent greets you at the start of the call and asks how they can help. NOT after you have already said why you are calling.",
+      "response_type": "phrase",
+      "response_value": "I got a TechCrew email for a three hundred ninety-nine dollars and ninety-nine cents renewal. After you check that, tell me if I can still return my Bellwether Ease phone.",
+      "occurrence_mode": "first_n",
+      "occurrence_n": 1
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks for the caller's full name and a phone number, or for a name and the number on the account. NOT when asking for ZIP, card last four, or an order number alone. This includes a question that offers the order number or the name and phone as alternatives.",
       "response_type": "phrase",
       "response_value": "Rosalind Baptiste, 541-555-0133.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the ZIP code on the order and the last four digits of the card, together or in either order. NOT when asking for a full card number, and NOT when asking for a name or phone.",
+      "match_phrase": "The agent asks for the ZIP code on the order and the last four digits of the card, together or in either order, or repeats that request. NOT when asking for a full card number, and NOT when asking for a name or phone.",
       "response_type": "phrase",
       "response_value": "ZIP 97401, card ending 7719.",
       "occurrence_mode": "always"
@@ -134,16 +143,16 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "has already finished the original request you called about, confirmed that outcome out loud, and is now offering a second unrelated request, a confirmation text, or asking if you need anything else. NOT during identity, NOT while they are still collecting facts or looking something up, and NOT before they have confirmed the original request is done.",
+      "match_phrase": "has already finished the original request you called about, confirmed that outcome out loud, and is now offering a second unrelated request, a confirmation text, or asking if you need anything else. NOT during identity, NOT while they are still collecting facts or looking something up, NOT before they have confirmed the original request is done, and NOT before they have said whether the Bellwether Ease phone can still be returned. NOT when they only asked whether you still have a question about the Bellwether return, and NOT when they only said they will now check the Bellwether return.",
       "response_type": "phrase",
       "response_value": "That's all I needed. Thank you.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "asks for the phone or email on the message, or how they reached you. NOT when asking for a full name together with a phone number for the account, NOT when asking for ZIP, card last four, or an order number.",
+      "match_phrase": "asks for the phone or email on the message, how the message reached you, or where you saw the charge. NOT when asking for a full name together with a phone number for the account, NOT when asking for ZIP, card last four, or an order number. This includes asking which email address received or got the renewal notice.",
       "response_type": "phrase",
-      "response_value": "They emailed me at rosalind.baptiste@example.test. My number is 541-555-0133.",
+      "response_value": "They emailed me at R O S A L I N D, dot, B A P T I S T E, at example dot test. My number is 541-555-0133.",
       "occurrence_mode": "always"
     },
     {
@@ -169,14 +178,14 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "has already said the email did not come from Kestrel, there is no such charge, that message was not from Kestrel, or filed the report, and asks if you need anything else. NOT when they have already said whether the Bellwether Ease phone can still be returned.",
+      "match_phrase": "has already said the email did not come from Kestrel, there is no such charge, or that the report is filed, and has not yet said whether the Bellwether Ease phone can be returned, whether or not they ask if you need anything else. NOT when they have already said whether the Bellwether Ease phone can still be returned, NOT while they are still checking the email or asking about it. This includes when they ask whether you still have a question about the Bellwether Ease return, and when they said they will check the Bellwether return but have not answered it.",
       "response_type": "phrase",
-      "response_value": "Can I still return my Bellwether Ease phone?",
+      "response_value": "Thanks. Now, can I still return my Bellwether Ease phone?",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "has already answered whether the Bellwether Ease phone can still be returned, and asks if you need anything else. NOT when they are still checking the email or have not yet answered the return question.",
+      "match_phrase": "has already answered whether the Bellwether Ease phone can still be returned, and asks if you need anything else. NOT when they are still checking the email or have not yet answered the return question. NOT when they only asked whether you still have a question about the return, and NOT when they only said they will check the return.",
       "response_type": "phrase",
       "response_value": "Thank you, that's all I needed.",
       "occurrence_mode": "always"

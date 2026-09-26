@@ -1,7 +1,7 @@
 {
   "task_name": "C5-M3: Hourly consumer consultation",
   "customer_name": "Estelle Kowalczyk",
-  "intent": "Open with exactly: \"I need a lawyer about a defective Halloway Toolworks product. Nobody was hurt — I just need help with the warranty and the bill.\" If asked what type of matter this is, say exactly: \"It's a consumer warranty and billing problem, not product liability.\" If they call it product liability, say exactly: \"No. Nobody was injured. It's a consumer warranty and billing problem, not product liability.\" If asked whether you were injured or if this is a personal-injury claim, say exactly: \"No. Nobody was injured. It's a warranty and billing problem, not a personal-injury claim.\" When asked when, say exactly: \"It was July tenth, twenty twenty six.\" If asked email or text for the packet, say email. Take the first appointment time offered. Confirm only after they read back the consultation fee. Decline a callback or a later-booking promise. Stay until they confirm the intake is on the file and the consultation is booked. A spoken \"we'll take care of it\" or a later-booking promise, without those writes, is not enough. Do not ask for a staff member. Once they confirm the intake is on the file and the consultation is booked, say exactly: \"Thank you, that's all I needed.\" and end the call.",
+  "intent": "Open with exactly: \"I need a lawyer about a defective Halloway Toolworks product. Nobody was hurt. I just need help with the warranty and the bill.\" If asked what type of matter this is, say exactly: \"It's a consumer warranty and billing problem, not product liability.\" If they call it product liability, say exactly: \"No. Nobody was injured. It's a consumer warranty and billing problem, not product liability.\" If asked whether you were injured or if this is a personal-injury claim, say exactly: \"No. Nobody was injured. It's a warranty and billing problem, not a personal-injury claim.\" When asked when, say exactly: \"It was July tenth, twenty twenty six.\" If asked email or text for the packet, say email. Take the first appointment time offered. Confirm only after they read back the consultation fee. Decline a callback or a later-booking promise. Stay until they confirm the intake is on the file and the consultation is booked. A spoken \"we'll take care of it\" or a later-booking promise, without those writes, is not enough. Do not ask for a staff member. Once they confirm the intake is on the file and the consultation is booked, say exactly: \"Thank you, that's all I needed.\" and end the call. When the agent asks you a question, answer it in that same turn with the answer given here. Never answer a question with only okay, sure, mm-hmm, yeah or thanks, and never speak the agent's lines for it. Say \"Thank you, that's all I needed.\" only after the agent says the consultation is booked for a specific day and time. After you say it, end the call and say nothing more.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -88,7 +88,14 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
+      "match_phrase": "The agent says it did not catch your name or number, or asks you to repeat, spell, or say them slowly or one digit at a time, or asks for the area code or the last digits. NOT when asking anything else.",
+      "response_type": "phrase",
+      "response_value": "Estelle, E S T E L L E, Kowalczyk, K O W A L C Z Y K. My number is nine, one, six, five, five, five, zero, one, two, eight.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether a lawyer or law firm currently represents the caller, whether the caller has an attorney for this, or whether the caller has already hired or signed with anyone, including when the same turn also says they are looking the caller up or thanks them. NOT any other question.",
       "response_type": "phrase",
       "response_value": "No, nobody represents me.",
       "occurrence_mode": "always"
@@ -151,7 +158,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent confirms the intake is on the file and the consultation is booked. NOT when offering times or reading back a hold.",
+      "match_phrase": "The agent says the consultation is booked or confirmed for a specific day and time. NOT when offering times, reading back a hold, asking whether to book, or saying they will move forward or record the intake.",
       "response_type": "phrase",
       "response_value": "Thank you, that's all I needed.",
       "occurrence_mode": "always"
@@ -182,6 +189,34 @@
       "match_phrase": "The agent has already held a slot and is reading back that held appointment's day, time, attorney and fee, asking whether to confirm it. NOT when first listing open times, NOT during representation screening or conflict checks, and NOT before they have named the fee, and NOT when asking which slot to hold.",
       "response_type": "phrase",
       "response_value": "Yes, that's right, go ahead and book it.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether you want to book or schedule the consultation, or whether to find times. NOT when listing specific times, NOT when reading back a held appointment, NOT after it is booked.",
+      "response_type": "phrase",
+      "response_value": "Yes, book the consultation now, please.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks you to describe what happened, what kind of accident or matter it was, where it happened, what injuries or losses you had, or whether you got medical treatment. NOT when asking the date, the state alone, your name or number, or who the other side is.",
+      "response_type": "phrase",
+      "response_value": "The Halloway Toolworks table saw I bought stopped working after two weeks. They denied the warranty repair and still billed me four hundred dollars for it. Nobody was hurt.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks for your email address or how to spell it. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "It's estelle dot kowalczyk at example dot com.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent reads the incident date back to you and asks you to confirm it, or asks for the year. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "Yes, July tenth, twenty twenty six.",
       "occurrence_mode": "always"
     }
   ],

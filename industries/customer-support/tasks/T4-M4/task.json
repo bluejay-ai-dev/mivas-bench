@@ -66,16 +66,30 @@
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the caller's full name and a phone number, or for a name and the number on the account. NOT when asking for ZIP, card last four, or an order number alone.",
+      "match_phrase": "The agent asks for the caller's full name and a phone number, or for a name and the number on the account. NOT when asking for ZIP, card last four, or an order number alone. NOT when they say they missed or did not catch the phone number or name, and NOT when they ask you to repeat it one digit at a time or to spell your name.",
       "response_type": "phrase",
       "response_value": "Selina Cortez, 541-555-0171.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the ZIP code on the order and the last four digits of the card, together or in either order. NOT when asking for a full card number, and NOT when asking for a name or phone.",
+      "match_phrase": "The agent says it missed or did not catch the phone number or the name, or asks you to repeat the phone number slowly or one digit at a time, or to spell your name. NOT when asking for ZIP, card last four, or an order number.",
+      "response_type": "phrase",
+      "response_value": "Cortez is spelled C, O, R, T, E, Z. The phone number is five four one, five five five, zero one seven one.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks for the ZIP code on the order and the last four digits of the card, together or in either order. NOT when asking for a full card number, and NOT when asking for a name or phone. NOT when they say they missed a digit or ask you to repeat the ZIP or the card digits one at a time.",
       "response_type": "phrase",
       "response_value": "ZIP 97035, card ending 1156.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent says it missed a digit of the ZIP or the card, or asks you to repeat the ZIP code or the last four digits of the card one digit at a time. NOT when asking for name, phone, or an order number.",
+      "response_type": "phrase",
+      "response_value": "ZIP nine seven zero three five. Card ending one, one, five, six.",
       "occurrence_mode": "always"
     },
     {

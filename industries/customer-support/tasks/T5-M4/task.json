@@ -1,7 +1,7 @@
 {
   "task_name": "T5-M4: Price not lower on the Halo",
   "customer_name": "Felix Moreau",
-  "intent": "Open with exactly: \"Rivertide has the Halo soundbar at the same five hundred forty-nine ninety-nine I paid. Match it.\" Give identity when asked. Order KE-4495108, Halo. Stay until they say that price is not lower so there is nothing to refund. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
+  "intent": "Open with exactly: \"Rivertide has the Halo soundbar on my order KE-4495108 at the same five hundred forty-nine ninety-nine I paid. Match it.\" Give identity when asked. Order KE-4495108, Halo. Stay until they say that price is not lower so there is nothing to refund. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -59,7 +59,13 @@
     {
       "name": "quote_price_match",
       "parameters": {
-        "order_number": "KE-4495108",
+        "order_number": {
+          "any_of": [
+            "KE-4495108",
+            "KE4495108",
+            "KE-449-5108"
+          ]
+        },
         "competitor": "Rivertide",
         "competitor_price": 549.99
       }
@@ -71,9 +77,23 @@
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the caller's full name and a phone number, or for a name and the number on the account. NOT when asking for ZIP, card last four, or an order number alone.",
+      "match_phrase": "The agent greets you at the start of the call and asks how they can help. NOT after identity or order lookup has started.",
+      "response_type": "phrase",
+      "response_value": "Rivertide has the Halo soundbar on my order KE-4495108 at the same five hundred forty-nine ninety-nine I paid. Match it.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks for the caller's full name and a phone number, or for a name and the number on the account. NOT when asking for ZIP, card last four, or an order number alone. NOT when they say they missed or did not catch the name or number, and NOT when they ask you to spell your name or repeat the phone one digit at a time.",
       "response_type": "phrase",
       "response_value": "Felix Moreau, 541-555-0108.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent says it missed or did not catch the name or phone number, or asks you to spell your name or repeat the phone number slowly or one digit at a time. NOT when asking for ZIP, card last four, or an order number.",
+      "response_type": "phrase",
+      "response_value": "Moreau is M, O, R, E, A, U. The phone number is five four one, five five five, zero one zero eight.",
       "occurrence_mode": "always"
     },
     {
@@ -85,9 +105,16 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for an order number, which order, or which item. NOT when asking for name, phone, ZIP, or card last four.",
+      "match_phrase": "The agent asks for an order number, which order, or which item. NOT when asking for name, phone, ZIP, or card last four. NOT when they ask you to repeat the order number or its digits.",
       "response_type": "phrase",
       "response_value": "Order KE-4495108, the Aurelian Halo soundbar.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks you to repeat the order number, says it did not catch the digits, or asks for the order number one character or one digit at a time. NOT when asking for ZIP, card last four, name, or phone.",
+      "response_type": "phrase",
+      "response_value": "K, E, four, four, nine, five, one, zero, eight.",
       "occurrence_mode": "always"
     },
     {

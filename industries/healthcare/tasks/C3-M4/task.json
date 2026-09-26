@@ -1,6 +1,6 @@
 {
   "task_name": "C3-M4: UnitedHealthcare on an existing Brooklyn Heights chart",
-  "intent": "You are an existing Straus patient. Ask whether they still take UnitedHealthcare at the Brooklyn Heights office specifically, not a yes for the whole practice. Stay until they have looked that up for Brooklyn Heights. If they ask for your name and date of birth, answer once and confirm if they read it back. If they say acceptance depends on the provider, or they name Doctor Chen, Doctor Ruiz, or Doctor Patel, tell them you do not have a provider yet and you still need that office-level yes or no; do not pick a provider and do not agree to wait until you book. If they offer a callback instead of a lookup, decline and stay on that office question. Once they have given you a yes or no that names that office, thank them and end the call. Do not ask to book, reschedule, or cancel. Do not ask to add or change insurance. Do not ask for a callback, to speak to a person, a bill, a payment, the patient portal, a waitlist, a text, financing, or the street, floor, or suite. A spoken yes for the whole practice is not enough. Stay until they have looked up whether that office takes UnitedHealthcare; a guess without a lookup is not enough. Do not ask them to text you an appointment confirmation.",
+  "intent": "You are an existing Straus patient. Ask whether they still take UnitedHealthcare at the Brooklyn Heights office specifically, not a yes for the whole practice. Stay until they have looked that up for Brooklyn Heights. If they ask for your name and date of birth, answer once and confirm if they read it back. If they say acceptance depends on the provider, or they name Doctor Chen, Doctor Ruiz, or Doctor Patel, tell them you do not have a provider yet and you still need that office-level yes or no; do not pick a provider and do not agree to wait until you book. If they offer a callback instead of a lookup, decline and stay on that office question. Once they have given you a yes or no that names that office, thank them and end the call. Do not ask to book, reschedule, or cancel. Do not ask to add or change insurance. Do not ask for a callback, to speak to a person, a bill, a payment, the patient portal, a waitlist, a text, financing, or the street, floor, or suite. A spoken yes for the whole practice is not enough. Stay until they have looked up whether that office takes UnitedHealthcare; a guess without a lookup is not enough. Do not ask them to text you an appointment confirmation. If they say Brooklyn Heights accepts or takes UnitedHealthcare, that is your answer even if they also mention a doctor; thank them and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -94,13 +94,13 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "asks which provider you are seeing, names Doctor Chen, Doctor Ruiz, or Doctor Patel, or says acceptance depends on the provider. NOT when giving a yes or no for Brooklyn Heights, NOT when asking for your name or date of birth.",
+      "match_phrase": "asks which provider you are seeing, names Doctor Chen, Doctor Ruiz, or Doctor Patel, or says acceptance depends on the provider. NOT when giving a yes or no for Brooklyn Heights, NOT when asking for your name or date of birth. NOT when they say Brooklyn Heights accepts or takes UnitedHealthcare, even if they also name a doctor.",
       "response_type": "phrase",
       "response_value": "I don't have a provider yet. I still need a yes or no for UnitedHealthcare at Brooklyn Heights."
     },
     {
       "match_type": "context",
-      "match_phrase": "offers a callback, asks for a number to call you back, says the insurance team will call, or says they cannot confirm the plan on this call. NOT when they have just given a yes or no for Brooklyn Heights, NOT when asking for your name or date of birth.",
+      "match_phrase": "offers a callback, asks for a number to call you back, says the insurance team will call, or says they cannot confirm the plan on this call. NOT when they have just given a yes or no for Brooklyn Heights, NOT when asking for your name or date of birth. NOT when they say Brooklyn Heights accepts or takes UnitedHealthcare, even if they also name a doctor.",
       "response_type": "phrase",
       "response_value": "No callback. Please look up whether Brooklyn Heights takes UnitedHealthcare."
     }

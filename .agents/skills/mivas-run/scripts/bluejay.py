@@ -456,7 +456,7 @@ def score_dir(out: Path, *, in_pod_tools: bool = False) -> bool:
             print(f"{result.get('id')!s:>8} {result.get('digital_human_id')!s:>7} {status:<20} {'-':<5} FAIL (no conversation)")
             all_ok = False
             continue
-        transcript = score_rubric._fetch_transcript(str(result["transcript_url"])) if result.get("transcript_url") else None
+        transcript = score_rubric._fetch_transcript(str(result["transcript_url"])) if result.get("transcript_url") else score_rubric.inline_transcript(result)
         score = score_rubric.score_call(result, transcript=transcript, in_pod_tools=in_pod_tools)
         flags = " ".join(f"{k}={'ok' if score['checks'][k]['pass'] else 'FAIL'}" for k in score_rubric.CHECKS)
         goal = result.get("goal_success")

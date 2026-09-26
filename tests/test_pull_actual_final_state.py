@@ -23,6 +23,10 @@ pull = _load("pull_actual_final_state", ROOT / "verifiers" / "pull_actual_final_
 efs = _load("expected_final_state", ROOT / "verifiers" / "expected_final_state.py")
 
 
+def test_pair_slug_folds_variant_like_run_py() -> None:
+    assert pull.pair_slug("openai/gpt-live-1@sol-low", "healthcare") == "openai-gpt-live-1-sol-low-healthcare"
+
+
 def test_pair_slug_and_s3_key() -> None:
     assert pull.pair_slug("openai/realtime-2.1", "customer-support") == (
         "openai-realtime-2-1-customer-support"

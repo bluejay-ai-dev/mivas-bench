@@ -1,7 +1,7 @@
 {
   "task_name": "C4-M3: Packet by text message",
   "customer_name": "Priya Nair",
-  "intent": "Open with exactly: \"A debt collector keeps calling me at work.\" When asked who this would be against, say exactly: \"It's Apex Collections.\" California. February tenth, twenty twenty six. If they ask whether this is employment, workers' compensation, or a job claim, say exactly: \"No. It's a debt collector, not my employer.\" If offered the packet, say exactly: \"Text is fine.\" Decline booking. Stay until they confirm the intake is on the file and the packet was sent by text. A spoken promise without those writes is not enough. Once finished, say exactly: \"Thank you, that's all I needed.\" and end the call.",
+  "intent": "Open with exactly: \"A debt collector keeps calling me at work.\" When asked who this would be against, say exactly: \"It's Apex Collections.\" California. February tenth, twenty twenty six. If they ask whether this is employment, workers' compensation, or a job claim, say exactly: \"No. It's a debt collector, not my employer.\" If offered the packet, say exactly: \"Text is fine.\" Decline booking. Stay until they confirm the intake is on the file and the packet was sent by text. A spoken promise without those writes is not enough. Once finished, say exactly: \"Thank you, that's all I needed.\" and end the call. The agent often says one moment or let me pull you up and then asks a question in the same turn. Always answer the question at the end of the agent's turn with the fact it asks for. Never reply with only \"Sure\", \"Okay\", \"Yeah\", or \"Thank you\" when the agent's turn ends in a question. Answer only the question the agent asks; do not repeat facts you already gave.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -89,16 +89,16 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
+      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, whether any attorney represents you, or whether the caller has already hired or signed with anyone, even when the same turn starts with a filler such as one moment, let me pull you up, let me look you up, or I'll check that. NOT any other question.",
       "response_type": "phrase",
       "response_value": "No, nobody represents me.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question.",
+      "match_phrase": "The agent asks who the claim or matter would be against, who the other side is, or for the name of the debt collector or company this would be against, even when the same turn starts with a filler such as one moment, let me pull you up, let me look you up, or I'll check that. Also when they ask you to spell the company name. NOT when asking you to spell your own name. NOT any other question.",
       "response_type": "phrase",
-      "response_value": "It's Apex Collections.",
+      "response_value": "It's Apex Collections, A-P-E-X Collections.",
       "occurrence_mode": "always"
     },
     {
@@ -110,7 +110,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks when the incident happened, or for the date of the accident, injury or event. NOT any other question.",
+      "match_phrase": "The agent asks when the incident happened, when the collector most recently called, when the calls started, or for a date, even when the same turn starts with a filler such as one moment, let me pull you up, let me look you up, or I'll check that. NOT any other question.",
       "response_type": "phrase",
       "response_value": "It was February tenth, twenty twenty six.",
       "occurrence_mode": "always"
@@ -138,9 +138,44 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers an appointment or evaluation time",
+      "match_phrase": "asks whether you want to book or schedule a consultation, a case evaluation, or an appointment, or offers a time. NOT when asking email or text. NOT when you have already declined booking once and the agent is only saying take your time or call back when ready. NOT when the agent asks whether to leave it there or end for now. NOT when the agent asks whether you want to continue, continue with the evaluation, or keep going before the intake is recorded.",
       "response_type": "phrase",
       "response_value": "Not yet, let me read the paperwork first.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks what happened, about the calls, or how they have affected you. NOT when asking who the claim would be against, which state, or the date.",
+      "response_type": "phrase",
+      "response_value": "Apex Collections keeps calling me at work about a debt, even after I asked them to stop. It's stressful.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "ONLY IF earlier in this call the agent has confirmed the intake is recorded and the packet was sent by text. Then: the agent says take your time, call back when ready, asks if there is anything else, or says goodbye. NOT if either of those has not been confirmed yet. NOT during screening. NOT when the agent asks which state, the date, or any other question, and NOT right after the agent reads a fee or consultation price.",
+      "response_type": "phrase",
+      "response_value": "Thank you, that's all I needed.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent starts to wrap up, says take the time you need or take your time, says goodbye, asks if that is all, or says to call back when ready, before confirming the intake is recorded and the packet was sent by text. NOT after both have been confirmed. NOT during screening.",
+      "response_type": "phrase",
+      "response_value": "I still need the intake on the file and the packet sent by text.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether to leave it there, stop, or end for now, before it has said the intake is recorded and the packet was sent by text. NOT after both are confirmed.",
+      "response_type": "phrase",
+      "response_value": "No, I still need the intake on the file and the packet sent by text.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether you want to continue, continue with the evaluation, keep going, or move on to the next step, before it has said the intake is recorded. NOT when asking to book or schedule a specific appointment time, NOT when asking email or text.",
+      "response_type": "phrase",
+      "response_value": "Yes, please take my intake and text me the packet. I don't want to book an appointment yet.",
       "occurrence_mode": "always"
     }
   ],

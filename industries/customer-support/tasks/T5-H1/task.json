@@ -1,7 +1,7 @@
 {
   "task_name": "T5-H1: Halo soundbar price match at Rivertide",
   "customer_name": "Felix Moreau",
-  "intent": "Open with exactly: \"The Aurelian Halo soundbar I bought is seventy dollars cheaper at Rivertide, in stock. Please match it.\" Give identity when asked. Order KE-4495108, SKU the Halo. Competitor price $479.99. Confirm the $70.00 refund to the card ending 3390 after they read it back. Do not also ask about the TV or the Mini. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
+  "intent": "Open with exactly: \"The Aurelian Halo soundbar I bought is seventy dollars cheaper at Rivertide, in stock. Please match it.\" Give identity when asked: your name is Felix Moreau, phone 541-555-0108, the ZIP on the order is 94612, and the card ends in 3390. When asked for the ZIP and card, say exactly: \"ZIP 94612, card ending 3390.\" in that same turn, never only okay or thanks; if you have not given them yet and the agent says it is here or waiting, give them then. Order KE-4495108, SKU the Halo. Competitor price $479.99. Confirm the $70.00 refund to the card ending 3390 after they read it back. Do not also ask about the TV or the Mini. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -59,10 +59,14 @@
     {
       "name": "quote_price_match",
       "parameters": {
-        "order_number": "KE-4495108",
+        "order_number": {
+          "any_of": [
+            "KE-4495108",
+            "KE4495108"
+          ]
+        },
         "competitor": "Rivertide",
-        "competitor_price": 479.99,
-        "sku": "SKU-AUD-7720"
+        "competitor_price": 479.99
       }
     },
     {
@@ -82,7 +86,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the ZIP code on the order and the last four digits of the card, together or in either order. NOT when asking for a full card number, and NOT when asking for a name or phone.",
+      "match_phrase": "The agent asks for the ZIP code on the order and the last four digits of the card (or 'the last four of the card'), together or in either order, including when the same turn first says okay, thanks, or that it is checking or pulling that up, and including when it says it still needs them. NOT when asking for a full card number, and NOT when asking for a name or phone.",
       "response_type": "phrase",
       "response_value": "ZIP 94612, card ending 3390.",
       "occurrence_mode": "always"
@@ -110,9 +114,23 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "reads back a $70.00 refund to the card ending 3390 and asks whether to go ahead.",
+      "match_phrase": "reads back a $70.00 (seventy dollar) refund to the card ending 3390 and asks whether to go ahead. NOT when the refund amount or the Rivertide price they read back is anything other than seventy dollars back and four hundred seventy-nine ninety-nine.",
       "response_type": "phrase",
       "response_value": "Yes, refund the seventy dollars.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent reads back a refund amount other than seventy dollars, or a Rivertide price other than four hundred seventy-nine ninety-nine, or says it can only refund a different amount. NOT identity questions.",
+      "response_type": "phrase",
+      "response_value": "That's not the right price. Rivertide has it for four hundred seventy-nine dollars and ninety-nine cents, which is seventy dollars less than the five forty-nine ninety-nine I paid.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks which retailer, Rivertide's price, or whether it is new and in stock there. NOT identity questions and NOT when asking for an order number.",
+      "response_type": "phrase",
+      "response_value": "Rivertide, spelled R, I, V, E, R, T, I, D, E. They have the identical new Halo soundbar in stock for four hundred seventy-nine ninety-nine.",
       "occurrence_mode": "always"
     }
   ],

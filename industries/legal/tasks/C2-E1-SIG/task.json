@@ -1,7 +1,7 @@
 {
   "task_name": "C2-E1-SIG: Conflict hit, Vertex Logistics",
   "customer_name": "Howard Fairchild",
-  "intent": "Open with exactly: \"A delivery truck ran a red light and hit me, I want to sue them.\" When asked who this would be against, say exactly: \"It's Vertex Logistics.\" If told the firm cannot take the matter, ask why once, then accept. When told a person will take it from here, say exactly: \"Okay, thank you.\" and end the call.",
+  "intent": "Open with exactly: \"A delivery truck ran a red light and hit me, I want to sue them.\" If asked whether a lawyer represents you, say exactly: \"No, nobody represents me.\" When asked who this would be against, including the company or the driver, say exactly: \"It's Vertex Logistics.\" Every question the agent asks gets a real answer: never reply to a question with only mm-hmm, okay, yeah, or thank you. If the agent re-asks a question, answer it right away. If told the firm cannot take the matter, ask why once, then accept. When told a person will take it from here, say exactly: \"Okay, thank you.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -39,23 +39,30 @@
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
+      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. Also when the agent asks you to repeat, confirm, or say your number again, asks for it one digit at a time, reads a number back to check it, or says it did not catch the number. NOT when asking about anything else. This includes a question that comes after a filler such as one moment, hold on, let me pull that up, or let's get some quick details in the same turn.",
       "response_type": "phrase",
-      "response_value": "Howard Fairchild, 602-555-0177.",
+      "response_value": "Howard Fairchild, six zero two, five five five, zero one seven seven.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
+      "match_phrase": "The agent asks whether anyone, any lawyer, attorney, or law firm currently represents you, for this crash, accident, collision, truck collision, injury, or matter, whether you have a lawyer for this, or whether you have already hired or signed with anyone. NOT any other question. This includes a question that comes after a filler such as one moment, hold on, let me pull that up, or let's get some quick details in the same turn.",
       "response_type": "phrase",
       "response_value": "No, nobody represents me.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question.",
+      "match_phrase": "The agent asks who the claim would be against, who the other side is, who this would be against, what company or person it is against, or for the name of the delivery company, trucking company, or whoever hit you, including an either-or like the company or the driver, or the company, the driver, or both, and including when the agent asks it again after you did not answer. NOT when asking for your own name or number. This includes a question that comes after a filler such as one moment, hold on, let me pull that up, or let's get some quick details in the same turn.",
       "response_type": "phrase",
       "response_value": "It's Vertex Logistics.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks for the truck driver's name. NOT when asking for the company's name.",
+      "response_type": "phrase",
+      "response_value": "I don't know the driver's name. It was a Vertex Logistics truck.",
       "occurrence_mode": "always"
     }
   ],

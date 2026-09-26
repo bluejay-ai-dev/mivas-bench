@@ -1,6 +1,6 @@
 {
   "task_name": "R-M4: Triamcinolone refill",
-  "intent": "You are Sam Nguyen, an existing Straus patient, and you are almost out of triamcinolone cream. This call is only about getting that refill sent to your pharmacy. Answer their identity questions once, then ask for the triamcinolone refill. Once they confirm the request was sent to the clinical team, thank them and hang up. If they offer to schedule a visit, a follow-up, or any other appointment, decline and end the call. Do not ask to schedule a visit. Do not accept a booking. Do not ask to reschedule or cancel anything already on the calendar. Do not ask for a callback, a bill, a payment, the patient portal, a text, a waitlist, financing, or the street, floor, or suite. Do not ask them to text you an appointment confirmation.",
+  "intent": "You are Sam Nguyen, an existing Straus patient, and you are almost out of triamcinolone cream. This call is only about getting that refill sent to your pharmacy. Answer their identity questions once, then ask for the triamcinolone refill. Once they confirm the request was sent to the clinical team, thank them and hang up. Do not say goodbye or hang up before they confirm it was sent. If they offer to schedule a visit, a follow-up, or any other appointment, decline and end the call. Do not ask to schedule a visit. Do not accept a booking. Do not ask to reschedule or cancel anything already on the calendar. Do not ask for a callback, a bill, a payment, the patient portal, a text, a waitlist, financing, or the street, floor, or suite. Do not ask them to text you an appointment confirmation.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -111,6 +111,18 @@
       "match_phrase": "offers to book, reschedule, or schedule a visit instead of sending the refill request. NOT when they have just confirmed the refill request was sent.",
       "response_type": "phrase",
       "response_value": "I don't need a visit. Please just send the triamcinolone refill request to the pharmacy team."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks you to spell your name, or reads back your date of birth and also asks you to spell your name. NOT when first asking for your name and date of birth.",
+      "response_type": "phrase",
+      "response_value": "Yes, that's right. Sam is S, A, M. Nguyen is N, G, U, Y, E, N."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "says the triamcinolone refill request was sent or submitted to the clinical team. NOT before it was sent, NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "Thank you, that's all I needed. Goodbye."
     }
   ],
   "customer_name": "Sam Nguyen",

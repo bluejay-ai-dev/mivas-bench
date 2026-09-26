@@ -33,11 +33,13 @@ import uuid
 from pathlib import Path
 
 from websockets.asyncio.server import serve
+from websockets.exceptions import ConnectionClosed
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from live import LiveSession, MODEL, _peak, AUDIBLE_PEAK  # noqa: E402
 from pack import load_pack  # noqa: E402
 from tools import call_session, run_tool, set_call_id  # noqa: E402
+import call_id as _call_id  # noqa: E402  (runtime/, on sys.path via tools)
 from tracing import Tracer, post_trace_ids, provider  # noqa: E402
 
 log = logging.getLogger("mivas.gpt-live.chirp")
@@ -65,11 +67,24 @@ def _simulation_result_id(ws) -> str | None:
     return str(val).strip() if val else None
 
 
+class _CallFilter(logging.Filter):
+    """Stamp every record with the Bluejay result id of the task that logged it.
+
+    Calls overlap on one pod, so untagged tool/handoff/transcript lines cannot be
+    attributed to a call afterwards.
+    """
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        record.call = _call_id.current() or "-"
+        return True
+
+
 class _AgentSpeech:
     """Outbound agent audio: pass-through + speech.started/completed markers."""
 
     def __init__(self, ws) -> None:
         self.ws = ws
+        self.accepted = time.monotonic()
         self.utt: str | None = None
         self.last_audible = 0.0
         self.bytes_out = 0
@@ -101,12 +116,16 @@ class _AgentSpeech:
 
     async def _emit(self, frame: bytes) -> None:
         self.bytes_out += len(frame)
-        if _peak(frame) >= AUDIBLE_PEAK:
-            self.last_audible = time.monotonic()
-            if self.utt is None:
-                self.utt = f"u_{uuid.uuid4().hex[:12]}"
-                await self.ws.send(_marker("speech.started", self.utt))
-        await self.ws.send(frame)
+        try:
+            if _peak(frame) >= AUDIBLE_PEAK:
+                self.last_audible = time.monotonic()
+                if self.utt is None:
+                    self.utt = f"u_{uuid.uuid4().hex[:12]}"
+                    log.info("agent speech start +%dms", (self.last_audible - self.accepted) * 1000)
+                    await self.ws.send(_marker("speech.started", self.utt))
+            await self.ws.send(frame)
+        except ConnectionClosed:
+            pass  # Bluejay hung up while the provider was still streaming; the bridge is closing
 
     async def watch(self) -> None:
         while True:
@@ -149,6 +168,8 @@ async def _bridge(ws, industry: str) -> None:
                 nonlocal bytes_in
                 async for msg in ws:
                     if isinstance(msg, bytes):
+                        if not bytes_in:
+                            log.info("first caller audio +%dms", (time.monotonic() - speech.accepted) * 1000)
                         bytes_in += len(msg)
                         await live.send_audio(msg)
                     else:
@@ -183,6 +204,10 @@ async def _handler(ws, industry: str) -> None:
     if expected and ws.request.headers.get("Authorization") != expected:
         await ws.close(1008, "unauthorized")
         return
+    if _simulation_result_id(ws) == "preflight":
+        # mivas-run preflight probes the upgrade only; no provider session, no trace link.
+        await ws.close(1000)
+        return
     try:
         await _bridge(ws, industry)
     except Exception:
@@ -202,8 +227,10 @@ def main() -> None:
         raise SystemExit("OPENAI_API_KEY required")
     logging.basicConfig(
         level=os.environ.get("GPT_LIVE_LOG_LEVEL", "INFO"),
-        format="%(asctime)s %(name)s %(levelname)s %(message)s",
+        format="%(asctime)s %(name)s %(levelname)s [%(call)s] %(message)s",
     )
+    for handler in logging.getLogger().handlers:
+        handler.addFilter(_CallFilter())
     log.info("chirp↔%s × %s :%s auth=%s", MODEL, a.industry, a.port, bool(_auth()))
 
     async def run() -> None:

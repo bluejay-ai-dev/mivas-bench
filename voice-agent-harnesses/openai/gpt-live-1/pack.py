@@ -133,6 +133,12 @@ class Tool:
             "name": self.name,
             "description": self.description,
             "parameters": params,
+            # Responses defaults function tools to strict, which makes every optional
+            # field required: measured 2026-09-25, gpt-5.6-sol and gpt-6-astra both sent
+            # check_plan_accepted provider_id="prov_chen" 6/6 for a caller with no
+            # provider (must_not_assert at Brooklyn Heights). The pack's schemas mark
+            # optional fields by leaving them out of `required`, so strict must be off.
+            "strict": False,
         }
 
 

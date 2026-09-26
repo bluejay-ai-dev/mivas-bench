@@ -1,6 +1,6 @@
 {
   "task_name": "C4-M2: Cheek filler consult",
-  "intent": "Ask what cheek filler costs. When you hear the price, say that is more than you can pay all at once and ask whether there is a way to spread it out. Then ask to book a filler consult at Park Avenue. You must get the Park Avenue street address, floor, and suite before you accept a time — if they quote a time or an address without all three, ask for the street, the floor, and the suite. Agree to the deposit and cancellation rules. Take the first appointment time they offer after you have the address. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first time out loud. If they ask who you are, give your name and date of birth once, then continue. Do not thank them, say goodbye, or hang up until a consult time is confirmed on the calendar. If they try to wrap up after quoting a price, financing, or an address, say you still need the consult booked on this call. Do not ask for a callback, to speak to a person, about a medical bill, insurance, a medical appointment, the patient portal, a waitlist, or a text. Do not ask for a confirmation text or a deposit payment link. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar. If they only list openings, say book the first one. A spoken yes or no about spreading the cost is enough; then stay on booking the consult. Do not ask them to text you an appointment confirmation.",
+  "intent": "Ask what cheek filler costs. When you hear the price, say that is more than you can pay all at once and ask whether there is a way to spread it out. Then ask to book a filler consult at Park Avenue. You must get the Park Avenue street address, floor, and suite before you accept a time; if they quote a time or an address without all three, ask for the street, the floor, and the suite. Agree to the deposit and cancellation rules. Take the first appointment time they offer after you have the address. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first time out loud. If they ask who you are, give your name and date of birth once, then continue. Do not thank them, say goodbye, or hang up until a consult time is confirmed on the calendar. If they try to wrap up after quoting a price, financing, or an address, say you still need the consult booked on this call. Do not ask for a callback, to speak to a person, about a medical bill, insurance, a medical appointment, the patient portal, a waitlist, or a text. Do not ask for a confirmation text or a deposit payment link. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar. If they only list openings, say book the first one. A spoken yes or no about spreading the cost is enough; then stay on booking the consult. Do not ask them to text you an appointment confirmation. Once they have said the consult is on the calendar, thank them and end the call right away.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -119,25 +119,19 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers an appointment time, asks you to confirm a slot, or quotes an office name without the street address, floor, and suite. NOT when they have already said the street, the floor, and the suite.",
+      "match_phrase": "offers an appointment time or asks you to confirm a slot, and has NOT yet said the Park Avenue street address, floor, and suite anywhere earlier in the call. NOT when the street, floor, and suite have already been said at any point in the call, NOT when asking for your name, date of birth, ZIP code, or phone number.",
       "response_type": "phrase",
       "response_value": "Before I take a time, I need the street address, the floor, and the suite."
     },
     {
       "match_type": "context",
-      "match_phrase": "thanks you, says goodbye, or wraps up after you have asked for a Park Avenue filler consult, before a consult time has been confirmed on the calendar. NOT when greeting you or asking how they can help at the start of the call, NOT when they have just confirmed a booked time, NOT when asking for your name or date of birth.",
+      "match_phrase": "thanks you, says goodbye, wraps up, or asks if you need anything else, and no consult time has been booked yet anywhere in the call. NOT when they have said at any point that a consult is booked, confirmed, or on the calendar, NOT when greeting you at the start of the call, NOT when asking a question.",
       "response_type": "phrase",
       "response_value": "I still need the consult booked. Please confirm a time on the calendar before I go."
     },
     {
       "match_type": "context",
-      "match_phrase": "thanks you, says goodbye, or wraps up after quoting filler, financing, or an address, before a time is on the calendar. NOT when greeting you or asking how they can help at the start of the call, NOT when they have just confirmed a booked time.",
-      "response_type": "phrase",
-      "response_value": "I still need that time booked. Please confirm it is on the calendar before I go."
-    },
-    {
-      "match_type": "context",
-      "match_phrase": "has already said the cosmetic deposit amount and the cancellation window out loud, and is asking whether you agree to that policy before booking. NOT when asking any other yes-or-no, NOT during identity verification, NOT when quoting a price range, and NOT before they have named both the deposit and the cancellation window.",
+      "match_phrase": "has already said the cosmetic deposit amount and the cancellation window out loud, and is asking whether you agree to that policy before booking. NOT when asking any other yes-or-no, NOT during identity verification, NOT when quoting a price range, and NOT before they have named both the deposit and the cancellation window. NOT when asking for a phone or mobile number, NOT when they have already booked the consult.",
       "response_type": "phrase",
       "response_value": "Yes. I agree to the $125 deposit, free changes through 72 hours before, forfeiting the deposit inside 72 hours, and paying any treatment balance at the visit."
     },

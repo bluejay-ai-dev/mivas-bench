@@ -1,7 +1,7 @@
 {
   "task_name": "C3-M1: Medical malpractice in California",
   "customer_name": "Yvonne Pressley",
-  "intent": "Open with exactly: \"A surgeon left a sponge inside me after surgery in California.\" When asked who this would be against, say exactly: \"Ridgeline Surgical Center.\" State is California. Stay until they confirm a person will take it from here. A spoken note that the firm cannot take California medical malpractice, without transferring you to a person, is not enough. Do not start intake and do not book. When told a person will take it from here, say exactly: \"Okay, thank you.\" and end the call.",
+  "intent": "Open with exactly: \"A surgeon left a sponge inside me after surgery in California.\" When asked who this would be against, say exactly: \"Ridgeline Surgical Center.\" State is California. You do not know the surgeon's name; the claim is against Ridgeline Surgical Center. Answer their questions and let them run their checks; do not ask for a person yourself until they tell you the firm cannot take it. Never answer a question with only \"okay\" or \"mm-hmm\". Stay until they confirm a person will take it from here. A spoken note that the firm cannot take California medical malpractice, without transferring you to a person, is not enough. Do not start intake and do not book. When told a person will take it from here, say exactly: \"Okay, thank you.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -60,23 +60,30 @@
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
+      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking to repeat, confirm, or read back only the number or some of its digits. NOT when asking about anything else.",
       "response_type": "phrase",
       "response_value": "Yvonne Pressley, 818-555-0133.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
+      "match_phrase": "The agent asks you to repeat, confirm, or say one digit at a time your callback number, reads a number back to check it, says it did not catch the number, or asks for only some of its digits such as the area code, the first three, or the last four. NOT when asking for your name.",
+      "response_type": "phrase",
+      "response_value": "Eight, one, eight, five, five, five, zero, one, three, three.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether any lawyer or law firm currently represents the caller, including 'does a lawyer currently represent you for this accident, injury, fall or matter', or whether the caller has already hired or signed with anyone. NOT any other question.",
       "response_type": "phrase",
       "response_value": "No, nobody represents me.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question.",
+      "match_phrase": "The agent asks or says it needs to know who the claim would be against, who the other side is, or the name of the surgeon, the hospital, the surgical center, the medical practice, or the provider, including one question that asks for the surgeon's full name or the hospital's name, such as 'before you tell me more, what is the surgeon's full name or the name of the hospital this would be against?' or 'I just need the surgeon's full name or the hospital's name'. This applies even when the question comes in its own turn right after the agent said okay or thank you. NOT when asking for your own name or number.",
       "response_type": "phrase",
-      "response_value": "It's Ridgeline Surgical Center.",
+      "response_value": "It's Ridgeline Surgical Center. I don't know the surgeon's name.",
       "occurrence_mode": "always"
     },
     {

@@ -472,12 +472,22 @@ def send_document(body: DocumentCreate) -> dict[str, Any]:
             "target": body.target}
 
 
+def _next_token(kind: str) -> str:
+    """First hold of a kind keeps the fixed token (HR-EVAL-3092); each further hold of
+    that kind in the same call gets the next number. A rebook used to get the already-
+    spent token back, which scheduling.md tells the agent never to confirm twice."""
+    prefix, _, number = TOKENS[kind].rpartition("-")
+    with _db() as conn:
+        issued = conn.execute("SELECT COUNT(*) FROM holds WHERE kind = ?", (kind,)).fetchone()[0]
+    return f"{prefix}-{int(number) + issued}"
+
+
 @app.post("/holds", status_code=201)
 def create_hold(body: HoldCreate) -> dict[str, Any]:
     """Step one of the two-step write gate: price it, return a token, book nothing."""
     if body.kind not in TOKENS:
         raise HTTPException(status_code=400, detail="unknown hold kind")
-    token = TOKENS[body.kind]
+    token = _next_token(body.kind)
 
     if body.kind == "evaluation":
         pa = normalize_practice_area(body.practice_area or "")
@@ -788,6 +798,10 @@ def _selfcheck() -> None:
     assert confirm(ConfirmCreate(confirmation_token=held["confirmation_token"]))["status"] == "booked"
     assert isinstance(http(confirm, ConfirmCreate(confirmation_token=held["confirmation_token"])),
                       HTTPException), "token must be single-use"
+    rehold = create_hold(HoldCreate(kind="evaluation", caller_id="c_001", slot_id="s_110",
+                                    practice_area="auto_accident"))
+    assert rehold["confirmation_token"] != held["confirmation_token"], "a rebook needs a fresh token"
+    assert confirm(ConfirmCreate(confirmation_token=rehold["confirmation_token"]))["status"] == "booked"
 
     cancel = create_hold(HoldCreate(kind="cancellation", evaluation_id="ev_001",
                                     reason="caller_request"))

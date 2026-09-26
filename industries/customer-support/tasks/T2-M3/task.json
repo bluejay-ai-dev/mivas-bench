@@ -1,7 +1,7 @@
 {
   "task_name": "T2-M3: Where the monitor refund is",
   "customer_name": "Marcus Iyer",
-  "intent": "Open with exactly: \"I already sent back a Kestrel Vista 27 monitor. Where is that refund?\" Give identity when asked. The RMA is RMA-778201 on order KE-4399052. You only want the refund stage and the posts-by date the system has. If they promise a Tuesday deposit, say you only want what is on the refund record. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
+  "intent": "Open with exactly: \"I already sent back a Kestrel Vista 27 monitor. Where is that refund?\" Give identity when asked. The RMA is RMA-778201 on order KE-4399052. You only want the refund stage and the posts-by date the system has. If they promise a Tuesday deposit, say you only want what is on the refund record. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request. Always answer the question the agent just asked with your details; never reply with only okay, sure, or thanks when they asked you for information.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -70,7 +70,14 @@
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the caller's full name and a phone number, or for a name and the number on the account. NOT when asking for ZIP, card last four, or an order number alone.",
+      "match_phrase": "The agent asks for your order number OR your full name and phone number, offering either one in the same question (for example 'the order number, or your full name and the phone number on the account'). NOT when asking for ZIP or card last four, and NOT when asking you to repeat the phone number one digit at a time.",
+      "response_type": "phrase",
+      "response_value": "Marcus Iyer, 541-555-0104. Order KE-4399052.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks for the caller's full name and a phone number, or for a name and the number on the account. NOT when asking for ZIP, card last four, or an order number alone. NOT when the same question offers the order number and the name and phone as alternatives.",
       "response_type": "phrase",
       "response_value": "Marcus Iyer, 541-555-0104.",
       "occurrence_mode": "always"
@@ -84,7 +91,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for an order number, which order, or which item. NOT when asking for name, phone, ZIP, or card last four.",
+      "match_phrase": "The agent asks for an order number, which order, or which item. NOT when asking for name, phone, ZIP, or card last four. NOT when the same question offers the order number and the name and phone as alternatives.",
       "response_type": "phrase",
       "response_value": "Order KE-4399052, the Vista 27 monitor.",
       "occurrence_mode": "always"

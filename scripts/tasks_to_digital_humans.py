@@ -212,6 +212,19 @@ def success_criteria(tool_calls: Any) -> str:
     return f"Success requires {', '.join(names[:-1])}, and {names[-1]} to have been called."
 
 
+_DIGIT_WORDS = ("zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine")
+_DASHED_PHONE = re.compile(r"\b(\d{3})-(\d{3})-(\d{4})\b")
+
+
+def spoken_phone(text: str) -> str:
+    """'214-555-0163' -> 'two one four, five five five, zero one six three'. The caller's
+    TTS reads dashed numbers as 'two-one-fourteen, five-oh-three-five', so identity
+    lookups failed on numbers the persona had right (2026-09-25, ~72 legal calls)."""
+    def words(group: str) -> str:
+        return " ".join(_DIGIT_WORDS[int(ch)] for ch in group)
+    return _DASHED_PHONE.sub(lambda m: ", ".join(words(g) for g in m.groups()), text)
+
+
 def scripted_responses(raw: Any) -> list[dict[str, Any]]:
     if not raw:
         return []
@@ -224,7 +237,7 @@ def scripted_responses(raw: Any) -> list[dict[str, Any]]:
             "match_type": item.get("match_type"),
             "match_phrase": item.get("match_phrase"),
             "response_type": item.get("response_type"),
-            "response_value": item.get("response_value"),
+            "response_value": spoken_phone(item["response_value"]) if isinstance(item.get("response_value"), str) else item.get("response_value"),
             "occurrence_mode": item.get("occurrence_mode") or "always",
         }
         if item.get("occurrence_n") is not None:
@@ -296,7 +309,11 @@ def with_scenario_clock(intent: str, industry: str) -> str:
         return text
     return (
         f"{line} Use that date for today, tomorrow, this week, and this Friday. "
-        f"Do not use the real-world calendar.\n\n{text}"
+        f"Do not use the real-world calendar. This date is background for you only: "
+        f"never say today's date aloud unless the agent asks you for it. "
+        f"When the agent's turn contains a question, even after a filler like 'let me pull "
+        f"that up' or 'one moment', answer that question in the same reply, or say plainly "
+        f"that you will not; never reply with only 'okay', 'sure' or 'mm-hmm'.\n\n{text}"
     )
 
 

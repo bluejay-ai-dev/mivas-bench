@@ -1,6 +1,6 @@
 {
   "task_name": "C5-H4: Windermere balance, visit charge, then CareCredit and a link",
-  "intent": "You are an existing Straus patient. You got a bill for a few hundred dollars from the Windermere office and you cannot pay the whole thing this month. Answer their identity questions once, confirm the readback, then stay on the bill. Ask what you owe and why the visit charge is there. After you hear the amount and the explanation, say you cannot pay it all at once and ask whether there is a payment plan. Accept the financing they offer and ask for the payment link to be texted to you. Then thank them and end the call. Do not ask to book, reschedule, or cancel. Do not ask for a callback or to speak to a person. Do not ask about a waitlist, the patient portal, insurance, or the street, floor, or suite. Do not ask for any text other than the payment link. Stay until they have explained the visit charge, looked up a payment plan or financing in their system, then texted the payment link. A spoken 'we have plans' without a lookup is not enough. Do not ask them to text you an appointment confirmation.",
+  "intent": "You are an existing Straus patient. You got a bill for a few hundred dollars from the Windermere office and you cannot pay the whole thing this month. Answer their identity questions once, confirm the readback, then stay on the bill. Ask what you owe and why the visit charge is there. Do not ask about the missed-visit fee. After you hear the amount and the explanation, say you cannot pay it all at once and ask whether there is a payment plan. Accept the financing they offer and ask for the payment link to be texted to you. Then thank them and end the call. Do not ask to book, reschedule, or cancel. Do not ask for a callback or to speak to a person. Do not ask about a waitlist, the patient portal, insurance, or the street, floor, or suite. Do not ask for any text other than the payment link. Stay until they have explained the visit charge, looked up a payment plan or financing in their system, then texted the payment link. A spoken 'we have plans' without a lookup is not enough. Do not ask them to text you an appointment confirmation.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -111,15 +111,33 @@
   "scripted_responses": [
     {
       "match_type": "context",
+      "match_phrase": "greets you, asks how they can help, or asks why you are calling, before you have said why you are calling. NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "I got a bill from the Windermere office. What do I owe, and why is the visit charge there?"
+    },
+    {
+      "match_type": "context",
       "match_phrase": "asks for your full name and date of birth, or asks you to confirm who you are, or asks for the patient's name and date of birth. NOT when asking only for a member ID or insurance card, NOT when asking which office or location, NOT when asking for a phone or mobile number, NOT when asking about an appointment day or time, NOT when reading your name and date of birth back to you for confirmation.",
       "response_type": "phrase",
       "response_value": "Alice Romano. My date of birth is September eighth, nineteen ninety-five."
     },
     {
       "match_type": "context",
-      "match_phrase": "reads your name and date of birth back to you and asks whether that is right, or asks you to confirm the name and date of birth they just repeated. NOT when first asking for your name and date of birth, NOT when asking for a phone or mobile number.",
+      "match_phrase": "reads your name and date of birth back to you and asks whether that is right, or asks you to confirm the name and date of birth they just repeated. NOT when first asking for your name and date of birth, NOT when asking for a phone or mobile number. NOT when reading back a phone or mobile number.",
       "response_type": "phrase",
       "response_value": "Yes, that's right."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks for your ZIP code or postal code. NOT when asking for an office ZIP, NOT when reading the ZIP back to you.",
+      "response_type": "phrase",
+      "response_value": "My ZIP code is 34786."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "reads ZIP code 34786 back to you, or reads back your name, date of birth, and ZIP together, and asks whether it is correct. NOT when first asking for the ZIP code. NOT when reading back a phone or mobile number.",
+      "response_type": "phrase",
+      "response_value": "Yes, that's correct."
     },
     {
       "match_type": "context",
@@ -141,21 +159,45 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "gives the total balance without explaining the visit charge. NOT when they have just explained the visit line.",
+      "match_phrase": "gives the total balance or lists line items and amounts without explaining why the visit charge is there, or asks what you want help with before explaining the visit charge. NOT when they have just explained why the visit charge exists.",
       "response_type": "phrase",
       "response_value": "What is the visit charge for? Please explain that line."
     },
     {
       "match_type": "context",
-      "match_phrase": "explains the visit charge or gives the balance before looking up a way to spread the cost. NOT when they have just answered about CareCredit or a payment plan.",
+      "match_phrase": "explains why the visit charge is there (for example, the part of the visit your insurance applied to your deductible or copay), before looking up a way to spread the cost. NOT when they have only given amounts or listed line items, NOT when they have just answered about CareCredit or a payment plan.",
       "response_type": "phrase",
       "response_value": "I cannot pay the whole thing this month. Can you look up whether CareCredit or a payment plan is available?"
     },
     {
       "match_type": "context",
-      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before saying a payment link was sent. NOT when they have just said the payment link was sent.",
+      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before saying a payment link was sent. NOT when they have just said the payment link was sent. NOT a short 'thank you' or 'one moment' while they are verifying your identity or looking up the bill.",
       "response_type": "phrase",
       "response_value": "Please text me the payment link before I go."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "says CareCredit, financing, or a payment plan is available, or asks what you want to do after that lookup. NOT before financing was looked up, NOT after the payment link was sent. NOT before they have explained why the visit charge is there, NOT when they only offer to check financing as one option.",
+      "response_type": "phrase",
+      "response_value": "Okay, I'll go with that. Please text me the payment link at 407-555-0155."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks for a mobile number or which number to text the payment link to. NOT when asking for your name, date of birth, or ZIP code. Also when they ask you to repeat the phone number or say they did not get all the digits.",
+      "response_type": "phrase",
+      "response_value": "Send it to 407-555-0155."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "says the payment link was sent or texted, after explaining the visit charge and looking up financing. NOT before the payment link was sent.",
+      "response_type": "phrase",
+      "response_value": "Thank you, that's everything I needed. Goodbye."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "reads a phone or mobile number back to you and asks whether it is right, or asks you to confirm or repeat the full number. NOT when reading back your name, date of birth, or ZIP code, NOT when first asking which number to use.",
+      "response_type": "phrase",
+      "response_value": "My number is 407-555-0155. If that is exactly what you have, yes, please send the payment link."
     }
   ],
   "customer_name": "Alice Romano",

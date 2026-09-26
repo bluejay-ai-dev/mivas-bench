@@ -153,10 +153,16 @@ LEGAL_IGNORE_ROW_KEYS = frozenset({
 })
 LEGAL_EXTRA_OK_TABLES = frozenset({
     "messages", "intake_notes", "documents", "holds", "evaluations",
+    # reception.md says both "look them up" first and "take nothing" for adjusters and
+    # represented callers; an agent that looks the caller up before escalating creates a
+    # caller row the take-nothing reading does not. Expected rows stay required.
+    "callers",
 })
-# free-text the agent invents (caller never states a return reason);
-# lives as an rmas/holds column and nested inside holds.payload JSON.
-CS_IGNORE_ROW_KEYS = frozenset({"reason"})
+# free-text the agent writes in its own words: a return reason the caller never
+# states (rmas/holds column, nested in holds.payload JSON) and the service
+# appointment's issue text ("will not charge" vs "Aurora Pro will not charge").
+# Both are already prose args in INDUSTRY_PROSE_ARG_KEYS for the tool-call check.
+CS_IGNORE_ROW_KEYS = frozenset({"reason", "issue"})
 PHONE_KEY_RE = re.compile(r"phone|_e164$", re.I)
 # ISO date + hour + minute; seconds, micros, and timezone are optional.
 _DATETIME_RE = re.compile(
@@ -297,6 +303,26 @@ def _minute_datetime(value: Any) -> Any:
     return parsed.strftime("%Y-%m-%dT%H:%M")
 
 
+def _canon_amount(value: str) -> str:
+    """'$399.99' / '399.99 dollars' / '399.99' are one amount the caller stated."""
+    m = re.search(r"\d[\d,]*(?:\.\d+)?", value)
+    if not m:
+        return value.strip().casefold()
+    return f"{float(m.group(0).replace(',', '')):.2f}"
+
+
+_NO_PAYMENT = frozenset({"", "none", "not stated", "not requested", "no", "n/a", "na", "nothing"})
+
+
+def _canon_payment(value: str) -> str:
+    """Payment method the scammer asked for: 'none' / 'not stated' / '' mean none;
+    'gift card' and 'gift cards' are the same method."""
+    text = value.strip().casefold()
+    if text in _NO_PAYMENT:
+        return "none"
+    return re.sub(r"s\b", "", text)
+
+
 def _canon_row(row: Any, industry: str | None = None) -> Any:
     if not isinstance(row, dict):
         return row
@@ -319,6 +345,10 @@ def _canon_row(row: Any, industry: str | None = None) -> Any:
                 continue
         if isinstance(value, str) and _is_phone_key(key):
             out[key] = _digits_phone(value)
+        elif isinstance(value, str) and key == "amount_text":
+            out[key] = _canon_amount(value)
+        elif isinstance(value, str) and key == "payment_requested":
+            out[key] = _canon_payment(value)
         elif isinstance(value, str):
             # collapse T15:30 vs T15:30:00 first; casefold after so dump seconds
             # cannot disagree with a minute-precision seed.
@@ -453,7 +483,12 @@ def office_states_match(expected: Any, actual: Any, industry: str | None = None)
                 return False
             continue
         if not exp[table]:
-            if act[table]:
+            live = act[table]
+            if industry == "customer-support" and table == "holds":
+                # quote_* tools always write an unconsumed hold; a quote the caller never
+                # confirmed changes nothing. Expected-empty still fails on a consumed hold.
+                live = [row for row in live if isinstance(row, dict) and row.get("consumed") not in (0, "0", False)]
+            if live:
                 return False
         elif exp[table] != act[table]:
             return False
@@ -675,6 +710,21 @@ def _party_match(expected: Any, actual: Any, *, require_all_expected: bool = Fal
     return all(_fuzzy_in(g, joined_want, tol(g)) for g in got)
 
 
+_NO_DEFAULT = object()
+_URGENT_BY_DEFAULT = frozenset({"mohs"})
+
+
+def _omitted_default(tool: str, key: str, act_params: dict[str, Any]) -> Any:
+    """What the tool server uses when the model leaves an optional arg out. With strict
+    tools off the model may omit it; omitting a server default is the same call."""
+    if tool == "classify_visit_request" and key == "urgency":
+        visit = str(act_params.get("visit_class") or "").strip().lower()
+        return "urgent" if visit in _URGENT_BY_DEFAULT else "routine"
+    if tool == "classify_visit_request" and key == "is_new_patient":
+        return False
+    return _NO_DEFAULT
+
+
 def _values_equal(key: str, expected: Any, actual: Any) -> bool:
     if expected == actual:
         return True
@@ -704,14 +754,25 @@ def _values_equal(key: str, expected: Any, actual: Any) -> bool:
         )
     if _is_phone_key(key):
         return _digits_phone(str(expected)) == _digits_phone(str(actual))
+    if key == "order_number" and isinstance(expected, str) and isinstance(actual, str):
+        # the orders tools accept KE-4483316, KE4483316 and "KE 4483316" as one order
+        return re.sub(r"[^0-9A-Za-z]", "", expected).upper() == re.sub(r"[^0-9A-Za-z]", "", actual).upper()
     if isinstance(expected, bool) or isinstance(actual, bool):
         return expected is actual
     if isinstance(expected, (int, float)) or isinstance(actual, (int, float)):
         try:
             return float(expected) == float(actual)
         except (TypeError, ValueError):
-            return str(expected).strip().casefold() == str(actual).strip().casefold()
-    return str(expected).strip().casefold() == str(actual).strip().casefold()
+            return _plain(expected) == _plain(actual)
+    return _plain(expected) == _plain(actual)
+
+
+_TYPOGRAPHIC = str.maketrans({"\u2019": "'", "\u2018": "'", "\u201c": '"', "\u201d": '"', "\u2013": "-", "\u2014": "-"})
+
+
+def _plain(value: Any) -> str:
+    """Case- and typography-insensitive text: the model writes Grimwald\u2019s as often as Grimwald's."""
+    return str(value).translate(_TYPOGRAPHIC).strip().casefold()
 
 
 def _present_nonempty(value: Any) -> bool:
@@ -751,7 +812,10 @@ def _calls_match(
                 return False
             continue
         if key not in act_params:
-            return False
+            default = _omitted_default(str(expected.get("name") or ""), key, act_params)
+            if default is _NO_DEFAULT or not _values_equal(key, exp_value, default):
+                return False
+            continue
         if not _values_equal(key, exp_value, act_params.get(key)):
             return False
     exp_out = _output_fields(expected)
@@ -956,6 +1020,31 @@ def _fetch_result(result_id: str) -> dict[str, Any]:
     return body.get("simulation_result") or body
 
 
+_DH_CACHE: dict[str, dict[str, Any]] = {}
+
+
+def result_digital_human(detail: dict[str, Any], dh_by_id: dict[str, dict[str, Any]]) -> dict[str, Any]:
+    """The result's digital human. Results no longer embed it and the bulk
+    digital-humans-by-simulation endpoint 500s intermittently, so fall back to
+    GET digital-human/{id}, cached (a run has at most 72 distinct DHs)."""
+    if detail.get("digital_human"):
+        return detail["digital_human"]
+    dh_id = str(detail.get("digital_human_id") or "")
+    if not dh_id:
+        return {}
+    if dh_id in dh_by_id:
+        return dh_by_id[dh_id]
+    if dh_id not in _DH_CACHE:
+        try:
+            body = _get_with_retry(f"digital-human/{dh_id}")
+        except SystemExit:
+            body = {}
+        dh = body.get("digital_human", body) if isinstance(body, dict) else {}
+        dh = dh.get("digital_human", dh) if isinstance(dh, dict) else {}
+        _DH_CACHE[dh_id] = dh if isinstance(dh, dict) else {}
+    return _DH_CACHE[dh_id]
+
+
 def _digital_humans_by_sim(sim_id: str) -> dict[str, dict[str, Any]]:
     # sim 30915 (customer-support) 500s this list endpoint; each result still
     # carries digital_human, so scoring can continue without the bulk lookup.
@@ -1049,19 +1138,7 @@ def collect_scored_results(
     """Score every conversation in a run. Used by verify CLI and CSV export."""
     slug = slug or pull.pair_slug(harness, industry)
     schemas = load_tool_schemas(industry)
-    run_body = _get_with_retry(f"retrieve-simulation-results/{run_id}")
-    run = run_body.get("simulation_run") or {}
-    results = run_body.get("simulation_results") or run_body.get("results") or []
-    # the endpoint caps a page at 100 and returns no page metadata; a k=5 run
-    # is 360 conversations, so page it out or two thirds of the run is unscored
-    while results and len(results) % 100 == 0:
-        page = _get_with_retry(f"retrieve-simulation-results/{run_id}?offset={len(results)}")
-        more = page.get("simulation_results") or page.get("results") or []
-        seen = {str(r.get("id")) for r in results}
-        fresh = [r for r in more if str(r.get("id")) not in seen]
-        if not fresh:
-            break
-        results += fresh
+    run, results = verify_run.run_results(str(run_id), get=_get_with_retry)
     sim_id = str(run.get("simulation_id") or sim_hint or "")
     dh_by_id = _digital_humans_by_sim(sim_id) if sim_id else {}
 
@@ -1086,7 +1163,7 @@ def collect_scored_results(
             continue
         detail = _fetch_result(result_id)
         classified = verify_run.classify_detail(detail, result_id)
-        dh = detail.get("digital_human") or dh_by_id.get(str(detail.get("digital_human_id"))) or {}
+        dh = result_digital_human(detail, dh_by_id)
         case_key = case_key_from_dh(dh)
         task = load_task(industry, case_key) if case_key else None
 
@@ -1103,9 +1180,15 @@ def collect_scored_results(
             detail, task, actual_state, state_note=note, schemas=schemas,
             industry=industry,
         )
+        void_reason = classified.get("void_reason")
+        if not void_reason and task and actual_state is None and actuals_dir is not None \
+                and expected_state(task) is not None:
+            # the store is configured and the task has an expected state, so a missing
+            # dump means state was never checked: void it rather than pass it
+            void_reason = "no final-state snapshot for this result"
         if classified.get("pending"):
             mark = "wait"
-        elif classified.get("void_reason"):
+        elif void_reason:
             mark = "VOID"
         elif not task:
             mark = "MISS"
@@ -1121,7 +1204,7 @@ def collect_scored_results(
             "digital_human_id": detail.get("digital_human_id"),
             "status": classified.get("status") or detail.get("status"),
             "pending": classified.get("pending"),
-            "void_reason": classified.get("void_reason"),
+            "void_reason": void_reason,
             "mark": mark,
             "detail": detail,
             "task": task,

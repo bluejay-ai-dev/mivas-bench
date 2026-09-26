@@ -1,6 +1,6 @@
 {
   "task_name": "C4-H2: Botox on an existing cosmetic consult",
-  "intent": "You are an existing Straus patient. You already have a cosmetic consult booked at Park Avenue, and you want to keep that exact visit. Answer identity questions once, then get back to why you called. Ask three things, in this order: what Botox would cost; whether you can talk about Botox at the consult you already have; and after you hear the price, say that is more than you can pay all at once and ask whether there is a way to spread the cost out. Stay on the line until you have a price, confirmation that Botox can be discussed at that existing visit, and an answer about spreading the cost. Then thank them and end the call. Do not ask to book a new consult. Do not ask to reschedule or cancel the visit you already have. Do not ask for a street address, floor, suite, or location id. Do not ask for a callback, to speak to a person, about a medical bill, the patient portal, a waitlist, or a text. Answer identity first if they ask who you are. When you ask to spread the cost, ask whether CareCredit is available and stay until they have answered that from their system. Do not ask them to text you an appointment confirmation.",
+  "intent": "In your first reply, say you are an existing patient with a cosmetic consult already booked at Park Avenue. You are an existing Straus patient. You already have a cosmetic consult booked at Park Avenue, and you want to keep that exact visit. Answer identity questions once, then get back to why you called. Ask three things, in this order: what Botox would cost; whether you can talk about Botox at the consult you already have; and after you hear the price, say that is more than you can pay all at once and ask whether there is a way to spread the cost out. Stay on the line until you have a price, confirmation that Botox can be discussed at that existing visit, and an answer about spreading the cost. Then thank them and end the call. Do not ask to book a new consult. Do not ask to reschedule or cancel the visit you already have. Do not ask for a street address, floor, suite, or location id. Do not ask for a callback, to speak to a person, about a medical bill, the patient portal, a waitlist, or a text. Answer identity first if they ask who you are. When you ask to spread the cost, ask whether CareCredit is available and stay until they have answered that from their system. Do not ask them to text you an appointment confirmation. Once you have heard the Botox price, whether Botox can be discussed at your existing consult, and that CareCredit is available, thank them and end the call.",
   "traits": [
     {
       "trait_name": "patient_status",
@@ -88,13 +88,19 @@
   "scripted_responses": [
     {
       "match_type": "context",
+      "match_phrase": "asks for a ZIP code, either yours or the office's. NOT when asking for your name, date of birth, or phone number, NOT when reading a ZIP code back to you.",
+      "response_type": "phrase",
+      "response_value": "One, zero, zero, one, six."
+    },
+    {
+      "match_type": "context",
       "match_phrase": "asks for your full name and date of birth, or asks you to confirm who you are, or asks for the patient's name and date of birth. NOT when asking only for a member ID or insurance card, NOT when asking which office or location, NOT when asking for a phone or mobile number, NOT when asking about an appointment day or time, NOT when reading your name and date of birth back to you for confirmation.",
       "response_type": "phrase",
       "response_value": "Maria Alvarez. My date of birth is June thirtieth, nineteen seventy-two."
     },
     {
       "match_type": "context",
-      "match_phrase": "reads your name and date of birth back to you and asks whether that is right, or asks you to confirm the name and date of birth they just repeated. NOT when first asking for your name and date of birth, NOT when asking for a phone or mobile number.",
+      "match_phrase": "reads your name and date of birth back to you and asks whether that is right, or asks you to confirm the name and date of birth they just repeated. NOT when first asking for your name and date of birth, NOT when asking for a phone or mobile number. NOT when asking for a ZIP code.",
       "response_type": "phrase",
       "response_value": "Yes, that's right."
     },
@@ -124,15 +130,21 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "says CareCredit may qualify or may be available but refuses to check because the exact Botox amount is not known yet, or tells you to ask about financing at the consult instead of checking now.",
+      "match_phrase": "says CareCredit may qualify or may be available but refuses to check because the exact Botox amount is not known yet, or tells you to ask about financing at the consult instead of checking now. NOT when they have already said CareCredit is available.",
       "response_type": "phrase",
       "response_value": "Please check whether CareCredit is available for the low end of the quote, three hundred dollars. I need an answer from the system before I go."
     },
     {
       "match_type": "context",
-      "match_phrase": "thanks you, says goodbye, asks if you need anything else, or says financing may be available without checking CareCredit in the system. NOT when they have just confirmed CareCredit or a payment plan from a lookup.",
+      "match_phrase": "thanks you, says goodbye, asks if you need anything else, or says financing may be available without checking, and they have not yet said CareCredit is available from a check. NOT when they have said at any point that CareCredit is available or that they checked it, NOT when asking for your name, date of birth, or ZIP code.",
       "response_type": "phrase",
       "response_value": "Please look up CareCredit in the system before I go. I need to know whether I can spread the Botox cost out."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks whether you are a new or existing patient, or whether you have been seen at Straus before. NOT when asking for your name, date of birth, or ZIP code.",
+      "response_type": "phrase",
+      "response_value": "I'm an existing patient, and I already have a cosmetic consult booked at Park Avenue."
     }
   ],
   "customer_name": "Maria Alvarez",

@@ -72,7 +72,12 @@ def test_scripted_responses_always_or_omitted() -> None:
             continue
         saw_pins = True
         for pin in pins:
-            assert pin["occurrence_mode"] == "always"
+            # same contract as the generator's check(): always, or first_n with n > 0
+            # (an opening line must fire once, not on every matching turn)
+            mode = pin["occurrence_mode"]
+            assert mode == "always" or (
+                mode == "first_n" and isinstance(pin.get("occurrence_n"), int) and pin["occurrence_n"] > 0
+            ), pin
     assert saw_pins
 
 

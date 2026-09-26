@@ -28,13 +28,19 @@
       "value": "916-555-0128"
     }
   ],
-  "exp_handoff_path": [],
+  "exp_handoff_path": [
+    "transfer_to_screening",
+    "transfer_to_intake"
+  ],
   "exp_tool_calls": [
     {
       "name": "lookup_caller",
       "parameters": {
         "full_name": "Estelle Kowalczyk"
       }
+    },
+    {
+      "name": "transfer_to_screening"
     },
     {
       "name": "check_conflict",
@@ -64,6 +70,9 @@
       }
     },
     {
+      "name": "transfer_to_intake"
+    },
+    {
       "name": "record_intake",
       "parameters": {
         "practice_area": "auto_accident",
@@ -82,6 +91,13 @@
       "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
       "response_type": "phrase",
       "response_value": "Estelle Kowalczyk, 916-555-0128.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent says it did not catch your name or number, or asks you to repeat, spell, or say them slowly or one digit at a time, or asks for the area code or the last digits. NOT when asking anything else.",
+      "response_type": "phrase",
+      "response_value": "Estelle, E S T E L L E, Kowalczyk, K O W A L C Z Y K. My number is nine, one, six, five, five, five, zero, one, two, eight.",
       "occurrence_mode": "always"
     },
     {

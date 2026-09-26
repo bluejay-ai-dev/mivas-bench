@@ -195,3 +195,30 @@ def test_append_chunks_respect_cap() -> None:
     assert "".join(chunks) == text
     assert all(len(c) <= live_mod.APPEND_MAX_CHARS for c in chunks)
 
+
+
+def test_silence_is_primed_only_until_the_first_caller_frame(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(live_mod, "PRIME_SILENCE_S", 1.0)
+
+    async def go() -> None:
+        live, ws = _session([])
+        live._opened_mono = __import__("time").monotonic()
+        await live.speak_first()
+        await asyncio.sleep(0.25)
+        primed = len(ws.of("session.input_audio.append"))
+        assert 1 <= primed <= 4, primed
+        await live.send_audio(b"\x00\x00" * 160)  # first real caller frame
+        await asyncio.sleep(0.25)
+        assert len(ws.of("session.input_audio.append")) <= primed + 2, "priming must stop at the first caller frame"
+
+    asyncio.run(go())
+
+
+def test_backend_tools_are_not_strict() -> None:
+    """Strict tools force the model to invent optional arguments (provider_id, zip,
+    group_number); the pack's optional fields must stay optional."""
+    for industry in ("control-industry", "healthcare", "legal", "customer-support"):
+        pack = load_pack(REPO_ROOT / "industries" / industry)
+        for stage in pack.stages.values():
+            for tool in stage.responses_tools():
+                assert tool["strict"] is False, (industry, stage.name, tool["name"])

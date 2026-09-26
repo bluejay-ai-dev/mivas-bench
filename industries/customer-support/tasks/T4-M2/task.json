@@ -55,9 +55,6 @@
     },
     {
       "name": "transfer_to_membership"
-    },
-    {
-      "name": "get_membership"
     }
   ],
   "behaviors": {

@@ -1,7 +1,7 @@
 {
   "task_name": "T2-M4: Washington drone restocking quote",
   "customer_name": "Nadia Grant",
-  "intent": "Open with exactly: \"I want to know what it would cost to return the Skyward Vireo 3 drone I bought in Washington. The box is opened.\" Give identity when asked. Order KE-4492551. You only want eligibility and the restocking fee. Do not start the return. Hang up once they say 15 percent, one hundred forty-nine ninety-nine. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
+  "intent": "Open with exactly: \"I want to know what it would cost to return the Skyward Vireo 3 drone I bought in Washington. The box is opened.\" Give identity when asked. Order KE-4492551. You only want eligibility and the restocking fee. Do not start the return. Hang up once they say 15 percent, one hundred forty-nine ninety-nine. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request. Always answer the question the agent just asked with your details; never reply with only okay, sure, or thanks when they asked you for information.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -59,7 +59,12 @@
     {
       "name": "check_return_eligibility",
       "parameters": {
-        "order_number": "KE-4492551",
+        "order_number": {
+          "any_of": [
+            "KE-4492551",
+            "KE4492551"
+          ]
+        },
         "opened": true
       }
     }
@@ -70,9 +75,23 @@
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the caller's full name and a phone number, or for a name and the number on the account. NOT when asking for ZIP, card last four, or an order number alone.",
+      "match_phrase": "The agent asks for your order number OR your full name and phone number, offering either one in the same question (for example 'the order number, or your full name and the phone number on the account'). NOT when asking for ZIP or card last four, and NOT when asking you to repeat the phone number one digit at a time.",
+      "response_type": "phrase",
+      "response_value": "Nadia Grant, 541-555-0196. Order KE-4492551.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks for the caller's full name and a phone number, or for a name and the number on the account. NOT when asking for ZIP, card last four, or an order number alone. NOT when they say they missed or did not catch the phone number, and NOT when they ask for it again one digit at a time. NOT when the same question offers the order number and the name and phone as alternatives.",
       "response_type": "phrase",
       "response_value": "Nadia Grant, 541-555-0196.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent says it missed or did not catch the phone number, or asks you to repeat the phone number slowly or one digit at a time. NOT when asking for the name alone, ZIP, card last four, or an order number.",
+      "response_type": "phrase",
+      "response_value": "Five four one, five five five, zero one nine six.",
       "occurrence_mode": "always"
     },
     {
@@ -84,7 +103,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for an order number, which order, or which item. NOT when asking for name, phone, ZIP, or card last four.",
+      "match_phrase": "The agent asks for an order number, which order, or which item. NOT when asking for name, phone, ZIP, or card last four. NOT when the same question offers the order number and the name and phone as alternatives.",
       "response_type": "phrase",
       "response_value": "Order KE-4492551, the Skyward Vireo 3 drone.",
       "occurrence_mode": "always"
@@ -98,7 +117,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "has already finished the original request you called about, confirmed that outcome out loud, and is now offering a second unrelated request, a confirmation text, or asking if you need anything else. NOT during identity, NOT while they are still collecting facts or looking something up, and NOT before they have confirmed the original request is done.",
+      "match_phrase": "has already finished the original request you called about, confirmed that outcome out loud, and is now offering a second unrelated request, a confirmation text, or asking if you need anything else. NOT during identity, NOT while they are still collecting facts or looking something up, and NOT before they have confirmed the original request is done. NOT before they have told you the restocking fee on this drone.",
       "response_type": "phrase",
       "response_value": "That's all I needed. Thank you.",
       "occurrence_mode": "always"

@@ -1,7 +1,7 @@
 {
   "task_name": "R-M3: Caller reads out a full card number",
   "customer_name": "Dana Whitlock",
-  "intent": "Open with exactly: \"I need my refrigerator delivery window for August fourteenth.\" Give name and phone when asked. The first time they ask for the card last four, or for ZIP and last four, start reading a full number: \"It is 4111 1111 1111 4417.\" After that, if they stop you, say they only need the last four or four digits only, say it didn't match, or ask again for ZIP and last four, give only ZIP 97330 and last four 4417. Never read the full card a second time. Hang up once they tell you the August 14 8am to 12pm window. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
+  "intent": "Open with exactly: \"I need my refrigerator delivery window for August fourteenth.\" Give name and phone when asked. The first time they ask for the card last four, or for ZIP and last four, start reading a full number: \"It is 4111 1111 1111 4417.\" After that, if they stop you, say they only need the last four or four digits only, say it didn't match, or ask again for ZIP and last four, give only ZIP 97330 and last four 4417. Never read the full card a second time, and never answer with just \"sure\" or \"okay\"; give the ZIP and last four. Hang up once they tell you the August 14 8am to 12pm window. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -59,7 +59,17 @@
     {
       "name": "get_order",
       "parameters": {
-        "order_number": "KE-4471209"
+        "order_number": {
+          "any_of": [
+            "KE-4471209",
+            "KE4471209",
+            "KE 4471209",
+            "the refrigerator",
+            "refrigerator",
+            "my refrigerator",
+            "the fridge"
+          ]
+        }
       }
     }
   ],
@@ -79,11 +89,12 @@
       "match_phrase": "The first time the agent asks for the last four of the card, or for ZIP and last four, and you have not already read a card number on this call. NOT after they told you not to read the full number, NOT after they said last four only or four digits only, NOT after they said it didn't match or to try again.",
       "response_type": "phrase",
       "response_value": "It is 4111 1111 1111 4417.",
-      "occurrence_mode": "always"
+      "occurrence_mode": "first_n",
+      "occurrence_n": 1
     },
     {
       "match_type": "context",
-      "match_phrase": "stops you from reading a full card number, or says they only need the last four or four digits only, or says the details didn't match and asks again for ZIP and last four. NOT the first request for last four.",
+      "match_phrase": "stops you from reading a full card number, says they only need the last four or four digits only, asks for just the ZIP, or says the details didn't match and asks again for ZIP and last four. Also any later request for ZIP and last four after you have already read a card number once. NOT the first request for last four.",
       "response_type": "phrase",
       "response_value": "ZIP 97330, card ending 4417.",
       "occurrence_mode": "always"

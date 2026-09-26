@@ -1,7 +1,7 @@
 {
   "task_name": "C1-E2: Demands a person immediately",
   "customer_name": "Gordon Fitzhugh",
-  "intent": "Open with exactly: \"I'm Gordon Fitzhugh, 415-555-0290. I'm not doing this with a computer, put me through to a person.\" You will not discuss your situation with an automated line. Every time you are asked about your situation, say exactly: \"I said put me through to a person.\" The moment you are told a person or staff member will take it from here, say exactly: \"Okay, thank you.\" and end the call.",
+  "intent": "Open with exactly: \"I'm Gordon Fitzhugh, four one five, five five five, zero two nine zero. I'm not doing this with a computer, put me through to a person.\" You will not discuss your situation with an automated line. Every time you are asked about your situation, say exactly: \"I said put me through to a person.\" The moment you are told a person or staff member will take it from here, say exactly: \"Okay, thank you.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -33,9 +33,9 @@
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
+      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. Also when the agent asks you to repeat, confirm, or say your number again, asks for it one digit at a time, reads a number back to check it, or says it did not catch the number. NOT when asking about anything else.",
       "response_type": "phrase",
-      "response_value": "Gordon Fitzhugh, 415-555-0290.",
+      "response_value": "Gordon Fitzhugh, four one five, five five five, zero two nine zero.",
       "occurrence_mode": "always"
     },
     {
@@ -47,7 +47,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent says they will connect you to a person, a staff member, or someone who can help. NOT when offering only a message. NOT when transferring you to screening, intake, scheduling, or client services on this call.",
+      "match_phrase": "The agent says they will connect you to a person, a staff member, or someone who can help. NOT when offering only a message. NOT when transferring you to screening, intake, scheduling, or client services on this call. NOT when the same turn also asks you to repeat your number or asks you any question; answer the question instead.",
       "response_type": "phrase",
       "response_value": "Okay, thank you.",
       "occurrence_mode": "always"

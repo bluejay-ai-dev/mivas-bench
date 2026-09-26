@@ -1,7 +1,7 @@
 {
   "task_name": "C4-H2: Consumer intake, declines booking",
   "customer_name": "Estelle Kowalczyk",
-  "intent": "Open with exactly: \"A store sold me a defective space heater.\" When asked who this would be against, say exactly: \"It's Midtown Appliance.\" California. January fifth, twenty twenty six. If offered the packet, say exactly: \"Email is fine.\" If offered an appointment, say exactly: \"Not yet, let me read the paperwork first.\" Stay until they confirm the intake is on the file and the packet has been emailed. A spoken promise to send it without those writes is not enough. Once both are confirmed on the file, say exactly: \"Thank you, that's all I needed.\" and end the call.",
+  "intent": "Open with exactly: \"Midtown Appliance sold me a defective space heater.\" and say nothing else in that first turn. When asked who this would be against, say exactly: \"It's Midtown Appliance.\" California. January fifth, twenty twenty six. If offered the packet, say exactly: \"Email is fine.\" If offered an appointment, say exactly: \"Not yet, let me read the paperwork first.\" Stay until they confirm the intake is on the file and the packet has been emailed. A spoken promise to send it without those writes is not enough. Once both are confirmed on the file, say exactly: \"Thank you, that's all I needed.\" and end the call. The agent often says one moment or let me pull you up and then asks a question in the same turn. Always answer the question at the end of the agent's turn with the fact it asks for. Never reply with only \"Sure\", \"Okay\", \"Yeah\", or \"Thank you\" when the agent's turn ends in a question. Never say \"Thank you, that's all I needed.\" before the agent has said the packet was emailed. If asked whether there is anything else to add, say \"No, that's everything about what happened.\"",
   "traits": [
     {
       "trait_name": "full_name",
@@ -114,21 +114,28 @@
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
+      "match_phrase": "The agent asks for the caller's full name and a callback or phone number for the first time. NOT when asking you to repeat the number one digit at a time, slowly, or just the last four digits, NOT when asking you to spell your name, and NOT when asking about anything else.",
       "response_type": "phrase",
       "response_value": "Estelle Kowalczyk, 916-555-0128.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
+      "match_phrase": "The agent asks you to repeat or confirm the callback number one digit at a time, slowly, in groups, or just the last four digits, or asks you to spell your name, even when the same turn starts with a filler such as one moment, let me pull you up, let me look you up, or I'll check that. NOT the first time they ask for your name and number. NOT when asking for a date or a year.",
+      "response_type": "phrase",
+      "response_value": "Estelle Kowalczyk, K-O-W-A-L-C-Z-Y-K. Nine, one, six, five, five, five, zero, one, two, eight.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, whether any attorney represents you, or whether the caller has already hired or signed with anyone, even when the same turn starts with a filler such as one moment, let me pull you up, let me look you up, or I'll check that. NOT any other question.",
       "response_type": "phrase",
       "response_value": "No, nobody represents me.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question.",
+      "match_phrase": "The agent asks who the claim or matter would be against, who the other side is, or for the name of the store, company, or seller this would be against, even when the same turn starts with a filler such as one moment, let me pull you up, let me look you up, or I'll check that. NOT any other question.",
       "response_type": "phrase",
       "response_value": "It's Midtown Appliance.",
       "occurrence_mode": "always"
@@ -163,9 +170,65 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers an appointment or evaluation time. NOT when asking whether to send the packet by email or text.",
+      "match_phrase": "offers an appointment or evaluation time. NOT when asking whether to send the packet by email or text. NOT when you have already declined booking once and the agent is only saying take your time or call back when ready. NOT when asking whether a lawyer represents you.",
       "response_type": "phrase",
       "response_value": "Not yet, let me read the paperwork first.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether the heater injured anyone or damaged property, whether this is about a refund or replacement, or what happened with the heater. NOT when asking who the claim would be against, which state, or the date.",
+      "response_type": "phrase",
+      "response_value": "No one was hurt. It overheated and stopped working, and I want a refund or replacement.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks for your email address or where to send the packet by email. NOT when asking whether you want email or text.",
+      "response_type": "phrase",
+      "response_value": "Email is fine. It's estelle.kowalczyk@example.com.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "Earlier in this call the agent has confirmed the intake is recorded and the packet was sent by email, and now the agent says take your time, call back when ready, asks if there is anything else, or says goodbye. NOT if any of those has not been confirmed yet. NOT during screening.",
+      "response_type": "phrase",
+      "response_value": "Thank you, that's all I needed.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent starts to wrap up, says goodbye, asks if that is all, or says to call back when ready, before confirming the intake is recorded and the packet was sent by email. NOT after all of them have been confirmed. NOT during screening.",
+      "response_type": "phrase",
+      "response_value": "I still need the intake on the file and the packet emailed.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent says it missed or did not catch the year, or asks you to repeat the year or say its digits. NOT when asking for your phone number or name.",
+      "response_type": "phrase",
+      "response_value": "The year is two thousand twenty six. January fifth, two thousand twenty six.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks how much the heater cost, when or where you bought it, or whether you already asked Midtown Appliance for a refund or replacement. NOT when asking who the claim would be against, which state, or the date.",
+      "response_type": "phrase",
+      "response_value": "It cost about ninety dollars. I asked Midtown Appliance for a refund and they said no.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent reads back your email address, asks you to confirm it, or asks you to spell it. NOT when asking whether you want email or text.",
+      "response_type": "phrase",
+      "response_value": "It's estelle dot kowalczyk at example dot com. E-S-T-E-L-L-E, dot, K-O-W-A-L-C-Z-Y-K, at example dot com.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether there is anything else to add about what happened, or anything else the attorney should know, before it has said the packet was emailed. NOT after the intake and the emailed packet are both confirmed.",
+      "response_type": "phrase",
+      "response_value": "No, that's everything about what happened.",
       "occurrence_mode": "always"
     }
   ],

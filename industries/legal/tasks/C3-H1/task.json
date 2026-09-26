@@ -1,7 +1,7 @@
 {
   "task_name": "C3-H1: Caller starts the story before conflict check",
   "customer_name": "Yvonne Pressley",
-  "intent": "Open with exactly: \"So I was driving home and this van clipped my bumper.\" If interrupted for the other side, say exactly: \"It's Ridgeline Courier.\" State California. Date May fifteenth, twenty twenty six. Accept the new client packet by email if offered. Decline a case evaluation. Stay until they confirm the intake is on the file and the packet has been sent. A spoken promise to take care of it without those writes is not enough. Once they confirm the intake is recorded and the packet was sent, say exactly: \"Thank you, that's all I needed.\" Do not book an evaluation. End the call.",
+  "intent": "Open with exactly: \"So I was driving home and this van clipped my bumper.\" If interrupted for the other side, say exactly: \"It's Ridgeline Courier.\" State California. Date May fifteenth, twenty twenty six. Accept the new client packet by email if offered. If asked for your email address, give it: yvonne dot pressley at example dot com. Decline a case evaluation. Stay until they confirm the intake is on the file and the packet has been sent. A spoken promise to take care of it without those writes is not enough. Once they confirm the intake is recorded and the packet was sent, say exactly: \"Thank you, that's all I needed.\" Do not book an evaluation. End the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -26,6 +26,10 @@
     {
       "trait_name": "phone",
       "value": "818-555-0133"
+    },
+    {
+      "trait_name": "email",
+      "value": "yvonne.pressley@example.com"
     }
   ],
   "exp_handoff_path": [
@@ -100,14 +104,21 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
+      "match_phrase": "The agent asks you to spell your name, spell it letter by letter, or confirm a spelling of your name. NOT when asking for your phone number.",
+      "response_type": "phrase",
+      "response_value": "Yvonne is Y, V, O, N, N, E. Pressley is P, R, E, S, S, L, E, Y.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether any lawyer or law firm currently represents the caller, including 'does a lawyer currently represent you for this accident, injury, fall or matter', or whether the caller has already hired or signed with anyone. NOT any other question.",
       "response_type": "phrase",
       "response_value": "No, nobody represents me.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question.",
+      "match_phrase": "The agent asks who the claim would be against, who the other side is, who this would be against, or whether it is the van's driver, a company, or both. NOT any other question.",
       "response_type": "phrase",
       "response_value": "It's Ridgeline Courier.",
       "occurrence_mode": "always"
@@ -145,6 +156,13 @@
       "match_phrase": "The agent asks whether you want to book a free case evaluation or set up an evaluation appointment, before stating any percentage fee, dollar fee, or contingency number. NOT after a fee amount has already been read back.",
       "response_type": "phrase",
       "response_value": "No thank you. Intake and the packet are enough.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks for your email address, or asks you to spell or confirm it. NOT when asking whether to send the packet by email or text.",
+      "response_type": "phrase",
+      "response_value": "It's yvonne dot pressley at example dot com.",
       "occurrence_mode": "always"
     }
   ],

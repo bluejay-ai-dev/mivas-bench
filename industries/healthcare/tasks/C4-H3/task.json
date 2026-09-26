@@ -1,6 +1,6 @@
 {
   "task_name": "C4-H3: Filler consult for an existing patient",
-  "intent": "You are an existing Straus patient. Answer identity questions once with your name and date of birth, confirm if they read it back, then get to why you called. Ask how much cheek filler costs, then ask to come in for a filler consult at Brooklyn Heights. You need the Brooklyn Heights street address, the floor, and the suite before you will take any time — if they skip any of those, ask again. When they explain the deposit and cancellation rules, agree. Ask them to send the deposit payment link to your phone so you can pay it; that is the only text you want. After you have the address, take the first appointment time they offer. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first time out loud, then thank them and end the call. Do not ask to reschedule or cancel any visit you already have. Do not ask for a callback, to speak to a person, about a medical bill, the patient portal, a waitlist, financing, or a confirmation text. Never ask to speak to a person, a live agent, or the cosmetic team. If they offer a human transfer, refuse and insist this agent quote filler and book the Brooklyn Heights consult. Do not book anything except this Brooklyn Heights filler consult. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar and that a deposit payment link was sent to your phone. If they wrap up after booking without sending the link, ask them to text the deposit payment link. Do not ask them to text you an appointment confirmation.",
+  "intent": "You are an existing Straus patient. If they ask whether you are new or existing, say existing. Answer identity questions once with your name and date of birth, confirm if they read it back, then get to why you called. Ask how much cheek filler costs, then ask to come in for a filler consult at Brooklyn Heights. You need the Brooklyn Heights street address, the floor, and the suite before you will take any time; if they skip any of those, ask again. When they explain the deposit and cancellation rules, agree. Ask them to send the deposit payment link to your phone so you can pay it; that is the only text you want. After you have the address, take the first appointment time they offer, meaning the earliest one in their list, never a later one. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first time out loud, then thank them and end the call. Do not ask to reschedule or cancel any visit you already have. Do not ask for a callback, to speak to a person, about a medical bill, the patient portal, a waitlist, financing, or a confirmation text. Never ask to speak to a person, a live agent, or the cosmetic team. If they offer a human transfer, refuse and insist this agent quote filler and book the Brooklyn Heights consult. Do not book anything except this Brooklyn Heights filler consult. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar and that a deposit payment link was sent to your phone. If they wrap up after booking without sending the link, ask them to text the deposit payment link. Do not ask them to text you an appointment confirmation. Once they have said the consult is on the calendar and the deposit payment link was sent to your phone, thank them and end the call right away; do not ask for either again. Never say that is all you needed or goodbye while they are still asking you something or before they have said the link was sent. If they ask whether the deposit and cancellation terms are okay, say yes before anything else.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -127,6 +127,18 @@
   "scripted_responses": [
     {
       "match_type": "context",
+      "match_phrase": "asks for a ZIP code, either yours or the office's. NOT when asking for your name, date of birth, or phone number, NOT when reading a ZIP code back to you.",
+      "response_type": "phrase",
+      "response_value": "One, one, two, zero, one."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "reads back your name and it is not Sam Nguyen, for example a different or run-together last name. NOT when the name read back is Sam Nguyen.",
+      "response_type": "phrase",
+      "response_value": "No, it's Sam Nguyen. Nguyen is spelled N, G, U, Y, E, N."
+    },
+    {
+      "match_type": "context",
       "match_phrase": "greets you, asks how they can help, asks what you need, or says they are listening, before you have asked about filler or a consult. NOT when they have just confirmed a booked time, NOT when quoting filler, NOT when asking for your name or date of birth.",
       "response_type": "phrase",
       "response_value": "How much does cheek filler cost? I'd like to come in for a filler consult at Brooklyn Heights."
@@ -139,7 +151,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "reads your name and date of birth back to you and asks whether that is right, or asks you to confirm the name and date of birth they just repeated. NOT when first asking for your name and date of birth, NOT when asking for a phone or mobile number.",
+      "match_phrase": "reads your name and date of birth back to you and asks whether that is right, or asks you to confirm the name and date of birth they just repeated. NOT when first asking for your name and date of birth, NOT when asking for a phone or mobile number. NOT when the name they read back is anything other than Sam Nguyen, NOT when asking for a ZIP code.",
       "response_type": "phrase",
       "response_value": "Yes, that's right."
     },
@@ -147,7 +159,7 @@
       "match_type": "context",
       "match_phrase": "offers one or more concrete appointment dates or times after saying the Brooklyn Heights street address, floor, and suite, asks which day or time you want after giving that full address, or asks you to choose among concrete consult slots after giving that full address. NOT when any address part is still missing, NOT when asking for your identity.",
       "response_type": "phrase",
-      "response_value": "Book the first time you offered."
+      "response_value": "Book the first time you offered, the earliest one in your list."
     },
     {
       "match_type": "context",
@@ -169,33 +181,63 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers an appointment time, asks you to confirm a slot, or quotes an office name without the street address, floor, and suite. NOT when they have already said the street, the floor, and the suite.",
+      "match_phrase": "offers an appointment time or asks you to confirm a slot, and has NOT yet said the Brooklyn Heights street address, floor, and suite anywhere earlier in the call. NOT when the street, floor, and suite have already been said at any point in the call, NOT when asking for your name, date of birth, ZIP code, or phone number. NOT when this turn itself says the street address, floor, and suite.",
       "response_type": "phrase",
       "response_value": "Before I take a time, I need the street address, the floor, and the suite."
     },
     {
       "match_type": "context",
-      "match_phrase": "thanks you, says goodbye, or wraps up after you have asked for a filler consult, before a consult time has been confirmed on the calendar. NOT when greeting you or asking how they can help at the start of the call, NOT when they have just confirmed a booked time, NOT when asking for your name or date of birth.",
+      "match_phrase": "thanks you, says goodbye, wraps up, or asks if you need anything else, and no consult time has been booked yet anywhere in the call. NOT when they have said at any point that a consult is booked, confirmed, or on the calendar, NOT when greeting you at the start of the call, NOT when asking a question.",
       "response_type": "phrase",
       "response_value": "I still need the consult booked. Please confirm a time on the calendar before I go."
     },
     {
       "match_type": "context",
-      "match_phrase": "thanks you, says goodbye, confirms a consult time, or asks if you need anything else before saying a deposit payment link was sent. NOT when they have just said the payment link or deposit link was sent.",
+      "match_phrase": "thanks you, says goodbye, or asks if you need anything else, and has not yet said a deposit or payment link was sent. NOT when they have said at any point that the payment link or deposit link was sent or texted, NOT when asking for your mobile number, NOT when asking whether you agree to the deposit policy.",
       "response_type": "phrase",
       "response_value": "Please text me the deposit payment link before I go."
     },
     {
       "match_type": "context",
-      "match_phrase": "has already said the cosmetic deposit amount and the cancellation window out loud, and is asking whether you agree to that policy before booking. NOT when asking any other yes-or-no, NOT during identity verification, NOT when quoting a price range, and NOT before they have named both the deposit and the cancellation window.",
+      "match_phrase": "has already said the cosmetic deposit amount and the cancellation window out loud, and is asking whether you agree to that policy before booking. NOT when asking any other yes-or-no, NOT during identity verification, NOT when quoting a price range, and NOT before they have named both the deposit and the cancellation window. NOT when asking for a phone or mobile number, NOT when they have already booked the consult.",
       "response_type": "phrase",
       "response_value": "Yes. I agree to the $125 deposit, free changes through 72 hours before, forfeiting the deposit inside 72 hours, and paying any treatment balance at the visit."
     },
     {
       "match_type": "context",
-      "match_phrase": "offers to text a payment link or deposit link, asks whether you want the deposit payment link by text, or asks which mobile number should receive the payment link. NOT when offering an appointment confirmation, directions, or another unrelated text, NOT when asking for your mobile number for identity.",
+      "match_phrase": "offers to text a payment link or deposit link, asks whether you want the deposit payment link by text, or asks which mobile number should receive the payment link. NOT when offering an appointment confirmation, directions, or another unrelated text, NOT when asking for your mobile number for identity. NOT when they have already said the payment link or deposit link was sent or texted. NOT after they have said the link was sent, NOT when asking whether the link arrived.",
       "response_type": "phrase",
       "response_value": "Yes, please text the deposit payment link to 718-555-0122."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "reads back the phone number for the deposit payment link as 718-555-0122 exactly and asks whether it is right. NOT during identity verification, NOT when the digits differ. NOT after they have said the link was sent.",
+      "response_type": "phrase",
+      "response_value": "Yes, that's right. Please send the deposit payment link now."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "reads back a phone number for the deposit payment link with any digit different from 718-555-0122, or with an extra or missing digit. NOT during identity verification.",
+      "response_type": "phrase",
+      "response_value": "No. It's seven, one, eight, five, five, five, zero, one, two, two. Please send the deposit payment link now."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks whether you are a new patient or have been seen at Straus before, or whether this is your first visit. NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "I'm an existing patient. I've been seen at Straus before."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks whether the payment text or deposit link came through or arrived, or whether you see it. NOT before they have said the link was sent.",
+      "response_type": "phrase",
+      "response_value": "Yes, it came through. Thank you, that's everything."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "says the Brooklyn Heights street address, floor, and suite after already listing appointment times, without asking a new question. NOT when asking for your name, date of birth, ZIP code, or phone number, NOT once a consult is booked.",
+      "response_type": "phrase",
+      "response_value": "Thanks. Book the first time you offered, the earliest one in your list."
     }
   ],
   "customer_name": "Sam Nguyen",

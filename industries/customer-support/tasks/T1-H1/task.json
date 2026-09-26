@@ -57,15 +57,16 @@
       "name": "transfer_to_orders"
     },
     {
-      "name": "get_order",
-      "parameters": {
-        "order_number": "KE-4471209"
-      }
-    },
-    {
       "name": "quote_delivery_change",
       "parameters": {
-        "order_number": "KE-4471209",
+        "order_number": {
+          "any_of": [
+            "KE-4471209",
+            "KE4471209",
+            "the refrigerator",
+            "refrigerator"
+          ]
+        },
         "new_date": "2026-08-18"
       }
     },

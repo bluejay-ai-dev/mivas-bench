@@ -1,7 +1,7 @@
 {
   "task_name": "C5-H1: Medical malpractice booked in Florida",
   "customer_name": "Amina Okoro",
-  "intent": "Open with exactly: \"I think a surgeon at Palmetto Surgical Group nicked a nerve during my procedure in Florida.\" When asked who this would be against, say exactly: \"It's Palmetto Surgical Group.\" When asked when, say exactly: \"It was July tenth, twenty twenty six.\" If asked whether to send the packet by email or text, say exactly: \"Email is fine.\" Take the first appointment time offered. When read back, say exactly: \"Yes, that's right, go ahead and book it.\" Do not ask for a staff member. Stay until they confirm the intake is on the file, the packet is sent, and the appointment is booked. A spoken \"we'll take care of it\" without those writes is not enough. Once told the appointment is booked, say exactly: \"Thank you, that's all I needed.\" and end the call.",
+  "intent": "Open with exactly: \"I think a surgeon at Palmetto Surgical Group nicked a nerve during my procedure in Florida.\" When asked who this would be against, say exactly: \"It's Palmetto Surgical Group.\" When asked when, say exactly: \"It was July tenth, twenty twenty six.\" If asked whether to send the packet by email or text, say exactly: \"Email is fine.\" Take the first appointment time offered. When read back, say exactly: \"Yes, that's right, go ahead and book it.\" Do not ask for a staff member. Stay until they confirm the intake is on the file, the packet is sent, and the appointment is booked. A spoken \"we'll take care of it\" without those writes is not enough. Once told the appointment is booked and the packet was sent by email, say exactly: \"Thank you, that's all I needed.\" and end the call. If they ask for your email address, give it: amina dot okoro at example dot com. When the agent asks you a question, answer it in that same turn with the answer given here. Never answer a question with only okay, sure, mm-hmm, yeah or thanks, and never speak the agent's lines for it. Say \"Thank you, that's all I needed.\" only after the agent says the evaluation is booked for a specific day and time and the packet was sent by email, never after 'will do', 'one moment', 'taking care of that' or 'let's get some details'. After you say it, end the call and say nothing more. The packet goes by email, never text. Do not ask for the packet or the booking before the agent offers them; answer the question the agent asked.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -115,7 +115,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
+      "match_phrase": "The agent asks whether a lawyer or law firm currently represents the caller, whether the caller has an attorney for this, or whether the caller has already hired or signed with anyone, including when the same turn also says they are looking the caller up or thanks them. NOT any other question.",
       "response_type": "phrase",
       "response_value": "No, nobody represents me.",
       "occurrence_mode": "always"
@@ -150,9 +150,9 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks whether to send the packet by email or text, or which channel to use. NOT any other question.",
+      "match_phrase": "The agent asks whether to send the new client packet by email or text, or offers to send it by one channel, such as by text to your number, including \"Would you like the new client packet by email or text?\". This includes when the question comes at the end of a longer agent turn, after a fee, deadline, conflict, or disclaimer statement, or after 'one moment', 'thanks', 'let me pull that up', or 'I've recorded that'. NOT any other question.",
       "response_type": "phrase",
-      "response_value": "Email is fine.",
+      "response_value": "Email is fine, please send it by email.",
       "occurrence_mode": "always"
     },
     {
@@ -164,9 +164,58 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent has already held a slot and is reading back that held appointment's day, time, attorney and fee, asking whether to confirm it. NOT when first listing open times, NOT during representation screening or conflict checks, and NOT before they have named the fee, and NOT when asking which slot to hold.",
+      "match_phrase": "The agent has already held a slot and is reading back that held appointment's day, time, attorney and fee, asking whether to confirm it. NOT when first listing open times, NOT during representation screening or conflict checks, and NOT before they have named the fee, and NOT when asking which slot to hold. NOT when they say let's get some quick details or ask intake questions. NOT after they have said the evaluation is booked or confirmed. NOT when the agent asks whether there is anything else, NOT after the agent has said the evaluation is booked.",
       "response_type": "phrase",
       "response_value": "Yes, that's right, go ahead and book it.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks you to describe what happened, what kind of accident or matter it was, where it happened, what injuries or losses you had, or whether you got medical treatment. NOT when asking the date, the state alone, your name or number, or who the other side is.",
+      "response_type": "phrase",
+      "response_value": "It was carpal tunnel surgery on my right wrist at Palmetto Surgical Group. Since then my hand is numb and weak, and I've seen a neurologist about it.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks for your email address, where to send the packet by email, or how to spell it, including \"What email should I send the packet to?\", even when the same turn also says the evaluation is booked or confirmed. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "It's amina dot okoro at example dot com.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent offers to send a medical records release or authorization for your signature, or asks which doctor or provider treated you. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "No thanks, not right now.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether you want to book or schedule the free case evaluation, or whether to find appointment times. NOT when listing specific times, NOT when reading back a held appointment, NOT after it is booked.",
+      "response_type": "phrase",
+      "response_value": "Yes, please book the free case evaluation.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks for the surgeon's or doctor's name. NOT when asking which provider treated you afterwards.",
+      "response_type": "phrase",
+      "response_value": "I don't remember the surgeon's name. The claim is against Palmetto Surgical Group.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether you missed work, lost income, or had other losses. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "Yes, I missed three weeks of work because I couldn't use my right hand.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent has already said on this call that the new client packet was sent by email, and now says the evaluation is booked or confirmed for a specific day and time, or asks whether there is anything else right after saying it is booked. Also when the evaluation was already said to be booked earlier and the agent now says the packet was sent by email. NOT when the agent has said the packet is not out yet or has not been sent. NOT when the same turn asks for your email address or asks any question other than whether there is anything else. NOT when listing open times, NOT when reading back a held appointment and asking whether to book it, NOT when asking whether to book. NOT when the agent says it has held, is holding, or reserved a time, NOT while it is still reading the fee or the percentages, NOT when it says one moment, booking it now, or that it will confirm, and NOT when it asks you any question other than whether there is anything else. NOT when the agent asks whether there is anything to note for the attorney, and NOT before the agent has said the evaluation is booked.",
+      "response_type": "phrase",
+      "response_value": "Thank you, that's all I needed.",
       "occurrence_mode": "always"
     }
   ],

@@ -1,7 +1,7 @@
 {
   "task_name": "C4-H1: Product injury intake with packet and note",
   "customer_name": "Franklin Deshpande",
-  "intent": "Open with exactly: \"A ladder I bought from Halloway Toolworks collapsed under me. My neighbour Ruth Callahan saw it.\" Georgia. April twenty second, twenty twenty six. Mention the witness if asked for more detail. If they record intake, say exactly: \"Please add an intake note that Ruth Callahan saw it and I still have the ladder.\" Accept email packet. Decline booking. Stay until they confirm the intake is on the file, the witness note is on the file, and the packet has been sent. A spoken promise without those writes is not enough. Then say exactly: \"Thank you, that's all I needed.\" and end the call.",
+  "intent": "Open with exactly: \"A ladder I bought from Halloway Toolworks collapsed under me. My neighbour Ruth Callahan saw it.\" Georgia. April twenty second, twenty twenty six. Mention the witness if asked for more detail. If they record intake, say exactly: \"Please add an intake note that Ruth Callahan saw it and I still have the ladder.\" Accept email packet. Decline booking. Stay until they confirm the intake is on the file, the witness note is on the file, and the packet has been sent. A spoken promise without those writes is not enough. Then say exactly: \"Thank you, that's all I needed.\" and end the call. The agent often says one moment or let me pull you up and then asks a question in the same turn. Always answer the question at the end of the agent's turn with the fact it asks for. Never reply with only \"Sure\", \"Okay\", \"Yeah\", or \"Thank you\" when the agent's turn ends in a question.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -94,14 +94,21 @@
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
+      "match_phrase": "The agent asks for the caller's full name and a callback or phone number for the first time. NOT when asking you to repeat the number one digit at a time, slowly, or just the last four digits, NOT when asking you to spell your name, and NOT when asking about anything else.",
       "response_type": "phrase",
       "response_value": "Franklin Deshpande, 706-555-0173.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
+      "match_phrase": "The agent asks you to repeat or confirm the callback number one digit at a time, slowly, in groups, or just the last four digits, or asks you to spell your name, even when the same turn starts with a filler such as one moment, let me pull you up, let me look you up, or I'll check that. NOT the first time they ask for your name and number.",
+      "response_type": "phrase",
+      "response_value": "Franklin Deshpande, D-E-S-H-P-A-N-D-E. Seven, zero, six, five, five, five, zero, one, seven, three.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, whether any attorney represents you, or whether the caller has already hired or signed with anyone, even when the same turn starts with a filler such as one moment, let me pull you up, let me look you up, or I'll check that. This includes 'do you already have a lawyer for this', 'does a lawyer currently represent you', and 'yes or no' asked right after a lawyer question, and it includes that question at the end of a long turn that first reads fees, a deadline, or a check result. NOT any other question.",
       "response_type": "phrase",
       "response_value": "No, nobody represents me.",
       "occurrence_mode": "always"
@@ -122,21 +129,21 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question.",
+      "match_phrase": "The agent asks who the claim or matter would be against, who the other side is, or for the name of the manufacturer, company, or store this would be against, even when the same turn starts with a filler such as one moment, let me pull you up, let me look you up, or I'll check that. NOT any other question.",
       "response_type": "phrase",
       "response_value": "It's Halloway Toolworks, H-A-L-L-O-W-A-Y Toolworks.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks whether to send the packet by email or text, or which channel to use. NOT any other question.",
+      "match_phrase": "The agent asks whether to send the packet by email or text, or which channel to use, including when the same turn first says the incident or intake is recorded. NOT after the agent has confirmed the witness note is on the file. NOT any other question.",
       "response_type": "phrase",
-      "response_value": "Email is fine.",
+      "response_value": "Email is fine. And please add an intake note that Ruth Callahan saw it and I still have the ladder.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "has recorded the intake or asks if there is anything else to add. NOT when asking to book a case evaluation or appointment, and NOT when offering the packet by email or text.",
+      "match_phrase": "The agent has already recorded the intake, or after recording it asks if there is anything else to add. NOT before the intake is recorded, NOT when asking whether anyone represents you, NOT when asking to book a case evaluation or appointment, and NOT when offering the packet by email or text.",
       "response_type": "phrase",
       "response_value": "Please add an intake note that Ruth Callahan saw it and I still have the ladder.",
       "occurrence_mode": "always"
@@ -150,9 +157,51 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "asks whether you want to book a case evaluation, a free evaluation, or an appointment. NOT when asking if there is anything else to add after intake, and NOT when offering the packet by email or text.",
+      "match_phrase": "asks whether you want to book a case evaluation, a free evaluation, or an appointment. NOT when asking if there is anything else to add after intake, and NOT when offering the packet by email or text. NOT when you have already declined booking once and the agent is only saying take your time or call back when ready.",
       "response_type": "phrase",
       "response_value": "Not yet, let me read the paperwork first.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks what injuries or losses you had, or whether you got medical treatment. NOT when asking who the claim would be against, which state, or the date.",
+      "response_type": "phrase",
+      "response_value": "I was bruised and sore from the fall. I did not need medical treatment.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks for your email address or where to send the packet by email. NOT when asking whether you want email or text.",
+      "response_type": "phrase",
+      "response_value": "Email is fine. It's franklin.deshpande@example.com.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "Earlier in this call the agent has confirmed the intake is recorded, the witness note is on the file, and the packet was sent by email, and now the agent says take your time, call back when ready, asks if there is anything else, or says goodbye. NOT if any of those has not been confirmed yet. NOT during screening. NOT unless the agent has said the witness note or intake note about Ruth Callahan was added.",
+      "response_type": "phrase",
+      "response_value": "Thank you, that's all I needed.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent starts to wrap up, says goodbye, asks if that is all, or says to call back when ready, before confirming the intake is recorded, the witness note is on the file, and the packet was sent by email. NOT after all of them have been confirmed. NOT during screening.",
+      "response_type": "phrase",
+      "response_value": "I still need the intake, the witness note, and the email packet on the file.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether to send the packet by email or text after the agent has already confirmed the witness note is on the file. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "Email is fine.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks how to spell the company or manufacturer name, or asks whether a letter in it is A or O, such as a as in apple or o as in orange. NOT when asking your own name.",
+      "response_type": "phrase",
+      "response_value": "It's A as in apple. Halloway, H-A-L-L-O-W-A-Y, Toolworks.",
       "occurrence_mode": "always"
     }
   ],

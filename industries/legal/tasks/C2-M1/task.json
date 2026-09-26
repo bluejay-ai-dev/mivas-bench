@@ -1,7 +1,7 @@
 {
   "task_name": "C2-M1: Conflict hit, Northgate Insurance",
   "customer_name": "Selma Ridgeway",
-  "intent": "Open with exactly: \"My insurance company denied my claim.\" When asked who this would be against, say exactly: \"It's Northgate Insurance.\" Do not volunteer a state, a date, or a story, and do not ask for a person. If they ask which state, when it happened, or to describe what happened, say exactly: \"I'd rather not get into that until you check whether you can take it.\" If they offer an appointment or to start a written account, say exactly: \"No, I don't want to book. I need you to check whether you can take this.\" Stay until they confirm a person will take it from here. A spoken 'we'll look into it' or that the firm cannot take the matter, without transferring you to someone, is not enough. When told a person will take it from here, say exactly: \"Okay, thank you.\" and end the call.",
+  "intent": "Open with exactly: \"My insurance company denied my claim.\" When asked who this would be against, or which insurance company or insurer it is, say exactly: \"It's Northgate Insurance.\" Never answer that question with only \"okay\" or \"sure\". Do not volunteer a state, a date, or a story, and do not ask for a person. If they ask which state, when it happened, or to describe what happened, say exactly: \"I'd rather not get into that until you check whether you can take it.\" If they offer an appointment or to start a written account, say exactly: \"No, I don't want to book. I need you to check whether you can take this.\" Stay until they confirm a person will take it from here. A spoken 'we'll look into it' or that the firm cannot take the matter, without transferring you to someone, is not enough. When told a person will take it from here, say exactly: \"Okay, thank you.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -45,42 +45,49 @@
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
+      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking to repeat, confirm, or read back only the number or some of its digits. NOT when asking about anything else. This includes a question that comes after a filler such as one moment, hold on, let me pull that up, or let's get some quick details in the same turn.",
       "response_type": "phrase",
-      "response_value": "Selma Ridgeway, 919-555-0146.",
+      "response_value": "Selma Ridgeway, nine one nine, five five five, zero one four six. Nobody represents me, and it would be against Northgate Insurance.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
+      "match_phrase": "The agent asks you to repeat, confirm, or say one digit at a time your callback number, reads a number back to check it, says it did not catch the number, or asks for only some of its digits such as the area code, the first three, or the last four. NOT when asking for your name.",
+      "response_type": "phrase",
+      "response_value": "Nine, one, nine, five, five, five, zero, one, four, six.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question. This includes a question that comes after a filler such as one moment, hold on, let me pull that up, or let's get some quick details in the same turn.",
       "response_type": "phrase",
       "response_value": "No, nobody represents me.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question.",
+      "match_phrase": "The agent asks who the claim would be against, who the other side is, which insurance company or insurer this would be against, or for the name of the insurance company. NOT when asking for the caller's own name or callback number. This includes a question that comes after a filler such as one moment, hold on, let me pull that up, or let's get some quick details in the same turn.",
       "response_type": "phrase",
       "response_value": "It's Northgate Insurance.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks which state this happened in, or where it took place. NOT any other question.",
+      "match_phrase": "The agent asks which state this happened in, or where it took place. NOT any other question. NOT when asking for the insurance company's name or who this is against, and NOT when asking whether a lawyer represents you.",
       "response_type": "phrase",
       "response_value": "I'd rather not get into that until you check whether you can take it.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks when the incident happened, or for the date of the accident, injury or event. NOT any other question.",
+      "match_phrase": "The agent asks when the incident happened, or for the date of the accident, injury or event. NOT any other question. NOT when asking for the insurance company's name or who this is against, and NOT when asking whether a lawyer represents you.",
       "response_type": "phrase",
       "response_value": "I'd rather not get into that until you check whether you can take it.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent starts taking a written account, asks you to describe what happened in writing, or offers an appointment. NOT when asking which state or when it happened.",
+      "match_phrase": "The agent starts taking a written account, asks you to describe what happened in writing, or offers an appointment. NOT when asking which state or when it happened. NOT when asking for the insurance company's name or who this is against, and NOT when asking whether a lawyer represents you.",
       "response_type": "phrase",
       "response_value": "No, I don't want to book. I need you to check whether you can take this.",
       "occurrence_mode": "always"

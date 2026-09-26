@@ -1,6 +1,6 @@
 {
   "task_name": "C3-H4: Oscar Health at Windermere then an extra follow-up",
-  "intent": "You are an existing Straus patient. You already have an eczema follow-up on September fifteenth at Windermere; leave that one on the books. Answer their identity questions once, confirm the readback, then ask whether Windermere takes Oscar Health. After they answer, give your member ID O778899001 if they ask and have them run the live eligibility for a visit on August twenty-fourth. If they cannot confirm the plan, say that is fine and still ask to be booked for an additional follow-up at Windermere so you are on the calendar sooner as well. Before you take a time, ask for the Windermere street address, floor, and suite. Take the first new appointment time they offer. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first new time out loud, then thank them and end the call. Do not ask to cancel or reschedule the September fifteenth visit. Do not ask to add or change insurance. Do not ask for a callback, to speak to a person, a bill, a payment, the patient portal, a waitlist, a text, or financing. If they offer to move September fifteenth, say leave that one and book a new one. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar. If they only list openings, say book the first one. Do not ask them to text you an appointment confirmation.",
+  "intent": "You are an existing Straus patient. You already have an eczema follow-up on September fifteenth at Windermere; leave that one on the books. Start the call with your insurance question: ask whether Windermere takes Oscar Health. If they ask whether you are new or existing, say existing. If they ask for your name and date of birth, answer once and confirm the readback. After they answer about Oscar, say that is fine but do not agree to book yet, give your member ID O778899001 and your date of birth, and ask them to run the live eligibility for a visit on August twenty-fourth. Once they have told you the eligibility result or that they could not get it, ask to be booked for an additional follow-up at Windermere so you are on the calendar sooner as well. Before you take a time, ask for the Windermere street address, floor, and suite. Take the first new appointment time they offer. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first new time out loud, then thank them and end the call. Do not ask to cancel or reschedule the September fifteenth visit. Do not ask to add or change insurance. Do not ask for a callback, to speak to a person, a bill, a payment, the patient portal, a waitlist, a text, or financing. If they offer to move September fifteenth, say leave that one and book a new one. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar. If they only list openings, say book the first one. Do not ask them to text you an appointment confirmation. If they offer to book before running the eligibility check, say not yet and ask them to run it first.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -36,36 +36,10 @@
     }
   ],
   "exp_handoff_path": [
-    "transfer_to_identity",
     "transfer_to_coverage",
     "transfer_to_scheduling"
   ],
   "exp_tool_calls": [
-    {
-      "name": "transfer_to_identity",
-      "parameters": {
-        "next_intent": "coverage"
-      }
-    },
-    {
-      "name": "verify_identity",
-      "parameters": {
-        "full_name": "Alice Romano",
-        "dob": "1995-09-08"
-      },
-      "output": {
-        "ok": true,
-        "data": {
-          "verified": true
-        }
-      }
-    },
-    {
-      "name": "get_patient_summary",
-      "output": {
-        "ok": true
-      }
-    },
     {
       "name": "transfer_to_coverage"
     },
@@ -104,7 +78,6 @@
       "name": "classify_visit_request",
       "parameters": {
         "visit_class": "medical",
-        "urgency": "routine",
         "is_new_patient": false
       }
     },
@@ -146,6 +119,30 @@
   "scripted_responses": [
     {
       "match_type": "context",
+      "match_phrase": "greets you and asks what you need, what they can help with, or why you are calling, before you have explained the reason for the call.",
+      "response_type": "phrase",
+      "response_value": "Hi, I have an insurance question. Does your Windermere office take Oscar Health?"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks whether you are a new or existing patient, or whether you have been seen at Straus before. NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "I'm an existing patient."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks what the new follow-up is for, the reason for the visit, or whether it is a skin, medical, cosmetic, or allergy visit. NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "It's a routine medical follow-up for my eczema. Please leave September fifteenth on the books."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "reads your Oscar member ID and date of birth back for the eligibility check and asks whether they are right. NOT when reading back only your name and date of birth for identity. NOT when reading back a phone or callback number.",
+      "response_type": "phrase",
+      "response_value": "Yes, that's right, and the first character is the letter O as in Oscar, not a zero. Please run the eligibility for a visit on August twenty-fourth."
+    },
+    {
+      "match_type": "context",
       "match_phrase": "asks for your full name and date of birth, or asks you to confirm who you are, or asks for the patient's name and date of birth. NOT when asking only for a member ID or insurance card, NOT when asking which office or location, NOT when asking for a phone or mobile number, NOT when asking about an appointment day or time, NOT when reading your name and date of birth back to you for confirmation.",
       "response_type": "phrase",
       "response_value": "Alice Romano. My date of birth is September eighth, nineteen ninety-five."
@@ -164,7 +161,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers an appointment time, a slot, or asks which day or time you want AFTER already saying the Windermere street address, the floor, and the suite. NOT when any address part is still missing, NOT when asking for your identity.",
+      "match_phrase": "offers an appointment time, a slot, or asks which day or time you want AFTER already saying the Windermere street address, the floor, and the suite. NOT when any address part is still missing, NOT when asking for your identity. NOT once they have said a new time is booked or on the calendar.",
       "response_type": "phrase",
       "response_value": "I'll take the first time you offered."
     },
@@ -188,7 +185,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers an appointment time, asks you to confirm a slot, or quotes an office name without the street address, floor, and suite. NOT when they have already said the street, the floor, and the suite.",
+      "match_phrase": "offers an appointment time, asks you to confirm a slot, or quotes an office name without the street address, floor, and suite. NOT when they have already said the street, the floor, and the suite. NOT once they have said a new time is booked or on the calendar.",
       "response_type": "phrase",
       "response_value": "Before I take a time, I need the street address, the floor, and the suite."
     },
@@ -200,15 +197,45 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before a time has been confirmed on the calendar. NOT when they have just confirmed a booked time.",
+      "match_phrase": "says goodbye or asks if you need anything else while no new follow-up time has yet been said to be booked. NOT once they have said at any point that a new time is booked, NOT when they only say thanks, okay, or one moment, NOT when they are asking you a question. NOT when reading back your member ID or date of birth, NOT when saying they will check or run something.",
       "response_type": "phrase",
       "response_value": "I still need that time booked. Please confirm it is on the calendar before I go."
     },
     {
       "match_type": "context",
-      "match_phrase": "asks for your member ID after saying your identity was verified or your chart was opened. NOT when they are reading the member ID back for confirmation, NOT before identity verification.",
+      "match_phrase": "asks for your member ID, insurance ID, or the ID on your Oscar card. NOT when they are reading the member ID back for confirmation.",
       "response_type": "phrase",
-      "response_value": "My Oscar member ID is O778899001."
+      "response_value": "My Oscar member ID is the letter O as in Oscar, then seven, seven, eight, eight, nine, nine, zero, zero, one. My date of birth is September eighth, nineteen ninety-five."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "says they cannot confirm Oscar Health over the phone, that the insurance team will verify it, or offers to get you on the books now and flag it for benefits verification, and no eligibility result (plan active, copay, deductible) has been told to you yet. NOT when naming a specific appointment day and time, NOT when asking for your name or date of birth, NOT when reading your member ID back.",
+      "response_type": "phrase",
+      "response_value": "Not yet on the booking. My Oscar member ID is the letter O as in Oscar, then seven, seven, eight, eight, nine, nine, zero, zero, one, and my date of birth is September eighth, nineteen ninety-five. Please run the live eligibility for a visit on August twenty-fourth first, then we can book."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "tells you the eligibility result (plan active, copay, deductible, or coinsurance) or says the eligibility check could not be completed. NOT when only reading your member ID back, NOT once a new follow-up time has been booked.",
+      "response_type": "phrase",
+      "response_value": "Thanks. Now please book me an additional follow-up at Windermere. Leave September fifteenth on the books."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "says a new additional follow-up is booked, confirmed, or on the calendar AND names its specific day and time. NOT when only giving the office address, NOT when saying they can book it next, will book it, or are about to book it, NOT when only listing openings, NOT when asking whether to book a time, NOT when referring to the September fifteenth visit.",
+      "response_type": "phrase",
+      "response_value": "Great, thank you. That's everything I needed. Goodbye."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks what phone number, callback number, or mobile number to reach you at. NOT when reading a phone number back to you, NOT when asking for your member ID, name, or date of birth.",
+      "response_type": "phrase",
+      "response_value": "Four, zero, seven, five, five, five, zero, one, five, five."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "reads a phone or callback number back to you as 407-555-0155 and asks whether it is right. NOT when reading back your member ID.",
+      "response_type": "phrase",
+      "response_value": "Yes, that's right."
     }
   ],
   "customer_name": "Alice Romano",
@@ -389,7 +416,7 @@
       },
       {
         "id": 4,
-        "patient_id": "pat_alice_romano",
+        "patient_id": null,
         "location_id": "loc_windermere",
         "provider_id": "prov_patel",
         "appointment_type_code": "MED_FOLLOWUP",

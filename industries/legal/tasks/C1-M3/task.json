@@ -1,7 +1,7 @@
 {
   "task_name": "C1-M3: Cut-off number then complete",
   "customer_name": "Wendell Marsh",
-  "intent": "Open with exactly: \"I want to leave a message for whoever handles new cases.\" You called only to leave that message. You do not want a new matter, a screening, or an appointment. The first two times you are asked for your number, say exactly: \"two oh six, five five five, zero three.\" The third time, say exactly: \"Wendell Marsh, two oh six, five five five, zero three eight four.\" When asked what the message is, say exactly: \"Tell them Wendell Marsh called about a fall at a grocery store and wants a call back.\" Do not volunteer who it was against, which state, or when it happened. If asked about a new matter, who it would be against, which state, when it happened, or offered an appointment or a person instead of the message, say exactly: \"No, just the message please.\" Stay until they confirm the message is on the file. A spoken 'we'll take care of it' without the write is not enough. Once finished, say exactly: \"Thank you, that's all I needed.\" and end the call.",
+  "intent": "Open with exactly: \"I want to leave a message for whoever handles new cases.\" You called only to leave that message. You do not want a new matter, a screening, or an appointment. The first time you are asked for your name and number, say exactly: \"Wendell Marsh, two oh six, five five five, zero three.\" Every later time you are asked for your name or number, say exactly: \"Wendell Marsh, two oh six, five five five, zero three eight four.\" If asked who the message is for, say exactly: \"Whoever handles new cases, please.\" When asked what the message is, say exactly: \"Tell them Wendell Marsh called about a fall at a grocery store and wants a call back.\" Do not volunteer who it was against, which state, or when it happened. If asked about a new matter, who it would be against, which state, when it happened, or offered an appointment or a person instead of the message, say exactly: \"No, just the message please.\" Stay until they confirm the message is on the file. A spoken 'we'll take care of it' without the write is not enough. Once finished, say exactly: \"Thank you, that's all I needed.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -30,6 +30,21 @@
   "scripted_responses": [
     {
       "match_type": "context",
+      "match_phrase": "The agent asks for your name, your callback or phone number, or both, for the first time on this call. NOT when asking what the message is.",
+      "response_type": "phrase",
+      "response_value": "Wendell Marsh, two oh six, five five five, zero three.",
+      "occurrence_mode": "first_n",
+      "occurrence_n": 1
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks for your name or number again after you already gave a partial number: asks you to repeat, confirm, or finish it, asks for the full ten digits or the rest of it, or says it did not catch it. NOT when asking what the message is.",
+      "response_type": "phrase",
+      "response_value": "Wendell Marsh, two oh six, five five five, zero three eight four.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
       "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
       "response_type": "phrase",
       "response_value": "No, nobody represents me.",
@@ -37,9 +52,16 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks what the message is, what to tell them, or what you want passed along. NOT when asking for your name or number, NOT when asking who the claim is against, which state, or when it happened, and NOT when offering an appointment or a person.",
+      "match_phrase": "The agent asks what the message is, what to tell them, or what you want passed along. NOT when asking for your name or number, NOT when asking who the claim is against, which state, or when it happened, and NOT when offering an appointment or a person. NOT the opening greeting or a general how can I help, and NOT when asking who the message is for.",
       "response_type": "phrase",
       "response_value": "Tell them Wendell Marsh called about a fall at a grocery store and wants a call back.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks who the message is for, who at the firm should receive it, or which person to leave it with. NOT when asking what the message says.",
+      "response_type": "phrase",
+      "response_value": "Whoever handles new cases, please.",
       "occurrence_mode": "always"
     },
     {

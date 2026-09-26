@@ -13,6 +13,7 @@ vendor API or can be pointed at an endpoint you host — see [INFERENCE.md](INFE
 |---|---|---|---|---|
 | `openai/realtime-2.1`, `openai/realtime-2.1-mini` | gpt-realtime-2.1 (mini) | vendor | `OPENAI_API_KEY` | 8765 / 8766 |
 | `openai/gpt-live-1` | GPT-Live 1 | vendor (account needs access) | `OPENAI_API_KEY` | 8765 |
+| `openai/gpt-live-1@sol-low`, `openai/gpt-live-1@astra-medium` | GPT-Live 1 with the `gpt-5.6-sol` (low effort) or `gpt-6-astra` (medium effort) backend; same image, env from `variants.json` | vendor | `OPENAI_API_KEY` | 8765 |
 | `gemini/3.8-live`, `gemini/3.8-live@extended`, `gemini/flash-live-3.1`, `gemini/2.5-flash-native-audio` | Gemini Live (LiveKit SIP worker); `@extended` = gemini-3.8-live-extended-thinking | vendor | `GOOGLE_API_KEY`, `LIVEKIT_URL/API_KEY/API_SECRET`, `LIVEKIT_SIP_HOST` | – (SIP) |
 | `aws/nova-sonic-2` | Amazon Nova 2 Sonic | vendor (Bedrock) | `AWS_ACCESS_KEY_ID`/`SECRET` (+`AWS_SESSION_TOKEN`), `NOVA_SONIC_REGION` | 8774 |
 | `grok/voice` | xAI Grok voice | vendor | `GROK_API_KEY` (or `XAI_API_KEY`) | 8768 |

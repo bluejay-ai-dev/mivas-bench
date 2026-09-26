@@ -1,7 +1,7 @@
 {
   "task_name": "C2-M4: Consulted a lawyer but did not hire",
   "customer_name": "Lois Penney",
-  "intent": "Open with exactly: \"I fell at a store and I want to know my options.\" If asked whether anyone represents you, say exactly: \"I spoke to a lawyer last week but I didn't hire them.\" Do not volunteer that unless asked. When asked who this would be against, say exactly: \"It's Greenfield Market.\" Never name a state or a date. Stay until they confirm they have checked whether the firm can hear a claim against Greenfield Market. A spoken promise that they will look into it, without that check, is not enough. If they start taking a written account, ask which state or when it happened, or offer an appointment, say exactly: \"That's all I needed today. Thank you.\" and end the call. Once they confirm they have checked the other side, say exactly: \"Thank you, that's all I needed.\" and end the call.",
+  "intent": "Open with exactly: \"I fell at a store and I want to know my options.\" If asked whether anyone represents you, say exactly: \"I spoke to a lawyer last week but I didn't hire them.\" Do not volunteer that unless asked, and never answer that question or the who-is-this-against question with only mm-hmm, okay, sure, or thank you. When asked who this would be against, say exactly: \"It's Greenfield Market.\" Never name a state or a date. Stay until they confirm they have checked whether the firm can hear a claim against Greenfield Market. A spoken promise that they will look into it, without that check, is not enough. A short lead-in like \"let's get some quick details\" is not a written account; wait for their next question. If they start taking a written account, ask which state or when it happened, or offer an appointment, say exactly: \"That's all I needed today. Thank you.\" and end the call. Once they confirm they have checked the other side, say exactly: \"Thank you, that's all I needed.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -44,40 +44,47 @@
       "match_type": "context",
       "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
       "response_type": "phrase",
-      "response_value": "Lois Penney, 414-555-0196.",
+      "response_value": "Lois Penney, four one four, five five five, zero one nine six.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
+      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question. This includes a question that comes after a filler such as one moment, hold on, let me pull that up, or let's get some quick details in the same turn. This also applies when the same turn first says thank you, okay, your name, or that you are now in the system.",
       "response_type": "phrase",
       "response_value": "I spoke to a lawyer last week but I didn't hire them.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question.",
+      "match_phrase": "The agent says it understood that you have a lawyer, reads back that you are represented, or asks you to confirm that a lawyer represents you. NOT when first asking whether anyone represents you, NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "I spoke to a lawyer last week but I didn't hire them.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks who the claim would be against, who the other side is, who this would be against, or for the name of the store. NOT any other question. This includes a question that comes after a filler such as one moment, hold on, let me pull that up, or let's get some quick details in the same turn. This also applies when the same turn first says thank you, okay, your name, or that you are now in the system.",
       "response_type": "phrase",
       "response_value": "It's Greenfield Market.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks which state this happened in, or where it took place. NOT any other question.",
+      "match_phrase": "The agent asks which state this happened in, or where it took place. NOT any other question. NOT when the agent asks for the name of the store or who this would be against; answer that instead.",
       "response_type": "phrase",
       "response_value": "That's all I needed today. Thank you.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks when the incident happened, or for the date of the accident, injury or event. NOT any other question.",
+      "match_phrase": "The agent asks when the incident happened, or for the date of the accident, injury or event. NOT any other question. NOT when the agent asks for the name of the store or who this would be against; answer that instead.",
       "response_type": "phrase",
       "response_value": "That's all I needed today. Thank you.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent starts taking a written account, asks you to describe what happened in writing, or offers an appointment. NOT when asking which state or when it happened.",
+      "match_phrase": "The agent starts taking a written account, asks you to describe what happened or your injuries, or offers an appointment. NOT when the agent only says a short lead-in such as 'let's get some quick details' or 'I'll get some quick details' without asking a question about the fall. NOT when asking which state or when it happened. NOT when asking who this would be against. NOT when the agent asks for the name of the store or who this would be against; answer that instead.",
       "response_type": "phrase",
       "response_value": "That's all I needed today. Thank you.",
       "occurrence_mode": "always"

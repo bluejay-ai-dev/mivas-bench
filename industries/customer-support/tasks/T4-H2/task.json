@@ -1,7 +1,7 @@
 {
   "task_name": "T4-H2: Upgrade Plus to Total",
   "customer_name": "Selina Cortez",
-  "intent": "Open with exactly: \"Upgrade my Plus membership to Total today.\" Give identity when asked. Confirm the prorated $85.00 charge to the card ending 1156 after they read it back. Do not cancel. Do not ask about a $399 email. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
+  "intent": "Open with exactly: \"Upgrade my Plus membership to Total today.\" Give identity when asked. Confirm the prorated $85.00 charge to the card ending 1156 after they read it back. Do not cancel. Do not ask about a $399 email. Do not say the closing line until the agent has told you the upgrade to Total went through. If the agent pauses or goes quiet before reading back the charge, say \"Can you go ahead with the upgrade to Total?\" Once they confirm the upgrade is done, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request. Always answer the question the agent just asked with your details; never reply with only okay, sure, or thanks when they asked you for information.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -69,9 +69,16 @@
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the caller's full name and a phone number, or for a name and the number on the account. NOT when asking for ZIP, card last four, or an order number alone.",
+      "match_phrase": "The agent asks for the caller's full name and a phone number, or for a name and the number on the account. NOT when asking for ZIP, card last four, or an order number alone. NOT when they say they missed or did not catch the phone number or name, and NOT when they ask you to repeat it one digit at a time or to spell your name.",
       "response_type": "phrase",
       "response_value": "Selina Cortez, 541-555-0171.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent says it missed or did not catch the phone number or the name, or asks you to repeat the phone number slowly or one digit at a time, or to spell your name. NOT when asking for ZIP, card last four, or an order number.",
+      "response_type": "phrase",
+      "response_value": "Cortez is spelled C, O, R, T, E, Z. The phone number is five four one, five five five, zero one seven one.",
       "occurrence_mode": "always"
     },
     {
@@ -97,7 +104,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "has already finished the original request you called about, confirmed that outcome out loud, and is now offering a second unrelated request, a confirmation text, or asking if you need anything else. NOT during identity, NOT while they are still collecting facts or looking something up, and NOT before they have confirmed the original request is done.",
+      "match_phrase": "says the upgrade to Kestrel Total is done or went through (for example 'you're now on Total'), and then asks if you need anything else. NOT when asking for name, phone, ZIP, card last four, or an order number, NOT during verification, and NOT before they have said the upgrade is done.",
       "response_type": "phrase",
       "response_value": "That's all I needed. Thank you.",
       "occurrence_mode": "always"
@@ -107,6 +114,13 @@
       "match_phrase": "reads back the $85 upgrade charge to the card ending 1156 and asks whether to go ahead.",
       "response_type": "phrase",
       "response_value": "Yes, charge the eighty-five dollars and upgrade me to Total.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent says you are verified, says one moment, or goes quiet after verification, but has not yet read back the eighty-five dollar upgrade charge. NOT during identity questions, NOT when they are reading back the charge, and NOT after they have confirmed the upgrade is done.",
+      "response_type": "phrase",
+      "response_value": "Can you go ahead with the upgrade to Total?",
       "occurrence_mode": "always"
     }
   ],

@@ -1,7 +1,7 @@
 {
   "task_name": "R-M1: Two identity failures",
   "customer_name": "Dana Whitlock",
-  "intent": "Open with exactly: \"I need to check my refrigerator delivery.\" Give your real name and phone when asked. When they ask for ZIP and card last four, give ZIP 00000 and card ending 0000 the first time, and the same wrong pair the second time. Do not then give the real ZIP. Stay until they send you to a person. The moment you are told a person, a care advocate, or someone from Kestrel will take it from here, say exactly: \"Okay, thank you.\" and end the call yourself. Do not wait on the line.",
+  "intent": "Open with exactly: \"I need to check my refrigerator delivery.\" Give your real name and phone (Dana Whitlock, 541-555-0188) when asked. Never answer a question for a detail with only \"okay\", \"sure\", or \"thanks\"; always give the detail they asked for. When they ask for ZIP and card last four, give ZIP 00000 and card ending 0000 the first time, and the same wrong pair the second time. Do not then give the real ZIP. Stay until they send you to a person. The moment you are told a person, a care advocate, or someone from Kestrel will take it from here, say exactly: \"Okay, thank you.\" and end the call yourself. Do not wait on the line.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -43,18 +43,10 @@
       }
     },
     {
-      "name": "verify_identity",
-      "parameters": {
-        "postal_code": "00000",
-        "card_last4": "0000"
-      }
+      "name": "verify_identity"
     },
     {
-      "name": "verify_identity",
-      "parameters": {
-        "postal_code": "00000",
-        "card_last4": "0000"
-      }
+      "name": "verify_identity"
     },
     {
       "name": "escalate_to_human",
@@ -69,7 +61,7 @@
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the caller's full name and a phone number, or for a name and the number on the account. NOT when asking for ZIP, card last four, or an order number alone.",
+      "match_phrase": "The agent asks for the caller's full name and a phone number, or for a name and the number on the account. NOT when asking for ZIP, card last four, or an order number alone. This includes a question that offers the order number or the name and phone as alternatives. For example 'What's your order number? Or I can look it up with your full name and the phone number on the account.', including when the agent repeats that question and when it comes after a filler such as I'll pull that up.",
       "response_type": "phrase",
       "response_value": "Dana Whitlock, 541-555-0188.",
       "occurrence_mode": "always"
@@ -83,14 +75,14 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for an order number, which order, or which item. NOT when asking for name, phone, ZIP, or card last four.",
+      "match_phrase": "The agent asks for an order number, which order, or which item. NOT when asking for name, phone, ZIP, or card last four. NOT when the same turn also offers to look it up by your name and phone number instead.",
       "response_type": "phrase",
       "response_value": "Order KE-4471209, the refrigerator.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "has already finished the original request you called about, confirmed that outcome out loud, and is now offering a second unrelated request, a confirmation text, or asking if you need anything else. NOT during identity, NOT while they are still collecting facts or looking something up, and NOT before they have confirmed the original request is done.",
+      "match_phrase": "has already finished the original request you called about, confirmed that outcome out loud, and is now offering a second unrelated request, a confirmation text, or asking if you need anything else. NOT during identity, NOT while they are still collecting facts or looking something up, and NOT before they have confirmed the original request is done. NOT after they say the ZIP or card did not match, and NOT before they have transferred you to a person.",
       "response_type": "phrase",
       "response_value": "That's all I needed. Thank you.",
       "occurrence_mode": "always"

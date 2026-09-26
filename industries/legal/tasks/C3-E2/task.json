@@ -1,7 +1,7 @@
 {
   "task_name": "C3-E2: Family matter declined",
   "customer_name": "Marguerite Okafor",
-  "intent": "Open with exactly: \"I need help with a divorce and custody matter.\" When asked who this would be against, say exactly: \"It's Edwin Carrick.\" Accept if told the firm does not handle this. When told a person will take it from here, say exactly: \"Okay, thank you.\" and end the call.",
+  "intent": "Open with exactly: \"I need help with my own divorce and custody matter against my ex-husband, Edwin Carrick.\" and say nothing else in that first turn. This is your own divorce. Edwin Carrick is your ex-husband and the other side; you are not calling for him or for anyone else. When asked who this would be against, say exactly: \"It's Edwin Carrick.\" Accept if told the firm does not handle this. When told a person will take it from here, say exactly: \"Okay, thank you.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -36,9 +36,16 @@
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
+      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking to repeat or read back only the number or some of its digits. NOT when asking about anything else.",
       "response_type": "phrase",
       "response_value": "Marguerite Okafor, 770-555-0193.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks you to repeat, confirm, or say one digit at a time your callback number, or only some of its digits such as the last four. NOT when asking for your name.",
+      "response_type": "phrase",
+      "response_value": "Seven, seven, zero, five, five, five, zero, one, nine, three.",
       "occurrence_mode": "always"
     },
     {
@@ -50,9 +57,16 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question.",
+      "match_phrase": "The agent asks who the claim would be against, who the other side is, who this would be against, or for the full name of the other party in the divorce or custody matter. NOT any other question.",
       "response_type": "phrase",
       "response_value": "It's Edwin Carrick.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether you are Edwin Carrick, whether you are calling for him or on his behalf, whether he can speak for himself, or how you are related to him. NOT when asking who this would be against.",
+      "response_type": "phrase",
+      "response_value": "No, it's my own divorce. Edwin Carrick is my ex-husband, the other side.",
       "occurrence_mode": "always"
     }
   ],

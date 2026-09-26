@@ -1,6 +1,6 @@
 {
   "task_name": "C2-M3: Book a follow-up for eczema",
-  "intent": "You are an existing Straus patient and you do not have anything on the calendar right now. The eczema on your hands is flaring and you want a follow-up at Brooklyn Heights. Answer their identity questions once, confirm the readback, then proceed. Take the first appointment time they offer. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first time out loud, then thank them and end the call. Do not ask to add or change insurance. Do not ask for a callback, to speak to a person, a bill, a payment, the patient portal, a waitlist, a text, financing, or the street, floor, or suite. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar. If they only list openings, say book the first one. Do not ask them to text you an appointment confirmation.",
+  "intent": "You are an existing Straus patient and you do not have anything on the calendar right now. The eczema on your hands is flaring and you want a follow-up at Brooklyn Heights. Answer their identity questions once, confirm the readback, then proceed. Take the first appointment time they offer. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first time out loud, then thank them and end the call. Do not ask to add or change insurance. Do not ask for a callback, to speak to a person, a bill, a payment, the patient portal, a waitlist, a text, financing, or the street, floor, or suite. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar. If they only list openings, say book the first one. Do not ask them to text you an appointment confirmation. Once they have said the time is booked, confirm it once, thank them, and end the call; do not ask them to confirm it again. If they ask you to spell your last name, spell it exactly N, G, U, Y, E, N. Never confirm a readback of a different last name. If the agent is slow to greet you or pauses at the start, that is not the end of the call; stay and answer its questions. Always answer the question the agent just asked; never reply with only okay, sure, or thanks when they asked you for information, and if your last reply was only thanks and the question is still unanswered, give the answer in your next turn.",
   "traits": [
     {
       "trait_name": "preferred_office",
@@ -90,19 +90,25 @@
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "asks for your full name and date of birth, or asks you to confirm who you are, or asks for the patient's name and date of birth. NOT when asking only for a member ID or insurance card, NOT when asking which office or location, NOT when asking for a phone or mobile number, NOT when asking about an appointment day or time, NOT when reading your name and date of birth back to you for confirmation.",
+      "match_phrase": "asks whether you are a new or existing patient, or whether you have been seen at Straus before. NOT when asking for your name or date of birth, NOT when asking about an appointment time.",
+      "response_type": "phrase",
+      "response_value": "I'm an existing patient. I'd like an eczema follow-up at Brooklyn Heights."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks for your full name and date of birth, or asks you to confirm who you are, or asks for the patient's name and date of birth, including \"I just need to confirm a couple of things. What's your full name and date of birth?\". This includes when the question comes at the end of a longer agent turn after 'sure', 'okay', 'one moment', or a greeting, and after a slow start to the call. NOT when asking only for a member ID or insurance card, NOT when asking which office or location, NOT when asking for a phone or mobile number, NOT when asking about an appointment day or time, NOT when reading your name and date of birth back to you for confirmation.",
       "response_type": "phrase",
       "response_value": "Sam Nguyen. My date of birth is November third, nineteen eighty-five."
     },
     {
       "match_type": "context",
-      "match_phrase": "reads your name and date of birth back to you and asks whether that is right, or asks you to confirm the name and date of birth they just repeated. NOT when first asking for your name and date of birth, NOT when asking for a phone or mobile number.",
+      "match_phrase": "reads your name and date of birth back to you and asks whether that is right, or asks you to confirm the name and date of birth they just repeated. NOT when first asking for your name and date of birth, NOT when asking for a phone or mobile number. NOT when the last name they read back is anything other than Nguyen, such as Nigwin, Niguin, Noahan, McQuinn, or a spelling other than N G U Y E N.",
       "response_type": "phrase",
       "response_value": "Yes, that's right."
     },
     {
       "match_type": "context",
-      "match_phrase": "offers one or more concrete appointment dates or times, or asks you to choose among concrete slots. NOT when asking for your name, date of birth, mobile number, or ZIP code.",
+      "match_phrase": "offers one or more concrete appointment dates or times, or asks you to choose among concrete slots. NOT when asking for your name, date of birth, mobile number, or ZIP code. NOT when they read back one single time and ask whether to book it or go ahead.",
       "response_type": "phrase",
       "response_value": "Book the first time you offered and confirm it is on the calendar."
     },
@@ -126,9 +132,47 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before a time has been confirmed on the calendar. NOT when they have just confirmed a booked time.",
+      "match_phrase": "says goodbye or asks if you need anything else while no time has yet been said to be booked or on the calendar. NOT once they have said at any point in the call that a time is booked or on the calendar, NOT when they only say thanks, okay, or one moment, NOT when they are asking you a question.",
       "response_type": "phrase",
       "response_value": "I still need that time booked. Please confirm it is on the calendar before I go."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks whether to book, lock in, or confirm a specific time they just named. NOT when they already said the time is booked.",
+      "response_type": "phrase",
+      "response_value": "Yes, please book that time."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks what days or times work for you, or whether you have a preference, without naming a specific date and time. NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "Any day is fine. Please give me the first available time at Brooklyn Heights."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "calls this a new-patient visit or says you are a new patient. NOT when asking whether you are new or existing.",
+      "response_type": "phrase",
+      "response_value": "No, I'm an existing patient. I've been seen at Straus before. This is an eczema follow-up.",
+      "occurrence_mode": "first_n",
+      "occurrence_n": 1
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks you to spell your last name, or asks for it letter by letter.",
+      "response_type": "phrase",
+      "response_value": "N as in Nancy, G as in George, U as in Uncle, Y as in Yellow, E as in Edward, N as in Nancy. Nguyen."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "reads your last name back as anything other than Nguyen, for example Nigwin, Niguin, Noahan, McQuinn, or a spelling other than N G U Y E N, and asks whether it is right.",
+      "response_type": "phrase",
+      "response_value": "No. My last name is Nguyen: N, G, U, Y, E, N."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks whether Sam is your full first name or short for another name. NOT when asking for your last name.",
+      "response_type": "phrase",
+      "response_value": "Sam is my full first name. Sam Nguyen, N, G, U, Y, E, N."
     }
   ],
   "customer_name": "Sam Nguyen",

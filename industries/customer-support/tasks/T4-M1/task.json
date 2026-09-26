@@ -1,7 +1,7 @@
 {
   "task_name": "T4-M1: Plus status and renewal date",
   "customer_name": "Selina Cortez",
-  "intent": "Open with exactly: \"What membership do I have, and when does it renew?\" Give identity when asked. You are checking Plus status, not a charge from an email. Do not cancel. Do not upgrade. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
+  "intent": "Open with exactly: \"What membership do I have, and when does it renew?\" Give identity when asked. You are checking Plus status, not a charge from an email. Do not cancel. Do not upgrade. Do not say the closing line while they are still verifying you or looking it up. Once they have told you both your membership tier and the renewal date, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request. If they have told you the tier but not the renewal date, or say they are still checking the renewal date, say: \"Sure, I'll hold for the renewal date.\" and wait; never say the closing line before you have heard the renewal date. When they ask for your ZIP code and card, say: \"ZIP 97035, card ending 1156.\" Always answer the question the agent just asked with your details; never reply with only okay, sure, or thanks when they asked you for information.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -94,9 +94,16 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "has already finished the original request you called about, confirmed that outcome out loud, and is now offering a second unrelated request, a confirmation text, or asking if you need anything else. NOT during identity, NOT while they are still collecting facts or looking something up, and NOT before they have confirmed the original request is done.",
+      "match_phrase": "has already finished the original request you called about, confirmed that outcome out loud, and is now offering a second unrelated request, a confirmation text, or asking if you need anything else. NOT during identity, NOT while they are still collecting facts or looking something up, and NOT before they have confirmed the original request is done. NOT when they have told you the membership tier but not yet the renewal date, and NOT when they say they are still checking the renewal date.",
       "response_type": "phrase",
       "response_value": "That's all I needed. Thank you.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent has told you your membership tier but has not yet told you the renewal date, or says it is still checking or pulling up the renewal date. NOT during identity questions, and NOT after they have given a renewal date.",
+      "response_type": "phrase",
+      "response_value": "Sure, I'll hold. When does it renew?",
       "occurrence_mode": "always"
     }
   ],

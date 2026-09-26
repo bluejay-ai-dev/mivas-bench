@@ -1,6 +1,6 @@
 {
   "task_name": "C3-M3: Medicare at Windermere then a booking",
-  "intent": "You are a new patient in Florida. You have a sore on your forearm that will not heal and you want to be seen at the Windermere office. Start by asking whether that office takes Medicare. After they say yes, ask to book the visit there. Answer their intake questions once, then proceed. Take the first appointment time they offer. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first time out loud, then thank them and end the call. Do not ask to add or change insurance. Do not ask for a callback, to speak to a person, a bill, a payment, the patient portal, a waitlist, a text, financing, or the street, floor, or suite. Stay until they have looked up whether Windermere takes Medicare; a guess without a lookup is not enough. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar. If they only list openings, say book the first one. If they offer a callback, decline and stay until they have searched openings and confirmed a Windermere time is on the calendar. Do not ask them to text you an appointment confirmation.",
+  "intent": "You are a new patient in Florida. You have a small spot on your forearm that has not healed in about three weeks, and you want to be seen at the Windermere office. It is not painful, bleeding, spreading, or infected. Never call it a sore arm, a sore forearm, or pain. Start by asking whether that office takes Medicare. After they say yes, your very next reply must ask to book the visit there; never answer that yes with only sure or thank you. Answer their intake questions once, then proceed. Take the first appointment time they offer. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first time out loud, then thank them and end the call. Do not ask to add or change insurance. Do not ask for a callback, to speak to a person, a bill, a payment, the patient portal, a waitlist, a text, financing, or the street, floor, or suite. Stay until they have looked up whether Windermere takes Medicare; a guess without a lookup is not enough. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar. If they only list openings, say book the first one. If they offer a callback, decline and stay until they have searched openings and confirmed a Windermere time is on the calendar. Do not ask them to text you an appointment confirmation. Once they say the visit is booked or on the calendar, say thank you and goodbye and end the call; do not ask again whether it is booked.",
   "traits": [
     {
       "trait_name": "zip",
@@ -59,7 +59,6 @@
       "name": "classify_visit_request",
       "parameters": {
         "visit_class": "medical",
-        "urgency": "routine",
         "is_new_patient": true
       }
     },
@@ -95,19 +94,43 @@
   "scripted_responses": [
     {
       "match_type": "context",
+      "match_phrase": "asks what the visit is for, the reason for the visit, what is going on with your skin, or whether you are a new or existing patient. NOT when asking for your name, date of birth, or phone number, NOT when asking for a ZIP code, NOT when offering or reading back an appointment time.",
+      "response_type": "phrase",
+      "response_value": "I'm a new patient. It's a spot on my forearm that hasn't healed in about three weeks. It isn't painful, bleeding, spreading, or infected."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks for a ZIP code, either yours or the office's. NOT when asking for your name, date of birth, or phone number, NOT when reading a ZIP code back to you.",
+      "response_type": "phrase",
+      "response_value": "Three, four, seven, eight, six."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks which provider or doctor you want to see or are planning to see. NOT when reading back or offering an appointment time with a doctor's name.",
+      "response_type": "phrase",
+      "response_value": "I don't have a provider in mind. Whoever is first at Windermere is fine."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "reads back one specific appointment time with the office and provider and asks whether to book it or whether it works. NOT when offering several options, NOT when saying it is already booked. NOT after they have said the visit is booked.",
+      "response_type": "phrase",
+      "response_value": "Yes, please book it."
+    },
+    {
+      "match_type": "context",
       "match_phrase": "asks for your full name and date of birth, or asks you to confirm who you are, or asks for the patient's name and date of birth. NOT when asking only for a member ID or insurance card, NOT when asking which office or location, NOT when asking for a phone or mobile number, NOT when asking about an appointment day or time, NOT when reading your name and date of birth back to you for confirmation.",
       "response_type": "phrase",
       "response_value": "Walter Prinz. My date of birth is August third, nineteen fifty-two."
     },
     {
       "match_type": "context",
-      "match_phrase": "reads your name and date of birth back to you and asks whether that is right, or asks you to confirm the name and date of birth they just repeated. NOT when first asking for your name and date of birth, NOT when asking for a phone or mobile number.",
+      "match_phrase": "reads your name and date of birth back to you and asks whether that is right, or asks you to confirm the name and date of birth they just repeated. NOT when first asking for your name and date of birth, NOT when asking for a phone or mobile number. NOT when asking which provider or doctor, NOT when asking for a ZIP code, NOT when reading back an appointment time.",
       "response_type": "phrase",
       "response_value": "Yes, that's right."
     },
     {
       "match_type": "context",
-      "match_phrase": "offers an appointment time, a slot, or asks which day or time you want. NOT when asking for your name or date of birth, NOT when they have not yet given the street, floor, and suite if you still need those.",
+      "match_phrase": "offers two or more appointment times and asks which one you want, or asks which day or time you want. NOT when reading back one single time and asking whether to book it, NOT when saying a time is already booked, NOT when asking for your name, date of birth, phone, provider, ZIP code, or the reason for the visit, NOT before they have offered any time.",
       "response_type": "phrase",
       "response_value": "I'll take the first time you offered."
     },
@@ -131,21 +154,39 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "says they take the plan, accept the insurance, or that you are covered, without naming Windermere. NOT when they have just named Windermere.",
+      "match_phrase": "says Medicare is accepted or covered without saying which office, before Windermere acceptance has been confirmed. NOT when they name Windermere in that turn, NOT when they already confirmed Windermere acceptance earlier, NOT when they say they cannot confirm the plan, NOT when asking the reason for the visit or any other question.",
       "response_type": "phrase",
       "response_value": "Which office did you mean? I need Windermere specifically, not the whole practice."
     },
     {
       "match_type": "context",
-      "match_phrase": "offers a callback, asks for a number to call you back, says the front desk will call or follow up, or says they cannot book the visit on this call. NOT when they have just confirmed a booked time, NOT when asking for your identity.",
+      "match_phrase": "offers a callback, asks for a number to call you back, says the front desk will call or follow up, or says they cannot book the visit on this call. NOT when they have just confirmed a booked time, NOT when asking for your identity. NOT after a time has been booked.",
       "response_type": "phrase",
       "response_value": "No callback. Please book the soonest new-patient visit at Windermere on this call."
     },
     {
       "match_type": "context",
-      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before a time has been confirmed on the calendar. NOT when they have just confirmed a booked time.",
+      "match_phrase": "thanks you, says goodbye, or asks if you need anything else, and no appointment time has been booked yet anywhere in the call. NOT when they have said at any point that the visit is booked, confirmed, set, or on the calendar, NOT when asking a question. NOT when asking for your name, date of birth, or mobile number.",
       "response_type": "phrase",
       "response_value": "I still need that time booked. Please confirm it is on the calendar before I go."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "says the Windermere office accepts or takes Medicare, including a turn like 'let me check that. Yes, our Windermere office does accept Medicare.' with no question in it. Always reply with the booking request, never with only thanks. NOT when asking for your name, date of birth, phone, or the reason for the visit, NOT once any appointment time has been offered.",
+      "response_type": "phrase",
+      "response_value": "Great. Please book me the first available new-patient visit at Windermere for a spot on my forearm that hasn't healed in about three weeks."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks for your full name, date of birth, and mobile or phone number in the same question, or asks only for your mobile or phone number. NOT when reading any of them back to you.",
+      "response_type": "phrase",
+      "response_value": "Walter Prinz. My date of birth is August third, nineteen fifty-two. My mobile is 407-555-0181."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "says the new-patient visit is booked, confirmed, set, or on the calendar for a specific day and time. NOT when only offering or reading back a time before booking.",
+      "response_type": "phrase",
+      "response_value": "Thank you, that's all I needed. I don't need a confirmation text. Goodbye."
     }
   ],
   "customer_name": "Walter Prinz",

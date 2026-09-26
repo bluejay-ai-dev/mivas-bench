@@ -1,7 +1,7 @@
 {
   "task_name": "T2-H3: Marketplace headphone return",
   "customer_name": "Tomas Ferreira",
-  "intent": "Open with exactly: \"I want to return the Corva Studio Headphones I ordered last week.\" Give identity when asked. Order KE-4479002. If they say a Marketplace seller owns the policy, ask them to name the seller and get you to a person who can deal with that seller. Do not accept a Kestrel refund promise. The moment you are told a person, a care advocate, or someone from Kestrel will take it from here, say exactly: \"Okay, thank you.\" and end the call yourself. Do not wait on the line.",
+  "intent": "Open with exactly: \"I want to return the Corva Studio Headphones I ordered last week.\" Give identity when asked. Order KE-4479002. If they say a Marketplace seller owns the policy, ask them to name the seller and get you to a person who can deal with that seller. Do not accept a Kestrel refund promise. The moment you are told a person, a care advocate, or someone from Kestrel will take it from here, say exactly: \"Okay, thank you.\" and end the call yourself. Do not wait on the line. Always answer the question the agent just asked with your details; never reply with only okay, sure, or thanks when they asked you for information.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -57,12 +57,6 @@
       "name": "transfer_to_returns"
     },
     {
-      "name": "get_order",
-      "parameters": {
-        "order_number": "KE-4479002"
-      }
-    },
-    {
       "name": "check_return_eligibility",
       "parameters": {
         "order_number": "KE-4479002"
@@ -81,7 +75,14 @@
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the caller's full name and a phone number, or for a name and the number on the account. NOT when asking for ZIP, card last four, or an order number alone.",
+      "match_phrase": "The agent asks for your order number OR your full name and phone number, offering either one in the same question (for example 'the order number, or your full name and the phone number on the account'). NOT when asking for ZIP or card last four, and NOT when asking you to repeat the phone number one digit at a time.",
+      "response_type": "phrase",
+      "response_value": "Tomas Ferreira, 541-555-0146. Order KE-4479002.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks for the caller's full name and a phone number, or for a name and the number on the account. NOT when asking for ZIP, card last four, or an order number alone. NOT when the same question offers the order number and the name and phone as alternatives.",
       "response_type": "phrase",
       "response_value": "Tomas Ferreira, 541-555-0146.",
       "occurrence_mode": "always"
@@ -95,28 +96,28 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for an order number, which order, or which item. NOT when asking for name, phone, ZIP, or card last four.",
+      "match_phrase": "The agent asks for an order number, which order, or which item. NOT when asking for name, phone, ZIP, or card last four. NOT when the same question offers the order number and the name and phone as alternatives.",
       "response_type": "phrase",
       "response_value": "Order KE-4479002, the headphones.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "offers to transfer you to a human, a care advocate, the front desk, or a live agent because they cannot continue on this line. NOT when you already asked for a person, NOT when they are completing the return, delivery change, cancellation, or scam report, NOT when they say a Marketplace seller owns the return or that they can get you to someone who will put you in touch with that seller.",
+      "match_phrase": "offers to transfer you to a human, a care advocate, the front desk, or a live agent because they cannot continue on this line, before any Marketplace seller has been mentioned. NOT when you already asked for a person, NOT when they are completing the return, delivery change, cancellation, or scam report, and NOT at any point after they have said a Marketplace seller (for example Northwind Supply) owns the return, the refund, or the policy.",
       "response_type": "phrase",
       "response_value": "No, I don't need a person. Please finish what I asked on this call.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "says a Marketplace seller owns the return, the refund, or the policy, or that the return goes through the seller, and has not yet connected you to a person. NOT when they have already named the seller and said a person will take it from here.",
+      "match_phrase": "says a Marketplace seller owns the return, the refund, or the policy, or that the return goes through the seller, without saying the seller's name, and has not yet said a person will help. NOT when they have already said the seller's name (for example Northwind Supply), and NOT when they have said a person or care advocate will take it from here.",
       "response_type": "phrase",
       "response_value": "Who is the seller? Please get me to a person who can deal with that seller.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "quotes a Kestrel refund amount or asks you to confirm a Kestrel return on this order. NOT when they have said a Marketplace seller owns the policy.",
+      "match_phrase": "states a Kestrel refund dollar amount, or asks you to confirm or start a Kestrel return on this order. NOT when asking for an order number, name, phone, ZIP, or card last four, NOT when asking how they can help, and NOT when they have said a Marketplace seller owns the policy.",
       "response_type": "phrase",
       "response_value": "I don't want a Kestrel refund. Get me to a person who can deal with the seller.",
       "occurrence_mode": "always"
@@ -133,6 +134,13 @@
       "match_phrase": "has already finished the original request you called about, confirmed that outcome out loud, and is now offering a second unrelated request, a confirmation text, or asking if you need anything else. NOT during identity, NOT while they are still collecting facts or looking something up, and NOT before they have confirmed the original request is done.",
       "response_type": "phrase",
       "response_value": "That's all I needed. Thank you.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "has already said the seller's name (for example Northwind Supply) and that the seller's policy applies, but has not said a person or care advocate will help. NOT when they have said a person, care advocate, or someone from Kestrel will take it from here. NOT when they have said they are transferring, connecting, or getting you to a person or care advocate.",
+      "response_type": "phrase",
+      "response_value": "Please get me to a person who can deal with that seller.",
       "occurrence_mode": "always"
     }
   ],

@@ -871,3 +871,53 @@ def test_legal_c4_still_requires_in_order_hops() -> None:
     out = vtr.verify_result(result, task, None, industry="legal")
     assert out["handoff"]["passed"] is False
     assert out["handoff"]["verdict"] == "incomplete"
+
+
+def test_cs_state_normalizes_scam_amount_payment_and_ignores_issue() -> None:
+    canon = lambda row: vtr._canon_row(row, "customer-support")
+    assert canon({"amount_text": "$399.99"}) == canon({"amount_text": "399.99"})
+    assert canon({"amount_text": "399.99"}) != canon({"amount_text": "39.99"})
+    assert canon({"payment_requested": "Not stated"}) == canon({"payment_requested": "none"})
+    assert canon({"payment_requested": "Gift Cards"}) == canon({"payment_requested": "gift card"})
+    assert canon({"issue": "Aurora Pro will not charge"}) == canon({"issue": "will not charge"})
+
+
+def test_cs_unconsumed_quote_hold_is_not_a_state_change() -> None:
+    base = {k: [] for k in vtr.INDUSTRY_OFFICE_TABLES["customer-support"]}
+    quote = dict(base, holds=[{"token": "q1", "kind": "return", "customer_id": "c1", "payload": "{}", "summary": "s", "consumed": 0}])
+    spent = dict(base, holds=[dict(quote["holds"][0], consumed=1)])
+    assert vtr.office_states_match(base, quote, "customer-support")
+    assert not vtr.office_states_match(base, spent, "customer-support")
+    assert vtr.office_states_match(quote, quote, "customer-support")
+
+
+def test_string_args_ignore_typographic_quotes() -> None:
+    assert vtr._values_equal("competitor", "Grimwald's", "grimwald\u2019s")
+    assert not vtr._values_equal("competitor", "Grimwald's", "Halcyon Mart")
+
+
+def test_trust_empty_tools_turns_extraction_void_into_a_scorable_call(monkeypatch) -> None:
+    body = {"id": 1, "status": "COMPLETED", "trace_ids": ["t"],
+            "tool_calls": [{"name": "escalate_to_human", "expected": [{}], "actual": []}]}
+    monkeypatch.setattr(vtr.verify_run, "TRUST_EMPTY_TOOLS", False)
+    assert "extraction" in (vtr.verify_run.classify_detail(body)["void_reason"] or "")
+    monkeypatch.setattr(vtr.verify_run, "TRUST_EMPTY_TOOLS", True)
+    assert vtr.verify_run.classify_detail(body)["void_reason"] is None
+
+
+def test_omitted_optional_arg_matches_the_tool_default() -> None:
+    exp = {"name": "classify_visit_request", "parameters": {"visit_class": "medical", "urgency": "routine", "is_new_patient": False}}
+    omitted = {"name": "classify_visit_request", "parameters": {"visit_class": "medical"}}
+    urgent = {"name": "classify_visit_request", "parameters": {"visit_class": "medical", "urgency": "urgent"}}
+    mohs = {"name": "classify_visit_request", "parameters": {"visit_class": "mohs"}}
+    schemas = vtr.load_tool_schemas("healthcare")
+    match = lambda e, a: vtr._calls_match(e, a, schemas, "healthcare")
+    assert match(exp, omitted)
+    assert not match(exp, urgent)
+    assert not match({"name": "classify_visit_request", "parameters": {"visit_class": "mohs", "urgency": "routine"}}, mohs)
+
+
+def test_order_numbers_match_with_or_without_separators() -> None:
+    assert vtr._values_equal("order_number", "KE-4483316", "KE4483316")
+    assert vtr._values_equal("order_number", "KE-4471209", "ke 4471209")
+    assert not vtr._values_equal("order_number", "KE-4483316", "KE-4483317")
