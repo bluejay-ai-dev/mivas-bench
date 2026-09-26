@@ -36,6 +36,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import time
 import os
 import sys
 import urllib.error
@@ -55,11 +56,18 @@ def _get(path: str) -> dict:
     if not key:
         raise SystemExit("need BLUEJAY_API_KEY")
     req = urllib.request.Request(f"{API}/{path}", headers={"X-API-Key": key})
-    try:
-        with urllib.request.urlopen(req, timeout=60) as r:
-            return json.load(r)
-    except urllib.error.HTTPError as e:
-        raise SystemExit(f"GET {path} → {e.code} {e.read()[:300].decode(errors='replace')}")
+    for attempt in range(4):
+        try:
+            with urllib.request.urlopen(req, timeout=60) as r:
+                return json.load(r)
+        except urllib.error.HTTPError as e:
+            raise SystemExit(f"GET {path} → {e.code} {e.read()[:300].decode(errors='replace')}")
+        except (OSError, ValueError) as e:
+            # a body cut mid-read (IncompleteRead, connection reset) under load
+            if attempt == 3:
+                raise SystemExit(f"GET {path} failed: {e}")
+            time.sleep(3 * (attempt + 1))
+    raise SystemExit(f"GET {path} failed")
 
 
 def result_ids_for_run(run_id: str) -> list[str]:
