@@ -152,6 +152,10 @@ LEGAL_IGNORE_ROW_KEYS = frozenset({
 })
 LEGAL_EXTRA_OK_TABLES = frozenset({
     "messages", "intake_notes", "documents", "holds", "evaluations",
+    # reception.md says both "look them up" first and "take nothing" for adjusters and
+    # represented callers; an agent that looks the caller up before escalating creates a
+    # caller row the take-nothing reading does not. Expected rows stay required.
+    "callers",
 })
 # free-text the agent writes in its own words: a return reason the caller never
 # states (rmas/holds column, nested in holds.payload JSON) and the service
@@ -705,6 +709,21 @@ def _party_match(expected: Any, actual: Any, *, require_all_expected: bool = Fal
     return all(_fuzzy_in(g, joined_want, tol(g)) for g in got)
 
 
+_NO_DEFAULT = object()
+_URGENT_BY_DEFAULT = frozenset({"mohs"})
+
+
+def _omitted_default(tool: str, key: str, act_params: dict[str, Any]) -> Any:
+    """What the tool server uses when the model leaves an optional arg out. With strict
+    tools off the model may omit it; omitting a server default is the same call."""
+    if tool == "classify_visit_request" and key == "urgency":
+        visit = str(act_params.get("visit_class") or "").strip().lower()
+        return "urgent" if visit in _URGENT_BY_DEFAULT else "routine"
+    if tool == "classify_visit_request" and key == "is_new_patient":
+        return False
+    return _NO_DEFAULT
+
+
 def _values_equal(key: str, expected: Any, actual: Any) -> bool:
     if expected == actual:
         return True
@@ -789,7 +808,10 @@ def _calls_match(
                 return False
             continue
         if key not in act_params:
-            return False
+            default = _omitted_default(str(expected.get("name") or ""), key, act_params)
+            if default is _NO_DEFAULT or not _values_equal(key, exp_value, default):
+                return False
+            continue
         if not _values_equal(key, exp_value, act_params.get(key)):
             return False
     exp_out = _output_fields(expected)

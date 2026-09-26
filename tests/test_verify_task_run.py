@@ -903,3 +903,15 @@ def test_trust_empty_tools_turns_extraction_void_into_a_scorable_call(monkeypatc
     assert "extraction" in (vtr.verify_run.classify_detail(body)["void_reason"] or "")
     monkeypatch.setattr(vtr.verify_run, "TRUST_EMPTY_TOOLS", True)
     assert vtr.verify_run.classify_detail(body)["void_reason"] is None
+
+
+def test_omitted_optional_arg_matches_the_tool_default() -> None:
+    exp = {"name": "classify_visit_request", "parameters": {"visit_class": "medical", "urgency": "routine", "is_new_patient": False}}
+    omitted = {"name": "classify_visit_request", "parameters": {"visit_class": "medical"}}
+    urgent = {"name": "classify_visit_request", "parameters": {"visit_class": "medical", "urgency": "urgent"}}
+    mohs = {"name": "classify_visit_request", "parameters": {"visit_class": "mohs"}}
+    schemas = vtr.load_tool_schemas("healthcare")
+    match = lambda e, a: vtr._calls_match(e, a, schemas, "healthcare")
+    assert match(exp, omitted)
+    assert not match(exp, urgent)
+    assert not match({"name": "classify_visit_request", "parameters": {"visit_class": "mohs", "urgency": "routine"}}, mohs)
