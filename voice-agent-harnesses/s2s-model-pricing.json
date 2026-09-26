@@ -14,6 +14,9 @@
     "gpt-realtime-mini":             { "inputText": 0.6,  "inputAudio": 10.0, "cachedText": 0.06, "cachedAudio": 0.3, "outputText": 2.4,  "outputAudio": 20.0 },
     "gpt-4o-realtime-preview":       { "inputText": 5.0,  "inputAudio": 40.0, "cachedText": 2.5,  "cachedAudio": 2.5, "outputText": 20.0, "outputAudio": 80.0 },
     "gpt-4o-mini-realtime-preview":  { "inputText": 0.6,  "inputAudio": 10.0, "cachedText": 0.3,  "cachedAudio": 0.3, "outputText": 2.4,  "outputAudio": 20.0 },
+    "_note_gpt-live-1-backends":     "Backend Responses models behind openai/gpt-live-1 (sol-low, astra-medium), text only. Standard tier from https://developers.openai.com/api/docs/pricing, checked 2026-09-26. The live voice session is billed on top per minute (per_minute_pricing gpt-live-1).",
+    "gpt-5.6-sol":                   { "inputText": 4.0,  "inputAudio": null, "cachedText": 0.4,  "cachedAudio": null, "outputText": 20.0, "outputAudio": null },
+    "gpt-6-astra":                   { "inputText": 10.0, "inputAudio": null, "cachedText": 1.0,  "cachedAudio": null, "outputText": 50.0, "outputAudio": null },
 
     "gemini-2.5-flash-native-audio": { "inputText": 0.5,  "inputAudio": 3.0,  "cachedText": null, "cachedAudio": null, "outputText": 2.0, "outputAudio": 12.0 },
     "gemini-3.1-flash-live-preview": { "inputText": 0.75, "inputAudio": 3.0,  "cachedText": null, "cachedAudio": null, "outputText": 4.5, "outputAudio": 12.0 },

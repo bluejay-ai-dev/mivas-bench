@@ -30,6 +30,8 @@ HARNESS_MODELS = {
     "gemini-2.5-flash-native-audio": "gemini-2.5-flash-native-audio",
     "qwen-audio-realtime": "qwen-audio-3.0-realtime-plus",
     "livekit-cascaded": "gpt-4.1",
+    "openai-gpt-live-1@sol-low": "gpt-5.6-sol",
+    "openai-gpt-live-1@astra-medium": "gpt-6-astra",
 }
 
 MODEL_ALIASES = {
@@ -317,6 +319,9 @@ def deltalize(usages: list[dict]) -> list[dict]:
 def generations_from_spans(spans: list[dict], default_model: str) -> list[dict]:
     picked = [span for span in spans if (span.get("name") or "") in GENERATION_NAMES]
     if not picked:
+        # OTel GenAI naming (`chat {model}`): gpt-live-1's backend Responses calls
+        picked = [span for span in spans if (span.get("name") or "").startswith("chat ")]
+    if not picked:
         picked = [span for span in spans if (span.get("name") or "") == "realtime_session"]
     usages = []
     for span in picked:
@@ -544,6 +549,16 @@ def cost_conversation(
             total = estimate_from_rates(row, token_rates, slug)
             source = "estimated"
             allocate_by_duration(turns, total)
+
+    if slug.startswith("openai-gpt-live-1"):
+        # GPT-Live bills the voice session per minute on top of the backend's tokens
+        live_rate = (pricing.get("per_minute_pricing") or {}).get("gpt-live-1")
+        if live_rate is not None and duration:
+            live = duration / 60.0 * float(live_rate)
+            total += live
+            if source == "none":
+                allocate_by_duration(turns, live)
+            source = "per_minute" if source == "none" else f"{source}+per_minute"
 
     hourly = (total / duration * 3600.0) if duration and total else None
     payload = []
