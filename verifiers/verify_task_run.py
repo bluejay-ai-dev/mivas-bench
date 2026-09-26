@@ -27,6 +27,7 @@ from __future__ import annotations
 
 import argparse
 import importlib.util
+import http.client
 import json
 import os
 import re
@@ -940,6 +941,11 @@ def _get_with_retry(path: str, attempts: int = 6) -> dict[str, Any]:
             retryable = any(code in msg for code in ("401", "429", "500", "502", "503"))
             if i == attempts - 1 or not retryable:
                 raise
+        except (OSError, ValueError, http.client.HTTPException) as exc:
+            # IncompleteRead (an HTTPException) / connection reset mid-body: same retry
+            last = SystemExit(f"GET {path} failed: {exc}")
+            if i == attempts - 1:
+                raise last
             time.sleep(delay)
             delay = min(delay * 2, 30)
     raise last or SystemExit(f"GET {path} failed")
@@ -1046,6 +1052,16 @@ def collect_scored_results(
     run_body = _get_with_retry(f"retrieve-simulation-results/{run_id}")
     run = run_body.get("simulation_run") or {}
     results = run_body.get("simulation_results") or run_body.get("results") or []
+    # the endpoint caps a page at 100 and returns no page metadata; a k=5 run
+    # is 360 conversations, so page it out or two thirds of the run is unscored
+    while results and len(results) % 100 == 0:
+        page = _get_with_retry(f"retrieve-simulation-results/{run_id}?offset={len(results)}")
+        more = page.get("simulation_results") or page.get("results") or []
+        seen = {str(r.get("id")) for r in results}
+        fresh = [r for r in more if str(r.get("id")) not in seen]
+        if not fresh:
+            break
+        results += fresh
     sim_id = str(run.get("simulation_id") or sim_hint or "")
     dh_by_id = _digital_humans_by_sim(sim_id) if sim_id else {}
 

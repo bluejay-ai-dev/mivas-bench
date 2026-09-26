@@ -35,7 +35,9 @@ Exit code 0 = every result is scorable. 1 = at least one is void (re-run those).
 from __future__ import annotations
 
 import argparse
+import http.client
 import json
+import time
 import os
 import sys
 import urllib.error
@@ -55,16 +57,32 @@ def _get(path: str) -> dict:
     if not key:
         raise SystemExit("need BLUEJAY_API_KEY")
     req = urllib.request.Request(f"{API}/{path}", headers={"X-API-Key": key})
-    try:
-        with urllib.request.urlopen(req, timeout=60) as r:
-            return json.load(r)
-    except urllib.error.HTTPError as e:
-        raise SystemExit(f"GET {path} → {e.code} {e.read()[:300].decode(errors='replace')}")
+    for attempt in range(4):
+        try:
+            with urllib.request.urlopen(req, timeout=60) as r:
+                return json.load(r)
+        except urllib.error.HTTPError as e:
+            raise SystemExit(f"GET {path} → {e.code} {e.read()[:300].decode(errors='replace')}")
+        except (OSError, ValueError, http.client.HTTPException) as e:
+            # a body cut mid-read (IncompleteRead is an HTTPException, not an OSError)
+            if attempt == 3:
+                raise SystemExit(f"GET {path} failed: {e}")
+            time.sleep(3 * (attempt + 1))
+    raise SystemExit(f"GET {path} failed")
 
 
 def result_ids_for_run(run_id: str) -> list[str]:
     body = _get(f"retrieve-simulation-results/{run_id}")
     results = body.get("simulation_results") or body.get("results") or []
+    # 100 per page, no page metadata: page out a k=5 run
+    while results and len(results) % 100 == 0:
+        page = _get(f"retrieve-simulation-results/{run_id}?offset={len(results)}")
+        more = page.get("simulation_results") or page.get("results") or []
+        seen = {str(r.get("id")) for r in results}
+        fresh = [r for r in more if str(r.get("id")) not in seen]
+        if not fresh:
+            break
+        results += fresh
     return [str(r.get("id")) for r in results if r.get("id")]
 
 
