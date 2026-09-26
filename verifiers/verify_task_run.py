@@ -26,6 +26,7 @@ files without S3.
 from __future__ import annotations
 
 import argparse
+import ast
 import importlib.util
 import http.client
 import json
@@ -545,6 +546,22 @@ def _output_fields(call: dict[str, Any] | None) -> dict[str, Any]:
     return fields
 
 
+def _output_data(call: dict[str, Any] | None) -> dict[str, Any]:
+    """The `data` dict of a recorded tool output; Bluejay stores it as a repr string."""
+    output = (call or {}).get("output")
+    if isinstance(output, str):
+        try:
+            output = json.loads(output)
+        except ValueError:
+            try:
+                output = ast.literal_eval(output)
+            except (ValueError, SyntaxError):
+                return {}
+    if isinstance(output, dict) and isinstance(output.get("data"), dict):
+        return output["data"]
+    return {}
+
+
 def _as_calls(items: list[Any] | None) -> list[dict[str, Any]]:
     out: list[dict[str, Any]] = []
     for item in items or []:
@@ -792,7 +809,11 @@ def _calls_match(
         if key not in act_params:
             return False
         if not _values_equal(key, exp_value, act_params.get(key)):
-            return False
+            # the pack resolves references itself ("the refrigerator" → KE-4471209)
+            # and reports the resolved value; grade what it resolved to
+            resolved = _output_data(actual).get(key)
+            if resolved is None or not _values_equal(key, exp_value, resolved):
+                return False
     exp_out = _output_fields(expected)
     act_out = _output_fields(actual)
     for field in ("ok", "error_code"):

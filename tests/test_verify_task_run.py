@@ -887,3 +887,27 @@ def test_values_equal_normalises_ids_dates_and_amounts() -> None:
     assert not _values_equal("amount", "399.99", "500")
     assert _values_equal("competitor", "Rivertide", "rivertide")
     assert not _values_equal("competitor", "Rivertide", "Haussmann Mart")
+
+
+def test_calls_match_accepts_a_reference_the_pack_resolved() -> None:
+    from verifiers.verify_task_run import _calls_match
+
+    expected = {"name": "get_order", "parameters": {"order_number": "KE-4471209"}}
+    resolved = {
+        "name": "get_order",
+        "parameters": {"order_number": "the refrigerator"},
+        "output": "{'ok': True, 'data': {'order_number': 'KE-4471209', 'status': 'scheduled'}}",
+    }
+    unknown = {
+        "name": "get_order",
+        "parameters": {"order_number": "804415550112"},
+        "output": "{'ok': False, 'data': None, 'error_code': 'UNKNOWN_ORDER'}",
+    }
+    other = {
+        "name": "get_order",
+        "parameters": {"order_number": "the headphones"},
+        "output": "{'ok': True, 'data': {'order_number': 'KE-4479002'}}",
+    }
+    assert _calls_match(expected, resolved, {}, "customer-support")
+    assert not _calls_match(expected, unknown, {}, "customer-support")
+    assert not _calls_match(expected, other, {}, "customer-support")
