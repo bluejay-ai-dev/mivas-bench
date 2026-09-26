@@ -35,6 +35,7 @@ Exit code 0 = every result is scorable. 1 = at least one is void (re-run those).
 from __future__ import annotations
 
 import argparse
+import http.client
 import json
 import time
 import os
@@ -62,8 +63,8 @@ def _get(path: str) -> dict:
                 return json.load(r)
         except urllib.error.HTTPError as e:
             raise SystemExit(f"GET {path} → {e.code} {e.read()[:300].decode(errors='replace')}")
-        except (OSError, ValueError) as e:
-            # a body cut mid-read (IncompleteRead, connection reset) under load
+        except (OSError, ValueError, http.client.HTTPException) as e:
+            # a body cut mid-read (IncompleteRead is an HTTPException, not an OSError)
             if attempt == 3:
                 raise SystemExit(f"GET {path} failed: {e}")
             time.sleep(3 * (attempt + 1))

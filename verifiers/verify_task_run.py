@@ -27,6 +27,7 @@ from __future__ import annotations
 
 import argparse
 import importlib.util
+import http.client
 import json
 import os
 import re
@@ -940,8 +941,8 @@ def _get_with_retry(path: str, attempts: int = 6) -> dict[str, Any]:
             retryable = any(code in msg for code in ("401", "429", "500", "502", "503"))
             if i == attempts - 1 or not retryable:
                 raise
-        except (OSError, ValueError) as exc:
-            # IncompleteRead / connection reset mid-body under load: same retry
+        except (OSError, ValueError, http.client.HTTPException) as exc:
+            # IncompleteRead (an HTTPException) / connection reset mid-body: same retry
             last = SystemExit(f"GET {path} failed: {exc}")
             if i == attempts - 1:
                 raise last
