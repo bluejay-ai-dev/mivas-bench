@@ -228,7 +228,8 @@ def score_call(
     turns = _turns(result)
     url = result.get("transcript_url") or ""
     checks["utterances"] = {
-        "pass": turns > 0 and bool(url),
+        # SIP results carry the transcript inline and no transcript_url
+        "pass": turns > 0,
         "num_turns": turns,
         "transcript_url": bool(url),
     }
