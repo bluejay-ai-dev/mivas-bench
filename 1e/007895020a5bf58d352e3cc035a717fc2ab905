@@ -1,0 +1,14 @@
+voice-agent-harnesses/gemini/3.8-live/agent.py
+  h_bbe1a3ca680b9f 90-91,111-115,117
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "1e007895020a5bf58d352e3cc035a717fc2ab905",
+  "prompts": {},
+  "humans": {
+    "h_bbe1a3ca680b9f": {
+      "author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
