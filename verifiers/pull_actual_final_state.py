@@ -15,7 +15,9 @@ Writes:
 from __future__ import annotations
 
 import argparse
+import http.client
 import json
+import time
 import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
@@ -46,8 +48,9 @@ def s3_final_key(slug: str, result_id: str) -> str:
 
 
 def pair_slug(harness: str, industry: str) -> str:
+    # same rule as run.py: a variant (family/runtime@variant) is its own slug
     return (
-        f"{harness.replace('/', '-')}-{industry}"
+        f"{harness.replace('/', '-').replace('@', '-')}-{industry}"
         .replace("_", "-")
         .replace(".", "-")
         .lower()
@@ -72,6 +75,17 @@ def _req(path: str) -> dict[str, Any]:
         f"{API}/{path}",
         headers={"X-API-Key": _api_key(), "Content-Type": "application/json"},
     )
+    for attempt in range(4):
+        try:
+            with urlopen(req, timeout=120) as resp:
+                return json.load(resp)
+        except (OSError, ValueError, http.client.HTTPException) as e:
+            # body cut mid-read under load (IncompleteRead is an HTTPException)
+            if isinstance(e, HTTPError):
+                break
+            if attempt == 3:
+                raise SystemExit(f"GET {path} failed: {e}")
+            time.sleep(3 * (attempt + 1))
     try:
         with urlopen(req, timeout=120) as resp:
             return json.load(resp)
@@ -89,6 +103,16 @@ def list_run_results(run_id: str) -> tuple[dict[str, Any], list[dict[str, Any]]]
     results = body.get("simulation_results") or body.get("results") or []
     if not results:
         raise SystemExit(f"no simulation results for run {run_id}")
+    # 100 per page, no page metadata: without this a k=5 run gets snapshots
+    # for 100 of 360 calls and the state check silently skips the rest
+    while len(results) % 100 == 0:
+        page = _req(f"retrieve-simulation-results/{run_id}?offset={len(results)}")
+        more = page.get("simulation_results") or page.get("results") or []
+        seen = {str(r.get("id")) for r in results}
+        fresh = [r for r in more if str(r.get("id")) not in seen]
+        if not fresh:
+            break
+        results += fresh
     return run, results
 
 
