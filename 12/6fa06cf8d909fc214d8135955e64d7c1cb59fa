@@ -1,0 +1,19 @@
+industries/customer-support/tasks/T5-H4/task.json
+  s_b8b1f16f08cab5::t_74ce4dc0e66d53 79-84
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "126fa06cf8d909fc214d8135955e64d7c1cb59fa",
+  "prompts": {},
+  "sessions": {
+    "s_b8b1f16f08cab5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "94092b8e-9afd-43dd-b9b6-e5158ad4c7f3",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
