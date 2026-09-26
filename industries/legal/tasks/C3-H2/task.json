@@ -92,21 +92,21 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks who the claim would be against, who the other side is, who this would be against, or the name of the driver, person, or company. NOT when asking for your own name or number.",
+      "match_phrase": "The agent asks who the claim would be against, who the other side is, who this would be against, or the name of the driver, person, or company. Also when the agent re-asks it. This includes a question that comes after a filler such as okay, thanks, one second, one moment, checking on that, or let me pull you up in the same turn, and a separate agent turn that follows such a filler. NOT when asking for your own name or number.",
       "response_type": "phrase",
       "response_value": "It's Delta Freight.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks which state this happened in, what state the crash happened in, or where it took place. NOT any other question.",
+      "match_phrase": "The agent asks which state this happened in, what state the crash happened in, or where it took place. This includes a question that comes after a filler such as okay, thanks, one second, one moment, checking on that, or let me pull you up in the same turn, and a separate agent turn that follows such a filler. NOT any other question.",
       "response_type": "phrase",
       "response_value": "In Georgia.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks when the incident happened, or for the date of the accident, injury or event. NOT any other question.",
+      "match_phrase": "The agent asks when the incident happened, the date of the collision or crash including the year, or for the date of the accident, injury or event. This includes a question that comes after a filler such as okay, thanks, one second, one moment, checking on that, or let me pull you up in the same turn, and a separate agent turn that follows such a filler. NOT any other question.",
       "response_type": "phrase",
       "response_value": "It was March tenth, twenty twenty two.",
       "occurrence_mode": "always"

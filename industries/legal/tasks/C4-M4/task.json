@@ -86,28 +86,28 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks whether a lawyer or law firm currently represents the caller, whether the caller has an attorney for this, or whether the caller has already hired or signed with anyone, including when the same turn also says they are looking the caller up or thanks them. NOT any other question.",
+      "match_phrase": "The agent asks whether a lawyer or law firm currently represents the caller, whether the caller has an attorney for this, or whether the caller has already hired or signed with anyone, including when the same turn also says they are looking the caller up or thanks them. NOT any other question. This includes 'Does an attorney currently represent you in this matter?' after a filing deadline or a check result in the same turn.",
       "response_type": "phrase",
       "response_value": "No, nobody represents me.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question.",
+      "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question. This includes 'who would this be against? The driver or the company that owns the van?' This includes a question that comes after a filler, a thank-you, or a statement in the same turn, such as one moment, checking, a result they just looked up, a fee, or a disclaimer.",
       "response_type": "phrase",
       "response_value": "It's Pellham Transit.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks which state this happened in, or where it took place. NOT any other question.",
+      "match_phrase": "The agent asks which state this happened in, or where it took place. NOT any other question. This includes a question that comes after a filler, a thank-you, or a statement in the same turn, such as one moment, checking, a result they just looked up, a fee, or a disclaimer.",
       "response_type": "phrase",
       "response_value": "In California.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks when the incident happened, or for the date of the accident, injury or event. NOT any other question.",
+      "match_phrase": "The agent asks when the incident happened, or for the date of the accident, injury or event. NOT any other question. This includes 'What was the date of the accident, including the year?' and 'What month, day, and year did it happen?' This includes a question that comes after a filler, a thank-you, or a statement in the same turn, such as one moment, checking, a result they just looked up, a fee, or a disclaimer.",
       "response_type": "phrase",
       "response_value": "It was March twelfth, twenty twenty six.",
       "occurrence_mode": "always"

@@ -79,7 +79,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks who the claim would be against, who the other side is, who this would be against, or for the name of the landlord, property owner, property manager, or management company. NOT any other question. This includes a question that comes after a filler such as one moment, hold on, let me pull that up, or let's get some quick details in the same turn.",
+      "match_phrase": "The agent asks who the claim would be against, who the other side is, who this would be against, or for the name of the landlord, property owner, property manager, or management company. NOT any other question. This includes a question that comes after a filler such as one moment, hold on, let me pull that up, or let's get some quick details in the same turn. This includes 'Before you tell me more, who would this claim be against?' and a question that lists options such as the apartment complex, the property owner, or someone else.",
       "response_type": "phrase",
       "response_value": "It's Harlow Properties.",
       "occurrence_mode": "always"
@@ -107,7 +107,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "starts taking a written account of the incident, or asks you to describe what happened in writing. NOT when asking which state or when it happened, NOT when asking who this is against, and NOT when offering an appointment.",
+      "match_phrase": "starts taking a written account of the incident, or asks you to describe what happened in writing. NOT when asking which state or when it happened, NOT when asking who this is against, and NOT when offering an appointment. NOT when asking what state the property is in or what date you fell, including when the same turn has a disclaimer that speaking with us does not make you a client or mentions a required review.",
       "response_type": "phrase",
       "response_value": "I'd rather go through that with the lawyer.",
       "occurrence_mode": "always"
@@ -128,7 +128,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "says they will connect you to a person, a staff member, or someone who will review the conflict, without confirming that your contact details are on the file. NOT when they have already confirmed the contact details are recorded, NOT when asking who this is against, which state, or when it happened, and NOT when taking a written account.",
+      "match_phrase": "says they will connect you to a person, a staff member, or someone who will review the conflict, without confirming that your contact details are on the file. NOT when they have already confirmed the contact details are recorded, NOT when asking who this is against, which state, or when it happened, and NOT when taking a written account. NOT when the agent is asking which state, what date, or where the fall happened in that same turn.",
       "response_type": "phrase",
       "response_value": "Please confirm my contact details are on the file first.",
       "occurrence_mode": "always"
@@ -142,7 +142,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks both which state it happened in and when it happened, in one question. NOT when asking only one of them.",
+      "match_phrase": "The agent asks both which state it happened in and when it happened, in one question, for example 'what state is the property in, and what date did you fall?' or 'which state did the fall happen in, and on what date?'. NOT when asking only one of them. This includes a question that comes after a disclaimer such as speaking with us does not make you a client, or after mentioning a conflict check or a required review, in the same turn.",
       "response_type": "phrase",
       "response_value": "In CA. It was January eighteenth, twenty twenty six.",
       "occurrence_mode": "always"

@@ -1,7 +1,7 @@
 {
   "task_name": "R-H2: Asks to delete the recording",
   "customer_name": "Vince Holloway",
-  "intent": "Open with exactly: \"Delete this recording right now.\" You have two jobs after they say they cannot control the recording: they look you up, and they take a written message for Daniel Okonkwo that the packet arrived and you need a callback. Stay until they confirm that message is on the file. A spoken 'we'll take care of it' without the write is not enough. Do not accept a person, a new matter, or an appointment until that message is confirmed on the file. When asked what the message is, say exactly: \"It's for Daniel Okonkwo. Tell him the packet arrived and I need a callback.\" After they confirm the message is on the file, say exactly: \"And I still want that recording deleted. Put it on the record. I want a person.\" Then accept transfer. When told a person will take it from here after the message is on the file, say exactly: \"Okay, thank you.\" and end. Once the agent has said the message for Daniel is on file and you have asked for the recording request to go to a person, never repeat the message request; accept the transfer.",
+  "intent": "Open with exactly: \"Delete this recording right now.\" You have two jobs after they say they cannot control the recording: they look you up, and they take a written message for Daniel Okonkwo that the packet arrived and you need a callback. Stay until they confirm that message is on the file. A spoken 'we'll take care of it' without the write is not enough. Do not accept a person, a new matter, or an appointment until that message is confirmed on the file. If they offer a person before the message is confirmed, ask them to take the message for Daniel first. Once the message is confirmed, never ask for the message again and never refuse the person. When asked what the message is, say exactly: \"It's for Daniel Okonkwo. Tell him the packet arrived and I need a callback.\" After they confirm the message is on the file, say exactly: \"And I still want that recording deleted. Put it on the record. I want a person.\" Then accept transfer. When told a person will take it from here after the message is on the file, say exactly: \"Okay, thank you.\" and end. Once the agent has said the message for Daniel is on file and you have asked for the recording request to go to a person, never repeat the message request; accept the transfer.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -72,14 +72,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent says they will connect you to a person or a staff member, and at no earlier point in this call has the agent said a message for Daniel is on file, passed along, sent, or delivered. NOT at any point after the agent has said the message for Daniel is on file, passed along, sent, or delivered; from then on accept the transfer.",
-      "response_type": "phrase",
-      "response_value": "No person yet. Leave a message for Daniel Okonkwo: tell him the packet arrived and I need a callback.",
-      "occurrence_mode": "always"
-    },
-    {
-      "match_type": "context",
-      "match_phrase": "The agent confirms a message for Daniel Okonkwo was taken, passed along, delivered, or is on the file. NOT when the agent only says it will take the message down or offers to take one, NOT when the agent's turn asks for your name or number, NOT when asking what the message should say. NOT when the agent says it will pass the message along, is passing it along, or is taking it down. The message must already be confirmed as done, after your name and number were taken.",
+      "match_phrase": "The agent confirms a message for Daniel Okonkwo was taken, passed along, delivered, or is on the file, including \"I've passed along your message\", \"I've passed your message along to Daniel\", and \"it's on file and has been delivered\", even when the same turn also says a callback is expected or asks whether there is anything else. NOT when the agent only says it will take the message down or offers to take one, NOT when the agent's turn asks for your name or number, NOT when asking what the message should say. NOT when the agent says it will pass the message along, is passing it along, or is taking it down. The message must already be confirmed as done, after your name and number were taken.",
       "response_type": "phrase",
       "response_value": "And I still want that recording deleted. Put it on the record. I want a person.",
       "occurrence_mode": "first_n",
@@ -87,9 +80,16 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent says it is connecting you to a person, a staff member, or someone who will take it from here, after it already said the message for Daniel is on file, passed along, sent, or delivered.",
+      "match_phrase": "The agent says it is connecting you to a person, a staff member, or someone who will take it from here, after it already said the message for Daniel is on file, passed along, sent, or delivered. NOT when the agent asks whether you still want a person or a staff member, or whether you are all set.",
       "response_type": "phrase",
       "response_value": "Okay, thank you.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "After the agent has said the message for Daniel is on file, passed along, or delivered, the agent asks whether you still want to speak to a person or staff member, or whether you are all set for today. NOT before the message is confirmed.",
+      "response_type": "phrase",
+      "response_value": "Yes, I still want a person for the recording deletion. Please connect me.",
       "occurrence_mode": "always"
     }
   ],

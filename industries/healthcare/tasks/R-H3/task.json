@@ -1,6 +1,6 @@
 {
   "task_name": "R-H3: Dupixent authorization",
-  "intent": "You are an existing Straus patient on Dupixent and you are almost out. You want another prior authorization sent so the pharmacy can fill it. Ask for things one at a time in this order: the authorization request, then portal access, then the follow-up. Do not mention portal access or the follow-up until they say the request was sent. Give your name and date of birth once when they ask who you are, confirm if they read it back, then continue. Ask who actually handles this and tell them to have that person call you back after the request is sent, do not ask to speak to a person on this call. After they confirm the refill or authorization request was sent to the clinical team, ask them to send portal access so you can track the authorization, then ask to book a new medical follow-up at Park Avenue for the biologic, separate from Friday's cosmetic consult, leave Friday. Take the first new appointment time they offer. Once they give you a callback timeframe and the new visit is on the calendar, thank them and end the call. Do not ask to reschedule or cancel Friday. Do not ask about a bill, a payment, or a text other than portal access. Do not ask for a waitlist, financing, or the street, floor, or suite. Stay until they confirm the refill or authorization request was sent to the clinical team, not just a spoken callback promise, and a time is on the calendar. Do not ask them to text you an appointment confirmation.",
+  "intent": "You are an existing Straus patient on Dupixent and you are almost out. You want another prior authorization sent so the pharmacy can fill it. Ask for things one at a time in this order: the authorization request, then portal access, then the follow-up. Do not mention portal access or the follow-up until they say the request was sent. When they ask for your name and date of birth, give only your name and date of birth, with nothing about portal access or the follow-up. Do not ask for the follow-up, and do not say you still need a time booked, until they have said portal access was sent. Give your name and date of birth once when they ask who you are, confirm if they read it back, then continue. Ask who actually handles this and tell them to have that person call you back after the request is sent, do not ask to speak to a person on this call. After they confirm the refill or authorization request was sent to the clinical team, ask them to send portal access so you can track the authorization, then ask to book a new medical follow-up at Park Avenue for the biologic, separate from Friday's cosmetic consult, leave Friday. Take the first new appointment time they offer. Once they give you a callback timeframe and the new visit is on the calendar, thank them and end the call. Do not ask to reschedule or cancel Friday. Do not ask about a bill, a payment, or a text other than portal access. Do not ask for a waitlist, financing, or the street, floor, or suite. Stay until they confirm the refill or authorization request was sent to the clinical team, not just a spoken callback promise, and a time is on the calendar. Do not ask them to text you an appointment confirmation.",
   "traits": [
     {
       "trait_name": "mobile",
@@ -156,7 +156,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "asks for your full name and date of birth, or asks you to confirm who you are, or asks for the patient's name and date of birth. NOT when asking only for a member ID or insurance card, NOT when asking which office or location, NOT when asking for a phone or mobile number, NOT when asking about an appointment day or time, NOT when reading your name and date of birth back to you for confirmation.",
+      "match_phrase": "asks for your full name and date of birth, or asks you to confirm who you are, or asks for the patient's name and date of birth. NOT when asking only for a member ID or insurance card, NOT when asking which office or location, NOT when asking for a phone or mobile number, NOT when asking about an appointment day or time, NOT when reading your name and date of birth back to you for confirmation. This includes a name and date of birth question that comes after a filler such as okay, sure, or I just need to confirm a couple things in the same turn.",
       "response_type": "phrase",
       "response_value": "Maria Alvarez. My date of birth is June thirtieth, nineteen seventy-two."
     },
@@ -180,7 +180,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers to have the front desk or scheduling team call you back to book the follow-up, or says they cannot book the follow-up on this call, after you have asked for the follow-up. NOT when asking for your callback number, NOT when asking text or email for the portal, NOT when promising or arranging a callback about the refill or prior authorization, NOT before portal access has been sent, NOT when they have just confirmed a booked time.",
+      "match_phrase": "ONLY IF the agent said in an earlier turn that portal access was sent AND you have already asked for the new follow-up yourself. Then: offers to have the front desk or scheduling team call you back to book the follow-up, or says they cannot book the follow-up on this call. NOT when saying the refill or authorization request was sent or that the clinical team will call you back, NOT when asking for your callback number, NOT when asking text or email for the portal, NOT when promising or arranging a callback about the refill or prior authorization, NOT before portal access has been sent, NOT when they have just confirmed a booked time.",
       "response_type": "phrase",
       "response_value": "Please book that new medical follow-up on this call. I need the time on the calendar before I go."
     },
@@ -198,7 +198,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before a time has been confirmed on the calendar. NOT when they have just confirmed a booked time. NOT during identity verification, NOT before you have asked for the new follow-up. Only after you have already asked for the new follow-up yourself and they have said portal access was sent. NOT right after your identity is confirmed. NOT when talking about the refill, the authorization, or Dupixent.",
+      "match_phrase": "ONLY IF the agent said in an earlier turn that portal access was sent AND you have already asked for the new follow-up yourself. Then: thanks you, says goodbye, or asks if you need anything else before a time has been confirmed on the calendar. NOT when the agent's turn is only a short acknowledgment such as thanks, okay, or got it. NOT when they have just confirmed a booked time. NOT during identity verification or right after your identity is confirmed. NOT before portal access was sent. NOT when talking about the refill, the authorization, or Dupixent.",
       "response_type": "phrase",
       "response_value": "I still need that time booked. Please confirm it is on the calendar before I go."
     },
@@ -240,7 +240,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "says the refill or authorization request was sent, before saying portal access was sent. NOT after portal access was sent, NOT when asking for your callback number.",
+      "match_phrase": "says the refill or authorization request was sent, or that an urgent message went to the clinical team about Dupixent, or that the refill request is with the biologic coordinator, or that the clinical team will call you back, before saying portal access was sent. This wins over any booking or follow-up line. NOT after portal access was sent, NOT when asking for your callback number.",
       "response_type": "phrase",
       "response_value": "Thank you. Please send me portal access by text so I can track the authorization."
     },

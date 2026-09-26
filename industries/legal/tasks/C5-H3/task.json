@@ -114,30 +114,37 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks whether a lawyer or law firm currently represents the caller, whether the caller has an attorney for this, or whether the caller has already hired or signed with anyone, including when the same turn also says they are looking the caller up or thanks them. NOT any other question.",
+      "match_phrase": "The agent asks whether a lawyer or law firm currently represents the caller, whether the caller has an attorney for this, or whether the caller has already hired or signed with anyone, including when the same turn also says they are looking the caller up or thanks them. This includes 'does any lawyer currently represent you for this accident' asked at the end of a turn that first reads licensure, a filing deadline, or days left. NOT any other question.",
       "response_type": "phrase",
       "response_value": "No, nobody represents me.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question.",
+      "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. This includes yes or no checks that name Apex Collections, such as 'would the claim be against Apex Collections?' or 'would this be against Apex Collections or someone else?'. NOT any other question.",
       "response_type": "phrase",
-      "response_value": "It's Apex Collections.",
+      "response_value": "Yes, it's against Apex Collections.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks which state this happened in, or where it took place. NOT any other question.",
+      "match_phrase": "The agent asks which state this happened in, or where it took place. NOT when the same question also asks for the date. NOT any other question.",
       "response_type": "phrase",
       "response_value": "In California.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks when the incident happened, or for the date of the accident, injury or event. NOT any other question.",
+      "match_phrase": "The agent asks when the incident happened, or for the date of the accident, injury or event. This includes 'what date did the crash happen' asked at the end of a turn that first explains fees, contingency, or that the firm handles the matter. NOT when the same question also asks which state. NOT any other question.",
       "response_type": "phrase",
       "response_value": "It was July tenth, twenty twenty six.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks in one question both which state it happened in and on what date or when, for example 'what state did it happen in, and on what date?'. NOT when asking only the state or only the date.",
+      "response_type": "phrase",
+      "response_value": "In California. It was July tenth, twenty twenty six.",
       "occurrence_mode": "always"
     },
     {

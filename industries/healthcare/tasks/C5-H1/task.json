@@ -171,13 +171,13 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "says goodbye or asks if you need anything else before they have looked up a payment plan or financing. NOT when they have said at any point that CareCredit, financing, or a payment plan is available, NOT when they only say okay, thanks, or one moment, NOT right after confirming your name and date of birth, NOT when asking how much the payment link should be for, NOT when asking for your ZIP code, mobile number, or identity, NOT after the payment link was sent.",
+      "match_phrase": "says goodbye or asks if you need anything else before they have looked up a payment plan or financing. NOT when they have said at any point that CareCredit, financing, or a payment plan is available, NOT when they only say okay, thanks, or one moment, NOT right after confirming your name and date of birth, NOT when asking how much the payment link should be for, NOT when asking for your ZIP code, mobile number, or identity, NOT after the payment link was sent. NOT once CareCredit or financing has been mentioned anywhere earlier in the call, NOT after the consult was moved, and NOT when they say goodbye after moving the consult.",
       "response_type": "phrase",
       "response_value": "I still need a way to spread this out. Please look up a payment plan before I go."
     },
     {
       "match_type": "context",
-      "match_phrase": "says the payment link was sent or texted to your phone. NOT when they have only quoted the balance, explained a charge, or mentioned financing, NOT when they have not yet said a payment link was sent, NOT when the new time is already booked.",
+      "match_phrase": "says the payment link was sent or texted to your phone. NOT when they have only quoted the balance, explained a charge, or mentioned financing, NOT when they have not yet said a payment link was sent, NOT when the new time is already booked. NOT after they have said the consult was moved or that your consult is now at a new time, NOT when they only repeat that the link was already sent later in the call.",
       "response_type": "phrase",
       "response_value": "Thanks. I also need Friday's Park Avenue consult moved to a later date, not cancelled. I'll take the first time you offer."
     },
@@ -213,13 +213,13 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "reads back one specific new time and asks whether to move your consult to it, or asks you to confirm the new consult time before moving it. NOT when asking for your name, date of birth, or mobile number, NOT after they have said the consult was moved.",
+      "match_phrase": "reads back one specific new time and asks whether to move your consult to it, or asks you to confirm the new consult time before moving it. NOT when asking for your name, date of birth, or mobile number, NOT after they have said the consult was moved. This includes 'Should I move it there?' or 'Should I move the consult to that time?' even when the same turn says moving it is free or there is no charge.",
       "response_type": "phrase",
       "response_value": "Yes, please move my consult to that time."
     },
     {
       "match_type": "context",
-      "match_phrase": "says your Park Avenue consult was moved or rescheduled to a specific new time. NOT when only offering or reading back times, NOT when asking whether to move it, NOT when saying it has not been moved yet.",
+      "match_phrase": "says your Park Avenue consult HAS BEEN moved or rescheduled, or that your consult is now at a specific new time, as something already done. NOT when only offering or reading back times, NOT when the turn ends by asking whether to move it or should I move it there, NOT when they only say moving it is free or there is no charge to move it, NOT when saying it has not been moved yet.",
       "response_type": "phrase",
       "response_value": "Thank you, that's everything I needed. Goodbye."
     },
@@ -231,7 +231,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "says CareCredit, financing, or a payment plan is available, or asks whether you want to use it, and has not yet said a payment link was sent. NOT when asking for a mobile number.",
+      "match_phrase": "says CareCredit, financing, or a payment plan is available, or asks whether you want to use it, and has not yet said a payment link was sent. NOT when asking for a mobile number. NOT after the payment link was sent, NOT after the consult was moved.",
       "response_type": "phrase",
       "response_value": "Yes, I'll use the financing. Please also text me the payment link at 212-555-0133."
     },
@@ -240,6 +240,12 @@
       "match_phrase": "offers to text a payment link or asks which number should get it, before they have said CareCredit, financing, or a payment plan is available. NOT after the payment link was sent.",
       "response_type": "phrase",
       "response_value": "Yes, text it to 212-555-0133. But first, I can't pay it all at once. Is there a payment plan or financing?"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks what later date or time would work for the consult, whether you have a preferred day, time, or provider, or when you would like to move it, without naming a specific slot. NOT when asking for your name, date of birth, mobile number, or ZIP code, NOT when offering or reading back a specific time, NOT after they have said the consult was moved.",
+      "response_type": "phrase",
+      "response_value": "Any later date is fine. Please give me the first opening at Park Avenue."
     }
   ],
   "customer_name": "Maria Alvarez",

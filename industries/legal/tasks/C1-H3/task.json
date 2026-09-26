@@ -100,28 +100,28 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks whether anyone, any lawyer, attorney, or law firm currently represents you, whether you have a lawyer for this, or whether you have already hired or signed with anyone. NOT any other question. This includes a question that comes after a filler such as one moment, hold on, let me pull that up, or let's get some quick details in the same turn.",
+      "match_phrase": "The agent asks whether anyone, any lawyer, attorney, or law firm currently represents you, whether you have a lawyer for this, or whether you have already hired or signed with anyone. This includes 'does any lawyer currently represent you for what happened at work' and 'do you have a lawyer for this'. NOT any other question. This includes a question that comes after a filler such as one moment, hold on, let me pull that up, or let's get some quick details in the same turn.",
       "response_type": "phrase",
       "response_value": "No, nobody represents me.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question. This includes a question that comes after a filler such as one moment, hold on, let me pull that up, or let's get some quick details in the same turn.",
+      "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. This includes asking for the employer's full legal name, and 'is it your employer or someone else, what's their name'. NOT any other question. This includes a question that comes after a filler such as one moment, hold on, let me pull that up, or let's get some quick details in the same turn.",
       "response_type": "phrase",
       "response_value": "It's Sutter Cold Storage. Sutter is S, U, T, T, E, R.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks which state this happened in, or where it took place. NOT any other question. This includes a question that comes after a filler such as one moment, hold on, let me pull that up, or let's get some quick details in the same turn.",
+      "match_phrase": "The agent asks which state this happened in, or where it took place. NOT when asking who this would be against or for the employer's name. NOT any other question. This includes a question that comes after a filler such as one moment, hold on, let me pull that up, or let's get some quick details in the same turn.",
       "response_type": "phrase",
       "response_value": "In Florida.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks when the incident happened, or for the date of the accident, injury or event. NOT any other question. This includes a question that comes after a filler such as one moment, hold on, let me pull that up, or let's get some quick details in the same turn.",
+      "match_phrase": "The agent asks when the incident happened, or for the date of the accident, injury or event. NOT when asking whether this is workers' comp or something the employer did afterward. NOT any other question. This includes a question that comes after a filler such as one moment, hold on, let me pull that up, or let's get some quick details in the same turn.",
       "response_type": "phrase",
       "response_value": "It was July twenty eighth, twenty twenty six.",
       "occurrence_mode": "always"
@@ -135,7 +135,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks what type of matter this is, whether it is workers' compensation, or whether it happened on the job. NOT when asking who the claim would be against, which state, or when it happened. This includes a question that comes after a filler such as one moment, hold on, let me pull that up, or let's get some quick details in the same turn.",
+      "match_phrase": "The agent asks what type of matter this is, whether it is workers' compensation, whether it happened on the job, or whether this is about workers' comp or something your employer did afterward. NOT when asking who the claim would be against, which state, or when it happened. This includes a question that comes after a filler such as one moment, hold on, let me pull that up, or let's get some quick details in the same turn.",
       "response_type": "phrase",
       "response_value": "It's a workers' compensation claim. I was on the job.",
       "occurrence_mode": "always"
@@ -156,14 +156,14 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent offers an appointment, a case evaluation, or a time to meet. NOT when taking a written account, NOT when saying it will start or record the intake, NOT when offering the packet, and NOT when confirming intake already on the file. NOT when the agent has already accepted that you are not booking yet or says you can call back when ready.",
+      "match_phrase": "The agent offers an appointment, a case evaluation, or a time to meet. NOT when taking a written account, NOT when saying it will start or record the intake, NOT when offering the packet, and NOT when confirming intake already on the file. NOT when the agent has already accepted that you are not booking yet or says you can call back when ready. NOT when the agent reads a filing deadline and says let's get the details together for an evaluation or let's get some quick details; that is the intake starting.",
       "response_type": "phrase",
       "response_value": "Not yet, let me read the paperwork first.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks which doctor, hospital, clinic, or medical provider treated you, or where to send a records authorization. NOT any other question.",
+      "match_phrase": "The agent asks which doctor, hospital, clinic, or medical provider treated you, or where to send a records authorization. NOT when the same turn asks you to tell what happened. NOT any other question.",
       "response_type": "phrase",
       "response_value": "I'd rather get the intake on the file first. No records yet.",
       "occurrence_mode": "always"
@@ -177,7 +177,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent has confirmed BOTH that the intake is recorded or on the file AND that the new client packet was sent. NOT when the agent asks email or text, NOT when it asks for your email address, NOT when it asks what happened, NOT when it has confirmed only the intake, and NOT when the agent is still asking you any question. Also, once the intake and the packet were both confirmed, when the agent accepts that you are not booking yet or says you can call back when you are ready.",
+      "match_phrase": "The agent has said in this call BOTH that the intake is recorded or on the file AND that the new client packet was sent. Both statements must have been made by the agent. NOT when only a filing deadline, a fee, or a conflict check has been read. NOT when the agent says take your time or that it is here when you are ready. NOT when the agent asks email or text, asks for your email address, asks what happened, has confirmed only the intake, or is still asking you any question.",
       "response_type": "phrase",
       "response_value": "Thank you, that's all I needed.",
       "occurrence_mode": "always"
@@ -198,7 +198,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks what happened at work, what you were doing, where at the facility, whether you were on shift, or what injuries you had. NOT when asking who this is against, which state, when it happened, or which provider treated you.",
+      "match_phrase": "The agent asks what happened at work, asks you to tell them what happened, what you were doing, where at the facility, whether you were on shift, what injuries you had, or what medical treatment you received, including one turn that asks what happened, where you were, and what treatment you received. Also when the agent reads a filing deadline and then says let's get some quick details, let's get the details together for an evaluation, or let's walk through what happened. NOT when asking who this is against, which state, when it happened, or only for the name of the provider that treated you.",
       "response_type": "phrase",
       "response_value": "I was on my regular shift moving pallets in the freezer at Sutter Cold Storage when I collapsed. I was in the hospital for a few days and have missed work since.",
       "occurrence_mode": "always"

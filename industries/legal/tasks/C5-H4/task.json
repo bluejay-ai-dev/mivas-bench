@@ -113,33 +113,33 @@
       "match_type": "context",
       "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
       "response_type": "phrase",
-      "response_value": "Hector Salinas, 512-555-0194.",
+      "response_value": "Hector Salinas, 512-555-0194. Nobody represents me, and it would be against Rio Vista Market.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks whether a lawyer or law firm currently represents the caller, whether the caller has an attorney for this, or whether the caller has already hired or signed with anyone, including when the same turn also says they are looking the caller up or thanks them. NOT any other question.",
+      "match_phrase": "The agent asks whether a lawyer or law firm currently represents the caller, whether the caller has an attorney for this, or whether the caller has already hired or signed with anyone, including when the same turn also says they are looking the caller up or thanks them. This applies even when the same agent turn first says one moment, thanks, that they are pulling you up, a check result, the fee terms, a deadline, or that talking with them does not make you a client, and then asks the question. NOT any other question.",
       "response_type": "phrase",
       "response_value": "No, nobody represents me.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks who the claim would be against, who the other side is, who this would be against, or the name of the store. NOT any other question.",
+      "match_phrase": "The agent asks who the claim would be against, who the other side is, who this would be against, or the name of the store. This applies even when the same agent turn first says one moment, thanks, that they are pulling you up, a check result, the fee terms, a deadline, or that talking with them does not make you a client, and then asks the question. NOT any other question.",
       "response_type": "phrase",
       "response_value": "It's Rio Vista Market.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks which state this happened in, or where it took place. NOT any other question.",
+      "match_phrase": "The agent asks which state this happened in, or where it took place. This applies even when the same agent turn first says one moment, thanks, that they are pulling you up, a check result, the fee terms, a deadline, or that talking with them does not make you a client, and then asks the question. NOT any other question.",
       "response_type": "phrase",
       "response_value": "In Texas.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks when the incident happened, or for the date of the accident, injury or event. NOT any other question.",
+      "match_phrase": "The agent asks when the incident happened, or for the date of the accident, injury or event. This applies even when the same agent turn first says one moment, thanks, that they are pulling you up, a check result, the fee terms, a deadline, or that talking with them does not make you a client, and then asks the question. NOT any other question.",
       "response_type": "phrase",
       "response_value": "It was July tenth, twenty twenty six.",
       "occurrence_mode": "always"
@@ -181,7 +181,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks you to describe what happened, what kind of accident or matter it was, where it happened, what injuries or losses you had, or whether you got medical treatment. NOT when asking the date, the state alone, your name or number, or who the other side is.",
+      "match_phrase": "The agent asks you to describe what happened, what kind of accident or matter it was, where it happened, what injuries or losses you had, whether you got medical treatment, or what medical treatment you have had so far. This applies even when the same agent turn first says one moment, thanks, that they are pulling you up, a check result, the fee terms, a deadline, or that talking with them does not make you a client, and then asks the question. NOT when asking the date, the state alone, your name or number, or who the other side is.",
       "response_type": "phrase",
       "response_value": "I slipped on a wet floor with no warning sign in the produce aisle at Rio Vista Market in Austin and broke my right wrist. I was treated in the ER.",
       "occurrence_mode": "always"

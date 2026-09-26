@@ -114,7 +114,7 @@
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the caller's full name and a phone number, or for a name and the number on the account. NOT when asking for ZIP, card last four, or an order number alone. This includes a question that offers the order number or the name and phone as alternatives.",
+      "match_phrase": "The agent asks for the caller's full name and a phone number, or for a name and the number on the account. NOT when asking for ZIP, card last four, or an order number alone. This includes a question that offers the order number or the name and phone as alternatives. This also applies when the same turn first says sure, okay, thanks, or I'll check that.",
       "response_type": "phrase",
       "response_value": "Amina Kalu, 541-555-0152.",
       "occurrence_mode": "always"
@@ -142,9 +142,16 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "asks why you are returning the power bank, or whether it is swollen, hot, damaged, leaking, or smoking, before they have refused the label. NOT after they have said they cannot send a label, NOT when asking for name, phone, ZIP, card, or order number. This includes when they ask you to confirm it is undamaged, not swollen, or not hot, or to say one way or the other.",
+      "match_phrase": "asks why you are returning the power bank, or whether it is broken, swollen, hot, damaged, leaking, or smoking, before they have refused the label. NOT after they have said they cannot send a label, NOT when asking for name, phone, ZIP, card, or order number. This includes when they ask you to confirm it is undamaged, not swollen, or not hot, or to say one way or the other. This also applies when the same turn first says sure, okay, thanks, or I'll check that.",
       "response_type": "phrase",
       "response_value": "I just don't want it anymore. Please start the return and email me the prepaid label.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "reads back the refund amount or return summary and asks whether to confirm the return, start the return, or go ahead, before they have refused the label. NOT after they have said they cannot send a label, NOT when asking why you are returning it or whether it is broken, swollen, or hot, NOT when asking for name, phone, ZIP, card, or order number.",
+      "response_type": "phrase",
+      "response_value": "Yes, please confirm the return and email me the prepaid label.",
       "occurrence_mode": "always"
     }
   ],

@@ -137,7 +137,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "has confirmed the bench appointment booked on this call is cancelled and then asks what date works better, whether you want another day, or offers to rebook. NOT before a visit was booked and cancelled on this call.",
+      "match_phrase": "has confirmed the bench appointment booked on this call is cancelled and then asks what date works better, whether you want another day, or offers to rebook. NOT before a visit was booked and cancelled on this call. NOT when the agent said there was no appointment or nothing to cancel.",
       "response_type": "phrase",
       "response_value": "No need to rebook. Thank you, that's all I needed.",
       "occurrence_mode": "always"
@@ -158,7 +158,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "says you are booked or confirmed for a TechCrew bench visit on a day or at a time (for example 'booked for Monday, August 3 at 11AM'), including when they call it the first available slot, or asks if that booked slot works. NOT during identity or when asking for a name, phone, order number, ZIP, or card digits, NOT when asking what is wrong with the laptop, and NOT before a booking exists.",
+      "match_phrase": "says you are booked or confirmed for a TechCrew bench visit on a day or at a time (for example 'booked for Monday, August 3 at 11AM'), including when they call it the first available slot, or asks if that booked slot works. NOT during identity or when asking for a name, phone, order number, ZIP, or card digits, NOT when asking what is wrong with the laptop, and NOT before a booking exists. NOT when they only say they will check coverage, make sure it is covered, look for, or see about an appointment; the agent must name a day or time that is already booked.",
       "response_type": "phrase",
       "response_value": "I cannot make that day. Please cancel that appointment.",
       "occurrence_mode": "always"

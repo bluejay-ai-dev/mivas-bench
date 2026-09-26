@@ -47,7 +47,7 @@
       "match_type": "context",
       "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking to repeat, confirm, or read back only the number or some of its digits. NOT when asking about anything else. This includes a question that comes after a filler such as one moment, hold on, let me pull that up, or let's get some quick details in the same turn.",
       "response_type": "phrase",
-      "response_value": "Selma Ridgeway, nine one nine, five five five, zero one four six.",
+      "response_value": "Selma Ridgeway, nine one nine, five five five, zero one four six. Nobody represents me, and it would be against Northgate Insurance.",
       "occurrence_mode": "always"
     },
     {

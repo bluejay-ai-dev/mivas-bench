@@ -1,7 +1,7 @@
 {
   "task_name": "C5-M2: Workers comp booking in Florida",
   "customer_name": "Martin Iwu",
-  "intent": "Open with exactly: \"I was hurt on a Gulf Coast Rigging job site in Florida.\" When asked what type of matter this is, say it is workers' compensation. When asked when, say exactly: \"It was July tenth, twenty twenty six.\" Take the first appointment time offered. When read back, say exactly: \"Yes, that's right, go ahead and book it.\" If asked email or text for the packet, say email. Do not ask for a staff member. Stay until they confirm the evaluation is booked. A spoken promise without the booking is not enough. Once they confirm the evaluation is booked, say exactly: \"Thank you, that's all I needed.\" and end the call. When the agent asks you a question, answer it in that same turn with the answer given here. Never answer a question with only okay, sure, mm-hmm, yeah or thanks, and never speak the agent's lines for it. Say \"Thank you, that's all I needed.\" only after the agent says the evaluation is booked for a specific day and time, never after 'will do', 'one moment', 'taking care of that' or 'let's get some details'. After you say it, end the call and say nothing more. Nobody represents you: whenever asked whether a lawyer represents you, say \"No, nobody represents me.\" Do not push for an appointment while the agent is asking screening questions; answer the question asked.",
+  "intent": "Open with exactly: \"I was hurt on a Gulf Coast Rigging job site in Florida.\" When asked what type of matter this is, say it is workers' compensation. When asked when, say exactly: \"It was July tenth, twenty twenty six.\" Take the first appointment time offered. When read back, say exactly: \"Yes, that's right, go ahead and book it.\" If asked email or text for the packet, say email. Do not ask for a staff member. Stay until they confirm the evaluation is booked. A spoken promise without the booking is not enough. Once they confirm the evaluation is booked, say exactly: \"Thank you, that's all I needed.\" and end the call. When the agent asks you a question, answer it in that same turn with the answer given here. Never answer a question with only okay, sure, mm-hmm, yeah or thanks, and never speak the agent's lines for it. Say \"Thank you, that's all I needed.\" only after the agent says the evaluation is booked for a specific day and time, never after 'will do', 'one moment', 'taking care of that' or 'let's get some details'. After you say it, end the call and say nothing more. Nobody represents you: whenever asked whether a lawyer represents you, say \"No, nobody represents me.\" Do not push for an appointment while the agent is asking screening questions; answer the question asked. If your last reply was only okay or thanks and the agent's question is still unanswered, give the answer in your next turn.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -87,14 +87,14 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks whether a lawyer or law firm currently represents the caller, whether the caller has an attorney for this, or whether the caller has already hired or signed with anyone, including when the same turn also says they are looking the caller up or thanks them. NOT any other question.",
+      "match_phrase": "The agent asks whether a lawyer or law firm currently represents the caller, whether the caller has an attorney for this, or whether the caller has already hired or signed with anyone, including when the same turn also says they are looking the caller up or thanks them, including \"Does an attorney currently represent you for this injury?\". This includes when the question comes at the end of a longer agent turn, after a fee, deadline, conflict, or disclaimer statement, or after 'one moment', 'thanks', 'let me pull that up', or 'I've recorded that'. NOT any other question.",
       "response_type": "phrase",
       "response_value": "No, nobody represents me.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question.",
+      "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against, including \"Before you tell me more about what happened, who would the claim be against?\". This includes when the question comes at the end of a longer agent turn, after a fee, deadline, conflict, or disclaimer statement, or after 'one moment', 'thanks', 'let me pull that up', or 'I've recorded that'. NOT any other question.",
       "response_type": "phrase",
       "response_value": "It's Gulf Coast Rigging.",
       "occurrence_mode": "always"
@@ -108,14 +108,14 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks when the incident happened, or for the date of the accident, injury or event. NOT any other question.",
+      "match_phrase": "The agent asks when the incident happened, or for the date of the accident, injury or event, including \"What date were you hurt?\" and \"What date were you injured?\". This includes when the question comes at the end of a longer agent turn, after a fee, deadline, conflict, or disclaimer statement, or after 'one moment', 'thanks', 'let me pull that up', or 'I've recorded that'. NOT any other question.",
       "response_type": "phrase",
       "response_value": "It was July tenth, twenty twenty six.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "offers to transfer you to a human staff member, a live person at the front desk, or a real agent because they cannot continue on this line. NOT when transferring you to screening, intake, scheduling, or client services on this call. NOT when you already asked for a person.",
+      "match_phrase": "offers to transfer you to a human staff member, a live person at the front desk, or a real agent because they cannot continue on this line. NOT when transferring you to screening, intake, scheduling, or client services on this call. NOT the agent's greeting or \"How can I help?\". NOT when you already asked for a person.",
       "response_type": "phrase",
       "response_value": "No, I don't need a person. Please finish what I asked on this call.",
       "occurrence_mode": "always"
@@ -129,7 +129,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks whether to send the packet by email or text, or which channel to use. NOT any other question.",
+      "match_phrase": "The agent asks whether to send the packet by email or text, or which channel to use, including \"Would you like the new client packet by email or by text?\", or whether you want the new client packet at all. This includes when the question comes at the end of a longer agent turn, after a fee, deadline, conflict, or disclaimer statement, or after 'one moment', 'thanks', 'let me pull that up', or 'I've recorded that'. NOT any other question.",
       "response_type": "phrase",
       "response_value": "Email, please.",
       "occurrence_mode": "always"
@@ -150,14 +150,14 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks whether you were working for Gulf Coast Rigging, were an employee there, or were on the job when you got hurt. NOT any other question.",
+      "match_phrase": "The agent asks whether you were working for Gulf Coast Rigging, were an employee there, or were on the job when you got hurt, whether you were working at the site, were an employee, an independent contractor, or a visitor. This includes when the question comes at the end of a longer agent turn, after a fee, deadline, conflict, or disclaimer statement, or after 'one moment', 'thanks', 'let me pull that up', or 'I've recorded that'. NOT any other question.",
       "response_type": "phrase",
       "response_value": "Yes, I work for Gulf Coast Rigging, and I was on the job when I got hurt.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks you to describe what happened, what kind of accident or matter it was, where it happened, what injuries or losses you had, or whether you got medical treatment. NOT when asking the date, the state alone, your name or number, or who the other side is.",
+      "match_phrase": "The agent asks you to describe what happened, what kind of accident or matter it was, where it happened, what injuries or losses you had, or whether you got medical treatment, including \"Please tell me what happened at the job site and what injuries or losses you had\" and \"Can you briefly tell me how you were hurt and what injuries you had?\". This includes when the question comes at the end of a longer agent turn, after a fee, deadline, conflict, or disclaimer statement, or after 'one moment', 'thanks', 'let me pull that up', or 'I've recorded that'. NOT when asking the date, the state alone, your name or number, or who the other side is.",
       "response_type": "phrase",
       "response_value": "I was lifting a steel beam on the Gulf Coast Rigging site in Tampa and hurt my lower back. I saw a doctor at an urgent care clinic.",
       "occurrence_mode": "always"

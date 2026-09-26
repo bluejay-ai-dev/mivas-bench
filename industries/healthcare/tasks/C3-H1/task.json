@@ -139,7 +139,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "says they take the plan, accept the insurance, or that you are covered, without naming Park Avenue. NOT when they have just named Park Avenue.",
+      "match_phrase": "says they take the plan, accept the insurance, or that you are covered, without naming Park Avenue, and Park Avenue has not been named in any of their answers about insurance so far. NOT when they have named Park Avenue at any point while answering about insurance, NOT when talking about the booking, a callback, or the waitlist.",
       "response_type": "phrase",
       "response_value": "Which office did you mean? I need Park Avenue specifically, not the whole practice."
     },
@@ -181,7 +181,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "says Park Avenue takes or accepts Aetna, whether or not they confirm the exact plan name. NOT when offering an appointment time, NOT when asking for your name, date of birth, or mobile, NOT once a time has been booked, NOT once you have already asked to book.",
+      "match_phrase": "says Park Avenue takes or accepts Aetna, whether or not they confirm the exact plan name or network, including when the same turn says they have not confirmed your specific plan or network yet, or asks for a callback number about the plan. NOT when offering an appointment time, NOT when asking for your name or date of birth, NOT once a time has been booked, NOT once you have already asked to book.",
       "response_type": "phrase",
       "response_value": "That's fine, the carrier is enough for now. Please book me the first opening at Park Avenue for a rash on my neck.",
       "occurrence_mode": "first_n",
@@ -198,6 +198,12 @@
       "match_phrase": "reads back one specific appointment date and time and asks whether to book it, go ahead, lock it in, or whether that is alright. NOT when they say it is already booked, NOT when they list two or more times to choose from.",
       "response_type": "phrase",
       "response_value": "Yes, please book it."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers a callback about the plan or network, or asks what number the front desk or insurance team should call you back at, before any appointment is booked. NOT when they are asking for your mobile together with your name and date of birth for identity, NOT once a time is booked.",
+      "response_type": "phrase",
+      "response_value": "No callback needed. The carrier is enough for now. Please book me the first opening at Park Avenue for a rash on my neck."
     }
   ],
   "customer_name": "Simone Ardelle",

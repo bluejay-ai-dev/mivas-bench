@@ -82,6 +82,13 @@
   "scripted_responses": [
     {
       "match_type": "context",
+      "match_phrase": "The agent asks what you are calling about, how they can help, what they can help you with today, or what happened, before you have described the ladder. NOT when asking for your name or callback number, NOT once you have already said the ladder rung snapped.",
+      "response_type": "phrase",
+      "response_value": "The ladder rung snapped while I was standing on it. It was a Halloway Toolworks ladder. My neighbour Ruth Callahan saw it and still has the broken ladder.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
       "match_phrase": "The agent asks for the caller's full name and a callback or phone number for the first time. NOT when asking you to repeat the number one digit at a time, slowly, or just the last four digits, NOT when asking you to spell your name, and NOT when asking about anything else.",
       "response_type": "phrase",
       "response_value": "Franklin Deshpande, 706-555-0173.",
@@ -124,9 +131,9 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "has recorded the intake or asks if there is anything else to add. NOT when asking to book a case evaluation or appointment, and NOT when offering the new client packet by email or text.",
+      "match_phrase": "says they have recorded the intake or recorded what you shared, or asks if there is anything else to add, or asks whether to send the new client packet by email or text, and you have not yet asked for the intake note. NOT when asking to book a case evaluation or appointment, NOT after you have already asked for the intake note.",
       "response_type": "phrase",
-      "response_value": "Please add an intake note that Ruth Callahan saw it and I still have the broken ladder.",
+      "response_value": "Please add an intake note that Ruth Callahan saw it and I still have the broken ladder. No packet, please.",
       "occurrence_mode": "always"
     },
     {
@@ -138,7 +145,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks whether to send the packet by email or text, or which channel to use. NOT any other question.",
+      "match_phrase": "The agent asks whether to send the packet by email or text, or which channel to use, AFTER you have already asked for the intake note. NOT before you have asked for the intake note. NOT any other question.",
       "response_type": "phrase",
       "response_value": "No packet, just the witness note.",
       "occurrence_mode": "always"

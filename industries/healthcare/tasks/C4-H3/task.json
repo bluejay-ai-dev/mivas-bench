@@ -1,6 +1,6 @@
 {
   "task_name": "C4-H3: Filler consult for an existing patient",
-  "intent": "You are an existing Straus patient. If they ask whether you are new or existing, say existing. Answer identity questions once with your name and date of birth, confirm if they read it back, then get to why you called. Ask how much cheek filler costs, then ask to come in for a filler consult at Brooklyn Heights. You need the Brooklyn Heights street address, the floor, and the suite before you will take any time; if they skip any of those, ask again. When they explain the deposit and cancellation rules, agree. Ask them to send the deposit payment link to your phone so you can pay it; that is the only text you want. After you have the address, take the first appointment time they offer. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first time out loud, then thank them and end the call. Do not ask to reschedule or cancel any visit you already have. Do not ask for a callback, to speak to a person, about a medical bill, the patient portal, a waitlist, financing, or a confirmation text. Never ask to speak to a person, a live agent, or the cosmetic team. If they offer a human transfer, refuse and insist this agent quote filler and book the Brooklyn Heights consult. Do not book anything except this Brooklyn Heights filler consult. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar and that a deposit payment link was sent to your phone. If they wrap up after booking without sending the link, ask them to text the deposit payment link. Do not ask them to text you an appointment confirmation. Once they have said the consult is on the calendar and the deposit payment link was sent to your phone, thank them and end the call right away; do not ask for either again. Never say that is all you needed or goodbye while they are still asking you something or before they have said the link was sent. If they ask whether the deposit and cancellation terms are okay, say yes before anything else.",
+  "intent": "You are an existing Straus patient. If they ask whether you are new or existing, say existing. Answer identity questions once with your name and date of birth, confirm if they read it back, then get to why you called. Ask how much cheek filler costs, then ask to come in for a filler consult at Brooklyn Heights. You need the Brooklyn Heights street address, the floor, and the suite before you will take any time; if they skip any of those, ask again. When they explain the deposit and cancellation rules, agree. Ask them to send the deposit payment link to your phone so you can pay it; that is the only text you want. After you have the address, take the first appointment time they offer, meaning the earliest one in their list, never a later one. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first time out loud, then thank them and end the call. Do not ask to reschedule or cancel any visit you already have. Do not ask for a callback, to speak to a person, about a medical bill, the patient portal, a waitlist, financing, or a confirmation text. Never ask to speak to a person, a live agent, or the cosmetic team. If they offer a human transfer, refuse and insist this agent quote filler and book the Brooklyn Heights consult. Do not book anything except this Brooklyn Heights filler consult. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar and that a deposit payment link was sent to your phone. If they wrap up after booking without sending the link, ask them to text the deposit payment link. Do not ask them to text you an appointment confirmation. Once they have said the consult is on the calendar and the deposit payment link was sent to your phone, thank them and end the call right away; do not ask for either again. Never say that is all you needed or goodbye while they are still asking you something or before they have said the link was sent. If they ask whether the deposit and cancellation terms are okay, say yes before anything else.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -159,7 +159,7 @@
       "match_type": "context",
       "match_phrase": "offers one or more concrete appointment dates or times after saying the Brooklyn Heights street address, floor, and suite, asks which day or time you want after giving that full address, or asks you to choose among concrete consult slots after giving that full address. NOT when any address part is still missing, NOT when asking for your identity.",
       "response_type": "phrase",
-      "response_value": "Book the first time you offered."
+      "response_value": "Book the first time you offered, the earliest one in your list."
     },
     {
       "match_type": "context",
@@ -181,7 +181,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers an appointment time or asks you to confirm a slot, and has NOT yet said the Brooklyn Heights street address, floor, and suite anywhere earlier in the call. NOT when the street, floor, and suite have already been said at any point in the call, NOT when asking for your name, date of birth, ZIP code, or phone number.",
+      "match_phrase": "offers an appointment time or asks you to confirm a slot, and has NOT yet said the Brooklyn Heights street address, floor, and suite anywhere earlier in the call. NOT when the street, floor, and suite have already been said at any point in the call, NOT when asking for your name, date of birth, ZIP code, or phone number. NOT when this turn itself says the street address, floor, and suite.",
       "response_type": "phrase",
       "response_value": "Before I take a time, I need the street address, the floor, and the suite."
     },
@@ -232,6 +232,12 @@
       "match_phrase": "asks whether the payment text or deposit link came through or arrived, or whether you see it. NOT before they have said the link was sent.",
       "response_type": "phrase",
       "response_value": "Yes, it came through. Thank you, that's everything."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "says the Brooklyn Heights street address, floor, and suite after already listing appointment times, without asking a new question. NOT when asking for your name, date of birth, ZIP code, or phone number, NOT once a consult is booked.",
+      "response_type": "phrase",
+      "response_value": "Thanks. Book the first time you offered, the earliest one in your list."
     }
   ],
   "customer_name": "Sam Nguyen",

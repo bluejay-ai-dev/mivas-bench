@@ -1,7 +1,7 @@
 {
   "task_name": "T5-H3: Second price match on the same soundbar",
   "customer_name": "Felix Moreau",
-  "intent": "Open with exactly: \"Match the Halo soundbar at Rivertide for seventy dollars less, then also match Halcyon Mart at the same price.\" Give identity when asked. Order KE-4495108, Halo. Confirm the first $70 Rivertide match. Then, even if they ask whether you need anything else, ask them to match Halcyon Mart too at the same $479.99. Do not end the call before you have asked about Halcyon Mart. Stay for the one-match-per-item refusal. Do not argue. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request. You already bought the soundbar; never say you are planning to buy it. When they ask for your ZIP code and card, say: \"ZIP 94612, card ending 3390.\" Always answer the question the agent just asked with your details; never reply with only okay, sure, or thanks when they asked you for information.",
+  "intent": "Open with exactly: \"Match the Halo soundbar at Rivertide for seventy dollars less, then also match Halcyon Mart at the same price.\" Give identity when asked. Order KE-4495108, Halo. Confirm the first $70 Rivertide match. Then, even if they ask whether you need anything else, ask them to match Halcyon Mart too at the same $479.99. Do not end the call before you have asked about Halcyon Mart. Stay for the one-match-per-item refusal. Do not argue. After they refuse the Halcyon Mart match, never ask for a supervisor, a person, a manager, or an exception, and do not repeat the Halcyon Mart request; say the closing line. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request. You already bought the soundbar; never say you are planning to buy it. When they ask for your ZIP code and card, say: \"ZIP 94612, card ending 3390.\" Always answer the question the agent just asked with your details; never reply with only okay, sure, or thanks when they asked you for information.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -92,7 +92,14 @@
             "KE4495108"
           ]
         },
-        "competitor": "Halcyon Mart",
+        "competitor": {
+          "any_of": [
+            "Halcyon Mart",
+            "Halcyon Mark",
+            "Halcyon",
+            "HalcyonMart"
+          ]
+        },
         "competitor_price": 479.99
       }
     }
@@ -153,7 +160,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "has already told you the Halo soundbar has had its one price match, or otherwise refused or answered the Halcyon Mart match, and is now asking if you need anything else. NOT during identity, NOT while they are still collecting facts or looking something up, and NOT before you have asked about Halcyon Mart after the Rivertide match was confirmed.",
+      "match_phrase": "has refused or answered your Halcyon Mart request, for example says the Halo soundbar has already had its one price match or that only one match applies per item, after you asked about Halcyon Mart following the confirmed Rivertide match. This applies whether or not they then ask if you need anything else. NOT during identity, NOT while they are still collecting facts or looking something up, and NOT before you have asked about Halcyon Mart after the Rivertide match was confirmed.",
       "response_type": "phrase",
       "response_value": "That's all I needed. Thank you.",
       "occurrence_mode": "always"
@@ -167,7 +174,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "has said the Rivertide match is done or applied, or that the seventy dollars is going back to your card, and you have not yet asked about Halcyon Mart after that. This includes when they then ask if you need anything else or say goodbye. NOT during identity and NOT before the Rivertide match is confirmed.",
+      "match_phrase": "has said the Rivertide match is done or applied, or that the seventy dollars is going back to your card, and you have not yet asked about Halcyon Mart after that. This includes when they then ask if you need anything else or say goodbye. NOT during identity and NOT before the Rivertide match is confirmed. NOT after you have already asked about Halcyon Mart once since the Rivertide match was confirmed. NOT after they have refused the Halcyon Mart match.",
       "response_type": "phrase",
       "response_value": "Also match Halcyon Mart at the same price, four hundred seventy-nine ninety-nine, on the same Halo soundbar.",
       "occurrence_mode": "always"

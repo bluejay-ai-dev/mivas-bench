@@ -104,7 +104,13 @@
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "asks what date to start searching from, how far out to look, or what days or times work for you. NOT when offering specific appointment times, NOT when asking for your name, date of birth, or phone number.",
+      "match_phrase": "greets you, asks how they can help, or asks why you are calling, before you have said why you are calling. NOT when asking for your name or date of birth, NOT when quoting a price, NOT when asking which office.",
+      "response_type": "phrase",
+      "response_value": "Hi, this is Franklin Osei, I'm a new patient. How much is Botox at your Park Avenue office, and how much is filler? I only want the filler price. The consult I want to book is for Botox only, not filler."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks what date to start searching from, how far out to look, or what days or times work for you. NOT when asking which office, which location, or what ZIP code to search near, NOT when offering specific appointment times, NOT when asking for your name, date of birth, or phone number.",
       "response_type": "phrase",
       "response_value": "Whatever is soonest. Please search from today on your calendar and offer me the first opening."
     },
@@ -197,6 +203,18 @@
       "match_phrase": "reads back a phone number for the deposit payment link with any digit different from 212-555-0170, or with an extra or missing digit. NOT during identity verification.",
       "response_type": "phrase",
       "response_value": "No. It's two, one, two, five, five, five, zero, one, seven, zero. Please send the deposit payment link now."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks which office or location you want, asks whether Park Avenue or Brooklyn Heights, or asks what ZIP code to search near. NOT when offering specific appointment times, NOT when asking for your name, date of birth, or phone number.",
+      "response_type": "phrase",
+      "response_value": "Park Avenue, ZIP 10016. Before you offer me a time, I need the Park Avenue street address, the floor, and the suite."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "has quoted both the Botox and the filler price ranges, and nobody has mentioned financing, CareCredit, a payment plan, or spreading the cost yet. NOT when asking which office or ZIP code, NOT when offering specific appointment times, NOT when asking for your name, date of birth, or phone number, NOT when asking whether you agree to the deposit policy.",
+      "response_type": "phrase",
+      "response_value": "That Botox price is more than I can pay all at once. Is there a way to spread the cost out? And the consult is for Botox only, not filler, at Park Avenue."
     }
   ],
   "customer_name": "Franklin Osei",

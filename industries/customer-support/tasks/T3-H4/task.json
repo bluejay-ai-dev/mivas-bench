@@ -57,15 +57,7 @@
       "name": "transfer_to_service"
     },
     {
-      "name": "get_order",
-      "parameters": {
-        "order_number": {
-          "any_of": [
-            "KE-4471860",
-            "KE4471860"
-          ]
-        }
-      }
+      "name": "get_order"
     },
     {
       "name": "get_protection_plans"

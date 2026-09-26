@@ -1,7 +1,7 @@
 {
   "task_name": "C1-H2: Message then premises intake",
   "customer_name": "Sam Porter",
-  "intent": "Open with exactly: \"I need to leave a message for Tom Eckhart, and after that I also have a new matter I need help with.\" You have two jobs on this call. First they look you up and take a written message for Tom Eckhart. When asked what the message is, say exactly: \"Tell him Sam Porter called about the referral letter.\" Stay until they confirm that message is on the file. Do not hang up after the message. After they confirm the message is written down, say exactly: \"I also slipped at a store in Texas and I need a lawyer.\" This is a new matter of yours. You have not called this firm before. When asked who this would be against, say exactly: \"It's Cedarlane Market.\" When asked which state this happened in or where it took place, say exactly: \"In Texas.\" When asked when, say exactly: \"It was May third, twenty twenty six.\" Give your name and number if asked. Do not ask for a staff member. If offered an appointment or evaluation, decline booking. Stay until they confirm the message is on the file and the intake is recorded. A spoken 'we'll take care of it' without those writes is not enough. Then thank and end. Once they have confirmed the message is on the file and the intake is recorded, say exactly: \"Thank you, that's all I needed.\" and end the call.",
+  "intent": "Open with exactly: \"I need to leave a message for Tom Eckhart, and after that I also have a new matter I need help with.\" You have two jobs on this call. First they look you up and take a written message for Tom Eckhart. When asked what the message is, say exactly: \"Tell him Sam Porter called about the referral letter. And after the message, I also have a new matter.\" Stay until they confirm that message is on the file. Do not hang up after the message. After they confirm the message is written down, say exactly: \"I also slipped at a store in Texas and I need a lawyer.\" This is a new matter of yours. You have not called this firm before. When asked who this would be against, say exactly: \"It's Cedarlane Market.\" When asked which state this happened in or where it took place, say exactly: \"In Texas.\" When asked when, say exactly: \"It was May third, twenty twenty six.\" Give your name and number if asked. Do not ask for a staff member. If offered an appointment or evaluation, decline booking. Stay until they confirm the message is on the file and the intake is recorded. A spoken 'we'll take care of it' without those writes is not enough. Then thank and end. Once they have confirmed the message is on the file and the intake is recorded, say exactly: \"Thank you, that's all I needed.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -130,12 +130,12 @@
       "match_type": "context",
       "match_phrase": "The agent asks what the message is, what to tell or pass along to Tom Eckhart, what message to give him, or what you want written down. NOT when asking for your name or number, NOT when confirming a message already taken, and NOT when asking who the claim is against, which state, or when it happened.",
       "response_type": "phrase",
-      "response_value": "Tell him Sam Porter called about the referral letter.",
+      "response_value": "Tell him Sam Porter called about the referral letter. And after the message, I also have a new matter.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent confirms the message for Tom Eckhart was taken, written down, passed along, delivered, or is on the file, or, after taking it, asks whether there is anything else or asks about your new matter or what happened. NOT before you have given the message, and NOT after you have already said you slipped at a store.",
+      "match_phrase": "The agent confirms the message for Tom Eckhart was taken, written down, passed along, delivered, or is on the file, or, after taking it, asks whether there is anything else or asks about your new matter or what happened. This includes a turn that confirms the message and then says goodbye, a callback time, or that you are all set. NOT before you have given the message, and NOT after you have already said you slipped at a store.",
       "response_type": "phrase",
       "response_value": "I also slipped at a store in Texas and I need a lawyer.",
       "occurrence_mode": "first_n",

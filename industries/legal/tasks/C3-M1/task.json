@@ -81,7 +81,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks who the claim would be against, who the other side is, who this would be against, or the name of the surgeon, the hospital, or both in the same question, medical practice, or medical provider. NOT when asking for your own name or number.",
+      "match_phrase": "The agent asks or says it needs to know who the claim would be against, who the other side is, or the name of the surgeon, the hospital, the surgical center, the medical practice, or the provider, including one question that asks for the surgeon's full name or the hospital's name, such as 'before you tell me more, what is the surgeon's full name or the name of the hospital this would be against?' or 'I just need the surgeon's full name or the hospital's name'. This applies even when the question comes in its own turn right after the agent said okay or thank you. NOT when asking for your own name or number.",
       "response_type": "phrase",
       "response_value": "It's Ridgeline Surgical Center. I don't know the surgeon's name.",
       "occurrence_mode": "always"

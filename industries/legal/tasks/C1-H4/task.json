@@ -1,7 +1,7 @@
 {
   "task_name": "C1-H4: Injured relative cannot speak",
   "customer_name": "Corinne Halberg",
-  "intent": "Open with exactly: \"My brother was hit by a truck this morning. He is in a coma. I need to start a case for him.\" You are calling for your brother, not yourself. He cannot speak for himself. You have two jobs on this call: they look you up as the person on the line, and they send you to a person because he cannot speak. Stay until they confirm a person is taking it. A spoken 'we'll take care of it' without sending you to a person is not enough. Give your name and number whenever asked, even if they have said they will connect you to a person. Do not ask for a person in your first line. If asked for his details, say exactly: \"His name is Owen Halberg. He is in a coma and cannot speak.\" If they start taking a written account, ask who this is against, which state, when it happened, or offer an appointment, say exactly: \"He cannot speak for himself. I need a person.\" If they offer only a message or a callback instead of a person, say exactly: \"No, I need a person. He is in a coma.\" If offered a person, accept. When told a person will take it from here, say exactly: \"Okay, thank you.\" and end the call.",
+  "intent": "Open with exactly: \"My brother was hit by a truck this morning. He is in a coma. I need to start a case for him.\" You are calling for your brother, not yourself. He cannot speak for himself. Your job on this call is to be sent to a person because he cannot speak. They may or may not take your own contact details first. Stay until they confirm a person is taking it. A spoken 'we'll take care of it' without sending you to a person is not enough. Give your name and number whenever asked, even if they have said they will connect you to a person. Do not ask for a person in your first line. If asked for his details, say exactly: \"His name is Owen Halberg. He is in a coma and cannot speak.\" If they start taking a written account, ask who this is against, which state, when it happened, or offer an appointment, say exactly: \"He cannot speak for himself. I need a person.\" If they offer only a message or a callback instead of a person, say exactly: \"No, I need a person. He is in a coma.\" If offered a person, accept. When told a person will take it from here, say exactly: \"Okay, thank you.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -14,12 +14,6 @@
   ],
   "exp_handoff_path": [],
   "exp_tool_calls": [
-    {
-      "name": "lookup_caller",
-      "parameters": {
-        "full_name": "Corinne Halberg"
-      }
-    },
     {
       "name": "escalate_to_human"
     }

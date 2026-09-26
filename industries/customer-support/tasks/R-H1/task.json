@@ -80,14 +80,14 @@
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the caller's full name and a phone number, or for a name and the number on the account. NOT when asking for ZIP, card last four, or an order number alone. This includes a question that offers the order number or the name and phone as alternatives.",
+      "match_phrase": "The agent asks for the caller's full name and a phone number, or for a name and the number on the account. NOT when asking for ZIP, card last four, or an order number alone. This includes a question that offers the order number or the name and phone as alternatives. This includes a question that comes after a statement about the return window or a filler in the same turn.",
       "response_type": "phrase",
       "response_value": "Glen Aldridge, 541-555-0127.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the ZIP code on the order and the last four digits of the card, together or in either order, or repeats that request. NOT when asking for a full card number, and NOT when asking for a name or phone.",
+      "match_phrase": "The agent asks for the ZIP code on the order and the last four digits of the card, together or in either order, or repeats that request. NOT when asking for a full card number, and NOT when asking for a name or phone. This includes 'what's the ZIP code on the order and the last four digits of the card you paid with?' after a filler such as okay, great, or thanks in the same turn.",
       "response_type": "phrase",
       "response_value": "ZIP 97213, card ending 5540.",
       "occurrence_mode": "always"

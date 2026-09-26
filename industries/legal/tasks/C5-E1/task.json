@@ -124,14 +124,14 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks you to describe what happened, what kind of accident or matter it was, where it happened, what injuries or losses you had, or whether you got medical treatment. NOT when asking the date, the state alone, your name or number, or who the other side is.",
+      "match_phrase": "The agent asks you to describe what happened, what kind of accident or matter it was, where it happened, what injuries or losses you had, or whether you got medical treatment. This includes 'what injuries or other losses did you have?' asked after a note that talking with the firm does not make you a client. NOT when asking the date, the state alone, your name or number, or who the other side is.",
       "response_type": "phrase",
       "response_value": "The Northstar Logistics truck drifted into my lane on the freeway in Los Angeles and scraped the side of my car. I wasn't hurt and didn't need any medical treatment, just damage to my car.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks whether to send the new client packet by email or text, or offers to send it by one channel, such as by text to your number. NOT any other question.",
+      "match_phrase": "The agent asks whether to send the new client packet by email or by text, or offers to send it by one channel, such as by text to your number, including 'I've made a note of that. Would you like the new client packet by email or by text?' and including when that question comes in its own turn right after a short turn such as 'Thanks, Delphine.'. NOT any other question.",
       "response_type": "phrase",
       "response_value": "Text is fine.",
       "occurrence_mode": "always"

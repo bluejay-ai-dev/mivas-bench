@@ -1,6 +1,6 @@
 {
   "task_name": "C1-H4: Hours, parking, UnitedHealthcare, then a Brooklyn Heights booking",
-  "intent": "You are a new patient with no chart at Straus. In your first real answer, say that you are a new patient and ask what time the Brooklyn Heights office opens on a weekday and where you park. Do not mention booking, an appointment, a visit, or your scalp until they have answered whether Brooklyn Heights takes UnitedHealthcare. Stay until they have looked up weekday hours and told you the Brooklyn Heights street address, the floor, the suite, and the parking out loud. If they quote hours or parking without looking them up, ask them to check. Name the office as Brooklyn Heights; do not volunteer a ZIP. Do not ask them to text the address. Do not thank them or end the call after hours or parking, you still have more to do. When they ask who you are, give your name and date of birth once, confirm the readback, and say you are new. Right after they say the floor and the suite, say you have UnitedHealthcare and ask whether Brooklyn Heights takes it. Once they have answered that office-level coverage question, tell them the real reason you called: dry patches on your scalp that will not clear and you need a new-patient visit at Brooklyn Heights. Take the first appointment time they offer. After that time is on the calendar, ask to be waitlisted at Brooklyn Heights from August twenty-fourth through September thirtieth in case a better opening comes up (dates only; if they say those dates are not earlier than your booking, say to use them anyway), then ask the front desk to call you the morning of the visit about garage hours, number 718-555-0198. Confirm that first time out loud, then thank them and end the call. Do not ask to add or change insurance. Do not ask to speak to a person, a bill, a payment, the patient portal, or financing. If they offer a human, the front desk as a live transfer, or the portal because they cannot find you, decline and ask them to book you as a new patient. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar, you are waitlisted, and the parking callback is set. If they only list openings, say book the first one. Do not ask them to text you an appointment confirmation. Once they have said the time is booked, you are on the waitlist, and the parking callback is set, say thank you and goodbye and end the call; do not re-ask for anything already done. If they offer a confirmation text, always say no thanks.",
+  "intent": "You are a new patient with no chart at Straus. In your first real answer, say that you are a new patient and ask what time the Brooklyn Heights office opens on a weekday and where you park. Do not mention booking, an appointment, a visit, or your scalp until they have answered whether Brooklyn Heights takes UnitedHealthcare. Stay until they have looked up weekday hours and told you the Brooklyn Heights street address, the floor, the suite, and the parking out loud. If they quote hours or parking without looking them up, ask them to check. Name the office as Brooklyn Heights; do not volunteer a ZIP. Do not ask them to text the address. Do not thank them or end the call after hours or parking, you still have more to do. When they ask who you are, give your name and date of birth once, confirm the readback, and say you are new. Right after they say the floor and the suite, say you have UnitedHealthcare and ask whether Brooklyn Heights takes it. Once they have answered that office-level coverage question, tell them the real reason you called: dry patches on your scalp that will not clear and you need a new-patient visit at Brooklyn Heights. Take the first appointment time they offer. Do not mention the waitlist or the parking callback before a time is booked on the calendar. After that time is on the calendar, ask to be waitlisted at Brooklyn Heights from August twenty-fourth through September thirtieth in case a better opening comes up (dates only; if they say those dates are not earlier than your booking, say to use them anyway), then ask the front desk to call you the morning of the visit about garage hours, number 718-555-0198. Confirm that first time out loud, then thank them and end the call. Do not ask to add or change insurance. Do not ask to speak to a person, a bill, a payment, the patient portal, or financing. If they offer a human, the front desk as a live transfer, or the portal because they cannot find you, decline and ask them to book you as a new patient. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar, you are waitlisted, and the parking callback is set. If they only list openings, say book the first one. Do not ask them to text you an appointment confirmation. Once they have said the time is booked, you are on the waitlist, and the parking callback is set, say thank you and goodbye and end the call; do not re-ask for anything already done. If they offer a confirmation text, always say no thanks.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -171,7 +171,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers an appointment time or asks you to confirm a slot, and the Brooklyn Heights street address, floor, and suite have NOT been said anywhere earlier in this call. NOT when they said the street, the floor, and the suite at any earlier point, NOT when they say you are already booked, NOT when they are only asking for your ZIP. NOT once any time has been booked.",
+      "match_phrase": "ONLY IF the agent has never said the Brooklyn Heights street address, floor, and suite anywhere earlier in this call. Then: offers an appointment time or asks you to confirm a slot. NOT when they said the street, the floor, and the suite at any earlier point, NOT when they say you are already booked, NOT when they are only asking for your ZIP. NOT once any time has been booked.",
       "response_type": "phrase",
       "response_value": "Before I take a time, I need the street address, the floor, and the suite.",
       "occurrence_mode": "first_n",
@@ -187,7 +187,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "answers the weekday hours or gives the Brooklyn Heights address but has said nothing at all about parking. NOT when they mentioned street parking or the Clinton Street garage, NOT when parking has already been given.",
+      "match_phrase": "ONLY IF the agent has never mentioned parking anywhere earlier in this call. Then: answers the weekday hours or gives the Brooklyn Heights address. NOT when they mentioned street parking or the Clinton Street garage at any point, NOT when parking has already been given, NOT when offering or booking an appointment time.",
       "response_type": "phrase",
       "response_value": "I still need parking. Please look up where to park at Brooklyn Heights.",
       "occurrence_mode": "first_n",
@@ -263,7 +263,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "says you are booked for a specific time AND that you are on the waitlist AND that the front desk will call you about parking. NOT when any of the three is still pending.",
+      "match_phrase": "ONLY IF the agent has said, in this turn or earlier, that you are booked for a specific time AND that you are on or added to the Brooklyn Heights waitlist AND that the front desk will call you about parking. NOT when the agent has not said you are on the waitlist. NOT when any of the three is still pending.",
       "response_type": "phrase",
       "response_value": "Great, that's everything. Thank you, goodbye."
     },
@@ -304,6 +304,13 @@
       "match_phrase": "reads back a mobile or phone number that is NOT exactly the ten digits 7185550198, for example one with an extra or missing digit or a repeated area code, and asks whether it is right. NOT when the digits are exactly 7185550198.",
       "response_type": "phrase",
       "response_value": "No, it's seven, one, eight, five, five, five, zero, one, nine, eight. Ten digits."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "says a time is booked on the calendar (for example you're booked, that's booked, or you're all set for a day and time) and has not yet said you are on the Brooklyn Heights waitlist. NOT when only listing or reading back a time to book, NOT when they have already added you to the waitlist.",
+      "response_type": "phrase",
+      "response_value": "Thanks. Please also add me to the Brooklyn Heights waitlist from August twenty-fourth through September thirtieth, in case a better opening comes up.",
+      "occurrence_mode": "always"
     }
   ],
   "customer_name": "Marcus Bell",

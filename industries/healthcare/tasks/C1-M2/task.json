@@ -100,6 +100,14 @@
   "scripted_responses": [
     {
       "match_type": "context",
+      "match_phrase": "greets you at the start of the call and asks how they can help, before you have said anything. NOT after you have asked about Cigna.",
+      "response_type": "phrase",
+      "response_value": "Hi, does your Brooklyn Heights office take Cigna?",
+      "occurrence_mode": "first_n",
+      "occurrence_n": 1
+    },
+    {
+      "match_type": "context",
       "match_phrase": "asks for your full name and date of birth, or asks you to confirm who you are, or asks for the patient's name and date of birth. NOT when asking only for a member ID or insurance card, NOT when asking which office or location, NOT when asking ONLY for a phone or mobile number with no name or date of birth, NOT when asking about an appointment day or time, NOT when reading your name and date of birth back to you for confirmation.",
       "response_type": "phrase",
       "response_value": "Priya Raghunathan. My date of birth is February twenty-seventh, nineteen ninety."
@@ -148,13 +156,13 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before a time has been confirmed on the calendar. NOT when they have just confirmed a booked time. NOT when you have not yet asked to book a visit, NOT when they ask whether you would like to schedule an appointment.",
+      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before a time has been confirmed on the calendar. NOT when they have just confirmed a booked time. NOT when you have not yet asked to book a visit, NOT when they ask whether you would like to schedule an appointment. NOT once they have said at any point in the call that you are set, booked, or confirmed for a specific day and time.",
       "response_type": "phrase",
       "response_value": "I still need that time booked. Please confirm it is on the calendar before I go."
     },
     {
       "match_type": "context",
-      "match_phrase": "says whether Brooklyn Heights takes Cigna, or asks whether you would like to schedule an appointment, or asks what you would like to do next or if there is anything else, and you have NOT yet asked to book a visit. NOT when asking for your name or date of birth, NOT when a time is already booked.",
+      "match_phrase": "says whether Brooklyn Heights takes Cigna, or asks whether you would like to schedule an appointment, or asks what you would like to do next or if there is anything else, and you have NOT yet asked to book a visit. NOT when asking for your name or date of birth, NOT when a time is already booked. NOT when they only greet you at the start of the call and ask how they can help, before you have asked whether they take Cigna.",
       "response_type": "phrase",
       "response_value": "Thanks. I also need to come in for dry, scaly skin on my elbow. Please book me a new-patient visit at Brooklyn Heights.",
       "occurrence_mode": "first_n",
@@ -189,6 +197,12 @@
       "match_phrase": "reads back your mobile or phone number with exactly the ten digits 7185550192 (in any grouping, with or without an area code in parentheses) and asks whether it is right. NOT when the digits they read back are different, have an extra area code, or are missing a digit.",
       "response_type": "phrase",
       "response_value": "Yes, that's right."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "says you are set, booked, or confirmed on the calendar for a specific day and time, or confirms again that the time is on the calendar, and is not asking you a question. NOT when they are only offering or reading back a time before booking, NOT when they ask whether you want a confirmation text.",
+      "response_type": "phrase",
+      "response_value": "Great, that first time works for me. Thank you, goodbye."
     }
   ],
   "customer_name": "Priya Raghunathan",

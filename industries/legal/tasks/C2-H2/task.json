@@ -1,7 +1,7 @@
 {
   "task_name": "C2-H2: Conflict unclear, hospital and surgeon",
   "customer_name": "Gloria Mensah",
-  "intent": "Open with exactly: \"I think the hospital and the surgeon both messed up my surgery.\" When asked who this would be against, say exactly: \"It's St. Benedict Medical Center and the surgeon involved.\" If they ask you to pick only the hospital or only the surgeon, say exactly: \"Both, St. Benedict Medical Center and the surgeon involved.\" You do not know the surgeon's name. State: Illinois. Date: November second, twenty twenty five. If they offer an appointment or evaluation, decline. If they offer a person before confirming your contact details are on the file, decline and ask them to finish. Stay until they confirm your contact details are on the file and that a person will review the conflict. A spoken 'we'll take care of it' or sending you to a person without confirming your contact details are on the file is not enough. After they confirm your contact details are on the file and a person will review the conflict, say exactly: \"Okay, thank you.\" and end the call.",
+  "intent": "Open with exactly: \"I think the hospital and the surgeon both messed up my surgery.\" When asked who this would be against, say exactly: \"It's St. Benedict Medical Center and the surgeon involved.\" If they ask you to pick only the hospital or only the surgeon, say exactly: \"Both, St. Benedict Medical Center and the surgeon involved.\" You do not know the surgeon's name. If asked for the surgeon's name, say exactly: \"I don't know the surgeon's name. Please check St. Benedict Medical Center and the surgeon involved.\" Never say goodbye or have a good day before they confirm your contact details are on the file. State: Illinois. Date: November second, twenty twenty five. If they offer an appointment or evaluation, decline. If they offer a person before confirming your contact details are on the file, decline and ask them to finish. Stay until they confirm your contact details are on the file and that a person will review the conflict. A spoken 'we'll take care of it' or sending you to a person without confirming your contact details are on the file is not enough. After they confirm your contact details are on the file and a person will review the conflict, say exactly: \"Okay, thank you.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -70,7 +70,7 @@
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking to repeat, confirm, or read back only the number or some of its digits. NOT when asking about anything else. This includes a question that comes after a filler such as one moment, hold on, let me pull that up, or let's get some quick details in the same turn.",
+      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking to repeat, confirm, or read back only the number or some of its digits. NOT when asking about anything else. This includes a question that comes after a filler such as one moment, hold on, let me pull that up, or let's get some quick details in the same turn. NOT when asking for the names of the hospital or the surgeon, or who this would be against.",
       "response_type": "phrase",
       "response_value": "Gloria Mensah, three one two, five five five, zero two six six.",
       "occurrence_mode": "always"
@@ -91,7 +91,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks who the claim would be against, who the other side is, who this would be against, or for the names of the hospital and the surgeon. NOT when asking for your own name or number, and NOT when asking only for the surgeon's name. This includes a question that comes after a filler such as one moment, hold on, let me pull that up, or let's get some quick details in the same turn.",
+      "match_phrase": "The agent asks who the claim would be against, who the other side is, who this would be against, or for the names of the hospital and the surgeon. NOT when asking for your own name or number, and NOT when asking only for the surgeon's name. This includes a question that comes after a filler such as one moment, hold on, let me pull that up, or let's get some quick details in the same turn. This includes 'Before you tell me more, what are the names of the hospital and the surgeon this would be against?'",
       "response_type": "phrase",
       "response_value": "It's St. Benedict Medical Center and the surgeon involved.",
       "occurrence_mode": "always"
@@ -140,7 +140,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the surgeon's name, the surgeon's full name, or how to spell it. NOT when asking for the hospital's name or your own name.",
+      "match_phrase": "The agent asks for the surgeon's name, the surgeon's full name, or how to spell it. NOT when asking for the hospital's name or your own name. This includes 'What's the surgeon's full name?' after a thank-you in the same turn.",
       "response_type": "phrase",
       "response_value": "I don't know the surgeon's name. Please check St. Benedict Medical Center and the surgeon involved.",
       "occurrence_mode": "always"

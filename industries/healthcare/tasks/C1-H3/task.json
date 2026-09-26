@@ -179,7 +179,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when offering a payment link or deposit link, NOT when asking for a payment-link number, NOT when asking for your mobile number for identity, NOT when sending portal access.",
+      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS, asks whether you would like a confirmation text, or asks whether to send the confirmation text to a number (such as one ending in 0193). NOT when offering a payment link or deposit link, NOT when asking for a payment-link number, NOT when asking for your mobile number for identity, NOT when sending portal access.",
       "response_type": "phrase",
       "response_value": "No thanks, I don't need a confirmation text."
     },
@@ -221,7 +221,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "reads back one specific appointment date and time and asks whether to book it, go ahead, lock it in, or whether that is alright. NOT when they say it is already booked, NOT when they list two or more times to choose from.",
+      "match_phrase": "reads back one specific appointment date and time and asks whether to book it, go ahead, lock it in, or whether that is alright. NOT when they say it is already booked, NOT when they list two or more times to choose from. NOT when offering or asking whether you want a confirmation text or SMS. NOT when asking whether to send a text to a number.",
       "response_type": "phrase",
       "response_value": "Yes, please book it."
     },
@@ -233,9 +233,15 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "reads back your mobile or phone number with exactly the ten digits 2125550193 (in any grouping, with or without an area code in parentheses) and asks whether it is right. NOT when the digits they read back are different, have an extra area code, or are missing a digit.",
+      "match_phrase": "reads back your mobile or phone number with exactly the ten digits 2125550193 (in any grouping, with or without an area code in parentheses) and asks whether it is right. NOT when the digits they read back are different, have an extra area code, or are missing a digit. NOT when asking whether to send a confirmation text to that number.",
       "response_type": "phrase",
       "response_value": "Yes, that's right."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "says they cannot confirm or verify the Oscar Health plan on this call, and offers to book you now and flag it for benefits verification, asks whether to book now or wait for insurance confirmation first, or offers an insurance or benefits callback instead. NOT after an appointment time has been booked. NOT when offering a specific appointment time.",
+      "response_type": "phrase",
+      "response_value": "That's fine. Please book me now anyway so I'm on the calendar. I'd like the first available new patient visit at Park Avenue for a mole on my back."
     }
   ],
   "customer_name": "Gwen Okoro",

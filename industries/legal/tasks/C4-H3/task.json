@@ -1,7 +1,7 @@
 {
   "task_name": "C4-H3: Employment intake in Washington with packet and note",
   "customer_name": "Clara Whitman",
-  "intent": "Open with exactly: \"I was fired after I reported safety violations.\" When asked who this would be against, say exactly: \"It's Harborline Industries.\" Washington. April fifth, twenty twenty six. Give a short account when asked. If they record intake, say exactly: \"Please add an intake note that I still have the email I sent to HR about the safety violations.\" If offered the packet, say exactly: \"Email is fine.\" If offered a case evaluation or appointment, say exactly: \"Not yet, let me read the paperwork first.\" Stay until they confirm the intake, the note, and the email packet are on the file. A spoken promise that they will take care of it, without those writes, is not enough. Once they confirm the intake, the note, and the email packet are on the file, say exactly: \"Thank you, that's all I needed.\" Do not book an evaluation. End the call. The agent often says one moment or let me pull you up and then asks a question in the same turn. Always answer the question at the end of the agent's turn with the fact it asks for. Never reply with only \"Sure\", \"Okay\", \"Yeah\", or \"Thank you\" when the agent's turn ends in a question. Never say \"Thank you, that's all I needed.\" while the agent is asking you a question.",
+  "intent": "Open with exactly: \"I was fired after I reported safety violations.\" When asked who this would be against, say exactly: \"It's Harborline Industries.\" Washington. April fifth, twenty twenty six. Give a short account when asked. If they record intake, say exactly: \"Please add an intake note that I still have the email I sent to HR about the safety violations.\" This is your mandatory reply the first time the agent says it has recorded your account or intake, or asks if there is anything else to add, even when that same turn also offers the packet by email or text. If the agent asks what the note should say, say exactly: \"Just that I still have the email I sent to HR about the safety violations.\" If offered the packet, say exactly: \"Email is fine.\" If offered a case evaluation or appointment, say exactly: \"Not yet, let me read the paperwork first.\" Stay until they confirm the intake, the note, and the email packet are on the file. A spoken promise that they will take care of it, without those writes, is not enough. Once they confirm the intake, the note, and the email packet are on the file, say exactly: \"Thank you, that's all I needed.\" Do not book an evaluation. End the call. The agent often says one moment or let me pull you up and then asks a question in the same turn. Always answer the question at the end of the agent's turn with the fact it asks for. Never reply with only \"Sure\", \"Okay\", \"Yeah\", or \"Thank you\" when the agent's turn ends in a question. Never say \"Thank you, that's all I needed.\" while the agent is asking you a question, and never before the agent has said the note is added and the packet was sent by email.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -165,7 +165,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent has confirmed the intake, the note, and the email packet are on the file. NOT when offering the packet or asking email or text, NOT when the packet has not been sent yet, NOT when offering to book or asking whether anything else should go to the attorney. NOT during screening.",
+      "match_phrase": "The agent has said, in this turn or earlier, both that the intake note about the HR email was added and that the packet was sent by email, and this turn does not end in a question. NOT when the agent's turn ends in any question, such as email or text, your email or mailing address, what to put in the note, whether to book an evaluation, or whether anything else should be added. NOT when the agent has only said it recorded your account or intake. NOT when the note or the packet has not been confirmed. NOT during screening.",
       "response_type": "phrase",
       "response_value": "Thank you, that's all I needed.",
       "occurrence_mode": "always"
@@ -179,9 +179,16 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for your email address or where to send the packet by email. NOT when asking whether you want email or text.",
+      "match_phrase": "The agent asks for your email address, a good email or mailing address, or where to send the packet. NOT when asking whether you want email or text.",
       "response_type": "phrase",
       "response_value": "Email is fine. It's clara.whitman@example.com.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks what the note should say, what to include in the note, or what to put in the note about the HR email. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "Just that I still have the email I sent to HR about the safety violations.",
       "occurrence_mode": "always"
     }
   ],

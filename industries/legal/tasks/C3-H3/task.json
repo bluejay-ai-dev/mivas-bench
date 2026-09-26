@@ -119,7 +119,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT when asking for your name or number. NOT any other question.",
+      "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT when asking for your name or number. NOT any other question. This includes a question that comes after a filler, a thank-you, or a statement in the same turn, such as one moment, checking, a result they just looked up, a fee, or a disclaimer.",
       "response_type": "phrase",
       "response_value": "It's Wesley Trombley.",
       "occurrence_mode": "always"
@@ -133,7 +133,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks when the incident happened, or for the date of the accident, injury or event. NOT any other question.",
+      "match_phrase": "The agent asks when the incident happened, or for the date of the accident, injury or event. NOT any other question. This includes a question that comes after a filler, a thank-you, or a statement in the same turn, such as one moment, checking, a result they just looked up, a fee, or a disclaimer.",
       "response_type": "phrase",
       "response_value": "It was September fifteenth, twenty twenty four.",
       "occurrence_mode": "always"
@@ -171,6 +171,20 @@
       "match_phrase": "The agent asks which city or town, where in California, or exactly where it happened. NOT when asking which state.",
       "response_type": "phrase",
       "response_value": "In Ventura, California, as the car pulled out of a driveway.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether you have received or had any medical treatment, seen a doctor, or gone to the hospital for your injuries or pain. NOT any other question. This includes a question that comes after a filler, a thank-you, or a statement in the same turn, such as one moment, checking, a result they just looked up, a fee, or a disclaimer.",
+      "response_type": "phrase",
+      "response_value": "No medical treatment yet.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks what injuries, damage, or losses resulted, or whether you were hurt. NOT when asking only which city or where in California, NOT when asking about medical treatment. This includes a question that comes after a filler, a thank-you, or a statement in the same turn, such as one moment, checking, a result they just looked up, a fee, or a disclaimer.",
+      "response_type": "phrase",
+      "response_value": "Pain in my right side and shoulder, and damage to the passenger side of my car.",
       "occurrence_mode": "always"
     }
   ],

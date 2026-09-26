@@ -61,7 +61,7 @@
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the caller's full name and a phone number, or for a name and the number on the account. NOT when asking for ZIP, card last four, or an order number alone. This includes a question that offers the order number or the name and phone as alternatives.",
+      "match_phrase": "The agent asks for the caller's full name and a phone number, or for a name and the number on the account. NOT when asking for ZIP, card last four, or an order number alone. This includes a question that offers the order number or the name and phone as alternatives. For example 'What's your order number? Or I can look it up with your full name and the phone number on the account.', including when the agent repeats that question and when it comes after a filler such as I'll pull that up.",
       "response_type": "phrase",
       "response_value": "Dana Whitlock, 541-555-0188.",
       "occurrence_mode": "always"
@@ -75,7 +75,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for an order number, which order, or which item. NOT when asking for name, phone, ZIP, or card last four.",
+      "match_phrase": "The agent asks for an order number, which order, or which item. NOT when asking for name, phone, ZIP, or card last four. NOT when the same turn also offers to look it up by your name and phone number instead.",
       "response_type": "phrase",
       "response_value": "Order KE-4471209, the refrigerator.",
       "occurrence_mode": "always"

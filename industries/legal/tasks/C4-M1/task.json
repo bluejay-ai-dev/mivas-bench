@@ -1,7 +1,7 @@
 {
   "task_name": "C4-M1: Medical records authorization",
   "customer_name": "Franklin Deshpande",
-  "intent": "Open with exactly: \"A ladder I bought collapsed and I broke my ankle.\" and say nothing else in that first turn. Manufacturer Halloway Toolworks. Georgia. April twenty second, twenty twenty six. If records release offered, accept. When asked which doctor, hospital, clinic, or provider treated you, say exactly: \"Northside Orthopedic.\" Stay until they confirm the records authorization for Northside Orthopedic has been sent. Sent for your signature counts as on the file; do not ask them to confirm it was signed or received. A spoken promise without the write is not enough. Decline booking. Do not ask for a person. After they confirm the records authorization is on the file, thank and end. Do not hang up when asked for the manufacturer or the treating provider. You already named them. The agent often says one moment or let me pull you up and then asks a question in the same turn. Always answer the question at the end of the agent's turn with the fact it asks for. Never reply with only \"Sure\", \"Okay\", \"Yeah\", or \"Thank you\" when the agent's turn ends in a question.",
+  "intent": "Open with exactly: \"A ladder I bought collapsed and I broke my ankle.\" and say nothing else in that first turn. Manufacturer Halloway Toolworks. Georgia. April twenty second, twenty twenty six. When asked whether a lawyer represents you, say exactly: \"No, nobody represents me.\" If records release offered, accept. When asked which doctor, hospital, clinic, or provider treated you, say exactly: \"Northside Orthopedic.\" Stay until they confirm the records authorization for Northside Orthopedic has been sent. Sent for your signature counts as on the file; do not ask them to confirm it was signed or received. A spoken promise without the write is not enough. Decline booking. Do not ask for a person. After they confirm the records authorization is on the file, thank and end. Do not hang up when asked for the manufacturer or the treating provider. You already named them. The agent often says one moment or let me pull you up and then asks a question in the same turn. Always answer the question at the end of the agent's turn with the fact it asks for. Never reply with only \"Sure\", \"Okay\", \"Yeah\", or \"Thank you\" when the agent's turn ends in a question.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -75,7 +75,8 @@
         "provider": {
           "any_of": [
             "Northside Orthopedic",
-            "North Side Orthopedic"
+            "North Side Orthopedic",
+            "Northside Orthopedics"
           ]
         }
       }
@@ -235,7 +236,8 @@
         "target": {
           "any_of": [
             "Northside Orthopedic",
-            "North Side Orthopedic"
+            "North Side Orthopedic",
+            "Northside Orthopedics"
           ]
         }
       }

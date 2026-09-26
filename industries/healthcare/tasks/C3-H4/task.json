@@ -137,9 +137,9 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "reads your Oscar member ID and date of birth back for the eligibility check and asks whether they are right. NOT when reading back only your name and date of birth for identity.",
+      "match_phrase": "reads your Oscar member ID and date of birth back for the eligibility check and asks whether they are right. NOT when reading back only your name and date of birth for identity. NOT when reading back a phone or callback number.",
       "response_type": "phrase",
-      "response_value": "Yes, that's right. Please run the eligibility for a visit on August twenty-fourth."
+      "response_value": "Yes, that's right, and the first character is the letter O as in Oscar, not a zero. Please run the eligibility for a visit on August twenty-fourth."
     },
     {
       "match_type": "context",
@@ -205,13 +205,13 @@
       "match_type": "context",
       "match_phrase": "asks for your member ID, insurance ID, or the ID on your Oscar card. NOT when they are reading the member ID back for confirmation.",
       "response_type": "phrase",
-      "response_value": "My Oscar member ID is O, seven, seven, eight, eight, nine, nine, zero, zero, one. My date of birth is September eighth, nineteen ninety-five."
+      "response_value": "My Oscar member ID is the letter O as in Oscar, then seven, seven, eight, eight, nine, nine, zero, zero, one. My date of birth is September eighth, nineteen ninety-five."
     },
     {
       "match_type": "context",
       "match_phrase": "says they cannot confirm Oscar Health over the phone, that the insurance team will verify it, or offers to get you on the books now and flag it for benefits verification, and no eligibility result (plan active, copay, deductible) has been told to you yet. NOT when naming a specific appointment day and time, NOT when asking for your name or date of birth, NOT when reading your member ID back.",
       "response_type": "phrase",
-      "response_value": "Not yet on the booking. My Oscar member ID is O, seven, seven, eight, eight, nine, nine, zero, zero, one, and my date of birth is September eighth, nineteen ninety-five. Please run the live eligibility for a visit on August twenty-fourth first, then we can book."
+      "response_value": "Not yet on the booking. My Oscar member ID is the letter O as in Oscar, then seven, seven, eight, eight, nine, nine, zero, zero, one, and my date of birth is September eighth, nineteen ninety-five. Please run the live eligibility for a visit on August twenty-fourth first, then we can book."
     },
     {
       "match_type": "context",
@@ -221,9 +221,21 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "says a new additional follow-up time is booked, confirmed, or on the calendar. NOT when only listing openings, NOT when asking whether to book a time, NOT when referring to the September fifteenth visit.",
+      "match_phrase": "says a new additional follow-up is booked, confirmed, or on the calendar AND names its specific day and time. NOT when only giving the office address, NOT when saying they can book it next, will book it, or are about to book it, NOT when only listing openings, NOT when asking whether to book a time, NOT when referring to the September fifteenth visit.",
       "response_type": "phrase",
       "response_value": "Great, thank you. That's everything I needed. Goodbye."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks what phone number, callback number, or mobile number to reach you at. NOT when reading a phone number back to you, NOT when asking for your member ID, name, or date of birth.",
+      "response_type": "phrase",
+      "response_value": "Four, zero, seven, five, five, five, zero, one, five, five."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "reads a phone or callback number back to you as 407-555-0155 and asks whether it is right. NOT when reading back your member ID.",
+      "response_type": "phrase",
+      "response_value": "Yes, that's right."
     }
   ],
   "customer_name": "Alice Romano",

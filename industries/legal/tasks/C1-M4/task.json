@@ -1,7 +1,7 @@
 {
   "task_name": "C1-M4: New auto accident screening checks",
   "customer_name": "Harriet Voss",
-  "intent": "Open with exactly: \"I was in a car accident in Washington and I need a lawyer.\" This is a new matter of yours. You have not called this firm before. When asked who this would be against, say exactly: \"It's Pellham Transit.\" When asked which state this happened in or where it took place, say exactly: \"In Washington State, not DC.\" When asked when, say exactly: \"It was June eighth, twenty twenty six.\" Give your name and number if asked. Do not ask for a staff member. Stay until they confirm they have checked the other side, that they handle car accidents, that they are licensed in Washington, and the filing deadline. A spoken promise that they will take the matter, without those checks, is not enough. You only want the checks today. You do not want a file opened, an intake recorded, a packet, or an appointment yet. If they ask what happened, start taking a written account, or offer an appointment, a packet, or to record an intake, say exactly: \"That's all I needed today. Please don't open a file yet. Thank you.\" and end the call. Once they have confirmed the other side is clear, they handle car accidents in Washington, and they have given the filing deadline, say exactly: \"Thank you, that's all I needed. Please don't open a file yet.\" and end the call.",
+  "intent": "Open with exactly: \"I was in a car accident in Washington and I need a lawyer.\" This is a new matter of yours. You have not called this firm before. When asked who this would be against, say exactly: \"It's Pellham Transit.\" When asked which state this happened in or where it took place, say exactly: \"In Washington State, not DC.\" When asked when, say exactly: \"It was June eighth, twenty twenty six.\" Give your name and number if asked. Do not ask for a staff member. Stay until they confirm they have checked the other side, that they handle car accidents, that they are licensed in Washington, and the filing deadline. A spoken promise that they will take the matter, without those checks, is not enough. You only want the checks today. You do not want a file opened, an intake recorded, a packet, or an appointment yet. If they ask what happened, start taking a written account, or offer an appointment, a packet, or to record an intake, say exactly: \"That's all I needed today. Please don't open a file yet. Thank you.\" and end the call. Once they have confirmed the other side is clear, they handle car accidents in Washington, and they have given the filing deadline, say exactly: \"Thank you, that's all I needed. Please don't open a file yet.\" and end the call. Always answer the question the agent just asked; never reply with only okay, sure, thanks, or I'll wait when they asked you for information. If your last reply was only okay or thanks and the agent's question is still unanswered, give the answer in your next turn.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -82,14 +82,14 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question. This includes a question that comes after a filler such as one moment, hold on, let me pull that up, or let's get some quick details in the same turn.",
+      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone, including \"Does anyone currently represent you for this accident?\" and \"Is anyone representing you?\", even right after \"I've got you in our system\". This includes when the question comes at the end of a longer agent turn, after a fee, deadline, conflict, or disclaimer statement, or after 'one moment', 'thanks', 'let me pull that up', or 'I've recorded that'. NOT any other question. This includes a question that comes after a filler such as one moment, hold on, let me pull that up, or let's get some quick details in the same turn.",
       "response_type": "phrase",
       "response_value": "No, nobody represents me.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks who the claim would be against, who the other side is, who this would be against, or for the name of the company or driver. NOT any other question. This includes a question that comes after a filler such as one moment, hold on, let me pull that up, or let's get some quick details in the same turn.",
+      "match_phrase": "The agent asks who the claim would be against, who the other side is, who this would be against, or for the name of the company or driver, including \"Before you tell me about the accident, who would the claim be against?\". This includes when the question comes at the end of a longer agent turn, after a fee, deadline, conflict, or disclaimer statement, or after 'one moment', 'thanks', 'let me pull that up', or 'I've recorded that'. NOT any other question. This includes a question that comes after a filler such as one moment, hold on, let me pull that up, or let's get some quick details in the same turn.",
       "response_type": "phrase",
       "response_value": "It's Pellham Transit.",
       "occurrence_mode": "always"
@@ -103,7 +103,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks when the incident happened, for the date of the accident, or says it needs the date to check the filing deadline. NOT any other question. This includes a question that comes after a filler such as one moment, hold on, let me pull that up, or let's get some quick details in the same turn.",
+      "match_phrase": "The agent asks when the incident happened, for the date of the accident, or says it needs the date to check the filing deadline, including \"What date did the accident happen?\", even after the agent says the firm handles car accident matters in Washington and the consultation is free. This includes when the question comes at the end of a longer agent turn, after a fee, deadline, conflict, or disclaimer statement, or after 'one moment', 'thanks', 'let me pull that up', or 'I've recorded that'. NOT any other question. This includes a question that comes after a filler such as one moment, hold on, let me pull that up, or let's get some quick details in the same turn.",
       "response_type": "phrase",
       "response_value": "It was June eighth, twenty twenty six.",
       "occurrence_mode": "always"
@@ -117,7 +117,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks what happened or about injuries, starts taking a written account, offers an appointment, a case evaluation, or a packet, or says it will record an intake or open a file. NOT when asking who this is against, which state, or when it happened.",
+      "match_phrase": "The agent asks what happened or about injuries, starts taking a written account, offers an appointment, a case evaluation, or a packet, or says it will record an intake or open a file. NOT when asking who this is against, which state, or when it happened. NOT when the agent only says it is here, is waiting for you, or says \"whenever you're ready\". NOT when the agent asks for the accident date.",
       "response_type": "phrase",
       "response_value": "That's all I needed today. Please don't open a file yet. Thank you.",
       "occurrence_mode": "always"

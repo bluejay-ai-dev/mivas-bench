@@ -55,6 +55,13 @@
   "scripted_responses": [
     {
       "match_type": "context",
+      "match_phrase": "The agent asks what you are calling about, how they can help, or what the matter is, before you have described the crash. NOT when asking who the claim would be against or for the other driver's name.",
+      "response_type": "phrase",
+      "response_value": "A car pulled out and hit my passenger side in California.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
       "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
       "response_type": "phrase",
       "response_value": "Nadine Carlisle, 805-555-0167.",
@@ -125,7 +132,14 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent's turn uses the word intake and says the intake is recorded, saved, or on the file. NOT when the turn is only thank you or a filler such as one moment, I pull you up, let me pull you up, let me look you up, or let me check. NOT before the agent has asked who the claim would be against. NOT when asking who the claim would be against, NOT when asking for a date, name, phone, representation, what happened, or state. NOT when reading a filing deadline. NOT when offering to book or saying one moment. NOT when the agent asks or tells you to say what happened, or reads a filing deadline and then asks for details.",
+      "match_phrase": "The agent reads or starts to read a filing deadline, a deadline date, or days remaining, including a turn cut off after 'the filing deadline is', or says let's get some quick details or the details for the evaluation, without having said the intake is recorded. NOT after the agent has said the intake is recorded.",
+      "response_type": "phrase",
+      "response_value": "Okay. He pulled out without looking and hit my passenger side. I still need the intake on the file.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent states in plain words that the intake itself is recorded, saved, or on the file, using the word intake in that statement, for example 'your intake is recorded' or 'I've recorded the intake'. NOT when the turn reads or starts to read a filing deadline, a date, or days remaining, even if it is cut off. NOT when the agent says let's get some details, quick details, or the details for the evaluation. NOT when the agent only says checking, one moment, okay, or thank you. NOT when the agent asks a question that is not about booking or the packet.",
       "response_type": "phrase",
       "response_value": "Thank you, that's all I needed.",
       "occurrence_mode": "always"
