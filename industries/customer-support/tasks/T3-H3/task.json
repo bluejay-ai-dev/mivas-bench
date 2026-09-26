@@ -1,7 +1,7 @@
 {
   "task_name": "T3-H3: Book a bench visit then cancel it",
   "customer_name": "Grace Okonkwo",
-  "intent": "Open with exactly: \"Book a TechCrew Bench visit for my Aurora Pro 16 that will not charge, first available.\" Give identity when asked. The only problem with the laptop is that it will not charge; never describe any other symptom, and it is not hot, swollen, smoking, or overheating. Always answer the question the agent just asked; never reply with only okay, sure, or thanks when they asked you for information. Order KE-4471860. Let them book the first August bench slot on the store calendar. Do not choose a specific date or change the location or state, even if the agent insists that a month or day is required; keep asking for the first available August bench visit. Do not mention canceling until they have confirmed a visit is booked. As soon as they confirm a booked day and time, say exactly: \"I cannot make that day. Please cancel that appointment.\" Hang up once they confirm the cancel. Do not say you are done until the cancel is confirmed. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
+  "intent": "Open with exactly: \"Book a TechCrew Bench visit for my Aurora Pro 16 that will not charge, first available.\" Give identity when asked. The only problem with the laptop is that it will not charge; never describe any other symptom, and it is not hot, swollen, smoking, or overheating. Always answer the question the agent just asked; never reply with only okay, sure, or thanks when they asked you for information. Order KE-4471860. Let them book the first August bench slot on the store calendar. Do not choose a specific date or change the location or state, even if the agent insists that a month or day is required; keep asking for the first available August bench visit until a visit is booked. Once the agent says you are booked for a day or time, even if they call it the first available slot, never ask for first available again; your next line is the cancel line. Do not mention canceling until they have confirmed a visit is booked. As soon as they confirm a booked day and time, say exactly: \"I cannot make that day. Please cancel that appointment.\" Hang up once they confirm the cancel. Do not say you are done until the cancel is confirmed. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -144,14 +144,14 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers bench times; asks which day, month, date, or state to book; asks for another day or state after saying a day is unavailable; says it needs a specific month or day; or says first available is not valid, while no appointment is booked. NOT during identity or when asking for a name, phone, order number, ZIP, or card digits, NOT during an internal transfer, NOT after a booking is confirmed, NOT after you asked to cancel, NOT after you said thank you, and NOT when asking what is wrong with the laptop.",
+      "match_phrase": "offers bench times; asks which day, month, date, or state to book; asks for another day or state after saying a day is unavailable; says it needs a specific month or day; or says first available is not valid, while no appointment is booked. NOT during identity or when asking for a name, phone, order number, ZIP, or card digits, NOT during an internal transfer, NOT after a booking is confirmed, NOT after you asked to cancel, NOT after you said thank you, and NOT when asking what is wrong with the laptop. NOT once they have said you are booked or confirmed for a day or time, even if they call it the first available slot.",
       "response_type": "phrase",
       "response_value": "I do not have a specific date. Please book the first available August bench visit.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "has just confirmed a booked TechCrew bench appointment by speaking a calendar day or a clock time, or asks if that booked slot works. NOT during identity or when asking for a name, phone, order number, ZIP, or card digits, NOT when asking what is wrong with the laptop, NOT when offering first available, NOT before a booking exists.",
+      "match_phrase": "says you are booked or confirmed for a TechCrew bench visit on a day or at a time (for example 'booked for Monday, August 3 at 11AM'), including when they call it the first available slot, or asks if that booked slot works. NOT during identity or when asking for a name, phone, order number, ZIP, or card digits, NOT when asking what is wrong with the laptop, and NOT before a booking exists.",
       "response_type": "phrase",
       "response_value": "I cannot make that day. Please cancel that appointment.",
       "occurrence_mode": "always"

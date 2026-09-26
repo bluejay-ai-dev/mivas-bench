@@ -1,7 +1,7 @@
 {
   "task_name": "T4-H4: Quote cancel, refuse the save, then confirm",
   "customer_name": "Felix Moreau",
-  "intent": "Open with exactly: \"I want the cancellation quote on my Plus, then cancel it today.\" Give identity when asked. Hear the quote, refuse one save offer, then confirm after the proration readback. Do not upgrade. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
+  "intent": "Open with exactly: \"I want the cancellation quote on my Plus, then cancel it today.\" Give identity when asked. Hear the quote, refuse one save offer, then confirm after the proration readback. Do not upgrade. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request. Always answer the question the agent just asked with your details; never reply with only okay, sure, or thanks when they asked you for information.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -72,14 +72,14 @@
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the caller's full name and a phone number, or for a name and the number on the account. NOT when asking for ZIP, card last four, or an order number alone. NOT when they say they missed or did not catch the phone number or name, and NOT when they ask you to repeat it one digit at a time or to spell your name.",
+      "match_phrase": "The agent asks for the caller's full name and a phone number, or for a name and the number on the account. NOT when asking for ZIP, card last four, or an order number alone. NOT when they say they missed or did not catch the phone number or name, and NOT when they ask you to repeat it one digit at a time or to spell your name. NOT when they ask you to confirm the full phone number again.",
       "response_type": "phrase",
       "response_value": "Felix Moreau, 541-555-0108.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent says it missed or did not catch the phone number or the name, or asks you to repeat the phone number slowly or one digit at a time, or to spell your name. NOT when asking for ZIP, card last four, or an order number.",
+      "match_phrase": "The agent says it missed or did not catch the phone number or the name, or asks you to repeat the phone number slowly or one digit at a time, or to spell your name, or asks you to confirm the full phone number again. NOT when asking for ZIP, card last four, or an order number.",
       "response_type": "phrase",
       "response_value": "Moreau is spelled M, O, R, E, A, U. The phone number is five four one, five five five, zero one zero eight.",
       "occurrence_mode": "always"

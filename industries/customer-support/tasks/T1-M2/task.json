@@ -69,7 +69,7 @@
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the caller's full name and a phone number, or for a name and the number on the account. NOT when asking for ZIP, card last four, or an order number alone. NOT when they say they missed or did not catch the phone number, and NOT when they ask for it again one digit at a time.",
+      "match_phrase": "The agent asks for the caller's full name and a phone number, or for a name and the number on the account. NOT when asking for ZIP, card last four, or an order number alone. NOT when they say they missed or did not catch the phone number, and NOT when they ask for it again one digit at a time. NOT when they ask you to spell your name.",
       "response_type": "phrase",
       "response_value": "Selina Cortez, 541-555-0171.",
       "occurrence_mode": "always"
@@ -79,6 +79,13 @@
       "match_phrase": "The agent says it missed or did not catch the phone number, or asks you to repeat the phone number slowly or one digit at a time. NOT when asking for the name alone, ZIP, card last four, or an order number.",
       "response_type": "phrase",
       "response_value": "Five four one, five five five, zero one seven one.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks you to spell your name, or says it did not catch your name. NOT when asking only for the phone number, ZIP, card last four, or an order number.",
+      "response_type": "phrase",
+      "response_value": "Selina, S E L I N A. Cortez, C O R T E Z. My number is five, four, one, five, five, five, zero, one, seven, one.",
       "occurrence_mode": "always"
     },
     {

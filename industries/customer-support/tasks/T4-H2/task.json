@@ -1,7 +1,7 @@
 {
   "task_name": "T4-H2: Upgrade Plus to Total",
   "customer_name": "Selina Cortez",
-  "intent": "Open with exactly: \"Upgrade my Plus membership to Total today.\" Give identity when asked. Confirm the prorated $85.00 charge to the card ending 1156 after they read it back. Do not cancel. Do not ask about a $399 email. Do not say the closing line until the agent has told you the upgrade to Total went through. If the agent pauses or goes quiet before reading back the charge, say \"Can you go ahead with the upgrade to Total?\" Once they confirm the upgrade is done, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
+  "intent": "Open with exactly: \"Upgrade my Plus membership to Total today.\" Give identity when asked. Confirm the prorated $85.00 charge to the card ending 1156 after they read it back. Do not cancel. Do not ask about a $399 email. Do not say the closing line until the agent has told you the upgrade to Total went through. If the agent pauses or goes quiet before reading back the charge, say \"Can you go ahead with the upgrade to Total?\" Once they confirm the upgrade is done, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request. Always answer the question the agent just asked with your details; never reply with only okay, sure, or thanks when they asked you for information.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -104,7 +104,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "has already finished the original request you called about, confirmed that outcome out loud, and is now offering a second unrelated request, a confirmation text, or asking if you need anything else. NOT during identity, NOT while they are still collecting facts or looking something up, and NOT before they have confirmed the original request is done.",
+      "match_phrase": "says the upgrade to Kestrel Total is done or went through (for example 'you're now on Total'), and then asks if you need anything else. NOT when asking for name, phone, ZIP, card last four, or an order number, NOT during verification, and NOT before they have said the upgrade is done.",
       "response_type": "phrase",
       "response_value": "That's all I needed. Thank you.",
       "occurrence_mode": "always"

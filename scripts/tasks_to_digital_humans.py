@@ -297,7 +297,10 @@ def with_scenario_clock(intent: str, industry: str) -> str:
     return (
         f"{line} Use that date for today, tomorrow, this week, and this Friday. "
         f"Do not use the real-world calendar. This date is background for you only: "
-        f"never say today's date aloud unless the agent asks you for it.\n\n{text}"
+        f"never say today's date aloud unless the agent asks you for it. "
+        f"When the agent's turn contains a question, even after a filler like 'let me pull "
+        f"that up' or 'one moment', answer that question in the same reply, or say plainly "
+        f"that you will not; never reply with only 'okay', 'sure' or 'mm-hmm'.\n\n{text}"
     )
 
 

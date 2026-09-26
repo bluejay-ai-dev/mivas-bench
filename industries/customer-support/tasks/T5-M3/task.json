@@ -59,7 +59,13 @@
     {
       "name": "quote_price_match",
       "parameters": {
-        "order_number": "KE-4495108",
+        "order_number": {
+          "any_of": [
+            "KE-4495108",
+            "KE4495108",
+            "KE-449-5108"
+          ]
+        },
         "competitor": "Rivertide",
         "in_stock": false
       }
@@ -120,10 +126,11 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "explains the price-match policy or refuses the out-of-stock match without having looked up your order. NOT when they mention your order, your delivered soundbar, or say they checked or pulled up your order, and NOT during identity questions.",
+      "match_phrase": "explains the price-match policy or refuses the out-of-stock match without having looked up your order. NOT when they mention your order, your delivered soundbar, or say they checked or pulled up your order, and NOT during identity questions. NOT after they have said the out-of-stock offer on your order is not eligible, and NOT when they say they already ran or checked the match.",
       "response_type": "phrase",
       "response_value": "Please look up my order KE-4495108 and run the match anyway.",
-      "occurrence_mode": "always"
+      "occurrence_mode": "first_n",
+      "occurrence_n": 1
     },
     {
       "match_type": "context",

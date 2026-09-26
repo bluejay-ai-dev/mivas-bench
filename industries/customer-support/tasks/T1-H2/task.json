@@ -1,7 +1,7 @@
 {
   "task_name": "T1-H2: Late range delivery change",
   "customer_name": "Nadia Grant",
-  "intent": "Open with exactly: \"Please move my Emberline range delivery from August third to August sixth. I know it is close.\" Give identity when asked. Order KE-4500001. Accept the $29.99 late-change fee after they read it back. Confirm August 6, 8am to 12pm. Do not ask for a confirmation text. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
+  "intent": "Open with exactly: \"Please move my Emberline range delivery from August third to August sixth. I know it is close.\" When asked, give your name and phone (Nadia Grant, 541-555-0196), and the ZIP and card (ZIP 98042, card ending 7735). Never answer a question for a detail with only \"okay\", \"sure\", or \"thanks\"; always give the detail they asked for. Order KE-4500001. Accept the $29.99 late-change fee after they read it back. Confirm August 6, 8am to 12pm. Do not ask for a confirmation text. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -81,9 +81,16 @@
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the caller's full name and a phone number, or for a name and the number on the account. NOT when asking for ZIP, card last four, or an order number alone.",
+      "match_phrase": "The agent asks for the caller's full name and a phone number, or for a name and the number on the account. NOT when asking for ZIP, card last four, or an order number alone. NOT when they ask you to repeat the phone number one digit at a time. This includes a question that offers the order number or the name and phone as alternatives.",
       "response_type": "phrase",
       "response_value": "Nadia Grant, 541-555-0196.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent says it missed or did not catch the phone number, or asks you to repeat the phone number slowly or one digit at a time. NOT when asking for ZIP, card last four, or an order number.",
+      "response_type": "phrase",
+      "response_value": "Five, four, one, five, five, five, zero, one, nine, six.",
       "occurrence_mode": "always"
     },
     {

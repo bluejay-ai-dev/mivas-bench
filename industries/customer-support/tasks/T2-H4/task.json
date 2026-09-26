@@ -160,6 +160,13 @@
       "response_type": "phrase",
       "response_value": "Where does that refund stand now?",
       "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "has already read back the $45 restocking fee and now asks the reason for the return or why you are returning it. NOT during identity, NOT before they have named the forty-five dollar fee, and NOT after the return is started.",
+      "response_type": "phrase",
+      "response_value": "It was not a fit for me. I accept the forty-five dollar fee. Start the return, email me the prepaid label, and then tell me where the refund stands.",
+      "occurrence_mode": "always"
     }
   ],
   "customer_available_tools": {},

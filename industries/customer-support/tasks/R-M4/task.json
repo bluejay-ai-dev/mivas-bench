@@ -1,7 +1,7 @@
 {
   "task_name": "R-M4: Fake 399 charge, no money sent",
   "customer_name": "Rosalind Baptiste",
-  "intent": "Open with exactly: \"I got an email that my TechCrew subscription renewed for three hundred ninety-nine dollars and ninety-nine cents. Is that a real Kestrel charge?\" Give your phone 541-555-0133 and your email as soon as they ask, spelling the surname: rosalind dot baptiste, B A P T I S T E, at example dot test. Never answer a request for the email with just \"okay\". The amount in the email is $399.99. You have not sent money and have not given anyone device access. They did not ask you to buy store cards, send a gift card, or move money. Stay until they check the charge, check whether Kestrel contacted you, and file the report. After they say there is no such charge, that message did not come from Kestrel, nobody here emailed you, and they have given you next steps, thank them and hang up. Do not ask them to look up an order. Do not buy store cards or gift cards. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
+  "intent": "Open with exactly: \"I got an email that my TechCrew subscription renewed for three hundred ninety-nine dollars and ninety-nine cents. Is that a real Kestrel charge?\" Give your phone 541-555-0133 and your email as soon as they ask, spelling the surname: R O S A L I N D, dot, B A P T I S T E, at example dot test. Never answer a request for the email with just \"okay\". The amount in the email is $399.99. You have not sent money and have not given anyone device access. They did not ask you to buy store cards, send a gift card, or move money. Stay until they check the charge, check whether Kestrel contacted you, and file the report. After they say there is no such charge, that message did not come from Kestrel, nobody here emailed you, and they have given you next steps, thank them and hang up. Do not ask them to look up an order. Do not buy store cards or gift cards. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -48,23 +48,7 @@
             "$399.99",
             "399.99 dollars"
           ]
-        },
-        "payment_requested": {
-          "any_of": [
-            "none",
-            "None",
-            "no payment requested",
-            "not stated",
-            "none stated",
-            "not specified",
-            "not reported",
-            "nothing",
-            "none requested",
-            "n/a"
-          ]
-        },
-        "money_sent": false,
-        "remote_access_given": false
+        }
       }
     }
   ],
@@ -97,7 +81,7 @@
       "match_type": "context",
       "match_phrase": "asks for the phone or email on the message, which email address or phone received it, or how they reached you. NOT when asking for a full name together with a phone number for the account.",
       "response_type": "phrase",
-      "response_value": "They emailed me at rosalind dot baptiste, B A P T I S T E, at example dot test. My number is 541-555-0133.",
+      "response_value": "They emailed me at R O S A L I N D, dot, B A P T I S T E, at example dot test. My number is 541-555-0133.",
       "occurrence_mode": "always"
     },
     {

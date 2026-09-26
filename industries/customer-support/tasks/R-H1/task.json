@@ -57,15 +57,14 @@
       "name": "transfer_to_returns"
     },
     {
-      "name": "get_order",
-      "parameters": {
-        "order_number": "KE-4455031"
-      }
-    },
-    {
       "name": "check_return_eligibility",
       "parameters": {
-        "order_number": "KE-4455031"
+        "order_number": {
+          "any_of": [
+            "KE-4455031",
+            "KE4455031"
+          ]
+        }
       }
     },
     {
@@ -81,7 +80,7 @@
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the caller's full name and a phone number, or for a name and the number on the account. NOT when asking for ZIP, card last four, or an order number alone.",
+      "match_phrase": "The agent asks for the caller's full name and a phone number, or for a name and the number on the account. NOT when asking for ZIP, card last four, or an order number alone. This includes a question that offers the order number or the name and phone as alternatives.",
       "response_type": "phrase",
       "response_value": "Glen Aldridge, 541-555-0127.",
       "occurrence_mode": "always"
@@ -109,7 +108,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "says the phone is past the 14-day window, is not eligible for return, cannot go back, or that membership does not extend the window, even if the same turn also asks whether you need anything else. NOT before they have looked up the order, NOT when they are only asking for identity or the order number, and NOT after they have already offered to get you a person.",
+      "match_phrase": "has looked up your order and says your Solstice phone is past the 14-day window, is not eligible for return, or cannot go back, naming its delivery date or how many days past the window it is, even if the same turn also asks whether you need anything else. NOT when they only state the general 14-day phone policy before looking up your order, NOT before they have looked up the order, NOT when they are only asking for identity or the order number, and NOT after they have already offered to get you a person.",
       "response_type": "phrase",
       "response_value": "I still want to talk to a person, please.",
       "occurrence_mode": "always"

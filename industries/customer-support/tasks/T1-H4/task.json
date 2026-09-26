@@ -1,7 +1,7 @@
 {
   "task_name": "T1-H4: Cancel a shipped laptop, then the return window",
   "customer_name": "Marcus Iyer",
-  "intent": "Open with exactly: \"Please cancel my Kestrel Aurora 14 laptop order. I do not want it.\" Give identity when asked. Order KE-4408117. If they say it already shipped, was already delivered, or cannot be cancelled, ask whether it can still be returned. Stay for the return-window arithmetic even if they offer to start a return or send you to returns. Do not start a return on this call. Hang up only after they say the laptop is past the 15-day window. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
+  "intent": "Open with exactly: \"Please cancel my Kestrel Aurora 14 laptop order. I do not want it.\" When asked, give your name and phone (Marcus Iyer, 541-555-0104), and the ZIP and card (ZIP 97402, card ending 8802). Never answer a question for a detail with only \"okay\", \"sure\", or \"thanks\"; always give the detail they asked for. Order KE-4408117. If they say it already shipped, was already delivered, or cannot be cancelled, ask whether it can still be returned. Stay for the return-window arithmetic even if they offer to start a return or send you to returns. Do not start a return on this call. Hang up only after they say the laptop is past the 15-day window. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -54,9 +54,6 @@
       "name": "get_customer_summary"
     },
     {
-      "name": "get_order"
-    },
-    {
       "name": "transfer_to_returns"
     },
     {
@@ -72,7 +69,7 @@
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the caller's full name and a phone number, or for a name and the number on the account. NOT when asking for ZIP, card last four, or an order number alone.",
+      "match_phrase": "The agent asks for the caller's full name and a phone number, or for a name and the number on the account. NOT when asking for ZIP, card last four, or an order number alone. This includes a question that offers the order number or the name and phone as alternatives.",
       "response_type": "phrase",
       "response_value": "Marcus Iyer, 541-555-0104.",
       "occurrence_mode": "always"
@@ -100,7 +97,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers to book a repair, start a return, move a delivery, cancel a membership, send a confirmation text, or add another request after they have finished saying the laptop is past the 15-day window (with how many days over). NOT when still working on the original request, NOT when they just said the order shipped, was delivered, or cannot be cancelled, NOT when they are offering to check whether it can still be returned.",
+      "match_phrase": "offers to book a repair, start a return, move a delivery, cancel a membership, send a confirmation text, or add another request after they have finished saying the laptop is past the 15-day window (with how many days over). NOT when still working on the original request, NOT when they just said the order shipped, was delivered, or cannot be cancelled, NOT when they are offering to check whether it can still be returned. NOT before they have said how many days past the 15-day window the laptop is.",
       "response_type": "phrase",
       "response_value": "That's all I needed. Thank you.",
       "occurrence_mode": "always"

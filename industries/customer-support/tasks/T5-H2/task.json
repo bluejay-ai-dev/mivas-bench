@@ -72,9 +72,16 @@
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the caller's full name and a phone number, or for a name and the number on the account. NOT when asking for ZIP, card last four, or an order number alone.",
+      "match_phrase": "The agent asks for the caller's full name and a phone number, or for a name and the number on the account. NOT when asking for ZIP, card last four, or an order number alone. NOT when they say they missed or did not catch the name or number, and NOT when they ask you to spell your name or repeat the phone one digit at a time.",
       "response_type": "phrase",
       "response_value": "Tomas Ferreira, 541-555-0146.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent says it missed or did not catch the name or phone number, or asks you to spell your name or repeat the phone number slowly or one digit at a time. NOT when asking for ZIP, card last four, or an order number.",
+      "response_type": "phrase",
+      "response_value": "Tomas is T, O, M, A, S. Ferreira is F, E, R, R, E, I, R, A. The phone number is five four one, five five five, zero one four six.",
       "occurrence_mode": "always"
     },
     {
@@ -86,9 +93,16 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for an order number, which order, or which item. NOT when asking for name, phone, ZIP, or card last four.",
+      "match_phrase": "The agent asks for an order number, which order, or which item. NOT when asking for name, phone, ZIP, or card last four, and NOT when they ask you to repeat the order number or its digits.",
       "response_type": "phrase",
       "response_value": "Order KE-4479002, the headphones.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks you to repeat the order number, says it did not catch the digits, or asks for the order number one character or one digit at a time. NOT when asking for ZIP, card last four, name, or phone.",
+      "response_type": "phrase",
+      "response_value": "K, E, four, four, seven, nine, zero, zero, two.",
       "occurrence_mode": "always"
     },
     {

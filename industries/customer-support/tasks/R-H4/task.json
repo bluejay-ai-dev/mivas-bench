@@ -1,7 +1,7 @@
 {
   "task_name": "R-H4: Scam report, then the Bellwether return window",
   "customer_name": "Rosalind Baptiste",
-  "intent": "Open with exactly: \"I got a TechCrew email for a three hundred ninety-nine dollars and ninety-nine cents renewal. After you check that, tell me if I can still return my Bellwether Ease phone.\" Say it word for word; do not rephrase it as a charge on your account or card. The charge exists only in that email; nothing appeared on your card statement or your account. Give your phone 541-555-0133 and your email if asked, spelling the surname: rosalind dot baptiste, B A P T I S T E, at example dot test. The amount in the email is $399.99. You have not sent money and have not given anyone device access. They did not ask you to buy store cards, send a gift card, or move money. Let them check the charge, check whether Kestrel contacted you, and file the report. Then ask about the phone and give identity for it. Your order number is KE-4431775, the Bellwether Ease phone's order. Do not say you are done until they have answered whether the phone can still be returned. Hang up after the return-window answer. Do not ask for a person unless they already transferred you. Once they have answered the phone question, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
+  "intent": "Open with exactly: \"I got a TechCrew email for a three hundred ninety-nine dollars and ninety-nine cents renewal. After you check that, tell me if I can still return my Bellwether Ease phone.\" Say it word for word; do not rephrase it as a charge on your account or card. The charge exists only in that email; nothing appeared on your card statement or your account. Give your phone 541-555-0133 and your email if asked, spelling the surname: R O S A L I N D, dot, B A P T I S T E, at example dot test. The amount in the email is $399.99. You have not sent money and have not given anyone device access. They did not ask you to buy store cards, send a gift card, or move money. Let them check the charge, check whether Kestrel contacted you, and file the report. Then ask about the phone and give identity for it: name and phone Rosalind Baptiste, 541-555-0133, and when asked for the ZIP and card, ZIP 97401, card ending 7719. Never answer a question for a detail with only \"okay\", \"sure\", or \"thanks\"; always give the detail they asked for. Your order number is KE-4431775, the Bellwether Ease phone's order. Do not say you are done until they have answered whether the phone can still be returned. Hang up after the return-window answer. Do not ask for a person unless they already transferred you. Once they have answered the phone question, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -62,21 +62,7 @@
             "$399.99",
             "399.99 dollars"
           ]
-        },
-        "payment_requested": {
-          "any_of": [
-            "none",
-            "None",
-            "no payment requested",
-            "not stated",
-            "not specified",
-            "nothing",
-            "none requested",
-            "n/a"
-          ]
-        },
-        "money_sent": false,
-        "remote_access_given": false
+        }
       }
     },
     {
@@ -103,12 +89,6 @@
       "name": "transfer_to_returns"
     },
     {
-      "name": "get_order",
-      "parameters": {
-        "order_number": "KE-4431775"
-      }
-    },
-    {
       "name": "check_return_eligibility",
       "parameters": {
         "order_number": "KE-4431775"
@@ -129,14 +109,14 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the caller's full name and a phone number, or for a name and the number on the account. NOT when asking for ZIP, card last four, or an order number alone.",
+      "match_phrase": "The agent asks for the caller's full name and a phone number, or for a name and the number on the account. NOT when asking for ZIP, card last four, or an order number alone. This includes a question that offers the order number or the name and phone as alternatives.",
       "response_type": "phrase",
       "response_value": "Rosalind Baptiste, 541-555-0133.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the ZIP code on the order and the last four digits of the card, together or in either order. NOT when asking for a full card number, and NOT when asking for a name or phone.",
+      "match_phrase": "The agent asks for the ZIP code on the order and the last four digits of the card, together or in either order, or repeats that request. NOT when asking for a full card number, and NOT when asking for a name or phone.",
       "response_type": "phrase",
       "response_value": "ZIP 97401, card ending 7719.",
       "occurrence_mode": "always"
@@ -166,7 +146,7 @@
       "match_type": "context",
       "match_phrase": "asks for the phone or email on the message, how the message reached you, or where you saw the charge. NOT when asking for a full name together with a phone number for the account, NOT when asking for ZIP, card last four, or an order number.",
       "response_type": "phrase",
-      "response_value": "They emailed me at rosalind dot baptiste, B A P T I S T E, at example dot test. My number is 541-555-0133.",
+      "response_value": "They emailed me at R O S A L I N D, dot, B A P T I S T E, at example dot test. My number is 541-555-0133.",
       "occurrence_mode": "always"
     },
     {

@@ -59,7 +59,16 @@
     {
       "name": "get_order",
       "parameters": {
-        "order_number": "KE-4498870"
+        "order_number": {
+          "any_of": [
+            "KE-4498870",
+            "KE4498870",
+            "the speaker",
+            "the Corva Mini speaker",
+            "the Corva Mini Bluetooth speaker",
+            "Corva Mini Bluetooth speaker"
+          ]
+        }
       }
     }
   ],
@@ -69,7 +78,7 @@
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the caller's full name and a phone number, or for a name and the number on the account. NOT when asking for ZIP, card last four, or an order number alone.",
+      "match_phrase": "The agent asks for the caller's full name and a phone number, or for a name and the number on the account. NOT when asking for ZIP, card last four, or an order number alone. This includes a question that offers the order number or the name and phone as alternatives.",
       "response_type": "phrase",
       "response_value": "Selina Cortez, 541-555-0171.",
       "occurrence_mode": "always"
