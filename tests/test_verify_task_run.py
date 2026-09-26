@@ -889,3 +889,8 @@ def test_cs_unconsumed_quote_hold_is_not_a_state_change() -> None:
     assert vtr.office_states_match(base, quote, "customer-support")
     assert not vtr.office_states_match(base, spent, "customer-support")
     assert vtr.office_states_match(quote, quote, "customer-support")
+
+
+def test_string_args_ignore_typographic_quotes() -> None:
+    assert vtr._values_equal("competitor", "Grimwald's", "grimwald\u2019s")
+    assert not vtr._values_equal("competitor", "Grimwald's", "Halcyon Mart")

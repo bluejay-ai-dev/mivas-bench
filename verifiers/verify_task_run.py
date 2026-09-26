@@ -740,8 +740,16 @@ def _values_equal(key: str, expected: Any, actual: Any) -> bool:
         try:
             return float(expected) == float(actual)
         except (TypeError, ValueError):
-            return str(expected).strip().casefold() == str(actual).strip().casefold()
-    return str(expected).strip().casefold() == str(actual).strip().casefold()
+            return _plain(expected) == _plain(actual)
+    return _plain(expected) == _plain(actual)
+
+
+_TYPOGRAPHIC = str.maketrans({"\u2019": "'", "\u2018": "'", "\u201c": '"', "\u201d": '"', "\u2013": "-", "\u2014": "-"})
+
+
+def _plain(value: Any) -> str:
+    """Case- and typography-insensitive text: the model writes Grimwald\u2019s as often as Grimwald's."""
+    return str(value).translate(_TYPOGRAPHIC).strip().casefold()
 
 
 def _present_nonempty(value: Any) -> bool:
