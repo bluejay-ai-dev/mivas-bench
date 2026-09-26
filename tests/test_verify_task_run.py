@@ -871,3 +871,43 @@ def test_legal_c4_still_requires_in_order_hops() -> None:
     out = vtr.verify_result(result, task, None, industry="legal")
     assert out["handoff"]["passed"] is False
     assert out["handoff"]["verdict"] == "incomplete"
+
+
+def test_values_equal_normalises_ids_dates_and_amounts() -> None:
+    from verifiers.verify_task_run import _values_equal
+
+    assert _values_equal("order_number", "KE-4408117", "KE4408117")
+    assert _values_equal("order_number", "KE-4471860", "KE4471.860")
+    assert _values_equal("sku", "SKU-AUD-7720", "sku aud 7720")
+    assert not _values_equal("order_number", "KE-4498870", "KE-4498871")
+    assert _values_equal("new_date", "2026-08-06", "August 6, 2026")
+    assert _values_equal("dob", "1972-06-30", "06/30/1972")
+    assert not _values_equal("new_date", "2026-08-09", "2026-08-10")
+    assert _values_equal("amount", "399.99", "$399.99")
+    assert not _values_equal("amount", "399.99", "500")
+    assert _values_equal("competitor", "Rivertide", "rivertide")
+    assert not _values_equal("competitor", "Rivertide", "Haussmann Mart")
+
+
+def test_calls_match_accepts_a_reference_the_pack_resolved() -> None:
+    from verifiers.verify_task_run import _calls_match
+
+    expected = {"name": "get_order", "parameters": {"order_number": "KE-4471209"}}
+    resolved = {
+        "name": "get_order",
+        "parameters": {"order_number": "the refrigerator"},
+        "output": "{'ok': True, 'data': {'order_number': 'KE-4471209', 'status': 'scheduled'}}",
+    }
+    unknown = {
+        "name": "get_order",
+        "parameters": {"order_number": "804415550112"},
+        "output": "{'ok': False, 'data': None, 'error_code': 'UNKNOWN_ORDER'}",
+    }
+    other = {
+        "name": "get_order",
+        "parameters": {"order_number": "the headphones"},
+        "output": "{'ok': True, 'data': {'order_number': 'KE-4479002'}}",
+    }
+    assert _calls_match(expected, resolved, {}, "customer-support")
+    assert not _calls_match(expected, unknown, {}, "customer-support")
+    assert not _calls_match(expected, other, {}, "customer-support")
