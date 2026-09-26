@@ -62,9 +62,24 @@ def test_kick_sends_realtime_text() -> None:
     assert getattr(event, "turns", None) is None
 
 
+def test_tool_results_note_carries_outputs_not_handoffs() -> None:
+    items = [
+        SimpleNamespace(type="message", role="user", content=["hi"]),
+        SimpleNamespace(type="function_call_output", name="get_patient_summary", call_id="c1",
+                        output='{"appointments": [{"id": 7}]}'),
+        SimpleNamespace(type="function_call_output", name="transfer_to_scheduling", call_id="c2",
+                        output='{"ok": true}'),
+    ]
+    note = harness.tool_results_note(SimpleNamespace(items=items))
+    assert note and "get_patient_summary" in note and '"id": 7' in note
+    assert "transfer_to_scheduling" not in note
+    assert harness.tool_results_note(SimpleNamespace(items=items[:1])) is None
+
+
 if __name__ == "__main__":
     test_job_count_load()
     test_blueprint_and_greeting()
     test_agent_name()
     test_kick_sends_realtime_text()
+    test_tool_results_note_carries_outputs_not_handoffs()
     print("ok")
