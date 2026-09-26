@@ -808,3 +808,22 @@ def test_overlay_tool_actuals_prefers_postgres_when_present() -> None:
     empty_pg = {"tool_calls": [{"name": "end_call", "actual": []}]}
     kept = exp.overlay_tool_actuals(listing, empty_pg)
     assert kept["tool_calls"][0]["name"] == "end_call"
+
+
+def test_gpt_live_cost_is_backend_tokens_plus_session_minutes() -> None:
+    # gpt-live-1 traces carry backend usage on `chat {model}` spans; the voice
+    # session is billed per minute on top ($0.05/min)
+    spans = [
+        {"name": "voice.call", "attributes": {"gen_ai.usage.input_tokens": 999999}},
+        {"name": "chat gpt-5.6-sol", "attributes": {
+            "gen_ai.request.model": "gpt-5.6-sol",
+            "gen_ai.usage.input_tokens": 1_000_000,
+            "gen_ai.usage.cached_tokens": 500_000,
+            "gen_ai.usage.output_tokens": 10_000,
+        }},
+    ]
+    row = {"result_id": "1", "duration_s": "120"}
+    out = exp.eval_costs.cost_conversation(row, "openai/gpt-live-1@sol-low", spans=spans)
+    # 500k uncached * $4 + 500k cached * $0.40 + 10k out * $20 per 1M, + 2 min * $0.05
+    assert out["llm_cost_source"] == "tokens+per_minute"
+    assert abs(float(out["llm_cost_usd"]) - (2.0 + 0.2 + 0.2 + 0.1)) < 1e-6
