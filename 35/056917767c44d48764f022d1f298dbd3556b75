@@ -1,0 +1,143 @@
+industries/customer-support/tasks/R-H1/task.json
+  s_4ea68a93215613::t_e66ad55d131cdf 83,90
+industries/customer-support/tasks/R-H3/task.json
+  s_4ea68a93215613::t_cbd426250a2b5e 117,145,149-155
+industries/customer-support/tasks/R-M1/task.json
+  s_4ea68a93215613::t_c5f49f5ca315c0 64,78
+industries/customer-support/tasks/T3-H3/task.json
+  s_4ea68a93215613::t_cb52eb571e3f51 140,161
+industries/customer-support/tasks/T3-H4/task.json
+  s_4ea68a93215613::t_851cf524ef1d98 60
+industries/customer-support/tasks/T5-H1/task.json
+  s_4ea68a93215613::t_5a986dbd7db938 4,89
+industries/customer-support/tasks/T5-H3/task.json
+  s_4ea68a93215613::t_49d60ea6aad845 4,95-102,163,177
+industries/customer-support/tasks/T5-M2/task.json
+  s_4ea68a93215613::t_0cfa75b838b8c5 75-82
+industries/healthcare/tasks/C1-H2/task.json
+  s_4ea68a93215613::t_fad6ea58dc8cbc 140,222
+industries/healthcare/tasks/C1-H3/task.json
+  s_4ea68a93215613::t_94c86460fd4c6f 182,224,236,239-244
+industries/healthcare/tasks/C1-H4/task.json
+  s_4ea68a93215613::t_0b1598441272be 3,174,190,266,307-313
+industries/healthcare/tasks/C1-M1/task.json
+  s_4ea68a93215613::t_7ebb5722932c24 105,183,188-199
+industries/healthcare/tasks/C1-M2/task.json
+  s_4ea68a93215613::t_5bb21d6c1d11fb 101-108,159,165,200-205
+industries/healthcare/tasks/C1-M4/task.json
+  s_4ea68a93215613::t_c83e03223d2890 87,111,159,162-168
+industries/healthcare/tasks/C2-M1/task.json
+  s_4ea68a93215613::t_07980ad2d70038 3,161
+industries/healthcare/tasks/C2-M3/task.json
+  s_4ea68a93215613::t_420ece91d56a7f 3,99
+industries/healthcare/tasks/C3-H1/task.json
+  s_4ea68a93215613::t_2a5773d4fa0373 142,184,201-206
+industries/healthcare/tasks/C3-H4/task.json
+  s_4ea68a93215613::t_aebbadf1608963 140,142,208,214,224,227-238
+industries/healthcare/tasks/C3-M3/task.json
+  s_4ea68a93215613::t_b706055fd28cee 3,175
+industries/healthcare/tasks/C4-H1/task.json
+  s_4ea68a93215613::t_2ba0130d14bc66 107-113,206-217
+industries/healthcare/tasks/C4-H3/task.json
+  s_4ea68a93215613::t_e68e0e042cf0ed 3,162,184,235-240
+industries/healthcare/tasks/C5-H1/task.json
+  s_4ea68a93215613::t_5f34f44dbf5b33 174,180,216,222,234,243-248
+industries/healthcare/tasks/R-H3/task.json
+  s_4ea68a93215613::t_81f0cf4e040d47 3,159,183,201,243
+industries/legal/tasks/C1-H2/task.json
+  s_4ea68a93215613::t_e81fdae52dd77b 4,133,138
+industries/legal/tasks/C1-H3/task.json
+  s_4ea68a93215613::t_00381fb8617e42 103,110,117,124,138,159,166,180,201
+industries/legal/tasks/C1-H4/task.json
+  s_4ea68a93215613::t_46347fac45dc88 4
+industries/legal/tasks/C1-M4/task.json
+  s_4ea68a93215613::t_e8dd2fa6679ce1 4,85,92,106,120
+industries/legal/tasks/C2-E1-BG/task.json
+  s_4ea68a93215613::t_098a65dc0330ad 4,49,56
+industries/legal/tasks/C2-E1-SIG/task.json
+  s_4ea68a93215613::t_67263de522a6c2 4,49,56
+industries/legal/tasks/C2-E1/task.json
+  s_4ea68a93215613::t_75f05ebdb7d153 4,49,56
+industries/legal/tasks/C2-H1/task.json
+  s_4ea68a93215613::t_65f67e285d978e 82,110,131,145
+industries/legal/tasks/C2-H2/task.json
+  s_4ea68a93215613::t_536ea974871ff8 4,73,94,143
+industries/legal/tasks/C2-H3/task.json
+  s_4ea68a93215613::t_dfde3e95c5c105 4,27,48,53-59
+industries/legal/tasks/C2-H4/task.json
+  s_4ea68a93215613::t_0aad1096a68436 4,57
+industries/legal/tasks/C2-M1/task.json
+  s_4ea68a93215613::t_50abe464662c34 50
+industries/legal/tasks/C2-M4/task.json
+  s_4ea68a93215613::t_bf02643011f32c 4,52,59-66
+industries/legal/tasks/C3-H2/task.json
+  s_4ea68a93215613::t_0e7574aa29bb24 95,102,109
+industries/legal/tasks/C3-H3/task.json
+  s_4ea68a93215613::t_5f9ae5784f5611 122,136,175-188
+industries/legal/tasks/C3-H4/task.json
+  s_4ea68a93215613::t_8e648326aff8fd 4,103,115,122,129,136,168-181
+industries/legal/tasks/C3-M1/task.json
+  s_4ea68a93215613::t_57550c98475eec 84
+industries/legal/tasks/C4-E1-BG/task.json
+  s_4ea68a93215613::t_ff5a8fe64accd3 56-62,135-142
+industries/legal/tasks/C4-E1-SIG/task.json
+  s_4ea68a93215613::t_e2beb6af0e3c2f 56-62,135-142
+industries/legal/tasks/C4-E1/task.json
+  s_4ea68a93215613::t_ace53296f204bd 56-62,135-142
+industries/legal/tasks/C4-E2/task.json
+  s_4ea68a93215613::t_c08519364dd57d 4,65
+industries/legal/tasks/C4-H3/task.json
+  s_4ea68a93215613::t_dfee3831e66976 4,168,182,186-192
+industries/legal/tasks/C4-H4/task.json
+  s_4ea68a93215613::t_c6fea359dedbf2 4,118,139
+industries/legal/tasks/C4-M1/task.json
+  s_4ea68a93215613::t_710be28389bc51 4,78-79,239-240
+industries/legal/tasks/C4-M2/task.json
+  s_4ea68a93215613::t_5b70b3afe35c5e 83-89,134,136,148
+industries/legal/tasks/C4-M3/task.json
+  s_4ea68a93215613::t_ff55d45a2357d4 141,155,162,173-179
+industries/legal/tasks/C4-M4/task.json
+  s_4ea68a93215613::t_d0e15657b6b109 89,96,103,110
+industries/legal/tasks/C5-E1-BG/task.json
+  s_4ea68a93215613::t_a7cc9df91d0a05 127,134
+industries/legal/tasks/C5-E1-SIG/task.json
+  s_4ea68a93215613::t_eaf9805c07bb3c 127,134
+industries/legal/tasks/C5-E1/task.json
+  s_4ea68a93215613::t_19f4067de921c8 127,134
+industries/legal/tasks/C5-E2/task.json
+  s_4ea68a93215613::t_8102c59aaafc93 4,57
+industries/legal/tasks/C5-H1/task.json
+  s_4ea68a93215613::t_8821f4294f308a 4,153,181,216
+industries/legal/tasks/C5-H2/task.json
+  s_4ea68a93215613::t_034b771751b792 4,169,176,192,194,215,219,272,283-289
+industries/legal/tasks/C5-H3/task.json
+  s_4ea68a93215613::t_16a6c655c5dc1b 117,124,126,131,138,141-147
+industries/legal/tasks/C5-H4/task.json
+  s_4ea68a93215613::t_7bfd64b037bb51 116,121,128,135,142,184
+industries/legal/tasks/C5-M2/task.json
+  s_4ea68a93215613::t_7dce1fcbc36e7b 4,90,97,111,118,132,153,160
+industries/legal/tasks/C5-M4/task.json
+  s_4ea68a93215613::t_ace3756a7b1711 4,88,95,102,116,130,144,172
+industries/legal/tasks/R-H2/task.json
+  s_4ea68a93215613::t_4ff034453d66a8 4,75,83,87-93
+industries/legal/tasks/R-H3/task.json
+  s_4ea68a93215613::t_b49faa8abc32a6 4,103,110,124,131,138,145,152,159,166,180,187,191-211
+industries/legal/tasks/R-H4/task.json
+  s_4ea68a93215613::t_d2d6713cf94d2b 4,134
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "35056917767c44d48764f022d1f298dbd3556b75",
+  "prompts": {},
+  "sessions": {
+    "s_4ea68a93215613": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8eb3d720-2035-4a81-aa92-006569f46f3c",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
