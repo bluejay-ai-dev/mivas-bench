@@ -60,7 +60,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers an appointment day or time, or asks which day you want for allergy skin testing. NOT when asking for your name.",
+      "match_phrase": "offers an appointment day other than August twenty-fourth, or asks which day you want for allergy skin testing. NOT when asking for your name, NOT when they already named August twenty-fourth, NOT when asking morning or afternoon, NOT when asking whether to go ahead and book.",
       "response_type": "phrase",
       "response_value": "I need the Park Avenue skin-testing slot on August twenty-fourth."
     },
@@ -96,7 +96,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "asks whether you have already had an allergy evaluation, whether this is your first allergy visit, or whether a doctor told you to schedule skin testing. NOT when asking for your name or date of birth.",
+      "match_phrase": "asks whether you have already had an allergy evaluation, or whether a doctor told you to schedule skin testing. NOT when asking whether you are a new or existing patient, NOT when asking whether you have been seen at Straus before or whether this is your first visit with them, NOT when asking for your name or date of birth.",
       "response_type": "phrase",
       "response_value": "My primary-care doctor already evaluated me and ordered allergy skin testing. I don't need a separate evaluation, just the skin testing."
     },
@@ -105,6 +105,30 @@
       "match_phrase": "asks for your mobile or phone number. NOT when reading a number back to you.",
       "response_type": "phrase",
       "response_value": "My mobile is two, one, two, five, five, five, zero, one, nine, seven."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks whether you are a new or existing patient, whether you have been seen at Straus before, or whether this is your first visit with them. NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "I'm a new patient, I've never been seen at Straus. My primary-care doctor already evaluated me and ordered the skin testing."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks whether you prefer morning or afternoon, or what time window works on August twenty-fourth. NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "Morning is fine. The first available skin-testing slot on August twenty-fourth."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks whether to go ahead and book or lock in the August twenty-fourth skin-testing slot, or asks you to confirm that slot. NOT when they already said it is booked.",
+      "response_type": "phrase",
+      "response_value": "Yes, please book it. And which medicines do I need to stop beforehand?"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "says the allergy skin testing is booked or on the calendar for August twenty-fourth. NOT when they are only offering or asking to confirm it.",
+      "response_type": "phrase",
+      "response_value": "Great, thank you. Goodbye."
     }
   ],
   "customer_name": "Bernadette Kohl",

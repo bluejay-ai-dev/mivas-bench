@@ -20,7 +20,8 @@
         "reason_code": {
           "any_of": [
             "legal_advice_requested",
-            "caller_request"
+            "caller_request",
+            "conflict_review"
           ]
         }
       }
@@ -39,9 +40,16 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
+      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller. NOT when asking whether you signed with, hired, or are represented by Halverson and Reed. NOT any other question.",
       "response_type": "phrase",
       "response_value": "No, nobody represents me.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether you signed a representation agreement with Halverson and Reed, or whether Halverson and Reed already represents you on this case. NOT when asking about another lawyer or firm.",
+      "response_type": "phrase",
+      "response_value": "Yes, Halverson and Reed has my car accident case. Nobody else represents me.",
       "occurrence_mode": "always"
     },
     {
@@ -115,7 +123,8 @@
         "reason_code": {
           "any_of": [
             "legal_advice_requested",
-            "caller_request"
+            "caller_request",
+            "conflict_review"
           ]
         }
       }

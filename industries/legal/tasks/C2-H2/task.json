@@ -70,9 +70,16 @@
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. Also when the agent asks you to repeat, confirm, or say your number again, reads a number back to check it, or says it did not catch the number. NOT when asking about anything else.",
+      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking to repeat, confirm, or read back only the number or some of its digits. NOT when asking about anything else.",
       "response_type": "phrase",
       "response_value": "Gloria Mensah, 312-555-0266.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks you to repeat, confirm, or say one digit at a time your callback number, reads a number back to check it, says it did not catch the number, or asks for only some of its digits such as the area code, the first three, or the last four. NOT when asking for your name.",
+      "response_type": "phrase",
+      "response_value": "Three, one, two, five, five, five, zero, two, six, six.",
       "occurrence_mode": "always"
     },
     {

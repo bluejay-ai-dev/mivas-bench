@@ -1,6 +1,6 @@
 {
   "task_name": "C3-H4: Oscar Health at Windermere then an extra follow-up",
-  "intent": "You are an existing Straus patient. You already have an eczema follow-up on September fifteenth at Windermere; leave that one on the books. Answer their identity questions once, confirm the readback, then ask whether Windermere takes Oscar Health. After they answer, give your member ID O778899001 if they ask and have them run the live eligibility for a visit on August twenty-fourth. If they cannot confirm the plan, say that is fine and still ask to be booked for an additional follow-up at Windermere so you are on the calendar sooner as well. Before you take a time, ask for the Windermere street address, floor, and suite. Take the first new appointment time they offer. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first new time out loud, then thank them and end the call. Do not ask to cancel or reschedule the September fifteenth visit. Do not ask to add or change insurance. Do not ask for a callback, to speak to a person, a bill, a payment, the patient portal, a waitlist, a text, or financing. If they offer to move September fifteenth, say leave that one and book a new one. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar. If they only list openings, say book the first one. Do not ask them to text you an appointment confirmation.",
+  "intent": "You are an existing Straus patient. You already have an eczema follow-up on September fifteenth at Windermere; leave that one on the books. Start the call with your insurance question: ask whether Windermere takes Oscar Health. If they ask whether you are new or existing, say existing. If they ask for your name and date of birth, answer once and confirm the readback. After they answer about Oscar, say that is fine, give your member ID O778899001 and your date of birth, and ask them to run the live eligibility for a visit on August twenty-fourth. Once they have told you the eligibility result or that they could not get it, ask to be booked for an additional follow-up at Windermere so you are on the calendar sooner as well. Before you take a time, ask for the Windermere street address, floor, and suite. Take the first new appointment time they offer. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first new time out loud, then thank them and end the call. Do not ask to cancel or reschedule the September fifteenth visit. Do not ask to add or change insurance. Do not ask for a callback, to speak to a person, a bill, a payment, the patient portal, a waitlist, a text, or financing. If they offer to move September fifteenth, say leave that one and book a new one. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar. If they only list openings, say book the first one. Do not ask them to text you an appointment confirmation.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -36,33 +36,10 @@
     }
   ],
   "exp_handoff_path": [
-    "transfer_to_identity",
     "transfer_to_coverage",
     "transfer_to_scheduling"
   ],
   "exp_tool_calls": [
-    {
-      "name": "transfer_to_identity"
-    },
-    {
-      "name": "verify_identity",
-      "parameters": {
-        "full_name": "Alice Romano",
-        "dob": "1995-09-08"
-      },
-      "output": {
-        "ok": true,
-        "data": {
-          "verified": true
-        }
-      }
-    },
-    {
-      "name": "get_patient_summary",
-      "output": {
-        "ok": true
-      }
-    },
     {
       "name": "transfer_to_coverage"
     },
@@ -101,7 +78,6 @@
       "name": "classify_visit_request",
       "parameters": {
         "visit_class": "medical",
-        "urgency": "routine",
         "is_new_patient": false
       }
     },
@@ -145,7 +121,7 @@
       "match_type": "context",
       "match_phrase": "greets you and asks what you need, what they can help with, or why you are calling, before you have explained the reason for the call.",
       "response_type": "phrase",
-      "response_value": "Hi, I'm an existing patient. I'd like to book an additional follow-up at Windermere."
+      "response_value": "Hi, I have an insurance question. Does your Windermere office take Oscar Health?"
     },
     {
       "match_type": "context",
@@ -227,9 +203,15 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "asks for your member ID after saying your identity was verified or your chart was opened. NOT when they are reading the member ID back for confirmation, NOT before identity verification.",
+      "match_phrase": "asks for your member ID, insurance ID, or the ID on your Oscar card. NOT when they are reading the member ID back for confirmation.",
       "response_type": "phrase",
-      "response_value": "My Oscar member ID is O778899001."
+      "response_value": "My Oscar member ID is O, seven, seven, eight, eight, nine, nine, zero, zero, one. My date of birth is September eighth, nineteen ninety-five."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "says they cannot confirm Oscar Health at Windermere over the phone, or that the insurance team will verify it, and has not yet run an eligibility check. NOT when offering an appointment time, NOT when asking for your name or date of birth, NOT when reading your member ID back.",
+      "response_type": "phrase",
+      "response_value": "That's fine. My Oscar member ID is O, seven, seven, eight, eight, nine, nine, zero, zero, one, and my date of birth is September eighth, nineteen ninety-five. Please run the live eligibility for a visit on August twenty-fourth before we book."
     }
   ],
   "customer_name": "Alice Romano",
@@ -410,7 +392,7 @@
       },
       {
         "id": 4,
-        "patient_id": "pat_alice_romano",
+        "patient_id": null,
         "location_id": "loc_windermere",
         "provider_id": "prov_patel",
         "appointment_type_code": "MED_FOLLOWUP",

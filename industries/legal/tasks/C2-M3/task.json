@@ -15,12 +15,6 @@
   "exp_handoff_path": [],
   "exp_tool_calls": [
     {
-      "name": "lookup_caller",
-      "parameters": {
-        "full_name": "Marguerite Okafor"
-      }
-    },
-    {
       "name": "escalate_to_human"
     }
   ],
@@ -105,11 +99,6 @@
         "id": "c_005",
         "name": "Ruth Kealoha",
         "phone": "8085550233"
-      },
-      {
-        "id": "c_new",
-        "name": "Marguerite Okafor",
-        "phone": "7705550193"
       }
     ],
     "intakes": [],
@@ -121,7 +110,7 @@
     "escalations": [
       {
         "id": 1,
-        "caller_id": "c_new",
+        "caller_id": "",
         "reason_code": "represented_party"
       }
     ]

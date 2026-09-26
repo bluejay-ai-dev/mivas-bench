@@ -24,9 +24,16 @@
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
+      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. Also when the agent asks you to repeat, confirm, or say your number again, asks for it one digit at a time, reads a number back to check it, or says it did not catch the number. NOT when asking you to spell your name, and NOT when asking about anything else.",
       "response_type": "phrase",
-      "response_value": "Marcus Oyelaran, 415-555-0188.",
+      "response_value": "Marcus Oyelaran, four one five, five five five, zero one eight eight.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks you to spell your name or your last name, or asks for a word for each letter. NOT when asking only for your number.",
+      "response_type": "phrase",
+      "response_value": "Oyelaran. O as in Oscar, Y as in Yankee, E as in Echo, L as in Lima, A as in Alpha, R as in Romeo, A as in Alpha, N as in November.",
       "occurrence_mode": "always"
     },
     {

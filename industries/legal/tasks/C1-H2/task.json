@@ -86,7 +86,7 @@
       "match_type": "context",
       "match_phrase": "The agent asks for the caller's full name and a callback or phone number. Also when the agent asks you to repeat, confirm, or say your number again, reads a number back to check it, or says it did not catch the number. NOT when asking about anything else.",
       "response_type": "phrase",
-      "response_value": "Sam Porter, 617-555-0199.",
+      "response_value": "Sam Porter, six one seven, five five five, zero one nine nine.",
       "occurrence_mode": "always"
     },
     {
@@ -126,7 +126,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent confirms the message for Tom Eckhart was taken, written down, passed along, or is on the file, or asks whether there is anything else after taking it. NOT before you have given the message, and NOT after you have already said you slipped at a store.",
+      "match_phrase": "The agent confirms the message for Tom Eckhart was taken, written down, passed along, delivered, or is on the file, or, after taking it, asks whether there is anything else or asks about your new matter or what happened. NOT before you have given the message, and NOT after you have already said you slipped at a store.",
       "response_type": "phrase",
       "response_value": "I also slipped at a store in Texas and I need a lawyer.",
       "occurrence_mode": "first_n",
@@ -148,7 +148,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for a short account of what happened, how you fell, where in the store it happened, or what injuries you had. NOT when asking who this is against, which state, when it happened, or what time of day.",
+      "match_phrase": "The agent asks for a short account of what happened, how you fell, where in the store it happened, or what injuries you had. NOT when asking who this is against, which state, when it happened, or what time of day. NOT before you have said you slipped at a store.",
       "response_type": "phrase",
       "response_value": "I slipped on a wet floor in the produce aisle at Cedarlane Market and hurt my back.",
       "occurrence_mode": "always"
@@ -162,7 +162,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent confirms the intake or your new matter is recorded or on the file, after the message for Tom Eckhart was already confirmed. NOT when the agent is still asking you a question, and NOT when it only confirms the message.",
+      "match_phrase": "The agent confirms the intake or your new matter is recorded or on the file, after the message for Tom Eckhart was already confirmed. NOT when the agent is still asking you a question, and NOT when it only confirms the message. NOT when the agent asks what happened or asks about the new matter.",
       "response_type": "phrase",
       "response_value": "Thank you, that's all I needed.",
       "occurrence_mode": "always"

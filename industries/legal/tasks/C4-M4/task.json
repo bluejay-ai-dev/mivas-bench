@@ -142,14 +142,14 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks whether you want to book or schedule the free case evaluation, or offers appointment or evaluation times. NOT when they are offering a medical records release or authorization in the same turn.",
+      "match_phrase": "The agent asks whether you want to book or schedule the free case evaluation, or offers appointment or evaluation times. NOT when they are offering a medical records release or authorization in the same turn. NOT when you have already declined booking once and the agent is only saying take your time or let me know when you are ready. NOT after the intake, the records release, and the packet have all been confirmed.",
       "response_type": "phrase",
       "response_value": "Not yet, let me read the paperwork first.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks you to describe what happened, what kind of accident or matter it was, where it happened, what injuries or losses you had, or whether you got medical treatment. NOT when asking the date, the state alone, your name or number, or who the other side is.",
+      "match_phrase": "The agent asks you to describe what happened, what kind of accident or matter it was, where it happened, what injuries or losses you had, or whether you got medical treatment. NOT when asking the date, the state alone, your name or number, or who the other side is. NOT when you have already described what happened once and the agent now asks whether your car was damaged or about treatment beyond the ER.",
       "response_type": "phrase",
       "response_value": "A Pellham Transit van ran a stop sign and hit my car in Sacramento. I broke my collarbone and was treated in the ER at Mercy General.",
       "occurrence_mode": "always"
@@ -159,6 +159,27 @@
       "match_phrase": "The agent asks for your email address or how to spell it. NOT any other question.",
       "response_type": "phrase",
       "response_value": "It's chester dot lang at example dot com.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether your car was damaged, whether you had treatment beyond the emergency room, or whether you are still treating. NOT the first time they ask what happened.",
+      "response_type": "phrase",
+      "response_value": "Yes, my car was damaged. All my treatment has been at Mercy General.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "Earlier in this call the agent has confirmed the intake is recorded, the Mercy General records release was sent, and the packet was sent by email, and now the agent says take your time, call back when ready, asks if there is anything else, asks about booking again, or says goodbye. NOT if any of those has not been confirmed yet. NOT during screening.",
+      "response_type": "phrase",
+      "response_value": "Thank you, that's all I needed.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent starts to wrap up, says goodbye, asks if that is all, or says to call back when ready, before confirming the intake is recorded, the Mercy General records release was sent, and the packet was sent by email. NOT after all of them have been confirmed. NOT during screening. NOT when the agent asks a question.",
+      "response_type": "phrase",
+      "response_value": "I still need the intake recorded, the Mercy General records release sent, and the packet emailed.",
       "occurrence_mode": "always"
     }
   ],

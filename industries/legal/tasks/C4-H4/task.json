@@ -101,9 +101,9 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks you to repeat or confirm the callback number one digit at a time, slowly, in groups, or just the last four digits, or asks you to spell your name, even when the same turn starts with a filler such as one moment, let me pull you up, let me look you up, or I'll check that. NOT the first time they ask for your name and number.",
+      "match_phrase": "The agent asks you to repeat or confirm the callback number one digit at a time, slowly, in groups, or just the last four digits, or asks you to spell your name, your first name, or your last name, or asks which letter your first name starts with, even when the same turn starts with a filler such as one moment, let me pull you up, let me look you up, or I'll check that. NOT the first time they ask for your name and number.",
       "response_type": "phrase",
-      "response_value": "Aisha Rahman, R-A-H-M-A-N. Three, zero, five, five, five, five, zero, two, eight, eight.",
+      "response_value": "Aisha, A-I-S-H-A. Rahman, R-A-H-M-A-N. Three, zero, five, five, five, five, zero, two, eight, eight.",
       "occurrence_mode": "always"
     },
     {
@@ -136,7 +136,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks when the incident happened, or for the date of the accident, injury or event. NOT any other question.",
+      "match_phrase": "The agent asks when the incident happened, or for the date of the surgery, accident, injury or event. NOT any other question.",
       "response_type": "phrase",
       "response_value": "It was May twentieth, twenty twenty six.",
       "occurrence_mode": "always"
@@ -150,7 +150,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent offers to send a medical records release or authorization for signature, including when they also offer the packet or an evaluation. NOT when they are only asking which doctor, hospital, clinic, or provider treated you. NOT after they have already said the release was sent.",
+      "match_phrase": "The agent offers to send a medical records release or authorization for signature, including when they name more than one provider, and when they also offer the packet or an evaluation. NOT when they are only asking which doctor, hospital, clinic, or provider treated you. NOT after they have already said the release was sent.",
       "response_type": "phrase",
       "response_value": "Yes, please send the records release. Jackson Memorial.",
       "occurrence_mode": "always"
@@ -178,7 +178,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks what happened, what happened when you went back, or what injuries, treatment, or losses you had. NOT when asking who the claim would be against, which state, the date, or only which provider treated you.",
+      "match_phrase": "The agent asks what happened, what happened when you went back, or what injuries, treatment, or losses you had. NOT when asking who the claim would be against, which state, the date, or only which provider treated you. NOT when you have already described what happened once and the agent now asks about other injuries, bills, or time away from work.",
       "response_type": "phrase",
       "response_value": "Gulfshore Clinic left a sponge inside me during surgery. I had another procedure at Jackson Memorial to remove it, and I still have pain.",
       "occurrence_mode": "always"
@@ -202,6 +202,20 @@
       "match_phrase": "The agent starts to wrap up, says goodbye, asks if that is all, or says to call back when ready, before confirming the intake is recorded, the records release to Jackson Memorial was sent, and the packet was sent by email. NOT after all of them have been confirmed. NOT during screening.",
       "response_type": "phrase",
       "response_value": "I still need the intake on the file, the records release sent, and the packet emailed.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks about other injuries or losses besides the pain, medical bills, or time away from work. NOT the first time they ask what happened.",
+      "response_type": "phrase",
+      "response_value": "I had extra medical bills from the second procedure and I missed a week of work.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks you to repeat, confirm, or spell your email address, or where the at sign goes. NOT when asking whether you want email or text.",
+      "response_type": "phrase",
+      "response_value": "It's aisha dot rahman at example dot com. A-I-S-H-A, dot, R-A-H-M-A-N, at example dot com.",
       "occurrence_mode": "always"
     }
   ],

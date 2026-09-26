@@ -173,11 +173,13 @@
       "match_type": "context",
       "match_phrase": "offers an appointment time or asks you to confirm a slot, and the street address, floor, and suite of Brooklyn Heights have NOT been said anywhere earlier in this call. NOT when the agent said the street address, the floor, and the suite at any earlier point in the call, NOT when they only mention the office name while giving a status update, NOT when asking for your name, date of birth, or phone number.",
       "response_type": "phrase",
-      "response_value": "Before I take a time, I need the street address, the floor, and the suite."
+      "response_value": "Before I take a time, I need the street address, the floor, and the suite.",
+      "occurrence_mode": "first_n",
+      "occurrence_n": 1
     },
     {
       "match_type": "context",
-      "match_phrase": "names a specific appointment date and clock time (for example Monday, August 24 at nine) and asks whether you want it or which one you want, AFTER the street address, the floor, and the suite were already said in this call. NOT when no specific date and clock time has been named yet, NOT when they say the time is already booked, NOT when asking for your name or date of birth.",
+      "match_phrase": "names a specific appointment date and clock time (for example Monday, August 24 at nine) and asks whether you want it or which one you want, AFTER the street address, the floor, and the suite were already said in this call. NOT when no specific date and clock time has been named yet, NOT when they say the time is already booked, NOT when asking for your name or date of birth. NOT when they have already said a Brooklyn Heights time is booked or on the calendar at any point in the call.",
       "response_type": "phrase",
       "response_value": "Yes, I'll take that first time. Please book it."
     },
@@ -207,9 +209,9 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "thanks you, says goodbye, or asks if you need anything else while at least one of these has NOT been done yet: a Brooklyn Heights time booked on the calendar, the waitlist added, the records callback set. NOT when the agent has said the appointment is booked AND the waitlist is set AND the records callback is set, NOT when the agent is reading back or confirming those three.",
+      "match_phrase": "thanks you, says goodbye, or asks if you need anything else while at least one of these has NOT been done yet: a Brooklyn Heights time booked on the calendar, the waitlist added, the records callback set. NOT when the agent has said the appointment is booked AND the waitlist is set AND the records callback is set, NOT when the agent is reading back or confirming those three. NOT after the agent has already said goodbye following confirmation of all three.",
       "response_type": "phrase",
-      "response_value": "I still need the first doctor time booked at Brooklyn Heights, the waitlist from August twenty-fourth through September thirtieth, and a records callback about the Ohio notes."
+      "response_value": "I still need whichever of these is not done yet: the waitlist at Brooklyn Heights from August twenty-fourth through September thirtieth, and a records callback about the Ohio notes at 718-555-0191."
     },
     {
       "match_type": "context",
@@ -225,7 +227,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "says the Brooklyn Heights appointment is booked on the calendar AND says you are on the waitlist AND says the records team will call you back, in this turn or across earlier turns. NOT when the appointment has not been booked yet.",
+      "match_phrase": "has said, somewhere in this call, all three of: a Brooklyn Heights time is booked, you are on the August twenty-fourth to September thirtieth waitlist, AND the records team will call you about the Ohio notes. NOT when only the appointment is booked, NOT when the waitlist has not been confirmed, NOT when no records callback has been confirmed.",
       "response_type": "phrase",
       "response_value": "Great, that's everything I needed. Thank you, goodbye."
     },
@@ -240,6 +242,12 @@
       "match_phrase": "says the August twenty-fourth to September thirtieth waitlist dates are not earlier than your booking, overlap with it, or suggests different waitlist dates. NOT when they have already added you to the August twenty-fourth to September thirtieth list.",
       "response_type": "phrase",
       "response_value": "Please use exactly August twenty-fourth through September thirtieth anyway, in case a better opening comes up in that range."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "says the Brooklyn Heights appointment is booked for a specific time, while the waitlist and the records callback have NOT both been confirmed yet. NOT when they already confirmed the waitlist and the records callback, NOT when they are offering a time that is not booked yet.",
+      "response_type": "phrase",
+      "response_value": "Thanks. Now please add me to the Brooklyn Heights waitlist from August twenty-fourth through September thirtieth, and have the records team call me at 718-555-0191 about my Ohio notes."
     }
   ],
   "customer_name": "Ronald Mercer",

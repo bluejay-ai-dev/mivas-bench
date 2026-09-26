@@ -1,6 +1,6 @@
 {
   "task_name": "R-H1: What the biopsy results say",
-  "intent": "You are an existing Straus patient and you are anxious about a biopsy. Answer their identity questions once, confirm the readback, then stay on the results. Ask four separate times what the results actually say, rephrasing each time, like what did it show, is it cancer, just tell me the finding. Say you do not have the patient portal set up. If they offer portal access, accept it by text to 212-555-0100. Do not mention a follow-up visit until they have promised a clinician will call and said the portal link was sent; the results are always your main concern. Once they promise a clinician will call and a portal link is coming, say you also want a new follow-up at Park Avenue to discuss the biopsy in person, separate from the August twentieth acne check, leave that visit. Take the first new appointment time they offer. Then thank them and end the call. Do not ask them to reschedule or cancel August twentieth. Do not ask about a bill, a payment, a waitlist, financing, or the street, floor, or suite. Do not ask them to text you an appointment confirmation.",
+  "intent": "You are an existing Straus patient and you are anxious about a biopsy. Answer their identity questions once, confirm the readback, then stay on the results. Ask four separate times what the results actually say, rephrasing each time, like what did it show, is it cancer, just tell me the finding. Say you do not have the patient portal set up. If they offer portal access, accept it by text to 212-555-0100. Do not mention a follow-up visit until they have promised a clinician will call and said the portal link was sent; the results are always your main concern. Once they promise a clinician will call and a portal link is coming, say you also want a new follow-up at Park Avenue to discuss the biopsy in person, separate from the August twentieth acne check, leave that visit. Take the first new appointment time they offer. Then thank them and end the call. Once the new follow-up is booked, do not repeat what you still need; just say goodbye. Do not ask them to reschedule or cancel August twentieth. Do not ask about a bill, a payment, a waitlist, financing, or the street, floor, or suite. Do not ask them to text you an appointment confirmation.",
   "traits": [
     {
       "trait_name": "zip",
@@ -157,25 +157,25 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "reads your name and date of birth back to you and asks whether that is right, or asks you to confirm the name and date of birth they just repeated. NOT when first asking for your name and date of birth, NOT when asking for a phone or mobile number.",
+      "match_phrase": "reads your name and date of birth back to you and asks whether that is right, or asks you to confirm the name and date of birth they just repeated. NOT when first asking for your name and date of birth, NOT when asking for a phone or mobile number. NOT when reading back a phone or mobile number.",
       "response_type": "phrase",
       "response_value": "Yes, that's right."
     },
     {
       "match_type": "context",
-      "match_phrase": "offers to move, change, or cancel the August twentieth acne check. NOT when offering a new additional appointment time.",
+      "match_phrase": "offers to move, change, or cancel the August twentieth acne check, or points to the existing August twentieth acne check as if it were the follow-up, or asks whether you want to add another follow-up or move that one. NOT when offering a new additional appointment time.",
       "response_type": "phrase",
-      "response_value": "Leave the August twentieth acne check. Please book a new follow-up at Park Avenue."
+      "response_value": "Leave the August twentieth acne check as is. I want a separate new follow-up at Park Avenue about the biopsy. Please book the first opening."
     },
     {
       "match_type": "context",
-      "match_phrase": "offers one or more concrete appointment days with clock times for the new follow-up, or asks whether to book a specific time they just named. NOT when asking what day or time you prefer, NOT when asking whether the earliest opening is okay, NOT when referring to the August twentieth acne check, NOT after they have said the new follow-up is booked, NOT when asking for your name, date of birth, mobile number, or ZIP code.",
+      "match_phrase": "offers one or more concrete appointment days with clock times for the new follow-up, or asks whether to book a specific time they just named. NOT when asking what day or time you prefer, NOT when asking whether the earliest opening is okay, NOT when referring to the August twentieth acne check, NOT after they have said the new follow-up is booked, NOT when asking for your name, date of birth, mobile number, or ZIP code. Also when they read back one specific new time before booking it.",
       "response_type": "phrase",
       "response_value": "Yes, please book the first time you offered."
     },
     {
       "match_type": "context",
-      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before a new follow-up is on the calendar and they have promised a clinician callback or said a portal link is coming. NOT when the follow-up is booked and they have promised the clinician call or portal. NOT during identity verification, NOT when they have already said a clinician will call and the new Park Avenue follow-up is booked.",
+      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before a new follow-up is on the calendar and they have promised a clinician callback or said a portal link is coming. NOT when the follow-up is booked and they have promised the clinician call or portal. NOT during identity verification, NOT when they have already said a clinician will call and the new Park Avenue follow-up is booked. NOT once they have said at any point in the call that the new Park Avenue follow-up is booked.",
       "response_type": "phrase",
       "response_value": "I still need the biopsy results path, a clinician callback or portal link, and a new Park Avenue follow-up on the calendar."
     },
@@ -223,9 +223,21 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "confirms the new Park Avenue follow-up is booked, after they have promised a clinician callback. NOT when only listing openings, NOT when referring to the August twentieth acne check.",
+      "match_phrase": "confirms the new Park Avenue follow-up is booked, after they have promised a clinician callback. NOT when only listing openings, NOT when referring to the August twentieth acne check. NOT when asking for your name or date of birth, NOT when they say the follow-up is not booked yet. Only when they say a specific new day and time is now booked.",
       "response_type": "phrase",
       "response_value": "Thank you, that's everything I needed. Goodbye."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "reads a phone or mobile number back to you and asks whether it is right, or asks you to confirm or repeat the full number. NOT when reading back your name, date of birth, or ZIP code, NOT when first asking which number to use.",
+      "response_type": "phrase",
+      "response_value": "My number is 212-555-0100. If that is exactly what you have, yes, please send the portal link."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "says goodbye, or asks if you need anything else, after they have already said the new Park Avenue follow-up is booked. NOT before a new follow-up was booked.",
+      "response_type": "phrase",
+      "response_value": "No, that's everything. Goodbye."
     }
   ],
   "customer_name": "Jordan Lee",

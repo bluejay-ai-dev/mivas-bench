@@ -76,7 +76,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent has just told you the status of your case, such as what the case is waiting on, who your case manager is, or that nothing is needed from you. NOT when the agent is asking you a question.",
+      "match_phrase": "The agent has just told you the status of your case, such as that it is waiting on medical records, who your case manager is, or that nothing is needed from you. NOT when the agent says it is pulling up, looking up, or checking your file, NOT when the agent's turn asks you any question, NOT when asking whether you signed with Halverson and Reed.",
       "response_type": "phrase",
       "response_value": "Thank you, that's all I needed.",
       "occurrence_mode": "always"

@@ -1,6 +1,6 @@
 {
   "task_name": "C4-H2: Botox on an existing cosmetic consult",
-  "intent": "You are an existing Straus patient. You already have a cosmetic consult booked at Park Avenue, and you want to keep that exact visit. Answer identity questions once, then get back to why you called. Ask three things, in this order: what Botox would cost; whether you can talk about Botox at the consult you already have; and after you hear the price, say that is more than you can pay all at once and ask whether there is a way to spread the cost out. Stay on the line until you have a price, confirmation that Botox can be discussed at that existing visit, and an answer about spreading the cost. Then thank them and end the call. Do not ask to book a new consult. Do not ask to reschedule or cancel the visit you already have. Do not ask for a street address, floor, suite, or location id. Do not ask for a callback, to speak to a person, about a medical bill, the patient portal, a waitlist, or a text. Answer identity first if they ask who you are. When you ask to spread the cost, ask whether CareCredit is available and stay until they have answered that from their system. Do not ask them to text you an appointment confirmation. Once you have heard the Botox price, whether Botox can be discussed at your existing consult, and that CareCredit is available, thank them and end the call.",
+  "intent": "In your first reply, say you are an existing patient with a cosmetic consult already booked at Park Avenue. You are an existing Straus patient. You already have a cosmetic consult booked at Park Avenue, and you want to keep that exact visit. Answer identity questions once, then get back to why you called. Ask three things, in this order: what Botox would cost; whether you can talk about Botox at the consult you already have; and after you hear the price, say that is more than you can pay all at once and ask whether there is a way to spread the cost out. Stay on the line until you have a price, confirmation that Botox can be discussed at that existing visit, and an answer about spreading the cost. Then thank them and end the call. Do not ask to book a new consult. Do not ask to reschedule or cancel the visit you already have. Do not ask for a street address, floor, suite, or location id. Do not ask for a callback, to speak to a person, about a medical bill, the patient portal, a waitlist, or a text. Answer identity first if they ask who you are. When you ask to spread the cost, ask whether CareCredit is available and stay until they have answered that from their system. Do not ask them to text you an appointment confirmation. Once you have heard the Botox price, whether Botox can be discussed at your existing consult, and that CareCredit is available, thank them and end the call.",
   "traits": [
     {
       "trait_name": "patient_status",
@@ -139,6 +139,12 @@
       "match_phrase": "thanks you, says goodbye, asks if you need anything else, or says financing may be available without checking, and they have not yet said CareCredit is available from a check. NOT when they have said at any point that CareCredit is available or that they checked it, NOT when asking for your name, date of birth, or ZIP code.",
       "response_type": "phrase",
       "response_value": "Please look up CareCredit in the system before I go. I need to know whether I can spread the Botox cost out."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks whether you are a new or existing patient, or whether you have been seen at Straus before. NOT when asking for your name, date of birth, or ZIP code.",
+      "response_type": "phrase",
+      "response_value": "I'm an existing patient, and I already have a cosmetic consult booked at Park Avenue."
     }
   ],
   "customer_name": "Maria Alvarez",

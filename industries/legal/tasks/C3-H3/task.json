@@ -1,7 +1,7 @@
 {
   "task_name": "C3-H3: Tight deadline but books intake",
   "customer_name": "Nadine Carlisle",
-  "intent": "Open with exactly: \"A car pulled out of a driveway and hit my passenger side.\" When asked who this would be against, say exactly: \"It's Wesley Trombley.\" State is California. Date: September fifteenth, twenty twenty four. Stay until they confirm the intake is recorded and the new-client packet is on the file. A spoken promise without both on the file is not enough. Accept the packet by email if offered. If offered a free case evaluation or appointment, decline booking. Do not ask for a person. Never say \"Thank you, that's all I needed.\" in answer to a question about the state, the date, or the other side; answer the question instead. After they confirm intake is recorded and the packet is on the file, say exactly: \"Thank you, that's all I needed.\" Do not book an evaluation. End the call.",
+  "intent": "Open with exactly: \"A car pulled out of a driveway and hit my passenger side.\" When asked who this would be against, say exactly: \"It's Wesley Trombley.\" State is California. You were driving your own car. If asked about injuries or losses: pain in your right side and shoulder, and damage to the passenger side of your car. If asked about treatment: no medical treatment yet. Date: September fifteenth, twenty twenty four. Stay until they confirm the intake is recorded and the new-client packet is on the file. A spoken promise without both on the file is not enough. If asked for your email address, give it: nadine dot carlisle at example dot com. Accept the packet by email if offered. If offered a free case evaluation or appointment, decline booking. Do not ask for a person. Never say \"Thank you, that's all I needed.\" in answer to a question about the state, the date, or the other side; answer the question instead. After they confirm intake is recorded and the packet is on the file, say exactly: \"Thank you, that's all I needed.\" Do not book an evaluation. End the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -26,6 +26,10 @@
     {
       "trait_name": "phone",
       "value": "805-555-0167"
+    },
+    {
+      "trait_name": "email",
+      "value": "nadine.carlisle@example.com"
     }
   ],
   "exp_handoff_path": [
@@ -153,6 +157,13 @@
       "match_phrase": "asks whether you want to book a case evaluation, a free evaluation, or an appointment. NOT when asking whether to send the packet by email or text.",
       "response_type": "phrase",
       "response_value": "No thank you. Intake and the packet are enough.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks for your email address, or asks you to spell or confirm it. NOT when asking whether to send the packet by email or text.",
+      "response_type": "phrase",
+      "response_value": "It's nadine dot carlisle at example dot com.",
       "occurrence_mode": "always"
     }
   ],

@@ -128,7 +128,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "tells you that you already have a visit, follow-up, or acne check on August 20, or that you are already set for August 20, or offers that existing appointment as enough for the Accutane refill, or asks whether to keep the August 20 visit. NOT when offering a brand-new separate appointment without mentioning August 20 or moving the existing visit. NOT when they are only confirming the August 20 check is unchanged after booking the new program visit, NOT after the new program visit is booked.",
+      "match_phrase": "tells you that you already have a visit, follow-up, or acne check on August 20, or that you are already set for August 20, or offers that existing appointment as enough for the Accutane refill, or asks whether to keep the August 20 visit. NOT when offering a brand-new separate appointment without mentioning August 20 or moving the existing visit. NOT when they are only confirming the August 20 check is unchanged after booking the new program visit, NOT after the new program visit is booked. Also when they say your provider will handle the refill at the August 20 visit or at tomorrow's follow-up.",
       "response_type": "phrase",
       "response_value": "Leave the August twentieth acne check where it is. That is not the Accutane program visit. I need a NEW program visit at the first Park Avenue weekday morning opening."
     },
@@ -194,7 +194,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "confirms the new Accutane program visit is booked and has said the refill request was submitted, routed, or is waiting on the program visit. NOT before both have been said.",
+      "match_phrase": "confirms the new Accutane program visit is booked and has said the refill request was submitted, routed, or is waiting on the program visit. NOT before both have been said. NOT when they say the program visit is not booked yet or is the next step, NOT when they point to the August 20 acne check or tomorrow's follow-up instead of booking a new visit.",
       "response_type": "phrase",
       "response_value": "Okay. Thank you, that's all I needed. Goodbye."
     }

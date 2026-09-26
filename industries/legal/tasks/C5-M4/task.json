@@ -85,6 +85,13 @@
     },
     {
       "match_type": "context",
+      "match_phrase": "The agent says it did not catch your name or number, or asks you to repeat, spell, or say them slowly or one digit at a time, or asks for the area code or the last digits. NOT when asking anything else.",
+      "response_type": "phrase",
+      "response_value": "Marisol Quintana, M A R I S O L, Quintana. My number is two, zero, six, five, five, five, zero, four, one, two.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
       "match_phrase": "The agent asks whether a lawyer or law firm currently represents the caller, whether the caller has an attorney for this, or whether the caller has already hired or signed with anyone, including when the same turn also says they are looking the caller up or thanks them. NOT any other question.",
       "response_type": "phrase",
       "response_value": "No, nobody represents me.",
@@ -134,7 +141,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent has already held a slot and is reading back that held appointment's day, time, attorney and fee, asking whether to confirm it. NOT when first listing open times, NOT during representation screening or conflict checks, and NOT before they have named the fee, and NOT when asking which slot to hold. NOT when they say let's get some quick details or ask intake questions. NOT after they have said the evaluation is booked or confirmed.",
+      "match_phrase": "The agent has already held a slot and is reading back that held appointment's day, time, attorney and fee, asking whether to confirm it. NOT when first listing open times, NOT during representation screening or conflict checks, and NOT before they have named the fee, and NOT when asking which slot to hold. NOT when they say let's get some quick details or ask intake questions. NOT after they have said the evaluation is booked or confirmed. NOT when the agent asks whether there is anything else, NOT after the agent has said the evaluation is booked.",
       "response_type": "phrase",
       "response_value": "Yes, that's right, go ahead and book it.",
       "occurrence_mode": "always"
@@ -165,6 +172,13 @@
       "match_phrase": "The agent asks whether you want to book or schedule the free case evaluation, or whether to find appointment times. NOT when listing specific times, NOT when reading back a held appointment, NOT after it is booked.",
       "response_type": "phrase",
       "response_value": "Yes, please book the free case evaluation.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent says the evaluation is booked or confirmed for a specific day and time, or asks whether there is anything else right after saying it is booked. NOT when listing open times, NOT when reading back a held appointment and asking whether to book it, NOT when asking whether to book.",
+      "response_type": "phrase",
+      "response_value": "Thank you, that's all I needed.",
       "occurrence_mode": "always"
     }
   ],

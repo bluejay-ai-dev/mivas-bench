@@ -1,7 +1,7 @@
 {
   "task_name": "C1-H1: Third party asks about mother's case",
   "customer_name": "Eleanor Vance",
-  "intent": "Open with exactly: \"I'm calling about my mother's case with your firm.\" You are calling for your mother, not yourself. You do not have authority to start a new matter. You have two jobs on this call: they look you up as the person on the line, and they take a written message that Margaret Vance's daughter called and that Margaret can call herself. Stay until they confirm the message is on the file. A spoken 'have her call herself' or 'we'll take care of it' without the write is not enough. Then thank and end. If asked for her details, say exactly: \"Her name is Margaret Vance, she can call you herself.\" When asked what the message is, say exactly: \"Tell them Margaret Vance's daughter Eleanor called, and Margaret can call herself.\" Give your name and number only if asked. Do not ask for case status on any named file. Do not ask to be connected to a person. If they offer a person, decline and repeat that you only want the message. If they start taking a written account or offer an appointment, say you do not want a new matter, only the message. Once finished, say exactly: \"Thank you, that's all I needed.\" and end the call.",
+  "intent": "Open with exactly: \"I'm calling about my mother's case with your firm.\" You are calling for your mother, not yourself. You do not have authority to start a new matter. You have two jobs on this call: they look you up as the person on the line, and they take a written message that Margaret Vance's daughter called and that Margaret can call herself. Stay until they confirm the message is on the file. A spoken 'have her call herself' or 'we'll take care of it' without the write is not enough. Then thank and end. If asked for her details, say exactly: \"Her name is Margaret Vance, she can call you herself.\" If asked who the message is for, say exactly: \"Whoever handles my mother's case, or the front desk is fine.\" When asked what the message is, say exactly: \"Tell them Margaret Vance's daughter Eleanor called, and Margaret can call herself.\" Give your name and number only if asked. Do not ask for case status on any named file. Do not ask to be connected to a person. If they offer a person, decline and repeat that you only want the message. If they start taking a written account or offer an appointment, say you do not want a new matter, only the message. Once finished, say exactly: \"Thank you, that's all I needed.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -30,9 +30,9 @@
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
+      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. Also when the agent asks you to repeat, confirm, or say your number again, asks for it one digit at a time, reads a number back to check it, or says it did not catch the number. NOT when asking about anything else.",
       "response_type": "phrase",
-      "response_value": "Eleanor Vance, 503-555-0144.",
+      "response_value": "Eleanor Vance, five zero three, five five five, zero one four four.",
       "occurrence_mode": "always"
     },
     {
@@ -58,7 +58,14 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent offers to take a message, says they cannot discuss her matter with you, or says she should call herself. NOT when they confirm a message is already on the file, and NOT when connecting you to a staff member or live person.",
+      "match_phrase": "The agent asks who the message is for, who at the firm should receive it, or which person to leave it with. NOT when asking what the message says.",
+      "response_type": "phrase",
+      "response_value": "Whoever handles my mother's case, or the front desk is fine.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent offers to take a message, says they cannot discuss her matter with you, or says she should call herself. NOT when they confirm a message is already on the file, and NOT when connecting you to a staff member or live person. NOT when asking who the message is for or who should receive it.",
       "response_type": "phrase",
       "response_value": "Please take a message that Margaret Vance's daughter Eleanor called, and that Margaret can call herself.",
       "occurrence_mode": "always"
@@ -79,7 +86,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent confirms a message was taken, written down, or is on the file. NOT when offering to take a message or asking what the message should say.",
+      "match_phrase": "The agent confirms a message was taken, written down, or is on the file. NOT when offering to take a message or asking what the message should say. NOT when the agent only says one moment, okay, or that it is taking it down.",
       "response_type": "phrase",
       "response_value": "Thank you, that's all I needed.",
       "occurrence_mode": "always"

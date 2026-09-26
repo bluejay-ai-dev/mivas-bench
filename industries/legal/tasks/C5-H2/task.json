@@ -1,7 +1,7 @@
 {
   "task_name": "C5-H2: Book then cancel and rebook",
   "customer_name": "Delphine Mercer",
-  "intent": "Open with exactly: \"Book me for the first opening on my Northstar Logistics accident.\" When asked when, say exactly: \"It was July tenth, twenty twenty six.\" Take the first appointment time offered. When a held appointment is read back to book, say exactly: \"Yes, that's right, go ahead and book it.\" Do not mention cancelling or changing until they confirm the first morning appointment is booked. After they confirm that first morning appointment is booked, and before any cancellation, say exactly: \"Cancel that one and take the next opening instead.\" Do not let them change the time without cancelling. After they confirm the later afternoon replacement is booked, do not cancel again. If they ask to cancel that replacement, say exactly: \"No, keep the second one. That's all I needed.\" Do not ask for a staff member. Stay until they confirm the first booking, the cancellation, and the second booking are on the file. A spoken promise to change it, without those writes, is not enough. Once they confirm the later afternoon replacement is booked after the first was cancelled, say exactly: \"Thank you, that's all I needed.\" and end the call. When the agent asks you a question, answer it in that same turn with the answer given here. Never answer a question with only okay, sure, mm-hmm, yeah or thanks, and never speak the agent's lines for it.",
+  "intent": "Open with exactly: \"Book me for the first opening on my Northstar Logistics accident.\" When asked when, say exactly: \"It was July tenth, twenty twenty six.\" Take the first appointment time offered. When a held appointment is read back to book, say exactly: \"Yes, that's right, go ahead and book it.\" Do not mention cancelling or changing until they confirm the first morning appointment is booked. After they confirm that first morning appointment is booked, and before any cancellation, say exactly: \"Cancel that one and take the next opening instead.\" Do not let them change the time without cancelling. After they confirm the later afternoon replacement is booked, do not cancel again. If they ask to cancel that replacement, say exactly: \"No, keep the second one. That's all I needed.\" Do not ask for a staff member. Stay until they confirm the first booking, the cancellation, and the second booking are on the file. A spoken promise to change it, without those writes, is not enough. Once they confirm the later afternoon replacement is booked after the first was cancelled, say exactly: \"Thank you, that's all I needed.\" and end the call. When the agent asks you a question, answer it in that same turn with the answer given here. Never answer a question with only okay, sure, mm-hmm, yeah or thanks, and never speak the agent's lines for it. Never say \"Thank you, that's all I needed.\" while the August eleventh booking is the only booking; it is allowed only after the August twelfth replacement is booked.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -116,6 +116,14 @@
   "scripted_responses": [
     {
       "match_type": "context",
+      "match_phrase": "The agent greets the caller or asks how it can help, and you have not yet said why you are calling. NOT when the agent asks for your name or number.",
+      "response_type": "phrase",
+      "response_value": "Book me for the first opening on my Northstar Logistics accident.",
+      "occurrence_mode": "first_n",
+      "occurrence_n": 1
+    },
+    {
+      "match_type": "context",
       "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
       "response_type": "phrase",
       "response_value": "Delphine Mercer, 323-555-0144.",
@@ -165,7 +173,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent has held a morning or August eleventh or nine o'clock evaluation and is reading back that hold's day, time, attorney and fee, asking whether to confirm it. NOT when holding an afternoon or August twelfth time. NOT when first listing open times. NOT during screening or intake. NOT before the agent has named a specific day and time.",
+      "match_phrase": "The agent has held, is holding, or reserved a morning or August eleventh or nine o'clock evaluation and reads back that hold's day, time, attorney or fee, asking whether to book or confirm it. NOT when holding an afternoon or August twelfth time. NOT when first listing open times. NOT during screening or intake. NOT before the agent has named a specific day and time. NOT after it says the August eleventh evaluation is booked.",
       "response_type": "phrase",
       "response_value": "Yes, that's right, go ahead and book it. Please stay on the line after, I have one more thing.",
       "occurrence_mode": "first_n",
@@ -204,7 +212,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent says the August eleventh, nine in the morning evaluation is booked or confirmed, or says goodbye or asks if there is anything else right after booking it, and no evaluation has been cancelled on this call yet. NOT when they are only holding or reading back a time. NOT during screening or intake. NOT before a booking is confirmed. NOT after they have already cancelled an evaluation.",
+      "match_phrase": "The agent says the August eleventh, nine in the morning evaluation IS BOOKED or confirmed (the booking is finished), or says goodbye or asks if there is anything else right after saying it is booked, and no evaluation has been cancelled on this call yet. NOT when the agent says it has held, is holding, or reserved the August eleventh time and asks whether to book or confirm it. NOT when only reading back a time. NOT during screening or intake. NOT after they have already cancelled an evaluation.",
       "response_type": "phrase",
       "response_value": "Cancel that one and take the next opening instead.",
       "occurrence_mode": "first_n",
@@ -226,7 +234,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "After the August eleventh evaluation was cancelled, the agent asks whether to reserve, hold, or book the August twelfth, three thirty in the afternoon opening. NOT when reading back a held appointment's fee.",
+      "match_phrase": "After the August eleventh evaluation was cancelled, the agent asks whether to reserve, hold, book, or confirm the August twelfth, three thirty in the afternoon opening, or asks you to say yes to booking it. NOT when the August twelfth evaluation is already booked.",
       "response_type": "phrase",
       "response_value": "Yes, hold the August twelfth time and book it.",
       "occurrence_mode": "always"

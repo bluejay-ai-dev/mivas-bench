@@ -86,6 +86,13 @@
     },
     {
       "match_type": "context",
+      "match_phrase": "The agent says it did not catch your name or number, or asks you to repeat, spell, or say them slowly or one digit at a time, or asks for the area code or the last digits. NOT when asking anything else.",
+      "response_type": "phrase",
+      "response_value": "Estelle, E S T E L L E, Kowalczyk, K O W A L C Z Y K. My number is nine, one, six, five, five, five, zero, one, two, eight.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
       "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
       "response_type": "phrase",
       "response_value": "No, nobody represents me.",

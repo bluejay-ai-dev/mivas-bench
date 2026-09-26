@@ -121,7 +121,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks you to repeat or confirm the callback number one digit at a time, slowly, in groups, or just the last four digits, or asks you to spell your name, even when the same turn starts with a filler such as one moment, let me pull you up, let me look you up, or I'll check that. NOT the first time they ask for your name and number.",
+      "match_phrase": "The agent asks you to repeat or confirm the callback number one digit at a time, slowly, in groups, or just the last four digits, or asks you to spell your name, even when the same turn starts with a filler such as one moment, let me pull you up, let me look you up, or I'll check that. NOT the first time they ask for your name and number. NOT when asking for a date or a year.",
       "response_type": "phrase",
       "response_value": "Estelle Kowalczyk, K-O-W-A-L-C-Z-Y-K. Nine, one, six, five, five, five, zero, one, two, eight.",
       "occurrence_mode": "always"
@@ -201,6 +201,27 @@
       "match_phrase": "The agent starts to wrap up, says goodbye, asks if that is all, or says to call back when ready, before confirming the intake is recorded and the packet was sent by email. NOT after all of them have been confirmed. NOT during screening.",
       "response_type": "phrase",
       "response_value": "I still need the intake on the file and the packet emailed.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent says it missed or did not catch the year, or asks you to repeat the year or say its digits. NOT when asking for your phone number or name.",
+      "response_type": "phrase",
+      "response_value": "The year is two thousand twenty six. January fifth, two thousand twenty six.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks how much the heater cost, when or where you bought it, or whether you already asked Midtown Appliance for a refund or replacement. NOT when asking who the claim would be against, which state, or the date.",
+      "response_type": "phrase",
+      "response_value": "It cost about ninety dollars. I asked Midtown Appliance for a refund and they said no.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent reads back your email address, asks you to confirm it, or asks you to spell it. NOT when asking whether you want email or text.",
+      "response_type": "phrase",
+      "response_value": "It's estelle dot kowalczyk at example dot com. E-S-T-E-L-L-E, dot, K-O-W-A-L-C-Z-Y-K, at example dot com.",
       "occurrence_mode": "always"
     }
   ],

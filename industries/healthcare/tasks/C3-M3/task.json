@@ -59,7 +59,6 @@
       "name": "classify_visit_request",
       "parameters": {
         "visit_class": "medical",
-        "urgency": "routine",
         "is_new_patient": true
       }
     },
@@ -167,9 +166,21 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "thanks you, says goodbye, or asks if you need anything else, and no appointment time has been booked yet anywhere in the call. NOT when they have said at any point that the visit is booked, confirmed, set, or on the calendar, NOT when asking a question.",
+      "match_phrase": "thanks you, says goodbye, or asks if you need anything else, and no appointment time has been booked yet anywhere in the call. NOT when they have said at any point that the visit is booked, confirmed, set, or on the calendar, NOT when asking a question. NOT when asking for your name, date of birth, or mobile number.",
       "response_type": "phrase",
       "response_value": "I still need that time booked. Please confirm it is on the calendar before I go."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "says the Windermere office accepts or takes Medicare. NOT when asking for your name, date of birth, phone, or the reason for the visit, NOT once any appointment time has been offered.",
+      "response_type": "phrase",
+      "response_value": "Great. Please book me the first available new-patient visit at Windermere for a spot on my forearm that hasn't healed in about three weeks."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks for your full name, date of birth, and mobile or phone number in the same question, or asks only for your mobile or phone number. NOT when reading any of them back to you.",
+      "response_type": "phrase",
+      "response_value": "Walter Prinz. My date of birth is August third, nineteen fifty-two. My mobile is 407-555-0181."
     }
   ],
   "customer_name": "Walter Prinz",

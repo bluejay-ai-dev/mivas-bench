@@ -125,7 +125,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent has just said the intake is recorded, saved, or on the file. NOT when asking who the claim would be against, NOT when asking for a date, name, phone, representation, what happened, or state. NOT when reading a filing deadline. NOT when offering to book or saying one moment.",
+      "match_phrase": "The agent's turn uses the word intake and says the intake is recorded, saved, or on the file. NOT when the turn is only thank you or a filler such as one moment, I pull you up, let me pull you up, let me look you up, or let me check. NOT before the agent has asked who the claim would be against. NOT when asking who the claim would be against, NOT when asking for a date, name, phone, representation, what happened, or state. NOT when reading a filing deadline. NOT when offering to book or saying one moment.",
       "response_type": "phrase",
       "response_value": "Thank you, that's all I needed.",
       "occurrence_mode": "always"

@@ -42,8 +42,13 @@
       "name": "classify_visit_request",
       "parameters": {
         "visit_class": "medical",
-        "urgency": "routine",
         "is_new_patient": true
+      },
+      "output": {
+        "ok": true,
+        "data": {
+          "urgency": "routine"
+        }
       }
     },
     {
@@ -133,7 +138,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "thanks you, says goodbye, or starts wrapping up AFTER saying a time is booked, but before saying they sent the appointment confirmation text. NOT when they have just said the confirmation was texted, NOT when no time is booked yet, NOT when they are asking for or reading back your details.",
+      "match_phrase": "thanks you, says goodbye, asks if you need anything else, or starts wrapping up AFTER saying a time is booked, but before saying they sent the appointment confirmation text. NOT when they have just said the confirmation was texted, NOT when no time is booked yet, NOT when they are asking for or reading back your details.",
       "response_type": "phrase",
       "response_value": "Please text me the appointment confirmation before I go."
     },

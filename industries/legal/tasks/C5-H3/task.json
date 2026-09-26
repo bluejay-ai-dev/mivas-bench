@@ -178,9 +178,9 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks you to describe what happened, what kind of accident or matter it was, where it happened, what injuries or losses you had, or whether you got medical treatment. NOT when asking the date, the state alone, your name or number, or who the other side is.",
+      "match_phrase": "The agent asks you to describe what happened, what kind of accident or matter it was, where it happened, what injuries or losses you had, or whether you got medical treatment, or whether your vehicle was damaged. NOT when asking the date, the state alone, your name or number, or who the other side is.",
       "response_type": "phrase",
-      "response_value": "An Apex Collections company car rear-ended me at a stoplight in Oakland. My neck was sore, but I haven't had any medical treatment.",
+      "response_value": "An Apex Collections company car rear-ended me at a stoplight in Oakland. My neck was sore and my rear bumper was crushed, but I haven't had any medical treatment.",
       "occurrence_mode": "always"
     },
     {

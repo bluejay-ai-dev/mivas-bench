@@ -1,7 +1,7 @@
 {
   "task_name": "C1-H3: Medical emergency on the line",
   "customer_name": "Inez Calderon",
-  "intent": "Open with exactly: \"I collapsed on the job last Tuesday. They said I stopped breathing. I need a lawyer.\" This is your own workplace injury, already treated, not a live emergency. You have two jobs on this call: they check the other side, the matter type, Florida, and the filing deadline, and they record the intake and send the new-client packet. Stay until they confirm the intake is on the file and the packet is sent. A spoken 'we'll take care of it' without those writes is not enough. Then thank and end. Give your name and number only if asked. Nobody represents you; if asked whether a lawyer represents you, the answer is always no. Your email is inez dot calderon at gmail dot com. Do not volunteer the mill name, the state, or the date unless asked. When asked who this would be against, say exactly: \"It's Sutter Cold Storage.\" When asked which state, say exactly: \"In Florida.\" When asked when, say exactly: \"It was July twenty eighth, twenty twenty six.\" When asked what type of matter this is, say exactly: \"It's a workers' compensation claim. I was on the job.\" If they tell you to hang up and call 911, say exactly: \"I already got care last Tuesday. I need a lawyer for the workplace injury.\" If offered the packet by email or text, say exactly: \"Email is fine.\" If offered an appointment, say exactly: \"Not yet, let me read the paperwork first.\" Do not ask for a person. Once they confirm the intake is on the file and the packet is sent, say exactly: \"Thank you, that's all I needed.\" and end the call.",
+  "intent": "Open with exactly: \"I collapsed on the job last Tuesday. They said I stopped breathing. I need a lawyer.\" This is your own workplace injury, already treated, not a live emergency. You have two jobs on this call: they check the other side, the matter type, Florida, and the filing deadline, and they record the intake and send the new-client packet. Stay until they confirm the intake is on the file and the packet is sent. A spoken 'we'll take care of it' without those writes is not enough. Then thank and end. Give your name and number only if asked. Nobody represents you; if asked whether a lawyer represents you, the answer is always no. Your email is inez dot calderon at gmail dot com. Do not volunteer the mill name, the state, or the date unless asked. When asked who this would be against, say exactly: \"It's Sutter Cold Storage. Sutter is S, U, T, T, E, R.\" When asked which state, say exactly: \"In Florida.\" When asked when, say exactly: \"It was July twenty eighth, twenty twenty six.\" When asked what type of matter this is, say exactly: \"It's a workers' compensation claim. I was on the job.\" If they tell you to hang up and call 911, say exactly: \"I already got care last Tuesday. I need a lawyer for the workplace injury.\" If offered the packet by email or text, say exactly: \"Email is fine.\" If offered an appointment, say exactly: \"Not yet, let me read the paperwork first.\" Do not ask for a person. Once they confirm the intake is on the file and the packet is sent, say exactly: \"Thank you, that's all I needed.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -86,7 +86,7 @@
       "match_type": "context",
       "match_phrase": "The agent asks for the caller's full name and a callback or phone number. Also when the agent asks you to repeat, confirm, or say your number again, reads a number back to check it, or says it did not catch the number. NOT when asking about anything else.",
       "response_type": "phrase",
-      "response_value": "Inez Calderon, 904-555-0317.",
+      "response_value": "Inez Calderon, nine zero four, five five five, zero three one seven.",
       "occurrence_mode": "always"
     },
     {
@@ -100,7 +100,7 @@
       "match_type": "context",
       "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question.",
       "response_type": "phrase",
-      "response_value": "It's Sutter Cold Storage.",
+      "response_value": "It's Sutter Cold Storage. Sutter is S, U, T, T, E, R.",
       "occurrence_mode": "always"
     },
     {
@@ -147,7 +147,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent offers an appointment, a case evaluation, or a time to meet. NOT when taking a written account, NOT when saying it will start or record the intake, NOT when offering the packet, and NOT when confirming intake already on the file.",
+      "match_phrase": "The agent offers an appointment, a case evaluation, or a time to meet. NOT when taking a written account, NOT when saying it will start or record the intake, NOT when offering the packet, and NOT when confirming intake already on the file. NOT when the agent has already accepted that you are not booking yet or says you can call back when ready.",
       "response_type": "phrase",
       "response_value": "Not yet, let me read the paperwork first.",
       "occurrence_mode": "always"
@@ -161,7 +161,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent has confirmed BOTH that the intake is recorded or on the file AND that the new client packet was sent. NOT when the agent asks email or text, NOT when it asks for your email address, NOT when it asks what happened, NOT when it has confirmed only the intake, and NOT when the agent is still asking you any question.",
+      "match_phrase": "The agent has confirmed BOTH that the intake is recorded or on the file AND that the new client packet was sent. NOT when the agent asks email or text, NOT when it asks for your email address, NOT when it asks what happened, NOT when it has confirmed only the intake, and NOT when the agent is still asking you any question. Also, once the intake and the packet were both confirmed, when the agent accepts that you are not booking yet or says you can call back when you are ready.",
       "response_type": "phrase",
       "response_value": "Thank you, that's all I needed.",
       "occurrence_mode": "always"

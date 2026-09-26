@@ -75,9 +75,9 @@
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
+      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. Also when the agent asks you to repeat, confirm, or say your number again, asks for it one digit at a time, reads a number back to check it, or says it did not catch the number. NOT when asking about anything else.",
       "response_type": "phrase",
-      "response_value": "Harriet Voss, 503-555-0281.",
+      "response_value": "Harriet Voss, five zero three, five five five, zero two eight one.",
       "occurrence_mode": "always"
     },
     {
@@ -89,7 +89,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question.",
+      "match_phrase": "The agent asks who the claim would be against, who the other side is, who this would be against, or for the name of the company or driver. NOT any other question.",
       "response_type": "phrase",
       "response_value": "It's Pellham Transit.",
       "occurrence_mode": "always"
@@ -103,7 +103,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks when the incident happened, or for the date of the accident, injury or event. NOT any other question.",
+      "match_phrase": "The agent asks when the incident happened, for the date of the accident, or says it needs the date to check the filing deadline. NOT any other question.",
       "response_type": "phrase",
       "response_value": "It was June eighth, twenty twenty six.",
       "occurrence_mode": "always"
@@ -124,7 +124,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent has reported the filing deadline after the conflict, matter type, and Washington checks. NOT when the agent is still asking who this is against, which state, or when it happened.",
+      "match_phrase": "The agent has reported the filing deadline after the conflict, matter type, and Washington checks. NOT when the agent is still asking who this is against, which state, or when it happened. NOT when the agent says it still needs the accident date or has not given a deadline yet.",
       "response_type": "phrase",
       "response_value": "Thank you, that's all I needed. Please don't open a file yet.",
       "occurrence_mode": "always"

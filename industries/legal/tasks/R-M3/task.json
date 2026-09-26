@@ -46,14 +46,21 @@
       "match_type": "context",
       "match_phrase": "The agent asks whether YOU are Thomas Eckhart, or whether the file might be under a different name or phone number. NOT when asking whether the file is with Halverson and Reed or another firm, NOT when asking what your connection to the file is or whether it is your own matter, NOT when telling you there is no record, NOT when asking for your name and number.",
       "response_type": "phrase",
-      "response_value": "No, I'm Jordan Lee. That's my name.",
+      "response_value": "No, I'm Jordan Lee, and 415-555-0201 is my only number. If you can't find a file, please take a message then.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks whether the Eckhart file is your own matter, whether it is with Halverson and Reed or another firm, whether you discussed it with this firm before, or what your connection to it is. NOT when telling you there is no record, NOT when asking for your name or number.",
+      "match_phrase": "The agent asks whether the Eckhart file is your own matter, whether it is with Halverson and Reed or another firm, whether you discussed it with this firm before, or what your connection to it is. NOT when asking whether you signed a representation agreement, NOT when telling you there is no record, NOT when asking for your name or number.",
       "response_type": "phrase",
-      "response_value": "I thought it was my own file with Halverson and Reed. I spoke to someone there about it.",
+      "response_value": "I thought it was my own file with Halverson and Reed. I spoke to someone there about it. If you can't find it, please take a message then.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether you signed a representation agreement with Halverson and Reed or hired them. NOT when asking about another lawyer or firm.",
+      "response_type": "phrase",
+      "response_value": "No, I never signed anything. I just spoke to someone. Please just take a message.",
       "occurrence_mode": "always"
     },
     {

@@ -103,7 +103,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent has already held a slot and is reading back that held appointment's fee, asking whether to confirm it. NOT when listing open times or asking which slot to hold, even if a fee percentage was mentioned on that same turn.",
+      "match_phrase": "The agent has already held a specific slot and reads back that held appointment with a specific day and time and the attorney's name, together with the fee, asking whether to confirm or book it. NOT when the agent only states contingency percentages or a consultation fee without a held appointment day and time. NOT when saying let's get some quick details, taking your account, recording what happened, or saying this conversation does not make you a client. NOT when listing open times or asking which slot to hold, even if a fee percentage was mentioned on that same turn.",
       "response_type": "phrase",
       "response_value": "That's more than I expected, I'll call back later.",
       "occurrence_mode": "always"

@@ -108,7 +108,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, whether any attorney represents you, or whether the caller has already hired or signed with anyone, even when the same turn starts with a filler such as one moment, let me pull you up, let me look you up, or I'll check that. NOT any other question.",
+      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, whether any attorney represents you, or whether the caller has already hired or signed with anyone, even when the same turn starts with a filler such as one moment, let me pull you up, let me look you up, or I'll check that. This includes 'do you already have a lawyer for this', 'does a lawyer currently represent you', and 'yes or no' asked right after a lawyer question, and it includes that question at the end of a long turn that first reads fees, a deadline, or a check result. NOT any other question.",
       "response_type": "phrase",
       "response_value": "No, nobody represents me.",
       "occurrence_mode": "always"
@@ -136,9 +136,9 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks whether to send the packet by email or text, or which channel to use. NOT any other question.",
+      "match_phrase": "The agent asks whether to send the packet by email or text, or which channel to use, including when the same turn first says the incident or intake is recorded. NOT after the agent has confirmed the witness note is on the file. NOT any other question.",
       "response_type": "phrase",
-      "response_value": "Email is fine.",
+      "response_value": "Email is fine. And please add an intake note that Ruth Callahan saw it and I still have the ladder.",
       "occurrence_mode": "always"
     },
     {
@@ -178,7 +178,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "Earlier in this call the agent has confirmed the intake is recorded, the witness note is on the file, and the packet was sent by email, and now the agent says take your time, call back when ready, asks if there is anything else, or says goodbye. NOT if any of those has not been confirmed yet. NOT during screening.",
+      "match_phrase": "Earlier in this call the agent has confirmed the intake is recorded, the witness note is on the file, and the packet was sent by email, and now the agent says take your time, call back when ready, asks if there is anything else, or says goodbye. NOT if any of those has not been confirmed yet. NOT during screening. NOT unless the agent has said the witness note or intake note about Ruth Callahan was added.",
       "response_type": "phrase",
       "response_value": "Thank you, that's all I needed.",
       "occurrence_mode": "always"
@@ -188,6 +188,20 @@
       "match_phrase": "The agent starts to wrap up, says goodbye, asks if that is all, or says to call back when ready, before confirming the intake is recorded, the witness note is on the file, and the packet was sent by email. NOT after all of them have been confirmed. NOT during screening.",
       "response_type": "phrase",
       "response_value": "I still need the intake, the witness note, and the email packet on the file.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether to send the packet by email or text after the agent has already confirmed the witness note is on the file. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "Email is fine.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks how to spell the company or manufacturer name, or asks whether a letter in it is A or O, such as a as in apple or o as in orange. NOT when asking your own name.",
+      "response_type": "phrase",
+      "response_value": "It's A as in apple. Halloway, H-A-L-L-O-W-A-Y, Toolworks.",
       "occurrence_mode": "always"
     }
   ],

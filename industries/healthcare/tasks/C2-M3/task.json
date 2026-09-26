@@ -135,6 +135,26 @@
       "match_phrase": "says goodbye or asks if you need anything else while no time has yet been said to be booked or on the calendar. NOT once they have said at any point in the call that a time is booked or on the calendar, NOT when they only say thanks, okay, or one moment, NOT when they are asking you a question.",
       "response_type": "phrase",
       "response_value": "I still need that time booked. Please confirm it is on the calendar before I go."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks whether to book, lock in, or confirm a specific time they just named. NOT when they already said the time is booked.",
+      "response_type": "phrase",
+      "response_value": "Yes, please book that time."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks what days or times work for you, or whether you have a preference, without naming a specific date and time. NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "Any day is fine. Please give me the first available time at Brooklyn Heights."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "calls this a new-patient visit or says you are a new patient. NOT when asking whether you are new or existing.",
+      "response_type": "phrase",
+      "response_value": "No, I'm an existing patient. I've been seen at Straus before. This is an eczema follow-up.",
+      "occurrence_mode": "first_n",
+      "occurrence_n": 1
     }
   ],
   "customer_name": "Sam Nguyen",

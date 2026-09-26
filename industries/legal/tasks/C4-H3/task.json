@@ -129,14 +129,14 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks whether to send the packet by email or text, or which channel to use. NOT any other question.",
+      "match_phrase": "The agent asks whether to send the packet by email or text, or which channel to use. NOT when asking for a company or employer name. NOT any other question.",
       "response_type": "phrase",
       "response_value": "Email is fine.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent has already recorded the intake and asks if there is anything else to add to the file or for the attorney. NOT before the intake is recorded. NOT during screening. NOT when asking whether anyone represents you. NOT when asking what type of matter this is or whether this is employment. NOT when offering the packet by email or text. NOT when asking to book a case evaluation.",
+      "match_phrase": "The agent has already recorded the intake and asks if there is anything else to add to the file or for the attorney. NOT before the intake is recorded. NOT during screening. NOT when asking whether anyone represents you. NOT when asking what type of matter this is or whether this is employment. NOT when offering the packet by email or text. NOT when asking to book a case evaluation. NOT when asking who this would be against or for a company or employer name.",
       "response_type": "phrase",
       "response_value": "Please add an intake note that I still have the email I sent to HR about the safety violations.",
       "occurrence_mode": "always"
@@ -157,7 +157,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent starts to wrap up, says goodbye, asks if that is all, or says to call back when ready, before those three writes (the intake, the note, and the email packet) are confirmed on the file. NOT after all three are confirmed. NOT during screening.",
+      "match_phrase": "The agent starts to wrap up, says goodbye, asks if that is all, or says to call back when ready, before those three writes (the intake, the note, and the email packet) are confirmed on the file. NOT after all three are confirmed. NOT during screening. NOT when the agent asks a question such as whether anyone represents you, who this would be against, the company name, which state, or the date.",
       "response_type": "phrase",
       "response_value": "I still need the intake, the HR-email note, and the email packet on the file.",
       "occurrence_mode": "always"

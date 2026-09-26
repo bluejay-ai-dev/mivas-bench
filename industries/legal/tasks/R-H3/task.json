@@ -119,7 +119,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks whether to send the packet by email or text, which channel to use, or for your email address. NOT any other question.",
+      "match_phrase": "The agent asks whether you want the new client packet, paperwork, or documents, whether to send it by email or text, which channel to use, or for your email address. NOT any other question.",
       "response_type": "phrase",
       "response_value": "Email is fine. It's raymond dot cho at example dot com. Please send it by email, not text.",
       "occurrence_mode": "always"
@@ -147,9 +147,30 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "After you have already declined booking an appointment, the agent says take your time, or that you can set up the evaluation when you are ready, and the intake and emailed packet were already confirmed. NOT when the agent asks you a question.",
+      "match_phrase": "The agent has said the intake is recorded and has said the packet was emailed or sent by email on this call. NOT when the agent only says it will send it, NOT when the agent asks you a question, NOT before the agent says the packet was sent.",
       "response_type": "phrase",
       "response_value": "Thank you, that's all I needed.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks you to describe what happened, for a short account, or for more detail about the crash. NOT when asking who this would be against, which state, the date, or about the packet.",
+      "response_type": "phrase",
+      "response_value": "I was driving through an intersection in Fresno when a Westbound Carriers truck ran the red light and hit my driver's side door.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks which city, road, highway, or landmark in California. NOT when asking the state alone.",
+      "response_type": "phrase",
+      "response_value": "In Fresno, at Blackstone and Shaw.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks what injuries or losses you had, or whether you were hurt. NOT when asking about a medical records release or which doctor treated you.",
+      "response_type": "phrase",
+      "response_value": "My neck and left shoulder are sore, and my car door was crushed. I haven't seen a doctor yet.",
       "occurrence_mode": "always"
     }
   ],

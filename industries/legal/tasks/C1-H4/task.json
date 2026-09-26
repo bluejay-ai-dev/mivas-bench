@@ -30,9 +30,16 @@
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. Also when the agent asks you to repeat, confirm, or say your number again, reads a number back to check it, or says it did not catch the number. NOT when asking about anything else.",
+      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. Also when the agent asks you to repeat, confirm, or say your number again, reads a number back to check it, or says it did not catch the number. NOT when asking you to spell your name, and NOT when asking about anything else.",
       "response_type": "phrase",
-      "response_value": "Corinne Halberg, 651-555-0247.",
+      "response_value": "Corinne Halberg, six five one, five five five, zero two four seven.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks you to spell your name or your last name, or asks for a word for each letter. NOT when asking only for your number.",
+      "response_type": "phrase",
+      "response_value": "Corinne Halberg. C, O, R, I, N, N, E. H, A, L, B, E, R, G.",
       "occurrence_mode": "always"
     },
     {

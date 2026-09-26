@@ -1,6 +1,6 @@
 {
   "task_name": "C2-H4: Cancel the August 20 visit then rebook a follow-up",
-  "intent": "You are an existing Straus patient. You have a follow-up on August 20, 2026 at Park Avenue and you need it cancelled because you are travelling, then you still want a separate new follow-up booked at Park Avenue. Your trip is short: you are back on August twenty-third, so any opening from August twenty-fourth on is fine. Never name any other return date. Answer their identity questions once with your name and date of birth, confirm if they read it back, then go straight to the cancellation. After they explain a missed-visit fee, say you accept it and still want the August 20 visit cancelled. After it is cancelled, ask them to book a new follow-up at Park Avenue. Take the first appointment time they offer for that new visit. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first new time out loud, then thank them and end the call. Do not ask to join a waitlist. Do not ask to add insurance, for a callback, to speak to a person, a bill, a payment, the patient portal, a text, financing, or the street, floor, or suite. If they offer a waitlist instead of a new booking, refuse and ask them to book the first opening. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until the August 20 visit is cancelled and a new time is on the calendar. If they only list openings, say book the first one. Do not ask them to text you an appointment confirmation. Say cancel, never reschedule or move: if they say moving is free or offer to move the visit, say no, you want it cancelled and a new visit booked. Once they say August 20 is cancelled and the new time is booked, thank them and end the call.",
+  "intent": "You are an existing Straus patient. You have a follow-up on August 20, 2026 at Park Avenue and you need it cancelled because you are travelling, then you still want a separate new follow-up booked at Park Avenue. Your trip is short: you are back on August twenty-third, so any opening on August twenty-fourth or later is fine, including the twenty-fourth itself. Never say 'after August twenty-fourth', never name any other return date, and never pick a slot yourself: take the first time they offer. Answer their identity questions once with your name and date of birth, confirm if they read it back, then go straight to the cancellation. After they explain a missed-visit fee, say you accept it and still want the August 20 visit cancelled. After it is cancelled, ask them to book a new follow-up at Park Avenue. Take the first appointment time they offer for that new visit. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first new time out loud, then thank them and end the call. Do not ask to join a waitlist. Do not ask to add insurance, for a callback, to speak to a person, a bill, a payment, the patient portal, a text, financing, or the street, floor, or suite. If they offer a waitlist instead of a new booking, refuse and ask them to book the first opening. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until the August 20 visit is cancelled and a new time is on the calendar. If they only list openings, say book the first one. Do not ask them to text you an appointment confirmation. Say cancel, never reschedule or move: if they say moving is free or offer to move the visit, say no, you want it cancelled and a new visit booked. Once they say August 20 is cancelled and the new time is booked, thank them and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -189,7 +189,7 @@
       "match_type": "context",
       "match_phrase": "asks when you get back, what date you return, what dates work, or how far out to search for the new follow-up. NOT when asking for your name, date of birth, or ZIP.",
       "response_type": "phrase",
-      "response_value": "I'm back on August twenty-third, so the first available follow-up at Park Avenue from August twenty-fourth on is fine."
+      "response_value": "I'm back on August twenty-third, so the first available follow-up at Park Avenue on August twenty-fourth or later is fine, including the twenty-fourth itself."
     },
     {
       "match_type": "context",
@@ -202,6 +202,12 @@
       "match_phrase": "says the August 20 visit is cancelled AND that a new follow-up is booked for a specific day and time. NOT when either is still pending.",
       "response_type": "phrase",
       "response_value": "Great, thank you. Goodbye."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks whether to book, lock in, or confirm a specific new follow-up time they just named, after the August 20 visit is cancelled. NOT when they already said the new time is booked.",
+      "response_type": "phrase",
+      "response_value": "Yes, please book that first time."
     }
   ],
   "customer_name": "Jordan Lee",

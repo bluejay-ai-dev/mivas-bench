@@ -96,9 +96,9 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks who the claim or matter would be against, who the other side is, or for the name of the debt collector or company this would be against, even when the same turn starts with a filler such as one moment, let me pull you up, let me look you up, or I'll check that. NOT any other question.",
+      "match_phrase": "The agent asks who the claim or matter would be against, who the other side is, or for the name of the debt collector or company this would be against, even when the same turn starts with a filler such as one moment, let me pull you up, let me look you up, or I'll check that. Also when they ask you to spell the company name. NOT when asking you to spell your own name. NOT any other question.",
       "response_type": "phrase",
-      "response_value": "It's Apex Collections.",
+      "response_value": "It's Apex Collections, A-P-E-X Collections.",
       "occurrence_mode": "always"
     },
     {
@@ -152,7 +152,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "Earlier in this call the agent has confirmed the intake is recorded and the packet was sent by text, and now the agent says take your time, call back when ready, asks if there is anything else, or says goodbye. NOT if any of those has not been confirmed yet. NOT during screening.",
+      "match_phrase": "Earlier in this call the agent has confirmed the intake is recorded and the packet was sent by text, and now the agent says take your time, call back when ready, asks if there is anything else, or says goodbye. NOT if any of those has not been confirmed yet. NOT during screening. NOT when the agent asks which state, the date, or any other question, and NOT right after the agent reads a fee or consultation price.",
       "response_type": "phrase",
       "response_value": "Thank you, that's all I needed.",
       "occurrence_mode": "always"

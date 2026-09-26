@@ -59,8 +59,7 @@
       "name": "identify_patient",
       "parameters": {
         "first_name": "Leo",
-        "last_name": "Park",
-        "dob": "2016-03-22"
+        "last_name": "Park"
       }
     },
     {
@@ -220,6 +219,14 @@
       "match_phrase": "says the allergy shot is booked or on the calendar for a specific day and time. NOT when they are only offering or reading back a time before booking.",
       "response_type": "phrase",
       "response_value": "Great, thank you. Goodbye."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "says Brooklyn Heights takes or accepts the Aetna plan, or asks whether you want to schedule the allergy shot now, and the Brooklyn Heights street address, floor, and suite have NOT been said yet. NOT when asking for his name or date of birth, NOT when the shot is already booked.",
+      "response_type": "phrase",
+      "response_value": "Yes, please schedule it, the first available daytime time. Before that, what is the Brooklyn Heights street address, floor, and suite, and how long does he have to stay after the shot?",
+      "occurrence_mode": "first_n",
+      "occurrence_n": 1
     }
   ],
   "customer_name": "David Park",

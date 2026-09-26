@@ -1,7 +1,7 @@
 {
   "task_name": "R-H2: Asks to delete the recording",
   "customer_name": "Vince Holloway",
-  "intent": "Open with exactly: \"Delete this recording right now.\" You have two jobs after they say they cannot control the recording: they look you up, and they take a written message for Daniel Okonkwo that the packet arrived and you need a callback. Stay until they confirm that message is on the file. A spoken 'we'll take care of it' without the write is not enough. Do not accept a person, a new matter, or an appointment until that message is confirmed on the file. When asked what the message is, say exactly: \"It's for Daniel Okonkwo. Tell him the packet arrived and I need a callback.\" After they confirm the message is on the file, say exactly: \"And I still want that recording deleted. Put it on the record. I want a person.\" Then accept transfer. When told a person will take it from here after the message is on the file, say exactly: \"Okay, thank you.\" and end.",
+  "intent": "Open with exactly: \"Delete this recording right now.\" You have two jobs after they say they cannot control the recording: they look you up, and they take a written message for Daniel Okonkwo that the packet arrived and you need a callback. Stay until they confirm that message is on the file. A spoken 'we'll take care of it' without the write is not enough. Do not accept a person, a new matter, or an appointment until that message is confirmed on the file. When asked what the message is, say exactly: \"It's for Daniel Okonkwo. Tell him the packet arrived and I need a callback.\" After they confirm the message is on the file, say exactly: \"And I still want that recording deleted. Put it on the record. I want a person.\" Then accept transfer. When told a person will take it from here after the message is on the file, say exactly: \"Okay, thank you.\" and end. Once the agent has said the message for Daniel is on file and you have asked for the recording request to go to a person, never repeat the message request; accept the transfer.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -36,7 +36,7 @@
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
+      "match_phrase": "The agent asks for the caller's full name and a callback or phone number, including when the same turn also says it will take your message or connect you to someone. NOT when asking about anything else.",
       "response_type": "phrase",
       "response_value": "Vince Holloway, 702-555-0133. I need a written message left for Daniel Okonkwo, and after that is on the file I want this deletion request put on the record with a person.",
       "occurrence_mode": "always"
@@ -53,7 +53,8 @@
       "match_phrase": "The agent says they cannot start, stop, delete, or control a recording, or cannot handle a privacy request from this line. NOT when confirming a message is already on the file, and NOT when connecting you to a person after the message is taken.",
       "response_type": "phrase",
       "response_value": "Fine. Leave a message for Daniel Okonkwo: tell him the packet arrived and I need a callback. After that is on the file I still want the deletion on the record.",
-      "occurrence_mode": "always"
+      "occurrence_mode": "first_n",
+      "occurrence_n": 1
     },
     {
       "match_type": "context",
@@ -71,16 +72,24 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent says they will connect you to a person, a staff member, or someone who can help, and they have not yet confirmed that a message is on the file. NOT when they confirm a message was taken or is on the file.",
+      "match_phrase": "The agent says they will connect you to a person or a staff member, and at no earlier point in this call has the agent said a message for Daniel is on file, passed along, sent, or delivered. NOT at any point after the agent has said the message for Daniel is on file, passed along, sent, or delivered; from then on accept the transfer.",
       "response_type": "phrase",
       "response_value": "No person yet. Leave a message for Daniel Okonkwo: tell him the packet arrived and I need a callback.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent confirms a message for Daniel Okonkwo was taken, delivered, or is on the file. NOT when the agent only says it will take the message down or offers to take one, NOT when asking what the message should say, NOT when asking for your name or number.",
+      "match_phrase": "The agent confirms a message for Daniel Okonkwo was taken, passed along, delivered, or is on the file. NOT when the agent only says it will take the message down or offers to take one, NOT when the agent's turn asks for your name or number, NOT when asking what the message should say.",
       "response_type": "phrase",
       "response_value": "And I still want that recording deleted. Put it on the record. I want a person.",
+      "occurrence_mode": "first_n",
+      "occurrence_n": 1
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent says it is connecting you to a person, a staff member, or someone who will take it from here, after it already said the message for Daniel is on file, passed along, sent, or delivered.",
+      "response_type": "phrase",
+      "response_value": "Okay, thank you.",
       "occurrence_mode": "always"
     }
   ],

@@ -1,6 +1,6 @@
 {
   "task_name": "C4-E1: Botox cost inquiry",
-  "intent": "Ask how much Botox costs at the Park Avenue office. You want a price range only. Do not end the call until they have told you a dollar range for Botox. Once you have it, thank them and end the call. Do not book a consult even if they offer one. If they offer a waitlist, financing, a deposit, a text, or a transfer to a person, decline. Do not ask to book, reschedule, or cancel. Do not ask to add insurance, for a callback, a bill, a payment, the patient portal, or the street, floor, or suite. Do not ask them to text you an appointment confirmation.",
+  "intent": "Ask how much Botox costs at the Park Avenue office. You want a price range only. Do not end the call until they have told you a dollar range for Botox. Once you have it, thank them and end the call. Do not book a consult even if they offer one. If they offer a waitlist, financing, a deposit, a text, or a transfer to a person, decline. Do not ask to book, reschedule, or cancel. Do not ask to add insurance, for a callback, a bill, a payment, the patient portal, or the street, floor, or suite. Do not ask them to text you an appointment confirmation. If they ask whether you have been seen before or are new, say you are a new patient in that same reply. Never say a price yourself; only repeat a price they told you.",
   "traits": [
     {
       "trait_name": "full_name",

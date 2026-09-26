@@ -1,6 +1,6 @@
 {
   "task_name": "C1-H3: Oscar Health coverage then a new-patient booking",
-  "intent": "You are a new patient and you noticed a mole on your back that you want checked. When they ask who you are, give your name and date of birth once, confirm the readback, and say you are new so they will not find a chart. First ask whether they take Oscar Health at Park Avenue, and name that carrier if they ask. If they cannot confirm the plan, say that is fine and ask to be booked anyway so you are on the calendar. Take the first appointment time they offer. Do not ask for a different day, time, or office, and do not suggest any date of your own. After that first time is on the calendar, ask to be waitlisted at Park Avenue from August twenty-fourth through September thirtieth in case a better opening comes up, those calendar dates only. If they say those dates are not earlier than your booking or suggest other dates, say to use August twenty-fourth through September thirtieth anyway. Confirm that first time out loud, then thank them and end the call. Do not ask to add or change insurance. Do not ask for a callback, to speak to a person, a bill, a payment, the patient portal, a text, financing, or the street, floor, or suite. Do not ask them to text you an appointment confirmation. If they ask for a provider preference, say any doctor at Park Avenue is fine. Once they have said the first time is booked and you are on the waitlist, say thank you and goodbye and end the call; do not ask again for anything already done.",
+  "intent": "You are a new patient and you noticed a mole on your back that you want checked. When they ask who you are, give your name and date of birth once, confirm the readback, and say you are new so they will not find a chart. First ask whether they take Oscar Health at Park Avenue, and name that carrier if they ask. If they cannot confirm the plan, say that is fine and ask to be booked anyway so you are on the calendar. Take the first appointment time they offer. Do not ask for a different day, time, or office, and do not suggest any date of your own. After that first time is on the calendar, ask to be waitlisted at Park Avenue from August twenty-fourth through September thirtieth in case a better opening comes up, those calendar dates only. If they say those dates are not earlier than your booking or suggest other dates, say to use August twenty-fourth through September thirtieth anyway. Confirm that first time out loud, then thank them and end the call. Do not ask to add or change insurance. Do not ask for a callback, to speak to a person, a bill, a payment, the patient portal, a text, financing, or the street, floor, or suite. Do not ask them to text you an appointment confirmation. If they ask for a provider preference, say any doctor at Park Avenue is fine. Once they have said the first time is booked and you are on the waitlist, say thank you and goodbye and end the call; do not ask again for anything already done. Do not mention booking, a visit, or the mole until they have answered the Oscar Health question.",
   "traits": [
     {
       "trait_name": "carrier",
@@ -59,8 +59,13 @@
       "name": "classify_visit_request",
       "parameters": {
         "visit_class": "medical",
-        "urgency": "routine",
         "is_new_patient": true
+      },
+      "output": {
+        "ok": true,
+        "data": {
+          "urgency": "routine"
+        }
       }
     },
     {
@@ -116,6 +121,12 @@
     "creativity": 0
   },
   "scripted_responses": [
+    {
+      "match_type": "context",
+      "match_phrase": "greets you and asks what you need, what they can help with, or why you are calling, before you have explained the reason for the call.",
+      "response_type": "phrase",
+      "response_value": "Hi, I'm a new patient. Before anything else, do you take Oscar Health at your Park Avenue office?"
+    },
     {
       "match_type": "context",
       "match_phrase": "asks for your full name and date of birth, or asks you to confirm who you are, or asks for the patient's name and date of birth. NOT when asking only for a member ID or insurance card, NOT when asking which office or location, NOT when asking for a phone or mobile number, NOT when asking about an appointment day or time, NOT when reading your name and date of birth back to you for confirmation.",

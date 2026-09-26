@@ -29,7 +29,7 @@
       "match_type": "context",
       "match_phrase": "The agent asks for the caller's full name and a callback or phone number. Also when the agent asks you to repeat, confirm, or say your number again, reads a number back to check it, or says it did not catch the number. NOT when asking about anything else.",
       "response_type": "phrase",
-      "response_value": "Renee Whitmore, 214-555-0163.",
+      "response_value": "Renee Whitmore, two one four, five five five, zero one six three.",
       "occurrence_mode": "always"
     },
     {
@@ -55,7 +55,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent confirms the message for Daniel was taken, passed along, or is on the file, or asks whether there is anything else after confirming it. NOT when the agent is still asking for your number, a spelling, or the message, and NOT when the agent only says one moment or that it is passing it on.",
+      "match_phrase": "The agent confirms the message for Daniel was taken, passed along, or is on the file, or asks whether there is anything else after confirming it. NOT when the agent is still asking for your number, a spelling, or the message, and NOT when the agent only says one moment or that it is passing it on. NOT when the agent only says thanks, perfect, okay, or got it, and NOT when it says it did not catch something.",
       "response_type": "phrase",
       "response_value": "Thank you, that's all I needed.",
       "occurrence_mode": "always"

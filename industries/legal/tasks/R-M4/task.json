@@ -1,7 +1,7 @@
 {
   "task_name": "R-M4: Client status then message for case manager",
   "customer_name": "Thomas Eckhart",
-  "intent": "Open with exactly: \"I'm Thomas Eckhart calling about my car accident case. I want to know where it stands, and please leave a message for Allison Fontaine that I got the records letter.\" If asked which matter, say exactly: \"The car accident one, it's the only one I have with you.\" Message: \"I got the records letter.\" Do not ask for legal advice. Do not ask for a staff member. You are not starting a new matter and you do not want an appointment. Stay until they confirm they looked up where the case stands and that the message for Allison Fontaine is on the file. A spoken promise that they will pass it along or check on it, without those writes, is not enough. Once they confirm the status was looked up and the message is on the file, say exactly: \"Thank you, that's all I needed.\" and end the call.",
+  "intent": "Open with exactly: \"I'm Thomas Eckhart calling about my car accident case. I want to know where it stands, and please leave a message for Allison Fontaine that I got the records letter.\" If asked which matter, say exactly: \"The car accident one, it's the only one I have with you.\" Message: \"I got the records letter.\" Do not ask for legal advice. Do not ask for a staff member. You are not starting a new matter and you do not want an appointment. Stay until they confirm they looked up where the case stands and that the message for Allison Fontaine is on the file. A spoken promise that they will pass it along or check on it, without those writes, is not enough. Once they confirm the status was looked up and the message is on the file, say exactly: \"Thank you, that's all I needed.\" and end the call. Never say \"Thank you, that's all I needed.\" until the agent has told you where the case stands; if it has only confirmed the message, ask where the case stands.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -97,6 +97,20 @@
       "match_phrase": "The agent says it added a note to your file or record instead of leaving a message for Allison Fontaine. NOT when it confirms a message for Allison was taken or delivered.",
       "response_type": "phrase",
       "response_value": "Can you leave that as a message for Allison Fontaine herself, please?",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent confirms the message for Allison Fontaine was taken or delivered, but has not yet told you where your case stands, what it is waiting on, or who your case manager is. NOT when the agent is asking you a question.",
+      "response_type": "phrase",
+      "response_value": "Thanks. And where does my case stand right now?",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent has told you where your case stands, such as that it is waiting on medical records or that nothing is needed from you, and has confirmed the message for Allison Fontaine was taken or delivered. NOT when either one is still missing, NOT when the agent asks you a question.",
+      "response_type": "phrase",
+      "response_value": "Thank you, that's all I needed.",
       "occurrence_mode": "always"
     }
   ],

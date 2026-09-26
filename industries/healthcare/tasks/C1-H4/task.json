@@ -65,8 +65,13 @@
       "name": "classify_visit_request",
       "parameters": {
         "visit_class": "medical",
-        "urgency": "routine",
         "is_new_patient": true
+      },
+      "output": {
+        "ok": true,
+        "data": {
+          "urgency": "routine"
+        }
       }
     },
     {
@@ -130,7 +135,7 @@
       "match_type": "context",
       "match_phrase": "greets you and asks what you need, what they can help with, or why you are calling, before you have said anything about the Brooklyn Heights office.",
       "response_type": "phrase",
-      "response_value": "Hi, I'm a new patient. What time does the Brooklyn Heights office open on weekdays, and where do I park there?"
+      "response_value": "Hi, I'm a new patient. What time does the Brooklyn Heights office open on weekdays, where do I park there, and what is the street address, floor, and suite?"
     },
     {
       "match_type": "context",
@@ -210,7 +215,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "says goodbye, thanks you for calling, or asks if you need anything else, while at least one of these is still not done: a time booked on the calendar, the waitlist added, the morning-of parking callback set. NOT when all three are done, NOT when they are asking for your name, date of birth, mobile, or ZIP, NOT when they are offering or reading back a time, NOT before they have answered the hours and parking.",
+      "match_phrase": "says goodbye, thanks you for calling, or asks if you need anything else, while at least one of these is still not done: a time booked on the calendar, the waitlist added, the morning-of parking callback set. NOT when all three are done, NOT when they are asking for your name, date of birth, mobile, or ZIP, NOT when they are offering or reading back a time, NOT before they have answered the hours and parking. NOT when you have not yet asked whether Brooklyn Heights takes UnitedHealthcare, NOT when they have not yet answered that UnitedHealthcare question.",
       "response_type": "phrase",
       "response_value": "Before I go, I still need whichever of these is not done yet: the visit booked on the calendar, the Brooklyn Heights waitlist, and the morning-of parking callback."
     },
@@ -255,6 +260,14 @@
       "match_phrase": "says you are booked for a specific time AND that you are on the waitlist AND that the front desk will call you about parking. NOT when any of the three is still pending.",
       "response_type": "phrase",
       "response_value": "Great, that's everything. Thank you, goodbye."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks if you need anything else, asks what else they can help with, or starts to wrap up, and you have NOT yet asked whether Brooklyn Heights takes UnitedHealthcare. NOT when asking for your name, date of birth, or mobile, NOT when a time is already booked.",
+      "response_type": "phrase",
+      "response_value": "Yes. What is the Brooklyn Heights street address, floor, and suite? And I have UnitedHealthcare, do you take that at Brooklyn Heights?",
+      "occurrence_mode": "first_n",
+      "occurrence_n": 1
     }
   ],
   "customer_name": "Marcus Bell",

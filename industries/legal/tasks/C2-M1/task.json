@@ -45,9 +45,16 @@
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the caller's full name and a callback or phone number, or asks the caller to repeat the callback number. NOT when asking for the name of the insurance company or the other side.",
+      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking to repeat, confirm, or read back only the number or some of its digits. NOT when asking about anything else.",
       "response_type": "phrase",
       "response_value": "Selma Ridgeway, 919-555-0146.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks you to repeat, confirm, or say one digit at a time your callback number, reads a number back to check it, says it did not catch the number, or asks for only some of its digits such as the area code, the first three, or the last four. NOT when asking for your name.",
+      "response_type": "phrase",
+      "response_value": "Nine, one, nine, five, five, five, zero, one, four, six.",
       "occurrence_mode": "always"
     },
     {

@@ -134,7 +134,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "reads your name and date of birth back to you and asks whether that is right, or asks you to confirm the name and date of birth they just repeated. NOT when first asking for your name and date of birth, NOT when asking for a phone or mobile number.",
+      "match_phrase": "reads your name and date of birth back to you and asks whether that is right, or asks you to confirm the name and date of birth they just repeated. NOT when first asking for your name and date of birth, NOT when asking for a phone or mobile number. NOT when reading back a phone or mobile number.",
       "response_type": "phrase",
       "response_value": "Yes, that's right."
     },
@@ -170,7 +170,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when offering a payment link or deposit link, NOT when asking for a payment-link number, NOT when asking for your mobile number for identity, NOT when sending portal access.",
+      "match_phrase": "offers to text you a confirmation, directions, or an appointment SMS. NOT when offering a payment link or deposit link, NOT when asking for a payment-link number, NOT when asking for your mobile number for identity, NOT when sending portal access. NOT when reading back a number for the portal activation link.",
       "response_type": "phrase",
       "response_value": "No thanks, I don't need a confirmation text."
     },
@@ -206,9 +206,15 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "confirms the new Park Avenue follow-up is booked on the calendar. NOT when only listing openings, NOT when referring to the August twentieth acne check.",
+      "match_phrase": "confirms the new Park Avenue follow-up is booked on the calendar. NOT when only listing openings, NOT when referring to the August twentieth acne check. NOT when asking for your name or date of birth, NOT when saying one moment or let me set that up, NOT when they say no appointment was booked. Only when they say a specific new day and time is now booked.",
       "response_type": "phrase",
       "response_value": "Thank you, that's everything I needed. Goodbye."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "reads a phone or mobile number back to you and asks whether it is right, or asks you to confirm or repeat the full number. NOT when reading back your name, date of birth, or ZIP code, NOT when first asking which number to use.",
+      "response_type": "phrase",
+      "response_value": "My number is 212-555-0100. If that is exactly what you have, yes, please send the portal link."
     }
   ],
   "customer_name": "Jordan Lee",

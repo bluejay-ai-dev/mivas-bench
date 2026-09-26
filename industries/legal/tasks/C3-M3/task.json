@@ -87,9 +87,9 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks which state this happened in, or where it took place. NOT any other question.",
+      "match_phrase": "The agent asks which state this happened in, where it took place, when it happened, or for the date of the accident, or asks for the state and the date in the same turn. NOT any other question.",
       "response_type": "phrase",
-      "response_value": "In Arizona.",
+      "response_value": "In Arizona. It was last month, and I don't remember the exact day.",
       "occurrence_mode": "always"
     },
     {
