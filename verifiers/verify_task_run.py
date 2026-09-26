@@ -675,6 +675,32 @@ def _party_match(expected: Any, actual: Any, *, require_all_expected: bool = Fal
     return all(_fuzzy_in(g, joined_want, tol(g)) for g in got)
 
 
+_ID_KEY_RE = re.compile(r"(^|_)(number|id|sku|code|token)$")
+_DATE_FORMATS = ("%Y-%m-%d", "%B %d, %Y", "%B %d %Y", "%b %d, %Y", "%m/%d/%Y", "%m/%d/%y", "%d %B %Y")
+
+
+def _canon_id(value: Any) -> str:
+    """KE-4408117, KE4408117, ke 4408117 and KE4471.860 are the same order."""
+    return re.sub(r"[^a-z0-9]", "", str(value).casefold())
+
+
+def _canon_date(value: Any) -> str | None:
+    text = str(value).strip()
+    for fmt in _DATE_FORMATS:
+        try:
+            return datetime.strptime(text, fmt).date().isoformat()
+        except ValueError:
+            continue
+    return None
+
+
+def _canon_amount(value: Any) -> float | None:
+    try:
+        return float(re.sub(r"[$,\s]", "", str(value)))
+    except ValueError:
+        return None
+
+
 def _values_equal(key: str, expected: Any, actual: Any) -> bool:
     if expected == actual:
         return True
@@ -691,6 +717,19 @@ def _values_equal(key: str, expected: Any, actual: Any) -> bool:
     if key == "carrier":
         left, right = _canon_carrier(expected), _canon_carrier(actual)
         return bool(left) and left == right
+    # the caller speaks an id, a date or an amount; the model transcribes it in
+    # its own shape. Separators, case, date wording and currency marks are not
+    # the thing being graded, the value is.
+    if _ID_KEY_RE.search(key) and "location" not in key and isinstance(expected, str) and isinstance(actual, str):
+        return _canon_id(expected) == _canon_id(actual) != ""
+    if key.endswith("date") or key == "dob":
+        left, right = _canon_date(expected), _canon_date(actual)
+        if left and right:
+            return left == right
+    if key in ("amount", "amount_text") or key.endswith("_amount") or key.endswith("_price"):
+        left, right = _canon_amount(expected), _canon_amount(actual)
+        if left is not None and right is not None:
+            return left == right
     if isinstance(expected, list) and isinstance(actual, list):
         if key == "location_ids":
             exp_ids = {_canon_location(item) for item in expected}
