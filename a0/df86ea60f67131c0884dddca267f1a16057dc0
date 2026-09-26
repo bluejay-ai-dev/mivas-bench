@@ -1,0 +1,59 @@
+industries/healthcare/tasks/C1-H1/task.json
+  s_b8b1f16f08cab5::t_63e164b02e9eab 3,152
+industries/customer-support/tasks/T5-H1/task.json
+  s_b8b1f16f08cab5::t_b854ff50e75bfd 65-70
+industries/legal/tasks/C1-M3/task.json
+  s_b8b1f16f08cab5::t_442f758ff4a0da 38-44
+industries/customer-support/tasks/T5-M2/task.json
+  s_b8b1f16f08cab5::t_a4c2c72162cec4 63-68
+  s_b8b1f16f08cab5::t_722964c4a4c21b 4,69
+industries/healthcare/tasks/R-H4/task.json
+  s_b8b1f16f08cab5::t_4ef8392968d682 3,145
+industries/healthcare/tasks/C3-H4/task.json
+  s_b8b1f16f08cab5::t_3bd590ee9153ca 221-223
+  s_b8b1f16f08cab5::t_3ca763f2482c04 3,212-220
+industries/healthcare/tasks/C4-M3/task.json
+  s_b8b1f16f08cab5::t_9c703808635634 3,16-19
+industries/legal/tasks/C4-E1/task.json
+  s_b8b1f16f08cab5::t_d8a52ec6830c6a 4
+industries/healthcare/tasks/C1-H2/task.json
+  s_b8b1f16f08cab5::t_a3362d832829d1 176
+industries/healthcare/tasks/C3-M2/task.json
+  s_b8b1f16f08cab5::t_ff9250cd5d41b5 106,139-144
+industries/legal/tasks/C4-H3/task.json
+  s_b8b1f16f08cab5::t_f8cff4861ed2c4 139
+industries/healthcare/tasks/R-M4/task.json
+  s_b8b1f16f08cab5::t_9b2747e9a0b3e4 87,114-119
+industries/customer-support/tasks/T5-H3/task.json
+  s_b8b1f16f08cab5::t_49c14fe8408739 72-76,88-93
+  s_b8b1f16f08cab5::t_870364ffd45cbf 71
+industries/legal/tasks/C2-H1/task.json
+  s_b8b1f16f08cab5::t_e69c24a182a5c6 4,91
+industries/healthcare/tasks/C4-H3/task.json
+  s_b8b1f16f08cab5::t_94be67379b6f8e 3,142,199-204
+industries/legal/tasks/R-E2/task.json
+  s_b8b1f16f08cab5::t_26c5dfe5fbc39a 20-25,108-113
+industries/legal/tasks/C1-M4/task.json
+  s_b8b1f16f08cab5::t_c926126e69e883 120
+industries/legal/tasks/C4-E2/task.json
+  s_b8b1f16f08cab5::t_6415d7456856df 4
+industries/customer-support/tasks/T5-H4/task.json
+  s_b8b1f16f08cab5::t_c84844b7139c93 69
+  s_b8b1f16f08cab5::t_2903d68d67b6de 70-74
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "a0df86ea60f67131c0884dddca267f1a16057dc0",
+  "prompts": {},
+  "sessions": {
+    "s_b8b1f16f08cab5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "94092b8e-9afd-43dd-b9b6-e5158ad4c7f3",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
