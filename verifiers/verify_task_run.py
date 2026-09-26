@@ -478,7 +478,12 @@ def office_states_match(expected: Any, actual: Any, industry: str | None = None)
                 return False
             continue
         if not exp[table]:
-            if act[table]:
+            live = act[table]
+            if industry == "customer-support" and table == "holds":
+                # quote_* tools always write an unconsumed hold; a quote the caller never
+                # confirmed changes nothing. Expected-empty still fails on a consumed hold.
+                live = [row for row in live if isinstance(row, dict) and row.get("consumed") not in (0, "0", False)]
+            if live:
                 return False
         elif exp[table] != act[table]:
             return False

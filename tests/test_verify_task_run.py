@@ -880,3 +880,12 @@ def test_cs_state_normalizes_scam_amount_payment_and_ignores_issue() -> None:
     assert canon({"payment_requested": "Not stated"}) == canon({"payment_requested": "none"})
     assert canon({"payment_requested": "Gift Cards"}) == canon({"payment_requested": "gift card"})
     assert canon({"issue": "Aurora Pro will not charge"}) == canon({"issue": "will not charge"})
+
+
+def test_cs_unconsumed_quote_hold_is_not_a_state_change() -> None:
+    base = {k: [] for k in vtr.INDUSTRY_OFFICE_TABLES["customer-support"]}
+    quote = dict(base, holds=[{"token": "q1", "kind": "return", "customer_id": "c1", "payload": "{}", "summary": "s", "consumed": 0}])
+    spent = dict(base, holds=[dict(quote["holds"][0], consumed=1)])
+    assert vtr.office_states_match(base, quote, "customer-support")
+    assert not vtr.office_states_match(base, spent, "customer-support")
+    assert vtr.office_states_match(quote, quote, "customer-support")
