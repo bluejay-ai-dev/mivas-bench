@@ -17,6 +17,9 @@
 
     "gemini-2.5-flash-native-audio": { "inputText": 0.5,  "inputAudio": 3.0,  "cachedText": null, "cachedAudio": null, "outputText": 2.0, "outputAudio": 12.0 },
     "gemini-3.1-flash-live-preview": { "inputText": 0.75, "inputAudio": 3.0,  "cachedText": null, "cachedAudio": null, "outputText": 4.5, "outputAudio": 12.0 },
+    "_note_gemini-3.8-live": "Live API pricing page 2026-09-26: same rates as 3.1 flash live; output price includes thinking tokens, so the extended-thinking variant bills its reasoning as output.",
+    "gemini-3.8-live":               { "inputText": 0.75, "inputAudio": 3.0,  "cachedText": null, "cachedAudio": null, "outputText": 4.5, "outputAudio": 12.0 },
+    "gemini-3.8-live-extended-thinking": { "inputText": 0.75, "inputAudio": 3.0,  "cachedText": null, "cachedAudio": null, "outputText": 4.5, "outputAudio": 12.0 },
     "_note_gemini-live-2.5-flash-preview": "Unused, and this id no longer appears on https://ai.google.dev/gemini-api/docs/pricing (checked 2026-08-22). Vertex still lists a 'Gemini 2.5 Flash Live API' row at 0.50 / 3.00 / 2.00 / 12.00 — the rates below are stale. Do not price against this row.",
     "gemini-live-2.5-flash-preview": { "inputText": 0.35, "inputAudio": 2.1,  "cachedText": null, "cachedAudio": null, "outputText": 1.5, "outputAudio": 8.5 },
 
