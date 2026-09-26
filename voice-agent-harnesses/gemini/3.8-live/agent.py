@@ -1,12 +1,21 @@
 """Gemini 3.8 Live — LiveKit SIP worker.
 
-Copied from flash-live-3.1; only the model id and agent name differ. 3.8
-docs say client_content generates again, but the realtime-text kick still
-works and is the proven speak-first path, so it stays.
+Same wiring as flash-live-3.1. The `extended` variant (variants.json) runs
+gemini-3.8-live-extended-thinking, which differs on the wire in three ways,
+all measured against the API directly (not inferred from docs):
+
+1. It refuses to connect without a thinking_level (1007).
+2. It closes the socket on any FunctionResponse.scheduling (1007 "Function
+   response scheduling is not supported for this model"), BLOCKING or
+   NON_BLOCKING alike. It still answers a tool result on its own.
+3. It answers one caller turn with several generations (filler, tool call,
+   answer), each closed by turn_complete with interaction_status=IN_PROGRESS
+   until the final IDLE.
 """
 
 from __future__ import annotations
 
+import asyncio
 import os
 import sys
 from pathlib import Path
@@ -22,29 +31,21 @@ load_dotenv(Path(__file__).resolve().parents[1] / ".env", override=True)
 from google.genai import types as genai_types  # noqa: E402
 from livekit.agents import AgentSession  # noqa: E402
 from livekit.plugins import google as lk_google  # noqa: E402
+from livekit.plugins.google.realtime import realtime_api as _lk_rt  # noqa: E402
 
 import harness  # noqa: E402
 
 MODEL = os.environ.get("GEMINI_LIVE_MODEL", "gemini-3.8-live")
+EXTENDED = "extended" in MODEL
 AGENT_NAME = "mivas-gemini-3-8-live"
-
-# Seconds to wait for extended to answer a caller turn before forcing one.
-# 0 disables. Tuned above normal thinking latency so it only catches stalls.
-_ANSWER_WATCHDOG_S = float(os.environ.get("GEMINI_ANSWER_WATCHDOG_S", "6"))
-# Consecutive forced turns before the watchdog stops; a call that has really
-# ended should be allowed to end.
-_WATCHDOG_MAX_FORCES = int(os.environ.get("GEMINI_WATCHDOG_MAX_FORCES", "3"))
 
 _orig_dispatch = harness._dispatch
 
 
 async def _shielded_dispatch(name: str, args: dict[str, Any]) -> dict[str, Any]:
-    # agents-core cancels in-flight tool tasks on barge-in (cancel_and_wait on the
-    # exe task): a call the model already committed then never reaches the tool
-    # server and records no actual. Shield the dispatch and, if cancelled, finish
-    # it anyway — the result is committed via the finished-despite-interruption path.
-    import asyncio
-
+    # agents-core cancels in-flight tool tasks on barge-in: a call the model
+    # already committed then never reaches the tool server and records no
+    # actual. Finish the POST regardless.
     t = asyncio.ensure_future(_orig_dispatch(name, args))
     try:
         return await asyncio.shield(t)
@@ -55,57 +56,82 @@ async def _shielded_dispatch(name: str, args: dict[str, Any]) -> dict[str, Any]:
 harness._dispatch = _shielded_dispatch
 
 
-if "extended" in MODEL and os.environ.get("GEMINI_KEEP_TURN_OPEN", "1").strip() != "0":
-    # Extended thinking sends generation_complete and turn_complete while it is
-    # still producing, flagging that with interaction_status=IN_PROGRESS ("more
-    # output may follow"). The plugin has no notion of interaction_status:
-    # generation_complete closes the audio stream and turn_complete ends the
-    # generation, so everything after the first word is discarded — the caller
-    # hears "I" and then nothing, and hangs up at the 120 s dead-air limit.
-    # Suppress both while IN_PROGRESS; the IDLE that follows closes the turn.
-    from livekit.plugins.google.realtime import realtime_api as _lk_rt  # noqa: E402
+if EXTENDED:
+    # The plugin treats every server-initiated generation as a barge-in and
+    # cuts the playout of the previous one (_start_new_generation emits
+    # input_speech_started). With extended's multi-generation turns the caller
+    # hears the first words of each generation and nothing else. Queue them
+    # instead; a real barge-in still arrives as server_content.interrupted.
+    _orig_start = _lk_rt.RealtimeSession._start_new_generation
 
+    def _start_without_barge_in(self: Any) -> None:
+        self._handle_input_speech_started = lambda: None
+        try:
+            _orig_start(self)
+        finally:
+            del self._handle_input_speech_started
+
+    _lk_rt.RealtimeSession._start_new_generation = _start_without_barge_in
+
+    # Without scheduling a tool result is consumed WHEN_IDLE, and extended
+    # sometimes declares itself idle (turn_complete + interaction_status=IDLE)
+    # after a filler without ever speaking the result: measured 55-70 s of
+    # silence until the caller asked "are you still there?". An empty
+    # completed turn makes it act on the result, but sending one while it is
+    # still IN_PROGRESS reads as silence to it ("No speech."). So after a tool
+    # response, wait for the model's own IDLE with nothing generating (or,
+    # if it never says IDLE, for 20 s with no generation at all), then
+    # complete one empty turn.
+    _orig_send = _lk_rt.RealtimeSession._send_client_event
     _orig_server_content = _lk_rt.RealtimeSession._handle_server_content
 
-    def _server_content_keep_turn_open(self: Any, server_content: Any) -> Any:
-        status = str(
-            getattr(getattr(server_content, "interaction_status", None), "value",
-                    getattr(server_content, "interaction_status", None)) or ""
-        ).upper()
-        if status == "IN_PROGRESS":
-            # generation_complete closes the audio stream mid-sentence, so the
-            # caller hears "I" and then nothing. Suppress only that. turn_complete
-            # must still be honoured: suppressing it strands the generation open,
-            # and while one is open the caller's next utterance never starts a
-            # turn — 11 of 13 residual stalls were exactly that.
-            server_content.generation_complete = None
-        return _orig_server_content(self, server_content)
+    def _track_status(self: Any, server_content: Any) -> None:
+        self._mivas_active_at = asyncio.get_event_loop().time()
+        if server_content.turn_complete:
+            status = getattr(server_content, "interaction_status", None)
+            self._mivas_status = str(getattr(status, "value", status) or "").upper()
+            self._mivas_status_at = asyncio.get_event_loop().time()
+        _orig_server_content(self, server_content)
 
-    _lk_rt.RealtimeSession._handle_server_content = _server_content_keep_turn_open
+    _lk_rt.RealtimeSession._handle_server_content = _track_status
 
-    _orig_send_event = _lk_rt.RealtimeSession._send_client_event
+    async def _force_turn_when_idle(self: Any, sent_at: float) -> None:
+        deadline = sent_at + float(os.environ.get("GEMINI_FORCE_TURN_MAX_S", "45"))
+        while asyncio.get_event_loop().time() < deadline and not self._msg_ch.closed:
+            await asyncio.sleep(1.0)
+            gen = self._current_generation
+            if gen is not None and not gen._done:
+                continue
+            now = asyncio.get_event_loop().time()
+            idle_since = getattr(self, "_mivas_status_at", 0.0)
+            quiet = now - max(sent_at, getattr(self, "_mivas_active_at", 0.0))
+            said_idle = getattr(self, "_mivas_status", "") == "IDLE" and idle_since > sent_at
+            if (said_idle and now - idle_since >= 3.0) or quiet >= 20.0:
+                harness.logger.info(
+                    "forcing a turn after a tool result: status=%s quiet=%.0fs",
+                    getattr(self, "_mivas_status", ""), quiet,
+                )
+                _orig_send(self, genai_types.LiveClientContent(turns=[], turn_complete=True))
+                return
 
-    def _send_and_force_turn(self: Any, event: Any) -> Any:
-        # Extended rejects FunctionResponseScheduling (1007), so every tool response
-        # falls back to WHEN_IDLE and Gemini sits on it until the input stream goes
-        # quiet — which a SIP call never does. The response is delivered; only the
-        # turn is missing. Send an empty completed turn straight after it so the
-        # model acts on the result it already has instead of waiting for silence.
-        out = _orig_send_event(self, event)
+    def _send_and_watch(self: Any, event: Any) -> None:
         if isinstance(event, genai_types.LiveClientToolResponse) and event.function_responses:
-            _orig_send_event(self, genai_types.LiveClientContent(turns=[], turn_complete=True))
-        return out
+            # the plugin declares 3.8 tools NON_BLOCKING and then marks a result
+            # that needs no reply SILENT; extended closes the socket on any
+            # scheduling value (1007), which ended 9 of 720 k=5 calls mid-call
+            for fr in event.function_responses:
+                fr.scheduling = None
+            _orig_send(self, event)
+            asyncio.ensure_future(_force_turn_when_idle(self, asyncio.get_event_loop().time()))
+            return
+        _orig_send(self, event)
 
-    _lk_rt.RealtimeSession._send_client_event = _send_and_force_turn
+    _lk_rt.RealtimeSession._send_client_event = _send_and_watch
 
 
 def _llm(instructions: str) -> Any:
-    # extended-thinking rejects FunctionResponse.scheduling outright: the first tool
-    # response closes the socket with 1007 "Function response scheduling is not
-    # supported for this model", killing every tool after the first. It also refuses
-    # to connect without a thinking_level (1007 "Thinking level must be specified").
-    if "extended" in MODEL:
-        scheduling_kw: dict[str, Any] = {
+    if EXTENDED:
+        model_kw: dict[str, Any] = {
             "thinking_config": genai_types.ThinkingConfig(
                 thinking_level=genai_types.ThinkingLevel(
                     os.environ.get("GEMINI_THINKING_LEVEL", "LOW")
@@ -113,9 +139,9 @@ def _llm(instructions: str) -> Any:
             )
         }
     else:
-        # default WHEN_IDLE stalls on a continuous SIP stream: 3.1 holds the
-        # tool response until barge-in "idles" it
-        scheduling_kw = {
+        # default WHEN_IDLE holds the tool response until the input stream
+        # idles, which a SIP line never does
+        model_kw = {
             "tool_response_scheduling": genai_types.FunctionResponseScheduling.INTERRUPT
         }
     return lk_google.realtime.RealtimeModel(
@@ -123,7 +149,7 @@ def _llm(instructions: str) -> Any:
         voice="Puck",
         language="en-US",
         instructions=instructions,
-        **scheduling_kw,
+        **model_kw,
         # default end-of-turn VAD misses short confirmations on telephone
         # audio: model sits silent until the caller speaks again (30-60s)
         realtime_input_config=genai_types.RealtimeInputConfig(
@@ -140,72 +166,7 @@ def _llm(instructions: str) -> Any:
 
 
 def build_session(_bp: dict[str, Any]) -> AgentSession:
-    session = AgentSession(max_tool_steps=16)
-    # Required for extended, not optional: without it the agent goes silent after
-    # every tool call and the caller waits ~120 s before hanging up (measured).
-    if "extended" in MODEL and os.environ.get("GEMINI_KICK_AFTER_TOOLS", "1").strip() != "0":
-        # extended rejects FunctionResponse.scheduling (1007), so tool results default to
-        # WHEN_IDLE — and a continuous SIP stream never idles: the agent sits silent after
-        # a tool until the caller gives up. Nudge speech after each non-handoff tool.
-        # Handoffs already kick via Stage.on_enter; end_call must stay silent.
-        @session.on("function_tools_executed")
-        def _kick_after_tools(ev: Any) -> None:
-            # Transport-level forcing (see _send_and_force_turn) handles the normal
-            # case. This stays as a backstop for batches whose response never
-            # triggered a turn, and is skipped for handoffs (the new stage speaks)
-            # and end_call (which must stay silent).
-            names = [c.name for c in getattr(ev, "function_calls", []) or []]
-            if not names or any(n.startswith("transfer_to") or n == "end_call" for n in names):
-                return
-            if os.environ.get("GEMINI_KICK_AFTER_TOOLS", "1").strip() == "0":
-                return
-            harness.kick(session, "Tell the caller that result now, in English.")
-
-    if "extended" in MODEL and _ANSWER_WATCHDOG_S > 0:
-        # Residual stalls are all "caller spoke, agent never answered": extended
-        # sometimes takes no turn at all after an utterance, and the caller sits in
-        # silence until it gives up. If no speech starts within the window, force
-        # one. Cancelled the moment the agent does start speaking, so a normally
-        # answered turn never sees it.
-        import asyncio
-        import time as _time
-
-        state: dict[str, Any] = {"last": _time.monotonic(), "forced": 0, "task": None}
-
-        def _touch(*_: Any) -> None:
-            state["last"] = _time.monotonic()
-            state["forced"] = 0
-
-        async def _watch() -> None:
-            # A silence watchdog rather than a per-utterance timer: extended also
-            # stalls after its own turn and after a handoff, where no caller
-            # transcript arrives to arm a one-shot. Poll, and force a turn each
-            # time the line has been quiet too long, a few times before giving up
-            # so a genuinely finished call is not kept alive forever.
-            while True:
-                await asyncio.sleep(1.0)
-                quiet = _time.monotonic() - state["last"]
-                if quiet < _ANSWER_WATCHDOG_S or state["forced"] >= _WATCHDOG_MAX_FORCES:
-                    continue
-                state["last"] = _time.monotonic()
-                state["forced"] += 1
-                try:
-                    session.generate_reply(
-                        instructions="Continue the call now, in English: answer the"
-                        " caller's last message or report the result you just looked up."
-                    )
-                except Exception:
-                    pass
-
-        for _ev in ("user_input_transcribed", "speech_created", "conversation_item_added"):
-            session.on(_ev, _touch)
-
-        @session.on("agent_state_changed")
-        def _on_state(ev: Any) -> None:
-            _touch()
-            if state["task"] is None:
-                state["task"] = asyncio.create_task(_watch())
-    return session
+    return AgentSession(max_tool_steps=16)
 
 
 if __name__ == "__main__":

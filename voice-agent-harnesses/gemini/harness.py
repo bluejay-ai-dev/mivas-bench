@@ -374,7 +374,15 @@ async def run_call(
     )
     await session.start(room=ctx.room, agent=start)
     tid = report.capture_trace()
-    ctx.add_shutdown_callback(lambda *_: report.link(sid, tid))
+
+    async def _link(*_: Any) -> None:
+        # shutdown callbacks run concurrently with the framework's own session
+        # close; close here first so the last turn's function_tool spans have
+        # ended and flushed before the link waits on the result.
+        await session.aclose()
+        await report.link(sid, tid)
+
+    ctx.add_shutdown_callback(_link)
     if greet == "kick":
         # the greeting is pinned in the connect-time instructions (speak_first);
         # quoting it here reads as the other party's line and the model answers

@@ -15,7 +15,9 @@ Writes:
 from __future__ import annotations
 
 import argparse
+import http.client
 import json
+import time
 import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
@@ -46,8 +48,7 @@ def s3_final_key(slug: str, result_id: str) -> str:
 
 
 def pair_slug(harness: str, industry: str) -> str:
-    """Must match run.py slug(): pods write snapshots under MIVAS_SLUG, and a
-    variant (family/runtime@variant) folds its @ into the same dash."""
+    # same rule as run.py: a variant (family/runtime@variant) is its own slug
     return (
         f"{harness.replace('/', '-').replace('@', '-')}-{industry}"
         .replace("_", "-")
@@ -97,8 +98,11 @@ def list_run_results(run_id: str) -> tuple[dict[str, Any], list[dict[str, Any]]]
     body = _req(f"retrieve-simulation-results/{run_id}")
     run = body.get("simulation_run") or {}
     results = body.get("simulation_results") or body.get("results") or []
-    # capped at 100 rows with no page metadata; a k=5 run is 360
-    while results and len(results) % 100 == 0:
+    if not results:
+        raise SystemExit(f"no simulation results for run {run_id}")
+    # 100 per page, no page metadata: without this a k=5 run gets snapshots
+    # for 100 of 360 calls and the state check silently skips the rest
+    while len(results) % 100 == 0:
         page = _req(f"retrieve-simulation-results/{run_id}?offset={len(results)}")
         more = page.get("simulation_results") or page.get("results") or []
         seen = {str(r.get("id")) for r in results}
@@ -106,8 +110,6 @@ def list_run_results(run_id: str) -> tuple[dict[str, Any], list[dict[str, Any]]]
         if not fresh:
             break
         results += fresh
-    if not results:
-        raise SystemExit(f"no simulation results for run {run_id}")
     return run, results
 
 
