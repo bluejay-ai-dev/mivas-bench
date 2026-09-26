@@ -753,6 +753,9 @@ def _values_equal(key: str, expected: Any, actual: Any) -> bool:
         )
     if _is_phone_key(key):
         return _digits_phone(str(expected)) == _digits_phone(str(actual))
+    if key == "order_number" and isinstance(expected, str) and isinstance(actual, str):
+        # the orders tools accept KE-4483316, KE4483316 and "KE 4483316" as one order
+        return re.sub(r"[^0-9A-Za-z]", "", expected).upper() == re.sub(r"[^0-9A-Za-z]", "", actual).upper()
     if isinstance(expected, bool) or isinstance(actual, bool):
         return expected is actual
     if isinstance(expected, (int, float)) or isinstance(actual, (int, float)):

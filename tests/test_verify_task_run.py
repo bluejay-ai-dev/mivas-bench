@@ -915,3 +915,9 @@ def test_omitted_optional_arg_matches_the_tool_default() -> None:
     assert match(exp, omitted)
     assert not match(exp, urgent)
     assert not match({"name": "classify_visit_request", "parameters": {"visit_class": "mohs", "urgency": "routine"}}, mohs)
+
+
+def test_order_numbers_match_with_or_without_separators() -> None:
+    assert vtr._values_equal("order_number", "KE-4483316", "KE4483316")
+    assert vtr._values_equal("order_number", "KE-4471209", "ke 4471209")
+    assert not vtr._values_equal("order_number", "KE-4483316", "KE-4483317")
