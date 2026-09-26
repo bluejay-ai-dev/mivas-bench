@@ -1,0 +1,23 @@
+scripts/eval_costs.py
+  s_4ea68a93215613::t_c86d50d6b4962a 33-34,321-323,553-562
+tests/test_bluejay_run_to_csv.py
+  s_4ea68a93215613::t_d70fe1568a0351 811-829
+voice-agent-harnesses/s2s-model-pricing.json
+  s_4ea68a93215613::t_d466ab8f4149af 17-19
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "3a9c81d0d13d05f283afbbcc146d0d13e117c931",
+  "prompts": {},
+  "sessions": {
+    "s_4ea68a93215613": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8eb3d720-2035-4a81-aa92-006569f46f3c",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
