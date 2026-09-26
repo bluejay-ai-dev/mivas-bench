@@ -1,7 +1,7 @@
 {
   "task_name": "C4-H3: Employment intake in Washington with packet and note",
   "customer_name": "Clara Whitman",
-  "intent": "Open with exactly: \"I was fired after I reported safety violations.\" When asked who this would be against, say exactly: \"It's Harborline Industries.\" Washington. April fifth, twenty twenty six. Give a short account when asked. If they record intake, say exactly: \"Please add an intake note that I still have the email I sent to HR about the safety violations.\" If offered the packet, say exactly: \"Email is fine.\" If offered a case evaluation or appointment, say exactly: \"Not yet, let me read the paperwork first.\" Stay until they confirm the intake, the note, and the email packet are on the file. A spoken promise that they will take care of it, without those writes, is not enough. Once they confirm the intake, the note, and the email packet are on the file, say exactly: \"Thank you, that's all I needed.\" Do not book an evaluation. End the call. The agent often says one moment or let me pull you up and then asks a question in the same turn. Always answer the question at the end of the agent's turn with the fact it asks for. Never reply with only \"Sure\", \"Okay\", \"Yeah\", or \"Thank you\" when the agent's turn ends in a question.",
+  "intent": "Open with exactly: \"I was fired after I reported safety violations.\" When asked who this would be against, say exactly: \"It's Harborline Industries.\" Washington. April fifth, twenty twenty six. Give a short account when asked. If they record intake, say exactly: \"Please add an intake note that I still have the email I sent to HR about the safety violations.\" If offered the packet, say exactly: \"Email is fine.\" If offered a case evaluation or appointment, say exactly: \"Not yet, let me read the paperwork first.\" Stay until they confirm the intake, the note, and the email packet are on the file. A spoken promise that they will take care of it, without those writes, is not enough. Once they confirm the intake, the note, and the email packet are on the file, say exactly: \"Thank you, that's all I needed.\" Do not book an evaluation. End the call. The agent often says one moment or let me pull you up and then asks a question in the same turn. Always answer the question at the end of the agent's turn with the fact it asks for. Never reply with only \"Sure\", \"Okay\", \"Yeah\", or \"Thank you\" when the agent's turn ends in a question. Never say \"Thank you, that's all I needed.\" while the agent is asking you a question.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -136,10 +136,11 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent has already recorded the intake and asks if there is anything else to add to the file or for the attorney. NOT before the intake is recorded. NOT during screening. NOT when asking whether anyone represents you. NOT when asking what type of matter this is or whether this is employment. NOT when offering the packet by email or text. NOT when asking to book a case evaluation. NOT when asking who this would be against or for a company or employer name.",
+      "match_phrase": "The agent says it has recorded the intake or your account (for example 'I've recorded that'), or asks if there is anything else to add, including when the same turn also offers the packet by email or text. NOT before the agent has asked what happened. NOT during screening. NOT when asking whether anyone represents you, who this would be against, which state, or the date. NOT when you have already asked for the intake note.",
       "response_type": "phrase",
-      "response_value": "Please add an intake note that I still have the email I sent to HR about the safety violations.",
-      "occurrence_mode": "always"
+      "response_value": "Please add an intake note that I still have the email I sent to HR about the safety violations. And email is fine for the packet.",
+      "occurrence_mode": "first_n",
+      "occurrence_n": 1
     },
     {
       "match_type": "context",

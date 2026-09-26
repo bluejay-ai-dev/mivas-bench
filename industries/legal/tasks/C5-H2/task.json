@@ -181,7 +181,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent has held an afternoon or August twelfth or three-thirty evaluation and is reading back that hold's day, time, attorney and fee, asking whether to confirm it. NOT when holding a morning or August eleventh time. NOT when first listing open times. NOT during screening or intake. NOT before the agent has named a specific day and time.",
+      "match_phrase": "The agent has held an afternoon or August twelfth or three-thirty evaluation and is reading back that hold's day, time, attorney and fee, asking whether to confirm it. NOT when holding a morning or August eleventh time. NOT when first listing open times. NOT during screening or intake. NOT before the agent has named a specific day and time. Includes 'shall I confirm this new appointment' for the August twelfth time after the first one was cancelled.",
       "response_type": "phrase",
       "response_value": "Yes, that's right, go ahead and book it.",
       "occurrence_mode": "first_n",
@@ -212,7 +212,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent says the August eleventh, nine in the morning evaluation IS BOOKED or confirmed (the booking is finished), or says goodbye or asks if there is anything else right after saying it is booked, and no evaluation has been cancelled on this call yet. NOT when the agent says it has held, is holding, or reserved the August eleventh time and asks whether to book or confirm it. NOT when only reading back a time. NOT during screening or intake. NOT after they have already cancelled an evaluation.",
+      "match_phrase": "The agent says the August eleventh, nine in the morning evaluation IS BOOKED or confirmed (the booking is finished), or says goodbye or asks if there is anything else right after saying it is booked, and no evaluation has been cancelled on this call yet. NOT when the agent says it has held, is holding, or reserved the August eleventh time and asks whether to book or confirm it. NOT when only reading back a time. NOT during screening or intake. NOT after they have already cancelled an evaluation. NOT when the agent asks whether to confirm, book, or finalize a time (shall I confirm, may I confirm, would you like me to confirm); that is a hold, not a booking.",
       "response_type": "phrase",
       "response_value": "Cancel that one and take the next opening instead.",
       "occurrence_mode": "first_n",
@@ -220,7 +220,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent says the August twelfth, three thirty in the afternoon evaluation is booked or confirmed, after the August eleventh one was cancelled. NOT when the agent says the August eleventh or nine in the morning evaluation is booked. NOT when only offering, holding, or reading back that later time. NOT when quoting a cancellation.",
+      "match_phrase": "The agent says the August twelfth, three thirty in the afternoon evaluation is booked or confirmed, after the August eleventh one was cancelled. NOT when the agent says the August eleventh or nine in the morning evaluation is booked. NOT when only offering, holding, or reading back that later time. NOT when quoting a cancellation. NOT when the agent asks whether to confirm or book the August twelfth time. NOT when no evaluation has been cancelled yet on this call, even if the agent says you are all set or asks what else it can help with.",
       "response_type": "phrase",
       "response_value": "Thank you, that's all I needed.",
       "occurrence_mode": "always"
@@ -272,6 +272,13 @@
       "match_phrase": "The agent asks whether you want to book or schedule the free case evaluation, or whether to find appointment times. NOT when listing specific times, NOT when reading back a held appointment, NOT after it is booked.",
       "response_type": "phrase",
       "response_value": "Yes, book the first opening.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether it was a vehicle accident, a workplace injury, or something else, or what kind of accident it was. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "It was a car accident. A Northstar Logistics truck ran a red light and hit my car.",
       "occurrence_mode": "always"
     }
   ],

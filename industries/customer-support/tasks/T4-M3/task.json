@@ -1,7 +1,7 @@
 {
   "task_name": "T4-M3: No membership on the account",
   "customer_name": "Marcus Iyer",
-  "intent": "Open with exactly: \"Do I have Kestrel Plus on my account?\" Give identity when asked. You only want a yes or no on membership. Do not buy one today. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
+  "intent": "Open with exactly: \"Do I have Kestrel Plus on my account?\" Give identity when asked. You only want a yes or no on membership. Do not buy one today. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request. Never say the closing line until they have told you yes or no on Kestrel Plus. If they ask for an order number or a different phone number, say: \"Order KE-4408117, the laptop.\" Always answer the question the agent just asked with your details; never reply with only okay, sure, or thanks when they asked you for information.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -84,7 +84,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for an order number, which order, or which item. NOT when asking for name, phone, ZIP, or card last four.",
+      "match_phrase": "The agent asks for an order number, which order, or which item, including when they ask for an order number or a different phone number the account might be under. NOT when asking for name, phone, ZIP, or card last four alone.",
       "response_type": "phrase",
       "response_value": "Order KE-4408117, the laptop.",
       "occurrence_mode": "always"
@@ -98,7 +98,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "has already finished the original request you called about, confirmed that outcome out loud, and is now offering a second unrelated request, a confirmation text, or asking if you need anything else. NOT during identity, NOT while they are still collecting facts or looking something up, and NOT before they have confirmed the original request is done.",
+      "match_phrase": "has already finished the original request you called about, confirmed that outcome out loud, and is now offering a second unrelated request, a confirmation text, or asking if you need anything else. NOT during identity, NOT while they are still collecting facts or looking something up, and NOT before they have confirmed the original request is done. NOT when they have not yet told you whether you have Kestrel Plus, and NOT when they ask for an order number or another phone number.",
       "response_type": "phrase",
       "response_value": "That's all I needed. Thank you.",
       "occurrence_mode": "always"

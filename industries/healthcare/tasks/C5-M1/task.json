@@ -132,9 +132,15 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "says the payment link was sent or texted. NOT when only reading the number back or asking you to confirm it, NOT before it was sent.",
+      "match_phrase": "says the payment link was sent or texted. NOT when only reading the number back or asking you to confirm it, NOT before it was sent. NOT when asking for your name, date of birth, or identity, NOT before they have told you the balance.",
       "response_type": "phrase",
       "response_value": "Thank you, that's all I needed. Goodbye."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "tells you the balance or the amount you owe, before a payment link was sent. NOT when asking for your identity, NOT when asking for a mobile number.",
+      "response_type": "phrase",
+      "response_value": "I'll pay it. Please text a payment link to 212-555-0100."
     }
   ],
   "customer_name": "Jordan Lee",

@@ -186,7 +186,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "confirms a new medical follow-up is booked or on the calendar, or reads back that newly booked medical follow-up day and time, after they have said the refill or authorization request was sent and portal access was sent and they have given a callback timeframe. NOT when only listing openings you have not accepted, NOT when the refill or authorization request has not been sent, NOT when portal access has not been sent, NOT when they have not given a callback timeframe, NOT when confirming or reading back Friday's existing cosmetic consult or Botox appointment. NOT when they say the follow-up still needs to be booked. NOT when they tell you to ask someone else for portal access.",
+      "match_phrase": "confirms a new medical follow-up is booked or on the calendar, or reads back that newly booked medical follow-up day and time, after they have said the refill or authorization request was sent and portal access was sent and they have given a callback timeframe. NOT when only listing openings you have not accepted, NOT when the refill or authorization request has not been sent, NOT when portal access has not been sent, NOT when they have not given a callback timeframe, NOT when confirming or reading back Friday's existing cosmetic consult or Botox appointment. NOT when they say the follow-up still needs to be booked. NOT when they tell you to ask someone else for portal access. NOT when they only say they will handle the follow-up next, NOT when they say no separate follow-up is scheduled, NOT when confirming Friday's cosmetic consult. Only when they name the new follow-up day and time as booked.",
       "response_type": "phrase",
       "response_value": "Thank you, that's all I needed. Goodbye."
     },
@@ -198,7 +198,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before a time has been confirmed on the calendar. NOT when they have just confirmed a booked time. NOT during identity verification, NOT before you have asked for the new follow-up. Only after you have already asked for the new follow-up yourself and they have said portal access was sent. NOT right after your identity is confirmed.",
+      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before a time has been confirmed on the calendar. NOT when they have just confirmed a booked time. NOT during identity verification, NOT before you have asked for the new follow-up. Only after you have already asked for the new follow-up yourself and they have said portal access was sent. NOT right after your identity is confirmed. NOT when talking about the refill, the authorization, or Dupixent.",
       "response_type": "phrase",
       "response_value": "I still need that time booked. Please confirm it is on the calendar before I go."
     },
@@ -255,6 +255,12 @@
       "match_phrase": "reads a phone or mobile number back to you and asks whether it is right, or asks you to confirm or repeat the full number. NOT when reading back your name, date of birth, or ZIP code, NOT when first asking which number to use.",
       "response_type": "phrase",
       "response_value": "My number is 212-555-0133. If that is exactly what you have, yes, please send the portal link."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "says they will handle the separate Park Avenue follow-up next, asks what the follow-up is for, or asks when you want it, after portal access was sent and before any new follow-up is booked. NOT when offering concrete times.",
+      "response_type": "phrase",
+      "response_value": "Yes, please book a new medical follow-up at Park Avenue for the biologic, separate from Friday's consult. The first opening is fine."
     }
   ],
   "customer_name": "Maria Alvarez",

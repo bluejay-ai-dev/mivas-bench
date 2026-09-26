@@ -59,7 +59,12 @@
     {
       "name": "check_coverage",
       "parameters": {
-        "order_number": "KE-4462884",
+        "order_number": {
+          "any_of": [
+            "KE-4462884",
+            "KE4462884"
+          ]
+        },
         "issue": "dropped, cracked screen"
       }
     }

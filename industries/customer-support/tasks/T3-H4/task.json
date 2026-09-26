@@ -1,7 +1,7 @@
 {
   "task_name": "T3-H4: Plans, coverage, book, then cancel",
   "customer_name": "Grace Okonkwo",
-  "intent": "Open with exactly: \"Tell me what plans I have, confirm the Aurora Pro that will not charge is covered at zero, book the first bench slot, then cancel it because I cannot make it.\" Give identity when asked. Order KE-4471860. Do the four things in that order. Keep asking for the first available bench slot; do not choose a calendar date, including September, even if the agent insists that a specific month or day is required. Do not mention canceling again until the agent confirms a booked calendar day and time. If they say nothing was booked or the booking failed, tell them the request is not complete and ask them to book the first available slot. Hang up only after they confirm that the booked appointment was cancelled. Once they have finished what you asked and confirmed the cancellation, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request. Always answer the question the agent just asked with your details; never reply with only okay, sure, or thanks when they asked you for information. Never say you are done or that's all you needed before the agent has booked the bench slot and then told you it is cancelled.",
+  "intent": "Open with exactly: \"Tell me what plans I have, confirm the Aurora Pro that will not charge is covered at zero, book the first bench slot, then cancel it because I cannot make it.\" Give identity when asked. Order KE-4471860. Do the four things in that order. Keep asking for the first available bench slot; do not choose a calendar date, including September, even if the agent insists that a specific month or day is required. Do not mention canceling again until the agent confirms a booked calendar day and time. If they say nothing was booked or the booking failed, tell them the request is not complete and ask them to book the first available slot. Hang up only after they confirm that the booked appointment was cancelled. If they say they booked the first slot and cancelled it, even in one step, that is the whole request: never ask them to book again. Once they have finished what you asked and confirmed the cancellation, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request. Always answer the question the agent just asked with your details; never reply with only okay, sure, or thanks when they asked you for information. Never say you are done or that's all you needed before the agent has booked the bench slot and then told you it is cancelled.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -140,7 +140,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "says the bench appointment booked on this call is now cancelled (uses the word cancelled or canceled about that visit), and then asks if you need anything else. NOT when asking for name, phone, ZIP, card last four, or an order number, NOT when reporting your plans or coverage, NOT when saying no appointments are booked right now, and NOT when no appointment has been booked on this call.",
+      "match_phrase": "says the bench appointment booked on this call is now cancelled (uses the word cancelled or canceled about that visit), including when they say they booked the first slot and then cancelled it in one step, whether or not they then ask if you need anything else or whether you want another day. NOT when asking for name, phone, ZIP, card last four, or an order number, NOT when reporting your plans or coverage, NOT when saying no appointments are booked right now, and NOT when no appointment has been booked on this call.",
       "response_type": "phrase",
       "response_value": "That's all I needed. Thank you.",
       "occurrence_mode": "always"
@@ -154,14 +154,14 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers bench times, asks which day, month, or date to book, says it needs a specific month or day, says first available is not a valid date or is unavailable, or asks for the earliest date that works, while no appointment is booked. NOT after a booked day and time are confirmed, and NOT after you asked to cancel a booked visit.",
+      "match_phrase": "offers bench times, asks which day, month, or date to book, says it needs a specific month or day, says first available is not a valid date or is unavailable, or asks for the earliest date that works, while no appointment is booked. NOT after a booked day and time are confirmed, and NOT after you asked to cancel a booked visit. NOT once they have said any visit was booked on this call, even if it was then cancelled.",
       "response_type": "phrase",
       "response_value": "Do not choose a date. Please book the first available bench slot on your calendar.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "says nothing was booked, no appointment exists, or the booking failed, and treats that as completing the request. NOT after a successful booking and cancellation, NOT when they say they are moving you to service or are about to check coverage or book, and NOT when they only mention that no appointment was open before booking started.",
+      "match_phrase": "says nothing was booked, no appointment exists, or the booking failed, and treats that as completing the request. NOT after a successful booking and cancellation, NOT when they say they are moving you to service or are about to check coverage or book, and NOT when they only mention that no appointment was open before booking started. NOT when they have said a visit was booked on this call and then cancelled.",
       "response_type": "phrase",
       "response_value": "That is not complete. Please book the first available bench slot, then cancel it after it is booked.",
       "occurrence_mode": "always"

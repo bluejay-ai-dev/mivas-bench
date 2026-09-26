@@ -122,7 +122,7 @@
       "match_type": "context",
       "match_phrase": "asks for your new insurance carrier, member ID, or the numbers on the new card. NOT when asking for a group number, NOT when reading the member ID back, NOT when asking for your name or date of birth.",
       "response_type": "phrase",
-      "response_value": "The carrier is Cigna. The member ID starts with the letter C: C, four, four, five, five, six, six, seven, seven, eight."
+      "response_value": "The carrier is Cigna. The member ID is C, four, four, five, five, six, six, seven, seven, eight."
     },
     {
       "match_type": "context",
@@ -144,13 +144,13 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "reads your member ID back exactly as C445566778, the letter C then four four five five six six seven seven eight, and asks whether it is correct. NOT when the readback drops the C or has a different digit, NOT when first asking for the member ID.",
+      "match_phrase": "reads your member ID back exactly as C445566778, the letter C then four four five five six six seven seven eight, and asks whether it is correct. NOT when the readback drops the C or has a different digit, NOT when first asking for the member ID. NOT when the readback has two Cs, such as CC445566778.",
       "response_type": "phrase",
       "response_value": "Yes, that's right."
     },
     {
       "match_type": "context",
-      "match_phrase": "reads your member ID back with a missing letter C, a different letter, an extra digit, or a missing digit. NOT when the readback is exactly C445566778. This includes an extra letter before the C, such as DC or TC.",
+      "match_phrase": "reads your member ID back with a missing letter C, a different letter, an extra digit, or a missing digit. NOT when the readback is exactly C445566778. This includes an extra letter before the C, such as DC, TC, or a second C as in CC445566778.",
       "response_type": "phrase",
       "response_value": "No. It's the letter C, then four, four, five, five, six, six, seven, seven, eight."
     },

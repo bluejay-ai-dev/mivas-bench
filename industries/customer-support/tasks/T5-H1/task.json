@@ -114,9 +114,23 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "reads back a $70.00 refund to the card ending 3390 and asks whether to go ahead.",
+      "match_phrase": "reads back a $70.00 (seventy dollar) refund to the card ending 3390 and asks whether to go ahead. NOT when the refund amount or the Rivertide price they read back is anything other than seventy dollars back and four hundred seventy-nine ninety-nine.",
       "response_type": "phrase",
       "response_value": "Yes, refund the seventy dollars.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent reads back a refund amount other than seventy dollars, or a Rivertide price other than four hundred seventy-nine ninety-nine, or says it can only refund a different amount. NOT identity questions.",
+      "response_type": "phrase",
+      "response_value": "That's not the right price. Rivertide has it for four hundred seventy-nine dollars and ninety-nine cents, which is seventy dollars less than the five forty-nine ninety-nine I paid.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks which retailer, Rivertide's price, or whether it is new and in stock there. NOT identity questions and NOT when asking for an order number.",
+      "response_type": "phrase",
+      "response_value": "Rivertide, spelled R, I, V, E, R, T, I, D, E. They have the identical new Halo soundbar in stock for four hundred seventy-nine ninety-nine.",
       "occurrence_mode": "always"
     }
   ],

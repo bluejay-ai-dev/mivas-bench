@@ -24,9 +24,9 @@
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
+      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else. This includes a question that comes after a filler such as one moment, hold on, let me pull that up, or let's get some quick details in the same turn.",
       "response_type": "phrase",
-      "response_value": "Nathaniel Croft, 628-555-0472.",
+      "response_value": "Nathaniel Croft, six two eight, five five five, zero four seven two.",
       "occurrence_mode": "always"
     },
     {
@@ -45,7 +45,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks what the caller's role is, whether the caller is an attorney, an insurance representative, an adjuster, or the opposing side, or on whose behalf the caller is calling. NOT when asking for the caller's name and number.",
+      "match_phrase": "The agent asks what the caller's role is, whether the caller is an attorney, an insurance representative, an adjuster, or the opposing side, or on whose behalf the caller is calling. NOT when asking for the caller's name and number. This includes a question that comes after a filler such as one moment, hold on, let me pull that up, or let's get some quick details in the same turn.",
       "response_type": "phrase",
       "response_value": "I'm the Northgate adjuster on the Eckhart claim. I'm not starting a new matter.",
       "occurrence_mode": "always"

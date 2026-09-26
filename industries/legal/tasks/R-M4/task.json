@@ -66,7 +66,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
+      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question. NOT when asking whether you signed with Halverson and Reed or whether this firm represents you.",
       "response_type": "phrase",
       "response_value": "No, nobody else. Halverson and Reed are handling it.",
       "occurrence_mode": "always"
@@ -111,6 +111,20 @@
       "match_phrase": "The agent has told you where your case stands, such as that it is waiting on medical records or that nothing is needed from you, and has confirmed the message for Allison Fontaine was taken or delivered. NOT when either one is still missing, NOT when the agent asks you a question.",
       "response_type": "phrase",
       "response_value": "Thank you, that's all I needed.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether you signed a representation agreement with Halverson and Reed, or whether this firm represents you on the case. NOT when asking about another lawyer or firm.",
+      "response_type": "phrase",
+      "response_value": "Yes, I signed with Halverson and Reed. They have my car accident case.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks you to spell your last name or repeat your name. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "Thomas Eckhart. That's E C K H A R T.",
       "occurrence_mode": "always"
     }
   ],

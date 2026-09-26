@@ -1,7 +1,7 @@
 {
   "task_name": "C5-E2: Declines after fee disclosure",
   "customer_name": "Percival Ndiaye",
-  "intent": "Open with exactly: \"I was rear-ended by a Summit Hauling truck and I'm thinking about talking to a lawyer.\" When asked when, say exactly: \"It was July tenth, twenty twenty six.\" If asked to book a free evaluation before any fee numbers, say yes and look at times. When times are offered, take the first slot so they can hold it. After they have held a slot and read back that fee, say exactly: \"That's more than I expected , I'll call back later.\" Do not confirm booking. Do not ask for a staff member. End after declining to book. When the agent asks you a question, answer it in that same turn with the answer given here. Never answer a question with only okay, sure, mm-hmm, yeah or thanks, and never speak the agent's lines for it.",
+  "intent": "Open with exactly: \"I was rear-ended by a Summit Hauling truck and I'm thinking about talking to a lawyer.\" When asked when, say exactly: \"It was July tenth, twenty twenty six.\" If asked to book a free evaluation before any fee numbers, say yes and look at times. When times are offered, take the first slot so they can hold it. After they have held a slot and read back that fee, say exactly: \"That's more than I expected , I'll call back later.\" Do not confirm booking. Do not ask for a staff member. End after declining to book. When the agent asks you a question, answer it in that same turn with the answer given here. Never answer a question with only okay, sure, mm-hmm, yeah or thanks, and never speak the agent's lines for it. Nobody represents you: whenever asked whether a lawyer represents you, say \"No, nobody represents me.\" If asked email or text for the packet, say \"Text is fine.\" If the agent lists open times, even in the same turn as the fee, that is not a hold yet: say \"I'll take the first time you offered.\" Say the decline line only after the agent says it has held a specific time and reads it back.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -96,7 +96,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent offers available appointment times or asks which slot to hold. NOT after a slot is already held and they are asking to confirm that booking.",
+      "match_phrase": "The agent offers available appointment times or asks which slot to hold. NOT after a slot is already held and they are asking to confirm that booking. Includes a turn that lists open times together with the fee percentages and asks which works better.",
       "response_type": "phrase",
       "response_value": "I'll take the first time you offered.",
       "occurrence_mode": "always"
@@ -134,6 +134,13 @@
       "match_phrase": "The agent offers to send a medical records release or authorization for your signature, or asks which doctor or provider treated you. NOT any other question.",
       "response_type": "phrase",
       "response_value": "No thanks, not right now.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether your car was damaged, or whether you had any other losses besides your sore neck. NOT the first time they ask what happened.",
+      "response_type": "phrase",
+      "response_value": "Yes, the back of my car was dented and I had it towed to a shop.",
       "occurrence_mode": "always"
     }
   ],

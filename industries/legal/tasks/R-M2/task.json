@@ -28,13 +28,19 @@
       "value": "404-555-0192"
     }
   ],
-  "exp_handoff_path": [],
+  "exp_handoff_path": [
+    "transfer_to_screening",
+    "transfer_to_intake"
+  ],
   "exp_tool_calls": [
     {
       "name": "lookup_caller",
       "parameters": {
         "full_name": "Percival Dane"
       }
+    },
+    {
+      "name": "transfer_to_screening"
     },
     {
       "name": "check_conflict",
@@ -62,6 +68,9 @@
         "practice_area": "auto_accident",
         "incident_date": "2026-06-08"
       }
+    },
+    {
+      "name": "transfer_to_intake"
     },
     {
       "name": "record_intake",

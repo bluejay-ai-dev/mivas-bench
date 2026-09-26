@@ -1,7 +1,7 @@
 {
   "task_name": "C1-E1-BG: Message for Daniel Okonkwo",
   "customer_name": "Renee Whitmore",
-  "intent": "Open with exactly: \"I need to leave a message for Daniel Okonkwo.\" You are calling about forms Daniel mailed you. You do not want a new matter or an appointment. When asked what the message is, say exactly: \"Tell him the forms he mailed arrived and I have a question about page four.\" If asked about a new matter, say exactly: \"No, just the message please.\" If asked to repeat your number or to spell Daniel's last name, answer it; never close while the agent is still asking you something. Only once they confirm the message is taken or passed along, say exactly: \"Thank you, that's all I needed.\" and end the call.",
+  "intent": "Open with exactly: \"I need to leave a message for Daniel Okonkwo.\" You are calling about forms Daniel mailed you. You do not want a new matter or an appointment. When asked what the message is, say exactly: \"Tell him the forms he mailed arrived and I have a question about page four.\" If asked about a new matter, say exactly: \"No, just the message please.\" If asked to repeat your number or to spell Daniel's last name, answer it; never close while the agent is still asking you something. If the agent says go ahead with the message, give the message. Only once they confirm the message is taken or passed along, say exactly: \"Thank you, that's all I needed.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -41,21 +41,21 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks what the message is, what to pass along to Daniel, or what you want written down. NOT when asking for your name or number, and NOT when asking for a spelling.",
+      "match_phrase": "The agent asks what the message is, what to pass along to Daniel, what you want written down, or tells you to go ahead with the message, or asks whether you want Daniel to call you back or what else to pass along. NOT when asking for your name or number, and NOT when asking for a spelling.",
       "response_type": "phrase",
       "response_value": "Tell him the forms he mailed arrived and I have a question about page four.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks you to spell Daniel's last name or the name of the person the message is for, or asks for a word for each letter. NOT when asking for your own name or number.",
+      "match_phrase": "The agent asks you to spell Daniel's last name or the name of the person the message is for, or asks for a word for each letter. NOT when asking for your own name or number. This includes a question that comes after a filler such as one moment, hold on, let me pull that up, or let's get some quick details in the same turn.",
       "response_type": "phrase",
       "response_value": "Okonkwo. O as in Oscar, K as in Kilo, O as in Oscar, N as in November, K as in Kilo, W as in Whiskey, O as in Oscar.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent confirms the message for Daniel was taken, passed along, or is on the file, or asks whether there is anything else after confirming it. NOT when the agent is still asking for your number, a spelling, or the message, and NOT when the agent only says one moment or that it is passing it on. NOT when the agent only says thanks, perfect, okay, or got it, and NOT when it says it did not catch something.",
+      "match_phrase": "The agent says in the past tense that the message for Daniel has been taken, sent, delivered, or is on the file, and the same turn asks you nothing. NEVER when the agent's turn contains any question, including a request to spell Daniel's last name, repeat your number, or give the message. NOT when the agent says it will add, pass, or send it, or says one moment. NOT when the agent only says thanks, perfect, okay, or got it, and NOT when it says it did not catch something.",
       "response_type": "phrase",
       "response_value": "Thank you, that's all I needed.",
       "occurrence_mode": "always"

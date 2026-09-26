@@ -1,7 +1,7 @@
 {
   "task_name": "T5-M3: Price match on an out-of-stock offer",
   "customer_name": "Felix Moreau",
-  "intent": "Open with exactly: \"Rivertide had the Halo soundbar on my order KE-4495108 for seventy dollars less, but that offer is out of stock. Please look up my order and match it anyway.\" Give identity when asked. You already bought the soundbar; never ask to buy or order another one. Order KE-4495108, Halo soundbar. If they ask whether it is in stock, say it is not. Stay for the out-of-stock exclusion. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
+  "intent": "Open with exactly: \"Rivertide had the Halo soundbar on my order KE-4495108 for seventy dollars less, but that offer is out of stock. Please look up my order and match it anyway.\" Give identity when asked. You already bought the soundbar; never ask to buy or order another one. Order KE-4495108, Halo soundbar. If they ask whether it is in stock, say it is not. Stay for the out-of-stock exclusion. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request. Once they say the out-of-stock offer is not eligible after checking your order, that is the answer: say the closing line and end the call. Never ask for an exception, a manual review, a note on the order, or a person. When they ask for your ZIP code and card, say: \"ZIP 94612, card ending 3390.\" Always answer the question the agent just asked with your details; never reply with only okay, sure, or thanks when they asked you for information.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -112,7 +112,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "has already finished the original request you called about, confirmed that outcome out loud, and is now offering a second unrelated request, a confirmation text, or asking if you need anything else. NOT during identity, NOT while they are still collecting facts or looking something up, and NOT before they have confirmed the original request is done.",
+      "match_phrase": "has said the out-of-stock Rivertide offer cannot be matched or is not eligible, and is now asking if you need anything else, or has said it again. NOT during identity, NOT before they have asked for and received your ZIP code and card.",
       "response_type": "phrase",
       "response_value": "That's all I needed. Thank you.",
       "occurrence_mode": "always"
@@ -126,7 +126,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "explains the price-match policy or refuses the out-of-stock match without having looked up your order. NOT when they mention your order, your delivered soundbar, or say they checked or pulled up your order, and NOT during identity questions. NOT after they have said the out-of-stock offer on your order is not eligible, and NOT when they say they already ran or checked the match.",
+      "match_phrase": "Before any identity check on this call (they have not yet asked for your ZIP code and card), the agent explains the price-match policy or refuses the out-of-stock match. NOT once they have asked for or been given your ZIP code and card, NOT when they mention your order or your delivered soundbar, and NOT during identity questions.",
       "response_type": "phrase",
       "response_value": "Please look up my order KE-4495108 and run the match anyway.",
       "occurrence_mode": "first_n",

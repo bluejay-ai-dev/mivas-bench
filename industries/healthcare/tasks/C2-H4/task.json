@@ -145,13 +145,13 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "has looked up the August 20 visit and explains a missed-visit fee or cancellation fee for cancelling that visit, or asks whether you still want to cancel the August 20 visit after naming that fee. NOT when they have already confirmed the August 20 visit is cancelled, NOT when stating a general cancellation policy before looking up that visit, NOT during identity verification, NOT when greeting you.",
+      "match_phrase": "has looked up the August 20 visit and explains a missed-visit fee or cancellation fee for cancelling that visit, or asks whether you still want to cancel the August 20 visit after naming that fee. NOT when they have already confirmed the August 20 visit is cancelled, NOT when stating a general cancellation policy before looking up that visit, NOT during identity verification, NOT when greeting you. Also fire when they ask whether you would like to pick a different time or should they go ahead and cancel.",
       "response_type": "phrase",
       "response_value": "I accept the missed-visit fee. Please cancel the August 20 visit, then book a new follow-up at Park Avenue."
     },
     {
       "match_type": "context",
-      "match_phrase": "offers to move or reschedule the August 20 visit, says moving it is free, or asks whether you want a different time or still want to cancel, while the August 20 visit is not cancelled yet. NOT after the August 20 visit is already cancelled, NOT when offering a new time after the cancel is done.",
+      "match_phrase": "offers to move or reschedule the August 20 visit, says moving it is free, or asks whether you want a different time or still want to cancel, while the August 20 visit is not cancelled yet. NOT after the August 20 visit is already cancelled, NOT when offering a new time after the cancel is done. Also fire when they ask whether to move your August 20 appointment to a new time they named.",
       "response_type": "phrase",
       "response_value": "No, don't move it. Please cancel the August 20 visit; I accept the fee. Then book a new follow-up at Park Avenue."
     },
@@ -187,7 +187,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "asks when you get back, what date you return, what dates work, or how far out to search for the new follow-up. NOT when asking for your name, date of birth, or ZIP.",
+      "match_phrase": "asks when you get back, what date you return, what dates work, or how far out to search for the new follow-up. NOT when asking for your name, date of birth, or ZIP. NOT before the August 20 visit is confirmed cancelled, NOT when they ask whether to move the visit or go ahead and cancel.",
       "response_type": "phrase",
       "response_value": "I'm back on August twenty-third, so the first available follow-up at Park Avenue on August twenty-fourth or later is fine, including the twenty-fourth itself."
     },

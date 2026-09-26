@@ -125,11 +125,13 @@
       "match_type": "context",
       "match_phrase": "greets you and asks what you need, what they can help with, or why you are calling, before you have explained the reason for the call.",
       "response_type": "phrase",
-      "response_value": "Hi, I'm a new patient. Before anything else, do you take Oscar Health at your Park Avenue office?"
+      "response_value": "Hi, I'm a new patient. Before anything else, do you take Oscar Health at your Park Avenue office?",
+      "occurrence_mode": "first_n",
+      "occurrence_n": 1
     },
     {
       "match_type": "context",
-      "match_phrase": "asks for your full name and date of birth, or asks you to confirm who you are, or asks for the patient's name and date of birth. NOT when asking only for a member ID or insurance card, NOT when asking which office or location, NOT when asking for a phone or mobile number, NOT when asking about an appointment day or time, NOT when reading your name and date of birth back to you for confirmation.",
+      "match_phrase": "asks for your full name and date of birth, or asks you to confirm who you are, or asks for the patient's name and date of birth. NOT when asking only for a member ID or insurance card, NOT when asking which office or location, NOT when asking ONLY for a phone or mobile number with no name or date of birth, NOT when asking about an appointment day or time, NOT when reading your name and date of birth back to you for confirmation.",
       "response_type": "phrase",
       "response_value": "Gwen Okoro. My date of birth is October eleventh, nineteen eighty-four."
     },
@@ -147,13 +149,13 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers one or more concrete appointment dates or times, or asks you to choose among concrete slots. NOT when asking for your name, date of birth, mobile number, or ZIP code. NOT when they say the time is already booked.",
+      "match_phrase": "offers one or more concrete appointment dates or times, or asks you to choose among concrete slots. NOT when asking for your name, date of birth, mobile number, or ZIP code. NOT when they say the time is already booked. NOT when they read back one single time and ask whether to book it or go ahead.",
       "response_type": "phrase",
       "response_value": "I'll take the first time you offered."
     },
     {
       "match_type": "context",
-      "match_phrase": "asks whether you want the waitlist, offers to add you to a list for an earlier opening, or says they can list you if something sooner opens. NOT when asking for the date window, NOT when offering a specific appointment time to book now. NOT when they have already said you are on the waitlist.",
+      "match_phrase": "asks whether you want the waitlist, offers to add you to a list for an earlier opening, or says they can list you if something sooner opens. NOT when asking for the date window, NOT when offering a specific appointment time to book now. NOT when they have already said you are on the waitlist. NOT when they are only offering to book you now and flag the insurance, or to set up an insurance or benefits callback, NOT before a time has been booked.",
       "response_type": "phrase",
       "response_value": "Yes, add me to the waitlist at Park Avenue from August twenty-fourth through September thirtieth, in case a better opening comes up."
     },
@@ -207,9 +209,33 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "says you are booked for a specific time AND that you are on the waitlist. NOT when either one is still pending.",
+      "match_phrase": "says you are booked for a specific time AND that you are on the waitlist. NOT when either one is still pending. NOT when they say no appointment has been booked, NOT when they have only said you are on the waitlist.",
       "response_type": "phrase",
       "response_value": "Great, thank you. Goodbye."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks what you would like to be seen for, the reason for the visit, or what the dermatologist should look at. NOT when asking for your name, date of birth, or mobile.",
+      "response_type": "phrase",
+      "response_value": "A mole on my back that I want checked. I'm a new patient."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "reads back one specific appointment date and time and asks whether to book it, go ahead, lock it in, or whether that is alright. NOT when they say it is already booked, NOT when they list two or more times to choose from.",
+      "response_type": "phrase",
+      "response_value": "Yes, please book it."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks for your full name, date of birth, AND your mobile or phone number in the same question. NOT when reading any of them back to you.",
+      "response_type": "phrase",
+      "response_value": "Gwen Okoro. My date of birth is October eleventh, nineteen eighty-four. My mobile is two, one, two, five, five, five, zero, one, nine, three."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "reads back your mobile or phone number with exactly the ten digits 2125550193 (in any grouping, with or without an area code in parentheses) and asks whether it is right. NOT when the digits they read back are different, have an extra area code, or are missing a digit.",
+      "response_type": "phrase",
+      "response_value": "Yes, that's right."
     }
   ],
   "customer_name": "Gwen Okoro",

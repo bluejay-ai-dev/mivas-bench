@@ -1,7 +1,7 @@
 {
   "task_name": "T5-M2: Price match at an unqualified retailer",
   "customer_name": "Felix Moreau",
-  "intent": "Open with exactly: \"Price match the Aurelian Halo soundbar. Grimwald's has it for seventy dollars less.\" Give identity when asked. Order KE-4495108, the Halo soundbar. You already bought and received it; you are not buying a new one. If they ask for Grimwald's price in dollars, repeat that it is seventy dollars less than you paid. Do not invent a dollar amount. If they only recite the published price-match policy, that is not done. Stay on the line. Stay until they refuse Grimwald's and read the qualified-competitor list. Do not name a second retailer. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
+  "intent": "Open with exactly: \"Price match the Aurelian Halo soundbar. Grimwald's has it for seventy dollars less.\" Give identity when asked. Order KE-4495108, the Halo soundbar. You already bought and received it; you are not buying a new one. If they ask for Grimwald's price in dollars, repeat that it is seventy dollars less than you paid. Do not invent a dollar amount. If they only recite the published price-match policy, that is not done. Stay on the line. Stay until they refuse Grimwald's and read the qualified-competitor list. Do not name a second retailer. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request. Never say the closing line until they have said Grimwald's cannot be matched. Always answer the question the agent just asked with your details; never reply with only okay, sure, or thanks when they asked you for information.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -147,7 +147,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "has already finished the original request you called about, confirmed that outcome out loud, and is now offering a second unrelated request, a confirmation text, or asking if you need anything else. NOT during identity, NOT while they are still collecting facts or looking something up, and NOT before they have confirmed the original request is done.",
+      "match_phrase": "has said Grimwald's cannot be matched or is not a qualified competitor, and is now asking if you need anything else or saying goodbye. NOT during identity, NOT when they have only recited the general price-match policy or asked whether you already bought it, and NOT while they are still looking something up.",
       "response_type": "phrase",
       "response_value": "That's all I needed. Thank you.",
       "occurrence_mode": "always"

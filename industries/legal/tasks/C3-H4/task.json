@@ -1,7 +1,7 @@
 {
   "task_name": "C3-H4: Employment in Washington clears screening",
   "customer_name": "Wilhelmina Prado",
-  "intent": "Open with exactly: \"I was fired after I reported a safety problem at work.\" When asked who this would be against, say exactly: \"It's Evergreen Millwork.\" State is Washington. If asked what you reported or what happened: you reported a blocked fire exit to your supervisor, and you were fired a week later. If asked about losses: your pay and your health insurance since the firing. Date: June second, twenty twenty six. You need the new client packet by email: if they ask email or text, say email. Decline booking. Stay until they confirm the intake is on the file and the packet was sent. A spoken promise to take care of it without those writes is not enough. After they confirm the intake is on the file and the packet was sent, say exactly: \"Thank you, that's all I needed.\" Do not book an evaluation. End the call.",
+  "intent": "Open with exactly: \"I was fired after I reported a safety problem at work.\" When asked who this would be against, say exactly: \"It's Evergreen Millwork.\" State is Washington. If asked what you reported or what happened: you reported a blocked fire exit to your supervisor, and you were fired a week later. If asked about losses: your pay and your health insurance since the firing. Date: June second, twenty twenty six. If asked for your email address, give it: wilhelmina dot prado at example dot com. You need the new client packet by email: if they ask email or text, say email. Decline booking. Stay until they confirm the intake is on the file and the packet was sent. A spoken promise to take care of it without those writes is not enough. After they confirm the intake is on the file and the packet was sent, say exactly: \"Thank you, that's all I needed.\" Do not book an evaluation. End the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -26,6 +26,10 @@
     {
       "trait_name": "phone",
       "value": "360-555-0149"
+    },
+    {
+      "trait_name": "email",
+      "value": "wilhelmina.prado@example.com"
     }
   ],
   "exp_handoff_path": [
@@ -150,9 +154,16 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers the new client packet or asks whether to send it by email or text. NOT when asking to book a case evaluation.",
+      "match_phrase": "offers the new client packet or asks whether to send it by email or text. NOT when asking to book a case evaluation. NOT when asking for your email address.",
       "response_type": "phrase",
       "response_value": "Please send the packet by email.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks for your email address, or asks you to spell, repeat, or confirm it. NOT when only asking whether to send the packet by email or text.",
+      "response_type": "phrase",
+      "response_value": "It's wilhelmina dot prado at example dot com.",
       "occurrence_mode": "always"
     }
   ],

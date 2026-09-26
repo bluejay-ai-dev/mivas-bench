@@ -100,7 +100,7 @@
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "asks for your full name and date of birth, or asks you to confirm who you are, or asks for the patient's name and date of birth. NOT when asking only for a member ID or insurance card, NOT when asking which office or location, NOT when asking for a phone or mobile number, NOT when asking about an appointment day or time, NOT when reading your name and date of birth back to you for confirmation.",
+      "match_phrase": "asks for your full name and date of birth, or asks you to confirm who you are, or asks for the patient's name and date of birth. NOT when asking only for a member ID or insurance card, NOT when asking which office or location, NOT when asking ONLY for a phone or mobile number with no name or date of birth, NOT when asking about an appointment day or time, NOT when reading your name and date of birth back to you for confirmation.",
       "response_type": "phrase",
       "response_value": "Priya Raghunathan. My date of birth is February twenty-seventh, nineteen ninety."
     },
@@ -118,7 +118,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers an appointment time, a slot, or asks which day or time you want. NOT when asking for your name or date of birth, NOT when they have not yet given the street, floor, and suite if you still need those.",
+      "match_phrase": "offers an appointment time, a slot, or asks which day or time you want. NOT when asking for your name or date of birth, NOT when they have not yet given the street, floor, and suite if you still need those. NOT when they read back one single time and ask whether to book it or go ahead.",
       "response_type": "phrase",
       "response_value": "I'll take the first time you offered."
     },
@@ -148,17 +148,47 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before a time has been confirmed on the calendar. NOT when they have just confirmed a booked time.",
+      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before a time has been confirmed on the calendar. NOT when they have just confirmed a booked time. NOT when you have not yet asked to book a visit, NOT when they ask whether you would like to schedule an appointment.",
       "response_type": "phrase",
       "response_value": "I still need that time booked. Please confirm it is on the calendar before I go."
     },
     {
       "match_type": "context",
-      "match_phrase": "says whether Brooklyn Heights takes Cigna, or asks what you would like to do next or if there is anything else, and you have NOT yet asked to book a visit. NOT when asking for your name or date of birth, NOT when a time is already booked.",
+      "match_phrase": "says whether Brooklyn Heights takes Cigna, or asks whether you would like to schedule an appointment, or asks what you would like to do next or if there is anything else, and you have NOT yet asked to book a visit. NOT when asking for your name or date of birth, NOT when a time is already booked.",
       "response_type": "phrase",
       "response_value": "Thanks. I also need to come in for dry, scaly skin on my elbow. Please book me a new-patient visit at Brooklyn Heights.",
       "occurrence_mode": "first_n",
       "occurrence_n": 1
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks whether you are a new patient or have been seen at Straus before. NOT when asking for your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "I'm a new patient, I've never been seen at Straus."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks what you would like to be seen for, the reason for the visit, or what day and time you want, before any time has been offered. NOT when asking for your name, date of birth, or mobile.",
+      "response_type": "phrase",
+      "response_value": "Dry, scaly skin on my elbow. Any day or time is fine, the first available new-patient time at Brooklyn Heights."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "reads back one specific appointment date and time and asks whether to book it, go ahead, lock it in, or whether that is alright. NOT when they say it is already booked, NOT when they list two or more times to choose from.",
+      "response_type": "phrase",
+      "response_value": "Yes, please book it."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks for your full name, date of birth, AND your mobile or phone number in the same question. NOT when reading any of them back to you.",
+      "response_type": "phrase",
+      "response_value": "Priya Raghunathan. My date of birth is February twenty-seventh, nineteen ninety. My mobile is seven, one, eight, five, five, five, zero, one, nine, two."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "reads back your mobile or phone number with exactly the ten digits 7185550192 (in any grouping, with or without an area code in parentheses) and asks whether it is right. NOT when the digits they read back are different, have an extra area code, or are missing a digit.",
+      "response_type": "phrase",
+      "response_value": "Yes, that's right."
     }
   ],
   "customer_name": "Priya Raghunathan",

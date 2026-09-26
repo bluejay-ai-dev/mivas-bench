@@ -1,7 +1,7 @@
 {
   "task_name": "C4-H2: Consumer intake, declines booking",
   "customer_name": "Estelle Kowalczyk",
-  "intent": "Open with exactly: \"A store sold me a defective space heater.\" When asked who this would be against, say exactly: \"It's Midtown Appliance.\" California. January fifth, twenty twenty six. If offered the packet, say exactly: \"Email is fine.\" If offered an appointment, say exactly: \"Not yet, let me read the paperwork first.\" Stay until they confirm the intake is on the file and the packet has been emailed. A spoken promise to send it without those writes is not enough. Once both are confirmed on the file, say exactly: \"Thank you, that's all I needed.\" and end the call. The agent often says one moment or let me pull you up and then asks a question in the same turn. Always answer the question at the end of the agent's turn with the fact it asks for. Never reply with only \"Sure\", \"Okay\", \"Yeah\", or \"Thank you\" when the agent's turn ends in a question.",
+  "intent": "Open with exactly: \"Midtown Appliance sold me a defective space heater.\" and say nothing else in that first turn. When asked who this would be against, say exactly: \"It's Midtown Appliance.\" California. January fifth, twenty twenty six. If offered the packet, say exactly: \"Email is fine.\" If offered an appointment, say exactly: \"Not yet, let me read the paperwork first.\" Stay until they confirm the intake is on the file and the packet has been emailed. A spoken promise to send it without those writes is not enough. Once both are confirmed on the file, say exactly: \"Thank you, that's all I needed.\" and end the call. The agent often says one moment or let me pull you up and then asks a question in the same turn. Always answer the question at the end of the agent's turn with the fact it asks for. Never reply with only \"Sure\", \"Okay\", \"Yeah\", or \"Thank you\" when the agent's turn ends in a question. Never say \"Thank you, that's all I needed.\" before the agent has said the packet was emailed. If asked whether there is anything else to add, say \"No, that's everything about what happened.\"",
   "traits": [
     {
       "trait_name": "full_name",
@@ -170,7 +170,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers an appointment or evaluation time. NOT when asking whether to send the packet by email or text. NOT when you have already declined booking once and the agent is only saying take your time or call back when ready.",
+      "match_phrase": "offers an appointment or evaluation time. NOT when asking whether to send the packet by email or text. NOT when you have already declined booking once and the agent is only saying take your time or call back when ready. NOT when asking whether a lawyer represents you.",
       "response_type": "phrase",
       "response_value": "Not yet, let me read the paperwork first.",
       "occurrence_mode": "always"
@@ -222,6 +222,13 @@
       "match_phrase": "The agent reads back your email address, asks you to confirm it, or asks you to spell it. NOT when asking whether you want email or text.",
       "response_type": "phrase",
       "response_value": "It's estelle dot kowalczyk at example dot com. E-S-T-E-L-L-E, dot, K-O-W-A-L-C-Z-Y-K, at example dot com.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether there is anything else to add about what happened, or anything else the attorney should know, before it has said the packet was emailed. NOT after the intake and the emailed packet are both confirmed.",
+      "response_type": "phrase",
+      "response_value": "No, that's everything about what happened.",
       "occurrence_mode": "always"
     }
   ],

@@ -1,7 +1,7 @@
 {
   "task_name": "C5-H3: Mumbled agreement is not a yes",
   "customer_name": "Lorraine Pike",
-  "intent": "Open with exactly: \"I want the first appointment you have for my Apex Collections accident.\" When asked when, say exactly: \"It was July tenth, twenty twenty six.\" If asked whether to send the packet by email or text, say exactly: \"Email is fine.\" Take the first appointment time offered. On the first booking readback, mumble exactly: \"Uh-huh.\" Only when asked again after that mumble, say exactly: \"Yes, that's right, go ahead and book it.\" Do not ask for a staff member. Stay until they confirm the intake is on the file, the packet is sent, and the appointment is booked. A spoken \"we'll take care of it\" without those writes is not enough. Once they confirm the appointment is booked, say exactly: \"Thank you, that's all I needed.\" and end the call. When the agent asks you a question, answer it in that same turn with the answer given here. Apart from the one scripted Uh-huh on the first booking readback, never answer a question with only okay, sure, mm-hmm, yeah or thanks, and never speak the agent's lines for it. Say \"Thank you, that's all I needed.\" only after the agent says the evaluation is booked for a specific day and time, never after 'will do', 'one moment', 'taking care of that' or 'let's get some details'. After you say it, end the call and say nothing more.",
+  "intent": "Open with exactly: \"I want the first appointment you have for my Apex Collections accident.\" When asked when, say exactly: \"It was July tenth, twenty twenty six.\" If asked whether to send the packet by email or text, say exactly: \"Email is fine.\" Take the first appointment time offered. On the first booking readback, mumble exactly: \"Uh-huh.\" Only when asked again after that mumble, say exactly: \"Yes, that's right, go ahead and book it.\" Do not ask for a staff member. Stay until they confirm the intake is on the file, the packet is sent, and the appointment is booked. A spoken \"we'll take care of it\" without those writes is not enough. Once they confirm the appointment is booked, say exactly: \"Thank you, that's all I needed.\" and end the call. When the agent asks you a question, answer it in that same turn with the answer given here. Apart from the one scripted Uh-huh on the first booking readback, never answer a question with only okay, sure, mm-hmm, yeah or thanks, and never speak the agent's lines for it. Say \"Thank you, that's all I needed.\" only after the agent says the evaluation is booked for a specific day and time, never after 'will do', 'one moment', 'taking care of that' or 'let's get some details'. After you say it, end the call and say nothing more. Say \"Uh-huh.\" only once, on the first booking readback, and nowhere else in the call. Nobody represents you: whenever asked whether a lawyer represents you, say \"No, nobody represents me.\" After that one \"Uh-huh.\", answer every later question about booking the read-back time with \"Yes, that's right, go ahead and book it.\"",
   "traits": [
     {
       "trait_name": "full_name",
@@ -156,7 +156,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent offers available appointment times or asks which slot to hold. NOT after a slot is already held and they are asking to confirm that booking.",
+      "match_phrase": "The agent offers available appointment times or asks which slot to hold. NOT after a slot is already held and they are asking to confirm that booking. NOT when the agent asks again whether to book a time it already read back.",
       "response_type": "phrase",
       "response_value": "I'll take the first time you offered.",
       "occurrence_mode": "always"
@@ -171,7 +171,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks again to confirm the booking after you already mumbled, said uh-huh, or did not give a clear yes. NOT the first readback, NOT during representation screening or conflict checks, and NOT before they have named the fee.",
+      "match_phrase": "The agent asks again to confirm the booking after you already mumbled, said uh-huh, or did not give a clear yes. NOT the first readback, NOT during representation screening or conflict checks, and NOT before they have named the fee. Includes any later turn that asks again whether to book the same read-back time, such as 'would you like me to book that appointment' asked a second time, or 'I need a clear yes'.",
       "response_type": "phrase",
       "response_value": "Yes, that's right, go ahead and book it.",
       "occurrence_mode": "always"

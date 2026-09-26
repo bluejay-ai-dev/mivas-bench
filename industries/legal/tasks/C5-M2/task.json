@@ -1,7 +1,7 @@
 {
   "task_name": "C5-M2: Workers comp booking in Florida",
   "customer_name": "Martin Iwu",
-  "intent": "Open with exactly: \"I was hurt on a Gulf Coast Rigging job site in Florida.\" When asked what type of matter this is, say it is workers' compensation. When asked when, say exactly: \"It was July tenth, twenty twenty six.\" Take the first appointment time offered. When read back, say exactly: \"Yes, that's right, go ahead and book it.\" If asked email or text for the packet, say email. Do not ask for a staff member. Stay until they confirm the evaluation is booked. A spoken promise without the booking is not enough. Once they confirm the evaluation is booked, say exactly: \"Thank you, that's all I needed.\" and end the call. When the agent asks you a question, answer it in that same turn with the answer given here. Never answer a question with only okay, sure, mm-hmm, yeah or thanks, and never speak the agent's lines for it. Say \"Thank you, that's all I needed.\" only after the agent says the evaluation is booked for a specific day and time, never after 'will do', 'one moment', 'taking care of that' or 'let's get some details'. After you say it, end the call and say nothing more.",
+  "intent": "Open with exactly: \"I was hurt on a Gulf Coast Rigging job site in Florida.\" When asked what type of matter this is, say it is workers' compensation. When asked when, say exactly: \"It was July tenth, twenty twenty six.\" Take the first appointment time offered. When read back, say exactly: \"Yes, that's right, go ahead and book it.\" If asked email or text for the packet, say email. Do not ask for a staff member. Stay until they confirm the evaluation is booked. A spoken promise without the booking is not enough. Once they confirm the evaluation is booked, say exactly: \"Thank you, that's all I needed.\" and end the call. When the agent asks you a question, answer it in that same turn with the answer given here. Never answer a question with only okay, sure, mm-hmm, yeah or thanks, and never speak the agent's lines for it. Say \"Thank you, that's all I needed.\" only after the agent says the evaluation is booked for a specific day and time, never after 'will do', 'one moment', 'taking care of that' or 'let's get some details'. After you say it, end the call and say nothing more. Nobody represents you: whenever asked whether a lawyer represents you, say \"No, nobody represents me.\" Do not push for an appointment while the agent is asking screening questions; answer the question asked.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -143,7 +143,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent has already held a slot and is reading back that held appointment's day, time, attorney and fee, asking whether to confirm it. NOT when first listing open times, NOT during representation screening or conflict checks, and NOT before they have named the fee, and NOT when asking which slot to hold. NOT when they say let's get some quick details or ask intake questions. NOT after they have said the evaluation is booked or confirmed.",
+      "match_phrase": "The agent has already held a slot and is reading back that held appointment's day, time, attorney and fee, asking whether to confirm it. NOT when first listing open times, NOT during representation screening or conflict checks, and NOT before they have named the fee, and NOT when asking which slot to hold. NOT when they say let's get some quick details or ask intake questions. NOT after they have said the evaluation is booked or confirmed. NOT when the agent says the evaluation is booked and asks whether there is anything else.",
       "response_type": "phrase",
       "response_value": "Yes, that's right, go ahead and book it.",
       "occurrence_mode": "always"
@@ -181,6 +181,13 @@
       "match_phrase": "The agent asks whether you want to book or schedule the free case evaluation, or whether to find appointment times. NOT when listing specific times, NOT when reading back a held appointment, NOT after it is booked.",
       "response_type": "phrase",
       "response_value": "Yes, please book the free case evaluation.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent says the evaluation is booked or confirmed for a specific day and time, or asks whether there is anything else right after saying it is booked. NOT when listing open times, NOT when reading back a held appointment and asking whether to book it, NOT when it says it has held a time.",
+      "response_type": "phrase",
+      "response_value": "Thank you, that's all I needed.",
       "occurrence_mode": "always"
     }
   ],

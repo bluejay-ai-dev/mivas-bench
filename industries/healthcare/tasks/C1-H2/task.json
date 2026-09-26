@@ -107,7 +107,13 @@
   "scripted_responses": [
     {
       "match_type": "context",
-      "match_phrase": "asks for your full name and date of birth, or asks you to confirm who you are, or asks for the patient's name and date of birth. NOT when asking only for a member ID or insurance card, NOT when asking which office or location, NOT when asking for a phone or mobile number, NOT when asking about an appointment day or time, NOT when reading your name and date of birth back to you for confirmation.",
+      "match_phrase": "asks for your full name, date of birth, AND your mobile or phone number in the same question. NOT when reading any of them back to you.",
+      "response_type": "phrase",
+      "response_value": "Owen Castellanos. My date of birth is January thirtieth, nineteen fifty-seven. My mobile is two, one, two, five, five, five, zero, one, nine, six."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks for your full name and date of birth, or asks you to confirm who you are, or asks for the patient's name and date of birth. NOT when asking only for a member ID or insurance card, NOT when asking which office or location, NOT when asking ONLY for a phone or mobile number with no name or date of birth, NOT when asking about an appointment day or time, NOT when reading your name and date of birth back to you for confirmation.",
       "response_type": "phrase",
       "response_value": "Owen Castellanos. My date of birth is January thirtieth, nineteen fifty-seven."
     },
@@ -201,7 +207,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "asks for your mobile or phone number. NOT when reading a number back to you, NOT when asking for your name and date of birth.",
+      "match_phrase": "asks for your mobile or phone number. NOT when reading a number back to you, NOT when asking for your name and date of birth. NOT when they are reading a number back and asking if it is right.",
       "response_type": "phrase",
       "response_value": "My mobile is two, one, two, five, five, five, zero, one, nine, six."
     },
@@ -224,6 +230,18 @@
       "response_value": "Yes. What is the Park Avenue street address, floor, and suite? And I have Medicare, do you take that at Park Avenue?",
       "occurrence_mode": "first_n",
       "occurrence_n": 1
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "reads back your mobile or phone number with exactly the ten digits 2125550196 (in any grouping, with or without an area code in parentheses) and asks whether it is right. NOT when the digits they read back are different, have an extra area code, or are missing a digit.",
+      "response_type": "phrase",
+      "response_value": "Yes, that's right."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "reads back a mobile or phone number that is NOT exactly the ten digits 2125550196, for example one with an extra or missing digit or a repeated area code, and asks whether it is right. NOT when the digits are exactly 2125550196.",
+      "response_type": "phrase",
+      "response_value": "No, it's two, one, two, five, five, five, zero, one, nine, six. Ten digits."
     }
   ],
   "customer_name": "Owen Castellanos",

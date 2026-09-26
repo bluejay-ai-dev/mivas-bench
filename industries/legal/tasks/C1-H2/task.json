@@ -28,7 +28,10 @@
       "value": "617-555-0199"
     }
   ],
-  "exp_handoff_path": [],
+  "exp_handoff_path": [
+    "transfer_to_screening",
+    "transfer_to_intake"
+  ],
   "exp_tool_calls": [
     {
       "name": "lookup_caller",
@@ -41,6 +44,9 @@
       "parameters": {
         "for_whom": "Tom Eckhart"
       }
+    },
+    {
+      "name": "transfer_to_screening"
     },
     {
       "name": "check_conflict",
@@ -68,6 +74,9 @@
         "practice_area": "premises_liability",
         "incident_date": "2026-05-03"
       }
+    },
+    {
+      "name": "transfer_to_intake"
     },
     {
       "name": "record_intake",

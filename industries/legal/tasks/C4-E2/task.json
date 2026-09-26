@@ -1,7 +1,7 @@
 {
   "task_name": "C4-E2: Intake carries screened values",
   "customer_name": "Martin Iwu",
-  "intent": "Open with exactly: \"A car ran me off the road in Florida.\" Other driver Landry Vance. May second, twenty twenty six. Short account: he drifted into my lane and forced me off the road. Decline booking. Do not say thank you or end the call on a filing deadline, a date question, or a next-steps speech. Stay until they confirm the intake is recorded on the file. A spoken promise, a filing deadline, or next-steps talk, without that write, is not enough. Once they confirm the intake is recorded on the file, say exactly: \"Thank you, that's all I needed.\" and end the call. The agent often says one moment or let me pull you up and then asks a question in the same turn. Always answer the question at the end of the agent's turn with the fact it asks for. Never reply with only \"Sure\", \"Okay\", \"Yeah\", or \"Thank you\" when the agent's turn ends in a question.",
+  "intent": "Open with exactly: \"A car ran me off the road in Florida.\" and say nothing else in that first turn. Give the other driver, the date, and the account only when asked. Your own name is Martin Iwu; Landry Vance is the other driver, never you. Other driver Landry Vance. May second, twenty twenty six. Short account: he drifted into my lane and forced me off the road. Decline booking. Do not say thank you or end the call on a filing deadline, a date question, or a next-steps speech. Stay until they confirm the intake is recorded on the file. A spoken promise, a filing deadline, or next-steps talk, without that write, is not enough. Once they confirm the intake is recorded on the file, say exactly: \"Thank you, that's all I needed.\" and end the call. The agent often says one moment or let me pull you up and then asks a question in the same turn. Always answer the question at the end of the agent's turn with the fact it asks for. Never reply with only \"Sure\", \"Okay\", \"Yeah\", or \"Thank you\" when the agent's turn ends in a question.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -69,7 +69,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks who the claim or matter would be against, who the other side is, or for the name of the other driver or person this would be against, even when the same turn starts with a filler such as one moment, let me pull you up, let me look you up, or I'll check that. NOT any other question.",
+      "match_phrase": "The agent asks who the claim or matter would be against, who the other side is, or for the name of the other driver or person this would be against, even when the same turn starts with a filler such as one moment, let me pull you up, let me look you up, or I'll check that. NOT when asking you to spell your own name. NOT when asking whether Landry Vance is you or the other driver. NOT any other question.",
       "response_type": "phrase",
       "response_value": "It's Landry Vance.",
       "occurrence_mode": "always"
@@ -114,6 +114,20 @@
       "match_phrase": "The agent has just said the intake is recorded, saved, or on the file. NOT when asking who the claim would be against, NOT when asking for a date, name, phone, representation, what happened, or state. NOT when reading a filing deadline. NOT when offering to book.",
       "response_type": "phrase",
       "response_value": "Thank you, that's all I needed.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks you to spell your own name or last name, or asks whether your name is Martin Iwu. NOT when asking who the claim would be against.",
+      "response_type": "phrase",
+      "response_value": "My name is Martin Iwu. Martin, M-A-R-T-I-N. Iwu, I-W-U.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether Landry Vance is your name or the other driver's name, or asks you to confirm who Landry Vance is. NOT when first asking who the claim would be against.",
+      "response_type": "phrase",
+      "response_value": "Landry Vance is the other driver. My name is Martin Iwu.",
       "occurrence_mode": "always"
     }
   ],

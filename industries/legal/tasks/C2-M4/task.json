@@ -44,40 +44,40 @@
       "match_type": "context",
       "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
       "response_type": "phrase",
-      "response_value": "Lois Penney, 414-555-0196.",
+      "response_value": "Lois Penney, four one four, five five five, zero one nine six.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question.",
+      "match_phrase": "The agent asks whether another lawyer or law firm currently represents the caller, or whether the caller has already hired or signed with anyone. NOT any other question. This includes a question that comes after a filler such as one moment, hold on, let me pull that up, or let's get some quick details in the same turn.",
       "response_type": "phrase",
       "response_value": "I spoke to a lawyer last week but I didn't hire them.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question.",
+      "match_phrase": "The agent asks who the claim would be against, who the other side is, who this would be against, or for the name of the store. NOT any other question. This includes a question that comes after a filler such as one moment, hold on, let me pull that up, or let's get some quick details in the same turn.",
       "response_type": "phrase",
       "response_value": "It's Greenfield Market.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks which state this happened in, or where it took place. NOT any other question.",
+      "match_phrase": "The agent asks which state this happened in, or where it took place. NOT any other question. NOT when the agent asks for the name of the store or who this would be against; answer that instead.",
       "response_type": "phrase",
       "response_value": "That's all I needed today. Thank you.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks when the incident happened, or for the date of the accident, injury or event. NOT any other question.",
+      "match_phrase": "The agent asks when the incident happened, or for the date of the accident, injury or event. NOT any other question. NOT when the agent asks for the name of the store or who this would be against; answer that instead.",
       "response_type": "phrase",
       "response_value": "That's all I needed today. Thank you.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent starts taking a written account, asks you to describe what happened or your injuries, or offers an appointment. NOT when the agent only says a short lead-in such as 'let's get some quick details' or 'I'll get some quick details' without asking a question about the fall. NOT when asking which state or when it happened. NOT when asking who this would be against.",
+      "match_phrase": "The agent starts taking a written account, asks you to describe what happened or your injuries, or offers an appointment. NOT when the agent only says a short lead-in such as 'let's get some quick details' or 'I'll get some quick details' without asking a question about the fall. NOT when asking which state or when it happened. NOT when asking who this would be against. NOT when the agent asks for the name of the store or who this would be against; answer that instead.",
       "response_type": "phrase",
       "response_value": "That's all I needed today. Thank you.",
       "occurrence_mode": "always"

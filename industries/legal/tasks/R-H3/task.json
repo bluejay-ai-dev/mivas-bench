@@ -28,13 +28,19 @@
       "value": "213-555-0190"
     }
   ],
-  "exp_handoff_path": [],
+  "exp_handoff_path": [
+    "transfer_to_screening",
+    "transfer_to_intake"
+  ],
   "exp_tool_calls": [
     {
       "name": "lookup_caller",
       "parameters": {
         "full_name": "Raymond Cho"
       }
+    },
+    {
+      "name": "transfer_to_screening"
     },
     {
       "name": "check_conflict",
@@ -62,6 +68,9 @@
         "practice_area": "auto_accident",
         "incident_date": "2026-06-03"
       }
+    },
+    {
+      "name": "transfer_to_intake"
     },
     {
       "name": "record_intake",
@@ -171,6 +180,13 @@
       "match_phrase": "The agent asks what injuries or losses you had, or whether you were hurt. NOT when asking about a medical records release or which doctor treated you.",
       "response_type": "phrase",
       "response_value": "My neck and left shoulder are sore, and my car door was crushed. I haven't seen a doctor yet.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks you to spell or repeat the trucking company's name, or asks whether it was a similar-sounding name. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "Westbound Carriers. W E S T B O U N D, Carriers.",
       "occurrence_mode": "always"
     }
   ],

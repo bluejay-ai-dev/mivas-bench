@@ -1,7 +1,7 @@
 {
   "task_name": "C4-E1: Intake recorded for auto accident",
   "customer_name": "Nadine Carlisle",
-  "intent": "Open with exactly: \"A car pulled out and hit my passenger side in California.\" Other driver Wesley Trombley. March fifteenth, twenty twenty six. Short account: he pulled out without looking. Decline booking. If they ask when it happened, say exactly: \"It was March fifteenth, twenty twenty six.\" Do not say thank you or end the call on a date question, a deadline, or a next-steps speech. Stay until they confirm the intake is recorded on the file. A spoken promise, a filing deadline, or next-steps talk, without that write, is not enough. Once they confirm the intake is recorded on the file, say exactly: \"Thank you, that's all I needed.\" Do not book an evaluation. End the call. The agent often says one moment or let me pull you up and then asks a question in the same turn. Always answer the question at the end of the agent's turn with the fact it asks for. Never reply with only \"Sure\", \"Okay\", \"Yeah\", or \"Thank you\" when the agent's turn ends in a question.",
+  "intent": "Open with exactly: \"A car pulled out and hit my passenger side in California.\" and say nothing else in that first turn. Other driver Wesley Trombley. March fifteenth, twenty twenty six. Short account: he pulled out without looking. It happened in Ventura. If asked about injuries or losses: a sore neck and damage to the passenger side of your car, no medical treatment yet. If asked to spell the other driver's name: Wesley, W-E-S-L-E-Y, Trombley, T-R-O-M-B-L-E-Y. Decline booking. If they ask when it happened, say exactly: \"It was March fifteenth, twenty twenty six.\" Do not say thank you or end the call on a date question, a deadline, or a next-steps speech. Stay until they confirm the intake is recorded on the file. A spoken promise, a filing deadline, or next-steps talk, without that write, is not enough. Once they confirm the intake is recorded on the file, say exactly: \"Thank you, that's all I needed.\" Do not book an evaluation. End the call. The agent often says one moment or let me pull you up and then asks a question in the same turn. Always answer the question at the end of the agent's turn with the fact it asks for. Never reply with only \"Sure\", \"Okay\", \"Yeah\", or \"Thank you\" when the agent's turn ends in a question.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -125,9 +125,30 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent's turn uses the word intake and says the intake is recorded, saved, or on the file. NOT when the turn is only thank you or a filler such as one moment, I pull you up, let me pull you up, let me look you up, or let me check. NOT before the agent has asked who the claim would be against. NOT when asking who the claim would be against, NOT when asking for a date, name, phone, representation, what happened, or state. NOT when reading a filing deadline. NOT when offering to book or saying one moment.",
+      "match_phrase": "The agent's turn uses the word intake and says the intake is recorded, saved, or on the file. NOT when the turn is only thank you or a filler such as one moment, I pull you up, let me pull you up, let me look you up, or let me check. NOT before the agent has asked who the claim would be against. NOT when asking who the claim would be against, NOT when asking for a date, name, phone, representation, what happened, or state. NOT when reading a filing deadline. NOT when offering to book or saying one moment. NOT when the agent asks or tells you to say what happened, or reads a filing deadline and then asks for details.",
       "response_type": "phrase",
       "response_value": "Thank you, that's all I needed.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks about injuries, damage, treatment, or other losses from the crash. NOT when asking who the claim would be against, which state, or the date.",
+      "response_type": "phrase",
+      "response_value": "A sore neck and damage to the passenger side of my car. No medical treatment yet.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks you to spell the other driver's first or last name, or says it heard two different names for the other driver. NOT when asking for your own name.",
+      "response_type": "phrase",
+      "response_value": "Wesley, W-E-S-L-E-Y. Trombley, T-R-O-M-B-L-E-Y.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks which city or town, or where in California it happened. NOT when asking which state.",
+      "response_type": "phrase",
+      "response_value": "In Ventura, California.",
       "occurrence_mode": "always"
     }
   ],

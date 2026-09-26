@@ -1,7 +1,7 @@
 {
   "task_name": "C4-M3: Packet by text message",
   "customer_name": "Priya Nair",
-  "intent": "Open with exactly: \"A debt collector keeps calling me at work.\" When asked who this would be against, say exactly: \"It's Apex Collections.\" California. February tenth, twenty twenty six. If they ask whether this is employment, workers' compensation, or a job claim, say exactly: \"No. It's a debt collector, not my employer.\" If offered the packet, say exactly: \"Text is fine.\" Decline booking. Stay until they confirm the intake is on the file and the packet was sent by text. A spoken promise without those writes is not enough. Once finished, say exactly: \"Thank you, that's all I needed.\" and end the call. The agent often says one moment or let me pull you up and then asks a question in the same turn. Always answer the question at the end of the agent's turn with the fact it asks for. Never reply with only \"Sure\", \"Okay\", \"Yeah\", or \"Thank you\" when the agent's turn ends in a question.",
+  "intent": "Open with exactly: \"A debt collector keeps calling me at work.\" When asked who this would be against, say exactly: \"It's Apex Collections.\" California. February tenth, twenty twenty six. If they ask whether this is employment, workers' compensation, or a job claim, say exactly: \"No. It's a debt collector, not my employer.\" If offered the packet, say exactly: \"Text is fine.\" Decline booking. Stay until they confirm the intake is on the file and the packet was sent by text. A spoken promise without those writes is not enough. Once finished, say exactly: \"Thank you, that's all I needed.\" and end the call. The agent often says one moment or let me pull you up and then asks a question in the same turn. Always answer the question at the end of the agent's turn with the fact it asks for. Never reply with only \"Sure\", \"Okay\", \"Yeah\", or \"Thank you\" when the agent's turn ends in a question. Answer only the question the agent asks; do not repeat facts you already gave.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -138,7 +138,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "asks whether you want to book or schedule a consultation, a case evaluation, or an appointment, or offers a time. NOT when asking email or text. NOT when you have already declined booking once and the agent is only saying take your time or call back when ready.",
+      "match_phrase": "asks whether you want to book or schedule a consultation, a case evaluation, or an appointment, or offers a time. NOT when asking email or text. NOT when you have already declined booking once and the agent is only saying take your time or call back when ready. NOT when the agent asks whether to leave it there or end for now.",
       "response_type": "phrase",
       "response_value": "Not yet, let me read the paperwork first.",
       "occurrence_mode": "always"
@@ -162,6 +162,13 @@
       "match_phrase": "The agent starts to wrap up, says goodbye, asks if that is all, or says to call back when ready, before confirming the intake is recorded and the packet was sent by text. NOT after all of them have been confirmed. NOT during screening.",
       "response_type": "phrase",
       "response_value": "I still need the intake on the file and the packet sent by text.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether to leave it there, stop, or end for now, before it has said the intake is recorded and the packet was sent by text. NOT after both are confirmed.",
+      "response_type": "phrase",
+      "response_value": "No, I still need the intake on the file and the packet sent by text.",
       "occurrence_mode": "always"
     }
   ],

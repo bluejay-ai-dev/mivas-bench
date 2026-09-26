@@ -79,7 +79,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent confirms a message for Daniel Okonkwo was taken, passed along, delivered, or is on the file. NOT when the agent only says it will take the message down or offers to take one, NOT when the agent's turn asks for your name or number, NOT when asking what the message should say.",
+      "match_phrase": "The agent confirms a message for Daniel Okonkwo was taken, passed along, delivered, or is on the file. NOT when the agent only says it will take the message down or offers to take one, NOT when the agent's turn asks for your name or number, NOT when asking what the message should say. NOT when the agent says it will pass the message along, is passing it along, or is taking it down. The message must already be confirmed as done, after your name and number were taken.",
       "response_type": "phrase",
       "response_value": "And I still want that recording deleted. Put it on the record. I want a person.",
       "occurrence_mode": "first_n",

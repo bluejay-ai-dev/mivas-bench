@@ -1,7 +1,7 @@
 {
   "task_name": "C5-H4: Premises evaluation booked in Texas",
   "customer_name": "Hector Salinas",
-  "intent": "Open with exactly: \"I slipped on a wet floor at a store in Texas and broke my wrist.\" When asked who this would be against, say exactly: \"It's Rio Vista Market.\" When asked when, say exactly: \"It was July tenth, twenty twenty six.\" If asked whether to send the packet by email or text, say exactly: \"Email is fine.\" Take the first appointment time offered. When read back, say exactly: \"Yes, that's right, go ahead and book it.\" Stay until they confirm the evaluation is booked and the packet is on the file. A spoken promise that they will take care of it, without those writes, is not enough. Do not ask for a staff member. Once they confirm the appointment is booked and the packet is on the file, say exactly: \"Thank you, that's all I needed.\" and end the call. When the agent asks you a question, answer it in that same turn with the answer given here. Never answer a question with only okay, sure, mm-hmm, yeah or thanks, and never speak the agent's lines for it. Say \"Thank you, that's all I needed.\" only after the agent says the evaluation is booked for a specific day and time, never after 'will do', 'one moment', 'taking care of that' or 'let's get some details'. After you say it, end the call and say nothing more.",
+  "intent": "Open with exactly: \"I slipped on a wet floor at a store in Texas and broke my wrist.\" When asked who this would be against, say exactly: \"It's Rio Vista Market.\" When asked when, say exactly: \"It was July tenth, twenty twenty six.\" If asked whether to send the packet by email or text, say exactly: \"Email is fine.\" Take the first appointment time offered. When read back, say exactly: \"Yes, that's right, go ahead and book it.\" Stay until they confirm the evaluation is booked and the packet is on the file. A spoken promise that they will take care of it, without those writes, is not enough. Do not ask for a staff member. Once they confirm the appointment is booked and the packet is on the file, say exactly: \"Thank you, that's all I needed.\" and end the call. When the agent asks you a question, answer it in that same turn with the answer given here. Never answer a question with only okay, sure, mm-hmm, yeah or thanks, and never speak the agent's lines for it. Say \"Thank you, that's all I needed.\" only after the agent says the evaluation is booked for a specific day and time, never after 'will do', 'one moment', 'taking care of that' or 'let's get some details'. After you say it, end the call and say nothing more. If the agent offers the new client packet in any way, say \"Email is fine, please send the packet.\" before moving on to booking.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -174,7 +174,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks you to repeat, spell, or read your name or phone number again, digit by digit or letter by letter. NOT when asking for the date. NOT any other question.",
+      "match_phrase": "The agent asks you to repeat, spell, or read your name or phone number again, digit by digit or letter by letter. NOT when asking for the date. NOT any other question. NOT when asking you to spell the store or company name.",
       "response_type": "phrase",
       "response_value": "Hector Salinas. My number is five one two, five five five, zero one nine four.",
       "occurrence_mode": "always"
@@ -195,7 +195,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent offers to send a medical records release or authorization for your signature, or asks which doctor or provider treated you. NOT any other question.",
+      "match_phrase": "The agent offers to send a medical records release or authorization for your signature. NOT when only asking where you were treated or the name of the hospital.",
       "response_type": "phrase",
       "response_value": "No thanks, not right now.",
       "occurrence_mode": "always"
@@ -209,9 +209,37 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent says the evaluation is booked or confirmed for a specific day and time, or asks whether there is anything else right after saying it is booked and the new client packet was already sent earlier on this call. NOT when listing open times, NOT when reading back a held appointment and asking whether to book it, NOT when asking whether to book.",
+      "match_phrase": "The agent says the evaluation is booked or confirmed for a specific day and time, or asks whether there is anything else right after saying it is booked and the new client packet was already sent earlier on this call. NOT when listing open times, NOT when reading back a held appointment and asking whether to book it, NOT when asking whether to book. NOT when the agent says it has held, is holding, or reserved a time, NOT while it is still reading the fee or the percentages, NOT when it says one moment, booking it now, or that it will confirm, and NOT when it asks you any question other than whether there is anything else.",
       "response_type": "phrase",
       "response_value": "Thank you, that's all I needed.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks you to spell the store's name or the name of the company this would be against. NOT when asking for your own name.",
+      "response_type": "phrase",
+      "response_value": "Rio Vista Market. R I O, V I S T A, Market.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether you missed work, lost income, or had other losses besides the wrist. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "No, I didn't miss any work or lose income.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether you were there as a customer, shopping, or there for work. NOT any other question.",
+      "response_type": "phrase",
+      "response_value": "I was there as a customer, shopping.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks where you were treated, which ER or hospital, or who treated your wrist. NOT when offering a records release.",
+      "response_type": "phrase",
+      "response_value": "At the emergency room at St. David's in Austin. I don't want a records release right now.",
       "occurrence_mode": "always"
     }
   ],

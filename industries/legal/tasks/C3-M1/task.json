@@ -1,7 +1,7 @@
 {
   "task_name": "C3-M1: Medical malpractice in California",
   "customer_name": "Yvonne Pressley",
-  "intent": "Open with exactly: \"A surgeon left a sponge inside me after surgery in California.\" When asked who this would be against, say exactly: \"Ridgeline Surgical Center.\" State is California. Answer their questions and let them run their checks; do not ask for a person yourself until they tell you the firm cannot take it. Never answer a question with only \"okay\" or \"mm-hmm\". Stay until they confirm a person will take it from here. A spoken note that the firm cannot take California medical malpractice, without transferring you to a person, is not enough. Do not start intake and do not book. When told a person will take it from here, say exactly: \"Okay, thank you.\" and end the call.",
+  "intent": "Open with exactly: \"A surgeon left a sponge inside me after surgery in California.\" When asked who this would be against, say exactly: \"Ridgeline Surgical Center.\" State is California. You do not know the surgeon's name; the claim is against Ridgeline Surgical Center. Answer their questions and let them run their checks; do not ask for a person yourself until they tell you the firm cannot take it. Never answer a question with only \"okay\" or \"mm-hmm\". Stay until they confirm a person will take it from here. A spoken note that the firm cannot take California medical malpractice, without transferring you to a person, is not enough. Do not start intake and do not book. When told a person will take it from here, say exactly: \"Okay, thank you.\" and end the call.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -81,9 +81,9 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks who the claim would be against, who the other side is, who this would be against, or the name of the surgeon, hospital, medical practice, or medical provider. NOT when asking for your own name or number.",
+      "match_phrase": "The agent asks who the claim would be against, who the other side is, who this would be against, or the name of the surgeon, the hospital, or both in the same question, medical practice, or medical provider. NOT when asking for your own name or number.",
       "response_type": "phrase",
-      "response_value": "It's Ridgeline Surgical Center.",
+      "response_value": "It's Ridgeline Surgical Center. I don't know the surgeon's name.",
       "occurrence_mode": "always"
     },
     {

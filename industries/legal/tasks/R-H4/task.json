@@ -103,7 +103,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent confirms a message was taken, written down, or is on the file. NOT when offering to take a message or asking what the message should say.",
+      "match_phrase": "The agent confirms a message was taken, written down, or is on the file. NOT when offering to take a message or asking what the message should say. NOT when the agent has only told you the case status and has not taken a message for Allison.",
       "response_type": "phrase",
       "response_value": "They offered a settlement. Should I take it?",
       "occurrence_mode": "always"
@@ -127,6 +127,13 @@
       "match_phrase": "The agent confirms they are connecting you to a person, a staff member, or someone who can help with the settlement question now. NOT when they only say someone will call you back or follow up later. NOT when they confirm a message was taken. NOT when they first look up status. NOT when transferring you to screening, intake, scheduling, or client services on this call.",
       "response_type": "phrase",
       "response_value": "Okay, thank you.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent has told you where the case stands, for example that it is waiting on medical records or who your case manager is, and you have not yet asked it to leave a message for Allison Fontaine. NOT after a message for Allison is on the file. NOT when the agent asks which matter.",
+      "response_type": "phrase",
+      "response_value": "Please tell Allison Fontaine they offered a settlement.",
       "occurrence_mode": "always"
     }
   ],

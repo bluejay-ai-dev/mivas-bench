@@ -146,9 +146,11 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "has named the total balance and explained the visit charge. NOT when they have not yet looked up the bill, NOT when they have named the balance but have not yet explained the visit charge, NOT when the August 21 consult is already cancelled. NOT when they have said the consult is cancelled at any earlier point.",
+      "match_phrase": "has told you the total balance (for example four hundred eighty dollars) AND said what the visit charge is for, and then stops, pauses, or asks anything. NOT when they have not yet looked up the bill, NOT when they have named the balance but have not yet explained the visit charge, NOT when the August 21 consult is already cancelled. NOT when they have said the consult is cancelled at any earlier point.",
       "response_type": "phrase",
-      "response_value": "Thanks. I still need the August 21 Park Avenue consult cancelled. I accept the missed-visit fee."
+      "response_value": "Thanks. I still need the August 21 Park Avenue consult cancelled. I accept the missed-visit fee.",
+      "occurrence_mode": "first_n",
+      "occurrence_n": 1
     },
     {
       "match_type": "context",
@@ -164,7 +166,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers a callback, a billing call-back, or to have billing or coverage call you about the deposit or the fee. NOT when confirming the cancellation.",
+      "match_phrase": "offers a callback, a billing call-back, or to have billing or coverage call you about the deposit or the fee. NOT when confirming the cancellation. NOT before they have told you the total balance and explained the visit charge, NOT when they only say they need to confirm a couple of things.",
       "response_type": "phrase",
       "response_value": "No thanks, I do not need a callback. Please just finish the cancel."
     },

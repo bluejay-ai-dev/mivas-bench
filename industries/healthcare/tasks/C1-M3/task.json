@@ -90,7 +90,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before the Park Avenue allergy skin-testing visit is confirmed on the calendar. NOT when they have just confirmed the skin-testing service is scheduled.",
+      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before the Park Avenue allergy skin-testing visit is confirmed on the calendar. NOT when they have just confirmed the skin-testing service is scheduled. Also fire when they only answer the medicine question or say someone will follow up, and nothing is scheduled yet.",
       "response_type": "phrase",
       "response_value": "I still need allergy skin testing scheduled at Park Avenue on August twenty-fourth. Please confirm it is on the calendar before I go."
     },
@@ -108,7 +108,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "asks whether you are a new or existing patient, whether you have been seen at Straus before, or whether this is your first visit with them. NOT when asking for your name or date of birth.",
+      "match_phrase": "asks whether you are a new or existing patient, whether you have been seen at Straus before, or whether this is your first visit with them. NOT when asking for your name or date of birth. Also fire when they ask whether you have been seen with us before or would this be your first visit.",
       "response_type": "phrase",
       "response_value": "I'm a new patient, I've never been seen at Straus. My primary-care doctor already evaluated me and ordered the skin testing."
     },
@@ -126,7 +126,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "says the allergy skin testing is booked or on the calendar for August twenty-fourth. NOT when they are only offering or asking to confirm it.",
+      "match_phrase": "says the words booked or scheduled for the allergy skin testing on August twenty-fourth. NOT when they are only offering or asking to confirm it, NOT when they only talk about which medicines to stop or who will confirm that, NOT when they have not named a date.",
       "response_type": "phrase",
       "response_value": "Great, thank you. Goodbye."
     }

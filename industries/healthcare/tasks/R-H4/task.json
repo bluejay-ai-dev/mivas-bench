@@ -176,7 +176,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before a time has been confirmed on the calendar. NOT when they have just confirmed a booked time. NOT during identity verification, NOT before you have asked for the new follow-up.",
+      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before a time has been confirmed on the calendar. NOT when they have just confirmed a booked time. NOT during identity verification, NOT before you have asked for the new follow-up. NOT right after confirming your name and date of birth, NOT when they only say thanks, okay, or one moment.",
       "response_type": "phrase",
       "response_value": "I still need that time booked. Please confirm it is on the calendar before I go."
     },
@@ -215,6 +215,12 @@
       "match_phrase": "reads a phone or mobile number back to you and asks whether it is right, or asks you to confirm or repeat the full number. NOT when reading back your name, date of birth, or ZIP code, NOT when first asking which number to use.",
       "response_type": "phrase",
       "response_value": "My number is 212-555-0100. If that is exactly what you have, yes, please send the portal link."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "says the portal activation link was sent, before any new follow-up has been booked. NOT after a new follow-up is booked, NOT when reading your number back.",
+      "response_type": "phrase",
+      "response_value": "Thanks. I also need a new follow-up at Park Avenue to go over the labs, separate from August twentieth. The first opening is fine."
     }
   ],
   "customer_name": "Jordan Lee",

@@ -1,7 +1,7 @@
 {
   "task_name": "T5-H3: Second price match on the same soundbar",
   "customer_name": "Felix Moreau",
-  "intent": "Open with exactly: \"Match the Halo soundbar at Rivertide for seventy dollars less, then also match Halcyon Mart at the same price.\" Give identity when asked. Order KE-4495108, Halo. Confirm the first $70 Rivertide match. Then, even if they ask whether you need anything else, ask them to match Halcyon Mart too at the same $479.99. Do not end the call before you have asked about Halcyon Mart. Stay for the one-match-per-item refusal. Do not argue. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request.",
+  "intent": "Open with exactly: \"Match the Halo soundbar at Rivertide for seventy dollars less, then also match Halcyon Mart at the same price.\" Give identity when asked. Order KE-4495108, Halo. Confirm the first $70 Rivertide match. Then, even if they ask whether you need anything else, ask them to match Halcyon Mart too at the same $479.99. Do not end the call before you have asked about Halcyon Mart. Stay for the one-match-per-item refusal. Do not argue. Once they have finished what you asked and confirmed it, say exactly: \"Thank you, that's all I needed.\" and end the call. Do not start a second request. You already bought the soundbar; never say you are planning to buy it. When they ask for your ZIP code and card, say: \"ZIP 94612, card ending 3390.\" Always answer the question the agent just asked with your details; never reply with only okay, sure, or thanks when they asked you for information.",
   "traits": [
     {
       "trait_name": "full_name",
@@ -93,8 +93,7 @@
           ]
         },
         "competitor": "Halcyon Mart",
-        "competitor_price": 479.99,
-        "sku": "SKU-AUD-7720"
+        "competitor_price": 479.99
       }
     }
   ],
@@ -107,7 +106,8 @@
       "match_phrase": "The agent greets you at the start of the call and asks how they can help. NOT after identity or order lookup has started.",
       "response_type": "phrase",
       "response_value": "Match the Halo soundbar at Rivertide for seventy dollars less, then also match Halcyon Mart at the same price.",
-      "occurrence_mode": "always"
+      "occurrence_mode": "first_n",
+      "occurrence_n": 1
     },
     {
       "match_type": "context",
@@ -132,7 +132,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks which retailer or competitor has the lower price, what their price is, or whether the item there is new and in stock, and has not yet completed the Rivertide match. NOT identity questions, NOT when asking for an order number, and NOT when they ask specifically about Halcyon Mart.",
+      "match_phrase": "The agent asks which retailer or competitor has the lower price, what their price is, or whether the item there is new and in stock, and has not yet completed the Rivertide match. NOT identity questions, NOT when asking for an order number, and NOT when they ask specifically about Halcyon Mart. NOT when they ask whether you already bought the soundbar or are planning to buy it.",
       "response_type": "phrase",
       "response_value": "Rivertide, spelled R, I, V, E, R, T, I, D, E. They have the identical new Halo soundbar in stock for four hundred seventy-nine ninety-nine.",
       "occurrence_mode": "always"
@@ -170,6 +170,13 @@
       "match_phrase": "has said the Rivertide match is done or applied, or that the seventy dollars is going back to your card, and you have not yet asked about Halcyon Mart after that. This includes when they then ask if you need anything else or say goodbye. NOT during identity and NOT before the Rivertide match is confirmed.",
       "response_type": "phrase",
       "response_value": "Also match Halcyon Mart at the same price, four hundred seventy-nine ninety-nine, on the same Halo soundbar.",
+      "occurrence_mode": "always"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "The agent asks whether you already bought the soundbar or are planning to buy it, whether this is a new purchase, or whether you bought it from Kestrel. NOT identity questions.",
+      "response_type": "phrase",
+      "response_value": "I already bought it from you. It's on order KE-4495108, the Aurelian Halo soundbar.",
       "occurrence_mode": "always"
     }
   ],

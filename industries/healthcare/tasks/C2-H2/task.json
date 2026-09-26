@@ -132,7 +132,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "reads your name and date of birth back to you and asks whether that is right, or asks you to confirm the name and date of birth they just repeated. NOT when first asking for your name and date of birth, NOT when asking for a phone or mobile number.",
+      "match_phrase": "reads back your son's name and date of birth (Leo Park, March twenty-second, two thousand sixteen, even if the name runs together like Leopard) and asks whether that is right. NOT when first asking for his name and date of birth, NOT when asking for a phone or mobile number.",
       "response_type": "phrase",
       "response_value": "Yes, that's right."
     },
@@ -168,7 +168,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before the allergy shot is confirmed on the calendar. NOT when they have just confirmed the shot is booked.",
+      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before the allergy shot is confirmed on the calendar. NOT when they have just confirmed the shot is booked. NOT when they are reading back a name or date of birth.",
       "response_type": "phrase",
       "response_value": "I still need the allergy shot scheduled. Please confirm a daytime time is on the calendar before I go."
     },
@@ -216,7 +216,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "says the allergy shot is booked or on the calendar for a specific day and time. NOT when they are only offering or reading back a time before booking.",
+      "match_phrase": "says the allergy shot is booked or on the calendar for a specific day and time. NOT when they are only offering or reading back a time before booking. NOT when they are reading back a name or date of birth.",
       "response_type": "phrase",
       "response_value": "Great, thank you. Goodbye."
     },

@@ -1,6 +1,6 @@
 {
   "task_name": "C3-M2: New insurance card on file",
-  "intent": "You are an existing Straus patient. You changed jobs and you need your new insurance card put on file. That is the only reason you called. Answer their identity questions once, then stay on the insurance update. Do not say the member ID until they ask for it. When they ask for the new plan, say the carrier and the member ID exactly as C445566778. You do not have a group number, not now, not later. Carrier and member ID are enough to save. If they read the member ID back, confirm it. Once they say the new insurance is saved, thank them and end the call. Do not book, reschedule, or cancel. Do not agree to a callback, a front-desk follow-up, or a hold because a group number is missing. Do not ask to speak to a person, about a bill, a payment, the patient portal, a waitlist, a text, financing, or the street, floor, or suite. Stay until they confirm the new card is saved on the chart. A spoken 'we'll update it' or a callback is not enough, ask them to save it now. After any 'we will update it,' ask whether it is on your chart now. Do not ask them to text you an appointment confirmation.",
+  "intent": "You are an existing Straus patient. You changed jobs and you need your new insurance card put on file. That is the only reason you called. Answer their identity questions once, then stay on the insurance update. Do not say the member ID until they ask for it. When they ask for your name and date of birth, give only those. When they ask for the new plan, say the carrier and the member ID exactly as C445566778. You do not have a group number, not now, not later. Carrier and member ID are enough to save. If they read the member ID back, confirm it. Once they say the new insurance is saved, thank them and end the call. Do not book, reschedule, or cancel. Do not agree to a callback, a front-desk follow-up, or a hold because a group number is missing. Do not ask to speak to a person, about a bill, a payment, the patient portal, a waitlist, a text, financing, or the street, floor, or suite. Stay until they confirm the new card is saved on the chart. A spoken 'we'll update it' or a callback is not enough, ask them to save it now. After any 'we will update it,' ask whether it is on your chart now. Do not ask them to text you an appointment confirmation.",
   "traits": [
     {
       "trait_name": "zip",
@@ -97,7 +97,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "asks for the insurance carrier, plan name, member ID, subscriber ID, or the numbers on your new card. NOT when asking for a group number, NOT when reading the member ID back, NOT when asking for your name or date of birth.",
+      "match_phrase": "asks for the insurance carrier, plan name, member ID, subscriber ID, or the numbers on your new card. NOT when asking for a group number, NOT when reading the member ID back, NOT when asking for your name or date of birth. NOT when asking for your full name or date of birth.",
       "response_type": "phrase",
       "response_value": "The carrier is Cigna. The member ID is C, four, four, five, five, six, six, seven, seven, eight."
     },
@@ -115,13 +115,13 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "reads your member ID back exactly as C445566778, the letter C then four four five five six six seven seven eight, and asks whether it is correct. NOT when the readback drops the C or has a different digit, NOT when first asking for the member ID, NOT when also asking for a group number.",
+      "match_phrase": "reads your member ID back exactly as C445566778, the letter C then four four five five six six seven seven eight, and asks whether it is correct. NOT when the readback drops the C or has a different digit, NOT when first asking for the member ID, NOT when also asking for a group number. NOT when the readback has three fives, three sixes, two sevens in the wrong place, or eleven characters. Count the digits: exactly nine digits after the C.",
       "response_type": "phrase",
       "response_value": "Yes, that's right."
     },
     {
       "match_type": "context",
-      "match_phrase": "reads your member ID back with a missing letter C, a different letter, an extra digit, or a missing digit. NOT when the readback is exactly C445566778.",
+      "match_phrase": "reads your member ID back with a missing letter C, a different letter, an extra digit, or a missing digit. NOT when the readback is exactly C445566778. Also when the readback repeats a digit group, for example five five five or five five six six seven seven eight after four four five.",
       "response_type": "phrase",
       "response_value": "No. It's the letter C, then four, four, five, five, six, six, seven, seven, eight."
     },

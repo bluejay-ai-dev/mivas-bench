@@ -40,9 +40,9 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks for the caller's full name and a callback or phone number. NOT when asking about anything else.",
+      "match_phrase": "The agent asks for the caller's full name and a callback or phone number, even after saying it will get to the accident first. NOT when asking about anything else. This includes a question that comes after a filler such as one moment, hold on, let me pull that up, or let's get some quick details in the same turn.",
       "response_type": "phrase",
-      "response_value": "Wade Killian, 469-555-0288.",
+      "response_value": "Wade Killian, four six nine, five five five, zero two eight eight.",
       "occurrence_mode": "always"
     },
     {
@@ -54,14 +54,14 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question.",
+      "match_phrase": "The agent asks who the claim would be against, who the other side is, or who this would be against. NOT any other question. NOT when the agent asks for your name or number. This includes a question that comes after a filler such as one moment, hold on, let me pull that up, or let's get some quick details in the same turn.",
       "response_type": "phrase",
       "response_value": "I'm the one being sued. Your client hit me.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent asks what happened, asks for more details about the accident, or asks the caller to tell the story. NOT when asking who this would be against, NOT when asking which state or when it happened, and NOT when offering an appointment.",
+      "match_phrase": "The agent asks what happened, asks for more details about the accident, or asks the caller to tell the story. NOT when asking who this would be against, NOT when asking which state or when it happened, and NOT when offering an appointment. NOT when the agent asks for your name or number.",
       "response_type": "phrase",
       "response_value": "It's a car accident.",
       "occurrence_mode": "always"

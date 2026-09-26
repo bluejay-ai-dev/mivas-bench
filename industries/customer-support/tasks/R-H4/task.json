@@ -91,7 +91,13 @@
     {
       "name": "check_return_eligibility",
       "parameters": {
-        "order_number": "KE-4431775"
+        "order_number": {
+          "any_of": [
+            "KE-4431775",
+            "KE4431775",
+            "KE 4431775"
+          ]
+        }
       }
     }
   ],
@@ -137,14 +143,14 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "has already finished the original request you called about, confirmed that outcome out loud, and is now offering a second unrelated request, a confirmation text, or asking if you need anything else. NOT during identity, NOT while they are still collecting facts or looking something up, NOT before they have confirmed the original request is done, and NOT before they have said whether the Bellwether Ease phone can still be returned.",
+      "match_phrase": "has already finished the original request you called about, confirmed that outcome out loud, and is now offering a second unrelated request, a confirmation text, or asking if you need anything else. NOT during identity, NOT while they are still collecting facts or looking something up, NOT before they have confirmed the original request is done, and NOT before they have said whether the Bellwether Ease phone can still be returned. NOT when they only asked whether you still have a question about the Bellwether return, and NOT when they only said they will now check the Bellwether return.",
       "response_type": "phrase",
       "response_value": "That's all I needed. Thank you.",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "asks for the phone or email on the message, how the message reached you, or where you saw the charge. NOT when asking for a full name together with a phone number for the account, NOT when asking for ZIP, card last four, or an order number.",
+      "match_phrase": "asks for the phone or email on the message, how the message reached you, or where you saw the charge. NOT when asking for a full name together with a phone number for the account, NOT when asking for ZIP, card last four, or an order number. This includes asking which email address received or got the renewal notice.",
       "response_type": "phrase",
       "response_value": "They emailed me at R O S A L I N D, dot, B A P T I S T E, at example dot test. My number is 541-555-0133.",
       "occurrence_mode": "always"
@@ -172,14 +178,14 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "has already said the email did not come from Kestrel, there is no such charge, or that the report is filed, and has not yet said whether the Bellwether Ease phone can be returned, whether or not they ask if you need anything else. NOT when they have already said whether the Bellwether Ease phone can still be returned, NOT while they are still checking the email or asking about it.",
+      "match_phrase": "has already said the email did not come from Kestrel, there is no such charge, or that the report is filed, and has not yet said whether the Bellwether Ease phone can be returned, whether or not they ask if you need anything else. NOT when they have already said whether the Bellwether Ease phone can still be returned, NOT while they are still checking the email or asking about it. This includes when they ask whether you still have a question about the Bellwether Ease return, and when they said they will check the Bellwether return but have not answered it.",
       "response_type": "phrase",
       "response_value": "Thanks. Now, can I still return my Bellwether Ease phone?",
       "occurrence_mode": "always"
     },
     {
       "match_type": "context",
-      "match_phrase": "has already answered whether the Bellwether Ease phone can still be returned, and asks if you need anything else. NOT when they are still checking the email or have not yet answered the return question.",
+      "match_phrase": "has already answered whether the Bellwether Ease phone can still be returned, and asks if you need anything else. NOT when they are still checking the email or have not yet answered the return question. NOT when they only asked whether you still have a question about the return, and NOT when they only said they will check the return.",
       "response_type": "phrase",
       "response_value": "Thank you, that's all I needed.",
       "occurrence_mode": "always"

@@ -150,9 +150,15 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "confirms a message was sent to the clinical team and gives a callback time, after the portal link was sent or they did not offer it. NOT before the message was sent, NOT when they are still asking text or email for the portal.",
+      "match_phrase": "confirms a message was sent to the clinical team and gives a callback time, after the portal link was sent or they did not offer it. NOT before the message was sent, NOT when they are still asking text or email for the portal. NOT when reading back your number or asking you to confirm it, NOT before they have said the portal link was sent or that they did not offer it.",
       "response_type": "phrase",
       "response_value": "Thank you, that's everything I needed. Goodbye."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "reads a phone or mobile number back to you and asks whether it is right. NOT when reading back your name or date of birth.",
+      "response_type": "phrase",
+      "response_value": "Yes, 212-555-0100 is right. Please send the portal link."
     }
   ],
   "customer_name": "Jordan Lee",

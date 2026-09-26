@@ -1,6 +1,6 @@
 {
   "task_name": "C2-M3: Book a follow-up for eczema",
-  "intent": "You are an existing Straus patient and you do not have anything on the calendar right now. The eczema on your hands is flaring and you want a follow-up at Brooklyn Heights. Answer their identity questions once, confirm the readback, then proceed. Take the first appointment time they offer. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first time out loud, then thank them and end the call. Do not ask to add or change insurance. Do not ask for a callback, to speak to a person, a bill, a payment, the patient portal, a waitlist, a text, financing, or the street, floor, or suite. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar. If they only list openings, say book the first one. Do not ask them to text you an appointment confirmation. Once they have said the time is booked, confirm it once, thank them, and end the call; do not ask them to confirm it again.",
+  "intent": "You are an existing Straus patient and you do not have anything on the calendar right now. The eczema on your hands is flaring and you want a follow-up at Brooklyn Heights. Answer their identity questions once, confirm the readback, then proceed. Take the first appointment time they offer. Do not ask for a different day, time, or office, and do not suggest any date of your own. Confirm that first time out loud, then thank them and end the call. Do not ask to add or change insurance. Do not ask for a callback, to speak to a person, a bill, a payment, the patient portal, a waitlist, a text, financing, or the street, floor, or suite. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar. If they only list openings, say book the first one. Do not ask them to text you an appointment confirmation. Once they have said the time is booked, confirm it once, thank them, and end the call; do not ask them to confirm it again. If they ask you to spell your last name, spell it exactly N, G, U, Y, E, N. Never confirm a readback of a different last name.",
   "traits": [
     {
       "trait_name": "preferred_office",
@@ -102,13 +102,13 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "reads your name and date of birth back to you and asks whether that is right, or asks you to confirm the name and date of birth they just repeated. NOT when first asking for your name and date of birth, NOT when asking for a phone or mobile number.",
+      "match_phrase": "reads your name and date of birth back to you and asks whether that is right, or asks you to confirm the name and date of birth they just repeated. NOT when first asking for your name and date of birth, NOT when asking for a phone or mobile number. NOT when the last name they read back is anything other than Nguyen, such as Nigwin, Niguin, Noahan, McQuinn, or a spelling other than N G U Y E N.",
       "response_type": "phrase",
       "response_value": "Yes, that's right."
     },
     {
       "match_type": "context",
-      "match_phrase": "offers one or more concrete appointment dates or times, or asks you to choose among concrete slots. NOT when asking for your name, date of birth, mobile number, or ZIP code.",
+      "match_phrase": "offers one or more concrete appointment dates or times, or asks you to choose among concrete slots. NOT when asking for your name, date of birth, mobile number, or ZIP code. NOT when they read back one single time and ask whether to book it or go ahead.",
       "response_type": "phrase",
       "response_value": "Book the first time you offered and confirm it is on the calendar."
     },
@@ -155,6 +155,24 @@
       "response_value": "No, I'm an existing patient. I've been seen at Straus before. This is an eczema follow-up.",
       "occurrence_mode": "first_n",
       "occurrence_n": 1
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks you to spell your last name, or asks for it letter by letter.",
+      "response_type": "phrase",
+      "response_value": "N as in Nancy, G as in George, U as in Uncle, Y as in Yellow, E as in Edward, N as in Nancy. Nguyen."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "reads your last name back as anything other than Nguyen, for example Nigwin, Niguin, Noahan, McQuinn, or a spelling other than N G U Y E N, and asks whether it is right.",
+      "response_type": "phrase",
+      "response_value": "No. My last name is Nguyen: N, G, U, Y, E, N."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "asks whether Sam is your full first name or short for another name. NOT when asking for your last name.",
+      "response_type": "phrase",
+      "response_value": "Sam is my full first name. Sam Nguyen, N, G, U, Y, E, N."
     }
   ],
   "customer_name": "Sam Nguyen",

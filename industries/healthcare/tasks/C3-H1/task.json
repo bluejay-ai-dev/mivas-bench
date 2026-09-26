@@ -1,6 +1,6 @@
 {
   "task_name": "C3-H1: Aetna Open Access Elect Choice at Park Avenue",
-  "intent": "You are a new patient and you are particular about the plan name. When they ask who you are, give your name, date of birth, and mobile once, confirm the readback, and say you are new. Ask whether Straus takes Aetna Open Access Elect Choice at Park Avenue, and say that full plan name, not just the carrier. Once they have answered about Aetna at that office, even if they only confirm the carrier and not the exact plan name, ask to be booked for a rash on your neck. Take the first appointment time they offer. After that time is on the calendar, ask to be waitlisted at Park Avenue from August twenty-fourth through September thirtieth for anything earlier, those calendar dates only. Confirm that first time out loud, then thank them and end the call. Do not ask them to flag the visit. Do not ask to add or change insurance. Do not ask for a callback, to speak to a person, a bill, a payment, the patient portal, a text, financing, or the street, floor, or suite. Stay until they have looked up whether Park Avenue takes Aetna; a guess without a lookup is not enough. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar and you are on the waitlist. If they only list openings, say book the first one. Do not ask them to text you an appointment confirmation. Once they have said the time is booked and you are on the waitlist, confirm both once, thank them, and end the call; do not ask them to confirm again and do not say a waitlist is not needed. Ask about the full plan name at most once after their first answer. If they say they can confirm Aetna at Park Avenue but not the exact plan, say that is fine and ask to be booked now; do not make the booking wait on the plan name.",
+  "intent": "You are a new patient and you are particular about the plan name. When they ask who you are, give your name, date of birth, and mobile once, confirm the readback, and say you are new. Ask whether Straus takes Aetna Open Access Elect Choice at Park Avenue, and say that full plan name, not just the carrier. Once they have answered about Aetna at that office, even if they only confirm the carrier and not the exact plan name, ask to be booked for a rash on your neck. Take the first appointment time they offer. After that time is on the calendar, ask to be waitlisted at Park Avenue from August twenty-fourth through September thirtieth in case a better opening comes up, those calendar dates only. Never call that range earlier dates. If they say those dates are not earlier than your booking or suggest other dates, say to use August twenty-fourth through September thirtieth anyway. Confirm that first time out loud, then thank them and end the call. Do not ask them to flag the visit. Do not ask to add or change insurance. Do not ask for a callback, to speak to a person, a bill, a payment, the patient portal, a text, financing, or the street, floor, or suite. Stay until they have looked up whether Park Avenue takes Aetna; a guess without a lookup is not enough. A listed opening is not a booking. Do not thank them, say goodbye, or hang up until they confirm a time is on the calendar and you are on the waitlist. If they only list openings, say book the first one. Do not ask them to text you an appointment confirmation. Once they have said the time is booked and you are on the waitlist, confirm both once, thank them, and end the call; do not ask them to confirm again and do not say a waitlist is not needed. Ask about the full plan name at most once after their first answer. If they say they can confirm Aetna at Park Avenue but not the exact plan, say that is fine and ask to be booked now; do not make the booking wait on the plan name.",
   "traits": [
     {
       "trait_name": "plan_name",
@@ -145,7 +145,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers one or more concrete appointment dates or times, or asks you to choose among concrete slots. NOT when asking for your name, date of birth, mobile number, or ZIP code.",
+      "match_phrase": "offers one or more concrete appointment dates or times, or asks you to choose among concrete slots. NOT when asking for your name, date of birth, mobile number, or ZIP code. NOT when they read back one single time and ask whether to book it or go ahead.",
       "response_type": "phrase",
       "response_value": "I'll take the first time you offered."
     },
@@ -181,9 +181,23 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "says Aetna is accepted at Park Avenue but they cannot confirm the exact plan name, or that the check only confirmed the carrier. NOT when offering an appointment time, NOT when asking for your name, date of birth, or mobile, NOT once a time has been booked.",
+      "match_phrase": "says Park Avenue takes or accepts Aetna, whether or not they confirm the exact plan name. NOT when offering an appointment time, NOT when asking for your name, date of birth, or mobile, NOT once a time has been booked, NOT once you have already asked to book.",
       "response_type": "phrase",
-      "response_value": "That's fine, the carrier is enough for now. Please book me the first opening at Park Avenue for a rash on my neck."
+      "response_value": "That's fine, the carrier is enough for now. Please book me the first opening at Park Avenue for a rash on my neck.",
+      "occurrence_mode": "first_n",
+      "occurrence_n": 1
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "says the August twenty-fourth to September thirtieth waitlist dates are not earlier than your booking, overlap with it, or suggests different waitlist dates such as August nineteenth through August twenty-third. NOT when they have already added you to the August twenty-fourth to September thirtieth list.",
+      "response_type": "phrase",
+      "response_value": "Please use exactly August twenty-fourth through September thirtieth anyway, in case a better opening comes up in that range."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "reads back one specific appointment date and time and asks whether to book it, go ahead, lock it in, or whether that is alright. NOT when they say it is already booked, NOT when they list two or more times to choose from.",
+      "response_type": "phrase",
+      "response_value": "Yes, please book it."
     }
   ],
   "customer_name": "Simone Ardelle",

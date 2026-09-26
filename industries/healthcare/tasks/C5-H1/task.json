@@ -165,13 +165,13 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "offers to text a payment link, asks whether you want the payment link by text, or asks which mobile number should receive the payment link. NOT when offering an appointment confirmation, directions, or another unrelated text, NOT when they have already said the payment link was sent.",
+      "match_phrase": "offers to text a payment link, asks whether you want the payment link by text, or asks which mobile number should receive the payment link. NOT when offering an appointment confirmation, directions, or another unrelated text, NOT when they have already said the payment link was sent. NOT before they have said CareCredit, financing, or a payment plan is available.",
       "response_type": "phrase",
       "response_value": "Yes, please text the payment link to 212-555-0133."
     },
     {
       "match_type": "context",
-      "match_phrase": "thanks you, says goodbye, or wraps up before they have looked up a payment plan or financing. NOT when they have said at any point that CareCredit or financing is available, NOT when asking how much the payment link should be for, NOT when asking for your ZIP code, mobile number, or identity. NOT after the payment link was sent, NOT once the conversation has moved on to the Park Avenue consult or appointment times.",
+      "match_phrase": "says goodbye or asks if you need anything else before they have looked up a payment plan or financing. NOT when they have said at any point that CareCredit, financing, or a payment plan is available, NOT when they only say okay, thanks, or one moment, NOT right after confirming your name and date of birth, NOT when asking how much the payment link should be for, NOT when asking for your ZIP code, mobile number, or identity, NOT after the payment link was sent.",
       "response_type": "phrase",
       "response_value": "I still need a way to spread this out. Please look up a payment plan before I go."
     },
@@ -222,6 +222,24 @@
       "match_phrase": "says your Park Avenue consult was moved or rescheduled to a specific new time. NOT when only offering or reading back times, NOT when asking whether to move it, NOT when saying it has not been moved yet.",
       "response_type": "phrase",
       "response_value": "Thank you, that's everything I needed. Goodbye."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "tells you the balance amount or explains the visit charge, and has not yet said CareCredit, financing, or a payment plan is available. NOT when asking for your identity.",
+      "response_type": "phrase",
+      "response_value": "That's more than I can pay this month. Is there a payment plan or financing to spread it out?"
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "says CareCredit, financing, or a payment plan is available, or asks whether you want to use it, and has not yet said a payment link was sent. NOT when asking for a mobile number.",
+      "response_type": "phrase",
+      "response_value": "Yes, I'll use the financing. Please also text me the payment link at 212-555-0133."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to text a payment link or asks which number should get it, before they have said CareCredit, financing, or a payment plan is available. NOT after the payment link was sent.",
+      "response_type": "phrase",
+      "response_value": "Yes, text it to 212-555-0133. But first, I can't pay it all at once. Is there a payment plan or financing?"
     }
   ],
   "customer_name": "Maria Alvarez",

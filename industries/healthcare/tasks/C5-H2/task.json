@@ -155,7 +155,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "thanks you, says goodbye, or asks if you need anything else before a time has been confirmed on the calendar. NOT when they have just confirmed a booked time. NOT a short 'thank you', 'okay', or 'one second' while they are verifying your identity or looking up your bill, NOT before they have started looking for a new appointment time.",
+      "match_phrase": "says goodbye or asks if you need anything else after they have started looking for a new appointment time and before a new time is confirmed on the calendar. NOT during identity verification, NOT before the balance and a charge explanation have been given, NOT when they only say thanks, okay, or one moment, NOT when they have just confirmed a moved time.",
       "response_type": "phrase",
       "response_value": "I still need that time booked. Please confirm it is on the calendar before I go."
     },
@@ -167,7 +167,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "states the balance and explains a charge, then thanks you or starts wrapping up before moving August 20 appointment. NOT when scheduling is already finding a new time.",
+      "match_phrase": "has told you the dollar balance and explained at least one charge, and nobody has yet started looking for a new time for August 20. NOT when scheduling is already finding a new time, NOT when offering concrete times, NOT when asking whether you want to pay, finance, or dispute.",
       "response_type": "phrase",
       "response_value": "Thanks. I also cannot make the August 20's Park Avenue appointment. Please move it to the first later opening."
     },
@@ -185,7 +185,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "confirms the August 20 visit was moved and the new time is on the calendar, after they have told you the balance and explained a charge. NOT when only listing openings, NOT before the balance was given.",
+      "match_phrase": "confirms the August 20 visit was moved and the new time is on the calendar, after they have told you the balance and explained a charge. NOT when only listing openings, NOT before the balance was given. Only when they name a new day and time other than August 20. NOT when they say August 20 is booked or confirmed, NOT when they say they will make sure it is on the calendar.",
       "response_type": "phrase",
       "response_value": "Thank you, that's everything I needed. Goodbye."
     }

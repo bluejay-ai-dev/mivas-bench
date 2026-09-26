@@ -117,7 +117,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "The agent has looked up this order and says it is past the return window or names the delivery date, but has not said how many days past the 15-day window it is. NOT when they have already said a number of days past or over the window, and NOT during identity.",
+      "match_phrase": "The agent has looked up this order and says it is past the return window or names the delivery date, but has not said how many days past the 15-day window it is. NOT when they have already said a number of days past or over the window, and NOT during identity. This includes when they only say the order was delivered, or offer to help with a next step, without a days-past count.",
       "response_type": "phrase",
       "response_value": "How many days past the fifteen-day window is it, counting from the delivery date?",
       "occurrence_mode": "first_n",
@@ -132,7 +132,7 @@
     },
     {
       "match_type": "context",
-      "match_phrase": "has already finished the original request you called about, confirmed that outcome out loud, and is now offering a second unrelated request, a confirmation text, or asking if you need anything else. NOT during identity, NOT while they are still collecting facts or looking something up, and NOT before they have confirmed the original request is done. NOT before they have told you how many days past the 15-day window this laptop is.",
+      "match_phrase": "has already finished the original request you called about, confirmed that outcome out loud, and is now offering a second unrelated request, a confirmation text, or asking if you need anything else. NOT during identity, NOT while they are still collecting facts or looking something up, and NOT before they have confirmed the original request is done. NOT before they have told you how many days past the 15-day window this laptop is. NOT when they only said the order was delivered or offered help with a next step.",
       "response_type": "phrase",
       "response_value": "That's all I needed. Thank you.",
       "occurrence_mode": "always"

@@ -1,6 +1,6 @@
 {
   "task_name": "C5-H3: Itemized balance",
-  "intent": "You are an existing Straus patient. You opened a statement and the total looks like more than one charge. You want both line items explained, then you will ask them to send the missed-visit fee for a waiver review and pay the rest. Answer their identity questions once with your name and date of birth; if they also ask for ZIP, give 34786 in that same answer. Confirm the readback if they repeat it, then go straight to the bill and do not re-give identity. Ask what the total is made of. Stay on the line until they have explained why each of the two charges is there, the missed-visit fee and the visit charge. A list of amounts alone is not an explanation. If they give only a total, only amounts, or explain only one line, ask them to explain the other. After they have explained both lines, ask them to send the missed-visit fee for review, then text a payment link for the remaining balance to 407-555-0155. If they ask which mobile number to send it to, give 407-555-0155 once. Then thank them and end the call. Do not ask for financing, a payment plan, a callback, or to speak to a person. Do not mention, book, move, or cancel your upcoming appointment. Do not ask for a confirmation text or any text other than the payment link. Do not ask for the street, floor, suite, waitlist, or an insurance change. Do not thank them until they say the payment link was sent to 407-555-0155. Do not ask them to text you an appointment confirmation.",
+  "intent": "You are an existing Straus patient. You opened a statement and the total looks like more than one charge. You want both line items explained, then you will ask them to send the missed-visit fee for a waiver review and pay the rest. Answer their identity questions once with your name and date of birth; if they also ask for ZIP, give 34786 in that same answer. Confirm the readback if they repeat it, then go straight to the bill and do not re-give identity. Ask what the total is made of. Stay on the line until they have explained why each of the two charges is there, the missed-visit fee and the visit charge. A list of amounts alone is not an explanation, but a one-sentence reason for each line is enough. Do not ask for dates of service or more detail. If they give only a total, only amounts, or explain only one line, ask them to explain the other. After they have explained both lines, ask them to send the missed-visit fee for review, then text a payment link for the remaining balance to 407-555-0155. If they ask which mobile number to send it to, give 407-555-0155 once. Then thank them and end the call. Do not ask for financing, a payment plan, a callback, or to speak to a person. Do not mention, book, move, or cancel your upcoming appointment. Do not ask for a confirmation text or any text other than the payment link. Do not ask for the street, floor, suite, waitlist, or an insurance change. Do not thank them until they say the payment link was sent to 407-555-0155. Do not ask them to text you an appointment confirmation.",
   "traits": [
     {
       "trait_name": "zip",
@@ -220,6 +220,12 @@
       "match_phrase": "reads a phone or mobile number back to you and asks whether it is right, or asks you to confirm or repeat the full number. NOT when reading back your name, date of birth, or ZIP code, NOT when first asking which number to use.",
       "response_type": "phrase",
       "response_value": "My number is 407-555-0155. If that is exactly what you have, yes, please send the payment link."
+    },
+    {
+      "match_type": "context",
+      "match_phrase": "offers to have the billing team review the charges, look into the details, or follow up, or says they cannot see more detail such as a date of service. NOT when offering to send the missed-visit fee for review.",
+      "response_type": "phrase",
+      "response_value": "No, that explanation is enough. Please send the missed-visit fee for a waiver review, then text a payment link for the rest to 407-555-0155."
     }
   ],
   "customer_name": "Alice Romano",
