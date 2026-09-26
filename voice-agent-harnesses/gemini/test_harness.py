@@ -32,6 +32,9 @@ def test_blueprint_and_greeting() -> None:
     os.environ.pop("MIVAS_TODAY", None)
     clocked = harness.with_clock(health["agents"][health["start"]]["instructions"], health["industry_dir"])
     assert "August 19, 2026" in clocked
+    assert "CALENDAR: Today is Wednesday, August 19, 2026." in clocked
+    assert "as soon as possible is 2026-08-19." in clocked
+    assert harness.with_clock(clocked, health["industry_dir"]) == clocked
 
 
 def test_agent_name() -> None:
