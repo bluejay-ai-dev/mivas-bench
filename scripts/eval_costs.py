@@ -30,6 +30,8 @@ HARNESS_MODELS = {
     "gemini-2.5-flash-native-audio": "gemini-2.5-flash-native-audio",
     "qwen-audio-realtime": "qwen-audio-3.0-realtime-plus",
     "livekit-cascaded": "gpt-4.1",
+    "gemini-3.8-live": "gemini-3.8-live",
+    "gemini-3.8-live@extended": "gemini-3.8-live-extended-thinking",
 }
 
 MODEL_ALIASES = {
