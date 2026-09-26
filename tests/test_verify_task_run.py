@@ -894,3 +894,12 @@ def test_cs_unconsumed_quote_hold_is_not_a_state_change() -> None:
 def test_string_args_ignore_typographic_quotes() -> None:
     assert vtr._values_equal("competitor", "Grimwald's", "grimwald\u2019s")
     assert not vtr._values_equal("competitor", "Grimwald's", "Halcyon Mart")
+
+
+def test_trust_empty_tools_turns_extraction_void_into_a_scorable_call(monkeypatch) -> None:
+    body = {"id": 1, "status": "COMPLETED", "trace_ids": ["t"],
+            "tool_calls": [{"name": "escalate_to_human", "expected": [{}], "actual": []}]}
+    monkeypatch.setattr(vtr.verify_run, "TRUST_EMPTY_TOOLS", False)
+    assert "extraction" in (vtr.verify_run.classify_detail(body)["void_reason"] or "")
+    monkeypatch.setattr(vtr.verify_run, "TRUST_EMPTY_TOOLS", True)
+    assert vtr.verify_run.classify_detail(body)["void_reason"] is None

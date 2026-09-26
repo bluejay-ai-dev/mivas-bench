@@ -105,6 +105,12 @@ def latest_run_for_sim(sim_id: str) -> str:
     return str(newest.get("id") or newest.get("simulation_run_id"))
 
 
+# Set for harnesses whose tool extraction is confirmed against the pod's own tool log
+# (openai/gpt-live-1, 2026-09-25: 17/17 empty-list calls had zero tool calls in the pod).
+# Then an empty list with a linked trace is a real zero, a model failure, not a void.
+TRUST_EMPTY_TOOLS = os.environ.get("MIVAS_TRUST_EMPTY_TOOLS", "").strip() in ("1", "true", "yes")
+
+
 def classify_detail(d: dict, result_id: str | None = None) -> dict:
     """VOID / pending / pairing verdict from an already-fetched result body."""
     rid = str(result_id or d.get("id") or "")
@@ -126,7 +132,7 @@ def classify_detail(d: dict, result_id: str | None = None) -> dict:
         void_reason = f"no conversation ({status})"
     elif not d.get("trace_ids"):
         void_reason = "no trace linked — the harness never posted trace_ids"
-    elif expected and not fired:
+    elif expected and not fired and not TRUST_EMPTY_TOOLS:
         void_reason = "tool list empty while tools were expected — extraction did not land"
 
     return {
