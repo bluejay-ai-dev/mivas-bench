@@ -76,7 +76,12 @@
             "KE4495108"
           ]
         },
-        "sku": "SKU-AUD-8820",
+        "sku": {
+          "any_of": [
+            "SKU-AUD-8820",
+            "Aurelian Soundbar Mini"
+          ]
+        },
         "competitor": "Crestline Audio",
         "competitor_price": 399.99
       }
