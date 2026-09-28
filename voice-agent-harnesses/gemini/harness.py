@@ -128,7 +128,7 @@ def build_agents(industry_dir: str | Path) -> tuple[str, list[str]]:
 
 
 def with_clock(instructions: str, industry_dir: str | Path | None = None) -> str:
-    """Tell the model the pack's TODAY, not the wall clock."""
+    """Tell the model the pack's TODAY, not the wall clock (shared runtime text)."""
     return with_pack_clock(instructions, industry_dir)
 
 
