@@ -16,6 +16,7 @@ if str(RUNTIME) not in sys.path:
 from pack_clock import (  # noqa: E402
     pack_today,
     read_pack_today,
+    calendar_block,
     today_clock_line,
     with_pack_clock,
 )
@@ -54,5 +55,7 @@ def test_mivas_today_override(monkeypatch: pytest.MonkeyPatch) -> None:
 def test_with_pack_clock_appends_once() -> None:
     line = today_clock_line("legal")
     first = with_pack_clock("Be helpful.", "legal")
-    assert first.endswith(line)
+    assert line in first
+    assert first.endswith(calendar_block("legal"))
+    assert "as soon as possible is 2026-08-01." in first
     assert with_pack_clock(first, "legal") == first

@@ -94,6 +94,30 @@ def today_clock_line(
     return f"Today is {d.strftime('%A')}, {d.strftime('%B')} {d.day}, {d.year}."
 
 
+def calendar_block(
+    industry_dir: str | Path | None = None,
+    *,
+    today: date | None = None,
+) -> str:
+    """The pack date, stated so a model cannot substitute its own.
+
+    One "Today is ..." line is enough for most models, but plain Gemini 3.8
+    Live reverts to its real-world date once a session carries handoff history
+    (legal run 354814: 50 of 59 failed booking calls searched from the wall
+    clock). Measured on the Live API with such a history: the line alone holds
+    the pack date 1/5, at top and end 0/5, this block 13/13. Every harness gets
+    the same text so the clock treatment is identical across the benchmark.
+    """
+    d = today if today is not None else pack_today(industry_dir)
+    return (
+        f"CALENDAR: Today is {d.strftime('%A')}, {d.strftime('%B')} {d.day}, {d.year}. "
+        "That is the only current date for this call. Never use any other notion of "
+        "today's date, including any real-world date you may believe it is. Any date "
+        "argument that means today, now, the first opening or as soon as possible is "
+        f"{d.isoformat()}."
+    )
+
+
 def with_pack_clock(
     instructions: str,
     industry_dir: str | Path | None = None,
@@ -101,7 +125,10 @@ def with_pack_clock(
     today: date | None = None,
 ) -> str:
     line = today_clock_line(industry_dir, today=today)
+    block = calendar_block(industry_dir, today=today)
     text = (instructions or "").rstrip()
-    if line in text:
-        return text
-    return f"{text}\n\n{line}"
+    if line not in text:
+        text = f"{text}\n\n{line}"
+    if block not in text:
+        text = f"{text}\n\n{block}"
+    return text
