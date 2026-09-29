@@ -176,6 +176,14 @@ def token_cost(usage: dict, rates: dict) -> float:
             input_text = input_total
             output_text = output_total
 
+    # Tokens the provider bills but does not attribute to the text or audio lane
+    # (Gemini Live: input_tokens exceeds text + audio by 5-10%, and thinking tokens
+    # can sit outside the output split). Price them at the text rate, the lower one.
+    if any((input_text, input_audio)) and input_total > input_text + input_audio:
+        input_text += input_total - input_text - input_audio
+    if any((output_text, output_audio)) and output_total > output_text + output_audio:
+        output_text += output_total - output_text - output_audio
+
     cached_text = min(cached, input_text) if input_text else (cached if not input_audio else 0)
     cached_audio = min(max(0, cached - cached_text), input_audio)
     uncached_text = max(0, input_text - cached_text)
@@ -321,8 +329,15 @@ def deltalize(usages: list[dict]) -> list[dict]:
 def generations_from_spans(spans: list[dict], default_model: str) -> list[dict]:
     picked = [span for span in spans if (span.get("name") or "") in GENERATION_NAMES]
     if not any(usage_present(span.get("attributes") or {}) for span in picked):
-        # livekit-agents 1.8 moved realtime usage off agent_turn onto realtime_inference
-        picked = [span for span in spans if (span.get("name") or "") == "realtime_inference"]
+        # livekit-agents 1.8 moved realtime usage off agent_turn onto realtime_inference.
+        # When the usage packet lands after that span closed, the plugin stamps it on a
+        # child realtime_metrics span instead; the two never carry the same turn twice
+        # (checked on Gemini 3.8 traces: 0 duplicates, ~1 in 5 turns metrics-only).
+        picked = [
+            span for span in spans
+            if (span.get("name") or "") == "realtime_inference"
+            or ((span.get("name") or "") == "realtime_metrics" and usage_present(span.get("attributes") or {}))
+        ]
     if not picked:
         # OTel GenAI naming (`chat {model}`): gpt-live-1's backend Responses calls
         picked = [span for span in spans if (span.get("name") or "").startswith("chat ")]
