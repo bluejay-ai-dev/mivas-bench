@@ -1,0 +1,21 @@
+scripts/eval_costs.py
+  s_b8b1f16f08cab5::t_c7cbb809f13999 179-186,332-340
+tests/test_eval_costs_gemini.py
+  s_b8b1f16f08cab5::t_5233c31962cbcd 1-34
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "f6725657b2daf43451d67fddc7c657a23861e9d3",
+  "prompts": {},
+  "sessions": {
+    "s_b8b1f16f08cab5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "94092b8e-9afd-43dd-b9b6-e5158ad4c7f3",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
