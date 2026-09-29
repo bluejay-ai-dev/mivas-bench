@@ -155,6 +155,19 @@ def kick(session: AgentSession, text: str) -> None:
     logger.info("kicked gemini speak-first")
 
 
+def tool_results_note(chat_ctx: Any, limit: int = 800) -> str | None:
+    """Tool outputs of this call as one model-role message for the next stage."""
+    lines = [
+        f"{it.name or it.call_id}: {str(it.output)[:limit]}"
+        for it in chat_ctx.items
+        if getattr(it, "type", "") == "function_call_output"
+        and not str(getattr(it, "name", "")).startswith("transfer_to")
+    ]
+    if not lines:
+        return None
+    return "Results of tools already run earlier on this call:\n" + "\n".join(lines)
+
+
 def opener(instructions: str) -> str | None:
     m = _OPENER.search(instructions)
     return m.group(1).strip() if m else None
@@ -252,6 +265,13 @@ def _tools(
                 prior = context.session.current_agent.chat_ctx.copy(
                     exclude_instructions=True, exclude_function_call=True
                 )
+                # exclude_function_call also drops every tool RESULT, so the
+                # specialist lost what earlier agents looked up (appointment
+                # ids, balances) and asked the caller for it; the OpenAI
+                # harness keeps them natively. Carry them over as text.
+                notes = tool_results_note(context.session.current_agent.chat_ctx)
+                if notes:
+                    prior.add_message(role="assistant", content=notes)
                 stage = Stage(
                     bp, _target, hangup, make_llm, scripted,
                     entered_by_handoff=True, chat_ctx=prior,

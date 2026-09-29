@@ -87,6 +87,8 @@ if EXTENDED:
 
     def _track_status(self: Any, server_content: Any) -> None:
         self._mivas_active_at = asyncio.get_event_loop().time()
+        if server_content.input_transcription and server_content.input_transcription.text:
+            self._mivas_caller_at = self._mivas_active_at
         if server_content.turn_complete:
             status = getattr(server_content, "interaction_status", None)
             self._mivas_status = str(getattr(status, "value", status) or "").upper()
@@ -106,7 +108,13 @@ if EXTENDED:
             idle_since = getattr(self, "_mivas_status_at", 0.0)
             quiet = now - max(sent_at, getattr(self, "_mivas_active_at", 0.0))
             said_idle = getattr(self, "_mivas_status", "") == "IDLE" and idle_since > sent_at
+            if getattr(self, "_mivas_forced_at", -1.0) > getattr(self, "_mivas_caller_at", 0.0):
+                # one nudge per caller turn: a second one only buys another
+                # filler ("I am still working on your previous request") and
+                # the loop ran until the caller hung up on 14 legal calls
+                return
             if (said_idle and now - idle_since >= 3.0) or quiet >= 20.0:
+                self._mivas_forced_at = now
                 harness.logger.info(
                     "forcing a turn after a tool result: status=%s quiet=%.0fs",
                     getattr(self, "_mivas_status", ""), quiet,
