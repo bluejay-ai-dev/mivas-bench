@@ -32,6 +32,8 @@ HARNESS_MODELS = {
     "livekit-cascaded": "gpt-4.1",
     "openai-gpt-live-1@sol-low": "gpt-5.6-sol",
     "openai-gpt-live-1@astra-medium": "gpt-6-astra",
+    "gemini-3.8-live": "gemini-3.8-live",
+    "gemini-3.8-live@extended": "gemini-3.8-live-extended-thinking",
 }
 
 MODEL_ALIASES = {
@@ -318,6 +320,9 @@ def deltalize(usages: list[dict]) -> list[dict]:
 
 def generations_from_spans(spans: list[dict], default_model: str) -> list[dict]:
     picked = [span for span in spans if (span.get("name") or "") in GENERATION_NAMES]
+    if not any(usage_present(span.get("attributes") or {}) for span in picked):
+        # livekit-agents 1.8 moved realtime usage off agent_turn onto realtime_inference
+        picked = [span for span in spans if (span.get("name") or "") == "realtime_inference"]
     if not picked:
         # OTel GenAI naming (`chat {model}`): gpt-live-1's backend Responses calls
         picked = [span for span in spans if (span.get("name") or "").startswith("chat ")]
