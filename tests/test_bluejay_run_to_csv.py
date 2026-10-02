@@ -465,7 +465,8 @@ def test_cost_columns_estimated_without_trace() -> None:
     for name in exp.eval_costs.COST_COLUMNS:
         assert name in exp.HEADERS
         assert name in row
-    assert row["llm_cost_source"] == "estimated"
+    # no trace and no token columns: every turn is rebuilt from the transcript at list price
+    assert row["llm_cost_source"] == "reconstructed"
     assert float(row["llm_cost_usd"]) > 0
     assert float(row["llm_cost_per_hour_usd"]) > 0
     utterances = json.loads(row["utterance_costs_json"])
@@ -789,7 +790,7 @@ def test_pricing_file_has_component_pricing_for_the_cascade() -> None:
     stt = pricing["component_pricing"]["stt"]
     tts = pricing["component_pricing"]["tts"]
     assert (stt["model"], stt["usd_per_minute"]) == ("flux-general-en", 0.0077)
-    assert (tts["model"], tts["usd_per_1k_characters"]) == ("eleven_flash_v2_5", 0.0825)
+    assert (tts["model"], tts["usd_per_1k_characters"]) == ("eleven_flash_v2_5", 0.04)
 
 
 def test_pricing_file_has_gpt_41_row() -> None:
