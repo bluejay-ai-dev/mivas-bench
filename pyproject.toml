@@ -31,6 +31,10 @@ dependencies = [
 dev = ["pytest>=8.0.0"]
 
 [tool.uv]
+constraint-dependencies = [
+    "PyJWT>=2.15.0,<3.0",
+    "urllib3>=2.8.0,<3.0",
+]
 package = false
 
 [tool.pyright]
