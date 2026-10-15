@@ -4,7 +4,8 @@ xAI Grok Speech-to-Speech harnesses. Each subfolder is one model runtime.
 
 | Folder | Model |
 |---|---|
-| `voice/` | [`grok-voice-latest`](https://docs.x.ai/developers/model-capabilities/audio/voice-agent) (alias for `grok-voice-think-fast-2.0`) |
+| `voice/` | [`grok-voice-latest`](https://docs.x.ai/developers/model-capabilities/audio/voice-agent) (Grok Voice 3.0 since 2026-10-14; `grok-voice-think-fast-2.0` before) |
+| `voice@3.0` | same harness, env-only variant from `voice/variants.json`, so Grok Voice 3.0 results keep their own slug |
 
 Shared builder: `harness.py`. Tracing/reporting: `report.py` (`BLUEJAY_SERVICE_NAME=mivas-grok`, provider `xai`).
 

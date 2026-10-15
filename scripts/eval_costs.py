@@ -48,6 +48,7 @@ HARNESS_MODELS = {
     "openai-realtime-2.1": "gpt-realtime-2.1",
     "openai-realtime-2.1-mini": "gpt-realtime-2.1-mini",
     "grok-voice": "grok-voice-latest",
+    "grok-voice@3.0": "grok-voice-latest",
     "aws-nova-sonic-2": "amazon.nova-2-sonic-v1:0",
     "gemini-flash-live-3.1": "gemini-3.1-flash-live-preview",
     "gemini-2.5-flash-native-audio": "gemini-2.5-flash-native-audio",

@@ -1495,7 +1495,7 @@ def collect_filled_results(
 
 
 def default_out_path(industry: str, harness: str, primary: str) -> Path:
-    return ROOT / "eval_outputs" / f"{industry}-{harness.replace('/', '-')}-{primary}.csv"
+    return ROOT / "eval_outputs" / f"{industry}-{harness.replace('/', '-').replace('@', '-')}-{primary}.csv"
 
 
 def main(argv: list[str] | None = None) -> int:
