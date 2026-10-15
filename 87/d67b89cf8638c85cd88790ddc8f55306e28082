@@ -1,0 +1,23 @@
+runtime/pack_clock.py
+  s_b8b1f16f08cab5::t_87d2742a506763 97-120,128,130-134
+tests/test_pack_clock.py
+  s_b8b1f16f08cab5::t_209a07ec93fa9d 19,58-60
+voice-agent-harnesses/gemini/harness.py
+  s_b8b1f16f08cab5::t_592c354437a1b4 41,131-132
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "87d67b89cf8638c85cd88790ddc8f55306e28082",
+  "prompts": {},
+  "sessions": {
+    "s_b8b1f16f08cab5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "94092b8e-9afd-43dd-b9b6-e5158ad4c7f3",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

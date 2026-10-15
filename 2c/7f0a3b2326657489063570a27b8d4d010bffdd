@@ -1,0 +1,19 @@
+voice-agent-harnesses/openai/gpt-live-1/README.md
+  s_4ea68a93215613::t_4a8538f08e48b3 126-134,159
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "2c7f0a3b2326657489063570a27b8d4d010bffdd",
+  "prompts": {},
+  "sessions": {
+    "s_4ea68a93215613": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8eb3d720-2035-4a81-aa92-006569f46f3c",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

@@ -1,0 +1,23 @@
+scripts/tasks_to_digital_humans.py
+  s_4ea68a93215613::t_a9ec83ee62344e 215-227,240
+tests/test_verify_task_run.py
+  s_4ea68a93215613::t_4f9a962a11a272 906-917
+verifiers/verify_task_run.py
+  s_4ea68a93215613::t_0fbc7ee576648e 155-158,712-726,811-814
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "213e4400ba81764ee7e8dddf820bf74648c53bff",
+  "prompts": {},
+  "sessions": {
+    "s_4ea68a93215613": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8eb3d720-2035-4a81-aa92-006569f46f3c",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

@@ -1,0 +1,21 @@
+verifiers/pull_actual_final_state.py
+  s_4ea68a93215613::t_afaa25d70908d0 77-93
+verifiers/verify_run.py
+  s_4ea68a93215613::t_efc893fc5ba2be 38,40,60-73
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "49ee9292871d64f11c1b9f6dbfde808522cf74c5",
+  "prompts": {},
+  "sessions": {
+    "s_4ea68a93215613": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8eb3d720-2035-4a81-aa92-006569f46f3c",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

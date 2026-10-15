@@ -1,0 +1,21 @@
+verifiers/verify_run.py
+  s_b8b1f16f08cab5::t_4b4f4490e9e68a 38,66-67
+verifiers/verify_task_run.py
+  s_b8b1f16f08cab5::t_7e7ea2b2c19a0e 30,944-945
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "d0230e29717b9f08bacf28be4d13f5ec72d769c4",
+  "prompts": {},
+  "sessions": {
+    "s_b8b1f16f08cab5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "94092b8e-9afd-43dd-b9b6-e5158ad4c7f3",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

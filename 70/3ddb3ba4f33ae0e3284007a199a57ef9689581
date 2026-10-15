@@ -1,0 +1,21 @@
+scripts/bluejay_run_to_csv.py
+  s_4ea68a93215613::t_555552e1a56440 1392
+verifiers/verify_task_run.py
+  s_4ea68a93215613::t_1d6aeac79d4681 953-977,1096
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "703ddb3ba4f33ae0e3284007a199a57ef9689581",
+  "prompts": {},
+  "sessions": {
+    "s_4ea68a93215613": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8eb3d720-2035-4a81-aa92-006569f46f3c",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

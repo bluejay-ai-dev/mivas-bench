@@ -1,0 +1,39 @@
+scripts/eval_costs.py
+  s_699b30c8cd6a66::t_0452a062f134bf 1191-1194
+  s_699b30c8cd6a66::t_6873d54ec7bdeb 333-364,366-379,381-387,391-393
+  s_699b30c8cd6a66::t_8f8dd9c0235834 63-64,69-78
+  s_699b30c8cd6a66::t_605d0ac98d9077 856-857
+  s_699b30c8cd6a66::t_6c2ac571bb0c30 1-23,35,40,43-45,79-90,95-97,157-160,183-199,225-231,236-238,278-281,365,411-414,416-462,466,469-470,474-475,479-512,514-548,553-563,565-574,587-597,603-608,610,612-628,630-665,669,671-672,675-704,706-715,717-855,858-973,1025-1026,1028-1031,1033,1036-1058,1075,1109-1110,1113-1135,1148-1154,1159,1165-1166,1168-1169,1171-1190,1195-1225,1229-1238,1253-1254,1256-1260
+  s_699b30c8cd6a66::t_591e5e330118bb 463-465,467-468,471-473,476-478
+  s_699b30c8cd6a66::t_7a10e2d8b36da6 549-552,564
+  s_699b30c8cd6a66::t_0aa12a4d747614 575-586,600-602,609,611
+  s_699b30c8cd6a66::t_83539e907eccad 629
+  s_699b30c8cd6a66::t_b0c2718503425d 666-668
+  s_699b30c8cd6a66::t_dced9eddf64ad2 598-599,670
+tests/test_eval_costs_gemini.py
+  s_699b30c8cd6a66::t_8d65ee1621cb10 1-2,10-11,14-18,23-47,51-71,73-75,77-78,85-149
+scripts/annotate_eval_costs.py
+  s_699b30c8cd6a66::t_2c12acba3761ee 1-188
+scripts/bluejay_run_to_csv.py
+  s_699b30c8cd6a66::t_03ffefcda27820 96-98,1189-1191
+tests/test_bluejay_run_to_csv.py
+  s_699b30c8cd6a66::t_8b75093aed2b89 468-469,793
+voice-agent-harnesses/s2s-model-pricing.json
+  s_699b30c8cd6a66::t_7c5e49cf1e56dc 5-7,44,46-67,70,83,89-90
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "c90c4d5560242debca8837bad80e259cd34904da",
+  "prompts": {},
+  "sessions": {
+    "s_699b30c8cd6a66": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "f1e30cbc-9665-43ba-9fd5-717102388cff",
+        "model": "auto-smart"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

@@ -1,0 +1,21 @@
+tests/test_verify_task_run.py
+  s_b8b1f16f08cab5::t_abf7ff7ae2675e 874-889
+verifiers/verify_task_run.py
+  s_b8b1f16f08cab5::t_c54c0e9f73d17f 678-703,720-732
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "dbc885557669786bf17e5026bbefacaf46edaafd",
+  "prompts": {},
+  "sessions": {
+    "s_b8b1f16f08cab5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "94092b8e-9afd-43dd-b9b6-e5158ad4c7f3",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

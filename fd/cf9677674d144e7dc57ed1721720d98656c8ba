@@ -1,0 +1,131 @@
+industries/customer-support/tasks/T2-H2/task.json
+  s_b8b1f16f08cab5::t_c4d886b17f4da3 60,63
+industries/healthcare/tasks/C3-M2/task.json
+  s_b8b1f16f08cab5::t_ff9250cd5d41b5 106,139-144
+industries/legal/tasks/C4-E1/task.json
+  s_b8b1f16f08cab5::t_d8a52ec6830c6a 4
+industries/legal/tasks/C2-H1/task.json
+  s_b8b1f16f08cab5::t_e69c24a182a5c6 4,91
+industries/customer-support/tasks/T5-H2/task.json
+  s_b8b1f16f08cab5::t_ac811c37842686 60
+industries/customer-support/tasks/T1-H4/task.json
+  s_b8b1f16f08cab5::t_48029578f0c56e 63-68,77-82
+industries/customer-support/tasks/T4-E1-BG/task.json
+  s_b8b1f16f08cab5::t_a39c313826c4ed 12
+industries/customer-support/tasks/R-H3/task.json
+  s_b8b1f16f08cab5::t_7df7f288a8aff0 60,63,66
+industries/customer-support/tasks/T3-H3/task.json
+  s_b8b1f16f08cab5::t_ef50c640f66165 60
+industries/healthcare/tasks/C4-M3/task.json
+  s_b8b1f16f08cab5::t_9c703808635634 3,16-19
+industries/customer-support/tasks/T2-M1/task.json
+  s_b8b1f16f08cab5::t_2a06d520725c1d 60
+industries/legal/tasks/C4-H3/task.json
+  s_b8b1f16f08cab5::t_f8cff4861ed2c4 139
+industries/legal/tasks/C1-M3/task.json
+  s_b8b1f16f08cab5::t_442f758ff4a0da 38-44
+industries/customer-support/tasks/T3-H1/task.json
+  s_b8b1f16f08cab5::t_1a1d70837902c7 60
+industries/healthcare/tasks/C3-H2/task.json
+  s_b8b1f16f08cab5::t_89578b4af98bd1 66
+industries/healthcare/tasks/R-H3/task.json
+  s_b8b1f16f08cab5::t_541e0045807ccc 51,111
+industries/healthcare/tasks/R-H1/task.json
+  s_b8b1f16f08cab5::t_c69b768f6e7bec 51
+industries/healthcare/tasks/C1-H3/task.json
+  s_b8b1f16f08cab5::t_4747fc4588c0b4 66
+industries/healthcare/tasks/C4-H2/task.json
+  s_b8b1f16f08cab5::t_3f5917726405ba 46
+tests/test_tasks_to_digital_humans.py
+  s_b8b1f16f08cab5::t_578e9502ff2676 373-375
+industries/customer-support/tasks/T3-H4/task.json
+  s_b8b1f16f08cab5::t_0c726e0a704512 60
+industries/healthcare/tasks/C2-H1/task.json
+  s_b8b1f16f08cab5::t_3e3b6efb4ef80c 111-112
+industries/customer-support/tasks/R-H1/task.json
+  s_b8b1f16f08cab5::t_a958ead4e8b3dc 60,63
+industries/customer-support/tasks/T5-H1/task.json
+  s_b8b1f16f08cab5::t_b854ff50e75bfd 64-69
+industries/customer-support/tasks/T1-M1/task.json
+  s_b8b1f16f08cab5::t_a6fa7ec0d3f677 60
+industries/customer-support/tasks/T2-H4/task.json
+  s_b8b1f16f08cab5::t_183bbe4535581d 60,63
+industries/customer-support/tasks/T2-M4/task.json
+  s_b8b1f16f08cab5::t_290d3ace06b6d9 62-67
+industries/customer-support/tasks/T5-H3/task.json
+  s_b8b1f16f08cab5::t_870364ffd45cbf 60,67-72,83-88
+industries/healthcare/tasks/C1-H1/task.json
+  s_b8b1f16f08cab5::t_63e164b02e9eab 3,152
+industries/healthcare/tasks/R-M4/task.json
+  s_b8b1f16f08cab5::t_9b2747e9a0b3e4 87,114-119
+industries/customer-support/tasks/R-H2/task.json
+  s_b8b1f16f08cab5::t_67ca34bd4f9167 36,48
+industries/legal/tasks/C1-M4/task.json
+  s_b8b1f16f08cab5::t_c926126e69e883 120
+industries/customer-support/tasks/T1-M2/task.json
+  s_b8b1f16f08cab5::t_5c8290422864d3 60
+industries/customer-support/tasks/T3-M3/task.json
+  s_b8b1f16f08cab5::t_0343b15fe5692c 62-68
+industries/customer-support/tasks/T2-M2/task.json
+  s_b8b1f16f08cab5::t_f3187137ce7c24 62-67
+industries/healthcare/tasks/R-H4/task.json
+  s_b8b1f16f08cab5::t_4ef8392968d682 3,145
+industries/legal/tasks/R-E2/task.json
+  s_b8b1f16f08cab5::t_26c5dfe5fbc39a 20-25,108-113
+industries/customer-support/tasks/R-H4/task.json
+  s_b8b1f16f08cab5::t_65772aa3adcf5c 50,60,87,90,843
+industries/customer-support/tasks/T2-H3/task.json
+  s_b8b1f16f08cab5::t_b5213d02c8a2a4 60,63
+industries/customer-support/tasks/T5-H4/task.json
+  s_b8b1f16f08cab5::t_c84844b7139c93 60,66-72
+industries/customer-support/tasks/T4-E1-SIG/task.json
+  s_b8b1f16f08cab5::t_a5c35cf67e5565 12
+industries/customer-support/tasks/T1-M4/task.json
+  s_b8b1f16f08cab5::t_d102d39e8b18ea 62-74
+industries/healthcare/tasks/C3-H4/task.json
+  s_b8b1f16f08cab5::t_3ca763f2482c04 3,106,210-221
+industries/customer-support/tasks/T5-M2/task.json
+  s_b8b1f16f08cab5::t_a4c2c72162cec4 62-68
+industries/customer-support/tasks/R-M4/task.json
+  s_b8b1f16f08cab5::t_9f4fff54887afb 36,46,772
+industries/customer-support/tasks/T2-H1/task.json
+  s_b8b1f16f08cab5::t_5afe44a3f38d27 60,63
+industries/customer-support/tasks/T2-E1/task.json
+  s_b8b1f16f08cab5::t_8661516bca2f99 12
+industries/healthcare/tasks/C4-H4/task.json
+  s_b8b1f16f08cab5::t_adf45f9a208fdb 46
+industries/legal/tasks/C4-E2/task.json
+  s_b8b1f16f08cab5::t_6415d7456856df 4
+industries/healthcare/tasks/C5-H1/task.json
+  s_b8b1f16f08cab5::t_af9f7c972374a8 47
+industries/customer-support/tasks/T4-E1/task.json
+  s_b8b1f16f08cab5::t_86855714972ca4 12
+industries/healthcare/tasks/C4-H3/task.json
+  s_b8b1f16f08cab5::t_34cbabae595f64 46,136,193-198
+industries/customer-support/tasks/R-M3/task.json
+  s_b8b1f16f08cab5::t_b8738b3949cd1f 60
+industries/healthcare/tasks/C2-H2/task.json
+  s_b8b1f16f08cab5::t_4848d81f3eb104 59
+industries/healthcare/tasks/C2-H3/task.json
+  s_b8b1f16f08cab5::t_f3e6cf2606eb8e 47
+industries/healthcare/tasks/C1-H2/task.json
+  s_b8b1f16f08cab5::t_a3362d832829d1 176
+industries/customer-support/tasks/T1-H2/task.json
+  s_b8b1f16f08cab5::t_2e6dfe944dcb29 62-68
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "fdcf9677674d144e7dc57ed1721720d98656c8ba",
+  "prompts": {},
+  "sessions": {
+    "s_b8b1f16f08cab5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "94092b8e-9afd-43dd-b9b6-e5158ad4c7f3",
+        "model": "unknown"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

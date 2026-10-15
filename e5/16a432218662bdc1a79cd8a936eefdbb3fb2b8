@@ -1,0 +1,19 @@
+voice-agent-harnesses/gemini/3.8-live/agent.py
+  s_b8b1f16f08cab5::t_eaa1ae3addcc4a 119-124,126-127
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "e516a432218662bdc1a79cd8a936eefdbb3fb2b8",
+  "prompts": {},
+  "sessions": {
+    "s_b8b1f16f08cab5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "94092b8e-9afd-43dd-b9b6-e5158ad4c7f3",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

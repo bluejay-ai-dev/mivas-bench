@@ -1,0 +1,21 @@
+tests/test_verify_task_run.py
+  s_4ea68a93215613::t_a70a50d53ae957 897-905
+verifiers/verify_run.py
+  s_4ea68a93215613::t_642e60e440ebb5 108-113,135
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "843c2daaaed9aa1744c1005ae5d229b648cbb592",
+  "prompts": {},
+  "sessions": {
+    "s_4ea68a93215613": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8eb3d720-2035-4a81-aa92-006569f46f3c",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

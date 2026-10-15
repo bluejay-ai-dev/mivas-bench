@@ -1,0 +1,21 @@
+industries/healthcare/tasks/C2-M1/task.json
+  s_b8b1f16f08cab5::t_6c252403f5bef7 66-71
+tests/test_tasks_to_digital_humans.py
+  s_b8b1f16f08cab5::t_578e9502ff2676 373-375
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "5f411ce9fd4443961fc70eb95b06f2544d0f705e",
+  "prompts": {},
+  "sessions": {
+    "s_b8b1f16f08cab5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "94092b8e-9afd-43dd-b9b6-e5158ad4c7f3",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

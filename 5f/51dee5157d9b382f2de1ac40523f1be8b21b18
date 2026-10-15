@@ -1,0 +1,19 @@
+verifiers/pull_actual_final_state.py
+  s_b8b1f16f08cab5::t_ccb6c95d610493 18,20,51,53,78-88,106-115
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "5f51dee5157d9b382f2de1ac40523f1be8b21b18",
+  "prompts": {},
+  "sessions": {
+    "s_b8b1f16f08cab5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "94092b8e-9afd-43dd-b9b6-e5158ad4c7f3",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

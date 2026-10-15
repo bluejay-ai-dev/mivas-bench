@@ -1,0 +1,21 @@
+voice-agent-harnesses/gemini/harness.py
+  s_b8b1f16f08cab5::t_0b30a94567403a 158-170,268-274
+voice-agent-harnesses/gemini/test_harness.py
+  s_b8b1f16f08cab5::t_0c0e815ddf079a 65-78,84
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "8ba21f4da2dd1bca726680b7dfb7ee4c7fcee24a",
+  "prompts": {},
+  "sessions": {
+    "s_b8b1f16f08cab5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "94092b8e-9afd-43dd-b9b6-e5158ad4c7f3",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
