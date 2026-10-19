@@ -1,0 +1,60 @@
+{
+  "task": "C2-H2",
+  "industry": "healthcare",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "transfer_to_identity",
+      "arguments": {
+        "next_intent": "coverage"
+      }
+    },
+    {
+      "name": "identify_patient",
+      "arguments": {
+        "first_name": "Leo",
+        "last_name": "Park",
+        "dob": "2016-03-22"
+      }
+    },
+    {
+      "name": "verify_identity",
+      "arguments": {
+        "full_name": "Leo Park",
+        "dob": "2016-03-22"
+      }
+    },
+    {
+      "name": "get_patient_summary",
+      "arguments": {}
+    },
+    {
+      "name": "transfer_to_coverage",
+      "arguments": {}
+    },
+    {
+      "name": "check_plan_accepted",
+      "arguments": {
+        "carrier": "aetna",
+        "location_id": "loc_brooklyn_heights"
+      }
+    },
+    {
+      "name": "transfer_to_scheduling",
+      "arguments": {}
+    },
+    {
+      "name": "list_locations",
+      "arguments": {
+        "location_id": "loc_brooklyn_heights"
+      }
+    },
+    {
+      "name": "schedule_allergy_service",
+      "arguments": {
+        "service": "allergy_shot",
+        "location_id": "loc_brooklyn_heights"
+      }
+    }
+  ]
+}

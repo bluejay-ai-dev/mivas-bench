@@ -1,0 +1,43 @@
+{
+  "task": "T5-M4",
+  "industry": "customer-support",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "transfer_to_verification",
+      "arguments": {}
+    },
+    {
+      "name": "identify_customer",
+      "arguments": {
+        "full_name": "Felix Moreau",
+        "phone": "541-555-0108"
+      }
+    },
+    {
+      "name": "verify_identity",
+      "arguments": {
+        "postal_code": "94612",
+        "card_last4": "3390"
+      }
+    },
+    {
+      "name": "get_customer_summary",
+      "arguments": {}
+    },
+    {
+      "name": "transfer_to_orders",
+      "arguments": {}
+    },
+    {
+      "name": "quote_price_match",
+      "arguments": {
+        "order_number": "KE-4495108",
+        "competitor": "Rivertide",
+        "competitor_price": 549.99,
+        "sku": "SKU-AUD-7720"
+      },
+      "expect_error": "PRICE_NOT_LOWER"
+    }
+  ]
+}

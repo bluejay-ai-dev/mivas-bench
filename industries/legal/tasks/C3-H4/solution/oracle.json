@@ -1,0 +1,69 @@
+{
+  "task": "C3-H4",
+  "industry": "legal",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "lookup_caller",
+      "arguments": {
+        "full_name": "Wilhelmina Prado",
+        "phone": "360-555-0149"
+      }
+    },
+    {
+      "name": "transfer_to_screening",
+      "arguments": {
+        "handoff_summary": "C3-H4: Employment in Washington clears screening"
+      }
+    },
+    {
+      "name": "check_conflict",
+      "arguments": {
+        "opposing_party": "Evergreen Millwork"
+      }
+    },
+    {
+      "name": "check_practice_area",
+      "arguments": {
+        "practice_area": "employment"
+      }
+    },
+    {
+      "name": "check_jurisdiction",
+      "arguments": {
+        "state": "WA",
+        "practice_area": "employment"
+      }
+    },
+    {
+      "name": "calculate_filing_deadline",
+      "arguments": {
+        "state": "WA",
+        "practice_area": "employment",
+        "incident_date": "2026-06-02"
+      }
+    },
+    {
+      "name": "transfer_to_intake",
+      "arguments": {
+        "handoff_summary": "C3-H4: Employment in Washington clears screening",
+        "contact_details_only": false
+      }
+    },
+    {
+      "name": "record_intake",
+      "arguments": {
+        "practice_area": "employment",
+        "state": "WA",
+        "incident_date": "2026-06-02",
+        "summary": "Retaliation after a workplace safety report."
+      }
+    },
+    {
+      "name": "send_intake_packet",
+      "arguments": {
+        "channel": "email"
+      }
+    }
+  ]
+}

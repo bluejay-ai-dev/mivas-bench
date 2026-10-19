@@ -1,0 +1,13 @@
+{
+  "task": "T5-E1-SIG",
+  "industry": "customer-support",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "get_policy",
+      "arguments": {
+        "topic": "price match"
+      }
+    }
+  ]
+}

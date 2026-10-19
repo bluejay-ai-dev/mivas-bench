@@ -1,0 +1,62 @@
+{
+  "task": "T3-H4",
+  "industry": "customer-support",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "transfer_to_verification",
+      "arguments": {}
+    },
+    {
+      "name": "identify_customer",
+      "arguments": {
+        "full_name": "Grace Okonkwo",
+        "phone": "541-555-0112"
+      }
+    },
+    {
+      "name": "verify_identity",
+      "arguments": {
+        "postal_code": "97005",
+        "card_last4": "6628"
+      }
+    },
+    {
+      "name": "get_customer_summary",
+      "arguments": {}
+    },
+    {
+      "name": "transfer_to_service",
+      "arguments": {}
+    },
+    {
+      "name": "get_order",
+      "arguments": {
+        "order_number": "KE-4471860"
+      }
+    },
+    {
+      "name": "get_protection_plans",
+      "arguments": {}
+    },
+    {
+      "name": "check_coverage",
+      "arguments": {
+        "order_number": "KE-4471860",
+        "issue": "will not charge"
+      }
+    },
+    {
+      "name": "book_service_appointment",
+      "arguments": {
+        "order_number": "KE-4471860",
+        "service_type": "bench",
+        "issue": "will not charge"
+      }
+    },
+    {
+      "name": "cancel_service_appointment",
+      "arguments": {}
+    }
+  ]
+}

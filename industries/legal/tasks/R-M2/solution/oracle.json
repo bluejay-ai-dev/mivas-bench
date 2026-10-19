@@ -1,0 +1,63 @@
+{
+  "task": "R-M2",
+  "industry": "legal",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "lookup_caller",
+      "arguments": {
+        "full_name": "Percival Dane",
+        "phone": "404-555-0192"
+      }
+    },
+    {
+      "name": "transfer_to_screening",
+      "arguments": {
+        "handoff_summary": "R-M2: Is eighty thousand in the right area"
+      }
+    },
+    {
+      "name": "check_conflict",
+      "arguments": {
+        "opposing_party": "Decatur Freight"
+      }
+    },
+    {
+      "name": "check_practice_area",
+      "arguments": {
+        "practice_area": "auto_accident"
+      }
+    },
+    {
+      "name": "check_jurisdiction",
+      "arguments": {
+        "state": "GA",
+        "practice_area": "auto_accident"
+      }
+    },
+    {
+      "name": "calculate_filing_deadline",
+      "arguments": {
+        "state": "GA",
+        "practice_area": "auto_accident",
+        "incident_date": "2026-06-08"
+      }
+    },
+    {
+      "name": "transfer_to_intake",
+      "arguments": {
+        "handoff_summary": "R-M2: Is eighty thousand in the right area",
+        "contact_details_only": false
+      }
+    },
+    {
+      "name": "record_intake",
+      "arguments": {
+        "practice_area": "auto_accident",
+        "state": "GA",
+        "incident_date": "2026-06-08",
+        "summary": "Rear-end collision."
+      }
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "task": "C2-H2",
+  "industry": "legal",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "lookup_caller",
+      "arguments": {
+        "full_name": "Gloria Mensah",
+        "phone": "312-555-0266"
+      }
+    },
+    {
+      "name": "transfer_to_screening",
+      "arguments": {
+        "handoff_summary": "C2-H2: Conflict unclear, hospital and surgeon"
+      }
+    },
+    {
+      "name": "check_conflict",
+      "arguments": {
+        "opposing_party": "St. Benedict Medical Center"
+      }
+    },
+    {
+      "name": "transfer_to_intake",
+      "arguments": {
+        "handoff_summary": "C2-H2: Conflict unclear, hospital and surgeon",
+        "contact_details_only": false
+      }
+    },
+    {
+      "name": "record_intake",
+      "arguments": {
+        "practice_area": "medical_malpractice",
+        "state": "IL",
+        "incident_date": "2025-11-02",
+        "summary": "Intake summary."
+      }
+    },
+    {
+      "name": "escalate_to_human",
+      "arguments": {
+        "reason_code": "conflict_review"
+      }
+    }
+  ]
+}

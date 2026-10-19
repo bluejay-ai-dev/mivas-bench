@@ -1,0 +1,39 @@
+{
+  "task": "R-M3",
+  "industry": "customer-support",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "transfer_to_verification",
+      "arguments": {}
+    },
+    {
+      "name": "identify_customer",
+      "arguments": {
+        "full_name": "Dana Whitlock",
+        "phone": "541-555-0188"
+      }
+    },
+    {
+      "name": "verify_identity",
+      "arguments": {
+        "postal_code": "97330",
+        "card_last4": "4417"
+      }
+    },
+    {
+      "name": "get_customer_summary",
+      "arguments": {}
+    },
+    {
+      "name": "transfer_to_orders",
+      "arguments": {}
+    },
+    {
+      "name": "get_order",
+      "arguments": {
+        "order_number": "KE-4471209"
+      }
+    }
+  ]
+}

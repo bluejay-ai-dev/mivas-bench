@@ -1,0 +1,40 @@
+{
+  "task": "T3-M2",
+  "industry": "customer-support",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "transfer_to_verification",
+      "arguments": {}
+    },
+    {
+      "name": "identify_customer",
+      "arguments": {
+        "full_name": "Priya Raman",
+        "phone": "541-555-0119"
+      }
+    },
+    {
+      "name": "verify_identity",
+      "arguments": {
+        "postal_code": "98104",
+        "card_last4": "3361"
+      }
+    },
+    {
+      "name": "get_customer_summary",
+      "arguments": {}
+    },
+    {
+      "name": "transfer_to_service",
+      "arguments": {}
+    },
+    {
+      "name": "check_coverage",
+      "arguments": {
+        "order_number": "KE-4462884",
+        "issue": "dropped, cracked screen"
+      }
+    }
+  ]
+}

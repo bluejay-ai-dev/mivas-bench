@@ -1,0 +1,31 @@
+{
+  "task": "C3-M2",
+  "industry": "healthcare",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "transfer_to_identity",
+      "arguments": {
+        "next_intent": "coverage"
+      }
+    },
+    {
+      "name": "transfer_to_coverage",
+      "arguments": {}
+    },
+    {
+      "name": "verify_identity",
+      "arguments": {
+        "dob": "1990-04-12",
+        "full_name": "Jordan Lee"
+      }
+    },
+    {
+      "name": "capture_insurance_update",
+      "arguments": {
+        "carrier": "cigna",
+        "member_id": "C445566778"
+      }
+    }
+  ]
+}

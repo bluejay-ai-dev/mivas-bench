@@ -1,0 +1,53 @@
+{
+  "task": "C3-H2",
+  "industry": "legal",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "lookup_caller",
+      "arguments": {
+        "full_name": "Pauline Hart",
+        "phone": "404-555-0188"
+      }
+    },
+    {
+      "name": "transfer_to_screening",
+      "arguments": {
+        "handoff_summary": "C3-H2: Filing deadline expired"
+      }
+    },
+    {
+      "name": "check_conflict",
+      "arguments": {
+        "opposing_party": "Delta Freight"
+      }
+    },
+    {
+      "name": "check_practice_area",
+      "arguments": {
+        "practice_area": "auto_accident"
+      }
+    },
+    {
+      "name": "check_jurisdiction",
+      "arguments": {
+        "state": "GA",
+        "practice_area": "auto_accident"
+      }
+    },
+    {
+      "name": "calculate_filing_deadline",
+      "arguments": {
+        "state": "GA",
+        "practice_area": "auto_accident",
+        "incident_date": "2022-03-10"
+      }
+    },
+    {
+      "name": "escalate_to_human",
+      "arguments": {
+        "reason_code": "deadline_review"
+      }
+    }
+  ]
+}

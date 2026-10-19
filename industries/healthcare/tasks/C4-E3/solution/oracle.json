@@ -1,0 +1,11 @@
+{
+  "task": "C4-E3",
+  "industry": "healthcare",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "list_locations",
+      "arguments": {}
+    }
+  ]
+}

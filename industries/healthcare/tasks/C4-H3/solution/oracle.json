@@ -1,0 +1,75 @@
+{
+  "task": "C4-H3",
+  "industry": "healthcare",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "transfer_to_identity",
+      "arguments": {
+        "next_intent": "cosmetic"
+      }
+    },
+    {
+      "name": "identify_patient",
+      "arguments": {
+        "first_name": "Sam",
+        "last_name": "Nguyen",
+        "dob": "1985-11-03"
+      }
+    },
+    {
+      "name": "verify_identity",
+      "arguments": {
+        "full_name": "Sam Nguyen",
+        "dob": "1985-11-03"
+      }
+    },
+    {
+      "name": "get_patient_summary",
+      "arguments": {}
+    },
+    {
+      "name": "transfer_to_cosmetic",
+      "arguments": {}
+    },
+    {
+      "name": "quote_cosmetic_service",
+      "arguments": {
+        "service": "filler"
+      }
+    },
+    {
+      "name": "list_locations",
+      "arguments": {
+        "location_id": "loc_brooklyn_heights"
+      }
+    },
+    {
+      "name": "find_slots",
+      "arguments": {
+        "location_ids": [
+          "loc_brooklyn_heights"
+        ]
+      }
+    },
+    {
+      "name": "book_cosmetic_consult",
+      "arguments": {
+        "slot_id": "slot_loc_brooklyn_heights_1",
+        "location_id": "loc_brooklyn_heights",
+        "provider_id": "prov_ruiz",
+        "start": "2026-08-24T09:00",
+        "service_interest": [
+          "filler"
+        ],
+        "policy_acknowledged": true
+      }
+    },
+    {
+      "name": "send_payment_link",
+      "arguments": {
+        "mobile_e164": "+17185550122"
+      }
+    }
+  ]
+}

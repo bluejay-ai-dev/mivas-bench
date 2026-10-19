@@ -1,0 +1,48 @@
+{
+  "task": "C4-M1",
+  "industry": "healthcare",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "transfer_to_cosmetic",
+      "arguments": {}
+    },
+    {
+      "name": "quote_cosmetic_service",
+      "arguments": {
+        "service": "microneedling"
+      }
+    },
+    {
+      "name": "list_locations",
+      "arguments": {}
+    },
+    {
+      "name": "find_slots",
+      "arguments": {
+        "location_ids": [
+          "loc_park_ave"
+        ]
+      }
+    },
+    {
+      "name": "book_cosmetic_consult",
+      "arguments": {
+        "slot_id": "slot_loc_park_ave_1",
+        "location_id": "loc_park_ave",
+        "provider_id": "prov_chen",
+        "start": "2026-08-24T09:00",
+        "service_interest": [
+          "microneedling"
+        ],
+        "policy_acknowledged": true
+      }
+    },
+    {
+      "name": "send_payment_link",
+      "arguments": {
+        "mobile_e164": "+12125550171"
+      }
+    }
+  ]
+}

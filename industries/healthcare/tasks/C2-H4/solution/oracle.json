@@ -1,0 +1,62 @@
+{
+  "task": "C2-H4",
+  "industry": "healthcare",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "transfer_to_identity",
+      "arguments": {
+        "next_intent": "scheduling"
+      }
+    },
+    {
+      "name": "transfer_to_scheduling",
+      "arguments": {}
+    },
+    {
+      "name": "verify_identity",
+      "arguments": {
+        "full_name": "Jordan Lee",
+        "dob": "1990-04-12"
+      }
+    },
+    {
+      "name": "get_patient_summary",
+      "arguments": {}
+    },
+    {
+      "name": "cancel_appointment",
+      "arguments": {
+        "appointment_id": "1",
+        "cancellation_reason_code": "patient_request"
+      }
+    },
+    {
+      "name": "cancel_appointment",
+      "arguments": {
+        "fee_disclosed_and_accepted": true,
+        "appointment_id": "1",
+        "cancellation_reason_code": "patient_request"
+      }
+    },
+    {
+      "name": "find_slots",
+      "arguments": {
+        "location_ids": [
+          "loc_park_ave"
+        ]
+      }
+    },
+    {
+      "name": "book_appointment",
+      "arguments": {
+        "location_id": "loc_park_ave",
+        "slot_id": "slot_loc_park_ave_1",
+        "provider_id": "prov_chen",
+        "start": "2026-08-24T09:00",
+        "end": "2026-08-24T09:30",
+        "appointment_type_code": "MED_FOLLOWUP"
+      }
+    }
+  ]
+}

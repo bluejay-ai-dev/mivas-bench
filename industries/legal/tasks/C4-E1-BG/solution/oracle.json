@@ -1,0 +1,36 @@
+{
+  "task": "C4-E1-BG",
+  "industry": "legal",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "lookup_caller",
+      "arguments": {
+        "full_name": "Nadine Carlisle",
+        "phone": "805-555-0167"
+      }
+    },
+    {
+      "name": "transfer_to_screening",
+      "arguments": {
+        "handoff_summary": "C4-E1-BG: Intake recorded for auto accident"
+      }
+    },
+    {
+      "name": "transfer_to_intake",
+      "arguments": {
+        "handoff_summary": "C4-E1-BG: Intake recorded for auto accident",
+        "contact_details_only": false
+      }
+    },
+    {
+      "name": "record_intake",
+      "arguments": {
+        "practice_area": "auto_accident",
+        "state": "CA",
+        "incident_date": "2026-03-15",
+        "summary": "Driveway pull-out collision."
+      }
+    }
+  ]
+}

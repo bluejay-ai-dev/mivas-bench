@@ -1,0 +1,30 @@
+{
+  "task": "C5-M2",
+  "industry": "healthcare",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "transfer_to_identity",
+      "arguments": {
+        "next_intent": "billing"
+      }
+    },
+    {
+      "name": "transfer_to_billing",
+      "arguments": {}
+    },
+    {
+      "name": "verify_identity",
+      "arguments": {
+        "dob": "1990-04-12",
+        "full_name": "Jordan Lee"
+      }
+    },
+    {
+      "name": "request_fee_waiver",
+      "arguments": {
+        "fee_line_item_id": "li_noshow"
+      }
+    }
+  ]
+}

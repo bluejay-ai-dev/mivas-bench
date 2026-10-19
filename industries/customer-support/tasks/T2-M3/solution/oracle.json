@@ -1,0 +1,39 @@
+{
+  "task": "T2-M3",
+  "industry": "customer-support",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "transfer_to_verification",
+      "arguments": {}
+    },
+    {
+      "name": "identify_customer",
+      "arguments": {
+        "full_name": "Marcus Iyer",
+        "phone": "541-555-0104"
+      }
+    },
+    {
+      "name": "verify_identity",
+      "arguments": {
+        "postal_code": "97402",
+        "card_last4": "8802"
+      }
+    },
+    {
+      "name": "get_customer_summary",
+      "arguments": {}
+    },
+    {
+      "name": "transfer_to_returns",
+      "arguments": {}
+    },
+    {
+      "name": "get_refund_status",
+      "arguments": {
+        "rma_number": "RMA-778201"
+      }
+    }
+  ]
+}

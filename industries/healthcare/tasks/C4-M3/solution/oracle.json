@@ -1,0 +1,24 @@
+{
+  "task": "C4-M3",
+  "industry": "healthcare",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "transfer_to_cosmetic",
+      "arguments": {}
+    },
+    {
+      "name": "quote_cosmetic_service",
+      "arguments": {
+        "service": "chemical_peel"
+      }
+    },
+    {
+      "name": "create_callback_task",
+      "arguments": {
+        "queue": "cosmetic",
+        "callback_number": "+17185550188"
+      }
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "task": "C2-M1",
+  "industry": "healthcare",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "transfer_to_identity",
+      "arguments": {
+        "next_intent": "scheduling"
+      }
+    },
+    {
+      "name": "transfer_to_scheduling",
+      "arguments": {}
+    },
+    {
+      "name": "verify_identity",
+      "arguments": {
+        "dob": "1990-04-12",
+        "full_name": "Jordan Lee"
+      }
+    },
+    {
+      "name": "find_slots",
+      "arguments": {
+        "location_ids": [
+          "loc_park_ave"
+        ]
+      }
+    },
+    {
+      "name": "reschedule_appointment",
+      "arguments": {
+        "appointment_id": "1",
+        "new_start": "2026-08-24T09:00",
+        "new_end": "2026-08-24T09:30"
+      }
+    },
+    {
+      "name": "send_sms",
+      "arguments": {
+        "mobile_e164": "+12125550100",
+        "template_id": "appointment_confirmation"
+      }
+    }
+  ]
+}

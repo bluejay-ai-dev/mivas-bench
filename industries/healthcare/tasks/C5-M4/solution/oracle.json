@@ -1,0 +1,34 @@
+{
+  "task": "C5-M4",
+  "industry": "healthcare",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "transfer_to_identity",
+      "arguments": {
+        "next_intent": "billing"
+      }
+    },
+    {
+      "name": "transfer_to_billing",
+      "arguments": {}
+    },
+    {
+      "name": "verify_identity",
+      "arguments": {
+        "full_name": "Jordan Lee",
+        "dob": "1990-04-12"
+      }
+    },
+    {
+      "name": "get_account_balance",
+      "arguments": {}
+    },
+    {
+      "name": "explain_charge",
+      "arguments": {
+        "line_item_id": "li_visit"
+      }
+    }
+  ]
+}

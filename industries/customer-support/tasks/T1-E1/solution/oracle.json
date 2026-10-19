@@ -1,0 +1,13 @@
+{
+  "task": "T1-E1",
+  "industry": "customer-support",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "get_fee",
+      "arguments": {
+        "fee": "haul away with delivery"
+      }
+    }
+  ]
+}

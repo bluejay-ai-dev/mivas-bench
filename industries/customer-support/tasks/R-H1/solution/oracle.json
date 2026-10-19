@@ -1,0 +1,45 @@
+{
+  "task": "R-H1",
+  "industry": "customer-support",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "transfer_to_verification",
+      "arguments": {}
+    },
+    {
+      "name": "identify_customer",
+      "arguments": {
+        "full_name": "Glen Aldridge",
+        "phone": "541-555-0127"
+      }
+    },
+    {
+      "name": "verify_identity",
+      "arguments": {
+        "postal_code": "97213",
+        "card_last4": "5540"
+      }
+    },
+    {
+      "name": "get_customer_summary",
+      "arguments": {}
+    },
+    {
+      "name": "transfer_to_returns",
+      "arguments": {}
+    },
+    {
+      "name": "check_return_eligibility",
+      "arguments": {
+        "order_number": "KE-4455031"
+      }
+    },
+    {
+      "name": "escalate_to_human",
+      "arguments": {
+        "reason_code": "caller_request"
+      }
+    }
+  ]
+}

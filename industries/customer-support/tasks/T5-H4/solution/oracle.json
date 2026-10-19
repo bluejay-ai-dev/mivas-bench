@@ -1,0 +1,52 @@
+{
+  "task": "T5-H4",
+  "industry": "customer-support",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "transfer_to_verification",
+      "arguments": {}
+    },
+    {
+      "name": "identify_customer",
+      "arguments": {
+        "full_name": "Felix Moreau",
+        "phone": "541-555-0108"
+      }
+    },
+    {
+      "name": "verify_identity",
+      "arguments": {
+        "postal_code": "94612",
+        "card_last4": "3390"
+      }
+    },
+    {
+      "name": "get_customer_summary",
+      "arguments": {}
+    },
+    {
+      "name": "transfer_to_orders",
+      "arguments": {}
+    },
+    {
+      "name": "get_order",
+      "arguments": {
+        "order_number": "KE-4495108"
+      }
+    },
+    {
+      "name": "quote_price_match",
+      "arguments": {
+        "order_number": "KE-4495108",
+        "sku": "SKU-AUD-8820",
+        "competitor": "Crestline Audio",
+        "competitor_price": 399.99
+      }
+    },
+    {
+      "name": "confirm_price_match",
+      "arguments": {}
+    }
+  ]
+}

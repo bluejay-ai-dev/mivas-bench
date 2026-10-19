@@ -1,0 +1,40 @@
+{
+  "task": "C2-M4",
+  "industry": "healthcare",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "transfer_to_identity",
+      "arguments": {
+        "next_intent": "scheduling"
+      }
+    },
+    {
+      "name": "transfer_to_scheduling",
+      "arguments": {}
+    },
+    {
+      "name": "verify_identity",
+      "arguments": {
+        "full_name": "Alice Romano",
+        "dob": "1995-09-08"
+      }
+    },
+    {
+      "name": "find_slots",
+      "arguments": {
+        "location_ids": [
+          "loc_windermere"
+        ]
+      }
+    },
+    {
+      "name": "reschedule_appointment",
+      "arguments": {
+        "appointment_id": "3",
+        "new_start": "2026-08-24T09:00",
+        "new_end": "2026-08-24T09:30"
+      }
+    }
+  ]
+}

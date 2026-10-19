@@ -1,0 +1,33 @@
+# Every MIVAS task ships a replayable oracle (solution/oracle.json). This job replays
+# each one on a fresh seed and fails when a recipe cannot reach the task's own
+# exp_db_state, when a call errors unexpectedly, or when an oracle.json is stale.
+name: oracle-check
+
+on:
+  push:
+    paths:
+      - "industries/**"
+      - "verifiers/**"
+      - "tests/test_oracle_recipes.py"
+      - ".github/workflows/oracle-check.yml"
+  pull_request:
+    paths:
+      - "industries/**"
+      - "verifiers/**"
+      - "tests/test_oracle_recipes.py"
+      - ".github/workflows/oracle-check.yml"
+
+jobs:
+  oracle-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - run: uv sync --group dev
+      - name: Oracle recipes are current
+        run: uv run python verifiers/oracle_recipes.py --check
+      - name: Every oracle reaches its expected state
+        run: uv run python verifiers/oracle_check.py
+      - run: uv run pytest tests/test_oracle_recipes.py -q

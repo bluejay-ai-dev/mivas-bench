@@ -1,0 +1,34 @@
+{
+  "task": "C5-M1",
+  "industry": "healthcare",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "transfer_to_identity",
+      "arguments": {
+        "next_intent": "billing"
+      }
+    },
+    {
+      "name": "transfer_to_billing",
+      "arguments": {}
+    },
+    {
+      "name": "verify_identity",
+      "arguments": {
+        "dob": "1990-04-12",
+        "full_name": "Jordan Lee"
+      }
+    },
+    {
+      "name": "get_account_balance",
+      "arguments": {}
+    },
+    {
+      "name": "send_payment_link",
+      "arguments": {
+        "mobile_e164": "+12125550100"
+      }
+    }
+  ]
+}

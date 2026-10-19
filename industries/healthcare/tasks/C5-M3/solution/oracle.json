@@ -1,0 +1,28 @@
+{
+  "task": "C5-M3",
+  "industry": "healthcare",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "transfer_to_identity",
+      "arguments": {
+        "next_intent": "billing"
+      }
+    },
+    {
+      "name": "transfer_to_billing",
+      "arguments": {}
+    },
+    {
+      "name": "verify_identity",
+      "arguments": {
+        "dob": "1985-11-03",
+        "full_name": "Sam Nguyen"
+      }
+    },
+    {
+      "name": "get_account_balance",
+      "arguments": {}
+    }
+  ]
+}

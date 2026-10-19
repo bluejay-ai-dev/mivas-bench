@@ -1,0 +1,13 @@
+{
+  "task": "R-E2",
+  "industry": "customer-support",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "get_store_info",
+      "arguments": {
+        "store": "Corvallis"
+      }
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+{
+  "task": "C4-M4",
+  "industry": "legal",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "lookup_caller",
+      "arguments": {
+        "full_name": "Chester Lang",
+        "phone": "916-555-0274"
+      }
+    },
+    {
+      "name": "check_conflict",
+      "arguments": {
+        "opposing_party": "Pellham Transit"
+      }
+    },
+    {
+      "name": "check_practice_area",
+      "arguments": {
+        "practice_area": "auto_accident"
+      }
+    },
+    {
+      "name": "check_jurisdiction",
+      "arguments": {
+        "state": "CA",
+        "practice_area": "auto_accident"
+      }
+    },
+    {
+      "name": "record_intake",
+      "arguments": {
+        "practice_area": "auto_accident",
+        "state": "CA",
+        "incident_date": "2026-03-12",
+        "summary": "Van collision with a broken collarbone."
+      }
+    },
+    {
+      "name": "request_records_authorization",
+      "arguments": {
+        "provider": "Mercy General"
+      }
+    },
+    {
+      "name": "send_intake_packet",
+      "arguments": {
+        "channel": "email"
+      }
+    }
+  ]
+}

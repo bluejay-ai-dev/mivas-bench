@@ -1,0 +1,76 @@
+{
+  "task": "C5-H1",
+  "industry": "healthcare",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "transfer_to_identity",
+      "arguments": {
+        "next_intent": "billing"
+      }
+    },
+    {
+      "name": "identify_patient",
+      "arguments": {
+        "first_name": "Maria",
+        "last_name": "Alvarez",
+        "dob": "1972-06-30"
+      }
+    },
+    {
+      "name": "verify_identity",
+      "arguments": {
+        "full_name": "Maria Alvarez",
+        "dob": "1972-06-30"
+      }
+    },
+    {
+      "name": "get_patient_summary",
+      "arguments": {}
+    },
+    {
+      "name": "transfer_to_billing",
+      "arguments": {}
+    },
+    {
+      "name": "get_account_balance",
+      "arguments": {}
+    },
+    {
+      "name": "explain_charge",
+      "arguments": {
+        "line_item_id": "li_visit"
+      }
+    },
+    {
+      "name": "offer_financing",
+      "arguments": {}
+    },
+    {
+      "name": "send_payment_link",
+      "arguments": {
+        "mobile_e164": "+12125550133"
+      }
+    },
+    {
+      "name": "transfer_to_scheduling",
+      "arguments": {}
+    },
+    {
+      "name": "find_slots",
+      "arguments": {
+        "location_ids": [
+          "loc_park_ave"
+        ]
+      }
+    },
+    {
+      "name": "reschedule_appointment",
+      "arguments": {
+        "appointment_id": "2",
+        "new_start": "2026-08-24T09:00",
+        "new_end": "2026-08-24T09:30"
+      }
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "task": "C1-M3",
+  "industry": "healthcare",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "transfer_to_scheduling",
+      "arguments": {}
+    },
+    {
+      "name": "schedule_allergy_service",
+      "arguments": {
+        "service": "skin_testing",
+        "location_id": "loc_park_ave"
+      }
+    }
+  ]
+}

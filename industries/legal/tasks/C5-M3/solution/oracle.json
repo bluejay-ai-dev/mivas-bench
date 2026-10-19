@@ -1,0 +1,53 @@
+{
+  "task": "C5-M3",
+  "industry": "legal",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "lookup_caller",
+      "arguments": {
+        "full_name": "Estelle Kowalczyk",
+        "phone": "916-555-0128"
+      }
+    },
+    {
+      "name": "check_conflict",
+      "arguments": {
+        "opposing_party": "Halloway Toolworks"
+      }
+    },
+    {
+      "name": "check_practice_area",
+      "arguments": {
+        "practice_area": "consumer"
+      }
+    },
+    {
+      "name": "check_jurisdiction",
+      "arguments": {
+        "state": "CA",
+        "practice_area": "consumer"
+      }
+    },
+    {
+      "name": "record_intake",
+      "arguments": {
+        "practice_area": "consumer",
+        "state": "CA",
+        "incident_date": "2026-07-10",
+        "summary": "Defective product."
+      }
+    },
+    {
+      "name": "hold_evaluation",
+      "arguments": {
+        "practice_area": "consumer",
+        "slot_id": "s_100"
+      }
+    },
+    {
+      "name": "confirm_evaluation",
+      "arguments": {}
+    }
+  ]
+}

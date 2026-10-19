@@ -1,0 +1,35 @@
+{
+  "task": "R-M4",
+  "industry": "customer-support",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "transfer_to_fraud",
+      "arguments": {}
+    },
+    {
+      "name": "check_subscription_charge",
+      "arguments": {
+        "phone": "541-555-0133",
+        "amount": 399.99
+      },
+      "expect_error": "NO_SUCH_CHARGE"
+    },
+    {
+      "name": "check_outbound_contact",
+      "arguments": {
+        "phone": "541-555-0133"
+      },
+      "expect_error": "NO_OUTBOUND_CONTACT"
+    },
+    {
+      "name": "report_scam_contact",
+      "arguments": {
+        "phone": "541-555-0133",
+        "channel": "email",
+        "claimed_brand": "TechCrew",
+        "amount": "399.99"
+      }
+    }
+  ]
+}

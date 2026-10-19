@@ -1,0 +1,46 @@
+{
+  "task": "C4-H2",
+  "industry": "healthcare",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "transfer_to_identity",
+      "arguments": {
+        "next_intent": "cosmetic"
+      }
+    },
+    {
+      "name": "identify_patient",
+      "arguments": {
+        "first_name": "Maria",
+        "last_name": "Alvarez",
+        "dob": "1972-06-30"
+      }
+    },
+    {
+      "name": "verify_identity",
+      "arguments": {
+        "full_name": "Maria Alvarez",
+        "dob": "1972-06-30"
+      }
+    },
+    {
+      "name": "get_patient_summary",
+      "arguments": {}
+    },
+    {
+      "name": "transfer_to_cosmetic",
+      "arguments": {}
+    },
+    {
+      "name": "quote_cosmetic_service",
+      "arguments": {
+        "service": "botox"
+      }
+    },
+    {
+      "name": "offer_financing",
+      "arguments": {}
+    }
+  ]
+}

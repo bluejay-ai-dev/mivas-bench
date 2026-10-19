@@ -1,0 +1,69 @@
+{
+  "task": "C1-H3",
+  "industry": "legal",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "lookup_caller",
+      "arguments": {
+        "full_name": "Inez Calderon",
+        "phone": "904-555-0317"
+      }
+    },
+    {
+      "name": "transfer_to_screening",
+      "arguments": {
+        "handoff_summary": "C1-H3: Medical emergency on the line"
+      }
+    },
+    {
+      "name": "check_conflict",
+      "arguments": {
+        "opposing_party": "Sutter Cold Storage"
+      }
+    },
+    {
+      "name": "check_practice_area",
+      "arguments": {
+        "practice_area": "workers_comp"
+      }
+    },
+    {
+      "name": "check_jurisdiction",
+      "arguments": {
+        "state": "FL",
+        "practice_area": "workers_comp"
+      }
+    },
+    {
+      "name": "calculate_filing_deadline",
+      "arguments": {
+        "state": "FL",
+        "practice_area": "workers_comp",
+        "incident_date": "2026-07-28"
+      }
+    },
+    {
+      "name": "transfer_to_intake",
+      "arguments": {
+        "handoff_summary": "C1-H3: Medical emergency on the line",
+        "contact_details_only": false
+      }
+    },
+    {
+      "name": "record_intake",
+      "arguments": {
+        "practice_area": "workers_comp",
+        "state": "FL",
+        "incident_date": "2026-07-28",
+        "summary": "Intake summary."
+      }
+    },
+    {
+      "name": "send_intake_packet",
+      "arguments": {
+        "channel": "email"
+      }
+    }
+  ]
+}

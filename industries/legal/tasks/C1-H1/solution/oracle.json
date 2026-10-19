@@ -1,0 +1,21 @@
+{
+  "task": "C1-H1",
+  "industry": "legal",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "lookup_caller",
+      "arguments": {
+        "full_name": "Eleanor Vance",
+        "phone": "503-555-0144"
+      }
+    },
+    {
+      "name": "take_message",
+      "arguments": {
+        "for_whom": "attorney",
+        "message": "Please call back."
+      }
+    }
+  ]
+}

@@ -1,0 +1,75 @@
+{
+  "task": "C4-H3",
+  "industry": "legal",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "lookup_caller",
+      "arguments": {
+        "full_name": "Clara Whitman",
+        "phone": "206-555-0220"
+      }
+    },
+    {
+      "name": "transfer_to_screening",
+      "arguments": {
+        "handoff_summary": "C4-H3: Employment intake in Washington with packet and note"
+      }
+    },
+    {
+      "name": "check_conflict",
+      "arguments": {
+        "opposing_party": "Harborline Industries"
+      }
+    },
+    {
+      "name": "check_practice_area",
+      "arguments": {
+        "practice_area": "employment"
+      }
+    },
+    {
+      "name": "check_jurisdiction",
+      "arguments": {
+        "state": "WA",
+        "practice_area": "employment"
+      }
+    },
+    {
+      "name": "calculate_filing_deadline",
+      "arguments": {
+        "state": "WA",
+        "practice_area": "employment",
+        "incident_date": "2026-04-05"
+      }
+    },
+    {
+      "name": "transfer_to_intake",
+      "arguments": {
+        "handoff_summary": "C4-H3: Employment intake in Washington with packet and note",
+        "contact_details_only": false
+      }
+    },
+    {
+      "name": "record_intake",
+      "arguments": {
+        "practice_area": "employment",
+        "state": "WA",
+        "incident_date": "2026-04-05",
+        "summary": "Retaliation after safety report."
+      }
+    },
+    {
+      "name": "add_intake_note",
+      "arguments": {
+        "note": "Caller still has the HR email about the safety violations."
+      }
+    },
+    {
+      "name": "send_intake_packet",
+      "arguments": {
+        "channel": "email"
+      }
+    }
+  ]
+}

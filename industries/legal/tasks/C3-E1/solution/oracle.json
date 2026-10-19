@@ -1,0 +1,26 @@
+{
+  "task": "C3-E1",
+  "industry": "legal",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "lookup_caller",
+      "arguments": {
+        "full_name": "Silas Dunmore",
+        "phone": "215-555-0287"
+      }
+    },
+    {
+      "name": "check_practice_area",
+      "arguments": {
+        "practice_area": "bankruptcy"
+      }
+    },
+    {
+      "name": "escalate_to_human",
+      "arguments": {
+        "reason_code": "practice_area"
+      }
+    }
+  ]
+}

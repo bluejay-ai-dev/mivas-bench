@@ -1,0 +1,20 @@
+{
+  "task": "C1-H4",
+  "industry": "legal",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "lookup_caller",
+      "arguments": {
+        "full_name": "Corinne Halberg",
+        "phone": "651-555-0247"
+      }
+    },
+    {
+      "name": "escalate_to_human",
+      "arguments": {
+        "reason_code": "caller_request"
+      }
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "task": "R-M1",
+  "industry": "customer-support",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "transfer_to_verification",
+      "arguments": {}
+    },
+    {
+      "name": "identify_customer",
+      "arguments": {
+        "full_name": "Dana Whitlock",
+        "phone": "541-555-0188"
+      }
+    },
+    {
+      "name": "verify_identity",
+      "arguments": {
+        "postal_code": "00000",
+        "card_last4": "0000"
+      },
+      "expect_error": "VERIFICATION_MISMATCH"
+    },
+    {
+      "name": "verify_identity",
+      "arguments": {
+        "postal_code": "00000",
+        "card_last4": "0000"
+      },
+      "expect_error": "VERIFICATION_FAILED"
+    },
+    {
+      "name": "escalate_to_human",
+      "arguments": {
+        "reason_code": "identity_failed"
+      }
+    }
+  ]
+}

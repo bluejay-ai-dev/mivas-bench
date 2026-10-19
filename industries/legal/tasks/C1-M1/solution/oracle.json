@@ -1,0 +1,25 @@
+{
+  "task": "C1-M1",
+  "industry": "legal",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "lookup_caller",
+      "arguments": {
+        "full_name": "Dana Whitfield",
+        "phone": "510-555-0142"
+      }
+    },
+    {
+      "name": "get_caller_matters",
+      "arguments": {}
+    },
+    {
+      "name": "take_message",
+      "arguments": {
+        "for_whom": "Allison Fontaine",
+        "message": "Please call back."
+      }
+    }
+  ]
+}

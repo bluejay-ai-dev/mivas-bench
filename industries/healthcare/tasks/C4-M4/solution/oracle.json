@@ -1,0 +1,21 @@
+{
+  "task": "C4-M4",
+  "industry": "healthcare",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "transfer_to_cosmetic",
+      "arguments": {}
+    },
+    {
+      "name": "quote_cosmetic_service",
+      "arguments": {
+        "service": "microneedling"
+      }
+    },
+    {
+      "name": "offer_financing",
+      "arguments": {}
+    }
+  ]
+}

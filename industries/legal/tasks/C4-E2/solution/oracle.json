@@ -1,0 +1,36 @@
+{
+  "task": "C4-E2",
+  "industry": "legal",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "lookup_caller",
+      "arguments": {
+        "full_name": "Martin Iwu",
+        "phone": "727-555-0311"
+      }
+    },
+    {
+      "name": "transfer_to_screening",
+      "arguments": {
+        "handoff_summary": "C4-E2: Intake carries screened values"
+      }
+    },
+    {
+      "name": "transfer_to_intake",
+      "arguments": {
+        "handoff_summary": "C4-E2: Intake carries screened values",
+        "contact_details_only": false
+      }
+    },
+    {
+      "name": "record_intake",
+      "arguments": {
+        "practice_area": "auto_accident",
+        "state": "FL",
+        "incident_date": "2026-05-02",
+        "summary": "Run off the road by another driver."
+      }
+    }
+  ]
+}

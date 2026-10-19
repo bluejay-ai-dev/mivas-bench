@@ -1,0 +1,32 @@
+{
+  "task": "C2-M1",
+  "industry": "legal",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "lookup_caller",
+      "arguments": {
+        "full_name": "Selma Ridgeway",
+        "phone": "919-555-0146"
+      }
+    },
+    {
+      "name": "transfer_to_screening",
+      "arguments": {
+        "handoff_summary": "C2-M1: Conflict hit, Northgate Insurance"
+      }
+    },
+    {
+      "name": "check_conflict",
+      "arguments": {
+        "opposing_party": "Northgate Insurance"
+      }
+    },
+    {
+      "name": "escalate_to_human",
+      "arguments": {
+        "reason_code": "conflict"
+      }
+    }
+  ]
+}

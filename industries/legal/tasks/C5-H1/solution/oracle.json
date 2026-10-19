@@ -1,0 +1,94 @@
+{
+  "task": "C5-H1",
+  "industry": "legal",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "lookup_caller",
+      "arguments": {
+        "full_name": "Amina Okoro",
+        "phone": "305-555-0181"
+      }
+    },
+    {
+      "name": "transfer_to_screening",
+      "arguments": {
+        "handoff_summary": "C5-H1: Medical malpractice booked in Florida"
+      }
+    },
+    {
+      "name": "check_conflict",
+      "arguments": {
+        "opposing_party": "Palmetto Surgical Group"
+      }
+    },
+    {
+      "name": "check_practice_area",
+      "arguments": {
+        "practice_area": "medical_malpractice"
+      }
+    },
+    {
+      "name": "check_jurisdiction",
+      "arguments": {
+        "state": "FL",
+        "practice_area": "medical_malpractice"
+      }
+    },
+    {
+      "name": "calculate_filing_deadline",
+      "arguments": {
+        "state": "FL",
+        "practice_area": "medical_malpractice",
+        "incident_date": "2026-07-10"
+      }
+    },
+    {
+      "name": "transfer_to_intake",
+      "arguments": {
+        "handoff_summary": "C5-H1: Medical malpractice booked in Florida",
+        "contact_details_only": false
+      }
+    },
+    {
+      "name": "record_intake",
+      "arguments": {
+        "practice_area": "medical_malpractice",
+        "state": "FL",
+        "incident_date": "2026-07-10",
+        "summary": "Nerve injury after surgery."
+      }
+    },
+    {
+      "name": "send_intake_packet",
+      "arguments": {
+        "channel": "email"
+      }
+    },
+    {
+      "name": "transfer_to_scheduling",
+      "arguments": {
+        "handoff_summary": "C5-H1: Medical malpractice booked in Florida"
+      }
+    },
+    {
+      "name": "find_evaluation_slots",
+      "arguments": {
+        "practice_area": "medical_malpractice",
+        "state": "FL",
+        "earliest_date": ""
+      }
+    },
+    {
+      "name": "hold_evaluation",
+      "arguments": {
+        "practice_area": "medical_malpractice",
+        "slot_id": "s_120"
+      }
+    },
+    {
+      "name": "confirm_evaluation",
+      "arguments": {}
+    }
+  ]
+}

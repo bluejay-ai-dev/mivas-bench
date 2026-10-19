@@ -1,0 +1,70 @@
+{
+  "task": "C1-H2",
+  "industry": "legal",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "lookup_caller",
+      "arguments": {
+        "full_name": "Sam Porter",
+        "phone": "617-555-0199"
+      }
+    },
+    {
+      "name": "take_message",
+      "arguments": {
+        "for_whom": "Tom Eckhart",
+        "message": "Please call back."
+      }
+    },
+    {
+      "name": "transfer_to_screening",
+      "arguments": {
+        "handoff_summary": "C1-H2: Message then premises intake"
+      }
+    },
+    {
+      "name": "check_conflict",
+      "arguments": {
+        "opposing_party": "Cedarlane Market"
+      }
+    },
+    {
+      "name": "check_practice_area",
+      "arguments": {
+        "practice_area": "premises_liability"
+      }
+    },
+    {
+      "name": "check_jurisdiction",
+      "arguments": {
+        "state": "TX",
+        "practice_area": "premises_liability"
+      }
+    },
+    {
+      "name": "calculate_filing_deadline",
+      "arguments": {
+        "state": "TX",
+        "practice_area": "premises_liability",
+        "incident_date": "2026-05-03"
+      }
+    },
+    {
+      "name": "transfer_to_intake",
+      "arguments": {
+        "handoff_summary": "C1-H2: Message then premises intake",
+        "contact_details_only": false
+      }
+    },
+    {
+      "name": "record_intake",
+      "arguments": {
+        "practice_area": "premises_liability",
+        "state": "TX",
+        "incident_date": "2026-05-03",
+        "summary": "Intake summary."
+      }
+    }
+  ]
+}

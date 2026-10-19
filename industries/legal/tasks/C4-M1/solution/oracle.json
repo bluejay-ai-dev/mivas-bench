@@ -1,0 +1,56 @@
+{
+  "task": "C4-M1",
+  "industry": "legal",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "lookup_caller",
+      "arguments": {
+        "full_name": "Franklin Deshpande",
+        "phone": "706-555-0173"
+      }
+    },
+    {
+      "name": "check_conflict",
+      "arguments": {
+        "opposing_party": "Halloway Toolworks"
+      }
+    },
+    {
+      "name": "check_practice_area",
+      "arguments": {
+        "practice_area": "product_liability"
+      }
+    },
+    {
+      "name": "check_jurisdiction",
+      "arguments": {
+        "state": "GA",
+        "practice_area": "product_liability"
+      }
+    },
+    {
+      "name": "calculate_filing_deadline",
+      "arguments": {
+        "state": "GA",
+        "practice_area": "product_liability",
+        "incident_date": "2026-04-22"
+      }
+    },
+    {
+      "name": "record_intake",
+      "arguments": {
+        "practice_area": "product_liability",
+        "state": "GA",
+        "incident_date": "2026-04-22",
+        "summary": "Ladder collapse injury."
+      }
+    },
+    {
+      "name": "request_records_authorization",
+      "arguments": {
+        "provider": "Northside Orthopedic"
+      }
+    }
+  ]
+}

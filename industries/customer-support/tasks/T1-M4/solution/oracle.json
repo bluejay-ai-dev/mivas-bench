@@ -1,0 +1,40 @@
+{
+  "task": "T1-M4",
+  "industry": "customer-support",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "transfer_to_verification",
+      "arguments": {}
+    },
+    {
+      "name": "identify_customer",
+      "arguments": {
+        "full_name": "Nadia Grant",
+        "phone": "541-555-0196"
+      }
+    },
+    {
+      "name": "verify_identity",
+      "arguments": {
+        "postal_code": "98042",
+        "card_last4": "7735"
+      }
+    },
+    {
+      "name": "get_customer_summary",
+      "arguments": {}
+    },
+    {
+      "name": "transfer_to_orders",
+      "arguments": {}
+    },
+    {
+      "name": "quote_delivery_change",
+      "arguments": {
+        "order_number": "KE-4500001",
+        "new_date": "2026-08-06"
+      }
+    }
+  ]
+}

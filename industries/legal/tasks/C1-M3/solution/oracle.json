@@ -1,0 +1,21 @@
+{
+  "task": "C1-M3",
+  "industry": "legal",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "lookup_caller",
+      "arguments": {
+        "full_name": "Wendell Marsh",
+        "phone": "206-555-0384"
+      }
+    },
+    {
+      "name": "take_message",
+      "arguments": {
+        "for_whom": "attorney",
+        "message": "Please call back."
+      }
+    }
+  ]
+}
