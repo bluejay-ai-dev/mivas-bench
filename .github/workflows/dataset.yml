@@ -1,0 +1,41 @@
+# dataset/ is the committed export of industries/ that gets published to Hugging Face
+# (bluejay-labs/mivas-bench). Any change to a task, prompt, tool schema or blueprint must
+# ship with a re-run of scripts/export_dataset.py, and every exported task must obey the
+# write/seed-state contract.
+name: dataset
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - industries/**
+      - dataset/**
+      - scripts/export_dataset.py
+      - scripts/dataset_card_template.md
+      - tests/test_seed_state_contract.py
+      - verifiers/expected_final_state.py
+      - .github/workflows/dataset.yml
+  pull_request:
+    paths:
+      - industries/**
+      - dataset/**
+      - scripts/export_dataset.py
+      - scripts/dataset_card_template.md
+      - tests/test_seed_state_contract.py
+      - verifiers/expected_final_state.py
+      - .github/workflows/dataset.yml
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+          enable-cache: true
+      - run: uv sync --frozen
+      - name: dataset/ matches industries/
+        run: uv run python scripts/export_dataset.py --check
+      - name: expected writes change expected state
+        run: uv run pytest tests/test_seed_state_contract.py -q
