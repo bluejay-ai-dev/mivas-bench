@@ -1,0 +1,21 @@
+.github/workflows/dataset.yml
+  s_a76db42bc2a366::t_d19a42e188d9c7 4-6,9-11
+  s_a76db42bc2a366::t_b9c7c497270a4f 48-79
+  s_a76db42bc2a366::t_ba851c3472ebc1 12
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "2b44f6783508a39e0097206cd2ad200e919995de",
+  "prompts": {},
+  "sessions": {
+    "s_a76db42bc2a366": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "23d41bce-12de-483a-9fba-3ced242a7298",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
