@@ -1,8 +1,14 @@
 # dataset/ is the committed export of industries/ that gets published to Hugging Face
 # (bluejay-labs/mivas-bench). Any change to a task, prompt, tool schema or blueprint must
 # ship with a re-run of scripts/export_dataset.py, and every exported task must obey the
-# write/seed-state contract.
+# write/seed-state contract. On main, once those checks pass, dataset/ is pushed to the
+# Hugging Face repo, so the published dataset can no longer drift from the task files.
+# Needs the repository secret HF_TOKEN: a Hugging Face write token for bluejay-labs/mivas-bench.
 name: dataset
+
+concurrency:
+  group: dataset-${{ github.ref }}
+  cancel-in-progress: false
 
 on:
   push:
@@ -39,3 +45,35 @@ jobs:
         run: uv run python scripts/export_dataset.py --check
       - name: expected writes change expected state
         run: uv run pytest tests/test_seed_state_contract.py -q
+
+  publish:
+    # Only a push to main that passed the checks above reaches Hugging Face.
+    needs: export
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    env:
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      HF_REPO: bluejay-labs/mivas-bench
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install --quiet "huggingface_hub>=1.0,<2"
+      - name: require HF_TOKEN
+        run: |
+          if [ -z "$HF_TOKEN" ]; then
+            echo "::error::HF_TOKEN secret is not set; dataset/ was not published" >&2
+            exit 1
+          fi
+      - name: push dataset/ to Hugging Face
+        # Uploads every file under dataset/ to the repo root. Prompt files are the only
+        # managed files that can be renamed or removed, so stale ones are deleted on the
+        # hub; agent_blueprint.png and .gitattributes live only on the hub and are kept.
+        # huggingface_hub skips the commit when nothing changed, so a re-run is a no-op.
+        run: |
+          hf upload "$HF_REPO" dataset . \
+            --repo-type dataset \
+            --delete "*/system-prompts/*" \
+            --commit-message "Export from mivas-bench ${GITHUB_SHA}" \
+            --commit-description "Published by the dataset workflow from ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/commit/${GITHUB_SHA}"
