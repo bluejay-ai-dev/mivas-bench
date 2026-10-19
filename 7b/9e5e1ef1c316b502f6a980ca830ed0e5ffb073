@@ -1,0 +1,98 @@
+.agents/skills/mivas-run/HARNESS.md
+  s_47c7d5bd09ec8c::t_a3abcd7cf9fbea 17
+mivas_finals/legal-aws-nova-sonic-2.5.csv
+  s_47c7d5bd09ec8c::t_b75bc75e549a4e 1-5508
+scripts/runbook.py
+  s_47c7d5bd09ec8c::t_a3abcd7cf9fbea 50,80-81,93-94
+  s_47c7d5bd09ec8c::t_abcceba1ea7634 77-78,88
+  s_47c7d5bd09ec8c::t_26abbf38aeffcd 644
+voice-agent-harnesses/s2s-model-pricing.json
+  s_47c7d5bd09ec8c::t_abcceba1ea7634 196,200
+  s_47c7d5bd09ec8c::t_68a438623dbe46 106-113,191
+voice-agent-harnesses/aws/nova-sonic/agent.py
+  s_47c7d5bd09ec8c::t_a3abcd7cf9fbea 1-43
+scripts/render_runbook_md.py
+  s_47c7d5bd09ec8c::t_a3abcd7cf9fbea 22,26-27,101
+  s_47c7d5bd09ec8c::t_f426e2066a8efa 145
+  s_47c7d5bd09ec8c::t_bd68c280bf97b4 105
+  s_47c7d5bd09ec8c::t_c947a2db476801 160-161
+  s_47c7d5bd09ec8c::t_e3be1b08cc6de2 21,96-99,102-103
+  s_47c7d5bd09ec8c::t_1c707d8d6311f1 106
+  s_47c7d5bd09ec8c::t_0c04278fadd950 23-25,28,73,79-80,85-95
+  s_47c7d5bd09ec8c::t_ac09d8d43b3544 100
+  s_47c7d5bd09ec8c::t_2a25399ee954bb 104
+voice-agent-harnesses/aws/nova-sonic/adapters/chirp.py
+  s_47c7d5bd09ec8c::t_b0efbd8bb48ef4 1-8
+scripts/eval_costs.py
+  s_47c7d5bd09ec8c::t_abcceba1ea7634 28
+  s_47c7d5bd09ec8c::t_a3abcd7cf9fbea 30
+RUNBOOK_V3.md
+  s_47c7d5bd09ec8c::t_8091135049fbaf 18-19,40-41,68,88,108
+  s_47c7d5bd09ec8c::t_2a25399ee954bb 44
+  s_47c7d5bd09ec8c::t_bd68c280bf97b4 45
+  s_47c7d5bd09ec8c::t_f426e2066a8efa 65,85,105
+  s_47c7d5bd09ec8c::t_c947a2db476801 66,86,106,125-126
+  s_47c7d5bd09ec8c::t_53709ed5d73607 69,89
+  s_47c7d5bd09ec8c::t_6cba4726c8f6d5 109
+  s_47c7d5bd09ec8c::t_0c04278fadd950 15-16,25-36
+  s_47c7d5bd09ec8c::t_e3be1b08cc6de2 5,37-39,42-43
+  s_47c7d5bd09ec8c::t_4bd5734e030fe6 46
+  s_47c7d5bd09ec8c::t_c4632ba775815d 3
+.agents/skills/mivas-run/scripts/score_rubric.py
+  s_47c7d5bd09ec8c::t_e5d125b9a4279a 231-232
+voice-agent-harnesses/aws/harness.py
+  s_47c7d5bd09ec8c::t_483a516dd69969 895-898
+  s_47c7d5bd09ec8c::t_450c3cdac2d934 135,139-152,820
+  s_47c7d5bd09ec8c::t_a3abcd7cf9fbea 86
+voice-agent-harnesses/aws/nova-sonic/variants.json
+  s_47c7d5bd09ec8c::t_6d123f772dae07 1-8
+voice-agent-harnesses/aws/nova-sonic/Dockerfile
+  s_47c7d5bd09ec8c::t_a3abcd7cf9fbea 1-64
+voice-agent-harnesses/aws/README.md
+  s_47c7d5bd09ec8c::t_a3abcd7cf9fbea 3,7-10,28,32
+.env.example
+  s_47c7d5bd09ec8c::t_a3abcd7cf9fbea 66
+.agents/skills/mivas-run/INFERENCE.md
+  s_47c7d5bd09ec8c::t_a3abcd7cf9fbea 21
+scripts/export_legal_v3.py
+  s_47c7d5bd09ec8c::t_a3abcd7cf9fbea 35
+scripts/bluejay_run_to_csv.py
+  s_47c7d5bd09ec8c::t_26abbf38aeffcd 1604
+voice-agent-harnesses/grok/voice/variants.json
+  s_47c7d5bd09ec8c::t_abcceba1ea7634 1-5
+mivas_finals/MANIFEST.csv
+  s_47c7d5bd09ec8c::t_fc5885a13221d5 41-43
+  s_47c7d5bd09ec8c::t_b75bc75e549a4e 44-46
+verifiers/verify_run.py
+  s_47c7d5bd09ec8c::t_1d66649af767bb 68-76
+mivas_finals/legal-grok-voice-3.0.csv
+  s_47c7d5bd09ec8c::t_fc5885a13221d5 1-5039
+verifiers/pull_actual_final_state.py
+  s_47c7d5bd09ec8c::t_89951c697072d8 99-107
+run.py
+  s_47c7d5bd09ec8c::t_e7a6666980d193 869-870
+mivas_finals/customer-support-aws-nova-sonic-2.5.csv
+  s_47c7d5bd09ec8c::t_6512134ae35c24 1-3525
+mivas_finals/customer-support-grok-voice-3.0.csv
+  s_47c7d5bd09ec8c::t_8af1bba748e468 1-3119
+mivas_finals/healthcare-aws-nova-sonic-2.5.csv
+  s_47c7d5bd09ec8c::t_53cc14bf6468b5 1-5962
+mivas_finals/healthcare-grok-voice-3.0.csv
+  s_47c7d5bd09ec8c::t_861a7baaf12df6 1-4750
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "7b9e5e1ef1c316b502f6a980ca830ed0e5ffb073",
+  "prompts": {},
+  "sessions": {
+    "s_47c7d5bd09ec8c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8dbb0629-0627-4560-9e91-79d9f8c60aa5",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}
