@@ -1,0 +1,32 @@
+{
+  "task": "C2-E1-BG",
+  "industry": "legal",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "lookup_caller",
+      "arguments": {
+        "full_name": "Howard Fairchild",
+        "phone": "602-555-0177"
+      }
+    },
+    {
+      "name": "transfer_to_screening",
+      "arguments": {
+        "handoff_summary": "C2-E1-BG: Conflict hit, Vertex Logistics"
+      }
+    },
+    {
+      "name": "check_conflict",
+      "arguments": {
+        "opposing_party": "Vertex Logistics"
+      }
+    },
+    {
+      "name": "escalate_to_human",
+      "arguments": {
+        "reason_code": "conflict"
+      }
+    }
+  ]
+}

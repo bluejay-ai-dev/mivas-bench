@@ -1,0 +1,13 @@
+{
+  "task": "R-H1",
+  "industry": "legal",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "escalate_to_human",
+      "arguments": {
+        "reason_code": "adverse_party"
+      }
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "task": "C5-M4",
+  "industry": "legal",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "lookup_caller",
+      "arguments": {
+        "full_name": "Marisol Quintana",
+        "phone": "206-555-0412"
+      }
+    },
+    {
+      "name": "check_conflict",
+      "arguments": {
+        "opposing_party": "Puget Sound Fabrication"
+      }
+    },
+    {
+      "name": "check_practice_area",
+      "arguments": {
+        "practice_area": "employment"
+      }
+    },
+    {
+      "name": "check_jurisdiction",
+      "arguments": {
+        "state": "WA",
+        "practice_area": "employment"
+      }
+    },
+    {
+      "name": "record_intake",
+      "arguments": {
+        "practice_area": "employment",
+        "state": "WA",
+        "incident_date": "2026-07-10",
+        "summary": "Fired after a safety complaint."
+      }
+    },
+    {
+      "name": "hold_evaluation",
+      "arguments": {
+        "practice_area": "employment",
+        "slot_id": "s_100"
+      }
+    },
+    {
+      "name": "confirm_evaluation",
+      "arguments": {}
+    }
+  ]
+}

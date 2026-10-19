@@ -1,0 +1,14 @@
+{
+  "task": "R-E2",
+  "industry": "healthcare",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "transfer_to_human",
+      "arguments": {
+        "destination": "clinical_triage",
+        "reason": "clinical_emergency"
+      }
+    }
+  ]
+}

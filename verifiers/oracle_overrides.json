@@ -1,0 +1,61 @@
+{
+  "_doc": "Per-task fixes the generator cannot derive from task.json. Keys are <industry>/<task>; selectors are 'tool' or 'tool#n' (n-th occurrence, 1-based). 'args' merges arguments, 'expect_error' marks a call that must fail with that code, 'insert' adds a call before/after a selector.",
+
+  "customer-support/R-M1": {
+    "_why": "The caller gives a wrong ZIP and card twice; the task lists verify_identity without arguments.",
+    "args": {"verify_identity#1": {"postal_code": "00000", "card_last4": "0000"},
+             "verify_identity#2": {"postal_code": "00000", "card_last4": "0000"}},
+    "expect_error": {"verify_identity#1": "VERIFICATION_MISMATCH",
+                     "verify_identity#2": "VERIFICATION_FAILED"}
+  },
+  "customer-support/R-H2": {
+    "expect_error": {"check_subscription_charge": "NO_SUCH_CHARGE",
+                     "check_outbound_contact": "NO_OUTBOUND_CONTACT"}
+  },
+  "customer-support/R-H4": {
+    "expect_error": {"check_subscription_charge": "NO_SUCH_CHARGE",
+                     "check_outbound_contact": "NO_OUTBOUND_CONTACT"}
+  },
+  "customer-support/R-M4": {
+    "expect_error": {"check_subscription_charge": "NO_SUCH_CHARGE",
+                     "check_outbound_contact": "NO_OUTBOUND_CONTACT"}
+  },
+  "customer-support/R-H3": {
+    "_why": "A swollen battery cannot ship; the label request is supposed to be refused.",
+    "expect_error": {"create_return_label": "HAZMAT_NO_LABEL"}
+  },
+  "customer-support/T2-H3": {
+    "expect_error": {"check_return_eligibility": "MARKETPLACE_SELLER_POLICY"}
+  },
+  "customer-support/T5-H1": {
+    "_why": "Order KE-4495108 has three items; the caller names the Halo soundbar.",
+    "args": {"quote_price_match": {"sku": "SKU-AUD-7720"}}
+  },
+  "customer-support/T5-H3": {
+    "args": {"quote_price_match#1": {"sku": "SKU-AUD-7720"},
+             "quote_price_match#2": {"sku": "SKU-AUD-7720"}},
+    "expect_error": {"quote_price_match#2": "PRICE_MATCH_ALREADY_USED"}
+  },
+  "customer-support/T5-M2": {
+    "args": {"quote_price_match": {"sku": "SKU-AUD-7720"}},
+    "expect_error": {"quote_price_match": "NOT_A_QUALIFIED_COMPETITOR"}
+  },
+  "customer-support/T5-M3": {
+    "args": {"quote_price_match": {"sku": "SKU-AUD-7720"}},
+    "expect_error": {"quote_price_match": "PRICE_MATCH_EXCLUDED"}
+  },
+  "customer-support/T5-M4": {
+    "args": {"quote_price_match": {"sku": "SKU-AUD-7720"}},
+    "expect_error": {"quote_price_match": "PRICE_NOT_LOWER"}
+  },
+  "healthcare/C2-H1": {
+    "_why": "The expected waitlist row carries latest 2026-09-30, which the graded call omits.",
+    "args": {"join_waitlist": {"latest": "2026-09-30"}}
+  },
+  "legal/C5-E2": {
+    "_why": "The expected intake row exists but no listed call creates it; the intake stage records it en route to scheduling.",
+    "insert": [{"before": "hold_evaluation", "name": "record_intake",
+                "arguments": {"practice_area": "auto_accident", "state": "CA",
+                              "incident_date": "2026-07-10", "summary": "Rear-end collision."}}]
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "task": "C1-E1-SIG",
+  "industry": "legal",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "lookup_caller",
+      "arguments": {
+        "full_name": "Renee Whitmore",
+        "phone": "214-555-0163"
+      }
+    },
+    {
+      "name": "take_message",
+      "arguments": {
+        "for_whom": "Daniel Okonkwo",
+        "message": "Please call back."
+      }
+    }
+  ]
+}

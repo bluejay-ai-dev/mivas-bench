@@ -1,0 +1,30 @@
+{
+  "task": "R-M3",
+  "industry": "healthcare",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "transfer_to_identity",
+      "arguments": {
+        "next_intent": "clinical"
+      }
+    },
+    {
+      "name": "transfer_to_clinical",
+      "arguments": {}
+    },
+    {
+      "name": "verify_identity",
+      "arguments": {
+        "dob": "1995-09-08",
+        "full_name": "Alice Romano"
+      }
+    },
+    {
+      "name": "request_rx_refill",
+      "arguments": {
+        "medication_name": "xanax"
+      }
+    }
+  ]
+}

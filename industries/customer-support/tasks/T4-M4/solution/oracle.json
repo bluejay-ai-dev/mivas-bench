@@ -1,0 +1,37 @@
+{
+  "task": "T4-M4",
+  "industry": "customer-support",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "transfer_to_verification",
+      "arguments": {}
+    },
+    {
+      "name": "identify_customer",
+      "arguments": {
+        "full_name": "Selina Cortez",
+        "phone": "541-555-0171"
+      }
+    },
+    {
+      "name": "verify_identity",
+      "arguments": {
+        "postal_code": "97035",
+        "card_last4": "1156"
+      }
+    },
+    {
+      "name": "get_customer_summary",
+      "arguments": {}
+    },
+    {
+      "name": "transfer_to_membership",
+      "arguments": {}
+    },
+    {
+      "name": "quote_membership_upgrade",
+      "arguments": {}
+    }
+  ]
+}

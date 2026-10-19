@@ -1,0 +1,43 @@
+{
+  "task": "T4-H4",
+  "industry": "customer-support",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "transfer_to_verification",
+      "arguments": {}
+    },
+    {
+      "name": "identify_customer",
+      "arguments": {
+        "full_name": "Felix Moreau",
+        "phone": "541-555-0108"
+      }
+    },
+    {
+      "name": "verify_identity",
+      "arguments": {
+        "postal_code": "94612",
+        "card_last4": "3390"
+      }
+    },
+    {
+      "name": "get_customer_summary",
+      "arguments": {}
+    },
+    {
+      "name": "transfer_to_membership",
+      "arguments": {}
+    },
+    {
+      "name": "quote_membership_cancellation",
+      "arguments": {}
+    },
+    {
+      "name": "confirm_membership_cancellation",
+      "arguments": {
+        "proration_acknowledged": true
+      }
+    }
+  ]
+}

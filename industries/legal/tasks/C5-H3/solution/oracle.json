@@ -1,0 +1,94 @@
+{
+  "task": "C5-H3",
+  "industry": "legal",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "lookup_caller",
+      "arguments": {
+        "full_name": "Lorraine Pike",
+        "phone": "510-555-0171"
+      }
+    },
+    {
+      "name": "transfer_to_screening",
+      "arguments": {
+        "handoff_summary": "C5-H3: Mumbled agreement is not a yes"
+      }
+    },
+    {
+      "name": "check_conflict",
+      "arguments": {
+        "opposing_party": "Apex Collections"
+      }
+    },
+    {
+      "name": "check_practice_area",
+      "arguments": {
+        "practice_area": "auto_accident"
+      }
+    },
+    {
+      "name": "check_jurisdiction",
+      "arguments": {
+        "state": "CA",
+        "practice_area": "auto_accident"
+      }
+    },
+    {
+      "name": "calculate_filing_deadline",
+      "arguments": {
+        "state": "CA",
+        "practice_area": "auto_accident",
+        "incident_date": "2026-07-10"
+      }
+    },
+    {
+      "name": "transfer_to_intake",
+      "arguments": {
+        "handoff_summary": "C5-H3: Mumbled agreement is not a yes",
+        "contact_details_only": false
+      }
+    },
+    {
+      "name": "record_intake",
+      "arguments": {
+        "practice_area": "auto_accident",
+        "state": "CA",
+        "incident_date": "2026-07-10",
+        "summary": "Intake summary."
+      }
+    },
+    {
+      "name": "send_intake_packet",
+      "arguments": {
+        "channel": "email"
+      }
+    },
+    {
+      "name": "transfer_to_scheduling",
+      "arguments": {
+        "handoff_summary": "C5-H3: Mumbled agreement is not a yes"
+      }
+    },
+    {
+      "name": "find_evaluation_slots",
+      "arguments": {
+        "practice_area": "auto_accident",
+        "state": "CA",
+        "earliest_date": ""
+      }
+    },
+    {
+      "name": "hold_evaluation",
+      "arguments": {
+        "practice_area": "auto_accident",
+        "slot_id": "s_110"
+      }
+    },
+    {
+      "name": "confirm_evaluation",
+      "arguments": {}
+    }
+  ]
+}

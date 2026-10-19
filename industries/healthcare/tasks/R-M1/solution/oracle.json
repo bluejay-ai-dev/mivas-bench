@@ -1,0 +1,42 @@
+{
+  "task": "R-M1",
+  "industry": "healthcare",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "transfer_to_identity",
+      "arguments": {
+        "next_intent": "clinical"
+      }
+    },
+    {
+      "name": "transfer_to_clinical",
+      "arguments": {}
+    },
+    {
+      "name": "verify_identity",
+      "arguments": {
+        "dob": "1990-04-12",
+        "full_name": "Jordan Lee"
+      }
+    },
+    {
+      "name": "get_results_status",
+      "arguments": {
+        "order_type": "pathology"
+      }
+    },
+    {
+      "name": "create_clinical_message",
+      "arguments": {
+        "category": "results_followup"
+      }
+    },
+    {
+      "name": "send_portal_activation",
+      "arguments": {
+        "channel": "sms"
+      }
+    }
+  ]
+}

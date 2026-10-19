@@ -1,0 +1,34 @@
+{
+  "task": "C5-E1",
+  "industry": "legal",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "lookup_caller",
+      "arguments": {
+        "full_name": "Delphine Mercer",
+        "phone": "323-555-0144"
+      }
+    },
+    {
+      "name": "record_intake",
+      "arguments": {
+        "practice_area": "auto_accident",
+        "state": "CA",
+        "incident_date": "2026-07-10",
+        "summary": "Intake summary."
+      }
+    },
+    {
+      "name": "hold_evaluation",
+      "arguments": {
+        "practice_area": "auto_accident",
+        "slot_id": "s_110"
+      }
+    },
+    {
+      "name": "confirm_evaluation",
+      "arguments": {}
+    }
+  ]
+}

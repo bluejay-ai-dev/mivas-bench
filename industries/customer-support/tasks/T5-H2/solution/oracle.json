@@ -1,0 +1,45 @@
+{
+  "task": "T5-H2",
+  "industry": "customer-support",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "transfer_to_verification",
+      "arguments": {}
+    },
+    {
+      "name": "identify_customer",
+      "arguments": {
+        "full_name": "Tomas Ferreira",
+        "phone": "541-555-0146"
+      }
+    },
+    {
+      "name": "verify_identity",
+      "arguments": {
+        "postal_code": "94110",
+        "card_last4": "2208"
+      }
+    },
+    {
+      "name": "get_customer_summary",
+      "arguments": {}
+    },
+    {
+      "name": "transfer_to_orders",
+      "arguments": {}
+    },
+    {
+      "name": "get_order",
+      "arguments": {
+        "order_number": "KE-4479002"
+      }
+    },
+    {
+      "name": "escalate_to_human",
+      "arguments": {
+        "reason_code": "marketplace_seller"
+      }
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "task": "C3-E1-BG",
+  "industry": "healthcare",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "transfer_to_coverage",
+      "arguments": {}
+    },
+    {
+      "name": "check_plan_accepted",
+      "arguments": {
+        "carrier": "unitedhealthcare",
+        "location_id": "loc_brooklyn_heights"
+      }
+    }
+  ]
+}

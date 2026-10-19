@@ -1,0 +1,68 @@
+{
+  "task": "R-H3",
+  "industry": "customer-support",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "transfer_to_verification",
+      "arguments": {}
+    },
+    {
+      "name": "identify_customer",
+      "arguments": {
+        "full_name": "Amina Kalu",
+        "phone": "541-555-0152"
+      }
+    },
+    {
+      "name": "verify_identity",
+      "arguments": {
+        "postal_code": "98661",
+        "card_last4": "6673"
+      }
+    },
+    {
+      "name": "get_customer_summary",
+      "arguments": {}
+    },
+    {
+      "name": "transfer_to_returns",
+      "arguments": {}
+    },
+    {
+      "name": "get_order",
+      "arguments": {
+        "order_number": "KE-4483316"
+      }
+    },
+    {
+      "name": "check_return_eligibility",
+      "arguments": {
+        "order_number": "KE-4483316"
+      }
+    },
+    {
+      "name": "quote_return",
+      "arguments": {
+        "order_number": "KE-4483316"
+      }
+    },
+    {
+      "name": "confirm_return",
+      "arguments": {
+        "confirmation_token": "KE-RTN-4417"
+      }
+    },
+    {
+      "name": "create_return_label",
+      "arguments": {},
+      "expect_error": "HAZMAT_NO_LABEL"
+    },
+    {
+      "name": "escalate_to_human",
+      "arguments": {
+        "reason_code": "product_safety"
+      }
+    }
+  ]
+}

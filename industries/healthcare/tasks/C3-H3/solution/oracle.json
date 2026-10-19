@@ -1,0 +1,60 @@
+{
+  "task": "C3-H3",
+  "industry": "healthcare",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "transfer_to_identity",
+      "arguments": {
+        "next_intent": "coverage"
+      }
+    },
+    {
+      "name": "transfer_to_coverage",
+      "arguments": {}
+    },
+    {
+      "name": "transfer_to_scheduling",
+      "arguments": {}
+    },
+    {
+      "name": "verify_identity",
+      "arguments": {
+        "dob": "1990-04-12",
+        "full_name": "Jordan Lee"
+      }
+    },
+    {
+      "name": "capture_insurance_update",
+      "arguments": {
+        "carrier": "cigna",
+        "member_id": "C445566778"
+      }
+    },
+    {
+      "name": "list_locations",
+      "arguments": {
+        "location_id": "loc_park_ave"
+      }
+    },
+    {
+      "name": "find_slots",
+      "arguments": {
+        "location_ids": [
+          "loc_park_ave"
+        ]
+      }
+    },
+    {
+      "name": "book_appointment",
+      "arguments": {
+        "location_id": "loc_park_ave",
+        "slot_id": "slot_loc_park_ave_1",
+        "provider_id": "prov_chen",
+        "start": "2026-08-24T09:00",
+        "end": "2026-08-24T09:30",
+        "appointment_type_code": "MED_FOLLOWUP"
+      }
+    }
+  ]
+}

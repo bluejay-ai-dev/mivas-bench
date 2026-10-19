@@ -1,0 +1,53 @@
+{
+  "task": "C5-M2",
+  "industry": "legal",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "lookup_caller",
+      "arguments": {
+        "full_name": "Martin Iwu",
+        "phone": "727-555-0311"
+      }
+    },
+    {
+      "name": "check_conflict",
+      "arguments": {
+        "opposing_party": "Gulf Coast Rigging"
+      }
+    },
+    {
+      "name": "check_practice_area",
+      "arguments": {
+        "practice_area": "workers_comp"
+      }
+    },
+    {
+      "name": "check_jurisdiction",
+      "arguments": {
+        "state": "FL",
+        "practice_area": "workers_comp"
+      }
+    },
+    {
+      "name": "record_intake",
+      "arguments": {
+        "practice_area": "workers_comp",
+        "state": "FL",
+        "incident_date": "2026-07-10",
+        "summary": "Intake summary."
+      }
+    },
+    {
+      "name": "hold_evaluation",
+      "arguments": {
+        "practice_area": "workers_comp",
+        "slot_id": "s_130"
+      }
+    },
+    {
+      "name": "confirm_evaluation",
+      "arguments": {}
+    }
+  ]
+}

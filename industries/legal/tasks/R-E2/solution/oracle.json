@@ -1,0 +1,20 @@
+{
+  "task": "R-E2",
+  "industry": "legal",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "lookup_caller",
+      "arguments": {
+        "full_name": "Thomas Eckhart",
+        "phone": "312-555-0277"
+      }
+    },
+    {
+      "name": "escalate_to_human",
+      "arguments": {
+        "reason_code": "legal_advice_requested"
+      }
+    }
+  ]
+}

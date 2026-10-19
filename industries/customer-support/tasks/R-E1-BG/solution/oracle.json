@@ -1,0 +1,13 @@
+{
+  "task": "R-E1-BG",
+  "industry": "customer-support",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "escalate_to_human",
+      "arguments": {
+        "reason_code": "caller_request"
+      }
+    }
+  ]
+}

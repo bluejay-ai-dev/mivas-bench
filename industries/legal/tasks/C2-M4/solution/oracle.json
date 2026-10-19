@@ -1,0 +1,26 @@
+{
+  "task": "C2-M4",
+  "industry": "legal",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "lookup_caller",
+      "arguments": {
+        "full_name": "Lois Penney",
+        "phone": "414-555-0196"
+      }
+    },
+    {
+      "name": "transfer_to_screening",
+      "arguments": {
+        "handoff_summary": "C2-M4: Consulted a lawyer but did not hire"
+      }
+    },
+    {
+      "name": "check_conflict",
+      "arguments": {
+        "opposing_party": "Greenfield Market"
+      }
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "task": "R-M4",
+  "industry": "healthcare",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "transfer_to_identity",
+      "arguments": {
+        "next_intent": "clinical"
+      }
+    },
+    {
+      "name": "transfer_to_clinical",
+      "arguments": {}
+    },
+    {
+      "name": "verify_identity",
+      "arguments": {
+        "full_name": "Sam Nguyen",
+        "dob": "1985-11-03"
+      }
+    },
+    {
+      "name": "request_rx_refill",
+      "arguments": {
+        "medication_name": "triamcinolone"
+      }
+    }
+  ]
+}

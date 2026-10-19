@@ -1,0 +1,67 @@
+{
+  "task": "R-H4",
+  "industry": "customer-support",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "transfer_to_fraud",
+      "arguments": {}
+    },
+    {
+      "name": "check_subscription_charge",
+      "arguments": {
+        "phone": "541-555-0133",
+        "amount": 399.99
+      },
+      "expect_error": "NO_SUCH_CHARGE"
+    },
+    {
+      "name": "check_outbound_contact",
+      "arguments": {
+        "phone": "541-555-0133"
+      },
+      "expect_error": "NO_OUTBOUND_CONTACT"
+    },
+    {
+      "name": "report_scam_contact",
+      "arguments": {
+        "phone": "541-555-0133",
+        "channel": "email",
+        "claimed_brand": "TechCrew",
+        "amount": "399.99"
+      }
+    },
+    {
+      "name": "transfer_to_verification",
+      "arguments": {}
+    },
+    {
+      "name": "identify_customer",
+      "arguments": {
+        "full_name": "Rosalind Baptiste",
+        "phone": "541-555-0133"
+      }
+    },
+    {
+      "name": "verify_identity",
+      "arguments": {
+        "postal_code": "97401",
+        "card_last4": "7719"
+      }
+    },
+    {
+      "name": "get_customer_summary",
+      "arguments": {}
+    },
+    {
+      "name": "transfer_to_returns",
+      "arguments": {}
+    },
+    {
+      "name": "check_return_eligibility",
+      "arguments": {
+        "order_number": "KE-4431775"
+      }
+    }
+  ]
+}

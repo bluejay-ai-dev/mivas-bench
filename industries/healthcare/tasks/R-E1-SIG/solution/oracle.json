@@ -1,0 +1,14 @@
+{
+  "task": "R-E1-SIG",
+  "industry": "healthcare",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "transfer_to_human",
+      "arguments": {
+        "destination": "patient_support_center",
+        "reason": "caller_request"
+      }
+    }
+  ]
+}

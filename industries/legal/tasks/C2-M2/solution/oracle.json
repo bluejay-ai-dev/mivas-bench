@@ -1,0 +1,26 @@
+{
+  "task": "C2-M2",
+  "industry": "legal",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "lookup_caller",
+      "arguments": {
+        "full_name": "Elton Bragg",
+        "phone": "704-555-0255"
+      }
+    },
+    {
+      "name": "transfer_to_screening",
+      "arguments": {
+        "handoff_summary": "C2-M2: Refuses to name the other side"
+      }
+    },
+    {
+      "name": "escalate_to_human",
+      "arguments": {
+        "reason_code": "conflict_review"
+      }
+    }
+  ]
+}

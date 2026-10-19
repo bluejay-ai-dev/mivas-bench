@@ -1,0 +1,13 @@
+{
+  "task": "T2-E2",
+  "industry": "customer-support",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "get_fee",
+      "arguments": {
+        "fee": "drone restocking"
+      }
+    }
+  ]
+}

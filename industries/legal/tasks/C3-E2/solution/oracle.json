@@ -1,0 +1,26 @@
+{
+  "task": "C3-E2",
+  "industry": "legal",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "lookup_caller",
+      "arguments": {
+        "full_name": "Marguerite Okafor",
+        "phone": "770-555-0193"
+      }
+    },
+    {
+      "name": "check_practice_area",
+      "arguments": {
+        "practice_area": "family"
+      }
+    },
+    {
+      "name": "escalate_to_human",
+      "arguments": {
+        "reason_code": "practice_area"
+      }
+    }
+  ]
+}

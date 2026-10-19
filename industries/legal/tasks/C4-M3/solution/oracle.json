@@ -1,0 +1,56 @@
+{
+  "task": "C4-M3",
+  "industry": "legal",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "lookup_caller",
+      "arguments": {
+        "full_name": "Priya Nair",
+        "phone": "408-555-0199"
+      }
+    },
+    {
+      "name": "check_conflict",
+      "arguments": {
+        "opposing_party": "Apex Collections"
+      }
+    },
+    {
+      "name": "check_practice_area",
+      "arguments": {
+        "practice_area": "consumer"
+      }
+    },
+    {
+      "name": "check_jurisdiction",
+      "arguments": {
+        "state": "CA",
+        "practice_area": "consumer"
+      }
+    },
+    {
+      "name": "calculate_filing_deadline",
+      "arguments": {
+        "state": "CA",
+        "practice_area": "consumer",
+        "incident_date": "2026-02-10"
+      }
+    },
+    {
+      "name": "record_intake",
+      "arguments": {
+        "practice_area": "consumer",
+        "state": "CA",
+        "incident_date": "2026-02-10",
+        "summary": "Debt collector harassment at work."
+      }
+    },
+    {
+      "name": "send_intake_packet",
+      "arguments": {
+        "channel": "sms"
+      }
+    }
+  ]
+}

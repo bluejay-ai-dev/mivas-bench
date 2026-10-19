@@ -1,0 +1,57 @@
+{
+  "task": "T2-H2",
+  "industry": "customer-support",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "transfer_to_verification",
+      "arguments": {}
+    },
+    {
+      "name": "identify_customer",
+      "arguments": {
+        "full_name": "Owen Tsai",
+        "phone": "541-555-0183"
+      }
+    },
+    {
+      "name": "verify_identity",
+      "arguments": {
+        "postal_code": "43215",
+        "card_last4": "4482"
+      }
+    },
+    {
+      "name": "get_customer_summary",
+      "arguments": {}
+    },
+    {
+      "name": "transfer_to_returns",
+      "arguments": {}
+    },
+    {
+      "name": "check_return_eligibility",
+      "arguments": {
+        "order_number": "KE-4487740",
+        "opened": true
+      }
+    },
+    {
+      "name": "quote_return",
+      "arguments": {
+        "order_number": "KE-4487740",
+        "opened": true
+      }
+    },
+    {
+      "name": "confirm_return",
+      "arguments": {
+        "confirmation_token": "KE-RTN-4417"
+      }
+    },
+    {
+      "name": "create_return_label",
+      "arguments": {}
+    }
+  ]
+}

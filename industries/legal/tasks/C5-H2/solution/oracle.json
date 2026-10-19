@@ -1,0 +1,97 @@
+{
+  "task": "C5-H2",
+  "industry": "legal",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "lookup_caller",
+      "arguments": {
+        "full_name": "Delphine Mercer",
+        "phone": "323-555-0144"
+      }
+    },
+    {
+      "name": "check_conflict",
+      "arguments": {
+        "opposing_party": "Northstar Logistics"
+      }
+    },
+    {
+      "name": "check_practice_area",
+      "arguments": {
+        "practice_area": "auto_accident"
+      }
+    },
+    {
+      "name": "check_jurisdiction",
+      "arguments": {
+        "state": "CA",
+        "practice_area": "auto_accident"
+      }
+    },
+    {
+      "name": "calculate_filing_deadline",
+      "arguments": {
+        "state": "CA",
+        "practice_area": "auto_accident",
+        "incident_date": "2026-07-10"
+      }
+    },
+    {
+      "name": "record_intake",
+      "arguments": {
+        "practice_area": "auto_accident",
+        "state": "CA",
+        "incident_date": "2026-07-10",
+        "summary": "Intake summary."
+      }
+    },
+    {
+      "name": "transfer_to_scheduling",
+      "arguments": {
+        "handoff_summary": "C5-H2: Book then cancel and rebook"
+      }
+    },
+    {
+      "name": "find_evaluation_slots",
+      "arguments": {
+        "practice_area": "auto_accident",
+        "state": "CA",
+        "earliest_date": ""
+      }
+    },
+    {
+      "name": "hold_evaluation",
+      "arguments": {
+        "practice_area": "auto_accident",
+        "slot_id": "s_110"
+      }
+    },
+    {
+      "name": "confirm_evaluation",
+      "arguments": {}
+    },
+    {
+      "name": "hold_cancellation",
+      "arguments": {
+        "reason": "caller_request",
+        "evaluation_id": "ev_001"
+      }
+    },
+    {
+      "name": "confirm_cancellation",
+      "arguments": {}
+    },
+    {
+      "name": "hold_evaluation",
+      "arguments": {
+        "practice_area": "auto_accident",
+        "slot_id": "s_110"
+      }
+    },
+    {
+      "name": "confirm_evaluation",
+      "arguments": {}
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "task": "R-M3",
+  "industry": "legal",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "lookup_caller",
+      "arguments": {
+        "full_name": "Jordan Lee",
+        "phone": "415-555-0201"
+      }
+    },
+    {
+      "name": "take_message",
+      "arguments": {
+        "for_whom": "attorney",
+        "message": "Please call back."
+      }
+    }
+  ]
+}

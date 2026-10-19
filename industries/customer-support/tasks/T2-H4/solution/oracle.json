@@ -1,0 +1,62 @@
+{
+  "task": "T2-H4",
+  "industry": "customer-support",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "transfer_to_verification",
+      "arguments": {}
+    },
+    {
+      "name": "identify_customer",
+      "arguments": {
+        "full_name": "Priya Raman",
+        "phone": "541-555-0119"
+      }
+    },
+    {
+      "name": "verify_identity",
+      "arguments": {
+        "postal_code": "98104",
+        "card_last4": "3361"
+      }
+    },
+    {
+      "name": "get_customer_summary",
+      "arguments": {}
+    },
+    {
+      "name": "transfer_to_returns",
+      "arguments": {}
+    },
+    {
+      "name": "check_return_eligibility",
+      "arguments": {
+        "order_number": "KE-4462884",
+        "opened": true
+      }
+    },
+    {
+      "name": "quote_return",
+      "arguments": {
+        "order_number": "KE-4462884",
+        "opened": true
+      }
+    },
+    {
+      "name": "confirm_return",
+      "arguments": {
+        "fee_disclosed_acknowledged": true,
+        "confirmation_token": "KE-RTN-4417"
+      }
+    },
+    {
+      "name": "create_return_label",
+      "arguments": {}
+    },
+    {
+      "name": "get_refund_status",
+      "arguments": {}
+    }
+  ]
+}

@@ -1,0 +1,75 @@
+{
+  "task": "C4-H1",
+  "industry": "legal",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "lookup_caller",
+      "arguments": {
+        "full_name": "Franklin Deshpande",
+        "phone": "706-555-0173"
+      }
+    },
+    {
+      "name": "transfer_to_screening",
+      "arguments": {
+        "handoff_summary": "C4-H1: Product injury intake with packet and note"
+      }
+    },
+    {
+      "name": "check_conflict",
+      "arguments": {
+        "opposing_party": "Halloway Toolworks"
+      }
+    },
+    {
+      "name": "check_practice_area",
+      "arguments": {
+        "practice_area": "product_liability"
+      }
+    },
+    {
+      "name": "check_jurisdiction",
+      "arguments": {
+        "state": "GA",
+        "practice_area": "product_liability"
+      }
+    },
+    {
+      "name": "calculate_filing_deadline",
+      "arguments": {
+        "state": "GA",
+        "practice_area": "product_liability",
+        "incident_date": "2026-04-22"
+      }
+    },
+    {
+      "name": "transfer_to_intake",
+      "arguments": {
+        "handoff_summary": "C4-H1: Product injury intake with packet and note",
+        "contact_details_only": false
+      }
+    },
+    {
+      "name": "record_intake",
+      "arguments": {
+        "practice_area": "product_liability",
+        "state": "GA",
+        "incident_date": "2026-04-22",
+        "summary": "Ladder collapse injury."
+      }
+    },
+    {
+      "name": "send_intake_packet",
+      "arguments": {
+        "channel": "email"
+      }
+    },
+    {
+      "name": "add_intake_note",
+      "arguments": {
+        "note": "Witness Ruth Callahan; ladder preserved."
+      }
+    }
+  ]
+}

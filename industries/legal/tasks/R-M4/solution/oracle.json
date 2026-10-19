@@ -1,0 +1,37 @@
+{
+  "task": "R-M4",
+  "industry": "legal",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "lookup_caller",
+      "arguments": {
+        "full_name": "Thomas Eckhart",
+        "phone": "312-555-0277"
+      }
+    },
+    {
+      "name": "get_caller_matters",
+      "arguments": {}
+    },
+    {
+      "name": "transfer_to_client_services",
+      "arguments": {
+        "handoff_summary": "R-M4: Client status then message for case manager"
+      }
+    },
+    {
+      "name": "get_case_status",
+      "arguments": {
+        "matter_id": "m_91"
+      }
+    },
+    {
+      "name": "take_message",
+      "arguments": {
+        "for_whom": "Allison Fontaine",
+        "message": "Please call back."
+      }
+    }
+  ]
+}

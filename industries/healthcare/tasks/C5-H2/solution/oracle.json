@@ -1,0 +1,54 @@
+{
+  "task": "C5-H2",
+  "industry": "healthcare",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "transfer_to_identity",
+      "arguments": {
+        "next_intent": "billing"
+      }
+    },
+    {
+      "name": "transfer_to_billing",
+      "arguments": {}
+    },
+    {
+      "name": "transfer_to_scheduling",
+      "arguments": {}
+    },
+    {
+      "name": "verify_identity",
+      "arguments": {
+        "dob": "1990-04-12",
+        "full_name": "Jordan Lee"
+      }
+    },
+    {
+      "name": "get_account_balance",
+      "arguments": {}
+    },
+    {
+      "name": "explain_charge",
+      "arguments": {
+        "line_item_id": "li_visit"
+      }
+    },
+    {
+      "name": "find_slots",
+      "arguments": {
+        "location_ids": [
+          "loc_park_ave"
+        ]
+      }
+    },
+    {
+      "name": "reschedule_appointment",
+      "arguments": {
+        "appointment_id": "1",
+        "new_start": "2026-08-24T09:00",
+        "new_end": "2026-08-24T09:30"
+      }
+    }
+  ]
+}

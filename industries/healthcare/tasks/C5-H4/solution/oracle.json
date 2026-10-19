@@ -1,0 +1,48 @@
+{
+  "task": "C5-H4",
+  "industry": "healthcare",
+  "generated_by": "verifiers/oracle_recipes.py",
+  "calls": [
+    {
+      "name": "transfer_to_identity",
+      "arguments": {
+        "next_intent": "billing"
+      }
+    },
+    {
+      "name": "transfer_to_billing",
+      "arguments": {}
+    },
+    {
+      "name": "verify_identity",
+      "arguments": {
+        "full_name": "Alice Romano",
+        "dob": "1995-09-08"
+      }
+    },
+    {
+      "name": "get_patient_summary",
+      "arguments": {}
+    },
+    {
+      "name": "get_account_balance",
+      "arguments": {}
+    },
+    {
+      "name": "explain_charge",
+      "arguments": {
+        "line_item_id": "li_visit"
+      }
+    },
+    {
+      "name": "offer_financing",
+      "arguments": {}
+    },
+    {
+      "name": "send_payment_link",
+      "arguments": {
+        "mobile_e164": "+14075550155"
+      }
+    }
+  ]
+}
