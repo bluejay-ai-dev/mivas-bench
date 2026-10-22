@@ -34,6 +34,7 @@ dev = ["pytest>=8.0.0"]
 constraint-dependencies = [
     "PyJWT>=2.15.0,<3.0",
     "urllib3>=2.8.0,<3.0",
+    "mcp>=1.30.0,<2.0",
 ]
 package = false
 
