@@ -235,10 +235,14 @@ async def _bridge(ws, industry: str) -> None:
                     await end_agent()
                 if pacer is not None:
                     pacer.close()
+                # Bluejay's line first, so the caller's call ends the moment the
+                # farewell has played; Prism's close handshake can take seconds.
                 with contextlib.suppress(Exception):
-                    await prism.close()
+                    await asyncio.wait_for(ws.close(1000), timeout=2.0)
+                _log("chirp socket closed")
                 with contextlib.suppress(Exception):
-                    await ws.close(1000)
+                    await asyncio.wait_for(prism.close(), timeout=3.0)
+                _log("prism socket closed")
 
             async def after_reply_audio(resp_id: str, drain_token: str | None) -> None:
                 """speech.completed once the paced audio has left, then the playback receipt."""
