@@ -397,6 +397,13 @@ async def _bridge(ws, industry: str) -> None:
                             if not b or rid in cancelled:
                                 continue
                             if play["resp"] != rid:
+                                # A new reply's audio closes the previous utterance first, so
+                                # Bluejay never sees two replies under one utterance id or an
+                                # utterance that is never completed (its digital human would
+                                # then wait on the agent and nudge "are you still there").
+                                if turn["utt"] is not None:
+                                    await pacer.wait_until_idle()
+                                    await end_agent()
                                 play.update(item=ev.get("item_id") or cur["msg_item"], resp=rid, pushed=0, sent=0)
                                 if not opened.is_set():
                                     _log("first reply audio")
