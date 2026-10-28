@@ -1,0 +1,23 @@
+voice-agent-harnesses/rime/README.md
+  s_bf08e59301a37e::t_7f98997af33f2e 38
+voice-agent-harnesses/rime/harness.py
+  s_bf08e59301a37e::t_6b0d9734c29f08 197-200,202-203
+voice-agent-harnesses/rime/prism/adapters/chirp.py
+  s_bf08e59301a37e::t_bb8152c95f3a87 198-199,250-252,307-316,426,448-450
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "b71fe96b2cac5ac35b3f64efb88a690d921a962d",
+  "prompts": {},
+  "sessions": {
+    "s_bf08e59301a37e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2c20378e-b572-4256-8a13-4298d5a85d80",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
