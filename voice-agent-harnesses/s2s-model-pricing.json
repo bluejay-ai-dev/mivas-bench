@@ -73,7 +73,9 @@
     "grok-voice-latest":             0.08,
     "grok-voice-think-fast-2.0":     0.08,
     "grok-voice-3.0":                0.08,
-    "grok-voice-think-fast-1.0":     0.05
+    "grok-voice-think-fast-1.0":     0.05,
+    "_note_prism": "Rime Prism is metered per minute of call audio as ONE speech-to-speech charge: https://rime.ai/pricing 2026-10-28, Prism row '$0.080/min' on the Flex (pay as you go) plan; Scale is $0.064/min after a $100/month fee and Enterprise is unpublished. Flex is the list price used here. Prism reports input/output/total tokens on response.done but publishes no token rate, so eval_costs bills mivas.audio.duration_s from the realtime_session root (else duration_s) and the tokens are informational.",
+    "prism":                         0.08
   },
   "component_pricing": {
     "_comment": "Non-LLM legs of the livekit/cascaded pair, priced from the mivas.stt.audio_duration_s / mivas.tts.characters attrs on the voice.call root. cost_usd = cost_llm_usd + cost_stt_usd + cost_tts_usd.",

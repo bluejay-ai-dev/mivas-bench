@@ -27,6 +27,7 @@ FAMILIES = (
     "gemini",
     "grok",
     "livekit",
+    "rime",
 )
 
 
@@ -163,7 +164,7 @@ def _dispatch_family(family: str, harness: Any) -> None:
         if family == "livekit":
             _run(harness._execute("schedule_appointment", {"date": "08/15/2026"}, local=False))
             return
-        if family == "grok":
+        if family in ("grok", "rime"):
             bp = {
                 "agents": {
                     "scheduler": {

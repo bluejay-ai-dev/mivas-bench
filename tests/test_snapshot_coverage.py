@@ -28,6 +28,7 @@ HOOK_SITES = {
     "livekit": ["harness.py"],
     "openai": ["report.py"],
     "qwen": ["report.py"],
+    "rime": ["report.py"],
 }
 
 # any one of these means the family reaches capture_final on teardown.
