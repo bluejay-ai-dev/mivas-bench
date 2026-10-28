@@ -1,0 +1,19 @@
+voice-agent-harnesses/rime/prism/adapters/chirp.py
+  s_bf08e59301a37e::t_4d99ea9d8ebb4b 400-406
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "1b4fcfcbc1f28b3abe1cf72f1c50a8cd42c85665",
+  "prompts": {},
+  "sessions": {
+    "s_bf08e59301a37e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2c20378e-b572-4256-8a13-4298d5a85d80",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
