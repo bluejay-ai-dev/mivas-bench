@@ -258,6 +258,11 @@ async def _bridge(ws, industry: str) -> None:
                     updated_events.pop(upd["event_id"], None)
 
             async def maybe_continue(resp_id: str) -> None:
+                """Request the tool continuation once the round is complete.
+
+                Runs as its own task: switch_agent waits for a session.updated that
+                only the outbound reader can deliver, so awaiting it inside the
+                reader deadlocks until the timeout (10 s of dead air per handoff)."""
                 r = rounds.get(resp_id)
                 if r is None or not r.ready():
                     return
@@ -276,13 +281,21 @@ async def _bridge(ws, industry: str) -> None:
                 _log(f"tool continuation sent parent={resp_id} agent={state['agent']}"
                      + (" (closing after farewell)" if r.stop else ""))
 
-            async def dispatch_tool(resp_id: str, call_id: str, name: str, arguments: str) -> None:
-                if not name or call_id in handled:
-                    return
+            def register_call(resp_id: str, call_id: str) -> bool:
+                """Book the call on its round synchronously, in the reader. The
+                response.done that follows function_call_arguments.done can be
+                handled before a spawned task ever runs; a round registered late
+                never sees its done flag and the continuation is never sent."""
+                if call_id in handled:
+                    return False
                 handled.add(call_id)
                 r = rounds.setdefault(resp_id, _Round())
                 r.calls.add(call_id)
                 call_round[call_id] = resp_id
+                return True
+
+            async def dispatch_tool(resp_id: str, call_id: str, name: str, arguments: str) -> None:
+                r = rounds[resp_id]
                 if tracer is not None:
                     state["_otel_root"] = tracer.current_turn()  # tools nest under the turn
                 t0 = time.monotonic()
@@ -366,12 +379,11 @@ async def _bridge(ws, industry: str) -> None:
                             if item.get("type") == "message":
                                 cur["msg_item"] = item.get("id")
                         elif et == "response.function_call_arguments.done":
-                            asyncio.create_task(dispatch_tool(
-                                ev.get("response_id") or cur["resp"] or "",
-                                ev.get("call_id") or f"call_{_eid()}",
-                                ev.get("name", ""),
-                                ev.get("arguments") or "{}",
-                            ))
+                            rid = ev.get("response_id") or cur["resp"] or ""
+                            cid = ev.get("call_id") or f"call_{_eid()}"
+                            name = ev.get("name", "")
+                            if name and register_call(rid, cid):
+                                asyncio.create_task(dispatch_tool(rid, cid, name, ev.get("arguments") or "{}"))
                         elif et == "response.text.done":
                             tr = (ev.get("text") or "").strip()
                             if tr:
@@ -393,7 +405,7 @@ async def _bridge(ws, industry: str) -> None:
                             r = rounds.get(rid)
                             if r is not None:
                                 r.done = True
-                                await maybe_continue(rid)
+                                asyncio.create_task(maybe_continue(rid))
                             token = (resp.get("metadata") or {}).get("prism_drain_token")
                             if play["resp"] == rid or (closing["parent"] is not None and rid != closing["parent"]):
                                 asyncio.create_task(after_reply_audio(rid, token))
@@ -403,7 +415,7 @@ async def _bridge(ws, industry: str) -> None:
                             if item.get("type") == "function_call_output" and cid in call_round:
                                 rid = call_round[cid]
                                 rounds[rid].acked.add(cid)
-                                await maybe_continue(rid)
+                                asyncio.create_task(maybe_continue(rid))
                         elif et == "session.updated":
                             waiter = updated_events.get(ev.get("prism_request_event_id") or "")
                             if waiter is not None:
