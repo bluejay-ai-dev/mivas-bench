@@ -72,6 +72,7 @@ NUDGE_MAX_ATTEMPTS = int(os.environ.get("MIVAS_NUDGE_MAX_ATTEMPTS", "5"))
 # or at this cap if Prism never replies.
 FAREWELL_MAX_S = float(os.environ.get("MIVAS_FAREWELL_MAX_S", "20"))
 SESSION_SETUP_TIMEOUT_S = float(os.environ.get("RIME_SESSION_SETUP_TIMEOUT_S", "10"))
+CONNECT_RETRY_S = float(os.environ.get("RIME_CONNECT_RETRY_S", "12"))
 
 _LOG_ON = (os.environ.get("RIME_CHIRP_LOG") or "full").strip().lower() not in {"0", "off", "false", "no"}
 
@@ -117,6 +118,32 @@ class _Round:
         return self.done and bool(self.calls) and self.calls <= self.acked and not self.continued
 
 
+async def _connect_with_retry(log) -> tuple[Any, Any]:
+    """Open the Prism socket, retrying an upgrade refused with 429 or 503.
+
+    Prism answers 503 when it has no room and 429 "Account admission refused"
+    when the account's concurrent-conversation allowance is used up. Both are
+    transient from the caller's point of view, so keep trying for a bounded
+    window instead of handing the digital human a dead line at once."""
+    from websockets.exceptions import InvalidStatus
+
+    deadline = time.monotonic() + CONNECT_RETRY_S
+    attempt = 0
+    while True:
+        attempt += 1
+        cm = connect_prism()
+        try:
+            prism = await cm.__aenter__()
+            return prism, cm
+        except InvalidStatus as e:
+            status = e.response.status_code
+            body = (e.response.body or b"")[:120].decode(errors="replace").strip()
+            log(f"prism upgrade refused HTTP {status} {body!r} (attempt {attempt})")
+            if status not in (429, 503) or time.monotonic() >= deadline:
+                raise
+            await asyncio.sleep(min(1.0 * attempt, 3.0))
+
+
 async def _bridge(ws, industry: str) -> None:
     bp = load_blueprint(industry)
     state: dict[str, Any] = {"agent": bp["start"]}
@@ -144,8 +171,7 @@ async def _bridge(ws, industry: str) -> None:
             if tracer is not None:
                 state["_otel_root"] = tracer.root
 
-            prism_cm = connect_prism()
-            prism = await prism_cm.__aenter__()
+            prism, prism_cm = await _connect_with_retry(_log)
             _log("prism connected")
             created = json.loads(await asyncio.wait_for(prism.recv(), timeout=SESSION_SETUP_TIMEOUT_S))
             if created.get("type") != "session.created":
