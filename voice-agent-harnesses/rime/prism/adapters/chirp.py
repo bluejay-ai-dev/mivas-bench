@@ -299,6 +299,17 @@ async def _bridge(ws, industry: str) -> None:
                 if r.handoff:
                     await switch_agent(r.handoff)
                 if r.stop:
+                    # The caller's own "thanks, goodbye" often trails the tool call;
+                    # with interruption on, that tail cancels the farewell as a
+                    # barge-in (result 1361022 closed on a 40 ms farewell). Nothing
+                    # the caller says after end_call changes the outcome, so let the
+                    # goodbye play through.
+                    await send_prism({
+                        "type": "session.update",
+                        "event_id": f"upd_{_eid()}",
+                        "session": {"turn_detection": {"interrupt_response": False}},
+                    })
+
                     async def farewell_cap() -> None:
                         await asyncio.sleep(FAREWELL_MAX_S)
                         await close_all("farewell cap")
