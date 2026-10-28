@@ -35,7 +35,7 @@ CHIRP_PORT=8770 CHIRP_USER=mivas CHIRP_PASS=mivas BLUEJAY_SERVICE_NAME=mivas-rim
 | `RIME_API_KEY` | Rime API key (`Authorization: Bearer …` on the upgrade) |
 | `RIME_WS_URL` | override the realtime endpoint (default `wss://prism.api.rime.ai/v1/realtime`) |
 | `RIME_VOICE` | `astra` (default), `aurora`, `brando`, `wawona` |
-| `RIME_EAGERNESS` | `low` / `medium` / `high` / `auto`; locked after the first update |
+| `RIME_EAGERNESS` | `low` (default: digital humans pause mid-sentence and Prism cut in at `auto`) / `medium` / `high` / `auto`; `default` sends nothing; locked after the first update |
 | `RIME_END_OF_TURN_TIMEOUT_MS` | 1000 to 10000; Prism default 5000; locked after the first update |
 | `RIME_TOOL_FILLER` | `none` (default) or `auto` |
 | `TOOL_SERVER_URL` | industry state API |

@@ -195,7 +195,8 @@ async def _bridge(ws, industry: str) -> None:
             call_round: dict[str, str] = {}
             handled: set[str] = set()
             cancelled: set[str] = set()
-            closing = {"parent": None, "task": None}
+            closing = {"parent": None, "this": None, "task": None}
+            texts: dict[str, str] = {}
             play = {"item": None, "resp": None, "pushed": 0, "sent": 0}
             cur = {"resp": None, "msg_item": None, "down": None}
             turn = {"utt": None}
@@ -246,7 +247,9 @@ async def _bridge(ws, industry: str) -> None:
                     await end_agent()
                     if drain_token and resp_id not in cancelled:
                         await send_prism({"type": "prism.playback.drained", "drain_token": drain_token})
-                if closing["parent"] is not None and resp_id != closing["parent"]:
+                if closing["this"] == resp_id or (
+                    closing["parent"] is not None and resp_id != closing["parent"]
+                ):
                     await close_all("farewell played")
 
             async def on_speech_started(ev: dict[str, Any]) -> None:
@@ -296,13 +299,21 @@ async def _bridge(ws, industry: str) -> None:
                 if r.handoff:
                     await switch_agent(r.handoff)
                 if r.stop:
-                    closing["parent"] = resp_id
-
                     async def farewell_cap() -> None:
                         await asyncio.sleep(FAREWELL_MAX_S)
                         await close_all("farewell cap")
 
                     closing["task"] = asyncio.create_task(farewell_cap())
+                    if texts.get(resp_id, "").strip():
+                        # The reply that called end_call already spoke the goodbye
+                        # (Prism says it in the same reply); a continuation makes
+                        # it say goodbye twice. Close once that audio has played.
+                        closing["this"] = resp_id
+                        _log(f"session tool with spoken farewell; closing after {resp_id} plays")
+                        if play["resp"] != resp_id and pacer._idle.is_set():
+                            await close_all("farewell already played")
+                        return
+                    closing["parent"] = resp_id
                 await send_prism(tool_continuation(resp_id))
                 _log(f"tool continuation sent parent={resp_id} agent={state['agent']}"
                      + (" (closing after farewell)" if r.stop else ""))
@@ -412,6 +423,7 @@ async def _bridge(ws, industry: str) -> None:
                                 asyncio.create_task(dispatch_tool(rid, cid, name, ev.get("arguments") or "{}"))
                         elif et == "response.text.done":
                             tr = (ev.get("text") or "").strip()
+                            texts[ev.get("response_id") or cur["resp"] or ""] = tr
                             if tr:
                                 _log(f"prism[{state['agent']}] {tr[:200]}")
                         elif et == "conversation.item.input_audio_transcription.completed":
@@ -433,7 +445,9 @@ async def _bridge(ws, industry: str) -> None:
                                 r.done = True
                                 asyncio.create_task(maybe_continue(rid))
                             token = (resp.get("metadata") or {}).get("prism_drain_token")
-                            if play["resp"] == rid or (closing["parent"] is not None and rid != closing["parent"]):
+                            if play["resp"] == rid or closing["this"] == rid or (
+                                closing["parent"] is not None and rid != closing["parent"]
+                            ):
                                 asyncio.create_task(after_reply_audio(rid, token))
                         elif et == "conversation.item.created":
                             item = ev.get("item") or {}

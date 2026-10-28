@@ -194,9 +194,13 @@ def session_update_for_agent(
     # voice, turn timing and client caps are first-update settings; eagerness
     # and the end-of-turn timeout are locked for the rest of the conversation.
     if not mid_call:
+        # Digital humans pause between clauses the way a phone caller does, and at
+        # Prism's default eagerness the agent answered inside those pauses (smoke
+        # result 1360991: "Thank you, Alan." over the caller's phone number,
+        # "What else can I help" over a question). low waits for more certainty.
         turn: dict[str, Any] = {"interrupt_response": True}
-        eagerness = os.environ.get("RIME_EAGERNESS", "").strip().lower()
-        if eagerness:
+        eagerness = os.environ.get("RIME_EAGERNESS", "low").strip().lower()
+        if eagerness and eagerness != "default":
             turn["eagerness"] = eagerness
         eot = os.environ.get("RIME_END_OF_TURN_TIMEOUT_MS", "").strip()
         if eot:
