@@ -1,0 +1,25 @@
+dataset/README.md
+  s_a76db42bc2a366::t_2e95ee741fd901 18,51
+dataset/customer-support/tasks.jsonl
+  s_a76db42bc2a366::t_034bed585c269f 1-72
+dataset/healthcare/tasks.jsonl
+  s_a76db42bc2a366::t_ace57a6607bc37 1-72
+dataset/legal/tasks.jsonl
+  s_a76db42bc2a366::t_97074fde284560 1-72
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "6f76efd2ba1cc281986eab6c0b7f842846a11de2",
+  "prompts": {},
+  "sessions": {
+    "s_a76db42bc2a366": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "23d41bce-12de-483a-9fba-3ced242a7298",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}

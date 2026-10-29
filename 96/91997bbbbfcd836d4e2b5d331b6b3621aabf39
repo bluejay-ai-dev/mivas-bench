@@ -1,0 +1,97 @@
+dataset/customer-support/system-prompts/fraud.md
+  s_aa9187e0e89e73::t_5d212dc1f1d527 1-238
+dataset/CHANGELOG.md
+  s_aa9187e0e89e73::t_4c4ad7eeaa6015 1-11,14-110,112-113,115-123
+  s_aa9187e0e89e73::t_c287dacde9a243 111,114
+  s_aa9187e0e89e73::t_0b17a7c05f7360 12-13
+dataset/healthcare/system-prompts/identity.md
+  s_aa9187e0e89e73::t_5d212dc1f1d527 1-177
+dataset/customer-support/agent_blueprint.json
+  s_aa9187e0e89e73::t_5d212dc1f1d527 1-122
+dataset/customer-support/system-prompts/membership.md
+  s_aa9187e0e89e73::t_5d212dc1f1d527 1-207
+dataset/legal/system-prompts/scheduling.md
+  s_aa9187e0e89e73::t_5d212dc1f1d527 1-173
+dataset/legal/tasks.jsonl
+  s_aa9187e0e89e73::t_5d212dc1f1d527 1-72
+dataset/healthcare/agent_blueprint.json
+  s_aa9187e0e89e73::t_5d212dc1f1d527 1-326
+dataset/legal/agent_blueprint.mmd
+  s_aa9187e0e89e73::t_5d212dc1f1d527 1-18
+dataset/customer-support/tasks.jsonl
+  s_aa9187e0e89e73::t_5d212dc1f1d527 1-72
+dataset/customer-support/system-prompts/returns.md
+  s_aa9187e0e89e73::t_5d212dc1f1d527 1-224
+dataset/healthcare/tasks.jsonl
+  s_aa9187e0e89e73::t_5d212dc1f1d527 1-72
+dataset/customer-support/system-prompts/service.md
+  s_aa9187e0e89e73::t_5d212dc1f1d527 1-225
+dataset/customer-support/tools.json
+  s_aa9187e0e89e73::t_5d212dc1f1d527 1-1428
+dataset/legal/system-prompts/intake.md
+  s_aa9187e0e89e73::t_5d212dc1f1d527 1-178
+dataset/legal/system-prompts/client_services.md
+  s_aa9187e0e89e73::t_5d212dc1f1d527 1-164
+dataset/legal/system-prompts/screening.md
+  s_aa9187e0e89e73::t_5d212dc1f1d527 1-183
+dataset/healthcare/system-prompts/scheduling.md
+  s_aa9187e0e89e73::t_5d212dc1f1d527 1-227
+dataset/legal/agent_blueprint.json
+  s_aa9187e0e89e73::t_5d212dc1f1d527 1-183
+dataset/customer-support/system-prompts/reception.md
+  s_aa9187e0e89e73::t_5d212dc1f1d527 1-217
+dataset/customer-support/system-prompts/orders.md
+  s_aa9187e0e89e73::t_5d212dc1f1d527 1-221
+dataset/customer-support/agent_blueprint.mmd
+  s_aa9187e0e89e73::t_5d212dc1f1d527 1-37
+dataset/legal/tools.json
+  s_aa9187e0e89e73::t_5d212dc1f1d527 1-1033
+dataset/healthcare/tools.json
+  s_aa9187e0e89e73::t_5d212dc1f1d527 1-1726
+.github/workflows/dataset.yml
+  s_aa9187e0e89e73::t_c657b2bd9e5339 1-41
+dataset/healthcare/system-prompts/clinical.md
+  s_aa9187e0e89e73::t_5d212dc1f1d527 1-196
+dataset/healthcare/system-prompts/reception.md
+  s_aa9187e0e89e73::t_5d212dc1f1d527 1-185
+dataset/README.md
+  s_aa9187e0e89e73::t_5d212dc1f1d527 1-219
+dataset/healthcare/system-prompts/coverage.md
+  s_aa9187e0e89e73::t_5d212dc1f1d527 1-181
+tests/test_seed_state_contract.py
+  s_aa9187e0e89e73::t_1a5c0e7db3b8d6 1-2,6-39,41-53,55-66,70-210
+  s_aa9187e0e89e73::t_6a98058f41c04e 3-5
+  s_aa9187e0e89e73::t_15baeb697a9b19 40
+  s_aa9187e0e89e73::t_5b8da8d6aa8da0 54
+  s_aa9187e0e89e73::t_8f517746f76f1e 67-69
+dataset/healthcare/system-prompts/cosmetic.md
+  s_aa9187e0e89e73::t_5d212dc1f1d527 1-184
+scripts/dataset_card_template.md
+  s_aa9187e0e89e73::t_5f049060e4dbfb 1-198
+dataset/customer-support/system-prompts/verification.md
+  s_aa9187e0e89e73::t_5d212dc1f1d527 1-219
+dataset/healthcare/system-prompts/billing.md
+  s_aa9187e0e89e73::t_5d212dc1f1d527 1-170
+dataset/healthcare/agent_blueprint.mmd
+  s_aa9187e0e89e73::t_5d212dc1f1d527 1-28
+dataset/legal/system-prompts/reception.md
+  s_aa9187e0e89e73::t_5d212dc1f1d527 1-187
+scripts/export_dataset.py
+  s_aa9187e0e89e73::t_b26dc09759bbb5 1-157
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "9691997bbbbfcd836d4e2b5d331b6b3621aabf39",
+  "prompts": {},
+  "sessions": {
+    "s_aa9187e0e89e73": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "33502150-ad2f-41ec-9a5e-540eacd8fd6b",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": null
+    }
+  }
+}

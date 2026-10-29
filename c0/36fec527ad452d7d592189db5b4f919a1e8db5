@@ -1,0 +1,59 @@
+voice-agent-harnesses/rime/prism/adapters/chirp.py
+  s_bf08e59301a37e::t_4b67e48650d922 1-487
+voice-agent-harnesses/rime/prism/agent.py
+  s_bf08e59301a37e::t_2590eab4f90e28 1-51
+voice-agent-harnesses/rime/report.py
+  s_bf08e59301a37e::t_01213ac2e61485 1-505
+voice-agent-harnesses/rime/harness.py
+  s_bf08e59301a37e::t_ee59662cf3f943 1-445
+voice-agent-harnesses/rime/prism/Dockerfile
+  s_bf08e59301a37e::t_bb03f233729fad 1-65
+.agents/skills/mivas-run/HARNESS.md
+  s_bf08e59301a37e::t_b770764b62849e 21
+.agents/skills/mivas-run/INFERENCE.md
+  s_bf08e59301a37e::t_f042bae2968bd7 24
+README.md
+  s_bf08e59301a37e::t_c81977a58738a1 252
+k8s/deployment.yaml
+  s_bf08e59301a37e::t_7aec72a2e58414 188-193
+k8s/secret.example.yaml
+  s_bf08e59301a37e::t_e00ae9153f6e22 32
+run.py
+  s_bf08e59301a37e::t_27d50707a96ec9 47,458
+scripts/eval_costs.py
+  s_bf08e59301a37e::t_a9aae2844ffcc5 56
+tests/test_dockerfiles.py
+  s_bf08e59301a37e::t_2ae8ee7bb40fed 15-16
+tests/test_harness_tool_headers.py
+  s_bf08e59301a37e::t_2def4a144ed2a6 30,167
+tests/test_snapshot_coverage.py
+  s_bf08e59301a37e::t_87125e943b8260 31
+tests/test_tool_span_ok.py
+  s_bf08e59301a37e::t_06dc0f181ee466 10
+voice-agent-harnesses/rime/README.md
+  s_bf08e59301a37e::t_1fceefccb11719 1-54
+voice-agent-harnesses/rime/pcm.py
+  s_bf08e59301a37e::t_cd0d0086b3a6ac 1-126
+voice-agent-harnesses/rime/requirements.txt
+  s_bf08e59301a37e::t_a4d77fce70faa4 1-6
+voice-agent-harnesses/rime/test_llm_usage_span.py
+  s_bf08e59301a37e::t_a672ee736ebd5b 1-70
+voice-agent-harnesses/s2s-model-pricing.json
+  s_bf08e59301a37e::t_9e76af04030388 76-78
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "c036fec527ad452d7d592189db5b4f919a1e8db5",
+  "prompts": {},
+  "sessions": {
+    "s_bf08e59301a37e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2c20378e-b572-4256-8a13-4298d5a85d80",
+        "model": "unknown"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
