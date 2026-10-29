@@ -1,0 +1,69 @@
+.agents/skills/mivas-run/HARNESS.md
+  s_c25b448649a2a7::t_1c188300f6c7f6 21
+.agents/skills/mivas-run/INFERENCE.md
+  s_c25b448649a2a7::t_4f40135402d871 24
+.agents/skills/mivas-run/SKILL.md
+  s_c25b448649a2a7::t_a4b896d5bd8d5d 28
+.agents/skills/mivas-run/scripts/preflight.py
+  s_c25b448649a2a7::t_bc476a628910cd 36
+.env.example
+  s_c25b448649a2a7::t_dcda8b1893ae9c 64-69
+README.md
+  s_c25b448649a2a7::t_e1b76f8b0a4883 252,255
+k8s/deployment.yaml
+  s_c25b448649a2a7::t_ee9817ebafb57c 188-193
+k8s/secret.example.yaml
+  s_c25b448649a2a7::t_12e2cc5d1b7343 32
+pyproject.toml
+  s_c25b448649a2a7::t_187165ff797791 44
+run.py
+  s_c25b448649a2a7::t_28a0c06d8bc302 45,448
+scripts/annotate_eval_costs.py
+  s_c25b448649a2a7::t_89801b65d3cb0f 46,62,78
+scripts/eval_costs.py
+  s_c25b448649a2a7::t_7a689ab727c546 61-62
+tests/test_dockerfiles.py
+  s_c25b448649a2a7::t_fa2bb01f06af8f 15-16
+tests/test_harness_tool_headers.py
+  s_c25b448649a2a7::t_d1f94b7d0fbbbe 30,164-166
+tests/test_snapshot_coverage.py
+  s_c25b448649a2a7::t_32374cbcf0cd44 30
+tests/test_tool_span_ok.py
+  s_c25b448649a2a7::t_cce9c55df7f4b4 10
+voice-agent-harnesses/phonic/README.md
+  s_c25b448649a2a7::t_cefb392cb986a7 1-70
+voice-agent-harnesses/phonic/adapters/chirp.py
+  s_c25b448649a2a7::t_3a2fd7a9f73797 1-301
+voice-agent-harnesses/phonic/harness.py
+  s_c25b448649a2a7::t_769c53bcbb33e3 1-340
+voice-agent-harnesses/phonic/report.py
+  s_c25b448649a2a7::t_bb874da0cd92e5 1-489
+voice-agent-harnesses/phonic/requirements.txt
+  s_c25b448649a2a7::t_157614ed5fae6e 1-6
+voice-agent-harnesses/phonic/sts/Dockerfile
+  s_c25b448649a2a7::t_5f837a97f10821 1-64
+voice-agent-harnesses/phonic/sts/adapters/chirp.py
+  s_c25b448649a2a7::t_82cea63dba437b 1-8
+voice-agent-harnesses/phonic/sts/agent.py
+  s_c25b448649a2a7::t_50383c9504192e 1-40
+voice-agent-harnesses/phonic/sts/variants.json
+  s_c25b448649a2a7::t_8ec55bbb8df902 1-6
+voice-agent-harnesses/s2s-model-pricing.json
+  s_c25b448649a2a7::t_a4280c61db6150 73-74
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d2eeccc6de9fefdeabcbcf985b47e69898af3468",
+  "prompts": {},
+  "sessions": {
+    "s_c25b448649a2a7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6b1f45fe-b928-41d4-8987-db2032705686",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Yash Savalia <yashsavalia1@gmail.com>"
+    }
+  }
+}
