@@ -21,6 +21,7 @@ local flows all read from there.
 | `aws/nova-sonic-2` | AWS account with Bedrock access to Nova Sonic 2 in the chosen region | `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, optional `AWS_SESSION_TOKEN`, `NOVA_SONIC_REGION` |
 | `grok/voice` | console.x.ai | `GROK_API_KEY` (alias `XAI_API_KEY`) |
 | `qwen/audio-realtime` | Alibaba Model Studio / DashScope | `DASHSCOPE_API_KEY`, `QWEN_WORKSPACE_ID`, `QWEN_REGION` |
+| `phonic/sts@phonic-1-high` | Phonic dashboard → API keys | `PHONIC_API_KEY` |
 | `livekit/cascaded` | four vendors: Deepgram (STT), OpenAI (LLM), ElevenLabs (TTS), LiveKit Cloud | `DEEPGRAM_API_KEY`, `OPENAI_API_KEY`, `ELEVENLABS_API_KEY`, `LIVEKIT_*` |
 
 Every container also needs `BLUEJAY_API_KEY` (trace upload and result relink) and

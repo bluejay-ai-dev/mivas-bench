@@ -43,6 +43,7 @@ INDUSTRY_CSVS: dict[str, dict[str, str]] = {
         "gemini-flash-live-3.1": "healthcare-gemini-flash-live-3.1-247348.csv",
         "gemini-2.5-flash-native-audio": "healthcare-gemini-2.5-flash-native-audio-247475.csv",
         "qwen-audio-realtime": "healthcare-qwen-audio-realtime-248135.csv",
+        "phonic-sts@phonic-1-high": "mivas-v3/healthcare-phonic-sts-phonic-1-high-503142.csv",
         "livekit-cascaded": "healthcare-livekit-cascaded-248703.csv",
     },
     "legal": {
@@ -58,6 +59,7 @@ INDUSTRY_CSVS: dict[str, dict[str, str]] = {
         "gemini-flash-live-3.1": "legal-gemini-flash-live-3.1-254119.csv",
         "gemini-2.5-flash-native-audio": "legal-gemini-2.5-flash-native-audio-254163.csv",
         "qwen-audio-realtime": "legal-qwen-audio-realtime-254129.csv",
+        "phonic-sts@phonic-1-high": "mivas-v3/legal-phonic-sts-phonic-1-high-503147.csv",
         "livekit-cascaded": "legal-livekit-cascaded-254130.csv",
     },
     "customer-support": {
@@ -73,6 +75,7 @@ INDUSTRY_CSVS: dict[str, dict[str, str]] = {
         "gemini-flash-live-3.1": "customer-support-gemini-flash-live-3.1-257174.csv",
         "gemini-2.5-flash-native-audio": "customer-support-gemini-2.5-flash-native-audio-257187.csv",
         "qwen-audio-realtime": "customer-support-qwen-audio-realtime-257215.csv",
+        "phonic-sts@phonic-1-high": "mivas-v3/customer-support-phonic-sts-phonic-1-high-503194.csv",
         "livekit-cascaded": "customer-support-livekit-cascaded-257156.csv",
     },
 }

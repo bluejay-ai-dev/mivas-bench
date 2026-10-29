@@ -70,6 +70,8 @@
     "_note_": "grok-voice-latest resolves to Grok Voice 3.0 since 2026-10-14 (xAI moved the alias; price unchanged, https://x.ai/news/grok-voice-3). Before that it was an alias of grok-voice-think-fast-2.0 (verified 2026-08-22, https://docs.x.ai/docs/models: '$0.08 / min ($4.80 / hr) audio'). xAI meters the speech-to-speech model as ONE per-minute charge, not as separate STT/LLM/TTS legs — grok-stt ($0.10/hr REST, $0.20/hr streaming) and grok-tts ($15.00/1M chars) are separate products that a cascaded pipeline would pay for instead. Duration minutes are the right billing basis. Add $0.01/min if xAI PSTN telephony is used (we use CHIRP, so no).",
     "_note_gpt-live-1": "GPT-Live meters the voice session per minute, billed per second with no rounding ($0.05/min, https://developers.openai.com/api/docs/pricing and /models/gpt-live-1, checked 2026-09-29). eval_costs bills the API-reported mivas.live.usage_seconds from the voice.call span when present, else duration_s. The backend Responses model is billed separately on its own tokens — price those from the chat spans, not from this row.",
     "gpt-live-1":                    0.05,
+    "_note_phonic": "Phonic bills one price per conversation minute with no per-token or LLM pass-through charges (phonic.ai/pricing, 2026-10-27): Starter $0.06/min, Pro $0.055/min. Benchmark cost uses the Starter list price. The STS socket reports no usage; billed minutes are GET /v1/conversations/{id} duration_ms, keyed by the trace root attribute phonic.conversation_id.",
+    "phonic-1":                      0.06,
     "grok-voice-latest":             0.08,
     "grok-voice-think-fast-2.0":     0.08,
     "grok-voice-3.0":                0.08,

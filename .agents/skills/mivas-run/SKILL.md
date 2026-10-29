@@ -25,7 +25,7 @@ default you pick if they say "you choose" or do not know. Never silently assume 
 
 1. **What model are you benchmarking?**
    *(a)* a model already wired up — OpenAI Realtime 2.1 / 2.1-mini, GPT-Live 1, Gemini Live,
-   Nova Sonic 2, Grok Voice, Qwen Audio Realtime, or the LiveKit cascaded baseline
+   Nova Sonic 2, Grok Voice, Qwen Audio Realtime, Phonic 1, or the LiveKit cascaded baseline
    → vendor API. *(b)* **your own or an open-weight model** → it needs an inference endpoint
    you stand up first; only the cascaded harnesses can point at one. **[openai/realtime-2.1]**
    Map the answer to a `family/runtime` from [HARNESS.md](HARNESS.md); refuse a model with no harness

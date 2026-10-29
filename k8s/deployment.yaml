@@ -185,6 +185,12 @@ __VARIANT_ENV__            - name: MIVAS_MODE
                   name: mivas-secrets
                   key: QWEN_REGION
                   optional: true
+            - name: PHONIC_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: mivas-secrets
+                  key: PHONIC_API_KEY
+                  optional: true
             - name: AWS_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:

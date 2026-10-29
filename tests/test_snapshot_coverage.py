@@ -27,6 +27,7 @@ HOOK_SITES = {
     "grok": ["voice/adapters/chirp.py"],
     "livekit": ["harness.py"],
     "openai": ["report.py"],
+    "phonic": ["report.py"],
     "qwen": ["report.py"],
 }
 

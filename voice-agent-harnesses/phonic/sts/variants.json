@@ -1,0 +1,6 @@
+{
+  "phonic-1-high": {
+    "PHONIC_MODEL": "phonic-1",
+    "PHONIC_INTELLIGENCE": "high"
+  }
+}
