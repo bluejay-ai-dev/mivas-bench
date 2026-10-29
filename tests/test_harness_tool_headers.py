@@ -27,6 +27,7 @@ FAMILIES = (
     "gemini",
     "grok",
     "livekit",
+    "phonic",
 )
 
 
@@ -159,6 +160,9 @@ def _dispatch_family(family: str, harness: Any) -> None:
             return
         if family == "gemini":
             _run(harness._dispatch("schedule_appointment", {"date": "08/15/2026"}))
+            return
+        if family == "phonic":
+            _run(harness.post_tool("schedule_appointment", {"date": "08/15/2026"}))
             return
         if family == "livekit":
             _run(harness._execute("schedule_appointment", {"date": "08/15/2026"}, local=False))

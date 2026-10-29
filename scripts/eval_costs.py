@@ -58,6 +58,8 @@ HARNESS_MODELS = {
     "openai-gpt-live-1@astra-medium": "gpt-6-astra",
     "gemini-3.8-live": "gemini-3.8-live",
     "gemini-3.8-live@extended": "gemini-3.8-live-extended-thinking",
+    # Phonic bills per conversation minute only (no tokens); see s2s-model-pricing.json
+    "phonic-sts@phonic-1-high": "phonic-1",
 }
 
 MODEL_ALIASES = {
