@@ -9,16 +9,16 @@ byte for byte. This file is written by hand; everything else in this folder come
 
 ## Export of 2026-11-06: public samples only
 
-The published rows drop from 72 per industry to 6 per industry, 18 total. Each industry
-keeps one hard case from each of its six categories, the one with the lowest mean pass@1
-across the published leaderboard runtimes. The full suite is held out; earlier revisions and git
-history still carry it, and leaderboard scores still cover the full suite.
+The published rows drop from 72 per industry to 3 per industry, 9 total: the three hard
+cases in each industry with the lowest mean pass@1 across the published leaderboard
+runtimes. The full suite is held out; earlier revisions and git history still carry it,
+and leaderboard scores still cover the full suite.
 
 | Industry | Kept |
 |---|---|
-| Healthcare | C1-H3, C2-H3, C3-H2, C4-H4, C5-H1, R-H1 |
-| Legal | C1-H2, C2-H1, C3-H2, C4-H3, C5-H2, R-H4 |
-| Customer support | T1-H2, T2-H3, T3-H4, T4-H3, T5-H3, R-H4 |
+| Healthcare | C3-H2, C4-H4, C5-H1 |
+| Legal | C2-H1, C4-H3, C5-H2 |
+| Customer support | R-H4, T2-H3, T5-H3 |
 
 Kept rows are unchanged apart from `mivas_bench_commit`.
 
