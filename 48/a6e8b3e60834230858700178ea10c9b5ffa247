@@ -1,0 +1,29 @@
+dataset/CHANGELOG.md
+  s_0983322d9e1951::t_81fdca742342c7 14-15
+dataset/README.md
+  s_0983322d9e1951::t_3116c6300dbed7 18,47,51
+dataset/customer-support/tasks.jsonl
+  s_0983322d9e1951::t_0bab2274829511 1-6
+dataset/healthcare/tasks.jsonl
+  s_0983322d9e1951::t_6ec924930e5e69 1-6
+dataset/legal/tasks.jsonl
+  s_0983322d9e1951::t_950566611dc7a7 1-6
+scripts/dataset_card_template.md
+  s_0983322d9e1951::t_e1cb97f4053d10 47
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "48a6e8b3e60834230858700178ea10c9b5ffa247",
+  "prompts": {},
+  "sessions": {
+    "s_0983322d9e1951": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "63baad97-7ae8-48df-9ebf-e25c51689327",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
