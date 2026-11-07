@@ -1,0 +1,41 @@
+README.md
+  s_0983322d9e1951::t_4b36431025602f 53
+dataset/CHANGELOG.md
+  s_0983322d9e1951::t_1ea77c3d26ab42 10-24
+dataset/README.md
+  s_0983322d9e1951::t_77a88659f35751 18,47,51,108-110,118-123,129-134,140-147
+dataset/customer-support/tasks.jsonl
+  s_0983322d9e1951::t_1fe3621a1c09eb 1-6
+dataset/healthcare/tasks.jsonl
+  s_0983322d9e1951::t_95ad48e9df9b69 1-6
+dataset/legal/tasks.jsonl
+  s_0983322d9e1951::t_7a51318b238079 1-6
+scripts/dataset_card_template.md
+  s_0983322d9e1951::t_d97ec5f077db00 47,126
+tests/conftest.py
+  s_0983322d9e1951::t_0d6347d2d4b35e 1-21
+tests/test_bluejay_run_to_csv.py
+  s_0983322d9e1951::t_ad99c2f9deaa22 12-13,440
+tests/test_scenario_clock.py
+  s_0983322d9e1951::t_a324e8f6684c75 10-11,65
+tests/test_tasks_to_digital_humans.py
+  s_0983322d9e1951::t_c4e8cd7a449db4 12-13,30,39,88,149,163,177,186,195,209,251,350,367,378,595,652,702
+tests/test_verify_task_run.py
+  s_0983322d9e1951::t_565f2a2e9f6fe9 10-11,809,835,857,870
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "7ff082478c4ef520f3cd43ecb595b0f8ae410c3a",
+  "prompts": {},
+  "sessions": {
+    "s_0983322d9e1951": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "63baad97-7ae8-48df-9ebf-e25c51689327",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
