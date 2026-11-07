@@ -44,7 +44,7 @@ Evaluation cases and industry environments for [MIVAS Bench](https://github.com/
 
 Each row is one spoken benchmark case: the caller specification, expected specialist handoffs, expected tool sequence, and expected final database state. Beside the cases, each industry folder ships the **multi-agent blueprint**, **Mermaid handoff graph**, **agent-facing tool schemas**, and **production-length system prompts** used to stand the environment up. Later industries are added as a sibling folder.
 
-This release covers **healthcare**, **legal**, and **customer support**: {{count:healthcare}}, {{count:legal}} and {{count:customer-support}} cases, {{total}} total.
+This release covers **healthcare**, **legal**, and **customer support**: {{count:healthcare}}, {{count:legal}} and {{count:customer-support}} cases, {{total}} total. These are public samples: one hard case from each category. The 72-case suite per industry that the leaderboard scores is held out.
 
 ## Provenance
 
@@ -123,7 +123,7 @@ Add a new industry by dropping a sibling folder with the same files and a matchi
 
 {{categories:customer-support}}
 
-Each category follows the MIVAS v2 suite: 2 easy / 4 medium / 4 hard scored cases, plus audio clones of that category's E1 (`*-E1-BG` background noise, `*-E1-SIG` degraded signal).
+In the held-out suite each category follows the MIVAS v2 layout: 2 easy / 4 medium / 4 hard scored cases, plus audio clones of that category's E1 (`*-E1-BG` background noise, `*-E1-SIG` degraded signal).
 
 ## Multi-agent architecture
 
