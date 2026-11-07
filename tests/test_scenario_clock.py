@@ -7,6 +7,8 @@ import sys
 from datetime import date
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[1]
 RUNTIME = ROOT / "runtime"
 if str(RUNTIME) not in sys.path:
@@ -60,6 +62,7 @@ def test_expected_healthcare_bookings_are_published_future_slots() -> None:
                 )
 
 
+@pytest.mark.full_suite
 def test_relative_date_tasks_name_the_pack_calendar() -> None:
     for key, needle in (
         ("C2-H1", "August 20"),

@@ -50,7 +50,7 @@ Bluejay Digital Humans conduct live, adaptive voice calls against the composed r
 
 ### Task suites
 
-Each scored industry contains 72 locked cases: 60 base tasks and 12 audio-condition variants that repeat selected cases under background noise or degraded signal. The suites are balanced across easy, medium, and hard tasks. Every case begins from known state and defines:
+Each scored industry contains 72 locked cases: 60 base tasks and 12 audio-condition variants that repeat selected cases under background noise or degraded signal. The suites are balanced across easy, medium, and hard tasks. The scored suite is held out. This repository publishes three hard cases per industry as samples (`industries/<industry>/tasks/`). Every case begins from known state and defines:
 
 - the caller's identity, objective, traits, and behavioral constraints;
 - scripted facts or responses needed to keep the task well-specified;

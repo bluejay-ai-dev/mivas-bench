@@ -9,6 +9,8 @@ import json
 import sys
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[1]
 _SPEC = importlib.util.spec_from_file_location(
     "bluejay_run_to_csv", ROOT / "scripts" / "bluejay_run_to_csv.py"
@@ -435,6 +437,7 @@ def test_metadata_from_case_key() -> None:
     }
 
 
+@pytest.mark.full_suite
 def test_missing_task_still_fills_metadata_from_case_key() -> None:
     scored = _scored_result()
     scored["case_key"] = "C1-H4"
