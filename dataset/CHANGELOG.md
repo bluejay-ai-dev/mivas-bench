@@ -11,8 +11,8 @@ byte for byte. This file is written by hand; everything else in this folder come
 
 The published rows drop from 72 per industry to 6 per industry, 18 total. Each industry
 keeps one hard case from each of its six categories, the one with the lowest mean pass@1
-across the published leaderboard runtimes. The other 198 cases are held out; they stay in
-earlier revisions and in git history, and leaderboard scores still cover all 72 per industry.
+across the published leaderboard runtimes. The full suite is held out; earlier revisions and git
+history still carry it, and leaderboard scores still cover the full suite.
 
 | Industry | Kept |
 |---|---|
