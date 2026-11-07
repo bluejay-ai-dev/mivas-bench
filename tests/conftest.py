@@ -1,4 +1,4 @@
-"""The public repo ships six sample tasks per industry; the full 72-task suite is private.
+"""The public repo ships three sample tasks per industry; the full suite is private (mivas-tasks).
 Tests marked full_suite read held-out tasks and skip unless that suite is checked out."""
 
 from pathlib import Path
