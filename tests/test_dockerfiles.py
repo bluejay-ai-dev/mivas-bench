@@ -12,7 +12,7 @@ if str(ROOT) not in sys.path:
 
 def test_dockerfiles_install_deps_before_source() -> None:
     files = sorted((ROOT / "voice-agent-harnesses").glob("*/*/Dockerfile"))
-    # one per shipped runtime: aws(1) gemini(3) grok(1) livekit(1) openai(3) qwen(1) rime(1)
+    # one per shipped runtime: aws(1) gemini(3) grok(1) livekit(1) openai(3) phonic(1) qwen(1) rime(1)
     assert len(files) == 11
     for path in files:
         text = path.read_text()

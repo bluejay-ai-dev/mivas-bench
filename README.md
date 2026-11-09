@@ -50,7 +50,7 @@ Bluejay Digital Humans conduct live, adaptive voice calls against the composed r
 
 ### Task suites
 
-Each scored industry contains 72 locked cases: 60 base tasks and 12 audio-condition variants that repeat selected cases under background noise or degraded signal. The suites are balanced across easy, medium, and hard tasks. Every case begins from known state and defines:
+Each scored industry contains 72 locked cases: 60 base tasks and 12 audio-condition variants that repeat selected cases under background noise or degraded signal. The suites are balanced across easy, medium, and hard tasks. The scored suite is held out. This repository publishes three hard cases per industry as samples (`industries/<industry>/tasks/`). Every case begins from known state and defines:
 
 - the caller's identity, objective, traits, and behavioral constraints;
 - scripted facts or responses needed to keep the task well-specified;
@@ -249,10 +249,10 @@ Harnesses translate the MIVAS blueprint into provider-specific runtimes. Native 
 
 | Status | Runtime |
 | ------ | ------- |
-| Native S2S | [OpenAI GPT-Live 1](voice-agent-harnesses/openai/gpt-live-1/), [OpenAI Realtime 2.1 and 2.1 Mini](voice-agent-harnesses/openai/), [Gemini 3.8 Live, 3.8 Live Extended Thinking, Flash Live 3.1 and 2.5 Flash Native Audio](voice-agent-harnesses/gemini/), [Amazon Nova Sonic 2](voice-agent-harnesses/aws/), [Grok Voice](voice-agent-harnesses/grok/), [Qwen Audio Realtime](voice-agent-harnesses/qwen/), [Rime Prism](voice-agent-harnesses/rime/) |
+| Native S2S | [OpenAI GPT-Live 1](voice-agent-harnesses/openai/gpt-live-1/), [OpenAI Realtime 2.1 and 2.1 Mini](voice-agent-harnesses/openai/), [Gemini 3.8 Live, 3.8 Live Extended Thinking, Flash Live 3.1 and 2.5 Flash Native Audio](voice-agent-harnesses/gemini/), [Amazon Nova Sonic 2](voice-agent-harnesses/aws/), [Grok Voice](voice-agent-harnesses/grok/), [Qwen Audio Realtime](voice-agent-harnesses/qwen/), [Phonic 1](voice-agent-harnesses/phonic/), [Rime Prism](voice-agent-harnesses/rime/) |
 | Cascaded baseline | [LiveKit Cascaded](voice-agent-harnesses/livekit/) with Deepgram Flux, GPT-4.1, and ElevenLabs |
 
-The eight-runtime Pass<sup>5</sup> matrix covers every runtime above except GPT-Live 1, which has landed and passes an end-to-end smoke but is not yet scored. See the [harness contract](voice-agent-harnesses/README.md) for the provider adapter, tool dispatch, handoff, and session requirements.
+The eight-runtime Pass<sup>5</sup> matrix covers every runtime above except GPT-Live 1, which has landed and passes an end-to-end smoke but is not yet scored. Phonic 1 was scored after that matrix was released; its results are on the leaderboard. See the [harness contract](voice-agent-harnesses/README.md) for the provider adapter, tool dispatch, handoff, and session requirements.
 
 ## Quick start
 

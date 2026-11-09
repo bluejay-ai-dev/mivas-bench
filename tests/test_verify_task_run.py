@@ -7,6 +7,8 @@ import json
 import sys
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[1]
 _SPEC = importlib.util.spec_from_file_location(
     "verify_task_run", ROOT / "verifiers" / "verify_task_run.py"
@@ -804,6 +806,7 @@ def _named_tool_result(names: list[str]) -> dict:
     }
 
 
+@pytest.mark.full_suite
 def test_legal_c5_e1_requires_screening_intake_scheduling_hops() -> None:
     task = json.loads(
         (ROOT / "industries" / "legal" / "tasks" / "C5-E1" / "task.json").read_text()
@@ -829,6 +832,7 @@ def test_legal_c5_e1_requires_screening_intake_scheduling_hops() -> None:
     assert out["passed"] is False
 
 
+@pytest.mark.full_suite
 def test_legal_c5_hard_includes_handoff_tools() -> None:
     task = json.loads(
         (ROOT / "industries" / "legal" / "tasks" / "C5-H1" / "task.json").read_text()
@@ -850,6 +854,7 @@ def test_legal_c5_hard_includes_handoff_tools() -> None:
     assert out["passed"] is False
 
 
+@pytest.mark.full_suite
 def test_legal_c5_hard_skip_confirm_fails_tools() -> None:
     task = json.loads(
         (ROOT / "industries" / "legal" / "tasks" / "C5-H1" / "task.json").read_text()
@@ -862,6 +867,7 @@ def test_legal_c5_hard_skip_confirm_fails_tools() -> None:
     assert out["passed"] is False
 
 
+@pytest.mark.full_suite
 def test_legal_c4_still_requires_in_order_hops() -> None:
     task = json.loads(
         (ROOT / "industries" / "legal" / "tasks" / "C4-E1" / "task.json").read_text()

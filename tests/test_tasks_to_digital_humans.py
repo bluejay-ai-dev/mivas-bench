@@ -9,6 +9,8 @@ import sys
 from collections import Counter
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[1]
 _SPEC = importlib.util.spec_from_file_location(
     "tasks_to_digital_humans", ROOT / "scripts" / "tasks_to_digital_humans.py"
@@ -25,6 +27,7 @@ def _humans() -> list[dict]:
     return conv.build("healthcare")
 
 
+@pytest.mark.full_suite
 def test_healthcare_emits_72_payloads() -> None:
     humans = _humans()
     assert len(humans) == 72
@@ -33,6 +36,7 @@ def test_healthcare_emits_72_payloads() -> None:
     conv.check(humans, "healthcare")
 
 
+@pytest.mark.full_suite
 def test_names_are_person_only_and_test_name_from_task() -> None:
     for dh in _humans():
         key = conv.case_key_of(dh)
@@ -81,6 +85,7 @@ def test_scripted_responses_always_or_omitted() -> None:
     assert saw_pins
 
 
+@pytest.mark.full_suite
 def test_clones_share_source_easy_voice() -> None:
     by_key = {conv.case_key_of(dh): dh for dh in _humans()}
     clones = [k for k in by_key if conv.source_case_key(k) != k]
@@ -141,6 +146,7 @@ def test_legal_background_noise_is_quieter_than_default() -> None:
     assert healthcare["background_noise_volume"] == 0.8
 
 
+@pytest.mark.full_suite
 def test_audio_condition_mapping() -> None:
     by_audio = Counter()
     for dh in _humans():
@@ -154,6 +160,7 @@ def test_audio_condition_mapping() -> None:
     assert by_audio["bad_signal"] == 6
 
 
+@pytest.mark.full_suite
 def test_two_four_four_per_category() -> None:
     scored: dict[str, Counter] = {}
     for dh in _humans():
@@ -167,6 +174,7 @@ def test_two_four_four_per_category() -> None:
         assert counts == Counter({"easy": 2, "medium": 4, "hard": 4}), area
 
 
+@pytest.mark.full_suite
 def test_legal_emits_72_payloads() -> None:
     humans = conv.build("legal")
     assert len(humans) == 72
@@ -175,6 +183,7 @@ def test_legal_emits_72_payloads() -> None:
     conv.check(humans, "legal")
 
 
+@pytest.mark.full_suite
 def test_customer_support_emits_72_payloads() -> None:
     humans = conv.build("customer-support")
     assert len(humans) == 72
@@ -183,6 +192,7 @@ def test_customer_support_emits_72_payloads() -> None:
     conv.check(humans, "customer-support")
 
 
+@pytest.mark.full_suite
 def test_customer_support_two_by_four_per_category() -> None:
     scored: dict[str, Counter] = {}
     for dh in conv.build("customer-support"):
@@ -196,6 +206,7 @@ def test_customer_support_two_by_four_per_category() -> None:
         assert counts == Counter({"easy": 2, "medium": 4, "hard": 4}), area
 
 
+@pytest.mark.full_suite
 def test_customer_support_rerun_pins_lock_contaminated_paths() -> None:
     tasks = ROOT / "industries" / "customer-support" / "tasks"
 
@@ -237,6 +248,7 @@ def test_customer_support_rerun_pins_lock_contaminated_paths() -> None:
     assert "not complete" in incomplete["response_value"].lower()
 
 
+@pytest.mark.full_suite
 def test_legal_two_by_four_per_category() -> None:
     scored: dict[str, Counter] = {}
     for dh in conv.build("legal"):
@@ -335,6 +347,7 @@ def test_claim_updates_include_expected_tool_calls() -> None:
     assert cleared[0]["update"]["scripted_responses"] == []
 
 
+@pytest.mark.full_suite
 def test_claim_updates_include_audio_fields_for_legal_bg_clone() -> None:
     legal = conv.build("legal")
     bg = next(dh for dh in legal if conv.case_key_of(dh).endswith("-BG"))
@@ -351,6 +364,7 @@ def test_api_url_reads_env_after_import(monkeypatch) -> None:
     assert conv.api_url() == "https://example.test/v1"
 
 
+@pytest.mark.full_suite
 def test_json_emits_raw_digital_humans(capsys) -> None:
     conv.main(["--industry", "healthcare", "--json"])
     body = json.loads(capsys.readouterr().out)
@@ -361,6 +375,7 @@ def test_json_emits_raw_digital_humans(capsys) -> None:
     assert "test_name" in humans[0]
 
 
+@pytest.mark.full_suite
 def test_healthcare_leftover_holes_are_closed() -> None:
     tasks = ROOT / "industries" / "healthcare" / "tasks"
 
@@ -577,6 +592,7 @@ def test_healthcare_leftover_holes_are_closed() -> None:
     assert book["parameters"]["slot_id"] == "slot_loc_park_ave_1"
 
 
+@pytest.mark.full_suite
 def test_healthcare_hard_tool_counts_span_7_to_12() -> None:
     """Hard band is 7–12 including handoffs. Spread the band; do not require a flat histogram."""
     hist: Counter = Counter()
@@ -633,6 +649,7 @@ def test_healthcare_expected_params_match_schema() -> None:
                     )
 
 
+@pytest.mark.full_suite
 def test_healthcare_greeting_and_stay_pins_lock_path() -> None:
     tasks = ROOT / "industries" / "healthcare" / "tasks"
 
@@ -682,6 +699,7 @@ def test_healthcare_greeting_and_stay_pins_lock_path() -> None:
         assert len(phrases) == len(set(phrases)), path.parent.name
 
 
+@pytest.mark.full_suite
 def test_legal_fairness_c2h1_state_pin_and_rm_lookup_only() -> None:
     tasks = ROOT / "industries" / "legal" / "tasks"
 

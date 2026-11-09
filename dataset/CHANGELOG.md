@@ -7,6 +7,21 @@ same result with and without the write-time `created_at` columns. Files are comp
 byte for byte. This file is written by hand; everything else in this folder comes from
 `scripts/export_dataset.py`.
 
+## Export of 2026-11-06: public samples only
+
+The published rows drop from 72 per industry to 3 per industry, 9 total: the three hard
+cases in each industry with the lowest mean pass@1 across the published leaderboard
+runtimes. The full suite is held out; earlier revisions and git history still carry it,
+and leaderboard scores still cover the full suite.
+
+| Industry | Kept |
+|---|---|
+| Healthcare | C3-H2, C4-H4, C5-H1 |
+| Legal | C2-H1, C4-H3, C5-H2 |
+| Customer support | R-H4, T2-H3, T5-H3 |
+
+Kept rows are unchanged apart from `mivas_bench_commit`.
+
 ## Export of 2026-10-19 (mivas-bench `553b58ed85cd3ad0e569cea00f636af4b44a2bd4`) vs revision `2eb37a90` (exported 2026-08-24)
 
 Regenerated from the runtime task, prompt, tool schema and blueprint files. No runtime
