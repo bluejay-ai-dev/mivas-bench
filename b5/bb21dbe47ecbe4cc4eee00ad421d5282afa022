@@ -1,0 +1,91 @@
+.agents/skills/mivas-run/HARNESS.md
+  s_bff998c4fecef7::t_9d7d55096617be 21
+.agents/skills/mivas-run/INFERENCE.md
+  s_bff998c4fecef7::t_ef36516c3a1a82 24
+.agents/skills/mivas-run/SKILL.md
+  s_bff998c4fecef7::t_8c8dedede3adb8 28
+.agents/skills/mivas-run/scripts/preflight.py
+  s_bff998c4fecef7::t_a137e877be9a45 36
+.env.example
+  s_bff998c4fecef7::t_165038e45d43d8 64-69
+README.md
+  s_bff998c4fecef7::t_682dd9e99dc149 53,252,255
+dataset/CHANGELOG.md
+  s_bff998c4fecef7::t_d509bafb755561 10-24
+dataset/README.md
+  s_bff998c4fecef7::t_872ff60c583734 18,47,51,108-110,118-120,126-128,134-138
+dataset/customer-support/tasks.jsonl
+  s_bff998c4fecef7::t_85cdd44d3a0343 1-3
+dataset/healthcare/tasks.jsonl
+  s_bff998c4fecef7::t_7c161278f3c63c 1-3
+dataset/legal/tasks.jsonl
+  s_bff998c4fecef7::t_0915cf19cace2d 1-3
+k8s/deployment.yaml
+  s_bff998c4fecef7::t_a90c7a238e25ac 188-192
+k8s/secret.example.yaml
+  s_bff998c4fecef7::t_7d11f339f93b75 32
+pyproject.toml
+  s_bff998c4fecef7::t_0575e4e7e55199 44
+run.py
+  s_bff998c4fecef7::t_f9407cc4322a72 45,449
+scripts/annotate_eval_costs.py
+  s_bff998c4fecef7::t_e68ccd2e1a4336 46,62,78
+scripts/dataset_card_template.md
+  s_bff998c4fecef7::t_a7e36b9e5e4925 47,126
+scripts/eval_costs.py
+  s_bff998c4fecef7::t_f28b35346fa8dd 62-63
+tests/conftest.py
+  s_bff998c4fecef7::t_e00278ea9d283d 1-21
+tests/test_bluejay_run_to_csv.py
+  s_bff998c4fecef7::t_97a70e224e3e60 12-13,440
+tests/test_dockerfiles.py
+  s_bff998c4fecef7::t_c24d8976633fd0 15
+tests/test_harness_tool_headers.py
+  s_bff998c4fecef7::t_35f03aa85477c9 30,165-167
+tests/test_scenario_clock.py
+  s_bff998c4fecef7::t_183520b202d020 10-11,65
+tests/test_snapshot_coverage.py
+  s_bff998c4fecef7::t_006e2f1ad4d0db 30
+tests/test_tasks_to_digital_humans.py
+  s_bff998c4fecef7::t_ce8511bf73e37a 12-13,30,39,88,149,163,177,186,195,209,251,350,367,378,595,652,702
+tests/test_tool_span_ok.py
+  s_bff998c4fecef7::t_4ea7a878ed6927 10
+tests/test_verify_task_run.py
+  s_bff998c4fecef7::t_7b9281ce7eb4e6 10-11,809,835,857,870
+voice-agent-harnesses/phonic/README.md
+  s_bff998c4fecef7::t_700de37944f0bb 1-70
+voice-agent-harnesses/phonic/adapters/chirp.py
+  s_bff998c4fecef7::t_b81e3d3b37d504 1-301
+voice-agent-harnesses/phonic/harness.py
+  s_bff998c4fecef7::t_f4d28e31c7a652 1-340
+voice-agent-harnesses/phonic/report.py
+  s_bff998c4fecef7::t_6fde8ce90ffd64 1-187,189-268,270-393,395-447,449-489
+voice-agent-harnesses/phonic/requirements.txt
+  s_bff998c4fecef7::t_9002105cb0c619 1-6
+voice-agent-harnesses/phonic/sts/Dockerfile
+  s_bff998c4fecef7::t_896062719561a9 1-64
+voice-agent-harnesses/phonic/sts/adapters/chirp.py
+  s_bff998c4fecef7::t_6ea90964f93844 1-8
+voice-agent-harnesses/phonic/sts/agent.py
+  s_bff998c4fecef7::t_dc515a78513ba4 1-40
+voice-agent-harnesses/phonic/sts/variants.json
+  s_bff998c4fecef7::t_01c470e508ecae 2-5
+voice-agent-harnesses/s2s-model-pricing.json
+  s_bff998c4fecef7::t_e9e4fadd584f79 73-74
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "b5bb21dbe47ecbe4cc4eee00ad421d5282afa022",
+  "prompts": {},
+  "sessions": {
+    "s_bff998c4fecef7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a47c7015-8a12-4c3e-96d9-b1cde7fb3cf2",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
