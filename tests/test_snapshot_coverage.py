@@ -29,6 +29,7 @@ HOOK_SITES = {
     "openai": ["report.py"],
     "phonic": ["report.py"],
     "qwen": ["report.py"],
+    "rime": ["report.py"],
 }
 
 # any one of these means the family reaches capture_final on teardown.

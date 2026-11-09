@@ -53,6 +53,7 @@ HARNESS_MODELS = {
     "gemini-flash-live-3.1": "gemini-3.1-flash-live-preview",
     "gemini-2.5-flash-native-audio": "gemini-2.5-flash-native-audio",
     "qwen-audio-realtime": "qwen-audio-3.0-realtime-plus",
+    "rime-prism": "prism",
     "livekit-cascaded": "gpt-4.1",
     "openai-gpt-live-1@sol-low": "gpt-5.6-sol",
     "openai-gpt-live-1@astra-medium": "gpt-6-astra",
