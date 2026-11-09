@@ -1,0 +1,19 @@
+tests/test_dockerfiles.py
+  s_bff998c4fecef7::t_4100e0f0537c7c 16
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "81c5c1182d1ca8345931fc776291d019506377b9",
+  "prompts": {},
+  "sessions": {
+    "s_bff998c4fecef7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a47c7015-8a12-4c3e-96d9-b1cde7fb3cf2",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "farazmsiddiqi <farazs27@gmail.com>"
+    }
+  }
+}
