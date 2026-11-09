@@ -315,6 +315,30 @@ def greeting_nudge(bp: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+HANDOFF_RESUME_INSTRUCTION = (
+    "The transfer you just made has completed and you now handle this call. "
+    "The caller is still on the line; continue from their last request."
+)
+
+
+def handoff_resume() -> dict[str, Any]:
+    """First reply of the agent that just received a handoff.
+
+    Requested as a proactive reply rather than a tool_continuation of the reply
+    that announced the handoff: with the continuation Prism carries the
+    announced transfer through as transfer_to_human on the new agent's first
+    turn (9 of 9 local trials), with the proactive reply it picks the call up
+    from the caller's request (9 of 9 trials)."""
+    return {
+        "type": "response.create",
+        "event_id": _event_id("resume"),
+        "response": {
+            "prism_instruction": HANDOFF_RESUME_INSTRUCTION,
+            "metadata": {"prism_cause": "proactive"},
+        },
+    }
+
+
 def tool_continuation(parent_response_id: str) -> dict[str, Any]:
     return {
         "type": "response.create",
@@ -421,6 +445,9 @@ def demo() -> None:
         assert bp["greeting"] in nudge["response"]["prism_instruction"]
     cont = tool_continuation("resp_1")
     assert cont["response"]["metadata"]["prism_parent_response_id"] == "resp_1"
+    resume = handoff_resume()
+    assert resume["response"]["metadata"] == {"prism_cause": "proactive"}
+    assert "transfer you just made has completed" in resume["response"]["prism_instruction"]
     out = function_call_output("call_1", {"ok": True})
     assert out["item"]["type"] == "function_call_output" and out["event_id"] == "result_call_1"
     state = {"agent": start}

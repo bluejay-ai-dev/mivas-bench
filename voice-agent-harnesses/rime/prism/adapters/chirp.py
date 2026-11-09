@@ -50,6 +50,7 @@ from harness import (  # noqa: E402
     OUTPUT_RATE,
     connect_prism,
     greeting_nudge,
+    handoff_resume,
     handle_function_call,
     handoff_role,
     industry_path,
@@ -73,6 +74,9 @@ NUDGE_MAX_ATTEMPTS = int(os.environ.get("MIVAS_NUDGE_MAX_ATTEMPTS", "5"))
 FAREWELL_MAX_S = float(os.environ.get("MIVAS_FAREWELL_MAX_S", "20"))
 SESSION_SETUP_TIMEOUT_S = float(os.environ.get("RIME_SESSION_SETUP_TIMEOUT_S", "10"))
 CONNECT_RETRY_S = float(os.environ.get("RIME_CONNECT_RETRY_S", "12"))
+# how long the new agent waits for the handoff reply to finish playing before
+# it speaks; Prism takes a proactive reply only while the session is idle
+HANDOFF_RESUME_MAX_S = float(os.environ.get("RIME_HANDOFF_RESUME_MAX_S", "20"))
 
 _LOG_ON = (os.environ.get("RIME_CHIRP_LOG") or "full").strip().lower() not in {"0", "off", "false", "no"}
 
@@ -198,6 +202,7 @@ async def _bridge(ws, industry: str) -> None:
             closing = {"parent": None, "this": None, "task": None}
             texts: dict[str, str] = {}
             play = {"item": None, "resp": None, "pushed": 0, "sent": 0}
+            resume = {"event_id": None, "ok": False, "event": asyncio.Event()}
             cur = {"resp": None, "msg_item": None, "down": None}
             turn = {"utt": None}
 
@@ -290,6 +295,38 @@ async def _bridge(ws, industry: str) -> None:
                 finally:
                     updated_events.pop(upd["event_id"], None)
 
+            async def resume_after_handoff(resp_id: str) -> None:
+                """Let the receiving agent speak first under its own instructions.
+
+                With a tool_continuation of the handoff reply, Prism carries the
+                announced transfer through as transfer_to_human on the new agent's
+                first turn (9 of 9 local trials); a proactive reply under the new
+                instructions picks the call up instead. Prism takes a proactive
+                reply only while idle, so wait for the handoff line to drain
+                (typed_input.ready) and retry on busy."""
+                deadline = time.monotonic() + HANDOFF_RESUME_MAX_S
+                for attempt in range(3):
+                    while not typed_ready.is_set() and time.monotonic() < deadline:
+                        if resp_id in cancelled or end.is_set():
+                            _log("handoff resume skipped: caller spoke over the handoff line")
+                            return
+                        await asyncio.sleep(0.05)
+                    if end.is_set():
+                        return
+                    req = handoff_resume()
+                    resume.update(event_id=req["event_id"], ok=False)
+                    resume["event"].clear()
+                    typed_ready.clear()
+                    await send_prism(req)
+                    with contextlib.suppress(asyncio.TimeoutError):
+                        await asyncio.wait_for(resume["event"].wait(), timeout=5.0)
+                    if resume["ok"]:
+                        _log(f"handoff resume sent agent={state['agent']} (attempt {attempt + 1})")
+                        return
+                    _log(f"handoff resume refused or unanswered (attempt {attempt + 1}); retrying")
+                    deadline = time.monotonic() + 5.0
+                _log("handoff resume gave up; Prism answers the caller's next turn itself")
+
             async def maybe_continue(resp_id: str) -> None:
                 """Request the tool continuation once the round is complete.
 
@@ -302,6 +339,9 @@ async def _bridge(ws, industry: str) -> None:
                 r.continued = True
                 if r.handoff:
                     await switch_agent(r.handoff)
+                    if not r.stop:
+                        await resume_after_handoff(resp_id)
+                        return
                 if r.stop:
                     # The caller's own "thanks, goodbye" often trails the tool call;
                     # with interruption on, that tail cancels the farewell as a
@@ -433,6 +473,9 @@ async def _bridge(ws, industry: str) -> None:
                             cur["resp"] = rid
                             cur["msg_item"] = None
                             typed_ready.clear()
+                            if resume["event_id"] and ev.get("prism_request_event_id") == resume["event_id"]:
+                                resume.update(ok=True)
+                                resume["event"].set()
                         elif et == "response.output_item.added":
                             item = ev.get("item") or {}
                             if item.get("type") == "message":
@@ -490,6 +533,9 @@ async def _bridge(ws, industry: str) -> None:
                             err = ev.get("error") or {}
                             _log(f"prism error code={err.get('code')} scope={err.get('scope')} "
                                  f"event_id={err.get('event_id')} msg={str(err.get('message'))[:200]}")
+                            if resume["event_id"] and err.get("event_id") == resume["event_id"]:
+                                resume.update(ok=False)
+                                resume["event"].set()
                             if err.get("scope") == "session":
                                 await close_all(f"session error {err.get('code')}")
                 finally:
